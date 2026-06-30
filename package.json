@@ -1,0 +1,23 @@
+{
+  "name": "somnary",
+  "type": "module",
+  "version": "0.0.0",
+  "private": true,
+  "description": "somnary — an independent, evidence-graded sleep & natural-remedies wiki.",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check"
+  },
+  "dependencies": {
+    "@astrojs/mdx": "^4.0.8",
+    "@astrojs/sitemap": "^3.2.1",
+    "astro": "^5.2.5"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.4",
+    "typescript": "^5.7.3"
+  }
+}

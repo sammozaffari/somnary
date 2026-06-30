@@ -1,0 +1,25 @@
+---
+import Base from '../layouts/Base.astro';
+
+// Placeholder home (CHK-0.2). Counts are 0 until the catalog lands; the tagline
+// follows the locked pattern from CLAUDE.md. Rendered as static HTML so the text
+// is in the page source, not injected by JS.
+const remediesGraded = 0;
+const sourcesCited = 0;
+const tagline = `somnary · ${remediesGraded} remedies graded, ${sourcesCited} sources cited · zero brand money`;
+---
+
+<Base
+  title="somnary — evidence-graded sleep & natural-remedies wiki"
+  description="An independent, evidence-graded sleep & natural-remedies wiki. Every remedy graded S–F by the strength of published human evidence, every claim cited, zero brand money."
+>
+  <main>
+    <p>somnary.</p>
+    <h1>the sleep reference is being built.</h1>
+    <p>{tagline}</p>
+    <p>
+      independent · evidence-graded · reader-funded. zero affiliate links, zero
+      brand sponsorship, zero hallucinated citations.
+    </p>
+  </main>
+</Base>
