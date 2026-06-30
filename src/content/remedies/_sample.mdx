@@ -1,0 +1,84 @@
+---
+# SCHEMA FIXTURE — proves a remedy validates against src/content.config.ts.
+# draft:true + underscore filename → never published. Replaced by the real valerian
+# page in Phase 3. The single citation is a real meta-analysis (verified by the CHK-0.5
+# resolver), so it does not violate the "no invented references" non-negotiable.
+draft: true
+tier: C
+name: valerian
+aliases:
+  - valeriana officinalis
+  - all-heal
+  - garden valerian
+oneLineVerdict: popular and old, but the human data is small and inconsistent.
+verdict: >-
+  valerian is one of the most-used sleep botanicals, but the trials are small,
+  heterogeneous, and often low quality. some report modest improvements in
+  subjective sleep; objective measures rarely move. honest read: mixed evidence,
+  not nothing, far from proven.
+keyCompound: valerenic acid
+bestFor:
+  - mild subjective sleep difficulty
+outcomes:
+  - sleep quality
+  - fall asleep faster
+symptoms:
+  - can't fall asleep
+  - light sleeper
+claims:
+  - claimed: valerian reliably improves sleep quality.
+    studiesShow: >-
+      a systematic review of 16 trials found a possible subjective improvement,
+      but the evidence was methodologically weak and inconsistent.
+    sources: [1]
+  - claimed: valerian works as well as prescription sleep aids.
+    studiesShow: null
+    sources: []
+evidenceGates:
+  - label: meta-analysis exists
+    variant: positive
+  - label: heterogeneous trials
+    variant: neutral
+  - label: effect size small/uncertain
+    variant: caution
+doses:
+  - form: root extract (standardized to valerenic acid)
+    studiedDose: 300–600 mg
+    timing: 30–120 min before bed
+    marketComparison: many products are unstandardized or underdosed vs trial doses.
+safety:
+  severity: caution
+  lead: >-
+    generally well tolerated short-term; long-term safety is not well characterized.
+  risks:
+    - category: sedation
+      text: may add to other sedatives (alcohol, benzodiazepines, sedating antihistamines).
+    - category: hepatic
+      text: rare reports of liver issues with combination products; cause unclear.
+  pregnancy: insufficient data — avoid in pregnancy and breastfeeding.
+  interactions:
+    - CNS depressants (additive sedation)
+standardization: >-
+  look for extracts standardized to valerenic acid; "valerian root 500 mg" with no
+  constituent quantified is a downgrade signal.
+mechanism: >-
+  hypothesized GABAergic activity (valerenic acid modulating GABA-A); mechanism in
+  humans is not well established.
+sources:
+  - n: 1
+    title: "Valerian for sleep: a systematic review and meta-analysis"
+    sourceLine: "Bent S, et al. Am J Med. 2006;119(12):1005–1012."
+    finding: >-
+      16 RCTs; valerian may improve subjective sleep quality but the evidence is
+      methodologically weak and results are inconsistent.
+    type: meta-analysis
+    pmid: "17145239"
+    doi: "10.1016/j.amjmed.2006.02.026"
+community:
+  reportsCount: 0
+seo:
+  questionTitle: does valerian actually help you sleep?
+---
+
+This MDX body is a placeholder. In Phase 2 the 12-block remedy template (PLAN §4) renders
+from the structured frontmatter above; prose blocks like mechanism notes live here.
