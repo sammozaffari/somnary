@@ -1,6 +1,9 @@
 ---
-// Base document layout. Tokens, fonts, and global styling are wired in CHK-0.3;
-// this is the minimal server-rendered shell so content is crawlable from day one.
+// Base document layout. Imports the global stylesheet (Tailwind layers + DESIGN_SYSTEM
+// tokens) and loads the three brand typefaces per §1c. Server-rendered shell so content
+// is crawlable from day one.
+import '../styles/global.css';
+
 interface Props {
   title: string;
   description?: string;
@@ -17,6 +20,14 @@ const { title, description } = Astro.props;
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
     {description && <meta name="description" content={description} />}
+
+    {/* Brand typefaces — DESIGN_SYSTEM §1c (verbatim) */}
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Hanken+Grotesk:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+    />
   </head>
   <body>
     <slot />

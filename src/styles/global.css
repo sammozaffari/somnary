@@ -1,0 +1,97 @@
+/* Global stylesheet — Tailwind layers + design tokens.
+   Tokens below are DESIGN_SYSTEM.md §1a (:root) and §1c (base document), verbatim.
+   These CSS custom properties are the source of truth that component specs reference
+   directly (e.g. var(--tier-d), var(--ink)). Tailwind (tailwind.config.mjs) mirrors
+   the same values as utility classes. Never hardcode raw values — see §5 guardrails. */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---- DESIGN_SYSTEM §1a — :root tokens (verbatim) ---- */
+:root {
+  /* ---- type families ---- */
+  --font-display: "Newsreader", Georgia, "Times New Roman", serif;
+  --font-body:    "Hanken Grotesk", system-ui, -apple-system, sans-serif;
+  --font-mono:    "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
+
+  /* ---- neutrals (warm) ---- */
+  --base:        #F7F5F0;
+  --surface:     #FCFBF7;
+  --sunken:      #F0EDE4;
+  --line:        #E4DFD3;
+  --line-strong: #D0C9B9;
+  --ink:         #1A1A1F;   /* 15.9:1 on base */
+  --ink-soft:    #4C4B52;   /*  7.91:1 on base */
+  --ink-faint:   #726F63;   /*  4.62:1 on base — AA small text */
+
+  /* ---- accents (muted) — base hue is FILL/BORDER ONLY (fails AA as text) ---- */
+  --lavender:      #8480C4;
+  --lavender-ink:  #5A549E;  /* 6.03:1 — accent text / links */
+  --lavender-tint: #ECEAF6;
+  --sage:          #82A088;
+  --sage-ink:      #4C6E53;  /* 5.26:1 — accent text */
+  --sage-tint:     #E8EFE7;
+
+  /* ---- tier spectrum (S→F): solid (fill/bar/glyph) · ink (text) · tint (badge wash) ---- */
+  --tier-s: #3D7A54; --tier-s-ink: #2E6342; --tier-s-tint: #E4EEE6;
+  --tier-a: #6E8B3F; --tier-a-ink: #566E2F; --tier-a-tint: #ECEFDF;
+  --tier-b: #94791F; --tier-b-ink: #75600F; --tier-b-tint: #F1ECD9;
+  --tier-c: #A8682E; --tier-c-ink: #864F1F; --tier-c-tint: #F3E8DA;
+  --tier-d: #AD5538; --tier-d-ink: #8C4127; --tier-d-tint: #F4E3DB;
+  --tier-f: #9B5161; --tier-f-ink: #7C3F4D; --tier-f-tint: #F1E2E4;
+
+  /* ---- type scale: size / line-height (weight + tracking in notes) ---- */
+  --text-display: 84px;   --lh-display: 0.98;  /* Newsreader 400, -0.02em */
+  --text-3xl:     60px;   --lh-3xl:     1.02;  /* Newsreader 400, -0.02em */
+  --text-2xl:     44px;   --lh-2xl:     1.05;  /* Newsreader 400 */
+  --text-xl:      32px;   --lh-xl:      1.10;  /* Newsreader 500 */
+  --text-lg:      24px;   --lh-lg:      1.20;  /* Hanken 600 */
+  --text-md:      21px;   --lh-md:      1.50;  /* Hanken 400 (lead) */
+  --text-base:    18px;   --lh-base:    1.62;  /* Hanken 400 (body) */
+  --text-sm:      15px;   --lh-sm:      1.50;  /* Hanken 400 */
+  --text-xs:      12.5px; --lh-xs:      1.40;  /* IBM Plex Mono 500, 0.12em, UPPERCASE */
+  --tracking-tight: -0.02em;
+  --tracking-label:  0.12em;
+
+  /* ---- spacing (8px base, 4px step) ---- */
+  --sp-1: 4px;  --sp-2: 8px;   --sp-3: 12px; --sp-4: 16px; --sp-5: 24px;
+  --sp-6: 32px; --sp-7: 48px;  --sp-8: 64px; --sp-9: 96px; --sp-10: 128px;
+
+  /* ---- radii ---- */
+  --r-xs: 3px; --r-sm: 6px; --r-md: 10px; --r-lg: 16px; --r-xl: 22px; --r-pill: 999px;
+
+  /* ---- borders ---- */
+  --border-hairline: 1px solid var(--line);
+  --border-strong:   1px solid var(--line-strong);
+  /* tier badge border = 1px solid var(--tier-{x}); */
+
+  /* ---- elevation ---- */
+  --shadow-sm:   0 1px 2px rgba(26,26,31,.04), 0 1px 3px rgba(26,26,31,.06);
+  --shadow-md:   0 4px 12px -4px rgba(26,26,31,.10);
+  --shadow-lift: 0 14px 34px -16px rgba(26,26,31,.18);
+
+  /* ---- a11y + brand mechanics ---- */
+  --ring:                0 0 0 3px rgba(132,128,196,.40); /* keyboard focus */
+  --grade-optical-shift: 0.13em;  /* serif-cap optical-center nudge in tier badges */
+
+  /* ---- motion ---- */
+  --dur-instant: 120ms; --dur-fast: 200ms; --dur-base: 320ms; --dur-slow: 560ms; --dur-ambient: 2800ms;
+  --ease-settle: cubic-bezier(0.22, 1, 0.36, 1);  /* default — decelerate & rest */
+  --ease-soft:   cubic-bezier(0.4, 0, 0.2, 1);    /* fades / color shifts */
+
+  /* ---- breakpoints (max-width, mobile-down) ---- */
+  /* 900px: sidebar stacks · 760px: tier rail stacks + stat row 2-col · 640px: phone */
+}
+
+/* ---- DESIGN_SYSTEM §1c — base document (verbatim) ---- */
+@layer base {
+  body {
+    background: var(--base);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+  }
+  ::selection { background: var(--lavender-tint); }
+}

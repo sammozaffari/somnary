@@ -1,9 +1,10 @@
 ---
 import Base from '../layouts/Base.astro';
+import TokenProbe from '../components/TokenProbe.astro';
 
-// Placeholder home (CHK-0.2). Counts are 0 until the catalog lands; the tagline
-// follows the locked pattern from CLAUDE.md. Rendered as static HTML so the text
-// is in the page source, not injected by JS.
+// Placeholder home (CHK-0.2, restyled with tokens in CHK-0.3). Counts are 0 until the
+// catalog lands; the tagline follows the locked pattern from CLAUDE.md. Rendered as
+// static HTML so the text is in the page source, not injected by JS.
 const remediesGraded = 0;
 const sourcesCited = 0;
 const tagline = `somnary · ${remediesGraded} remedies graded, ${sourcesCited} sources cited · zero brand money`;
@@ -13,13 +14,20 @@ const tagline = `somnary · ${remediesGraded} remedies graded, ${sourcesCited} s
   title="somnary — evidence-graded sleep & natural-remedies wiki"
   description="An independent, evidence-graded sleep & natural-remedies wiki. Every remedy graded S–F by the strength of published human evidence, every claim cited, zero brand money."
 >
-  <main>
-    <p>somnary.</p>
-    <h1>the sleep reference is being built.</h1>
-    <p>{tagline}</p>
-    <p>
+  <main class="max-w-3xl mx-auto px-6 py-10 font-body text-ink">
+    <p class="font-display text-lg">somnary<span class="text-lavender">.</span></p>
+
+    <h1 class="font-display text-3xl mt-6">the sleep reference is being built.</h1>
+
+    <p class="font-mono text-xs text-ink-faint mt-4">{tagline}</p>
+
+    <p class="text-md text-ink-soft mt-5">
       independent · evidence-graded · reader-funded. zero affiliate links, zero
       brand sponsorship, zero hallucinated citations.
     </p>
+
+    <div class="mt-8">
+      <TokenProbe />
+    </div>
   </main>
 </Base>
