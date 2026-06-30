@@ -1,0 +1,75 @@
+---
+// Stat row — DESIGN_SYSTEM §2.7. Four equal cells over a 1px-gap grid (hairline dividers).
+// Presentational: the caller passes real, computed values (never hardcoded) — e.g. the
+// methodology page derives counts from src/lib/content-index.ts. Key figures may accent the
+// number (sage for "0", lavender for "$0").
+type Accent = 'sage' | 'lavender' | undefined;
+interface Cell {
+  value: string;
+  label: string;
+  accent?: Accent;
+}
+interface Props {
+  cells: Cell[];
+}
+const { cells } = Astro.props;
+
+const accentColor: Record<'sage' | 'lavender', string> = {
+  sage: 'var(--sage-ink)',
+  lavender: 'var(--lavender-ink)',
+};
+---
+
+<dl class="statrow">
+  {
+    cells.map((c) => (
+      <div class="cell">
+        <dd class="num" style={c.accent ? `color:${accentColor[c.accent]}` : undefined}>
+          {c.value}
+        </dd>
+        <dt class="label">{c.label}</dt>
+      </div>
+    ))
+  }
+</dl>
+
+<style>
+  .statrow {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    margin: 0;
+    background: var(--line); /* shows through the 1px gaps as hairline dividers */
+    border-radius: var(--r-lg);
+    overflow: hidden;
+  }
+  .cell {
+    background: var(--base);
+    padding: var(--sp-6) var(--sp-5); /* ~28px / 24px */
+  }
+  .num {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--text-2xl);
+    line-height: 1;
+    color: var(--ink);
+  }
+  .label {
+    margin-top: var(--sp-3);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+  @media (max-width: 760px) {
+    .statrow {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (max-width: 420px) {
+    .statrow {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

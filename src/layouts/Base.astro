@@ -3,6 +3,8 @@
 // tokens) and loads the three brand typefaces per §1c. Server-rendered shell so content
 // is crawlable from day one.
 import '../styles/global.css';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
 
 interface Props {
   title: string;
@@ -30,6 +32,8 @@ const { title, description } = Astro.props;
     />
   </head>
   <body>
+    <Nav />
     <slot />
+    <Footer />
   </body>
 </html>

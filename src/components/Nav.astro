@@ -1,0 +1,72 @@
+---
+// Sticky top nav — DESIGN_SYSTEM §3 global chrome. Wordmark left; section links right.
+// The ⌘K search trigger is intentionally deferred to CHK-4.2 (slot left below). Only links
+// to pages that exist today are rendered, to avoid 404s; add more as routes land.
+import Wordmark from './Wordmark.astro';
+
+const links = [{ href: '/methodology', label: 'methodology' }];
+const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+---
+
+<nav class="nav" aria-label="primary">
+  <Wordmark />
+  <ul class="links">
+    {
+      links.map((l) => {
+        const current = path === l.href.replace(/\/$/, '');
+        return (
+          <li>
+            <a href={l.href} aria-current={current ? 'page' : undefined} class:list={['link', { current }]}>
+              {l.label}
+            </a>
+          </li>
+        );
+      })
+    }
+    {/* CHK-4.2: ⌘K search trigger mounts here. */}
+  </ul>
+</nav>
+
+<style>
+  .nav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-5);
+    height: 64px;
+    padding: 0 var(--sp-7);
+    /* §3: translucent base + blur + hairline rule (literal rgba — no alpha token). */
+    background: rgba(247, 245, 240, 0.86);
+    backdrop-filter: blur(10px);
+    border-bottom: var(--border-hairline);
+  }
+  .links {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-5);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .link {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    text-decoration: none;
+    transition: color var(--dur-fast) var(--ease-soft);
+  }
+  .link:hover,
+  .link.current {
+    color: var(--ink);
+  }
+  @media (max-width: 640px) {
+    .nav {
+      padding: 0 var(--sp-5);
+    }
+  }
+</style>
