@@ -1,8 +1,14 @@
 ---
-// Global site footer — DESIGN_SYSTEM §3 chrome. Carries the site-wide medical disclaimer and
-// the independence line. Legal targets (terms / privacy / disclosure) are created in CHK-1.2;
-// until then they render as muted text, not dead links. The full disclaimer component is CHK-1.3.
-const legal = ['terms', 'privacy', 'disclosure'];
+// Global site footer — DESIGN_SYSTEM §3 chrome. Carries the compact site-wide medical
+// disclaimer (CHK-1.3 component), the independence line, and links to all four legal pages.
+import Disclaimer from './Disclaimer.astro';
+
+const legal = [
+  { href: '/disclaimer', label: 'disclaimer' },
+  { href: '/terms', label: 'terms' },
+  { href: '/privacy', label: 'privacy' },
+  { href: '/disclosure', label: 'disclosure' },
+];
 ---
 
 <footer class="footer">
@@ -10,13 +16,15 @@ const legal = ['terms', 'privacy', 'disclosure'];
     <span class="brand">somnary<span class="dot">.</span></span>
     <p class="independence">zero affiliate links · zero brand money · reader-funded.</p>
   </div>
-  <p class="disclaimer">
-    educational, not medical advice. talk to a clinician before changing what you take,
-    especially if you’re pregnant, on other medications, or managing a health condition.
-  </p>
+  <div class="disclaimer">
+    <Disclaimer variant="compact" />
+  </div>
   <ul class="legal" aria-label="legal">
-    {/* CHK-1.2 turns these into links to /terms, /privacy, /disclosure. */}
-    {legal.map((l) => <li>{l}</li>)}
+    {legal.map((l) => (
+      <li>
+        <a href={l.href}>{l.label}</a>
+      </li>
+    ))}
   </ul>
 </footer>
 
@@ -51,12 +59,11 @@ const legal = ['terms', 'privacy', 'disclosure'];
   }
   .disclaimer {
     margin: var(--sp-4) 0 0;
-    max-width: 60ch;
-    font-size: var(--text-sm);
-    color: var(--ink-soft);
+    max-width: 70ch;
   }
   .legal {
     display: flex;
+    flex-wrap: wrap;
     gap: var(--sp-4);
     margin: var(--sp-5) 0 0;
     padding: 0;
@@ -65,6 +72,14 @@ const legal = ['terms', 'privacy', 'disclosure'];
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
     text-transform: uppercase;
+  }
+  .legal a {
+    color: var(--ink-faint);
+    text-decoration: none;
+    transition: color var(--dur-fast) var(--ease-soft);
+  }
+  .legal a:hover {
+    color: var(--ink);
   }
   @media (max-width: 640px) {
     .footer {

@@ -1,6 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import TokenProbe from '../components/TokenProbe.astro';
+import Disclaimer from '../components/Disclaimer.astro';
 import { plannedCount, liveCount, countByKind } from '../lib/content-index';
 
 // Placeholder home (CHK-0.2, restyled with tokens in CHK-0.3). "Graded" counts read the
@@ -33,6 +34,10 @@ const plannedLine = `${plannedCount} entries planned — ${countByKind('remedy')
 
     <div class="mt-8">
       <TokenProbe />
+    </div>
+
+    <div class="mt-8">
+      <Disclaimer variant="standard" />
     </div>
   </main>
 </Base>

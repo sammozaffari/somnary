@@ -1,0 +1,74 @@
+---
+// Reusable standing site disclaimer — CHK-1.3. Two forms:
+//   variant="standard" → per-page block (sits on every remedy/intervention page; CHK-2.1
+//     wires it into the remedy template). role="note".
+//   variant="compact"  → one-line form for the global footer.
+// Calm by design — uses restrained tokens, NOT the safety-callout severity colors (that
+// component, DESIGN §2.12, is for remedy-specific interaction warnings). Links to /disclaimer.
+interface Props {
+  variant?: 'standard' | 'compact';
+}
+const { variant = 'standard' } = Astro.props;
+---
+
+{
+  variant === 'compact' ? (
+    <p class="disc-compact" role="note">
+      educational, not medical advice · talk to a clinician before changing what you take ·
+      <a href="/disclaimer">full disclaimer</a>
+    </p>
+  ) : (
+    <aside class="disc-standard" role="note" aria-label="medical disclaimer">
+      <p class="disc-label">educational, not medical advice</p>
+      <p class="disc-body">
+        somnary grades published evidence; it doesn’t diagnose, treat, or tell you what to take.
+        talk to a doctor or pharmacist before starting, stopping, or changing any remedy or
+        medication — especially if you’re pregnant, breastfeeding, on other medications, managing
+        a health condition, or considering this for a child. “natural” doesn’t mean “safe.”
+        <a href="/disclaimer">full disclaimer →</a>
+      </p>
+    </aside>
+  )
+}
+
+<style>
+  /* compact (footer) */
+  .disc-compact {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    line-height: var(--lh-sm);
+  }
+  .disc-compact a {
+    color: var(--lavender-ink);
+  }
+
+  /* standard (per-page block) — calm, restrained; not the safety-callout severities */
+  .disc-standard {
+    background: var(--surface);
+    border: var(--border-hairline);
+    border-radius: var(--r-lg);
+    padding: var(--sp-5);
+  }
+  .disc-label {
+    margin: 0 0 var(--sp-2);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+  .disc-body {
+    margin: 0;
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--ink-soft);
+  }
+  .disc-body a {
+    color: var(--lavender-ink);
+    white-space: nowrap;
+  }
+</style>
