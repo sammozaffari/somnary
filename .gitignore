@@ -17,6 +17,9 @@ out/
 # Astro
 .astro/
 
+# Vercel
+.vercel/
+
 # Env / secrets
 .env
 .env.*
