@@ -9,7 +9,7 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done & verified
 ---
 
 ## Phase 0 — Repo & guardrails
-- [ ] **CHK-0.1 Repo scaffold.** Init repo, `/docs` holds PROJECT_PLAN.md + this file + DESIGN_SYSTEM.md, CLAUDE.md at root. *Accept:* all four files present; `.gitignore` correct; first commit pushed to GitHub.
+- [x] **CHK-0.1 Repo scaffold.** Init repo, `/docs` holds PROJECT_PLAN.md + this file + DESIGN_SYSTEM.md, CLAUDE.md at root. *Accept:* all four files present; `.gitignore` correct; first commit pushed to GitHub.
 - [ ] **CHK-0.2 Framework decision committed.** Choose Next.js or Astro (SSG/SSR). *Accept:* `package.json` exists; a placeholder home route renders server-side; build output contains pre-rendered HTML (verify content is in the HTML, not injected by JS).
 - [ ] **CHK-0.3 Design tokens wired.** Import tokens from DESIGN_SYSTEM.md into the styling layer (CSS vars / Tailwind config). *Accept:* a test component renders using named tokens only; no hardcoded hex/spacing in that component.
 - [ ] **CHK-0.4 Content model defined.** Schema for a remedy per CLAUDE.md. *Accept:* type/schema file exists with all fields; a sample remedy validates against it; citations stored as structured objects with PMID/DOI fields.
@@ -62,3 +62,4 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done & verified
 
 ### Session log (Claude Code appends one line per session)
 <!-- e.g. 2026-06-29 — CHK-2.1 melatonin template done, all 12 blocks, 14 citations resolved. -->
+2026-06-30 — CHK-0.1 ticked (scaffold criteria already met). Starting Phase 0 CHK-0.2→0.6: Astro + tokens + content model + citation resolver + content index.
