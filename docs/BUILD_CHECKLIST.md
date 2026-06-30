@@ -10,11 +10,11 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done & verified
 
 ## Phase 0 — Repo & guardrails
 - [x] **CHK-0.1 Repo scaffold.** Init repo, `/docs` holds PROJECT_PLAN.md + this file + DESIGN_SYSTEM.md, CLAUDE.md at root. *Accept:* all four files present; `.gitignore` correct; first commit pushed to GitHub.
-- [ ] **CHK-0.2 Framework decision committed.** Choose Next.js or Astro (SSG/SSR). *Accept:* `package.json` exists; a placeholder home route renders server-side; build output contains pre-rendered HTML (verify content is in the HTML, not injected by JS).
-- [ ] **CHK-0.3 Design tokens wired.** Import tokens from DESIGN_SYSTEM.md into the styling layer (CSS vars / Tailwind config). *Accept:* a test component renders using named tokens only; no hardcoded hex/spacing in that component.
-- [ ] **CHK-0.4 Content model defined.** Schema for a remedy per CLAUDE.md. *Accept:* type/schema file exists with all fields; a sample remedy validates against it; citations stored as structured objects with PMID/DOI fields.
-- [ ] **CHK-0.5 Citation resolver.** Script/check that every source's PMID/DOI resolves to a real URL. *Accept:* runs against sample data; fails the build (or logs clearly) if a citation is unresolvable. This enforces "0 hallucinated cites."
-- [ ] **CHK-0.6 Content index file.** A CSV/JSON registry of every planned remedy + intervention: name, aliases/latin name, planned tier, research status (not-started/drafting/cited/reviewed/live), source count. *Accept:* file exists; seeded from PLAN §5.1/§5.2/§5a; build can read it; it's the single source of truth for what's planned vs done.
+- [x] **CHK-0.2 Framework decision committed.** Choose Next.js or Astro (SSG/SSR). *Accept:* `package.json` exists; a placeholder home route renders server-side; build output contains pre-rendered HTML (verify content is in the HTML, not injected by JS).
+- [x] **CHK-0.3 Design tokens wired.** Import tokens from DESIGN_SYSTEM.md into the styling layer (CSS vars / Tailwind config). *Accept:* a test component renders using named tokens only; no hardcoded hex/spacing in that component.
+- [x] **CHK-0.4 Content model defined.** Schema for a remedy per CLAUDE.md. *Accept:* type/schema file exists with all fields; a sample remedy validates against it; citations stored as structured objects with PMID/DOI fields.
+- [x] **CHK-0.5 Citation resolver.** Script/check that every source's PMID/DOI resolves to a real URL. *Accept:* runs against sample data; fails the build (or logs clearly) if a citation is unresolvable. This enforces "0 hallucinated cites."
+- [x] **CHK-0.6 Content index file.** A CSV/JSON registry of every planned remedy + intervention: name, aliases/latin name, planned tier, research status (not-started/drafting/cited/reviewed/live), source count. *Accept:* file exists; seeded from PLAN §5.1/§5.2/§5a; build can read it; it's the single source of truth for what's planned vs done.
 
 ## Phase 1 — Methodology & legal (credibility spine — build BEFORE content)
 - [ ] **CHK-1.1 Methodology page.** Publishes the full S–F rubric, evidence-gate chips, source hierarchy, claim-check policy, corrections policy. *Accept:* server-rendered; matches PLAN §3; rubric is specific enough that a reader could re-derive a grade.
@@ -63,3 +63,4 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done & verified
 ### Session log (Claude Code appends one line per session)
 <!-- e.g. 2026-06-29 — CHK-2.1 melatonin template done, all 12 blocks, 14 citations resolved. -->
 2026-06-30 — CHK-0.1 ticked (scaffold criteria already met). Starting Phase 0 CHK-0.2→0.6: Astro + tokens + content model + citation resolver + content index.
+2026-06-30 — Phase 0 complete. CHK-0.2 Astro (static, pre-rendered HTML verified). CHK-0.3 DESIGN_SYSTEM tokens wired (css vars + tailwind, verbatim; token-only probe). CHK-0.4 MDX content collection + Zod schema (all fields, structured cites; rejects bad entry). CHK-0.5 citation resolver (offline gate via prebuild + --online; sample Bent 2006 resolves 200). CHK-0.6 content index (48 planned entries; zod-validated loader read at build). All pushed.
