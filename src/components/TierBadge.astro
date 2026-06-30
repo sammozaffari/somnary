@@ -1,0 +1,57 @@
+---
+// Tier badge — DESIGN_SYSTEM §2.2. Built during CHK-1.1 (front-loaded from CHK-2.3).
+// Square, tint background + 1px solid tier border, single serif glyph in the tier's -ink.
+// MANDATORY centering (§5 guardrail 4): line-height:1 + translateY(var(--grade-optical-shift));
+// the serif cap sits high otherwise. Always paired with a text grade label / aria-label —
+// never rely on color alone.
+import type { TierId } from '../lib/tiers';
+
+interface Props {
+  tier: TierId;
+  size?: 'inline' | 'card' | 'header';
+}
+const { tier, size = 'card' } = Astro.props;
+
+// Badge dimensions are fixed px per §2.2 (no token scale covers them; glyph ≈ 0.58 × box).
+const SIZES = {
+  inline: { box: 26, glyph: 16, radius: 'var(--r-sm)' },
+  card: { box: 44, glyph: 26, radius: 'var(--r-sm)' },
+  header: { box: 78, glyph: 46, radius: 'var(--r-lg)' },
+} as const;
+const s = SIZES[size];
+const lc = tier.toLowerCase();
+
+const boxStyle = [
+  `width:${s.box}px`,
+  `height:${s.box}px`,
+  `border-radius:${s.radius}`,
+  `background:var(--tier-${lc}-tint)`,
+  `border:1px solid var(--tier-${lc})`,
+  `color:var(--tier-${lc}-ink)`,
+].join(';');
+const glyphStyle = [
+  'font-family:var(--font-display)',
+  'font-weight:500',
+  'line-height:1',
+  `font-size:${s.glyph}px`,
+  'transform:translateY(var(--grade-optical-shift))',
+].join(';');
+---
+
+<span
+  class="tier-badge"
+  style={boxStyle}
+  role="img"
+  aria-label={`grade ${tier}`}
+>
+  <span style={glyphStyle} aria-hidden="true">{tier}</span>
+</span>
+
+<style>
+  .tier-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+  }
+</style>
