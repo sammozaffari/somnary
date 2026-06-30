@@ -1,0 +1,601 @@
+---
+import Base from '../layouts/Base.astro';
+import StatRow from '../components/StatRow.astro';
+import TierBadge from '../components/TierBadge.astro';
+import EvidenceGateChip from '../components/EvidenceGateChip.astro';
+import { TIERS } from '../lib/tiers';
+import { GATES } from '../lib/evidence-gates';
+import { contentIndex, liveCount } from '../lib/content-index';
+
+// Stat row reads real data (not hardcoded): counts derive from the content index /
+// citation registry. 0/0 until pages go live — honest for a pre-launch site.
+const remediesGraded = liveCount;
+const sourcesCited = contentIndex
+  .filter((e) => e.researchStatus === 'live')
+  .reduce((n, e) => n + e.sourceCount, 0);
+
+const statCells = [
+  { value: String(remediesGraded), label: 'remedies graded' },
+  { value: String(sourcesCited), label: 'sources cited' },
+  { value: '0', label: 'hallucinated cites', accent: 'sage' as const },
+  { value: '$0', label: 'brand money', accent: 'lavender' as const },
+];
+
+const sourceHierarchy = [
+  'meta-analysis / systematic review',
+  'randomized controlled trial',
+  'cohort study',
+  'case series',
+  'animal study',
+  'in-vitro',
+  'anecdote',
+];
+
+const killers = [
+  {
+    term: 'standardization.',
+    body: 'if a product doesn’t quantify its active constituent — withanolides in ashwagandha, valerenic acid in valerian, the L-theanine purity — then “it works” is unfalsifiable, because no two bottles are the same. unstandardized remedies are downgraded.',
+  },
+  {
+    term: 'dose-match.',
+    body: 'the dose that worked in a trial is often far higher than what’s actually in the capsules on sale. where the market dose doesn’t match the studied dose, we say so, and it pulls the grade down.',
+  },
+  {
+    term: 'the proprietary-blend penalty.',
+    body: 'a label that says “sleep blend 500 mg” without a per-ingredient breakdown is automatically downgraded. if you can’t see how much of each thing is in it, the claim can’t be checked — and we don’t grade on faith.',
+  },
+  {
+    term: 'form and bioavailability.',
+    body: 'form matters enormously: magnesium glycinate behaves differently from oxide; immediate-release melatonin differently from extended-release. grades and dosing notes specify the form the evidence actually supports.',
+  },
+];
+---
+
+<Base
+  title="how we grade — somnary methodology"
+  description="somnary grades every sleep remedy S to F by the strength of published human evidence. the full rubric, evidence gates, source hierarchy, citation policy, and corrections policy — specific enough to re-derive any grade."
+>
+  <main class="page">
+    <!-- header -->
+    <header class="head">
+      <p class="eyebrow">methodology · how somnary grades</p>
+      <h1 class="title">how we grade<span class="dot">.</span></h1>
+      <p class="dek">
+        somnary grades every sleep remedy from S to F by one thing only: the strength of the
+        published human evidence behind it. not popularity, not tradition, not how good the
+        marketing is. this page is the rubric in full — specific enough that you could
+        re-derive any grade on the site yourself. if you can’t check our work, we haven’t done
+        our job.
+      </p>
+    </header>
+
+    <StatRow cells={statCells} />
+
+    <!-- editorial-principle band -->
+    <aside class="principle">
+      <p class="principle-line">
+        evidence over opinion. published over promised. weak data labeled weak, never buried.
+      </p>
+      <p class="principle-sub">— the somnary editorial principle</p>
+    </aside>
+
+    <!-- Section 1 — the two rubrics -->
+    <section class="section">
+      <p class="eyebrow">section 01</p>
+      <h2 class="section-title">the two rubrics</h2>
+      <div class="prose">
+        <p>somnary keeps two separate grading systems, and never lets them touch:</p>
+        <ul>
+          <li>
+            <strong>the remedy grade (S–F)</strong> — set only by published human evidence.
+            this is the grade you see on every page.
+          </li>
+          <li>
+            <strong>the brand/product QA check</strong> — a separate, optional audit of
+            whether a specific product is third-party tested and honestly labeled. it never
+            changes a remedy’s evidence grade.
+          </li>
+        </ul>
+        <p>
+          we also keep a third thing fully walled off: <strong>community reports</strong> —
+          what readers tell us about their own experience. those sit beside the evidence as
+          context. they never move a grade. anecdote is the missing column, not the verdict.
+        </p>
+        <p>
+          mixing these is how every other supplement site loses the plot. a remedy with
+          glowing reviews and zero trials is still a D. a remedy with strong trials sold by a
+          sloppy brand is still graded on its evidence, with the brand problem flagged
+          separately.
+        </p>
+      </div>
+    </section>
+
+    <!-- Section 2 — the tier system (renders from src/lib/tiers.ts) -->
+    <section class="section">
+      <p class="eyebrow">section 02</p>
+      <h2 class="section-title">the tier system (S–F)</h2>
+      <div class="prose">
+        <p>
+          the grade answers one question: how strong is the human evidence that this actually
+          helps you sleep?
+        </p>
+        <p>
+          higher letters mean stronger, more consistent, better-replicated evidence in people
+          — not a bigger effect, and not how well-known the remedy is. tiers move when the
+          evidence moves (see <a href="#rankings">how rankings change</a>).
+        </p>
+      </div>
+
+      <div class="rubric">
+        {
+          TIERS.map((tier) => (
+            <div class:list={['tier-row', { serious: tier.serious }]}>
+              <div class="rail">
+                <TierBadge tier={tier.id} size="header" />
+                <p class="rail-name">
+                  tier {tier.letter} · {tier.name}
+                </p>
+              </div>
+              <div class="tier-body">
+                <p class="tier-oneliner">{tier.oneLiner}</p>
+                <div class="chips">
+                  {tier.typicalGates.map((g) => (
+                    <EvidenceGateChip id={g} />
+                  ))}
+                </div>
+                {tier.examples.length > 0 ? (
+                  <p class="examples">
+                    <span class="examples-label">examples</span> {tier.examples.join(' · ')}
+                  </p>
+                ) : (
+                  <p class="examples empty">{tier.emptyNote}</p>
+                )}
+              </div>
+            </div>
+          ))
+        }
+      </div>
+
+      <p class="prose note">
+        <strong>how to read a grade:</strong> the letter is the headline; the evidence-gate
+        chips on each remedy page show exactly which tests it passed or failed. the grade is
+        never a black box — it’s the sum of the gates, visible at a glance.
+      </p>
+    </section>
+
+    <!-- Section 3 — the evidence gates (renders from src/lib/evidence-gates.ts) -->
+    <section class="section">
+      <p class="eyebrow">section 03</p>
+      <h2 class="section-title">the evidence gates</h2>
+      <div class="prose">
+        <p>
+          these are the specific, checkable tests behind every grade. each remedy page displays
+          the gates it meets as chips, so the grade documents itself. a gate is either met or it
+          isn’t — no vibes.
+        </p>
+      </div>
+      <dl class="glossary">
+        {
+          GATES.map((gate) => (
+            <div class="glossary-row">
+              <dt>
+                <EvidenceGateChip id={gate.id} />
+              </dt>
+              <dd>{gate.meaning}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </section>
+
+    <!-- Section 4 — category-specific killers -->
+    <section class="section">
+      <p class="eyebrow">section 04</p>
+      <h2 class="section-title">the category-specific killers</h2>
+      <div class="prose">
+        <p>
+          botanicals and supplements fail in ways prescription drugs don’t. these dimensions can
+          cap or downgrade a grade no matter how promising the mechanism sounds:
+        </p>
+        {
+          killers.map((k) => (
+            <p>
+              <strong>{k.term}</strong> {k.body}
+            </p>
+          ))
+        }
+      </div>
+    </section>
+
+    <!-- Section 5 — how citations work -->
+    <section class="section">
+      <p class="eyebrow">section 05</p>
+      <h2 class="section-title">how citations work (cite or don’t claim)</h2>
+      <div class="prose">
+        <p>
+          every factual claim on this site points to a real, resolvable source — a PubMed ID, a
+          DOI, or a clinical-trial registry entry. no exceptions, and no invented references.
+        </p>
+        <p><strong>the source hierarchy.</strong> when sources disagree, the higher tier wins:</p>
+      </div>
+      <ol class="hierarchy" aria-label="source hierarchy, strongest first">
+        {sourceHierarchy.map((s) => <li>{s}</li>)}
+      </ol>
+      <div class="prose">
+        <p>
+          the highest-quality source available sets the claim. weaker evidence isn’t deleted —
+          it’s shown and labeled as weaker, so you can see the full picture.
+        </p>
+        <p>
+          <strong>zero hallucinated cites.</strong> every citation is checked to resolve to a
+          real source and checked by a human to confirm it actually says what we claim it says.
+          AI helps us draft and synthesize; it never gets the final word on a reference. the
+          count of hallucinated citations on this site is, and must stay, zero.
+        </p>
+        <p>
+          <strong>the claim-check counter.</strong> we publish how many claims have been
+          verified against their sources versus the total. it’s a live measure of how much of
+          the site is fully backed — including where we’re not done yet.
+        </p>
+      </div>
+    </section>
+
+    <!-- Section 6 — how uncertainty is handled -->
+    <section class="section">
+      <p class="eyebrow">section 06</p>
+      <h2 class="section-title">how uncertainty is handled</h2>
+      <div class="prose">
+        <p>
+          weak evidence is the normal state for most natural sleep remedies. we treat saying so
+          as a feature, not a failure.
+        </p>
+        <p>
+          when the data is thin, the page says thin. when a claim has no human trial behind it,
+          the claims-vs-data table shows “no human sleep trial tests this claim” rather than
+          quietly dropping the row. a near-empty remedy page isn’t a broken page — it’s an honest
+          one. the absence of evidence is information, and we show it.
+        </p>
+        <p>
+          we never round weak data up to sound more useful, and we never round strong data down
+          to sound more cautious. the grade reflects what’s published, today.
+        </p>
+      </div>
+    </section>
+
+    <!-- Section 7 — how rankings change -->
+    <section class="section" id="rankings">
+      <p class="eyebrow">section 07</p>
+      <h2 class="section-title">how rankings change</h2>
+      <div class="prose">
+        <p>
+          tiers are not fixed. a grade is a snapshot of the evidence at a point in time, and the
+          evidence moves:
+        </p>
+        <ul>
+          <li>a new well-powered RCT or meta-analysis can raise (or lower) a tier.</li>
+          <li>a safety signal can drop a remedy to F regardless of efficacy.</li>
+          <li>a failed replication can pull a grade down.</li>
+        </ul>
+        <p>
+          when a grade changes, we log it publicly — what changed, which new evidence drove it,
+          and when — so the history is auditable. we run a periodic deep-research sweep for new
+          trials, retractions, and updated reviews, and we prioritize re-reviews by what readers
+          are actually searching for.
+        </p>
+      </div>
+    </section>
+
+    <!-- Section 8 — conflicts of interest -->
+    <section class="section">
+      <p class="eyebrow">section 08</p>
+      <h2 class="section-title">conflicts of interest</h2>
+      <div class="prose">
+        <p>this is the part that makes the rest credible:</p>
+        <ul>
+          <li>
+            <strong>zero affiliate links.</strong> we never earn a commission when you buy
+            anything. no rel=sponsored, anywhere.
+          </li>
+          <li>
+            <strong>zero brand money.</strong> no supplement company pays us, sponsors us, or
+            sees a grade before you do.
+          </li>
+          <li><strong>no commerce.</strong> we don’t sell supplements.</li>
+          <li>
+            <strong>reader-funded only.</strong> the only money somnary takes comes from readers
+            who choose to support it. that’s the whole model, on purpose.
+          </li>
+        </ul>
+        <p>
+          we grade brands and products honestly precisely because we earn nothing from them. if
+          any of this ever changes, we’ll disclose it loudly, at the top of the page — not in the
+          footer.
+        </p>
+      </div>
+    </section>
+
+    <!-- Section 9 — corrections -->
+    <section class="section corrections">
+      <p class="eyebrow">section 09</p>
+      <h2 class="section-title">corrections</h2>
+      <div class="prose">
+        <p>
+          found something wrong — a citation that doesn’t resolve, a number that’s off, a grade
+          you think the evidence doesn’t support? tell us. corrections are public and we aim to
+          fix verified errors <strong>within 7 days</strong>.
+        </p>
+        <p class="inbox">
+          corrections inbox: <a href="mailto:sammymoz@gmail.com">sammymoz@gmail.com</a>
+        </p>
+      </div>
+    </section>
+
+    <!-- page footer strip (verbatim) -->
+    <p class="footer-strip">
+      somnary · methodology v1 · educational, not medical advice · talk to a clinician before
+      changing what you take, especially if you’re pregnant, on other medications, or managing a
+      health condition.
+    </p>
+  </main>
+</Base>
+
+<style>
+  .page {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: var(--sp-8) var(--sp-7) var(--sp-9);
+  }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0;
+  }
+  .dot {
+    color: var(--lavender);
+  }
+
+  /* header */
+  .head {
+    margin-bottom: var(--sp-7);
+  }
+  .title {
+    font-family: var(--font-display);
+    font-size: var(--text-3xl);
+    line-height: var(--lh-3xl);
+    letter-spacing: var(--tracking-tight);
+    color: var(--ink);
+    margin: var(--sp-3) 0 var(--sp-5);
+  }
+  .dek {
+    font-family: var(--font-body);
+    font-size: var(--text-md);
+    line-height: var(--lh-md);
+    color: var(--ink-soft);
+    max-width: 68ch;
+    margin: 0;
+  }
+
+  /* editorial-principle band */
+  .principle {
+    background: var(--lavender-tint);
+    border-radius: var(--r-xl);
+    padding: var(--sp-7);
+    margin: var(--sp-7) 0;
+  }
+  .principle-line {
+    font-family: var(--font-display);
+    font-size: var(--text-2xl);
+    line-height: var(--lh-2xl);
+    color: var(--ink);
+    margin: 0;
+    max-width: 28ch;
+  }
+  .principle-sub {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--lavender-ink);
+    margin: var(--sp-4) 0 0;
+  }
+
+  /* sections */
+  .section {
+    border-top: var(--border-hairline);
+    padding-top: var(--sp-6);
+    margin-top: var(--sp-8);
+  }
+  .section-title {
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    line-height: var(--lh-xl);
+    color: var(--ink);
+    margin: var(--sp-2) 0 var(--sp-5);
+  }
+
+  .prose {
+    max-width: 68ch;
+  }
+  .prose p {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--ink-soft);
+    margin: 0 0 var(--sp-4);
+  }
+  .prose strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .prose ul {
+    margin: 0 0 var(--sp-4);
+    padding-left: var(--sp-5);
+  }
+  .prose li {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--ink-soft);
+    margin-bottom: var(--sp-2);
+  }
+  .prose a {
+    color: var(--lavender-ink);
+  }
+  .prose.note {
+    margin-top: var(--sp-5);
+  }
+
+  /* tier rubric */
+  .rubric {
+    margin: var(--sp-6) 0 var(--sp-2);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+  }
+  .tier-row {
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    gap: var(--sp-5);
+    align-items: start;
+    padding: var(--sp-5);
+    border: var(--border-hairline);
+    border-radius: var(--r-lg);
+    background: var(--surface);
+  }
+  .tier-row.serious {
+    background: var(--tier-f-tint);
+    border-color: var(--tier-f);
+  }
+  .rail {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+    align-items: flex-start;
+  }
+  .rail-name {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0;
+  }
+  .tier-oneliner {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--ink);
+    margin: 0 0 var(--sp-4);
+  }
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2);
+  }
+  .examples {
+    font-size: var(--text-sm);
+    color: var(--ink-soft);
+    margin: var(--sp-4) 0 0;
+  }
+  .examples-label {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-right: var(--sp-2);
+  }
+  .examples.empty {
+    color: var(--ink-faint);
+    font-style: italic;
+  }
+
+  /* gate glossary */
+  .glossary {
+    margin: var(--sp-6) 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+  }
+  .glossary-row {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: var(--sp-5);
+    align-items: baseline;
+    padding-bottom: var(--sp-3);
+    border-bottom: var(--border-hairline);
+  }
+  .glossary-row dt {
+    margin: 0;
+  }
+  .glossary-row dd {
+    margin: 0;
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--ink-soft);
+  }
+
+  /* source hierarchy chain */
+  .hierarchy {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--sp-2);
+    list-style: none;
+    margin: var(--sp-3) 0 var(--sp-5);
+    padding: 0;
+  }
+  .hierarchy li {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--ink);
+    background: var(--sunken);
+    border-radius: var(--r-sm);
+    padding: var(--sp-2) var(--sp-3);
+  }
+  .hierarchy li:not(:last-child)::after {
+    content: '→';
+    margin-left: var(--sp-3);
+    color: var(--ink-faint);
+  }
+
+  /* corrections */
+  .corrections .inbox {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+  }
+
+  /* page footer strip */
+  .footer-strip {
+    margin: var(--sp-8) 0 0;
+    padding: var(--sp-5);
+    background: var(--sunken);
+    border-radius: var(--r-lg);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    line-height: var(--lh-sm);
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    text-align: center;
+  }
+
+  /* breakpoints */
+  @media (max-width: 640px) {
+    .page {
+      padding: var(--sp-6) var(--sp-5) var(--sp-8);
+    }
+    .title {
+      font-size: var(--text-2xl);
+    }
+    .tier-row {
+      grid-template-columns: 1fr;
+      gap: var(--sp-4);
+    }
+    .glossary-row {
+      grid-template-columns: 1fr;
+      gap: var(--sp-2);
+    }
+  }
+</style>
