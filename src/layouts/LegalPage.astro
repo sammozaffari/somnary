@@ -1,0 +1,123 @@
+---
+// Shared layout for the four legal pages (/disclaimer, /terms, /privacy, /disclosure).
+// Calm reading measure, token-only prose styles. Renders the PRE-LAUNCH review marker into
+// the output for every page that uses it.
+import Base from './Base.astro';
+
+interface Props {
+  title: string;
+  eyebrow: string;
+  description: string;
+  lastUpdated?: string;
+}
+const { title, eyebrow, description, lastUpdated } = Astro.props;
+
+// PRE-LAUNCH: requires legal review before launch / before membership goes live
+const PRELAUNCH = '<!-- PRE-LAUNCH: requires legal review before launch / before membership goes live -->';
+---
+
+<Base title={title} description={description}>
+  <Fragment set:html={PRELAUNCH} />
+  <main class="legal">
+    <header class="head">
+      <p class="eyebrow">{eyebrow}</p>
+      <h1 class="title"><slot name="title" />{title}<span class="dot">.</span></h1>
+      {lastUpdated && <p class="updated">last updated {lastUpdated}</p>}
+    </header>
+    <div class="legal-prose">
+      <slot />
+    </div>
+  </main>
+</Base>
+
+<style>
+  .legal {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: var(--sp-8) var(--sp-7) var(--sp-9);
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0;
+  }
+  .title {
+    font-family: var(--font-display);
+    font-size: var(--text-3xl);
+    line-height: var(--lh-3xl);
+    letter-spacing: var(--tracking-tight);
+    color: var(--ink);
+    margin: var(--sp-3) 0 var(--sp-3);
+  }
+  .dot {
+    color: var(--lavender);
+  }
+  .updated {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0;
+  }
+  .head {
+    margin-bottom: var(--sp-7);
+  }
+
+  /* prose */
+  .legal-prose :global(p),
+  .legal-prose :global(li) {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--ink-soft);
+  }
+  .legal-prose :global(p) {
+    margin: 0 0 var(--sp-5);
+    max-width: 68ch;
+  }
+  .legal-prose :global(.lead) {
+    font-size: var(--text-md);
+    line-height: var(--lh-md);
+    color: var(--ink);
+  }
+  .legal-prose :global(h2) {
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    line-height: var(--lh-lg);
+    color: var(--ink);
+    margin: var(--sp-7) 0 var(--sp-3);
+  }
+  .legal-prose :global(ul) {
+    margin: 0 0 var(--sp-5);
+    padding-left: var(--sp-5);
+    max-width: 68ch;
+  }
+  .legal-prose :global(li) {
+    margin-bottom: var(--sp-2);
+  }
+  .legal-prose :global(strong) {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .legal-prose :global(a) {
+    color: var(--lavender-ink);
+  }
+  /* the standing principle line on /disclosure-style emphasis */
+  .legal-prose :global(.emphasis) {
+    border-left: 2px solid var(--lavender);
+    padding-left: var(--sp-4);
+    color: var(--ink);
+  }
+
+  @media (max-width: 640px) {
+    .legal {
+      padding: var(--sp-6) var(--sp-5) var(--sp-8);
+    }
+    .title {
+      font-size: var(--text-2xl);
+    }
+  }
+</style>
