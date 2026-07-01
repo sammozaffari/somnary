@@ -79,7 +79,13 @@ const dose = z.object({
   marketComparison: z.string(), // how studied dose compares to typical products
 });
 
-const riskRow = z.object({ category: z.string(), text: z.string() });
+// A risk row may footnote its own sources[] — safety claims are health claims and get cited too
+// ("cite or don't claim"). Optional/defaulted so pages with general, uncited cautions still validate.
+const riskRow = z.object({
+  category: z.string(),
+  text: z.string(),
+  sources: z.array(z.number().int().positive()).default([]), // → source.n
+});
 
 /** Safety & interactions — surfaced prominently, never fine print (CLAUDE.md medical safety). */
 const safety = z.object({
@@ -88,6 +94,7 @@ const safety = z.object({
   risks: z.array(riskRow).default([]),
   pregnancy: z.string(),
   interactions: z.array(z.string()).default([]),
+  interactionsSources: z.array(z.number().int().positive()).default([]), // footnotes for the interactions list
 });
 
 const remedies = defineCollection({
@@ -122,20 +129,23 @@ const remedies = defineCollection({
       }),
       draft: z.boolean().default(false),
     })
-    // Integrity: every footnote a claim points to must exist in sources[].
+    // Integrity: every footnote (claims, risks, interactions) must exist in sources[].
     .superRefine((data, ctx) => {
       const known = new Set(data.sources.map((s) => s.n));
-      data.claims.forEach((c, ci) => {
-        c.sources.forEach((ref) => {
+      const check = (refs: number[], path: (string | number)[]) => {
+        refs.forEach((ref) => {
           if (!known.has(ref)) {
             ctx.addIssue({
               code: z.ZodIssueCode.custom,
-              path: ['claims', ci, 'sources'],
-              message: `claim references source [${ref}] which is not in sources[]`,
+              path,
+              message: `references source [${ref}] which is not in sources[]`,
             });
           }
         });
-      });
+      };
+      data.claims.forEach((c, ci) => check(c.sources, ['claims', ci, 'sources']));
+      data.safety.risks.forEach((r, ri) => check(r.sources, ['safety', 'risks', ri, 'sources']));
+      check(data.safety.interactionsSources, ['safety', 'interactionsSources']);
     }),
 });
 

@@ -5,9 +5,12 @@
 // (category / text), with pregnancy and interactions folded in as their own rows so nothing about
 // safety is buried; foot = "research reference · not medical advice". role="note". .risk 160px 1fr
 // → 1-col ≤640.
+import CiteMarker from './CiteMarker.astro';
+
 interface Risk {
   category: string;
   text: string;
+  sources?: number[];
 }
 interface Props {
   severity: 'caution' | 'serious';
@@ -15,8 +18,9 @@ interface Props {
   risks: Risk[];
   pregnancy: string;
   interactions: string[];
+  interactionsSources?: number[];
 }
-const { severity, lead, risks, pregnancy, interactions } = Astro.props;
+const { severity, lead, risks, pregnancy, interactions, interactionsSources = [] } = Astro.props;
 const sevWord = severity === 'serious' ? 'serious' : 'caution';
 ---
 
@@ -34,7 +38,12 @@ const sevWord = severity === 'serious' ? 'serious' : 'caution';
       risks.map((r) => (
         <div class="risk">
           <p class="cat">{r.category}</p>
-          <p class="text">{r.text}</p>
+          <p class="text">
+            {r.text}
+            {(r.sources ?? []).map((n) => (
+              <CiteMarker n={n} />
+            ))}
+          </p>
         </div>
       ))
     }
@@ -46,11 +55,20 @@ const sevWord = severity === 'serious' ? 'serious' : 'caution';
       interactions.length > 0 && (
         <div class="risk">
           <p class="cat">interactions</p>
-          <ul class="text int-list">
-            {interactions.map((i) => (
-              <li>{i}</li>
-            ))}
-          </ul>
+          <div class="text">
+            <ul class="int-list">
+              {interactions.map((i) => (
+                <li>{i}</li>
+              ))}
+            </ul>
+            {interactionsSources.length > 0 && (
+              <span class="int-src">
+                {interactionsSources.map((n) => (
+                  <CiteMarker n={n} />
+                ))}
+              </span>
+            )}
+          </div>
         </div>
       )
     }
