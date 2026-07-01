@@ -8,18 +8,31 @@ import indexData from '../data/content-index.json';
  * search index (CHK-4), and the tier board all consult it. It is data, validated on
  * import so a malformed registry fails the build.
  *
- * researchStatus lifecycle: not-started → drafting → cited → reviewed → live.
+ * researchStatus lifecycle: not-started → researching → drafting → cited → reviewed → live.
  * plannedTier is null for context pages (ramelteon, "when to see a doctor"), which are
  * educational and NOT graded as remedies (PLAN §5a).
+ *
+ * plannedTier is a PROVISIONAL research hypothesis to prioritize work — NEVER the published
+ * grade. The live grade is assigned only after the source-first, two-pass process (PLAN §9) and
+ * comes from the remedy's own researched, cited page. A provisional tier may move once the
+ * evidence is actually read. Hedged seed values ("B/C") collapse to the primary letter here; the
+ * nuance lives in `notes`. See docs/CONTENT_INDEX.md (the human-readable worklist this mirrors).
  */
 const entrySchema = z.object({
   name: z.string(),
   slug: z.string().regex(/^[a-z0-9-]+$/, 'slug must be kebab-case'),
   kind: z.enum(['remedy', 'intervention', 'context']),
   aliases: z.array(z.string()), // synonyms + latin names → feeds search (CHK-4)
-  plannedTier: z.enum(['S', 'A', 'B', 'C', 'D', 'F']).nullable(),
-  researchStatus: z.enum(['not-started', 'drafting', 'cited', 'reviewed', 'live']),
+  latin: z.string().nullable().default(null), // binomial / chemical name (its own search field)
+  category: z.string().default(''), // mineral · amino acid · botanical · behavioral · context …
+  plannedTier: z.enum(['S', 'A', 'B', 'C', 'D', 'F']).nullable(), // provisional hypothesis, NOT a grade
+  researchStatus: z.enum(['not-started', 'researching', 'drafting', 'cited', 'reviewed', 'live']),
   sourceCount: z.number().int().nonnegative(),
+  // Highest-value evidence to pull first (source hierarchy). UNVERIFIED research lead — every
+  // PMID/DOI here is checked against PubMed only when the actual page is built (as melatonin's were);
+  // it must never be copied to a live page as a citation without that check ("0 hallucinated cites").
+  sourceTarget: z.string().nullable().default(null),
+  notes: z.string().nullable().default(null), // honest-treatment / provisional-tier nuance
 });
 
 export type ContentIndexEntry = z.infer<typeof entrySchema>;
