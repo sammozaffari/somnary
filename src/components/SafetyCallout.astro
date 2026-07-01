@@ -1,0 +1,199 @@
+---
+// Safety & interactions — DESIGN_SYSTEM §2.12. TWO fixed severities only (§5 guardrail 8):
+// .sev-caution (tier-c) for A/B pages, .sev-serious (tier-f) for F-grade / documented harm. No
+// red, no flashing, no new severity. Head = sigil + title + severity tag; body = lead + .risk grid
+// (category / text), with pregnancy and interactions folded in as their own rows so nothing about
+// safety is buried; foot = "research reference · not medical advice". role="note". .risk 160px 1fr
+// → 1-col ≤640.
+interface Risk {
+  category: string;
+  text: string;
+}
+interface Props {
+  severity: 'caution' | 'serious';
+  lead: string;
+  risks: Risk[];
+  pregnancy: string;
+  interactions: string[];
+}
+const { severity, lead, risks, pregnancy, interactions } = Astro.props;
+const sevWord = severity === 'serious' ? 'serious' : 'caution';
+---
+
+<section class={`safety sev-${severity}`} role="note" aria-label="safety and interactions">
+  <div class="head">
+    <span class="sigil" aria-hidden="true">!</span>
+    <p class="title">safety &amp; interactions</p>
+    <span class="sev-tag">{sevWord}</span>
+  </div>
+
+  <p class="lead">{lead}</p>
+
+  <div class="risks">
+    {
+      risks.map((r) => (
+        <div class="risk">
+          <p class="cat">{r.category}</p>
+          <p class="text">{r.text}</p>
+        </div>
+      ))
+    }
+    <div class="risk">
+      <p class="cat">pregnancy</p>
+      <p class="text">{pregnancy}</p>
+    </div>
+    {
+      interactions.length > 0 && (
+        <div class="risk">
+          <p class="cat">interactions</p>
+          <ul class="text int-list">
+            {interactions.map((i) => (
+              <li>{i}</li>
+            ))}
+          </ul>
+        </div>
+      )
+    }
+  </div>
+
+  <p class="foot">research reference · not medical advice</p>
+</section>
+
+<style>
+  .safety {
+    border-radius: var(--r-lg);
+    border: 1px solid;
+    padding: var(--sp-6);
+  }
+  /* §2.12 severities — the two allowed tinted registers. */
+  .sev-caution {
+    background: var(--tier-c-tint);
+    border-color: var(--tier-c);
+  }
+  .sev-caution .sigil {
+    background: var(--tier-c);
+  }
+  .sev-caution .title,
+  .sev-caution .cat,
+  .sev-caution .foot {
+    color: var(--tier-c-ink);
+  }
+  .sev-caution .sev-tag {
+    background: var(--tier-c);
+  }
+  .sev-serious {
+    background: var(--tier-f-tint);
+    border-color: var(--tier-f);
+  }
+  .sev-serious .sigil {
+    background: var(--tier-f);
+  }
+  .sev-serious .title,
+  .sev-serious .cat,
+  .sev-serious .foot {
+    color: var(--tier-f-ink);
+  }
+  .sev-serious .sev-tag {
+    background: var(--tier-f);
+  }
+
+  .head {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+  }
+  .sigil {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    flex: none;
+    border-radius: var(--r-pill);
+    font-family: var(--font-display);
+    font-weight: 600;
+    color: var(--surface);
+    line-height: 1;
+  }
+  .title {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    margin: 0;
+    flex: 1;
+  }
+  .sev-tag {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--surface);
+    padding: 4px 10px;
+    border-radius: var(--r-pill);
+  }
+
+  .lead {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--ink);
+    margin: var(--sp-5) 0 var(--sp-4);
+  }
+
+  .risks {
+    display: flex;
+    flex-direction: column;
+  }
+  .risk {
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    gap: var(--sp-5);
+    padding: var(--sp-4) 0;
+    border-top: var(--border-hairline);
+  }
+  .cat {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    margin: 0;
+  }
+  .text {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--ink);
+    margin: 0;
+  }
+  .int-list {
+    list-style: none;
+    padding: 0;
+  }
+  .int-list li {
+    padding-left: var(--sp-4);
+    position: relative;
+    margin-bottom: var(--sp-2);
+  }
+  .int-list li::before {
+    content: '—';
+    position: absolute;
+    left: 0;
+    color: var(--ink-faint);
+  }
+
+  .foot {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    margin: var(--sp-5) 0 0;
+    padding-top: var(--sp-4);
+    border-top: var(--border-hairline);
+  }
+
+  @media (max-width: 640px) {
+    .risk {
+      grid-template-columns: 1fr;
+      gap: var(--sp-2);
+    }
+  }
+</style>

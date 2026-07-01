@@ -1,5 +1,5 @@
 [
-  { "name": "melatonin", "slug": "melatonin", "kind": "remedy", "aliases": ["n-acetyl-5-methoxytryptamine"], "plannedTier": "A", "researchStatus": "not-started", "sourceCount": 0 },
+  { "name": "melatonin", "slug": "melatonin", "kind": "remedy", "aliases": ["n-acetyl-5-methoxytryptamine"], "plannedTier": "A", "researchStatus": "live", "sourceCount": 8 },
   { "name": "magnesium", "slug": "magnesium", "kind": "remedy", "aliases": ["mg", "magnesium glycinate", "magnesium threonate", "magnesium citrate", "magnesium bisglycinate"], "plannedTier": "B", "researchStatus": "not-started", "sourceCount": 0 },
   { "name": "l-theanine", "slug": "l-theanine", "kind": "remedy", "aliases": ["theanine", "n-ethyl-l-glutamine", "suntheanine"], "plannedTier": "B", "researchStatus": "not-started", "sourceCount": 0 },
   { "name": "ashwagandha", "slug": "ashwagandha", "kind": "remedy", "aliases": ["withania somnifera", "indian ginseng", "winter cherry", "ksm-66", "shoden"], "plannedTier": "B", "researchStatus": "not-started", "sourceCount": 0 },

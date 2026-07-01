@@ -1,0 +1,39 @@
+---
+// Presentational evidence-gate chip — DESIGN_SYSTEM §2.3. Takes a raw {label, variant}: used by
+// VerdictBand (remedy frontmatter stores gates as label+variant pairs) and wrapped by
+// EvidenceGateChip (which looks a gate up by id first). This is the single home for the §2.3
+// variant→token map. Static (non-control) chip: no hover, label carries the meaning (never color).
+import type { GateVariant } from '../lib/evidence-gates';
+
+interface Props {
+  label: string;
+  variant: GateVariant;
+  title?: string;
+}
+const { label, variant, title } = Astro.props;
+
+// §2.3 variant → token pairs (the ONLY place these three pairs live).
+const VARIANT_STYLE: Record<GateVariant, string> = {
+  positive: 'color:var(--sage-ink);background:var(--sage-tint)',
+  caution: 'color:var(--tier-c-ink);background:var(--tier-c-tint)',
+  neutral: 'color:var(--ink-soft);background:var(--sunken)',
+};
+---
+
+<span class="gate-chip" style={VARIANT_STYLE[variant]} title={title}>{label}</span>
+
+<style>
+  .gate-chip {
+    display: inline-flex;
+    align-items: center;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: normal; /* chips are lowercase, not the uppercase --text-xs label style */
+    text-transform: none;
+    line-height: 1;
+    /* §2.3 padding is a literal spec value (no token covers 5/11px). */
+    padding: 5px 11px;
+    border-radius: var(--r-pill);
+    white-space: nowrap;
+  }
+</style>

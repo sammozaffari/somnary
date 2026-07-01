@@ -1,0 +1,81 @@
+---
+// Community read — DESIGN_SYSTEM §2.11. The evidence firewall in UI form (CLAUDE.md non-negotiable):
+// anonymous self-reports sit BESIDE the evidence and NEVER move the grade. This reads only
+// community.reportsCount and renders the true figure — including 0 — with a caption that states the
+// firewall out loud. role="progressbar". Low/empty data is shown honestly, never dressed up as a
+// pattern. Static (no count-up), so it works with JS off.
+interface Props {
+  reportsCount: number;
+  target?: number;
+}
+const { reportsCount, target = 100 } = Astro.props;
+const pct = Math.max(0, Math.min(100, Math.round((reportsCount / target) * 100)));
+const tooFew = reportsCount < 10;
+---
+
+<section class="community" aria-label="community read">
+  <p class="c-header">community read</p>
+  <p class="figure">{reportsCount} <span class="of">/ {target}</span></p>
+  <div
+    class="track"
+    role="progressbar"
+    aria-valuenow={reportsCount}
+    aria-valuemin="0"
+    aria-valuemax={target}
+    aria-label={`${reportsCount} of ${target} community reports`}
+  >
+    <div class="fill" style={`width:${pct}%`}></div>
+  </div>
+  <p class="caption">
+    {
+      tooFew
+        ? 'too few reports to show a pattern yet.'
+        : 'aggregated anonymous self-reports.'
+    } community reports never affect the grade — the grade is set by published evidence alone.
+  </p>
+</section>
+
+<style>
+  .community {
+    background: var(--surface);
+    border: var(--border-hairline);
+    border-radius: var(--r-lg);
+    padding: var(--sp-5);
+  }
+  .c-header {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0 0 var(--sp-3);
+  }
+  .figure {
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    line-height: 1;
+    color: var(--ink);
+    margin: 0 0 var(--sp-3);
+  }
+  .of {
+    color: var(--ink-faint);
+    font-size: var(--text-lg);
+  }
+  .track {
+    height: 7px;
+    border-radius: var(--r-pill);
+    background: var(--sunken);
+    overflow: hidden;
+  }
+  .fill {
+    height: 100%;
+    border-radius: var(--r-pill);
+    background: var(--lavender);
+  }
+  .caption {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--ink-soft);
+    margin: var(--sp-3) 0 0;
+  }
+</style>

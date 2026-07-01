@@ -1,39 +1,15 @@
 ---
-// Evidence-gate chip — DESIGN_SYSTEM §2.3. Built during CHK-1.1 (front-loaded from CHK-2.3).
-// Pill, mono, three semantic variants. The label text carries the meaning (never color-only).
-// Renders its label from evidence-gates.ts so gate text is never hardcoded at call sites.
-import { getGate, type GateId, type GateVariant } from '../lib/evidence-gates';
+// Evidence-gate chip by id — DESIGN_SYSTEM §2.3. Built during CHK-1.1 (front-loaded from CHK-2.3).
+// Looks the gate up in evidence-gates.ts (so label + meaning are never hardcoded at call sites)
+// and renders the shared presentational GateChip. Used by the methodology gate glossary + tier rows.
+import { getGate, type GateId } from '../lib/evidence-gates';
+import GateChip from './GateChip.astro';
 
 interface Props {
   id: GateId;
 }
 const { id } = Astro.props;
 const gate = getGate(id);
-
-// §2.3 variant → token pairs.
-const VARIANT_STYLE: Record<GateVariant, string> = {
-  positive: 'color:var(--sage-ink);background:var(--sage-tint)',
-  caution: 'color:var(--tier-c-ink);background:var(--tier-c-tint)',
-  neutral: 'color:var(--ink-soft);background:var(--sunken)',
-};
 ---
 
-<span class="gate-chip" style={VARIANT_STYLE[gate.variant]} title={gate.meaning}>
-  {gate.label}
-</span>
-
-<style>
-  .gate-chip {
-    display: inline-flex;
-    align-items: center;
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: normal; /* chips are lowercase, not the uppercase --text-xs label style */
-    text-transform: none;
-    line-height: 1;
-    /* §2.3 padding is a literal spec value (no token covers 5/11px). */
-    padding: 5px 11px;
-    border-radius: var(--r-pill);
-    white-space: nowrap;
-  }
-</style>
+<GateChip label={gate.label} variant={gate.variant} title={gate.meaning} />

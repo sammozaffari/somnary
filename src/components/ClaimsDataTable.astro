@@ -1,0 +1,258 @@
+---
+// Claims-vs-data table — DESIGN_SYSTEM §2.4, the signature strike-to-resolve move. Left = what
+// sellers claim (struck through); right = what the studies show, footnoted per row.
+//
+// FIXED reveal engine (§5 guardrail 6): content is VISIBLE by default (JS off ⇒ final state, strike
+// drawn, data shown). The script HIDES then reveals via INLINE styles on a staggered timer, retries
+// on rAF until rows exist, and force-reveals everything unconditionally at 2.5s. No
+// IntersectionObserver, no scroll listener, no .in class. The strike is a real .strikeline element
+// (not ::after). Reduced motion ⇒ leave the final state untouched. Null studiesShow ⇒ .nodata
+// marker (empty data is content, never a blank cell).
+import CiteMarker from './CiteMarker.astro';
+
+interface Claim {
+  claimed: string;
+  studiesShow: string | null;
+  sources: number[];
+}
+interface Props {
+  claims: Claim[];
+}
+const { claims } = Astro.props;
+---
+
+<div class="claims-table" role="table" aria-label="what's claimed versus what the studies show">
+  <div class="header" role="row">
+    <div class="h-claim" role="columnheader">what's claimed</div>
+    <div class="h-data" role="columnheader">what the studies show</div>
+  </div>
+
+  {
+    claims.map((c) => (
+      <div class="claimrow" role="row">
+        <div class="claim-cell" role="cell">
+          <span class="c-label c-label-claim" aria-hidden="true">claimed</span>
+          <span class="claim">
+            {c.claimed}
+            <span class="strikeline" aria-hidden="true" />
+          </span>
+        </div>
+        <div class="data-cell" role="cell">
+          <span class="c-label c-label-data" aria-hidden="true">studies show</span>
+          {c.studiesShow === null ? (
+            <span class="nodata">
+              <span class="dash" aria-hidden="true" />
+              no human sleep trial tests this claim
+            </span>
+          ) : (
+            <span class="data-text">
+              {c.studiesShow}
+              {c.sources.map((n) => (
+                <CiteMarker n={n} />
+              ))}
+            </span>
+          )}
+        </div>
+      </div>
+    ))
+  }
+</div>
+
+<style>
+  .claims-table {
+    border: var(--border-hairline);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+  }
+
+  .header {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    background: var(--sunken);
+  }
+  .h-claim,
+  .h-data {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    padding: var(--sp-3) var(--sp-5);
+  }
+  .h-claim {
+    color: var(--ink-faint);
+  }
+  .h-data {
+    color: var(--sage-ink);
+  }
+
+  .claimrow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-top: var(--border-hairline);
+  }
+  .claim-cell {
+    padding: 20px var(--sp-5);
+    border-right: 1px solid var(--line);
+  }
+  .data-cell {
+    padding: 20px var(--sp-5);
+    background: var(--surface);
+  }
+
+  /* labelled-pair eyebrows — hidden on desktop, shown in the ≤640 stack */
+  .c-label {
+    display: none;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    margin-bottom: var(--sp-2);
+  }
+  .c-label-claim {
+    color: var(--ink-faint);
+  }
+  .c-label-data {
+    color: var(--sage-ink);
+  }
+
+  .claim {
+    position: relative;
+    display: inline;
+    font-size: 16px;
+    line-height: var(--lh-base);
+    color: var(--ink-faint);
+  }
+  /* the strike is a real element; FINAL state = drawn (scaleX(1)) so JS-off shows it struck */
+  .strikeline {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 1.5px;
+    background: var(--tier-d);
+    transform-origin: left;
+    transform: scaleX(1);
+    transition: transform var(--dur-slow) var(--ease-settle);
+    pointer-events: none;
+  }
+
+  .data-text {
+    font-size: 16px;
+    line-height: var(--lh-base);
+    color: var(--ink);
+    /* FINAL state = visible; JS sets the hidden start inline then animates back to this */
+    display: inline-block;
+    opacity: 1;
+    transform: translateY(0);
+    transition:
+      opacity var(--dur-base) var(--ease-settle),
+      transform var(--dur-base) var(--ease-settle);
+  }
+
+  .nodata {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-2);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--ink-faint);
+  }
+  .dash {
+    width: 18px;
+    height: 1px;
+    background: var(--line-strong);
+    flex: none;
+  }
+
+  @media (max-width: 640px) {
+    .header {
+      display: none;
+    }
+    .claimrow {
+      grid-template-columns: 1fr;
+    }
+    .claim-cell {
+      border-right: none;
+      border-bottom: 1px solid var(--line);
+    }
+    .c-label {
+      display: block;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .strikeline,
+    .data-text {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  // Reveal engine (FIXED, §5 guardrail 6). Content is already final in the DOM; we hide-then-reveal
+  // via inline styles only. rAF-retry until rows exist; unconditional 2.5s force-reveal backstop.
+  (() => {
+    const REDUCED =
+      window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (REDUCED) return; // leave final state as-is
+
+    const forceReveal = (rows: NodeListOf<Element>) => {
+      rows.forEach((row) => {
+        const strike = row.querySelector<HTMLElement>('.strikeline');
+        const data = row.querySelector<HTMLElement>('.data-text');
+        if (strike) strike.style.transform = 'scaleX(1)';
+        if (data) {
+          data.style.opacity = '1';
+          data.style.transform = 'translateY(0)';
+        }
+      });
+    };
+
+    let revealed = false;
+    const start = (rows: NodeListOf<Element>) => {
+      if (revealed) return;
+      revealed = true;
+      // hide (inline start state)
+      rows.forEach((row) => {
+        const strike = row.querySelector<HTMLElement>('.strikeline');
+        const data = row.querySelector<HTMLElement>('.data-text');
+        if (strike) strike.style.transform = 'scaleX(0)';
+        if (data) {
+          data.style.opacity = '0';
+          data.style.transform = 'translateY(8px)';
+        }
+      });
+      // force a reflow so the start state applies before we animate to final
+      void (document.querySelector('.claims-table') as HTMLElement)?.offsetHeight;
+      // staggered reveal (~80ms/row)
+      rows.forEach((row, i) => {
+        window.setTimeout(() => {
+          const strike = row.querySelector<HTMLElement>('.strikeline');
+          const data = row.querySelector<HTMLElement>('.data-text');
+          if (strike) strike.style.transform = 'scaleX(1)';
+          if (data) {
+            data.style.opacity = '1';
+            data.style.transform = 'translateY(0)';
+          }
+        }, 120 + i * 80);
+      });
+    };
+
+    let tries = 0;
+    const tick = () => {
+      const rows = document.querySelectorAll('.claims-table .claimrow');
+      if (rows.length) {
+        start(rows);
+        return;
+      }
+      if (tries++ < 60) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+
+    // unconditional backstop: never leave the data column stranded hidden
+    window.setTimeout(() => {
+      const rows = document.querySelectorAll('.claims-table .claimrow');
+      if (rows.length) forceReveal(rows);
+    }, 2500);
+  })();
+</script>

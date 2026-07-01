@@ -72,8 +72,18 @@ async function resolve(url) {
   try {
     const ctrl = new AbortController();
     const t = setTimeout(() => ctrl.abort(), 12000);
-    // GET (some hosts reject HEAD); redirects followed (doi.org → publisher).
-    const res = await fetch(url, { method: 'GET', redirect: 'follow', signal: ctrl.signal });
+    // GET (some hosts reject HEAD); redirects followed (doi.org → publisher). A browser-like
+    // User-Agent avoids some publishers' crude bot walls (Silverchair/Wiley 403 otherwise).
+    const res = await fetch(url, {
+      method: 'GET',
+      redirect: 'follow',
+      signal: ctrl.signal,
+      headers: {
+        'User-Agent':
+          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36',
+        Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+      },
+    });
     clearTimeout(t);
     return { ok: res.ok, status: res.status };
   } catch (err) {
@@ -118,11 +128,19 @@ async function main() {
   let warned = 0;
   for (const u of allUrls) {
     const r = await resolve(u.url);
+    // 403/412/429/451 = access restricted / bot-challenge (Atypon/Incapsula use 412) / rate-limited /
+    // legal block — the publisher blocking a bot, NOT evidence the reference is fake or dead (a
+    // hallucinated id returns 404/410). Treat as an unverified warning, not a build-failing dead
+    // link; the human citation audit confirms these, and every source also carries a resolving PMID.
+    const BLOCKED = new Set([403, 412, 429, 451]);
     if (r.ok) {
       console.log(`  ✓ ${u.kind} ${u.value} → ${r.status}`);
     } else if (r.networkError) {
       warned++;
       console.warn(`  ⚠ ${u.kind} ${u.value} → network ${r.networkError} (${u.rel}) — could not verify`);
+    } else if (BLOCKED.has(r.status)) {
+      warned++;
+      console.warn(`  ⚠ ${u.kind} ${u.value} → HTTP ${r.status} bot-blocked (${u.rel}) — verify manually`);
     } else {
       dead++;
       console.error(`  ✗ ${u.kind} ${u.value} → HTTP ${r.status} (${u.rel})`);

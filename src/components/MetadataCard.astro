@@ -1,0 +1,105 @@
+---
+// Metadata "at a glance" card — DESIGN_SYSTEM §2.5. Sidebar summary: Grade (inline tier badge +
+// text label), Key compound, Studied dose, Best for, Safety flag (a chip). Unknown values render
+// "not established" in --ink-faint — never a blank cell (§5 guardrail 10).
+import type { GateVariant } from '../lib/evidence-gates';
+import type { TierId } from '../lib/tiers';
+import TierBadge from './TierBadge.astro';
+import GateChip from './GateChip.astro';
+
+interface Props {
+  tier: TierId;
+  keyCompound: string | null;
+  studiedDose: string | null;
+  bestFor: string[];
+  safetyFlag: { label: string; variant: GateVariant };
+}
+const { tier, keyCompound, studiedDose, bestFor, safetyFlag } = Astro.props;
+const bestForText = bestFor.length ? bestFor.join(', ') : null;
+---
+
+<aside class="meta-card" aria-label="at a glance">
+  <p class="meta-header">at a glance</p>
+
+  <div class="row">
+    <span class="label">grade</span>
+    <span class="value grade-value">
+      <TierBadge tier={tier} size="inline" />
+      <span>grade {tier}</span>
+    </span>
+  </div>
+
+  <div class="row">
+    <span class="label">key compound</span>
+    <span class="value">{keyCompound ?? <em class="unknown">not established</em>}</span>
+  </div>
+
+  <div class="row">
+    <span class="label">studied dose</span>
+    <span class="value">{studiedDose ?? <em class="unknown">not established</em>}</span>
+  </div>
+
+  <div class="row">
+    <span class="label">best for</span>
+    <span class="value">{bestForText ?? <em class="unknown">not established</em>}</span>
+  </div>
+
+  <div class="row row-flag">
+    <span class="label">safety flag</span>
+    <span class="value">
+      <GateChip label={safetyFlag.label} variant={safetyFlag.variant} />
+    </span>
+  </div>
+</aside>
+
+<style>
+  .meta-card {
+    background: var(--surface);
+    border: var(--border-hairline);
+    border-radius: var(--r-lg);
+    padding: var(--sp-5);
+  }
+  .meta-header {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0 0 var(--sp-4);
+  }
+  .row {
+    display: grid;
+    grid-template-columns: 96px 1fr;
+    gap: var(--sp-4);
+    align-items: baseline;
+    padding: var(--sp-3) 0;
+    border-bottom: var(--border-hairline);
+  }
+  .row-flag {
+    border-bottom: none;
+    align-items: center;
+  }
+  .label {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+  .value {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--ink);
+    text-align: right;
+    justify-self: end;
+  }
+  .grade-value {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-2);
+  }
+  .unknown {
+    color: var(--ink-faint);
+    font-style: italic;
+  }
+</style>

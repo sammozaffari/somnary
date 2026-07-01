@@ -1,0 +1,102 @@
+---
+// Ask panel — DESIGN_SYSTEM §2.9 (sidebar "ask" variant). Shipped as an HONEST, inert stub:
+// the RAG assistant is Phase 9 (CHK-9.2), so this must NOT look or behave as if it answers
+// (real-promises rule). The input is disabled and the caption says plainly it's not live yet and
+// will answer only from this page's cited sources. No script — nothing to submit.
+interface Props {
+  remedyName: string;
+}
+const { remedyName } = Astro.props;
+---
+
+<section class="ask" aria-label="ask about this remedy">
+  <p class="ask-label"><span class="dot" aria-hidden="true"></span> ask</p>
+  <p class="prompt">questions about {remedyName}? the assistant will answer only from the cited sources on this page.</p>
+  <div class="field">
+    <input
+      type="text"
+      class="ask-input"
+      placeholder="not live yet"
+      disabled
+      aria-label={`ask about ${remedyName} (coming soon)`}
+    />
+    <button type="button" class="send" disabled aria-disabled="true" aria-label="send (coming soon)">→</button>
+  </div>
+  <p class="stub-note">scoped assistant — arriving with the somnary corpus. it will never invent a source.</p>
+</section>
+
+<style>
+  .ask {
+    background: var(--lavender-tint);
+    border-radius: var(--r-lg);
+    padding: var(--sp-5);
+  }
+  .ask-label {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--lavender-ink);
+    margin: 0 0 var(--sp-3);
+  }
+  .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: var(--r-pill);
+    background: var(--lavender);
+    flex: none;
+  }
+  .prompt {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--ink-soft);
+    margin: 0 0 var(--sp-4);
+  }
+  .field {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+  }
+  .ask-input {
+    flex: 1;
+    min-width: 0;
+    min-height: 44px;
+    padding: 0 var(--sp-4);
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: var(--ink);
+    background: var(--surface);
+    border: var(--border-hairline);
+    border-radius: var(--r-pill);
+  }
+  .ask-input:disabled {
+    color: var(--ink-faint);
+    cursor: not-allowed;
+  }
+  .send {
+    width: 30px;
+    height: 30px;
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: var(--r-pill);
+    background: var(--lavender);
+    color: var(--surface);
+    font-family: var(--font-mono);
+  }
+  .send:disabled {
+    background: var(--line-strong);
+    cursor: not-allowed;
+  }
+  .stub-note {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--ink-faint);
+    margin: var(--sp-3) 0 0;
+  }
+</style>

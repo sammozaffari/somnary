@@ -1,0 +1,36 @@
+---
+// Inline citation marker — DESIGN_SYSTEM §2.8 trigger. A real <button> (not a decorative sup) so
+// it's keyboard-reachable; the single shared CitationPopover wires every .cite-sup[data-cite] on
+// the page by its number, so this component carries no script of its own. Usable in .astro and
+// inside MDX bodies (evidence summary). Pair a marker only with a source that exists in sources[].
+interface Props {
+  n: number;
+}
+const { n } = Astro.props;
+---
+
+<button type="button" class="cite-sup" data-cite={n} aria-label={`citation ${n}`}>{n}</button>
+
+<style>
+  .cite-sup {
+    font-family: var(--font-mono);
+    font-size: 0.72em;
+    vertical-align: super;
+    line-height: 0;
+    color: var(--lavender-ink);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0 1px;
+    /* keep the number legible + a comfortable hit area without disturbing text flow */
+    margin-left: 1px;
+  }
+  .cite-sup:hover {
+    color: var(--lavender);
+  }
+  .cite-sup:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+    border-radius: var(--r-sm);
+  }
+</style>

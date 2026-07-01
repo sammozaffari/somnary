@@ -1,0 +1,291 @@
+---
+// Remedy page template — CHK-2.1 (DESIGN_SYSTEM §2.5 / §3.2, PLAN §4). ONE dynamic route renders
+// every remedy from its structured frontmatter; melatonin is the first content file and Phase 3's
+// 25–30 pages inherit this exact template. Static / pre-rendered (crawlability non-negotiable):
+// getStaticPaths enumerates non-draft remedies, and render() turns the MDX body into the
+// evidence-summary block. The 12 PLAN §4 blocks are assembled below, each from a reusable component.
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { getTier } from '../../lib/tiers';
+import type { GateVariant } from '../../lib/evidence-gates';
+import TierBadge from '../../components/TierBadge.astro';
+import VerdictBand from '../../components/VerdictBand.astro';
+import ClaimsDataTable from '../../components/ClaimsDataTable.astro';
+import DosingGrid from '../../components/DosingGrid.astro';
+import SafetyCallout from '../../components/SafetyCallout.astro';
+import MetadataCard from '../../components/MetadataCard.astro';
+import CommunityBar from '../../components/CommunityBar.astro';
+import AskPanel from '../../components/AskPanel.astro';
+import SourcesList from '../../components/SourcesList.astro';
+import CitationPopover from '../../components/CitationPopover.astro';
+import Disclaimer from '../../components/Disclaimer.astro';
+
+export async function getStaticPaths() {
+  const remedies = await getCollection('remedies', (e) => !e.data.draft);
+  return remedies.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const d = entry.data;
+const { Content } = await render(entry);
+
+const tier = getTier(d.tier);
+const studiedDose = d.doses.length ? d.doses[0].studiedDose : null;
+const safetyFlag: { label: string; variant: GateVariant } = {
+  label: d.safety.severity === 'serious' ? 'serious — see safety' : 'caution — see safety',
+  variant: 'caution',
+};
+---
+
+<Base
+  title={`${d.seo.questionTitle} — somnary`}
+  description={d.oneLineVerdict}
+  canonical={d.seo.canonical}
+>
+  <main class="remedy">
+    {/* 1 — header */}
+    <header class="head">
+      <p class="crumb"><a href="/">somnary</a> <span aria-hidden="true">›</span> remedies</p>
+      <div class="head-main">
+        <TierBadge tier={d.tier} size="header" />
+        <div class="head-text">
+          <h1 class="title">{d.name}<span class="dot">.</span></h1>
+          <p class="dek">{d.oneLineVerdict}</p>
+          <p class="meta-line">
+            grade {d.tier} · {tier.name}
+            {d.keyCompound && <> · key compound: {d.keyCompound}</>}
+            {d.aliases.length > 0 && <> · also: {d.aliases.join(', ')}</>}
+          </p>
+        </div>
+      </div>
+    </header>
+
+    {/* 2 — verdict band */}
+    <VerdictBand verdict={d.verdict} gates={d.evidenceGates} tier={d.tier} />
+
+    <div class="body">
+      <div class="main">
+        {/* 3 — claims vs data */}
+        <section class="block">
+          <p class="eyebrow">claims vs. data</p>
+          <h2 class="block-title">what's claimed, what's shown</h2>
+          <ClaimsDataTable claims={d.claims} />
+        </section>
+
+        {/* 4 — evidence summary (MDX body) */}
+        <section class="block">
+          <p class="eyebrow">evidence summary</p>
+          <h2 class="block-title">what the trials actually found</h2>
+          <div class="prose"><Content /></div>
+        </section>
+
+        {/* 5 — dosing reality */}
+        <section class="block">
+          <p class="eyebrow">dosing reality</p>
+          <h2 class="block-title">the studied dose vs. the shelf</h2>
+          <DosingGrid doses={d.doses} />
+        </section>
+
+        {/* 6 — safety & interactions (prominent) */}
+        <section class="block">
+          <SafetyCallout
+            severity={d.safety.severity}
+            lead={d.safety.lead}
+            risks={d.safety.risks}
+            pregnancy={d.safety.pregnancy}
+            interactions={d.safety.interactions}
+          />
+        </section>
+
+        {/* 7 — standardization note */}
+        <section class="block">
+          <p class="eyebrow">standardization</p>
+          <h2 class="block-title">what to look for on a label</h2>
+          <p class="prose-p">{d.standardization}</p>
+        </section>
+
+        {/* 8 — mechanism */}
+        <section class="block">
+          <p class="eyebrow">mechanism</p>
+          <h2 class="block-title">how it's thought to work</h2>
+          <p class="prose-p">{d.mechanism}</p>
+        </section>
+
+        {/* 9 — sources */}
+        <section class="block">
+          <p class="eyebrow">sources</p>
+          <h2 class="block-title">every claim, footnoted</h2>
+          <SourcesList sources={d.sources} />
+        </section>
+      </div>
+
+      {/* sidebar: 10 community (walled off) · metadata · 11 ask stub */}
+      <div class="sidebar">
+        <MetadataCard
+          tier={d.tier}
+          keyCompound={d.keyCompound}
+          studiedDose={studiedDose}
+          bestFor={d.bestFor}
+          safetyFlag={safetyFlag}
+        />
+        <CommunityBar reportsCount={d.community.reportsCount} />
+        <AskPanel remedyName={d.name} />
+      </div>
+    </div>
+
+    {/* site-wide medical disclaimer on every remedy page (CHK-1.3 → CHK-2.1) */}
+    <div class="disclaimer-slot">
+      <Disclaimer variant="standard" />
+    </div>
+  </main>
+
+  {/* 9/12 — single shared citation popover for every .cite-sup on the page */}
+  <CitationPopover sources={d.sources} />
+</Base>
+
+<style>
+  .remedy {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: var(--sp-8) var(--sp-7) var(--sp-9);
+  }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0;
+  }
+  .dot {
+    color: var(--lavender);
+  }
+
+  /* header */
+  .head {
+    margin-bottom: var(--sp-6);
+  }
+  .crumb {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0 0 var(--sp-5);
+  }
+  .crumb a {
+    color: var(--ink-faint);
+    text-decoration: none;
+  }
+  .crumb a:hover {
+    color: var(--ink);
+  }
+  .head-main {
+    display: flex;
+    gap: var(--sp-5);
+    align-items: flex-start;
+  }
+  .title {
+    font-family: var(--font-display);
+    font-size: var(--text-3xl);
+    line-height: var(--lh-3xl);
+    letter-spacing: var(--tracking-tight);
+    color: var(--ink);
+    margin: 0 0 var(--sp-3);
+  }
+  .dek {
+    font-family: var(--font-body);
+    font-size: var(--text-md);
+    line-height: var(--lh-md);
+    color: var(--ink-soft);
+    max-width: 60ch;
+    margin: 0 0 var(--sp-3);
+  }
+  .meta-line {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0;
+  }
+
+  /* body grid */
+  .body {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: var(--sp-7);
+    margin-top: var(--sp-8);
+  }
+  .main {
+    min-width: 0;
+  }
+  .sidebar {
+    position: sticky;
+    top: 88px; /* clears the 64px nav */
+    align-self: start;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-5);
+  }
+
+  .block {
+    margin-bottom: var(--sp-8);
+  }
+  .block-title {
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    line-height: var(--lh-xl);
+    color: var(--ink);
+    margin: var(--sp-2) 0 var(--sp-5);
+  }
+
+  /* MDX evidence-summary prose */
+  .prose {
+    max-width: 68ch;
+  }
+  .prose :global(p) {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--ink-soft);
+    margin: 0 0 var(--sp-4);
+  }
+  .prose :global(strong) {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .prose-p {
+    max-width: 68ch;
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--ink-soft);
+    margin: 0;
+  }
+
+  .disclaimer-slot {
+    margin-top: var(--sp-8);
+  }
+
+  /* breakpoints (§3.2): body 1-col @900 (sidebar static below main); title 46px @640 */
+  @media (max-width: 900px) {
+    .body {
+      grid-template-columns: 1fr;
+    }
+    .sidebar {
+      position: static;
+      top: auto;
+    }
+  }
+  @media (max-width: 640px) {
+    .remedy {
+      padding: var(--sp-6) var(--sp-5) var(--sp-8);
+    }
+    .head-main {
+      gap: var(--sp-4);
+    }
+    .title {
+      font-size: 46px;
+    }
+  }
+</style>

@@ -2,14 +2,16 @@
 import Base from '../layouts/Base.astro';
 import TokenProbe from '../components/TokenProbe.astro';
 import Disclaimer from '../components/Disclaimer.astro';
-import { plannedCount, liveCount, countByKind } from '../lib/content-index';
+import { contentIndex, plannedCount, liveCount, countByKind } from '../lib/content-index';
 
 // Placeholder home (CHK-0.2, restyled with tokens in CHK-0.3). "Graded" counts read the
-// content index at build time (CHK-0.6) — currently 0 live; the planned figure proves the
-// registry is machine-readable. The tagline follows the locked pattern from CLAUDE.md.
+// content index at build time (CHK-0.6) — both figures derive from live entries, never hardcoded,
+// so the tagline can't overstate. The tagline follows the locked pattern from CLAUDE.md.
 // Rendered as static HTML so the text is in the page source, not injected by JS.
-const remediesGraded = liveCount; // 0 until pages go live
-const sourcesCited = 0;
+const remediesGraded = liveCount;
+const sourcesCited = contentIndex
+  .filter((e) => e.researchStatus === 'live')
+  .reduce((n, e) => n + e.sourceCount, 0);
 const tagline = `somnary · ${remediesGraded} remedies graded, ${sourcesCited} sources cited · zero brand money`;
 const plannedLine = `${plannedCount} entries planned — ${countByKind('remedy')} remedies, ${countByKind('intervention')} interventions, ${countByKind('context')} context.`;
 ---

@@ -1,0 +1,84 @@
+---
+// Dosing reality — DESIGN_SYSTEM §3.2 dosing grid. One card per dose form; inside, a 4-column
+// grid of labelled fields (form / studied dose / timing / vs. the market), 4→2 col at ≤640px.
+// "market comparison" is where this site earns trust — it's the studied dose vs. what's on shelves.
+interface Dose {
+  form: string;
+  studiedDose: string;
+  timing: string;
+  marketComparison: string;
+}
+interface Props {
+  doses: Dose[];
+}
+const { doses } = Astro.props;
+---
+
+<div class="dosing">
+  {
+    doses.map((d) => (
+      <div class="dose">
+        <div class="cell">
+          <p class="lbl">form</p>
+          <p class="val val-form">{d.form}</p>
+        </div>
+        <div class="cell">
+          <p class="lbl">studied dose</p>
+          <p class="val">{d.studiedDose}</p>
+        </div>
+        <div class="cell">
+          <p class="lbl">timing</p>
+          <p class="val">{d.timing}</p>
+        </div>
+        <div class="cell">
+          <p class="lbl">vs. the market</p>
+          <p class="val">{d.marketComparison}</p>
+        </div>
+      </div>
+    ))
+  }
+</div>
+
+<style>
+  .dosing {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+  }
+  .dose {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--sp-5);
+    padding: var(--sp-5);
+    background: var(--surface);
+    border: var(--border-hairline);
+    border-radius: var(--r-lg);
+  }
+  .cell {
+    min-width: 0;
+  }
+  .lbl {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0 0 var(--sp-2);
+  }
+  .val {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--ink);
+    margin: 0;
+  }
+  .val-form {
+    font-weight: 600;
+  }
+
+  @media (max-width: 640px) {
+    .dose {
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--sp-4);
+    }
+  }
+</style>

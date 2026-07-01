@@ -1,0 +1,84 @@
+---
+// Verdict band — DESIGN_SYSTEM §2.5. Two columns (1.5fr 1fr): the serif verdict statement left
+// (right border), the evidence-gate chips + a plain-language grade note right. The remedy schema
+// stores gates as {label, variant} pairs, so we render the presentational GateChip directly.
+// ≤640px → single column, left cell gains a bottom border (§2.5 responsive).
+import type { GateVariant } from '../lib/evidence-gates';
+import { getTier, type TierId } from '../lib/tiers';
+import GateChip from './GateChip.astro';
+
+interface Props {
+  verdict: string;
+  gates: { label: string; variant: GateVariant }[];
+  tier: TierId;
+}
+const { verdict, gates, tier } = Astro.props;
+const t = getTier(tier);
+---
+
+<section class="verdict-band" aria-label="verdict">
+  <p class="statement">{verdict}</p>
+  <div class="side">
+    <p class="grade-note">
+      graded <strong>{t.id}</strong> · {t.name} — the strength of the published human evidence,
+      not popularity.
+    </p>
+    <div class="chips">
+      {gates.map((g) => <GateChip label={g.label} variant={g.variant} />)}
+    </div>
+  </div>
+</section>
+
+<style>
+  .verdict-band {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: var(--sp-6);
+    background: var(--surface);
+    border: var(--border-hairline);
+    border-radius: var(--r-xl);
+    padding: var(--sp-6);
+  }
+  .statement {
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    line-height: var(--lh-lg);
+    color: var(--ink);
+    margin: 0;
+    padding-right: var(--sp-6);
+    border-right: var(--border-hairline);
+  }
+  .side {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+  }
+  .grade-note {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--ink-soft);
+    margin: 0;
+  }
+  .grade-note strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2);
+  }
+
+  @media (max-width: 640px) {
+    .verdict-band {
+      grid-template-columns: 1fr;
+      gap: var(--sp-5);
+    }
+    .statement {
+      padding-right: 0;
+      padding-bottom: var(--sp-5);
+      border-right: none;
+      border-bottom: var(--border-hairline);
+    }
+  }
+</style>

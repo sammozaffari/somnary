@@ -9,8 +9,9 @@ import Footer from '../components/Footer.astro';
 interface Props {
   title: string;
   description?: string;
+  canonical?: string; // per-page canonical URL (SEO furniture — first used by remedy pages, CHK-2.1)
 }
-const { title, description } = Astro.props;
+const { title, description, canonical } = Astro.props;
 ---
 
 <!doctype html>
@@ -22,6 +23,7 @@ const { title, description } = Astro.props;
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
     {description && <meta name="description" content={description} />}
+    {canonical && <link rel="canonical" href={canonical} />}
 
     {/* Brand typefaces — DESIGN_SYSTEM §1c (verbatim) */}
     <link rel="preconnect" href="https://fonts.googleapis.com" />

@@ -1,0 +1,225 @@
+---
+// Shared citation popover — DESIGN_SYSTEM §2.8 + §5 guardrail 7. ONE popover per page, wired to
+// every .cite-sup[data-cite] marker (rendered by CiteMarker, in the claims table + MDX body). The
+// source data is emitted as JSON with pre-resolved URLs (via src/lib/cite.ts, the same mapping the
+// build validates) so the client never rebuilds links. Positioning is the FIXED algorithm: anchor
+// below the marker, flip above on overflow, clamp against the popover's MEASURED height, re-clamp on
+// rAF + 140ms, with max-height+overflow as the hard backstop. Fade only (geometry must stay stable
+// for the clamp). One open at a time; Esc / outside-click close; focus returns to the trigger.
+import { sourceUrl, sourceIdLabel, sourceTypeLabel, type CiteSource } from '../lib/cite';
+
+interface Props {
+  sources: CiteSource[];
+}
+const { sources } = Astro.props;
+
+const payload = sources.map((s) => ({
+  n: s.n,
+  title: s.title,
+  sourceLine: s.sourceLine,
+  finding: s.finding,
+  url: sourceUrl(s),
+  idLabel: sourceIdLabel(s),
+  typeLabel: sourceTypeLabel(s.type),
+}));
+---
+
+<script type="application/json" id="cite-data" set:html={JSON.stringify(payload)} />
+
+<div class="cite-pop" role="dialog" aria-label="citation" tabindex="-1" hidden>
+  <p class="cp-head"><span class="cp-n"></span> · <span class="cp-type"></span></p>
+  <p class="cp-title"></p>
+  <p class="cp-line"></p>
+  <p class="cp-finding"></p>
+  <a class="cp-link" target="_blank" rel="noopener noreferrer"></a>
+</div>
+
+<style>
+  .cite-pop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 60;
+    width: 320px;
+    max-height: calc(100vh - 24px); /* literal exception per §5 guardrail 1 */
+    overflow: auto;
+    background: var(--surface);
+    border: var(--border-strong);
+    border-radius: var(--r-md);
+    box-shadow: var(--shadow-lift);
+    padding: 20px;
+  }
+  .cite-pop[hidden] {
+    display: none;
+  }
+  /* fade only — no scale/translate (§2.8: clamp needs stable geometry) */
+  .cite-pop:not([hidden]) {
+    animation: cp-fade var(--dur-base) var(--ease-settle);
+  }
+  @keyframes cp-fade {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  .cite-pop:focus-visible {
+    outline: none;
+    box-shadow: var(--shadow-lift), var(--ring);
+  }
+
+  .cp-head {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--lavender-ink);
+    margin: 0 0 var(--sp-3);
+  }
+  .cp-title {
+    font-family: var(--font-display);
+    font-size: var(--text-md);
+    line-height: var(--lh-lg);
+    color: var(--ink);
+    margin: 0 0 var(--sp-2);
+  }
+  .cp-line {
+    font-size: var(--text-sm);
+    color: var(--ink-soft);
+    margin: 0 0 var(--sp-3);
+  }
+  .cp-finding {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--ink-soft);
+    margin: 0;
+    padding-top: var(--sp-3);
+    border-top: var(--border-hairline);
+  }
+  .cp-link {
+    display: inline-block;
+    margin-top: var(--sp-3);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--lavender-ink);
+    text-decoration: none;
+  }
+  .cp-link:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+    border-radius: var(--r-sm);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cite-pop:not([hidden]) {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  (() => {
+    const pop = document.querySelector<HTMLElement>('.cite-pop');
+    const dataEl = document.getElementById('cite-data');
+    if (!pop || !dataEl) return;
+
+    type Cite = {
+      n: number;
+      title: string;
+      sourceLine: string;
+      finding: string;
+      url: string;
+      idLabel: string;
+      typeLabel: string;
+    };
+    let map: Record<string, Cite> = {};
+    try {
+      const arr = JSON.parse(dataEl.textContent || '[]') as Cite[];
+      map = Object.fromEntries(arr.map((c) => [String(c.n), c]));
+    } catch {
+      return;
+    }
+
+    const q = (sel: string) => pop.querySelector(sel) as HTMLElement | null;
+    let trigger: HTMLElement | null = null;
+
+    // FIXED clamp: measure real height, anchor below, flip above on overflow, clamp into viewport.
+    const clamp = (marker: HTMLElement) => {
+      const rect = marker.getBoundingClientRect();
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const h = pop.getBoundingClientRect().height;
+      let left = rect.left;
+      left = Math.max(16, Math.min(left, vw - 320 - 16));
+      let top = rect.bottom + 8;
+      if (top + h > vh - 12) top = rect.top - 8 - h; // flip above
+      top = Math.max(12, Math.min(top, vh - h - 12)); // clamp against measured height
+      pop.style.left = `${left}px`;
+      pop.style.top = `${top}px`;
+    };
+
+    const open = (marker: HTMLElement) => {
+      const n = marker.getAttribute('data-cite');
+      if (!n) return;
+      const s = map[n];
+      if (!s) return;
+      const setText = (sel: string, txt: string) => {
+        const el = q(sel);
+        if (el) el.textContent = txt;
+      };
+      setText('.cp-n', `citation ${n}`);
+      setText('.cp-type', s.typeLabel);
+      setText('.cp-title', s.title);
+      setText('.cp-line', s.sourceLine);
+      setText('.cp-finding', s.finding);
+      const link = q('.cp-link') as HTMLAnchorElement | null;
+      if (link) {
+        link.href = s.url;
+        link.textContent = `${s.idLabel} ↗`;
+      }
+      pop.setAttribute('aria-label', `citation ${n}`);
+      pop.hidden = false;
+      clamp(marker); // initial
+      requestAnimationFrame(() => clamp(marker)); // after paint
+      window.setTimeout(() => clamp(marker), 140); // after font/wrap settle
+      pop.focus();
+      trigger = marker;
+    };
+
+    const close = () => {
+      if (pop.hidden) return;
+      pop.hidden = true;
+      if (trigger) trigger.focus();
+      trigger = null;
+    };
+
+    // wire every marker (claims table + MDX body). Opening another replaces the current one.
+    document.querySelectorAll<HTMLElement>('.cite-sup[data-cite]').forEach((m) => {
+      m.addEventListener('click', (e) => {
+        e.stopPropagation();
+        open(m);
+      });
+    });
+
+    // outside click closes (marker/pop clicks are excluded)
+    document.addEventListener('click', (e) => {
+      if (pop.hidden) return;
+      const t = e.target as Node;
+      if (pop.contains(t)) return;
+      if (t instanceof Element && t.closest('.cite-sup')) return;
+      close();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') close();
+    });
+
+    // keep it anchored if the viewport changes while open
+    window.addEventListener('resize', () => {
+      if (!pop.hidden && trigger) clamp(trigger);
+    });
+  })();
+</script>
