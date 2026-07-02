@@ -60,5 +60,14 @@ export const countByKind = (kind: ContentIndexEntry['kind']): number =>
 export const countByStatus = (status: ResearchStatus): number =>
   contentIndex.filter((e) => e.researchStatus === status).length;
 
-/** Entries already published (live) — what the homepage stat row will count once real. */
+/** Entries already published (live), any kind. */
 export const liveCount = countByStatus('live');
+
+/**
+ * Live GRADED remedies/interventions — excludes `context` pages (explainers like /sleep-blends,
+ * educational pages) which are published but carry no evidence grade. This is the honest count
+ * behind the "remedies graded" stat: a context explainer isn't a graded remedy.
+ */
+export const liveRemedyCount = contentIndex.filter(
+  (e) => e.researchStatus === 'live' && e.kind !== 'context',
+).length;

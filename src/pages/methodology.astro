@@ -5,11 +5,11 @@ import TierBadge from '../components/TierBadge.astro';
 import EvidenceGateChip from '../components/EvidenceGateChip.astro';
 import { TIERS } from '../lib/tiers';
 import { GATES } from '../lib/evidence-gates';
-import { contentIndex, liveCount } from '../lib/content-index';
+import { contentIndex, liveRemedyCount } from '../lib/content-index';
 
 // Stat row reads real data (not hardcoded): counts derive from the content index /
-// citation registry. 0/0 until pages go live — honest for a pre-launch site.
-const remediesGraded = liveCount;
+// citation registry. "remedies graded" excludes context/explainer pages (liveRemedyCount).
+const remediesGraded = liveRemedyCount;
 const sourcesCited = contentIndex
   .filter((e) => e.researchStatus === 'live')
   .reduce((n, e) => n + e.sourceCount, 0);
