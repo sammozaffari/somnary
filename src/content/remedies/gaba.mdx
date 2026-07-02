@@ -1,0 +1,140 @@
+---
+# gaba — Phase 3 (CHK-3.1). Tier D by second-review call (proposed C was a flagged coin-flip; the
+# reviewer broke it DOWN: one weak trial + an unproven central mechanism = "claims outrun the data").
+# Source-first: 2 citations verified resolving. The blood-brain-barrier question is the whole story —
+# the verdict leads with it.
+tier: D
+name: gaba
+aliases:
+  - gamma-aminobutyric acid
+  - pharmagaba
+oneLineVerdict: >-
+  the central premise — that swallowed GABA reaches your brain — may be false, and the one
+  supporting sleep trial is small and weak.
+verdict: >-
+  GABA is the brain's main calming neurotransmitter, so "take GABA to sleep" sounds obvious — but the
+  whole idea rests on an unproven assumption: that GABA swallowed as a supplement actually crosses
+  into the brain, which the evidence says is uncertain and contradictory. the one trial that found a
+  sleep benefit was small and lopsidedly randomized. if oral GABA doesn't reach the brain, that result
+  is most likely peripheral, placebo, or noise. the claims outrun the data — a D.
+keyCompound: gamma-aminobutyric acid (GABA)
+bestFor:
+  - nothing proven — the mechanism itself is in question
+outcomes:
+  - fall asleep faster
+  - wind down before bed
+symptoms:
+  - can't switch off
+  - anxious wakefulness
+claims:
+  - claimed: GABA supplements calm your brain for sleep.
+    studiesShow: >-
+      whether oral GABA even reaches the brain is unresolved — it was long thought not to cross the
+      blood-brain barrier, the studies that tested it are contradictory, and any effect might act
+      peripherally, through the gut's own nervous system, rather than centrally.
+    sources: [2]
+  - claimed: it's clinically proven to improve sleep.
+    studiesShow: >-
+      one small trial (40 people, unevenly randomized 30 to 10) found shorter sleep-onset latency and
+      better sleep efficiency on a sleep monitor — a real signal, but single, small, unreplicated, and
+      using one specific proprietary product.
+    sources: [1]
+  - claimed: it's the same GABA your brain uses, so of course it works.
+    studiesShow: >-
+      being the brain's calming neurotransmitter doesn't help if the swallowed form can't get in —
+      and that's exactly the open question.
+    sources: [2]
+  - claimed: GABA cures insomnia.
+    studiesShow: null
+    sources: []
+evidenceGates:
+  - label: single small trial
+    variant: caution
+  - label: unbalanced randomization
+    variant: caution
+  - label: mechanism in doubt (blood-brain barrier)
+    variant: caution
+  - label: unreplicated
+    variant: neutral
+  - label: no major safety signal
+    variant: positive
+doses:
+  - form: GABA (the one trial used a fermented-rice-germ extract, not generic GABA)
+    studiedDose: 300 mg/day (single 4-week trial)
+    timing: evening
+    marketComparison: sold as generic "GABA"; the only positive trial used a specific fermented-rice-germ product, so the result may not carry over to a plain GABA capsule.
+safety:
+  severity: caution
+  lead: >-
+    GABA appears well tolerated — there is no serious safety signal. the question here is whether it
+    works, not whether it's safe.
+  risks:
+    - category: expected effect
+      text: generally well tolerated; mild adverse events in about 1 in 10 people in the single trial.
+    - category: thin data
+      text: one small trial; long-term safety and effects at higher doses aren't established.
+  pregnancy: >-
+    limited data — talk to a clinician before use in pregnancy or breastfeeding.
+  interactions:
+    - sedatives and CNS depressants (theoretical additive effect)
+standardization: >-
+  GABA is a single defined compound, but the one positive sleep trial used a specific
+  fermented-rice-germ extract rather than generic GABA powder — so "GABA 300 mg" on a label is not
+  necessarily the thing that was actually studied. and a hidden amount inside a "calm/sleep blend"
+  earns the proprietary-blend penalty.
+mechanism: >-
+  this is the whole problem. GABA is the brain's principal inhibitory (calming) neurotransmitter, but
+  whether GABA taken by mouth crosses the blood-brain barrier is uncertain and the studies
+  contradictory; any real effect might instead act peripherally, via the enteric (gut) nervous
+  system. biological plausibility is doing a lot of unearned work here.
+sources:
+  - n: 1
+    title: "Safety and efficacy of gamma-aminobutyric acid from fermented rice germ in patients with insomnia symptoms: a randomized, double-blind trial"
+    sourceLine: "Byun JI, Shin YY, Chung SE, Shin WC. J Clin Neurol. 2018;14(3):291–295."
+    finding: >-
+      40 patients with insomnia symptoms (30 GABA, 10 placebo), 300 mg/day of fermented-rice-germ GABA
+      for 4 weeks: polysomnographic sleep-onset latency fell (13.4 to 5.7 min, p=0.001) and sleep
+      efficiency rose (79.4% to 86.1%, p=0.018). a single small trial with lopsided randomization.
+    type: rct
+    pmid: "29856155"
+    doi: "10.3988/jcn.2018.14.3.291"
+  - n: 2
+    title: "Neurotransmitters as food supplements: the effects of GABA on brain and behavior"
+    sourceLine: "Boonstra E, de Kleijn R, Colzato LS, et al. Front Psychol. 2015;6:1520."
+    finding: >-
+      review: GABA's ability to cross the blood-brain barrier is uncertain and the assessing studies
+      contradictory; the authors suggest any real effects of GABA supplements "might be exerted through
+      BBB passage or, more indirectly, via an effect on the enteric nervous system."
+    type: review
+    pmid: "26500584"
+    doi: "10.3389/fpsyg.2015.01520"
+community:
+  reportsCount: 0
+seo:
+  questionTitle: does gaba (as a supplement) actually help you sleep?
+  canonical: https://somnary.vercel.app/r/gaba
+---
+
+import CiteMarker from '../../components/CiteMarker.astro';
+
+GABA is the most intuitive-sounding sleep supplement on the shelf and one of the least proven — and
+the two facts are connected.
+
+the intuition: GABA is your brain's main *inhibitory*, calming neurotransmitter, the very system that
+sedative drugs act on. so swallowing GABA to calm down and sleep feels like it must work. the
+problem is that a supplement in your gut is not the same as GABA made inside your brain, behind the
+blood-brain barrier — and whether oral GABA crosses that barrier at all is unresolved. a review of
+the question found the studies "often contradictory," and floated that any real effect might not be
+central at all, but peripheral, acting through the gut's own nervous system <CiteMarker n={2} />. if
+that's true, the premise behind the whole product is shaky.
+
+against that backdrop sits a single supportive trial: 40 people with insomnia symptoms, given 300 mg
+a day of a fermented-rice-germ GABA, who fell asleep faster and slept more efficiently on a sleep
+monitor than placebo <CiteMarker n={1} />. taken alone that looks encouraging — but it's one small
+study, the groups were split 30 to 10, it used one specific proprietary product, and no one has
+replicated it. and it can't settle the mechanism question: a positive result in a small, unbalanced
+trial is exactly what you'd also expect from a peripheral effect, a placebo response, or chance.
+
+so this is a **D**, not a C. a mixed-evidence C would mean the human data is genuinely conflicting on
+a plausible mechanism. here the mechanism itself is in doubt, and the human data is one weak trial.
+when the central premise might simply be false, a borderline grade should break down.
