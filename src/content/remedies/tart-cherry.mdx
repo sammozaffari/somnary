@@ -1,0 +1,162 @@
+---
+# tart cherry — Phase 3 (CHK-3.1). Tier C, second-review-approved on condition the pivot was
+# confirmed firsthand — done: the 2023 Stretton meta-analysis's NULL pooled effect was read from the
+# full-text deposit ("no statistically significant differences between tart cherry and placebo" for
+# sleep efficiency and total sleep time), and Losso's 8 completers / +84 min were confirmed from the
+# PubMed abstract. Source-first: 4 citations, all resolving. Verdict leads with the real tension.
+tier: C
+name: tart cherry
+aliases:
+  - prunus cerasus
+  - montmorency cherry
+  - tart cherry juice
+  - cherrypharm
+oneLineVerdict: >-
+  it really does contain and raise melatonin — but pool the trials and the sleep benefit disappears.
+verdict: >-
+  tart cherry is the rare sleep aid with a mechanism you can measure: it contains melatonin and
+  demonstrably raises your own melatonin levels, and a couple of tiny pilots found people slept more.
+  but the one meta-analysis that pooled the studies found no significant effect on sleep efficiency or
+  total sleep time — the individual positives don't survive pooling. a real, concrete mechanism
+  attached to an unproven benefit: a C.
+keyCompound: melatonin (naturally present) plus a tryptophan-sparing cherry compound
+bestFor:
+  - a gentle, food-based melatonin source (modest, unproven for sleep)
+outcomes:
+  - fall asleep faster
+  - sleep quality
+symptoms:
+  - can't fall asleep
+  - light sleeper
+claims:
+  - claimed: tart cherry juice is clinically proven to fix your sleep.
+    studiesShow: >-
+      the one meta-analysis that pooled the trials found no significant effect on sleep efficiency or
+      total sleep time — the individual positive studies were small and didn't survive pooling.
+    sources: [1]
+  - claimed: it's basically natural melatonin.
+    studiesShow: >-
+      this part is genuinely true — tart cherry contains melatonin and a week of it measurably raised
+      urinary melatonin in a trial — but that measurable melatonin bump hasn't translated into a
+      reliable sleep effect.
+    sources: [2]
+  - claimed: studies show it helps insomnia.
+    studiesShow: >-
+      a couple of tiny pilots did: one in just 8 older adults with insomnia found about 84 more minutes
+      of total sleep, and another reduced time spent awake at night. but "tiny pilot" is the operative
+      phrase, and the pooled evidence is null.
+    sources: [3, 4]
+  - claimed: tart cherry treats chronic insomnia.
+    studiesShow: null
+    sources: []
+evidenceGates:
+  - label: raises melatonin (measured)
+    variant: positive
+  - label: no major safety signal
+    variant: positive
+  - label: meta-analysis null
+    variant: caution
+  - label: small underpowered pilots
+    variant: caution
+  - label: low study quality
+    variant: caution
+doses:
+  - form: juice / concentrate
+    studiedDose: e.g. 240 mL juice twice daily, or ~30 mL concentrate (trials varied)
+    timing: morning and evening
+    marketComparison: juice is high in sugar; concentrate is more practical; melatonin content varies a lot by variety, harvest, and processing.
+  - form: capsule / powder
+    studiedDose: not well established for sleep
+    timing: evening
+    marketComparison: convenient, but the sleep trials used juice/concentrate — capsule equivalence to those doses is unclear.
+safety:
+  severity: caution
+  lead: >-
+    tart cherry is a food and very well tolerated; there's no serious safety signal — the practical
+    cautions are dietary, not toxic.
+  risks:
+    - category: sugar load
+      text: cherry juice is high in sugar — worth noting for diabetes or calorie intake; concentrate or capsules cut this down.
+    - category: gut
+      text: large amounts of juice can loosen stools (sorbitol).
+  pregnancy: >-
+    as a food, tart cherry is generally fine in normal dietary amounts; concentrated supplements lack
+    specific pregnancy data — check with a clinician before using those.
+  interactions:
+    - melatonin supplements (theoretically additive — both raise melatonin)
+standardization: >-
+  the constituent most relevant to sleep is the melatonin the cherries actually contain, which varies
+  with variety (Montmorency), harvest, and processing — and it's essentially never quantified on the
+  label. so two "tart cherry" products can differ a lot, and none is standardized to a melatonin dose.
+mechanism: >-
+  tart cherries genuinely contain melatonin, and a week of concentrate measurably raised urinary
+  melatonin in a controlled trial; a cherry compound (procyanidin B-2) may also spare tryptophan by
+  inhibiting the enzyme that degrades it. the mechanism is real and unusually concrete — it just
+  hasn't reliably produced better sleep once the trials are pooled.
+sources:
+  - n: 1
+    title: "Too Sour to be True? Tart Cherries (Prunus cerasus) and Sleep: a systematic review and meta-analysis"
+    sourceLine: "Stretton B, Eranki A, Kovoor J, et al. Curr Sleep Med Rep. 2023;9:225–233."
+    finding: >-
+      systematic review and meta-analysis of low-to-moderate-quality studies: pooled analysis of sleep
+      efficiency and total sleep time showed no statistically significant difference between tart cherry
+      and placebo — the individual positive results did not hold up when combined.
+    type: meta-analysis
+    doi: "10.1007/s40675-023-00261-w"
+  - n: 2
+    title: "Effect of tart cherry juice (Prunus cerasus) on melatonin levels and enhanced sleep quality"
+    sourceLine: "Howatson G, Bell PG, Tallent J, et al. Eur J Nutr. 2012;51(8):909–916."
+    finding: >-
+      20 healthy adults, crossover: 7 days of tart-cherry concentrate significantly raised urinary
+      melatonin and modestly improved time in bed, total sleep time, and sleep efficiency on actigraphy
+      (all p<0.05). confirms the melatonin mechanism — but in healthy adults, not insomnia.
+    type: rct
+    pmid: "22038497"
+    doi: "10.1007/s00394-011-0263-7"
+  - n: 3
+    title: "Pilot study of the tart cherry juice for the treatment of insomnia and investigation of mechanisms"
+    sourceLine: "Losso JN, Finley JW, Karki N, et al. Am J Ther. 2018;25(2):e194–e201."
+    finding: >-
+      pilot in older adults with insomnia (8 completers of 11 randomized): tart-cherry juice twice daily
+      for 2 weeks increased total sleep time by ~84 minutes on polysomnography versus placebo (p=0.018);
+      proposed mechanism via procyanidin B-2 increasing tryptophan availability. very small.
+    type: rct
+    pmid: "28901958"
+    doi: "10.1097/MJT.0000000000000584"
+  - n: 4
+    title: "Effects of a tart cherry juice beverage on the sleep of older adults with insomnia: a pilot study"
+    sourceLine: "Pigeon WR, Carr M, Gorman C, Perlis ML. J Med Food. 2010;13(3):579–583."
+    finding: >-
+      pilot in 15 older adults with insomnia: tart-cherry juice for 2 weeks reduced time awake after
+      sleep onset versus placebo, though effects were modest. another small positive signal.
+    type: rct
+    pmid: "20438325"
+    doi: "10.1089/jmf.2009.0096"
+community:
+  reportsCount: 0
+seo:
+  questionTitle: does tart cherry juice actually help you sleep?
+  canonical: https://somnary.vercel.app/r/tart-cherry
+---
+
+import CiteMarker from '../../components/CiteMarker.astro';
+
+tart cherry is the sleep remedy with the most concrete mechanism on this whole site — and it still
+lands at C, which tells you something about the gap between mechanism and outcome.
+
+start with what's genuinely true. tart cherries contain melatonin, the actual sleep hormone, and this
+isn't hand-waving: in a controlled crossover trial, a week of tart-cherry concentrate significantly
+raised participants' urinary melatonin and nudged their sleep time and efficiency up on a wrist
+monitor <CiteMarker n={2} />. a cherry compound may also spare tryptophan, serotonin's precursor. so
+the "it's basically natural melatonin" claim is, unusually, real.
+
+and a couple of small insomnia pilots looked promising — one in just eight older adults reported
+about 84 extra minutes of sleep on a sleep study <CiteMarker n={3} />, another reduced time spent
+awake in the night <CiteMarker n={4} />. taken alone, encouraging.
+
+then you pool it. the one systematic review and meta-analysis of the field combined the studies — of
+low-to-moderate quality — and found **no statistically significant difference** between tart cherry
+and placebo on sleep efficiency or total sleep time <CiteMarker n={1} />. the individual positives
+didn't survive being added together. that's the signature of a **C**: a plausible, even measurable
+mechanism, a few small conflicting trials, and a null result when you look at all of them at once. a
+pleasant, harmless food with a real melatonin content — and, so far, an unproven effect on sleep.
