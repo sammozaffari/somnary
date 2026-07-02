@@ -4,6 +4,10 @@
 import type { APIRoute } from 'astro';
 import { getSearchDocs } from '../lib/search';
 
+// Force static: emit dist/search-index.json at build (the /search SSR route otherwise flips
+// endpoints to on-demand). The palette fetches this cacheable static file, no serverless cost.
+export const prerender = true;
+
 export const GET: APIRoute = async () => {
   const docs = await getSearchDocs();
   return new Response(JSON.stringify(docs), {

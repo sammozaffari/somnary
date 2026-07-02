@@ -3,6 +3,7 @@
 // The ⌘K search trigger is intentionally deferred to CHK-4.2 (slot left below). Only links
 // to pages that exist today are rendered, to avoid 404s; add more as routes land.
 import Wordmark from './Wordmark.astro';
+import SearchPalette from './SearchPalette.astro';
 
 const links = [{ href: '/methodology', label: 'methodology' }];
 const path = Astro.url.pathname.replace(/\/$/, '') || '/';
@@ -23,7 +24,7 @@ const path = Astro.url.pathname.replace(/\/$/, '') || '/';
         );
       })
     }
-    {/* CHK-4.2: ⌘K search trigger mounts here. */}
+    <li><SearchPalette /></li>
   </ul>
 </nav>
 

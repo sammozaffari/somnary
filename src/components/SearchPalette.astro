@@ -1,0 +1,452 @@
+---
+// Command palette — DESIGN_SYSTEM §2.13, CHK-4.2. The keyboard-first search surface: a nav trigger
+// + a modal overlay (combobox/listbox) that lazy-loads /search-index.json and ranks with the SAME
+// pure ranker as the crawlable /search page (src/lib/search-rank). Opens on ⌘K / Ctrl+K / "/";
+// closes on Esc / scrim / route change; focus returns to the trigger. Motion is scrim-fade + modal
+// rise only (no scale), disabled under reduced motion. Tier is text (aria-label), never color-only.
+---
+
+<button
+  type="button"
+  class="search-trigger"
+  aria-haspopup="dialog"
+  aria-label="search (press ⌘K)"
+  data-search-open
+>
+  <span class="st-mag" aria-hidden="true">⌕</span>
+  <span class="st-label">search</span>
+  <kbd class="st-hint" aria-hidden="true">⌘K</kbd>
+</button>
+
+<div class="search-overlay" data-search-overlay hidden>
+  <div class="scrim" data-search-scrim></div>
+  <div class="palette" role="dialog" aria-modal="true" aria-label="search somnary">
+    <div class="p-input-row">
+      <span class="p-mag" aria-hidden="true">⌕</span>
+      <input
+        type="text"
+        class="p-input"
+        role="combobox"
+        aria-expanded="false"
+        aria-controls="p-listbox"
+        aria-autocomplete="list"
+        aria-label="search remedies, outcomes, and symptoms"
+        placeholder="a remedy, a compound, an outcome, a symptom…"
+        autocomplete="off"
+        spellcheck="false"
+        data-search-input
+      />
+    </div>
+    <ul id="p-listbox" class="p-list" role="listbox" aria-label="search results" data-search-list></ul>
+    <p class="p-hint" data-search-hint>type to search · ↑↓ to move · enter to open · esc to close</p>
+  </div>
+</div>
+
+<style>
+  /* trigger */
+  .search-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-2);
+    height: 32px;
+    padding: 0 var(--sp-3);
+    background: var(--surface);
+    border: var(--border-hairline);
+    border-radius: var(--r-pill);
+    cursor: pointer;
+    color: var(--ink-faint);
+    transition: border-color var(--dur-fast) var(--ease-soft);
+  }
+  .search-trigger:hover {
+    border-color: var(--line-strong);
+  }
+  .search-trigger:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+  }
+  .st-mag {
+    font-size: var(--text-base);
+    line-height: 1;
+  }
+  .st-label {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+  }
+  .st-hint {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-faint);
+    background: var(--sunken);
+    border-radius: var(--r-xs);
+    padding: 1px 5px;
+  }
+
+  /* overlay + scrim */
+  .search-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 12vh 16px 16px;
+  }
+  .search-overlay[hidden] {
+    display: none;
+  }
+  .scrim {
+    position: fixed;
+    inset: 0;
+    background: rgba(26, 26, 31, 0.28);
+    animation: p-scrim var(--dur-base) var(--ease-settle);
+  }
+  @keyframes p-scrim {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  /* palette modal */
+  .palette {
+    position: relative;
+    width: 100%;
+    max-width: 640px;
+    max-height: 70vh;
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    border: var(--border-strong);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-lift);
+    overflow: hidden;
+    animation: p-rise var(--dur-base) var(--ease-settle);
+  }
+  @keyframes p-rise {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .p-input-row {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    padding: var(--sp-4) var(--sp-5);
+    border-bottom: var(--border-hairline);
+  }
+  .p-mag {
+    color: var(--ink-faint);
+    font-size: var(--text-lg);
+    line-height: 1;
+  }
+  .p-input {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    background: var(--base);
+    border-radius: var(--r-sm);
+    padding: var(--sp-2) var(--sp-3);
+    font-family: var(--font-body);
+    font-size: 18px;
+    color: var(--ink);
+  }
+  .p-input:focus {
+    outline: none;
+    box-shadow: var(--ring);
+  }
+
+  .p-list {
+    list-style: none;
+    margin: 0;
+    padding: var(--sp-2);
+    overflow-y: auto;
+    flex: 1;
+  }
+  .p-list:empty {
+    display: none;
+  }
+  .p-group {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    padding: var(--sp-3) var(--sp-3) var(--sp-2);
+  }
+  .p-row {
+    display: grid;
+    grid-template-columns: 38px 1fr auto;
+    gap: var(--sp-3);
+    align-items: center;
+    padding: var(--sp-3);
+    border-radius: var(--r-md);
+    cursor: pointer;
+  }
+  .p-row[aria-selected='true'] {
+    background: var(--sunken);
+  }
+  .p-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: var(--r-sm);
+    flex: none;
+  }
+  .p-glyph {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 1;
+    transform: translateY(var(--grade-optical-shift));
+  }
+  .p-main {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+  .p-name {
+    font-size: var(--text-base);
+    color: var(--ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .p-cat {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+  .p-grade {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  .p-hint,
+  .p-empty {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    padding: var(--sp-3) var(--sp-5);
+    margin: 0;
+    border-top: var(--border-hairline);
+  }
+  .p-empty[hidden] {
+    display: none;
+  }
+
+  @media (max-width: 640px) {
+    .st-label,
+    .st-hint {
+      display: none;
+    }
+    .search-trigger {
+      width: 44px;
+      height: 44px;
+      justify-content: center;
+      padding: 0;
+    }
+    .search-overlay {
+      padding: 8vh 8px 8px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .scrim,
+    .palette {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  import { searchDocs, type SearchDoc } from '../lib/search-rank';
+
+  const trigger = document.querySelector<HTMLButtonElement>('[data-search-open]');
+  const overlay = document.querySelector<HTMLElement>('[data-search-overlay]');
+  const scrim = document.querySelector<HTMLElement>('[data-search-scrim]');
+  const input = document.querySelector<HTMLInputElement>('[data-search-input]');
+  const list = document.querySelector<HTMLUListElement>('[data-search-list]');
+  const hint = document.querySelector<HTMLElement>('[data-search-hint]');
+  if (trigger && overlay && scrim && input && list && hint) {
+    let docs: SearchDoc[] | null = null;
+    let loading = false;
+    let options: SearchDoc[] = []; // flat, in rendered order
+    let active = -1;
+
+    const KIND_LABEL: Record<string, string> = {
+      remedy: 'remedies',
+      intervention: 'interventions',
+      outcome: 'outcomes',
+      context: 'context',
+    };
+
+    const loadDocs = async () => {
+      if (docs || loading) return;
+      loading = true;
+      try {
+        const res = await fetch('/search-index.json');
+        docs = (await res.json()) as SearchDoc[];
+      } catch {
+        docs = [];
+      }
+      loading = false;
+      if (!overlay.hidden) run(input.value); // re-run if user already typed
+    };
+
+    const esc = (s: string) =>
+      s.replace(/[&<>"']/g, (c) =>
+        ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c] as string,
+      );
+
+    const badge = (tier: string) => {
+      const t = tier.toLowerCase();
+      return (
+        `<span class="p-badge" style="background:var(--tier-${t}-tint);border:1px solid var(--tier-${t});color:var(--tier-${t}-ink)">` +
+        `<span class="p-glyph" aria-hidden="true">${esc(tier)}</span></span>`
+      );
+    };
+
+    const render = () => {
+      // group in rendered order (by kind); options[] stays flat for keyboard nav
+      const groups = new Map<string, SearchDoc[]>();
+      for (const d of options) (groups.get(d.kind) ?? groups.set(d.kind, []).get(d.kind)!).push(d);
+      let html = '';
+      let i = 0;
+      for (const [kind, rows] of groups) {
+        html += `<li class="p-group" role="presentation">${esc(KIND_LABEL[kind] ?? kind)} · ${rows.length}</li>`;
+        for (const d of rows) {
+          html +=
+            `<li id="p-opt-${i}" class="p-row" role="option" aria-selected="${i === active}" data-i="${i}" data-url="${esc(d.url)}" aria-label="grade ${esc(d.tier)}, ${esc(d.name)}">` +
+            badge(d.tier) +
+            `<span class="p-main"><span class="p-name">${esc(d.name)}</span><span class="p-cat">${esc(d.category)}</span></span>` +
+            `<span class="p-grade">grade ${esc(d.tier)}</span></li>`;
+          i++;
+        }
+      }
+      list.innerHTML = html;
+      input.setAttribute('aria-expanded', options.length ? 'true' : 'false');
+      const q = input.value.trim();
+      if (q && options.length === 0) {
+        hint.textContent = 'no matches — try a compound, an outcome, or a symptom';
+      } else {
+        hint.textContent = 'type to search · ↑↓ to move · enter to open · esc to close';
+      }
+      syncActive();
+    };
+
+    const syncActive = () => {
+      const rows = list.querySelectorAll<HTMLElement>('.p-row');
+      rows.forEach((r) => r.setAttribute('aria-selected', r.dataset.i === String(active) ? 'true' : 'false'));
+      if (active >= 0 && rows[active]) {
+        input.setAttribute('aria-activedescendant', `p-opt-${active}`);
+        rows[active].scrollIntoView({ block: 'nearest' });
+      } else {
+        input.removeAttribute('aria-activedescendant');
+      }
+    };
+
+    let timer: number | undefined;
+    const run = (q: string) => {
+      if (!docs) {
+        loadDocs();
+        return;
+      }
+      options = searchDocs(q, docs);
+      active = options.length ? 0 : -1;
+      render();
+    };
+
+    const open = () => {
+      if (!overlay.hidden) return;
+      overlay.hidden = false;
+      loadDocs();
+      input.value = '';
+      options = [];
+      active = -1;
+      render();
+      input.focus();
+    };
+    const close = () => {
+      if (overlay.hidden) return;
+      overlay.hidden = true;
+      input.value = '';
+      options = [];
+      active = -1;
+      trigger.focus();
+    };
+
+    const move = (delta: number) => {
+      if (!options.length) return;
+      active = (active + delta + options.length) % options.length;
+      syncActive();
+    };
+    const choose = () => {
+      const d = options[active];
+      if (d) window.location.href = d.url;
+    };
+
+    trigger.addEventListener('click', open);
+    scrim.addEventListener('click', close);
+
+    input.addEventListener('input', () => {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => run(input.value), 80);
+    });
+
+    // keyboard inside the palette
+    overlay.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        close();
+      } else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        move(1);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        move(-1);
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        choose();
+      } else if (e.key === 'Tab') {
+        e.preventDefault(); // trap: keep focus on the input (options are arrow-navigated)
+        input.focus();
+      }
+    });
+
+    // global open shortcuts: ⌘K / Ctrl+K, and "/" when not typing in a field
+    document.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        overlay.hidden ? open() : close();
+      } else if (
+        e.key === '/' &&
+        overlay.hidden &&
+        !/^(input|textarea|select)$/i.test((e.target as HTMLElement)?.tagName) &&
+        !(e.target as HTMLElement)?.isContentEditable
+      ) {
+        e.preventDefault();
+        open();
+      }
+    });
+  }
+</script>
