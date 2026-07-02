@@ -1,0 +1,179 @@
+---
+# valerian — Phase 3 flagship (CHK-3.1), APPROVED by second review. Tier C. Replaces the _sample.mdx
+# schema fixture. Source-first: 4 meta-analyses pulled, read, verified resolving. The site's defining
+# credibility test — famous, graded up everywhere else; the honest read is C. Leach & Page is stated
+# in the agreed CROSS-HERB phrasing (no herbal medicine, valerian included, beat placebo), not a
+# valerian-specific subgroup claim.
+tier: C
+name: valerian
+aliases:
+  - valeriana officinalis
+  - valerian root
+  - all-heal
+  - garden valerian
+  - valerenic acid
+oneLineVerdict: >-
+  famous, and not nothing — but the benefit is subjective, inconsistent, and shrinks as the studies
+  get more rigorous.
+verdict: >-
+  valerian is the most famous sleep herb, and that fame is exactly why it's a careful C rather than a
+  generous B. some meta-analyses find people are more likely to report better sleep on it — but those
+  same reviews flag publication bias and weak study quality, the objective measures barely move, and
+  the single most rigorous synthesis found no herbal medicine, valerian included, beat placebo. real
+  human trials exist; a robust effect doesn't.
+keyCompound: valerenic acid
+bestFor:
+  - mild, subjective sleep difficulty (modest, inconsistent evidence)
+outcomes:
+  - fall asleep faster
+  - sleep quality
+symptoms:
+  - can't fall asleep
+  - light sleeper
+claims:
+  - claimed: valerian reliably improves sleep.
+    studiesShow: >-
+      some meta-analyses find a subjective signal — people were about 1.8 times as likely to report
+      improved sleep — but the same reviews flag publication bias and weak study quality, and the most
+      rigorous synthesis found no herbal medicine, valerian included, outperformed placebo on any of
+      thirteen efficacy measures.
+    sources: [1, 4]
+  - claimed: it works like a sleeping pill, on your actual sleep.
+    studiesShow: >-
+      objective measures — sleep latency and quantified sleep quality — barely move. the benefit,
+      where it appears, is subjective, not something sleep monitors confirm.
+    sources: [2, 4]
+  - claimed: valerian is proven and well-established.
+    studiesShow: >-
+      the results are inconsistent largely because the extracts themselves vary widely in quality and
+      standardization — one review tied the mixed findings directly to that variability.
+    sources: [3]
+  - claimed: any valerian product works the same.
+    studiesShow: >-
+      whole root/rhizome appears more reliable than heavily processed extracts, and valerenic acid is
+      often unstandardized — so two bottles labelled "valerian" can behave very differently.
+    sources: [3]
+  - claimed: valerian cures chronic insomnia.
+    studiesShow: null
+    sources: []
+  - claimed: valerian is completely safe.
+    studiesShow: >-
+      it's generally well tolerated short-term, with no severe adverse events reported across ages
+      7–80; the rare liver reports almost always involve multi-herb combination products, not valerian
+      alone.
+    sources: [3]
+evidenceGates:
+  - label: meta-analysis exists
+    variant: positive
+  - label: no major safety signal
+    variant: positive
+  - label: heterogeneous trials
+    variant: caution
+  - label: publication bias
+    variant: caution
+  - label: subjective only
+    variant: caution
+  - label: unstandardized
+    variant: caution
+doses:
+  - form: root extract (standardized to valerenic acid)
+    studiedDose: 300–600 mg
+    timing: 30–120 min before bed
+    marketComparison: many products are unstandardized or underdosed versus the trial doses.
+  - form: whole root / rhizome
+    studiedDose: used traditionally; a review suggests it may be more reliable than processed extracts
+    timing: before bed
+    marketComparison: harder to dose consistently, but the constituent profile is closer to the whole herb.
+safety:
+  severity: caution
+  lead: >-
+    valerian is generally well tolerated for short-term use, with no severe adverse events reported
+    across a wide age range — the safety is better established than the efficacy.
+  risks:
+    - category: sedation
+      text: additive with alcohol, benzodiazepines, and sedating antihistamines; can cause next-day grogginess at higher doses.
+    - category: hepatic
+      text: rare reports of liver issues, almost always with multi-herb combination products rather than valerian alone.
+      sources: [3]
+  pregnancy: insufficient data — avoid in pregnancy and breastfeeding.
+  interactions:
+    - CNS depressants — alcohol, benzodiazepines, sedating antihistamines (additive sedation)
+standardization: >-
+  look for extracts standardized to valerenic acid; the whole root/rhizome may be more reliable than
+  heavily processed extracts. a label reading "valerian root 500 mg" with no constituent quantified
+  is a downgrade signal — much of the inconsistency in the trials comes from exactly this variability.
+mechanism: >-
+  the leading hypothesis is GABAergic activity — valerenic acid modulating GABA-A receptors — but the
+  mechanism in humans is not well established, and it does not explain why objective sleep measures so
+  rarely move.
+sources:
+  - n: 1
+    title: "Valerian for sleep: a systematic review and meta-analysis"
+    sourceLine: "Bent S, Padula A, Moore D, et al. Am J Med. 2006;119(12):1005–1012."
+    finding: >-
+      pooled trials with a yes/no sleep outcome found people about 1.8 times as likely to report
+      improved sleep on valerian (RR 1.8, 95% CI 1.2–2.9), but the authors noted most studies had
+      significant methodological problems and there was evidence of publication bias.
+    type: meta-analysis
+    pmid: "17145239"
+    doi: "10.1016/j.amjmed.2006.02.026"
+  - n: 2
+    title: "Effectiveness of Valerian on insomnia: a meta-analysis of randomized placebo-controlled trials"
+    sourceLine: "Fernández-San-Martín MI, Masa-Font R, Palacios-Soler L, et al. Sleep Med. 2010;11(6):505–511."
+    finding: >-
+      18 randomized trials: valerian showed a subjective improvement (RR 1.37), but objective measures
+      of sleep latency and quality showed minimal difference from placebo; the effectiveness was not
+      supported by quantitative measurements.
+    type: meta-analysis
+    pmid: "20347389"
+    doi: "10.1016/j.sleep.2009.12.009"
+  - n: 3
+    title: "Valerian root in treating sleep problems and associated disorders — a systematic review and meta-analysis"
+    sourceLine: "Shinjyo N, Waddell G, Green J. J Evid Based Integr Med. 2020;25:2515690X20967323."
+    finding: >-
+      review of 60 studies (sleep-quality meta-analysis of 10, ~1,065 people): valerian may improve
+      subjective sleep, but outcomes were inconsistent, attributed to variable herbal-extract quality;
+      whole root/rhizome appeared more reliable; no severe adverse events across ages 7–80.
+    type: systematic-review
+    pmid: "33086877"
+    doi: "10.1177/2515690X20967323"
+  - n: 4
+    title: "Herbal medicine for insomnia: a systematic review and meta-analysis"
+    sourceLine: "Leach MJ, Page AT. Sleep Med Rev. 2015;24:1–12."
+    finding: >-
+      the most rigorous synthesis (14 RCTs, 1,602 participants): no herbal medicine it reviewed —
+      valerian included — outperformed placebo on any of thirteen measures of clinical efficacy;
+      insufficient evidence to support herbal medicine for insomnia.
+    type: systematic-review
+    pmid: "25644982"
+    doi: "10.1016/j.smrv.2014.12.003"
+community:
+  reportsCount: 0
+seo:
+  questionTitle: does valerian actually help you sleep?
+  canonical: https://somnary.vercel.app/r/valerian
+---
+
+import CiteMarker from '../../components/CiteMarker.astro';
+
+valerian is the test of whether this site means what it says. it is the most famous natural sleep
+aid, it's graded up almost everywhere, and the honest reading of the evidence is a careful **C**.
+
+the case *for* it is real but soft. one meta-analysis found people were about 1.8 times as likely to
+report improved sleep on valerian than on placebo — except the same authors flagged that most of the
+studies had significant methodological problems and that there was evidence of **publication bias**,
+the pattern where small negative trials quietly go missing <CiteMarker n={1} />. a second
+meta-analysis of eighteen trials found a subjective improvement too, but noted the **objective**
+measures — how long people actually took to fall asleep — barely moved <CiteMarker n={2} />.
+
+why so inconsistent? largely because "valerian" isn't one thing. a 2020 review tied the conflicting
+results to the wildly variable quality of the extracts, and suggested the whole root may be more
+reliable than heavily processed products <CiteMarker n={3} />. and the tie-breaker: the single most
+rigorous synthesis, pooling fourteen trials, found that **no** herbal medicine it examined — valerian
+included — beat placebo on any of thirteen efficacy measures <CiteMarker n={4} />.
+
+so the signal shrinks as the studies get better. that's not an F — valerian has a genuine human trial
+base and a clean short-term safety record, which is more than most botanicals here can claim. but a
+subjective effect, undercut by publication bias and absent from the objective data, in a remedy far
+more popular than its evidence, is the textbook definition of **C**. we won't grade it up for being
+famous.

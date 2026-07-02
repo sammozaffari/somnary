@@ -1,0 +1,159 @@
+---
+# kava — Phase 3 flagship (CHK-3.1), APPROVED by second review. Tier F, safety-driven (sev-serious).
+# Source-first: 3 citations pulled, read, verified (Teschke abstract read firsthand; MMWR + Pittler
+# verified). The model F entry — F is NOT "doesn't work": kava has real anxiety evidence, but it is
+# a documented cause of serious liver injury (transplant cases + an FDA advisory), so risk outweighs
+# an unproven sleep benefit.
+tier: F
+name: kava
+aliases:
+  - piper methysticum
+  - kava kava
+  - kavalactones
+oneLineVerdict: >-
+  it genuinely eases anxiety — but it's a documented cause of liver failure, and it was never a
+  sleep remedy to begin with.
+verdict: >-
+  kava is the clearest example of why an F isn't "doesn't work." it has real, meta-analysis-backed
+  evidence for anxiety. but it is a documented cause of serious liver injury — including patients who
+  needed liver transplants — which is why the FDA warned about it and several countries restricted
+  it. its sleep use is borrowed from that anxiety/sedative effect, not shown in sleep trials. the
+  risk outweighs an unproven benefit.
+keyCompound: kavalactones
+bestFor:
+  - nothing we'd recommend for sleep — the liver risk is the headline
+outcomes:
+  - anxiety-driven restlessness
+symptoms:
+  - anxious wakefulness
+claims:
+  - claimed: kava is a safe, natural way to relax and sleep.
+    studiesShow: >-
+      kava does have real anxiety evidence, but it is a documented cause of serious liver injury —
+      including 11 patients who developed liver failure and needed a transplant — which is why the
+      FDA issued a consumer advisory.
+    sources: [1, 3]
+  - claimed: it works for sleep and insomnia.
+    studiesShow: >-
+      the evidence is for anxiety, not insomnia. a cochrane review found kava effective for anxiety
+      versus placebo; its sleep use is extrapolated from that sedative effect, not demonstrated in
+      sleep trials.
+    sources: [1]
+  - claimed: it's traditional, so it must be safe.
+    studiesShow: >-
+      liver injury has been documented across water-, ethanol-, and acetone-based extracts. a
+      clinical review judged kava potentially hepatotoxic, with risk rising from high doses, prolonged
+      use, combining it with other drugs, and poor-quality raw material.
+    sources: [2]
+  - claimed: the liver risk is overblown scare-mongering.
+    studiesShow: >-
+      it is documented harm, not hype: 11 transplant cases were reported across the US and Europe, and
+      the FDA issued a formal consumer advisory in 2002.
+    sources: [3]
+  - claimed: kava is a proven insomnia treatment.
+    studiesShow: null
+    sources: []
+evidenceGates:
+  - label: anxiety evidence exists
+    variant: neutral
+  - label: no insomnia trial
+    variant: neutral
+  - label: documented hepatotoxicity
+    variant: caution
+  - label: safety signal present
+    variant: caution
+doses:
+  - form: kavalactone-standardized extract
+    studiedDose: studied for anxiety (roughly 120–280 mg kavalactones/day)
+    timing: not applicable — not recommended for sleep
+    marketComparison: even standardized extracts have been linked to liver injury; standardization does not remove the risk.
+safety:
+  severity: serious
+  lead: >-
+    kava is a documented cause of serious liver injury — that is the central fact about it, and it
+    outweighs any sleep benefit, which was never demonstrated in the first place.
+  risks:
+    - category: liver injury
+      text: >-
+        linked to severe hepatotoxicity, including 11 documented cases of liver failure that required
+        transplantation across the US and Europe. stop and seek care for jaundice, dark urine, or
+        right-upper-abdominal pain.
+      sources: [3]
+    - category: risk factors
+      text: >-
+        risk rises with high doses, prolonged use, combining kava with other drugs or supplements, and
+        poor-quality raw material; injury has occurred across extract types.
+      sources: [2]
+    - category: regulatory action
+      text: the FDA issued a consumer advisory in 2002, and several countries restricted or banned kava.
+      sources: [3]
+  pregnancy: avoid entirely in pregnancy and breastfeeding.
+  interactions:
+    - alcohol and other liver-stressing substances (compounded hepatotoxicity)
+    - sedatives and CNS depressants (additive sedation)
+    - drugs metabolized by the liver
+  interactionsSources: [2]
+standardization: >-
+  standardization to kavalactones tells you the potency, not the safety — liver injury has been
+  reported even with standardized extracts, and poor raw-material quality is implicated. there is no
+  "look for this on the label" that makes kava a reasonable sleep choice.
+mechanism: >-
+  kavalactones act on GABA and other pathways to produce anxiolytic and sedative effects. the
+  mechanism of the liver injury is debated — proposed routes include CYP450 enzyme inhibition,
+  glutathione depletion, and toxic constituents from poor-quality raw material.
+sources:
+  - n: 1
+    title: "Kava extract for treating anxiety"
+    sourceLine: "Pittler MH, Ernst E. Cochrane Database Syst Rev. 2003;(1):CD003383."
+    finding: >-
+      meta-analysis of 11 RCTs (645 participants): compared with placebo, kava extract was an
+      effective symptomatic treatment for anxiety; adverse events in the trials were mild and
+      transient. the evidence is for anxiety, not insomnia.
+    type: systematic-review
+    pmid: "12535473"
+    doi: "10.1002/14651858.CD003383"
+  - n: 2
+    title: "Kava hepatotoxicity — a clinical review"
+    sourceLine: "Teschke R. Ann Hepatol. 2010;9(3):251–265."
+    finding: >-
+      clinical review with structured causality assessment in 14 patients worldwide judged kava
+      potentially hepatotoxic across water, ethanol, and acetone extracts; risk factors were overdose,
+      prolonged use, comedication, and unacceptable raw-material quality.
+    type: review
+    pmid: "20720265"
+  - n: 3
+    title: "Hepatic toxicity possibly associated with kava-containing products — United States, Germany, and Switzerland, 1999–2002"
+    sourceLine: "Centers for Disease Control and Prevention. MMWR Morb Mortal Wkly Rep. 2002;51(47):1065–1067."
+    finding: >-
+      surveillance report: 11 patients who used kava products developed liver failure and underwent
+      liver transplantation (US and Europe); in response the FDA issued a consumer advisory on
+      25 March 2002.
+    type: other
+    pmid: "12500906"
+community:
+  reportsCount: 0
+seo:
+  questionTitle: is kava safe to take for sleep?
+  canonical: https://somnary.vercel.app/r/kava
+---
+
+import CiteMarker from '../../components/CiteMarker.astro';
+
+kava is the remedy that proves an F on this site does not mean "it doesn't work."
+
+it works — for anxiety. a cochrane meta-analysis of eleven randomized trials found kava extract
+was an effective symptomatic treatment for anxiety compared with placebo, with mild and transient
+side effects in the trials themselves <CiteMarker n={1} />. that is a real result, and we're not
+going to pretend otherwise.
+
+the problem is the liver. kava is a documented cause of serious hepatotoxicity: a CDC surveillance
+report counted **eleven patients who developed liver failure and needed a transplant** across the
+United States and Europe, and the FDA issued a consumer advisory in 2002 <CiteMarker n={3} />. a
+detailed clinical review judged kava potentially hepatotoxic across every extract type — water,
+ethanol, and acetone — with risk rising from high doses, prolonged use, combining it with other
+drugs, and poor-quality raw material <CiteMarker n={2} />.
+
+and note what's missing: none of the good evidence is about **sleep**. kava's sleep reputation is
+borrowed from its calming, sedative effect on anxiety — it has never been shown to treat insomnia in
+a trial. so you'd be taking on a documented risk of liver failure for a benefit that was never
+demonstrated. that is the definition of an **F**: the risk outweighs the evidence.

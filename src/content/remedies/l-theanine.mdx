@@ -1,0 +1,144 @@
+---
+# l-theanine — Phase 3 flagship (CHK-3.1), APPROVED by second review (Lyon 2011 confirmed positive
+# on objective actigraphy). Tier B. Source-first: 2 citations pulled, read, verified resolving.
+# Honest B — a real but context-specific effect: a subjective RCT + an independent OBJECTIVE
+# (actigraphy) signal, good safety, but thin and not in general insomnia.
+# NOTE: do not add specific Lyon effect-size numbers without pulling the full text (direction +
+# significance are confirmed from the abstract; exact figures are not).
+tier: B
+name: l-theanine
+aliases:
+  - theanine
+  - n-ethyl-l-glutamine
+  - suntheanine
+  - l-γ-glutamylethylamide
+oneLineVerdict: >-
+  a calming amino acid with a real but modest sleep signal — including an objective one — mostly
+  studied in stress and in kids, not general insomnia.
+verdict: >-
+  l-theanine won't knock you out, but it has more than a feeling behind it: a four-week trial
+  improved sleep-quality scores in stressed adults, and an independent trial found objectively better
+  sleep on a wrist monitor in boys with ADHD. it's calming without sedation and very well tolerated.
+  the catch is that the evidence sits in specific groups — stress, ADHD — and no trial has tested it
+  in ordinary insomnia.
+keyCompound: l-theanine
+bestFor:
+  - winding down from stress
+  - calm without sedation
+outcomes:
+  - fall asleep faster
+  - wind down before bed
+symptoms:
+  - can't switch off
+  - stress-driven wakefulness
+claims:
+  - claimed: l-theanine is a proven sleep aid.
+    studiesShow: >-
+      a four-week randomized trial in stressed adults improved sleep-quality scores (PSQI) versus
+      placebo — but sleep was a secondary outcome in a small stress study.
+    sources: [1]
+  - claimed: it works for insomnia.
+    studiesShow: >-
+      no trial has tested it in diagnosed insomnia. the objective evidence is in boys with ADHD, where
+      400 mg significantly improved sleep efficiency and sleep percentage on a wrist activity monitor.
+    sources: [2]
+  - claimed: it sedates you like a sleeping pill.
+    studiesShow: >-
+      it's non-sedating — the effect is on relaxation and subjective quality (and objectively on sleep
+      efficiency), not a knock-out. you can take it in the daytime for calm without drowsiness.
+    sources: [1]
+  - claimed: any dose works for anyone.
+    studiesShow: >-
+      it was studied at 200–400 mg in specific groups — stressed adults and ADHD children — not in the
+      general insomniac. the dose that helps you may differ.
+    sources: [1, 2]
+  - claimed: l-theanine cures chronic insomnia.
+    studiesShow: null
+    sources: []
+evidenceGates:
+  - label: randomized trials
+    variant: positive
+  - label: objective sleep signal
+    variant: positive
+  - label: good safety
+    variant: positive
+  - label: sleep often a secondary outcome
+    variant: caution
+  - label: narrow study populations
+    variant: caution
+  - label: no general-insomnia RCT
+    variant: neutral
+doses:
+  - form: l-theanine (e.g. Suntheanine)
+    studiedDose: 200–400 mg
+    timing: evening / before bed (also usable in the daytime for calm)
+    marketComparison: often sold at 100–200 mg; the trials used 200–400 mg. good safety margin.
+safety:
+  severity: caution
+  lead: >-
+    l-theanine is one of the better-tolerated things on this site — no serious safety signal — but
+    the human data sits in narrow populations, so "safe" is better evidenced than "works for you".
+  risks:
+    - category: expected effect
+      text: very mild; occasional headache or slight drowsiness at higher doses.
+    - category: narrow evidence
+      text: studied mainly in stressed adults and ADHD children; general-insomnia and long-term data are lacking.
+  pregnancy: >-
+    limited data — talk to a clinician before use in pregnancy or breastfeeding.
+  interactions:
+    - may add mildly to sedative or blood-pressure-lowering effects
+standardization: >-
+  l-theanine is a single, defined amino acid, so there's no botanical constituent to standardize —
+  just look for a quantified dose in milligrams (a named grade such as Suntheanine helps), and avoid
+  proprietary "sleep blends" that hide how much l-theanine you're actually getting.
+mechanism: >-
+  l-theanine promotes alpha brain-wave activity and appears to modulate glutamate and GABA signaling
+  and dopamine/serotonin tone, producing a calm, un-sedated state. the sleep benefit may be secondary
+  to that reduced arousal rather than a direct hypnotic effect.
+sources:
+  - n: 1
+    title: "Effects of L-theanine administration on stress-related symptoms and cognitive functions in healthy adults: a randomized controlled trial"
+    sourceLine: "Hidese S, Ogawa S, Ota M, et al. Nutrients. 2019;11(10):2362."
+    finding: >-
+      30 healthy adults with stress, double-blind crossover, 200 mg/day for 4 weeks: the Pittsburgh
+      Sleep Quality Index improved significantly versus placebo (p=0.013), including the sleep-latency,
+      disturbance, and sleep-medication subscales. sleep was a secondary outcome.
+    type: rct
+    pmid: "31623400"
+    doi: "10.3390/nu11102362"
+  - n: 2
+    title: "The effects of L-theanine (Suntheanine) on objective sleep quality in boys with ADHD: a randomized, double-blind, placebo-controlled clinical trial"
+    sourceLine: "Lyon MR, Kapoor MP, Juneja LR. Altern Med Rev. 2011;16(4):348–354."
+    finding: >-
+      98 boys aged 8–12 with ADHD, 400 mg/day for 6 weeks: L-theanine significantly increased sleep
+      efficiency and sleep percentage on actigraphy versus placebo; sleep-onset latency did not change.
+      a genuine objective sleep signal, in a specific pediatric population.
+    type: rct
+    pmid: "22214254"
+community:
+  reportsCount: 0
+seo:
+  questionTitle: does l-theanine actually help you sleep?
+  canonical: https://somnary.vercel.app/r/l-theanine
+---
+
+import CiteMarker from '../../components/CiteMarker.astro';
+
+l-theanine is unusual among calming supplements: it has both a subjective *and* an objective sleep
+signal — just not yet in the people most likely to search for it.
+
+the subjective side comes from a four-week randomized crossover trial in stressed adults taking
+200 mg a day. their overall sleep-quality scores improved significantly versus placebo, including
+how quickly they fell asleep and how disturbed their sleep was — although sleep was a **secondary**
+outcome in what was really a stress study <CiteMarker n={1} />.
+
+the more interesting evidence is objective. in a randomized trial of boys with ADHD, 400 mg a day
+produced significantly better sleep on a wrist activity monitor — higher sleep efficiency and a
+higher proportion of time actually asleep — even though the time to fall asleep didn't change
+<CiteMarker n={2} />. an actigraphy signal is harder to fake than a questionnaire, and it's what
+lifts l-theanine above the remedies whose only evidence is how people *say* they slept.
+
+the honest limits: those two populations — stressed adults and ADHD children — aren't the general
+insomniac, sleep was often a secondary measure, and there's no large trial in diagnosed insomnia.
+so this is a **B**: a real, repeatable, well-tolerated effect on a thin, specific evidence base —
+not the knock-out the label implies, but not nothing either.

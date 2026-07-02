@@ -1,0 +1,139 @@
+---
+# 5-htp — Phase 3 flagship (CHK-3.1), APPROVED by second review pending two fixes, now applied:
+#  (a) Das 2004 is cited ONLY for the EMS/contamination point its abstract supports — the
+#      serotonin-syndrome interaction is stated as explicit clinician-guidance, NOT attributed to Das
+#      (its full text was inaccessible to confirm that wording).
+#  (b) the sleep-trial claim is softened to "the only standalone sleep trial we identified".
+# Tier D on efficacy; safety sev-serious (serotonergic). Source-first, both citations verified resolving.
+tier: D
+name: 5-htp
+aliases:
+  - 5-hydroxytryptophan
+  - oxitriptan
+  - griffonia simplicifolia
+oneLineVerdict: >-
+  a serotonin precursor with almost no standalone sleep evidence — and a serious interaction risk
+  that matters more than any benefit.
+verdict: >-
+  5-HTP is sold for sleep on the logic that it's a building block for serotonin and melatonin, but
+  the human sleep evidence for 5-HTP on its own is essentially absent — the one trial we found
+  combined it with GABA. more importantly, as a direct serotonin precursor it can cause serotonin
+  syndrome when mixed with common antidepressants or migraine drugs, which is why its safety section
+  matters more than its thin efficacy.
+keyCompound: 5-hydroxytryptophan
+bestFor:
+  - nothing proven for sleep on its own
+outcomes:
+  - fall asleep faster
+symptoms:
+  - can't fall asleep
+claims:
+  - claimed: 5-HTP is a proven sleep aid.
+    studiesShow: >-
+      the only standalone sleep trial we identified isn't standalone at all — it tested 5-HTP combined
+      with GABA in 18 people, so it can't tell you what 5-HTP does on its own. there is no quality
+      trial of 5-HTP alone for sleep.
+    sources: [1]
+  - claimed: it's a safe, natural serotonin boost.
+    studiesShow: >-
+      as a direct serotonin precursor, 5-HTP can trigger serotonin syndrome — a potentially
+      life-threatening reaction — when combined with SSRIs, SNRIs, MAOIs, or migraine triptans. this
+      is a serious interaction, not a gentle supplement.
+    sources: []
+  - claimed: it's natural, so it's side-effect-free.
+    studiesShow: >-
+      a closely related precursor, L-tryptophan, was pulled from the market in 1989 after a
+      contaminant caused eosinophilia-myalgia syndrome, a serious illness — a reminder that "natural"
+      precursors are only as safe as their purity.
+    sources: [2]
+  - claimed: 5-HTP alone treats insomnia.
+    studiesShow: null
+    sources: []
+evidenceGates:
+  - label: no standalone sleep RCT
+    variant: caution
+  - label: combination-only human data
+    variant: caution
+  - label: serious interaction risk
+    variant: caution
+  - label: mechanism only
+    variant: neutral
+doses:
+  - form: 5-HTP (from griffonia seed)
+    studiedDose: not established for sleep on its own
+    timing: evening
+    marketComparison: sold for sleep and mood; the sleep evidence is combination-only, and the interaction risk applies at any dose.
+safety:
+  severity: serious
+  lead: >-
+    5-HTP's headline is not its modest benefit — it's a serious drug interaction. as a serotonin
+    precursor it can trigger serotonin syndrome when combined with serotonergic medicines.
+  risks:
+    - category: serotonin syndrome
+      text: >-
+        do NOT combine 5-HTP with SSRIs, SNRIs, MAOIs, triptans, or other serotonergic drugs without
+        medical supervision — the combination can cause serotonin syndrome, which can be
+        life-threatening. (general clinician guidance.)
+    - category: contamination history
+      text: >-
+        a related precursor, L-tryptophan, caused a serious illness (eosinophilia-myalgia syndrome)
+        from a contaminant; purity and third-party testing matter for precursor supplements.
+      sources: [2]
+  pregnancy: avoid in pregnancy and breastfeeding — insufficient safety data.
+  interactions:
+    - SSRIs, SNRIs, MAOIs, triptans and other serotonergic drugs (serotonin syndrome risk)
+    - sedatives and CNS depressants (additive drowsiness)
+standardization: >-
+  5-HTP is a defined compound extracted from griffonia simplicifolia seeds. because closely related
+  precursors have a contamination history, third-party-tested purity is the thing to look for — but
+  no label quality changes the serotonergic interaction risk.
+mechanism: >-
+  5-HTP is the immediate precursor to serotonin, which the body can convert onward to melatonin, so
+  the theory is precursor "loading". but that same serotonergic action is the source of the
+  interaction risk, and human sleep outcomes for 5-HTP alone are essentially untested.
+sources:
+  - n: 1
+    title: "A randomized, placebo-controlled trial of an amino acid preparation on timing and quality of sleep"
+    sourceLine: "Shell W, Bullias D, Charuvastra E, et al. Am J Ther. 2010;17(2):133–139."
+    finding: >-
+      18 adults: an amino-acid preparation containing BOTH GABA and 5-HTP shortened time to fall asleep
+      (32 to 19 min, p=0.01) and increased sleep duration versus placebo. because it's a combination,
+      the effect of 5-HTP alone cannot be isolated.
+    type: rct
+    pmid: "19417589"
+    doi: "10.1097/MJT.0b013e31819e9eab"
+  - n: 2
+    title: "Safety of 5-hydroxy-L-tryptophan"
+    sourceLine: "Das YT, Bagchi M, Bagchi D, Preuss HG. Toxicol Lett. 2004;150(1):111–122."
+    finding: >-
+      safety review: L-tryptophan was discontinued in 1989 after an eosinophilia-myalgia syndrome
+      outbreak traced to a contaminant from a single manufacturer; analyses of 5-HTP have not found the
+      same contaminants, and no definitive 5-HTP toxicity cases had emerged over ~20 years of use.
+    type: review
+    pmid: "15068828"
+    doi: "10.1016/j.toxlet.2003.12.070"
+community:
+  reportsCount: 0
+seo:
+  questionTitle: does 5-htp help you sleep, and is it safe?
+  canonical: https://somnary.vercel.app/r/5-htp
+---
+
+import CiteMarker from '../../components/CiteMarker.astro';
+
+5-HTP is sold for sleep on a tidy piece of biochemistry: it's the immediate precursor to serotonin,
+which the body turns into melatonin. the theory is appealing. the human evidence, and the safety
+math, are not.
+
+on evidence: there is essentially no trial of 5-HTP **on its own** for sleep. the one study we
+identified tested an amino-acid combination of 5-HTP *and* GABA in 18 people, and while that mixture
+shortened the time to fall asleep, it cannot tell you what 5-HTP contributes by itself
+<CiteMarker n={1} />. that's a D — the claims run far ahead of the standalone data.
+
+on safety, 5-HTP is the rare D where the safety section outweighs the efficacy one. because it
+directly raises serotonin, combining it with common serotonergic medicines — SSRIs, SNRIs, MAOIs, or
+migraine triptans — can cause **serotonin syndrome**, which can be life-threatening. treat that as a
+hard rule: don't stack 5-HTP with those drugs without medical supervision. and there's a cautionary
+history nearby: L-tryptophan, a closely related precursor, was pulled from the market in 1989 after a
+contaminant caused a serious illness called eosinophilia-myalgia syndrome <CiteMarker n={2} /> — a
+reminder that a "natural" precursor is only as safe as its purity and what you take it with.
