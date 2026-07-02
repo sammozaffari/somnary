@@ -10,8 +10,9 @@ interface Props {
   title: string;
   description?: string;
   canonical?: string; // per-page canonical URL (SEO furniture — first used by remedy pages, CHK-2.1)
+  ogType?: string; // open-graph type: 'website' (default) or 'article' for remedy pages (CHK-2.2)
 }
-const { title, description, canonical } = Astro.props;
+const { title, description, canonical, ogType = 'website' } = Astro.props;
 ---
 
 <!doctype html>
@@ -24,6 +25,16 @@ const { title, description, canonical } = Astro.props;
     <title>{title}</title>
     {description && <meta name="description" content={description} />}
     {canonical && <link rel="canonical" href={canonical} />}
+
+    {/* Open Graph / Twitter (CHK-2.2). Per-remedy generated og:image is a follow-up. */}
+    <meta property="og:site_name" content="somnary" />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:title" content={title} />
+    {description && <meta property="og:description" content={description} />}
+    {canonical && <meta property="og:url" content={canonical} />}
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={title} />
+    {description && <meta name="twitter:description" content={description} />}
 
     {/* Brand typefaces — DESIGN_SYSTEM §1c (verbatim) */}
     <link rel="preconnect" href="https://fonts.googleapis.com" />

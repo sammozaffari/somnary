@@ -19,6 +19,7 @@ import AskPanel from '../../components/AskPanel.astro';
 import SourcesList from '../../components/SourcesList.astro';
 import CitationPopover from '../../components/CitationPopover.astro';
 import Disclaimer from '../../components/Disclaimer.astro';
+import { remedyJsonLd } from '../../lib/seo';
 
 export async function getStaticPaths() {
   const remedies = await getCollection('remedies', (e) => !e.data.draft);
@@ -35,13 +36,20 @@ const safetyFlag: { label: string; variant: GateVariant } = {
   label: d.safety.severity === 'serious' ? 'serious — see safety' : 'caution — see safety',
   variant: 'caution',
 };
+
+// SEO furniture (CHK-2.2): canonical + schema.org JSON-LD (MedicalWebPage + FAQ from the claims).
+const site = Astro.site?.href?.replace(/\/$/, '') ?? 'https://somnary.vercel.app';
+const canonical = d.seo.canonical ?? `${site}/r/${entry.id}`;
+const jsonLd = remedyJsonLd(d, canonical, site);
 ---
 
 <Base
   title={`${d.seo.questionTitle} — somnary`}
   description={d.oneLineVerdict}
-  canonical={d.seo.canonical}
+  canonical={canonical}
+  ogType="article"
 >
+  <script type="application/ld+json" is:inline set:html={JSON.stringify(jsonLd)} />
   <main class="remedy">
     {/* 1 — header */}
     <header class="head">
