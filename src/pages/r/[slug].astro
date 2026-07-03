@@ -48,6 +48,7 @@ const jsonLd = remedyJsonLd(d, canonical, site);
   description={d.oneLineVerdict}
   canonical={canonical}
   ogType="article"
+  ogImage={`${site}/r/${entry.id}/og.png`}
 >
   <script type="application/ld+json" is:inline set:html={JSON.stringify(jsonLd)} />
   <main class="remedy">
