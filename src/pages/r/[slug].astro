@@ -31,6 +31,7 @@ const d = entry.data;
 const { Content } = await render(entry);
 
 const tier = getTier(d.tier);
+const isIntervention = d.format === 'intervention';
 const studiedDose = d.doses.length ? d.doses[0].studiedDose : null;
 const safetyFlag: { label: string; variant: GateVariant } = {
   label: d.safety.severity === 'serious' ? 'serious — see safety' : 'caution — see safety',
@@ -54,7 +55,7 @@ const jsonLd = remedyJsonLd(d, canonical, site);
   <main class="remedy">
     {/* 1 — header */}
     <header class="head">
-      <p class="crumb"><a href="/">somnary</a> <span aria-hidden="true">›</span> remedies</p>
+      <p class="crumb"><a href="/">somnary</a> <span aria-hidden="true">›</span> {isIntervention ? 'interventions' : 'remedies'}</p>
       <div class="head-main">
         <TierBadge tier={d.tier} size="header" />
         <div class="head-text">
@@ -88,12 +89,14 @@ const jsonLd = remedyJsonLd(d, canonical, site);
           <div class="prose"><Content /></div>
         </section>
 
-        {/* 5 — dosing reality */}
-        <section class="block">
-          <p class="eyebrow">dosing reality</p>
-          <h2 class="block-title">the studied dose vs. the shelf</h2>
-          <DosingGrid doses={d.doses} />
-        </section>
+        {/* 5 — dosing reality (supplements only; interventions have no dose) */}
+        {d.doses.length > 0 && (
+          <section class="block">
+            <p class="eyebrow">dosing reality</p>
+            <h2 class="block-title">the studied dose vs. the shelf</h2>
+            <DosingGrid doses={d.doses} />
+          </section>
+        )}
 
         {/* 6 — safety & interactions (prominent) */}
         <section class="block">
@@ -107,10 +110,10 @@ const jsonLd = remedyJsonLd(d, canonical, site);
           />
         </section>
 
-        {/* 7 — standardization note */}
+        {/* 7 — standardization note (reframed as fidelity for interventions) */}
         <section class="block">
-          <p class="eyebrow">standardization</p>
-          <h2 class="block-title">what to look for on a label</h2>
+          <p class="eyebrow">{isIntervention ? 'the real version' : 'standardization'}</p>
+          <h2 class="block-title">{isIntervention ? 'what counts as the real thing' : 'what to look for on a label'}</h2>
           <p class="prose-p">{d.standardization}</p>
         </section>
 
@@ -133,6 +136,7 @@ const jsonLd = remedyJsonLd(d, canonical, site);
       <div class="sidebar">
         <MetadataCard
           tier={d.tier}
+          format={d.format}
           keyCompound={d.keyCompound}
           studiedDose={studiedDose}
           bestFor={d.bestFor}

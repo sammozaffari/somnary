@@ -102,6 +102,10 @@ const remedies = defineCollection({
   schema: z
     .object({
       tier,
+      // supplement (default) vs behavioral/environmental intervention (Phase 6, e.g. cbt-i). Drives
+      // template adaptation: interventions have no dose/compound, so those blocks are skipped and
+      // the "standardization" block reframes as fidelity ("what counts as the real thing").
+      format: z.enum(['supplement', 'intervention']).default('supplement'),
       name: z.string(), // lowercase in UI
       aliases: z.array(z.string()).default([]), // synonyms + latin names → search
       oneLineVerdict: z.string(),

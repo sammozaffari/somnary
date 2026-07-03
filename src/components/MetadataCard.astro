@@ -9,13 +9,17 @@ import GateChip from './GateChip.astro';
 
 interface Props {
   tier: TierId;
+  format?: 'supplement' | 'intervention';
   keyCompound: string | null;
   studiedDose: string | null;
   bestFor: string[];
   safetyFlag: { label: string; variant: GateVariant };
 }
-const { tier, keyCompound, studiedDose, bestFor, safetyFlag } = Astro.props;
+const { tier, format = 'supplement', keyCompound, studiedDose, bestFor, safetyFlag } = Astro.props;
 const bestForText = bestFor.length ? bestFor.join(', ') : null;
+// Interventions (e.g. cbt-i) have no active compound or dose, so those rows are omitted rather than
+// rendered "not established" — that phrasing implies a missing value, not an inapplicable one.
+const showDoseRows = format !== 'intervention';
 ---
 
 <aside class="meta-card" aria-label="at a glance">
@@ -29,15 +33,19 @@ const bestForText = bestFor.length ? bestFor.join(', ') : null;
     </span>
   </div>
 
-  <div class="row">
-    <span class="label">key compound</span>
-    <span class="value">{keyCompound ?? <em class="unknown">not established</em>}</span>
-  </div>
+  {showDoseRows && (
+    <div class="row">
+      <span class="label">key compound</span>
+      <span class="value">{keyCompound ?? <em class="unknown">not established</em>}</span>
+    </div>
+  )}
 
-  <div class="row">
-    <span class="label">studied dose</span>
-    <span class="value">{studiedDose ?? <em class="unknown">not established</em>}</span>
-  </div>
+  {showDoseRows && (
+    <div class="row">
+      <span class="label">studied dose</span>
+      <span class="value">{studiedDose ?? <em class="unknown">not established</em>}</span>
+    </div>
+  )}
 
   <div class="row">
     <span class="label">best for</span>
