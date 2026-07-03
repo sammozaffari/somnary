@@ -1,0 +1,81 @@
+---
+// Remedy card — DESIGN_SYSTEM §2.5/§7.4 (card form). The grid card used by the tier board (CHK-5.1)
+// and, next, outcome pages + home. Whole card is one link → /r/{slug}; tier badge + name + key
+// compound + one-line verdict. Hover: lift (§4 motion — translateY(-3px) + shadow-lift, no scale).
+import TierBadge from './TierBadge.astro';
+import type { TierId } from '../lib/tiers';
+
+interface Props {
+  slug: string;
+  name: string;
+  tier: TierId;
+  oneLiner: string;
+  keyCompound?: string | null;
+}
+const { slug, name, tier, oneLiner, keyCompound } = Astro.props;
+---
+
+<a class="card" href={`/r/${slug}`} aria-label={`${name} — grade ${tier}`}>
+  <div class="top">
+    <TierBadge tier={tier} size="card" />
+    <span class="name">{name}<span class="dot">.</span></span>
+  </div>
+  {keyCompound && <p class="meta">{keyCompound}</p>}
+  <p class="dek">{oneLiner}</p>
+</a>
+
+<style>
+  .card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+    background: var(--surface);
+    border: var(--border-hairline);
+    border-radius: var(--r-lg);
+    padding: var(--sp-5);
+    text-decoration: none;
+    color: var(--ink);
+    transition:
+      box-shadow var(--dur-base) var(--ease-settle),
+      transform var(--dur-base) var(--ease-settle);
+  }
+  .card:hover {
+    box-shadow: var(--shadow-lift);
+    transform: translateY(-3px);
+  }
+  .card:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+  }
+  .top {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+  }
+  .name {
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    line-height: 1.1;
+    color: var(--ink);
+  }
+  .dot {
+    color: var(--lavender);
+  }
+  .meta {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .dek {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--ink-soft);
+    margin: 0;
+  }
+</style>

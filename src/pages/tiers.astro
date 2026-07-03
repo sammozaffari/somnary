@@ -1,0 +1,248 @@
+---
+// Tier board — CHK-5.1 (PLAN §2.1 the hook; DESIGN_SYSTEM §3.3). Ranks every graded remedy S→F,
+// reading the structured grades from the content collection (single source of truth — no hand-kept
+// list). Server-rendered/static and crawlable. The empty S tier renders as an INTENTIONAL
+// dashed-border "nothing qualifies" panel (§3.3), not a missing section — the empty tier is the point.
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import StatRow from '../components/StatRow.astro';
+import TierBadge from '../components/TierBadge.astro';
+import RemedyCard from '../components/RemedyCard.astro';
+import { TIERS, type TierId } from '../lib/tiers';
+import { contentIndex, liveRemedyCount } from '../lib/content-index';
+
+interface Card {
+  slug: string;
+  name: string;
+  tier: TierId;
+  oneLiner: string;
+  keyCompound: string | null;
+}
+
+const remedies = await getCollection('remedies', (e) => !e.data.draft);
+const byTier = new Map<TierId, Card[]>(TIERS.map((t) => [t.id, []]));
+for (const e of remedies) {
+  byTier.get(e.data.tier)!.push({
+    slug: e.id,
+    name: e.data.name,
+    tier: e.data.tier,
+    oneLiner: e.data.oneLineVerdict,
+    keyCompound: e.data.keyCompound,
+  });
+}
+for (const arr of byTier.values()) arr.sort((a, b) => a.name.localeCompare(b.name));
+
+const sourcesCited = contentIndex
+  .filter((e) => e.researchStatus === 'live')
+  .reduce((n, e) => n + e.sourceCount, 0);
+const statCells = [
+  { value: String(liveRemedyCount), label: 'remedies graded' },
+  { value: String(sourcesCited), label: 'sources cited' },
+  { value: '0', label: 'hallucinated cites', accent: 'sage' as const },
+  { value: '$0', label: 'brand money', accent: 'lavender' as const },
+];
+---
+
+<Base
+  title="the tier board — every sleep remedy, graded S–F | somnary"
+  description="every natural sleep remedy ranked S to F by the strength of the published human evidence — not popularity. weak evidence labelled weak, shown not hidden. zero brand money."
+  canonical="https://somnary.vercel.app/tiers"
+>
+  <main class="page">
+    <header class="head">
+      <p class="eyebrow">the tier board · the hook</p>
+      <h1 class="title">every remedy, graded<span class="dot">.</span></h1>
+      <p class="dek">
+        every natural sleep remedy we've reviewed, ranked S to F by one thing only: the strength of
+        the published human evidence behind it. not popularity, not tradition, not the marketing.
+        weak evidence is labelled weak and shown, never buried — and the top tier is empty on purpose.
+      </p>
+    </header>
+
+    <StatRow cells={statCells} />
+
+    <!-- legend -->
+    <div class="legend" aria-label="what the tiers mean">
+      {
+        TIERS.map((t) => (
+          <div class="legend-item">
+            <TierBadge tier={t.id} size="inline" />
+            <span class="legend-name">{t.name}</span>
+          </div>
+        ))
+      }
+    </div>
+
+    <!-- one section per tier, S→F -->
+    {
+      TIERS.map((t) => {
+        const cards = byTier.get(t.id)!;
+        return (
+          <section class:list={['tier-row', { serious: t.serious }]} aria-label={`tier ${t.id} — ${t.name}`}>
+            <div class="rail">
+              <TierBadge tier={t.id} size="header" />
+              <p class="rail-name">{t.name}</p>
+              <p class="rail-count">{cards.length} graded</p>
+            </div>
+            <div class="cards">
+              {cards.length > 0 ? (
+                cards.map((c) => <RemedyCard {...c} />)
+              ) : (
+                <div class="empty" role="note">
+                  <p class="empty-title">nothing qualifies — and that's the point</p>
+                  <p class="empty-body">{t.emptyNote ?? 'no remedy has met this bar yet.'}</p>
+                </div>
+              )}
+            </div>
+          </section>
+        );
+      })
+    }
+  </main>
+</Base>
+
+<style>
+  .page {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: var(--sp-8) var(--sp-7) var(--sp-9);
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0;
+  }
+  .dot {
+    color: var(--lavender);
+  }
+  .head {
+    margin-bottom: var(--sp-7);
+  }
+  .title {
+    font-family: var(--font-display);
+    font-size: var(--text-display);
+    line-height: var(--lh-display);
+    letter-spacing: var(--tracking-tight);
+    color: var(--ink);
+    margin: var(--sp-3) 0 var(--sp-5);
+  }
+  .dek {
+    font-size: var(--text-md);
+    line-height: var(--lh-md);
+    color: var(--ink-soft);
+    max-width: 70ch;
+    margin: 0;
+  }
+
+  /* legend */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-5);
+    margin: var(--sp-6) 0 var(--sp-8);
+    padding: var(--sp-4) var(--sp-5);
+    background: var(--surface);
+    border: var(--border-hairline);
+    border-radius: var(--r-lg);
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+  }
+  .legend-name {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+
+  /* tier rows */
+  .tier-row {
+    display: grid;
+    grid-template-columns: 170px 1fr;
+    gap: var(--sp-6);
+    align-items: start;
+    border-top: var(--border-hairline);
+    padding-top: var(--sp-7);
+    margin-top: var(--sp-7);
+  }
+  .rail {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+    align-items: flex-start;
+    position: sticky;
+    top: 88px;
+  }
+  .rail-name {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--ink);
+    margin: 0;
+  }
+  .rail-count {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0;
+  }
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--sp-5);
+  }
+
+  /* intentional empty-tier panel (S) */
+  .empty {
+    grid-column: 1 / -1;
+    border: 2px dashed var(--line-strong);
+    border-radius: var(--r-lg);
+    padding: var(--sp-6);
+    background: transparent;
+  }
+  .empty-title {
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    line-height: var(--lh-xl);
+    color: var(--ink);
+    margin: 0 0 var(--sp-3);
+  }
+  .empty-body {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--ink-soft);
+    max-width: 60ch;
+    margin: 0;
+  }
+
+  @media (max-width: 760px) {
+    .tier-row {
+      grid-template-columns: 1fr;
+      gap: var(--sp-5);
+    }
+    .rail {
+      position: static;
+      top: auto;
+      flex-direction: row;
+      align-items: center;
+      gap: var(--sp-4);
+    }
+  }
+  @media (max-width: 640px) {
+    .page {
+      padding: var(--sp-6) var(--sp-5) var(--sp-8);
+    }
+    .title {
+      font-size: var(--text-2xl);
+    }
+  }
+</style>
