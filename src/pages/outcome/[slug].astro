@@ -1,0 +1,340 @@
+---
+// Outcome page — CHK-5.2 (PLAN §2.3, DESIGN_SYSTEM §3.4). Goal-first entry: for a sleep goal, the
+// remedies with evidence for it, ranked BEST EVIDENCE FIRST (by their own tier) — never by anecdote.
+// Reads the outcome→remedy map (src/lib/outcomes.ts) + the remedies collection. Static/crawlable.
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import TierBadge from '../../components/TierBadge.astro';
+import { OUTCOMES } from '../../lib/outcomes';
+import type { TierId } from '../../lib/tiers';
+
+export async function getStaticPaths() {
+  const remedies = await getCollection('remedies', (e) => !e.data.draft);
+  const bySlug = new Map(remedies.map((e) => [e.id, e.data]));
+  const rank: Record<TierId, number> = { S: 0, A: 1, B: 2, C: 3, D: 4, F: 5 };
+  return OUTCOMES.map((o) => {
+    const items = o.remedies
+      .map((slug) => {
+        const d = bySlug.get(slug);
+        return d
+          ? { slug, name: d.name, tier: d.tier as TierId, oneLiner: d.oneLineVerdict, keyCompound: d.keyCompound }
+          : null;
+      })
+      .filter((x): x is NonNullable<typeof x> => x !== null)
+      .sort((a, b) => rank[a.tier] - rank[b.tier]);
+    return { params: { slug: o.id }, props: { outcome: o, items } };
+  });
+}
+
+const { outcome, items } = Astro.props;
+const others = OUTCOMES.filter((o) => o.id !== outcome.id);
+---
+
+<Base
+  title={`${outcome.title} — best sleep remedies by evidence | somnary`}
+  description={`${outcome.dek}. the natural sleep remedies with real human evidence for this goal, ranked S–F by the strength of that evidence — not by popularity.`}
+  canonical={`https://somnary.vercel.app/outcome/${outcome.id}`}
+>
+  <main class="page">
+    <header class="head">
+      <p class="crumb"><a href="/">somnary</a> <span aria-hidden="true">›</span> by outcome</p>
+      <p class="eyebrow">by outcome · best evidence first</p>
+      <h1 class="title">{outcome.title}<span class="dot">.</span></h1>
+      <p class="dek">{outcome.dek} — ranked by the strength of the human evidence, not by popularity.</p>
+    </header>
+
+    <!-- goal switcher -->
+    <nav class="switcher" aria-label="switch goal">
+      {
+        OUTCOMES.map((o) => (
+          <a
+            class:list={['chip', { active: o.id === outcome.id }]}
+            href={`/outcome/${o.id}`}
+            aria-current={o.id === outcome.id ? 'page' : undefined}
+          >
+            {o.title}
+          </a>
+        ))
+      }
+    </nav>
+
+    <!-- ranked list -->
+    <ol class="ranked" aria-label={`remedies for ${outcome.title}, best evidence first`}>
+      {
+        items.map((r, i) => (
+          <li>
+            <a class="row" href={`/r/${r.slug}`}>
+              <span class="idx" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+              <TierBadge tier={r.tier} size="card" />
+              <span class="row-main">
+                <span class="row-name">{r.name}</span>
+                <span class="row-note">{r.oneLiner}</span>
+              </span>
+              <span class="row-grade">grade {r.tier}</span>
+            </a>
+          </li>
+        ))
+      }
+    </ol>
+
+    <!-- what we're measuring -->
+    <section class="measuring">
+      <p class="measuring-label">what we're measuring</p>
+      <p class="measuring-body">{outcome.measuring}</p>
+    </section>
+
+    <!-- other goals -->
+    <section class="section">
+      <p class="eyebrow">other goals</p>
+      <div class="others">
+        {
+          others.map((o) => (
+            <a class="other" href={`/outcome/${o.id}`}>
+              <p class="other-title">{o.title}<span class="dot">.</span></p>
+              <p class="other-dek">{o.dek}</p>
+            </a>
+          ))
+        }
+      </div>
+    </section>
+  </main>
+</Base>
+
+<style>
+  .page {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: var(--sp-8) var(--sp-7) var(--sp-9);
+  }
+  .dot {
+    color: var(--lavender);
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0;
+  }
+  .head {
+    margin-bottom: var(--sp-6);
+  }
+  .crumb {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0 0 var(--sp-5);
+  }
+  .crumb a {
+    color: var(--ink-faint);
+    text-decoration: none;
+  }
+  .crumb a:hover {
+    color: var(--ink);
+  }
+  .title {
+    font-family: var(--font-display);
+    font-size: var(--text-3xl);
+    line-height: var(--lh-3xl);
+    letter-spacing: var(--tracking-tight);
+    color: var(--ink);
+    margin: var(--sp-3) 0 var(--sp-3);
+  }
+  .dek {
+    font-size: var(--text-md);
+    line-height: var(--lh-md);
+    color: var(--ink-soft);
+    max-width: 64ch;
+    margin: 0;
+  }
+
+  /* goal switcher chips */
+  .switcher {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2);
+    margin: var(--sp-6) 0 var(--sp-7);
+  }
+  .chip {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    background: var(--surface);
+    border: var(--border-hairline);
+    border-radius: var(--r-pill);
+    padding: var(--sp-2) var(--sp-4);
+    text-decoration: none;
+    transition: border-color var(--dur-fast) var(--ease-soft);
+  }
+  .chip:hover {
+    border-color: var(--line-strong);
+  }
+  .chip.active {
+    color: var(--ink);
+    background: var(--lavender-tint);
+    border-color: var(--lavender);
+  }
+  .chip:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+  }
+
+  /* ranked list */
+  .ranked {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border: var(--border-hairline);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+  }
+  .ranked li + li .row {
+    border-top: var(--border-hairline);
+  }
+  .row {
+    display: grid;
+    grid-template-columns: 44px 44px 1fr auto;
+    gap: var(--sp-4);
+    align-items: center;
+    padding: var(--sp-4) var(--sp-5);
+    text-decoration: none;
+    color: var(--ink);
+    background: var(--surface);
+    transition: background var(--dur-fast) var(--ease-soft);
+  }
+  .row:hover {
+    background: var(--sunken);
+  }
+  .row:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+  }
+  .idx {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--ink-faint);
+  }
+  .row-main {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .row-name {
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    line-height: 1.1;
+    color: var(--ink);
+  }
+  .row-note {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--ink-soft);
+  }
+  .row-grade {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    white-space: nowrap;
+  }
+
+  /* what we're measuring */
+  .measuring {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: var(--sp-5);
+    margin-top: var(--sp-8);
+    padding: var(--sp-6);
+    background: var(--surface);
+    border: var(--border-hairline);
+    border-radius: var(--r-lg);
+  }
+  .measuring-label {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0;
+  }
+  .measuring-body {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--ink-soft);
+    margin: 0;
+    max-width: 66ch;
+  }
+
+  /* other goals */
+  .section {
+    margin-top: var(--sp-8);
+  }
+  .others {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--sp-4);
+    margin-top: var(--sp-5);
+  }
+  .other {
+    background: var(--surface);
+    border: var(--border-hairline);
+    border-radius: var(--r-lg);
+    padding: var(--sp-5);
+    text-decoration: none;
+    color: var(--ink);
+    transition:
+      box-shadow var(--dur-base) var(--ease-settle),
+      transform var(--dur-base) var(--ease-settle);
+  }
+  .other:hover {
+    box-shadow: var(--shadow-lift);
+    transform: translateY(-3px);
+  }
+  .other:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+  }
+  .other-title {
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    color: var(--ink);
+    margin: 0 0 var(--sp-2);
+  }
+  .other-dek {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--ink-soft);
+    margin: 0;
+  }
+
+  @media (max-width: 760px) {
+    .others {
+      grid-template-columns: 1fr;
+    }
+    .measuring {
+      grid-template-columns: 1fr;
+      gap: var(--sp-2);
+    }
+  }
+  @media (max-width: 640px) {
+    .page {
+      padding: var(--sp-6) var(--sp-5) var(--sp-8);
+    }
+    .title {
+      font-size: var(--text-2xl);
+    }
+    .row {
+      grid-template-columns: 32px 38px 1fr;
+    }
+    .row-grade {
+      display: none;
+    }
+  }
+</style>
