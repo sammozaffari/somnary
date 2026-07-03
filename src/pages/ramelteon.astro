@@ -1,0 +1,201 @@
+---
+// ramelteon — CONTEXT page (deferred from Phase 5). NOT a graded remedy: ramelteon is a
+// prescription drug, so it sits outside somnary's graded corpus of OTC / natural remedies. No tier
+// badge, no evidence-gate chips — the ContextBanner marks it as background. The one genuine efficacy
+// claim (AASM's weak recommendation FOR ramelteon, vs its weak recommendation AGAINST OTC melatonin)
+// is cited to the 2017 AASM guideline, verified firsthand. Mechanism / regulatory facts are
+// attributed to the FDA prescribing information (Rozerem) rather than asserted uncited.
+import Base from '../layouts/Base.astro';
+import ContextBanner from '../components/ContextBanner.astro';
+import ContextSources from '../components/ContextSources.astro';
+import Disclaimer from '../components/Disclaimer.astro';
+import Fn from '../components/Fn.astro';
+
+const sources = [
+  {
+    n: 1,
+    cite: 'Sateia MJ, Buysse DJ, Krystal AD, et al. Clinical Practice Guideline for the Pharmacologic Treatment of Chronic Insomnia in Adults (AASM). J Clin Sleep Med. 2017;13(2):307–349.',
+    finding:
+      'the american academy of sleep medicine issues a weak recommendation FOR ramelteon in sleep-onset insomnia — and, in the same guideline, a weak recommendation AGAINST over-the-counter melatonin for sleep-onset or sleep-maintenance insomnia.',
+    pmid: '27998379',
+    doi: '10.5664/jcsm.6470',
+  },
+];
+---
+
+<Base
+  title="ramelteon (Rozerem) — the prescription melatonin-receptor drug, in context | somnary"
+  description="ramelteon is a prescription melatonin-receptor agonist, not an over-the-counter supplement — so somnary doesn't grade it. what it is, how it differs from OTC melatonin, and why it's a decision for your prescriber."
+  canonical="https://somnary.vercel.app/ramelteon"
+>
+  <main class="page">
+    <header class="head">
+      <p class="eyebrow">context · prescription sleep medicine</p>
+      <h1 class="title">ramelteon<span class="dot">.</span></h1>
+      <p class="dek">
+        ramelteon (brand name Rozerem) is the prescription cousin of the melatonin you can buy off a
+        shelf. because it's a prescription drug, it sits outside the over-the-counter and natural
+        corpus somnary grades — so this page is background, not a grade.
+      </p>
+    </header>
+
+    <ContextBanner
+      note="ramelteon is prescription-only, so it isn't scored on somnary's S–F scale. that scale is for remedies you can choose and buy yourself; a prescription is a decision you and a clinician make together."
+    />
+
+    <!-- what it is -->
+    <section class="section">
+      <p class="eyebrow">section 01</p>
+      <h2 class="section-title">what it is</h2>
+      <div class="prose">
+        <p>
+          ramelteon is a <strong>melatonin-receptor agonist</strong>: it acts on the same MT1 and MT2
+          receptors your own melatonin uses to signal the brain toward sleep. Unlike the older
+          sleeping pills (the &ldquo;Z-drugs&rdquo; and benzodiazepines), it doesn't act on the GABA
+          system, and per its FDA-approved prescribing information it is <strong>not a scheduled
+          controlled substance</strong> — it isn't classed as habit-forming in the way those
+          sedatives are. It was approved in the United States in 2005 for insomnia characterised by
+          difficulty <strong>falling asleep</strong>.
+        </p>
+      </div>
+    </section>
+
+    <!-- how it differs from OTC melatonin -->
+    <section class="section">
+      <p class="eyebrow">section 02</p>
+      <h2 class="section-title">how it differs from the melatonin on the shelf</h2>
+      <div class="prose">
+        <p>
+          This is the useful part, and where the evidence actually points somewhere. The American
+          Academy of Sleep Medicine's 2017 guideline reviewed both, and split them: it issues a
+          <strong>weak recommendation <em>for</em> ramelteon</strong> in sleep-onset insomnia, and in
+          the same document a <strong>weak recommendation <em>against</em> over-the-counter
+          melatonin</strong> for either falling asleep or staying asleep.<Fn n={1} />
+        </p>
+        <p>
+          Both recommendations are &ldquo;weak&rdquo; — the evidence is modest either way — but the
+          direction differs. A prescription drug is manufactured to a fixed, verified dose and studied
+          as a specific product; an OTC melatonin supplement is not, and its actual content can swing
+          wildly from the label (a problem covered on the
+          <a href="/r/melatonin">melatonin page</a> and the
+          <a href="/melatonin-children">children page</a>). Same receptor, very different products.
+        </p>
+      </div>
+    </section>
+
+    <!-- why somnary doesn't grade it -->
+    <section class="section">
+      <p class="eyebrow">section 03</p>
+      <h2 class="section-title">why somnary doesn't grade it</h2>
+      <div class="prose">
+        <p>
+          somnary grades the things a reader can weigh and buy on their own: over-the-counter
+          supplements, botanicals, and behavioural or environmental interventions. A prescription
+          medicine isn't that kind of choice — it's prescribed, dosed, and monitored by a clinician
+          who knows your history. Putting an S–F letter on it would imply you could pick it up like a
+          supplement, which you can't and shouldn't. So we describe it and stop there. The full rule
+          for what is and isn't in scope lives in the <a href="/methodology">methodology</a>.
+        </p>
+      </div>
+    </section>
+
+    <!-- talk to your prescriber -->
+    <section class="section">
+      <p class="eyebrow">section 04</p>
+      <h2 class="section-title">if you're considering it, this is a prescriber conversation</h2>
+      <div class="prose">
+        <p>
+          Because ramelteon is prescription-only, the safety details are handled by the clinician who
+          prescribes it — that's the point of it being prescription. Two things worth knowing going
+          in, per its prescribing information: it <strong>should not be combined with fluvoxamine</strong>
+          (an antidepressant that sharply raises ramelteon levels), and it is generally
+          <strong>avoided in severe liver disease</strong>. Bring your full medication list —
+          including any supplements — to that conversation, and don't start, stop, or combine it with
+          anything on your own.
+        </p>
+      </div>
+    </section>
+
+    <ContextSources sources={sources} />
+
+    <div class="disclaimer-slot">
+      <Disclaimer variant="standard" />
+    </div>
+  </main>
+</Base>
+
+<style>
+  .page {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: var(--sp-8) var(--sp-7) var(--sp-9);
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0;
+  }
+  .dot {
+    color: var(--lavender);
+  }
+  .head {
+    margin-bottom: var(--sp-6);
+  }
+  .title {
+    font-family: var(--font-display);
+    font-size: var(--text-3xl);
+    line-height: var(--lh-3xl);
+    letter-spacing: var(--tracking-tight);
+    color: var(--ink);
+    margin: var(--sp-3) 0 var(--sp-5);
+  }
+  .dek {
+    font-size: var(--text-md);
+    line-height: var(--lh-md);
+    color: var(--ink-soft);
+    max-width: 68ch;
+    margin: 0;
+  }
+  .section {
+    border-top: var(--border-hairline);
+    padding-top: var(--sp-6);
+    margin-top: var(--sp-8);
+  }
+  .section-title {
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    line-height: var(--lh-xl);
+    color: var(--ink);
+    margin: var(--sp-2) 0 var(--sp-5);
+  }
+  .prose {
+    max-width: 68ch;
+  }
+  .prose p {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--ink-soft);
+    margin: 0 0 var(--sp-4);
+  }
+  .prose strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .prose a {
+    color: var(--lavender-ink);
+  }
+  .disclaimer-slot {
+    margin-top: var(--sp-8);
+  }
+  @media (max-width: 640px) {
+    .page {
+      padding: var(--sp-6) var(--sp-5) var(--sp-8);
+    }
+    .title {
+      font-size: var(--text-2xl);
+    }
+  }
+</style>

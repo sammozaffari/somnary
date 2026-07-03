@@ -1,0 +1,111 @@
+---
+// Sources list for CONTEXT pages — a self-contained footnote list (not the remedy citation island,
+// which reads structured sources[] from the collection). Each item is anchored (#src-N) so inline
+// <sup><a href="#src-N">N</a></sup> markers in the prose resolve to it, and links to the verified
+// PubMed record. Every id here was verified firsthand to resolve AND read before being cited.
+interface Source {
+  n: number;
+  cite: string; // author/journal line
+  finding: string; // what it actually supports (kept honest to what was read)
+  pmid?: string;
+  doi?: string;
+}
+interface Props {
+  sources: Source[];
+}
+const { sources } = Astro.props;
+---
+
+<section class="sources" aria-label="sources">
+  <p class="sources-label">sources</p>
+  <ol class="list">
+    {
+      sources.map((s) => (
+        <li id={`src-${s.n}`} class="src">
+          <p class="cite">{s.cite}</p>
+          <p class="finding">{s.finding}</p>
+          <p class="links">
+            {s.pmid && (
+              <a href={`https://pubmed.ncbi.nlm.nih.gov/${s.pmid}/`} rel="nofollow noopener" target="_blank">
+                PubMed {s.pmid}
+              </a>
+            )}
+            {s.doi && (
+              <a href={`https://doi.org/${s.doi}`} rel="nofollow noopener" target="_blank">
+                doi:{s.doi}
+              </a>
+            )}
+          </p>
+        </li>
+      ))
+    }
+  </ol>
+</section>
+
+<style>
+  .sources {
+    border-top: var(--border-hairline);
+    padding-top: var(--sp-6);
+    margin-top: var(--sp-8);
+  }
+  .sources-label {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0 0 var(--sp-5);
+  }
+  .list {
+    list-style: none;
+    counter-reset: src;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-5);
+  }
+  .src {
+    counter-increment: src;
+    position: relative;
+    padding-left: var(--sp-7);
+    scroll-margin-top: 80px;
+  }
+  .src::before {
+    content: counter(src);
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--ink-faint);
+  }
+  .cite {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--ink);
+    margin: 0 0 var(--sp-1);
+  }
+  .finding {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--ink-soft);
+    margin: 0 0 var(--sp-2);
+  }
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-4);
+    margin: 0;
+  }
+  .links a {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--lavender-ink);
+    text-decoration: none;
+  }
+  .links a:hover {
+    text-decoration: underline;
+  }
+</style>

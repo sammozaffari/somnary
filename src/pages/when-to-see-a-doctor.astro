@@ -1,0 +1,340 @@
+---
+// when to see a doctor — CONTEXT page (deferred from Phase 5), safety-forward. NOT a graded remedy:
+// it's the boundary of the site — the sleep problems a supplement can't fix and a clinician should
+// see. No tier badge, no evidence-gate chips. Red-flag symptoms are framed as signs clinicians
+// screen for (guidance directing to care, not efficacy claims). The one evidentiary specific — that
+// even chronic-insomnia drug options are only weakly recommended, so diagnosis matters more than a
+// pill — is cited to the 2017 AASM guideline, verified firsthand.
+import Base from '../layouts/Base.astro';
+import ContextBanner from '../components/ContextBanner.astro';
+import ContextSources from '../components/ContextSources.astro';
+import Disclaimer from '../components/Disclaimer.astro';
+import Fn from '../components/Fn.astro';
+
+const redFlags = [
+  {
+    sign: 'loud snoring with pauses in breathing',
+    detail:
+      'if a bed partner notices you stop breathing, gasp, or choke in your sleep — especially with heavy daytime sleepiness — that points toward obstructive sleep apnoea. No supplement treats it, and untreated it carries real health risks. Ask about a sleep study.',
+  },
+  {
+    sign: 'insomnia most nights, for months',
+    detail:
+      "clinicians generally call insomnia “chronic” when it runs at least three nights a week for three months or more. At that point it's a condition to treat properly, not to keep papering over with nightly supplements.",
+  },
+  {
+    sign: 'crawling, restless legs at night',
+    detail:
+      'an urge to move your legs with uncomfortable sensations, worse in the evening and relieved by movement, can be restless legs syndrome — sometimes linked to low iron. It has specific treatments a clinician can pursue.',
+  },
+  {
+    sign: 'falling asleep suddenly in the day',
+    detail:
+      'overwhelming daytime sleep attacks, or sudden muscle weakness with strong emotion, warrant evaluation for narcolepsy or another sleep disorder — not self-treatment.',
+  },
+  {
+    sign: 'acting out dreams',
+    detail:
+      'shouting, punching, or otherwise physically acting out dreams during sleep can be REM sleep behaviour disorder, which needs medical assessment (both for injury risk and what it can signal).',
+  },
+  {
+    sign: 'sleep loss with low mood or anxiety',
+    detail:
+      "when poor sleep travels with persistent low mood, anxiety, or—urgently—any thoughts of self-harm, the sleep is a symptom. Treat the whole picture with a clinician; seek help immediately for thoughts of self-harm.",
+  },
+];
+---
+
+<Base
+  title="when to see a doctor about sleep — the limits of a supplement | somnary"
+  description="supplements are for mild, occasional sleeplessness. loud snoring with breathing pauses, months of insomnia, restless legs, acting out dreams, or sleep loss with low mood are signs to see a clinician, not to self-treat."
+  canonical="https://somnary.vercel.app/when-to-see-a-doctor"
+>
+  <main class="page">
+    <header class="head">
+      <p class="eyebrow">context · when to get professional help</p>
+      <h1 class="title">when to see a doctor<span class="dot">.</span></h1>
+      <p class="dek">
+        somnary grades remedies for mild, occasional sleeplessness. It doesn't diagnose, and some
+        sleep problems need a clinician rather than anything on a shelf. This page is about
+        recognising those — the honest edge of what a supplement can do.
+      </p>
+    </header>
+
+    <ContextBanner
+      note="this isn't a remedy and isn't graded. it's the boundary of the site: the point where the right move is a professional, not a purchase."
+    />
+
+    <!-- top callout: supplements have limits (caution) -->
+    <section class="callout sev-caution" role="note" aria-label="when to seek care">
+      <div class="callout-head">
+        <span class="sigil" aria-hidden="true">!</span>
+        <p class="callout-title">supplements are for mild, short-term sleeplessness</p>
+      </div>
+      <p class="callout-body">
+        If your sleep problem is severe, persistent, or comes with any of the signs below, that's a
+        reason to see a clinician — not to keep trying supplements. A remedy that masks a treatable
+        disorder can delay the care that would actually fix it.
+      </p>
+    </section>
+
+    <!-- section 01: red flags -->
+    <section class="section">
+      <p class="eyebrow">section 01</p>
+      <h2 class="section-title">signs to get evaluated</h2>
+      <div class="flags">
+        {
+          redFlags.map((f) => (
+            <div class="flag">
+              <p class="flag-sign">{f.sign}</p>
+              <p class="flag-detail">{f.detail}</p>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <!-- section 02: why a pill can mask the problem -->
+    <section class="section">
+      <p class="eyebrow">section 02</p>
+      <h2 class="section-title">why reaching for a pill can be the wrong first move</h2>
+      <div class="prose">
+        <p>
+          Even for straightforward chronic insomnia, the medication options aren't a slam dunk: the
+          American Academy of Sleep Medicine's own guideline gives every one of them only a
+          <strong>weak recommendation</strong>.<Fn n={1} /> That's a strong hint that the answer isn't
+          usually &ldquo;find the right pill&rdquo; — it's getting the diagnosis right. For chronic
+          insomnia specifically, the recommended first-line treatment is a structured behavioural
+          programme (CBT-I), not a supplement or a sedative. A clinician can tell whether that's what
+          you need, or whether something like apnoea is the real driver.
+        </p>
+      </div>
+    </section>
+
+    <!-- section 03: prepare for the visit -->
+    <section class="section">
+      <p class="eyebrow">section 03</p>
+      <h2 class="section-title">what to bring to the appointment</h2>
+      <div class="prose">
+        <ul>
+          <li>
+            a rough <strong>sleep diary</strong> — bed and wake times, how long to fall asleep, night
+            wakings — for a week or two.
+          </li>
+          <li>
+            a full list of <strong>everything you take</strong>, including supplements, melatonin, and
+            anything bought over the counter.
+          </li>
+          <li>
+            what a <strong>bed partner has noticed</strong> — snoring, breathing pauses, leg
+            movements, acting out dreams.
+          </li>
+          <li>caffeine, alcohol, and screen habits in the hours before bed.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- section 04: urgent -->
+    <section class="section">
+      <p class="eyebrow">section 04</p>
+      <h2 class="section-title">when it's urgent</h2>
+      <div class="prose">
+        <p>
+          Some situations shouldn't wait for a routine appointment. If you or someone else has
+          <strong>thoughts of self-harm</strong>, contact your local emergency number or a crisis
+          line now (in the US, call or text <strong>988</strong>). If someone is
+          <strong>unrousable, struggling to breathe, or has taken a dangerous amount</strong> of any
+          substance, call emergency services — and for a suspected poisoning in the US, Poison Help is
+          <strong>1-800-222-1222</strong>.
+        </p>
+      </div>
+    </section>
+
+    <ContextSources sources={[
+      {
+        n: 1,
+        cite: 'Sateia MJ, Buysse DJ, Krystal AD, et al. Clinical Practice Guideline for the Pharmacologic Treatment of Chronic Insomnia in Adults (AASM). J Clin Sleep Med. 2017;13(2):307–349.',
+        finding:
+          'across the drugs assessed for chronic insomnia, every recommendation the guideline issues is graded weak — the evidence for pharmacologic treatment is modest, which underlines getting a proper diagnosis over self-treating with a pill.',
+        pmid: '27998379',
+        doi: '10.5664/jcsm.6470',
+      },
+    ]} />
+
+    <div class="disclaimer-slot">
+      <Disclaimer variant="standard" />
+    </div>
+  </main>
+</Base>
+
+<style>
+  .page {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: var(--sp-8) var(--sp-7) var(--sp-9);
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0;
+  }
+  .dot {
+    color: var(--lavender);
+  }
+  .head {
+    margin-bottom: var(--sp-6);
+  }
+  .title {
+    font-family: var(--font-display);
+    font-size: var(--text-3xl);
+    line-height: var(--lh-3xl);
+    letter-spacing: var(--tracking-tight);
+    color: var(--ink);
+    margin: var(--sp-3) 0 var(--sp-5);
+  }
+  .dek {
+    font-size: var(--text-md);
+    line-height: var(--lh-md);
+    color: var(--ink-soft);
+    max-width: 68ch;
+    margin: 0;
+  }
+
+  /* caution callout — §2.12 caution register (tier-c) */
+  .callout {
+    border-radius: var(--r-lg);
+    border: 1px solid;
+    padding: var(--sp-6);
+    margin-top: var(--sp-7);
+  }
+  .sev-caution {
+    background: var(--tier-c-tint);
+    border-color: var(--tier-c);
+  }
+  .callout-head {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    margin-bottom: var(--sp-4);
+  }
+  .sigil {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    flex: none;
+    border-radius: var(--r-pill);
+    background: var(--tier-c);
+    color: var(--surface);
+    font-family: var(--font-display);
+    font-weight: 600;
+    line-height: 1;
+  }
+  .callout-title {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--tier-c-ink);
+    margin: 0;
+  }
+  .callout-body {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--ink);
+    margin: 0;
+  }
+
+  .section {
+    border-top: var(--border-hairline);
+    padding-top: var(--sp-6);
+    margin-top: var(--sp-8);
+  }
+  .section-title {
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    line-height: var(--lh-xl);
+    color: var(--ink);
+    margin: var(--sp-2) 0 var(--sp-5);
+  }
+
+  /* red-flag rows */
+  .flags {
+    display: flex;
+    flex-direction: column;
+    border: var(--border-hairline);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+  }
+  .flag {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: var(--sp-5);
+    padding: var(--sp-5);
+    background: var(--surface);
+  }
+  .flag + .flag {
+    border-top: var(--border-hairline);
+  }
+  .flag-sign {
+    font-family: var(--font-display);
+    font-size: var(--text-md);
+    line-height: var(--lh-md);
+    color: var(--ink);
+    margin: 0;
+  }
+  .flag-detail {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--ink-soft);
+    margin: 0;
+  }
+
+  .prose {
+    max-width: 68ch;
+  }
+  .prose p {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--ink-soft);
+    margin: 0 0 var(--sp-4);
+  }
+  .prose strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .prose ul {
+    margin: 0;
+    padding-left: var(--sp-5);
+  }
+  .prose li {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--ink-soft);
+    margin-bottom: var(--sp-3);
+  }
+  .prose a {
+    color: var(--lavender-ink);
+  }
+  .disclaimer-slot {
+    margin-top: var(--sp-8);
+  }
+  @media (max-width: 760px) {
+    .flag {
+      grid-template-columns: 1fr;
+      gap: var(--sp-2);
+    }
+  }
+  @media (max-width: 640px) {
+    .page {
+      padding: var(--sp-6) var(--sp-5) var(--sp-8);
+    }
+    .title {
+      font-size: var(--text-2xl);
+    }
+  }
+</style>

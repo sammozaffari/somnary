@@ -1,0 +1,32 @@
+---
+// Footnote reference for CONTEXT pages — a crawlable superscript link to the #src-N entry in the
+// page's ContextSources list. Self-contained (no citation island); pair only with a source that
+// actually exists in that list and was verified to support the specific claim it marks.
+interface Props {
+  n: number;
+}
+const { n } = Astro.props;
+---
+
+<sup class="fn"><a href={`#src-${n}`} aria-label={`source ${n}`}>{n}</a></sup>
+
+<style>
+  .fn {
+    line-height: 0;
+  }
+  .fn a {
+    font-family: var(--font-mono);
+    font-size: 0.72em;
+    color: var(--lavender-ink);
+    text-decoration: none;
+    padding: 0 1px;
+  }
+  .fn a:hover {
+    text-decoration: underline;
+  }
+  .fn a:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+    border-radius: var(--r-sm);
+  }
+</style>

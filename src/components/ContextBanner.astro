@@ -1,0 +1,60 @@
+---
+// Context banner — the shared signal that a page is EDUCATIONAL CONTEXT, not a graded remedy.
+// Deliberately NOT tier-colored and NOT a verdict band: no TierBadge, no evidence-gate chips. It
+// reads as a neutral sage note so a context page can never be mistaken for an S–F remedy grade.
+// Used at the top of every /context-type page (ramelteon, when-to-see-a-doctor, melatonin-children).
+interface Props {
+  note: string; // one line: why this page isn't graded
+}
+const { note } = Astro.props;
+---
+
+<aside class="ctx" role="note" aria-label="context, not a graded remedy">
+  <span class="sigil" aria-hidden="true">i</span>
+  <p class="ctx-text">
+    <span class="ctx-tag">context — not a graded remedy</span>
+    {note}
+  </p>
+</aside>
+
+<style>
+  .ctx {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--sp-4);
+    background: var(--sage-tint);
+    border: 1px solid var(--sage);
+    border-radius: var(--r-lg);
+    padding: var(--sp-5) var(--sp-6);
+  }
+  .sigil {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    flex: none;
+    border-radius: var(--r-pill);
+    background: var(--sage);
+    color: var(--surface);
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-style: italic;
+    line-height: 1;
+  }
+  .ctx-text {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--ink);
+    margin: 0;
+  }
+  .ctx-tag {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--sage-ink);
+    margin-right: var(--sp-2);
+  }
+</style>

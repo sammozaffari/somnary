@@ -1,0 +1,260 @@
+---
+// melatonin in children — CONTEXT page (deferred from Phase 5), safety-forward. NOT a graded remedy
+// and NOT a recommendation to give a child melatonin: it's parent/carer safety context that also
+// folds into the melatonin remedy page's safety section. No tier badge, no evidence-gate chips.
+// Clinician-guidance framing throughout; every specific is cited to a source verified firsthand:
+// Lelak 2022 MMWR (accidental-ingestion surge, read), Erland 2017 (label-vs-content range, read),
+// Cohen 2023 JAMA (gummies mislabelled + some contained CBD — cited only for what its summary
+// supports; the specific percentages weren't readable, so they aren't asserted here).
+import Base from '../layouts/Base.astro';
+import ContextBanner from '../components/ContextBanner.astro';
+import ContextSources from '../components/ContextSources.astro';
+import Disclaimer from '../components/Disclaimer.astro';
+import Fn from '../components/Fn.astro';
+
+const sources = [
+  {
+    n: 1,
+    cite: 'Lelak K, Vohra V, Neuman MI, et al. Pediatric Melatonin Ingestions — United States, 2012–2021. MMWR Morb Mortal Wkly Rep. 2022;71(22):725–729.',
+    finding:
+      'reported pediatric melatonin ingestions rose 530% over the decade, the large majority unintentional in young children, with a rise in hospitalisations and some intensive-care admissions — the basis for treating melatonin as a medicine to lock away, not a harmless candy.',
+    pmid: '35653284',
+    doi: '10.15585/mmwr.mm7122a1',
+  },
+  {
+    n: 2,
+    cite: 'Erland LAE, Saxena PK. Melatonin Natural Health Products and Supplements: Presence of Serotonin and Significant Variability of Melatonin Content. J Clin Sleep Med. 2017;13(2):275–281.',
+    finding:
+      'lab analysis of 30 supplements: actual melatonin content ranged from 83% below to 478% above the label, varied up to 465% between lots of the same product, and serotonin was detected in eight products — so the number on the label is not a reliable dose.',
+    pmid: '27855744',
+    doi: '10.5664/jcsm.6462',
+  },
+  {
+    n: 3,
+    cite: 'Cohen PA, Avula B, Wang YH, et al. Quantity of Melatonin and CBD in Melatonin Gummies Sold in the US. JAMA. 2023;329(16):1401–1402.',
+    finding:
+      'an independent analysis of melatonin gummies sold in the US found the measured melatonin frequently did not match the labelled amount, and that some products marketed as melatonin also contained CBD.',
+    pmid: '37097362',
+  },
+];
+---
+
+<Base
+  title="melatonin for children — safety context for parents | somnary"
+  description="melatonin is a medicine, not a candy: accidental-ingestion cases have surged, supplement doses often don't match the label, and gummies can look like sweets. safety context for parents — and why it's a pediatrician conversation first."
+  canonical="https://somnary.vercel.app/melatonin-children"
+>
+  <main class="page">
+    <header class="head">
+      <p class="eyebrow">context · child safety</p>
+      <h1 class="title">melatonin in children<span class="dot">.</span></h1>
+      <p class="dek">
+        Melatonin is sold beside the vitamins, often as fruit-flavoured gummies, which makes it easy
+        to treat as harmless. For children it deserves more caution than that. This page is safety
+        context for parents and carers — not a grade, and not a recommendation to give a child
+        melatonin.
+      </p>
+    </header>
+
+    <ContextBanner
+      note="giving melatonin to a child is a decision to make with a pediatrician, not from a wiki. this page explains the specific risks that make it a medical conversation."
+    />
+
+    <!-- top safety callout: accidental ingestion (serious) -->
+    <section class="callout sev-serious" role="note" aria-label="accidental ingestion hazard">
+      <div class="callout-head">
+        <span class="sigil" aria-hidden="true">!</span>
+        <p class="callout-title">store it like a medicine — accidental ingestion is the biggest risk</p>
+      </div>
+      <p class="callout-body">
+        Reported accidental melatonin ingestions by children <strong>rose 530%</strong> between 2012
+        and 2021 in the United States, most of them young children finding it on their own, with a
+        rise in hospitalisations.<Fn n={1} /> Flavoured gummies that look and taste like sweets are
+        part of why. Keep melatonin capped, out of reach, and out of sight — the same as any other
+        medicine.
+      </p>
+    </section>
+
+    <!-- section 01: the label doesn't tell you the dose -->
+    <section class="section">
+      <p class="eyebrow">section 01</p>
+      <h2 class="section-title">the number on the label often isn't the dose in the bottle</h2>
+      <div class="prose">
+        <p>
+          A child's dose is small, which makes accuracy matter more — and supplement melatonin is
+          poorly standardised. When researchers assayed 30 products, actual melatonin content ranged
+          from <strong>83% below to 478% above</strong> the labelled amount, and varied by up to
+          <strong>465% between lots of the same product</strong>; some products also contained
+          serotonin.<Fn n={2} /> A separate analysis of melatonin <em>gummies</em> specifically found
+          the measured amount frequently didn't match the label, and that some products marketed as
+          melatonin also contained <strong>CBD</strong>.<Fn n={3} /> So &ldquo;1&nbsp;mg&rdquo; on a
+          children's gummy is not a dose you can rely on.
+        </p>
+      </div>
+    </section>
+
+    <!-- section 02: talk to a pediatrician first -->
+    <section class="section">
+      <p class="eyebrow">section 02</p>
+      <h2 class="section-title">it's a pediatrician conversation first</h2>
+      <div class="prose">
+        <p>
+          Persistent sleep trouble in a child can have causes that melatonin would only mask —
+          including behavioural sleep patterns, anxiety, or conditions like sleep apnoea. Major
+          pediatric and sleep bodies advise talking to a pediatrician <strong>before</strong> giving
+          a child melatonin, and trying <strong>behavioural sleep steps first</strong> — a consistent
+          bedtime, wind-down routine, and screens off well before bed. A clinician can also weigh the
+          things a label can't: your child's age, weight, other conditions, and any medicines they
+          take. Melatonin is not a first move, and it is not a nightly default.
+        </p>
+      </div>
+    </section>
+
+    <!-- section 03: if a child has taken too much -->
+    <section class="section">
+      <p class="eyebrow">section 03</p>
+      <h2 class="section-title">if a child has swallowed a lot</h2>
+      <div class="prose">
+        <p>
+          If you think a child has taken more melatonin than intended, don't wait for symptoms to
+          decide. In the United States, call <strong>Poison Help at 1-800-222-1222</strong> — a free,
+          confidential line staffed 24/7 — or your local emergency number if the child is drowsy to
+          the point of being hard to wake, having trouble breathing, or unresponsive. Outside the US,
+          contact your national poisons information service or emergency number.
+        </p>
+      </div>
+    </section>
+
+    <ContextSources sources={sources} />
+
+    <div class="disclaimer-slot">
+      <Disclaimer variant="standard" />
+    </div>
+  </main>
+</Base>
+
+<style>
+  .page {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: var(--sp-8) var(--sp-7) var(--sp-9);
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0;
+  }
+  .dot {
+    color: var(--lavender);
+  }
+  .head {
+    margin-bottom: var(--sp-6);
+  }
+  .title {
+    font-family: var(--font-display);
+    font-size: var(--text-3xl);
+    line-height: var(--lh-3xl);
+    letter-spacing: var(--tracking-tight);
+    color: var(--ink);
+    margin: var(--sp-3) 0 var(--sp-5);
+  }
+  .dek {
+    font-size: var(--text-md);
+    line-height: var(--lh-md);
+    color: var(--ink-soft);
+    max-width: 68ch;
+    margin: 0;
+  }
+
+  /* safety callout — reuses the §2.12 serious register (tier-f), bespoke to this context page */
+  .callout {
+    border-radius: var(--r-lg);
+    border: 1px solid;
+    padding: var(--sp-6);
+    margin-top: var(--sp-7);
+  }
+  .sev-serious {
+    background: var(--tier-f-tint);
+    border-color: var(--tier-f);
+  }
+  .callout-head {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    margin-bottom: var(--sp-4);
+  }
+  .sigil {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    flex: none;
+    border-radius: var(--r-pill);
+    background: var(--tier-f);
+    color: var(--surface);
+    font-family: var(--font-display);
+    font-weight: 600;
+    line-height: 1;
+  }
+  .callout-title {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--tier-f-ink);
+    margin: 0;
+  }
+  .callout-body {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--ink);
+    margin: 0;
+  }
+  .callout-body strong {
+    font-weight: 600;
+  }
+
+  .section {
+    border-top: var(--border-hairline);
+    padding-top: var(--sp-6);
+    margin-top: var(--sp-8);
+  }
+  .section-title {
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    line-height: var(--lh-xl);
+    color: var(--ink);
+    margin: var(--sp-2) 0 var(--sp-5);
+  }
+  .prose {
+    max-width: 68ch;
+  }
+  .prose p {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--ink-soft);
+    margin: 0 0 var(--sp-4);
+  }
+  .prose strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .prose a {
+    color: var(--lavender-ink);
+  }
+  .disclaimer-slot {
+    margin-top: var(--sp-8);
+  }
+  @media (max-width: 640px) {
+    .page {
+      padding: var(--sp-6) var(--sp-5) var(--sp-8);
+    }
+    .title {
+      font-size: var(--text-2xl);
+    }
+  }
+</style>

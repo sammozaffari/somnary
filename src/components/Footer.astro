@@ -9,6 +9,14 @@ const legal = [
   { href: '/privacy', label: 'privacy' },
   { href: '/disclosure', label: 'disclosure' },
 ];
+// Educational context pages — not graded remedies. Kept in their own labelled group so they're
+// site-wide discoverable (crawlable, no orphans) and never read as part of the graded catalog.
+const context = [
+  { href: '/when-to-see-a-doctor', label: 'when to see a doctor' },
+  { href: '/melatonin-children', label: 'melatonin in children' },
+  { href: '/ramelteon', label: 'ramelteon' },
+  { href: '/sleep-blends', label: 'sleep blends' },
+];
 ---
 
 <footer class="footer">
@@ -19,6 +27,16 @@ const legal = [
   <div class="disclaimer">
     <Disclaimer variant="compact" />
   </div>
+  <nav class="reflinks" aria-label="context">
+    <span class="group-label">context · not graded</span>
+    <ul class="linkrow">
+      {context.map((l) => (
+        <li>
+          <a href={l.href}>{l.label}</a>
+        </li>
+      ))}
+    </ul>
+  </nav>
   <ul class="legal" aria-label="legal">
     {legal.map((l) => (
       <li>
@@ -79,6 +97,40 @@ const legal = [
     transition: color var(--dur-fast) var(--ease-soft);
   }
   .legal a:hover {
+    color: var(--ink);
+  }
+  .reflinks {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--sp-4);
+    margin-top: var(--sp-6);
+  }
+  .group-label {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--sage-ink);
+  }
+  .linkrow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-4);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+  }
+  .linkrow a {
+    color: var(--ink-faint);
+    text-decoration: none;
+    transition: color var(--dur-fast) var(--ease-soft);
+  }
+  .linkrow a:hover {
     color: var(--ink);
   }
   @media (max-width: 640px) {
