@@ -24,7 +24,7 @@ export const OUTCOMES: readonly Outcome[] = [
     title: 'fall asleep faster',
     dek: 'cut the time it takes to drop off',
     measuring:
-      'sleep-onset latency — how long it takes to fall asleep once the lights are out. the remedies here have human evidence aimed at that specific measure.',
+      'sleep-onset latency: how long it takes to fall asleep once the lights are out. the remedies here have human evidence aimed at that specific measure.',
     remedies: [
       'melatonin',
       'magnesium',
@@ -42,7 +42,7 @@ export const OUTCOMES: readonly Outcome[] = [
     title: 'stay asleep',
     dek: 'reduce waking through the night',
     measuring:
-      'wake after sleep onset — time spent awake once you have already fallen asleep. fewer remedies target this than target falling asleep.',
+      'wake after sleep onset, the time spent awake once you have already fallen asleep. fewer remedies target this than target falling asleep.',
     remedies: ['ashwagandha', 'l-tryptophan', 'tart-cherry', 'valerian'],
   },
   {
@@ -50,7 +50,7 @@ export const OUTCOMES: readonly Outcome[] = [
     title: 'better sleep quality',
     dek: 'how rested and satisfied your sleep feels overall',
     measuring:
-      'subjective sleep quality, usually the Pittsburgh Sleep Quality Index (PSQI). a softer, self-reported measure — real, but easier to move with expectation than the objective ones.',
+      'subjective sleep quality, usually the Pittsburgh Sleep Quality Index (PSQI). a softer, self-reported measure: real, but easier to move with expectation than the objective ones.',
     remedies: [
       'ashwagandha',
       'l-theanine',
@@ -68,7 +68,7 @@ export const OUTCOMES: readonly Outcome[] = [
     title: 'anxiety-driven insomnia',
     dek: 'when a racing, anxious mind is what keeps you up',
     measuring:
-      'sleep trouble that is secondary to anxiety — so the calming evidence matters as much as the sleep evidence. several of these are proven anxiolytics whose sleep benefit rides on the calm.',
+      'sleep trouble that is secondary to anxiety. so the calming evidence matters as much as the sleep evidence. several of these are proven anxiolytics whose sleep benefit rides on the calm.',
     remedies: [
       'ashwagandha',
       'l-theanine',
@@ -86,7 +86,7 @@ export const OUTCOMES: readonly Outcome[] = [
     title: 'jet lag & shift work',
     dek: 'resetting a body clock that is out of sync with the day',
     measuring:
-      'circadian timing — shifting *when* you feel sleepy, not just sedating you. this is where the evidence is most concentrated in one remedy.',
+      'circadian timing: shifting *when* you feel sleepy, not just sedating you. this is where the evidence is most concentrated in one remedy.',
     remedies: ['melatonin', 'tart-cherry'],
   },
   {
@@ -94,7 +94,7 @@ export const OUTCOMES: readonly Outcome[] = [
     title: 'avoiding next-day grogginess',
     dek: 'sleep help that does not leave you foggy the next morning',
     measuring:
-      'next-day alertness and function — which options are least likely to leave a sedative "hangover". a short list, and honest about it.',
+      'next-day alertness and function (which options are least likely to leave a sedative "hangover"). a short list, and honest about it.',
     remedies: ['l-theanine', 'melatonin', 'glycine'],
   },
   {
@@ -102,7 +102,7 @@ export const OUTCOMES: readonly Outcome[] = [
     title: 'vivid dreams & REM',
     dek: 'remedies that noticeably affect dreaming or REM sleep',
     measuring:
-      'effects on dream intensity and REM sleep — sometimes a wanted effect, often an unwanted side effect worth knowing about before you take something.',
+      'effects on dream intensity and REM sleep, sometimes a wanted effect, often an unwanted side effect worth knowing about before you take something.',
     remedies: ['melatonin', '5-htp'],
   },
 ] as const;

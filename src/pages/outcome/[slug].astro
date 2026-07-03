@@ -31,8 +31,8 @@ const others = OUTCOMES.filter((o) => o.id !== outcome.id);
 ---
 
 <Base
-  title={`${outcome.title} — best sleep remedies by evidence | somnary`}
-  description={`${outcome.dek}. the natural sleep remedies with real human evidence for this goal, ranked S–F by the strength of that evidence — not by popularity.`}
+  title={`${outcome.title}: best sleep remedies by evidence | somnary`}
+  description={`${outcome.dek}. the natural sleep remedies with real human evidence for this goal, ranked S–F by the strength of that evidence, not by popularity.`}
   canonical={`https://somnary.vercel.app/outcome/${outcome.id}`}
 >
   <main class="page">
@@ -40,7 +40,7 @@ const others = OUTCOMES.filter((o) => o.id !== outcome.id);
       <p class="crumb"><a href="/">somnary</a> <span aria-hidden="true">›</span> by outcome</p>
       <p class="eyebrow">by outcome · best evidence first</p>
       <h1 class="title">{outcome.title}<span class="dot">.</span></h1>
-      <p class="dek">{outcome.dek} — ranked by the strength of the human evidence, not by popularity.</p>
+      <p class="dek">{outcome.dek}: ranked by the strength of the human evidence, not by popularity.</p>
     </header>
 
     <!-- goal switcher -->

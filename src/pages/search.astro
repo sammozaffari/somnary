@@ -33,7 +33,7 @@ const suggestions = ['melatonin', 'magnesium', 'jet lag', "can't fall asleep", '
 
 <Base
   title={q ? `search: ${q} — somnary` : 'search — somnary'}
-  description="search somnary — every remedy by name, alias, latin name, outcome, or symptom."
+  description="search somnary: every remedy by name, alias, latin name, outcome, or symptom."
 >
   <main class="page">
     <header class="head">
@@ -88,7 +88,7 @@ const suggestions = ['melatonin', 'magnesium', 'jet lag', "can't fall asleep", '
     {
       q && results.length === 0 && (
         <div class="empty">
-          <p class="empty-lead">no matches — try a compound, an outcome, or a symptom.</p>
+          <p class="empty-lead">no matches. try a compound, an outcome, or a symptom.</p>
           <p class="empty-sub">
             popular:
             {suggestions.map((s) => (
