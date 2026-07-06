@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Somnary Prototype | Label Checker</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <nav class="shell nav" aria-label="Primary navigation">
+        <a class="brand" href="index.html"><span class="brand-mark">s</span>somnary</a>
+        <div class="nav-links"><a href="index.html">Start Here</a><a href="tiers.html">Remedies</a><a href="outcome-fall-asleep.html">Goals</a><a href="safety.html">Safety</a><a aria-current="page" href="label-checker.html">Label Checker</a><a href="remedy-melatonin.html">Evidence</a></div>
+        <div class="nav-actions"><a class="button secondary" href="index.html"><i data-lucide="search" class="icon"></i> Search</a><a class="button" href="label-checker.html">Check a remedy</a></div>
+      </nav>
+    </header>
+    <main class="shell">
+      <section class="page-hero">
+        <div class="breadcrumb">Home <span>/</span> Label Checker</div>
+        <h1 class="page-title">Before you buy a sleep blend</h1>
+        <p class="lede">Paste a Supplement Facts panel and check for hidden doses, proprietary blends, high melatonin, and missing standardization.</p>
+        <div class="hero-metrics" aria-label="Label checker summary">
+          <div class="hero-metric"><b>1</b><span>Paste or upload label</span></div>
+          <div class="hero-metric"><b>4</b><span>Common red flags</span></div>
+          <div class="hero-metric"><b>0</b><span>Product commissions</span></div>
+          <div class="hero-metric"><b>!</b><span>Safety screen first</span></div>
+        </div>
+      </section>
+
+      <section class="label-checker">
+        <div class="label-input">
+          <span class="meta-label">Paste a label</span>
+          <textarea aria-label="Paste supplement facts">Sleep blend 850 mg
+Melatonin 10 mg
+Magnesium glycinate
+L-theanine
+Valerian root extract
+Proprietary calming complex</textarea>
+          <a class="button" href="#">Check label</a>
+          <a class="button secondary" href="#" style="margin-left:8px">Upload image</a>
+        </div>
+        <aside class="side-panel">
+          <h3>Red flags found</h3>
+          <div class="flag"><i data-lucide="triangle-alert" class="icon"></i><div><strong>Proprietary blend</strong><br><span style="color:var(--muted)">You cannot see ingredient-level dose.</span></div></div>
+          <div class="flag"><i data-lucide="eye-off" class="icon"></i><div><strong>Hidden dose</strong><br><span style="color:var(--muted)">Evidence cannot be matched to what is sold.</span></div></div>
+          <div class="flag"><i data-lucide="alarm-clock" class="icon"></i><div><strong>High melatonin</strong><br><span style="color:var(--muted)">More is not always better and may increase side effects.</span></div></div>
+          <div class="flag"><i data-lucide="flask-conical-off" class="icon"></i><div><strong>Missing standardization</strong><br><span style="color:var(--muted)">Botanical potency may vary bottle to bottle.</span></div></div>
+        </aside>
+      </section>
+
+      <section class="section">
+        <div class="section-header"><div><h2>What Somnary checks</h2><p class="sub">This is not a product recommendation. It is a claim and label integrity check.</p></div></div>
+        <div class="method-grid">
+          <div class="evidence-card"><b>1</b><h3>Ingredient dose</h3><p>Can each ingredient be compared to the studied dose?</p></div>
+          <div class="evidence-card"><b>2</b><h3>Form match</h3><p>Does the product use the form tested in human trials?</p></div>
+          <div class="evidence-card"><b>3</b><h3>Safety flags</h3><p>Does the label raise age, medication, pregnancy, or liver/kidney concerns?</p></div>
+          <div class="evidence-card"><b>4</b><h3>Evidence fit</h3><p>Does the product claim match what the evidence actually measured?</p></div>
+        </div>
+      </section>
+    </main>
+    <footer class="footer"><div class="shell footer-grid"><span>Label checker is educational and does not verify product purity or tell you what to take.</span><div class="footer-links"><a href="#">AI policy</a><a href="#">Disclosure</a></div></div></footer>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script><script src="script.js"></script>
+  </body>
+</html>

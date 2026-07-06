@@ -29,3 +29,8 @@ out/
 *.swp
 .idea/
 .vscode/
+
+# Redundant doc renders (kept locally; md/pdf sources are committed)
+docs/strategy/docx-render/
+docs/html-prototype/screenshots/
+docs/html-prototype/screenshots-v2/
