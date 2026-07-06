@@ -39,15 +39,15 @@ exists so sessions extend the site instead of rebuilding it.
 - [x] **CHK-0.1 Astro scaffold.** *(Pre-existing: Astro 5 + MDX + sitemap +
   Vercel adapter; build verified green 2026-07-06; content pre-rendered in
   dist HTML; pushed.)* `.claude/agents/` role files added in CHK-0.0 session.
-- [~] **CHK-0.2 Evidence-teal reskin + token linter.** *(Reworded from "tokens
+- [x] **CHK-0.2 Evidence-teal reskin + token linter.** *(Reworded from "tokens
   wired" — v1.2 tokens are wired; this item migrates them.)* Replace
   `tailwind.config.mjs` + `src/styles` + all components with DESIGN_SYSTEM v2
   tokens; wordmark → `Somnary.` (D3) site-wide. *Accept:* no v1.2 color/type
   value remains; token linter exists and fails on hardcoded hex/spacing;
-  contrast rules of DESIGN_SYSTEM §8 hold on live pages. *(Done in PR #2 —
-  build green through linter + resolver, zero v1.2 palette hex in built CSS,
-  D3 casing site-wide. Awaiting owner VISUAL review before merge, since the
-  session couldn't screenshot. Tick on merge.)*
+  contrast rules of DESIGN_SYSTEM §8 hold on live pages. *(Merged PR #2.
+  Build green through linter + resolver; zero v1.2 palette hex in built CSS;
+  D3 casing site-wide; visually verified via headless-Chrome screenshots of
+  home/tiers/melatonin/cbt-i — S/A badge distinction confirmed.)*
 - [~] **CHK-0.3 Content model extension.** *(Schema exists in
   `src/content.config.ts` with claims↔data, sources, doses, safety,
   interactions, community, seo.)* Add missing fields per CLAUDE.md: `notFor[]`,
