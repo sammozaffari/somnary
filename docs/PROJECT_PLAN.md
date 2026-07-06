@@ -47,7 +47,7 @@ These become your homepage stat row (mirroring reptides' "56 / 1,576 / 0 / $0").
 > **[SUPERSEDED by D3]** Brand is capitalized **"Somnary"** in prose, UI, and wordmark (`Somnary.` with trailing period). The lowercase styling below is retired.
 - **Name: somnary.** Coined from *somnus* (sleep) + *-ary* (library/repository) — reads as "the sleep reference." ~~Always lowercase; wordmark is `somnary.` with a trailing period (mirrors `reptides.`).~~
 - Voice: calm, declarative, skeptical-but-fair. Lowercase display type. Short sentences. No hype adjectives. Cite or don't claim.
-- Tagline pattern: "somnary · [N] remedies graded, [M] sources cited · zero brand money."
+- Tagline pattern: "Somnary · [N] remedies graded, [M] sources cited · zero brand money."
 - **Before launch:** verify the .com/.co domain is free and run a trademark check (USPTO + IP Australia) since the name is now locked.
 
 ### 1.4 The honesty firewall (critical for this category)
@@ -187,7 +187,7 @@ Maintain a **content index** (CSV/JSON) of every planned entry: name, aliases/la
 
 ### 5a. Non-supplement interventions (`/interventions`)
 
-A major differentiator: the strongest sleep evidence often isn't a pill. Covering behavioral, environmental, and device interventions — graded on the *same* S–F evidence rubric — makes somnary the honest one-stop reference and quietly reinforces the thesis (we follow evidence, even when it says "don't buy a supplement"). Many of these will out-grade the supplements, which is the point.
+A major differentiator: the strongest sleep evidence often isn't a pill. Covering behavioral, environmental, and device interventions — graded on the *same* S–F evidence rubric — makes Somnary the honest one-stop reference and quietly reinforces the thesis (we follow evidence, even when it says "don't buy a supplement"). Many of these will out-grade the supplements, which is the point.
 
 Seed list (each gets a page on the §4 template, adapted):
 - **Behavioral (typically highest evidence):** CBT-I (cognitive behavioral therapy for insomnia — likely S/A, first-line), sleep restriction therapy, stimulus control, sleep hygiene (honest about its modest standalone effect), worry/constructive-rumination journaling, paradoxical intention.

@@ -144,3 +144,4 @@ exists so sessions extend the site instead of rebuilding it.
 
 ### Session log (agents append one line per session)
 <!-- 2026-07-06 — checklist v2 adopted; decisions D1–D4 locked. -->
+- 2026-07-06 · CHK-0.0 · strategy package → /docs/strategy/; DESIGN_SYSTEM v2 (evidence-teal) rewritten from v3 prototype with computed contrast + 4 flagged gaps (G1 S-tier color HG, G2 undesigned page types, G3 warn-chip contrast, G4 focus states); PROJECT_PLAN/DESIGN_BRIEF superseded sections marked; checklist reality-audited to v2.1; .claude/agents/ ×6 added; pivot-analysis baseline corrected. Build + resolver green. PR opened (HG: S-tier token). Deferred: owner sign-off on G1/G3/G4; disclosure D2 update rides CHK-1.2.
