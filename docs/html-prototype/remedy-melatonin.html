@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Somnary Prototype | Melatonin</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <nav class="shell nav" aria-label="Primary navigation">
+        <a class="brand" href="index.html"><span class="brand-mark">s</span>somnary</a>
+        <div class="nav-links"><a href="index.html">Start Here</a><a href="tiers.html">Remedies</a><a href="outcome-fall-asleep.html">Goals</a><a href="safety.html">Safety</a><a href="label-checker.html">Label Checker</a><a aria-current="page" href="remedy-melatonin.html">Evidence</a></div>
+        <div class="nav-actions"><a class="button secondary" href="index.html"><i data-lucide="search" class="icon"></i> Search</a><a class="button" href="label-checker.html">Check a remedy</a></div>
+      </nav>
+    </header>
+
+    <main class="shell">
+      <section class="page-hero">
+        <div class="breadcrumb">Home <span>/</span> Remedies <span>/</span> Melatonin</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap">
+          <div>
+            <span class="chip verified">Source checked</span>
+            <h1 class="page-title" style="margin-top:16px">Melatonin</h1>
+            <p class="lede">Clock signal, not a knockout pill. Strongest for body-clock timing and short-term sleep onset.</p>
+            <div class="hero-metrics" aria-label="Melatonin decision summary">
+              <div class="hero-metric"><b>A</b><span>Evidence grade</span></div>
+              <div class="hero-metric"><b>0.3-2</b><span>mg studied dose</span></div>
+              <div class="hero-metric"><b>30-60</b><span>minutes before bed</span></div>
+              <div class="hero-metric"><b>!</b><span>Children need caution</span></div>
+            </div>
+          </div>
+          <a class="button secondary" href="#"><i data-lucide="share-2" class="icon"></i> Share</a>
+        </div>
+      </section>
+
+      <section class="remedy-summary">
+        <aside class="grade-panel">
+          <span class="meta-label">Grade</span>
+          <div style="margin-top:12px"><span class="grade big a">A</span></div>
+          <p><strong>Good evidence.</strong> Well supported in human studies for sleep onset and circadian timing.</p>
+          <a class="button ghost" style="margin-top:18px" href="#">Why this grade</a>
+        </aside>
+        <div class="summary-grid">
+          <div class="summary-item"><i data-lucide="alarm-clock" class="icon"></i><strong>Best for</strong><span>Body-clock timing, jet lag, shift work, delayed sleep phase.</span></div>
+          <div class="summary-item"><i data-lucide="ban" class="icon"></i><strong>Not for</strong><span>Knocking yourself out or fixing chronic insomnia alone.</span></div>
+          <div class="summary-item"><i data-lucide="triangle-alert" class="icon"></i><strong>Biggest risk</strong><span>Morning drowsiness and pediatric misuse.</span></div>
+          <div class="summary-item"><i data-lucide="timer" class="icon"></i><strong>Studied dose</strong><span>Usually 0.3-2 mg, 30-60 minutes before bed.</span></div>
+        </div>
+      </section>
+
+      <section class="section three-up">
+        <div class="module"><h3>Evidence in one sentence</h3><p>Consistent, moderate evidence that melatonin helps you fall asleep faster when timing matches your body clock.</p></div>
+        <div class="module"><h3>What changes your decision</h3><p>Your dose, timing, age, medications, and the quality of the product you choose.</p></div>
+        <div class="module"><h3>Safety boundary</h3><p>Short-term use for most adults. Avoid in pregnancy without medical advice and use caution in children.</p></div>
+      </section>
+
+      <section class="section">
+        <div class="section-header">
+          <div><h2>Claim vs data</h2><p class="sub">How common claims compare to what human studies show.</p></div>
+          <div class="popular"><span class="chip verified">Human evidence</span><span class="chip">Effect size reported</span><span class="chip warn">Pediatric caution</span></div>
+        </div>
+        <table class="data-table">
+          <thead><tr><th>Common claim</th><th>What studies show</th><th>Evidence</th><th># studies</th></tr></thead>
+          <tbody>
+            <tr><td>Helps me fall asleep faster.</td><td>Consistent improvement in sleep onset when timing matches circadian need.</td><td><span class="grade a">A</span></td><td>35</td></tr>
+            <tr><td>Improves sleep quality.</td><td>Mixed improvement in subjective sleep quality across populations.</td><td><span class="grade b">B</span></td><td>22</td></tr>
+            <tr><td>Knocks me out.</td><td>No evidence of dependence or sedative-strength effect.</td><td><span class="grade c">C</span></td><td>18</td></tr>
+            <tr><td>Safe for long-term daily use.</td><td>Most data is short-term; long-term effects need more evidence.</td><td><span class="grade c">C</span></td><td>11</td></tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+    <footer class="footer"><div class="shell footer-grid"><span>Somnary grades evidence. It does not diagnose or tell you what to take.</span><div class="footer-links"><a href="#">Sources</a><a href="#">Disclaimer</a><a href="#">Corrections</a></div></div></footer>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script><script src="script.js"></script>
+  </body>
+</html>

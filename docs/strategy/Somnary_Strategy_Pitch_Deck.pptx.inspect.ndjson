@@ -1,0 +1,264 @@
+{"kind":"deck","id":"pr/zy8e96","name":"Deck"}
+{"kind":"layout","layoutId":"50854be1-9502-4e0e-ba1a-47a5b7eb0985","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"b438663e-5ede-43c5-b422-3cdd080ec269","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/0deseu","slide":1,"title":"Somnary","textShapes":6}
+{"kind":"textbox","id":"sh/gr2p8nqx","slide":1,"text":"Somnary","textPreview":"Somnary","textChars":7,"textLines":1,"bbox":[54,64,480,86]}
+{"kind":"textbox","id":"sh/r65wjudg","slide":1,"text":"The evidence layer for natural sleep remedies","textPreview":"The evidence layer for natural sleep remedies","textChars":45,"textLines":1,"bbox":[54,162,720,42]}
+{"kind":"shape","id":"sh/ylc7u54z","slide":1,"bbox":[54,278,720,196]}
+{"kind":"textbox","id":"sh/5o7qpg3e","slide":1,"text":"A strategy to turn a credible remedy library into a trusted decision system: evidence, label reality, safety boundaries, AI discipline, and repeatable growth.","textPreview":"A strategy to turn a credible remedy library into a trusted decision system: evidence, label reality, safety boundaries, AI discipline, a...","textChars":158,"textLines":1,"bbox":[82,316,660,118]}
+{"kind":"shape","id":"sh/g3ex0nux","slide":1,"bbox":[850,94,300,430]}
+{"kind":"textbox","id":"sh/nih4byhg","slide":1,"text":"No affiliate links\nNo brand money\nNo invented certainty","textPreview":"No affiliate links | No brand money | No invented certainty","textChars":55,"textLines":3,"bbox":[890,156,220,210]}
+{"kind":"textbox","id":"sh/yxobm58z","slide":1,"text":"Prepared as a working pitch deck","textPreview":"Prepared as a working pitch deck","textChars":32,"textLines":1,"bbox":[54,612,440,28]}
+{"kind":"textbox","id":"sh/9s36hcrm","slide":1,"text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[1180,674,42,24]}
+{"kind":"notes","id":"nt/0deseu","slide":1,"text":""}
+{"kind":"slide","id":"sl/174ori","slide":2,"title":"SOMNARY STRATEGY","textShapes":11}
+{"kind":"textbox","id":"sh/6dcbulwv","slide":2,"text":"SOMNARY STRATEGY","textPreview":"SOMNARY STRATEGY","textChars":16,"textLines":1,"bbox":[54,28,280,24]}
+{"kind":"textbox","id":"sh/d4vmtwra","slide":2,"text":"People are tired, self-treating, and under-informed","textPreview":"People are tired, self-treating, and under-informed","textChars":51,"textLines":1,"bbox":[54,78,760,105]}
+{"kind":"textbox","id":"sh/oj2t83it","slide":2,"text":"Sleep aid use is common enough to support a focused evidence product.","textPreview":"Sleep aid use is common enough to support a focused evidence product.","textChars":69,"textLines":1,"bbox":[54,182,790,64]}
+{"kind":"shape","id":"sh/vmtwra5g","slide":2,"bbox":[54,254,1172,1]}
+{"kind":"shape","id":"sh/61032lsz","slide":2,"bbox":[54,310,330,220]}
+{"kind":"textbox","id":"sh/dsji5sne","slide":2,"text":"12.9%","textPreview":"12.9%","textChars":5,"textLines":1,"bbox":[78,334,282,64]}
+{"kind":"textbox","id":"sh/o7qpg3ex","slide":2,"text":"US adults using some sleep aid most days or every day in 2024","textPreview":"US adults using some sleep aid most days or every day in 2024","textChars":61,"textLines":1,"bbox":[78,408,282,108]}
+{"kind":"shape","id":"sh/vahoza1g","slide":2,"bbox":[424,310,330,220]}
+{"kind":"textbox","id":"sh/6tovahoz","slide":2,"text":"5.7%","textPreview":"5.7%","textChars":4,"textLines":1,"bbox":[448,334,282,64]}
+{"kind":"textbox","id":"sh/c3ylc7u5","slide":2,"text":"US adults using OTC medications or supplements for sleep","textPreview":"US adults using OTC medications or supplements for sleep","textChars":56,"textLines":1,"bbox":[448,408,282,108]}
+{"kind":"shape","id":"sh/1kre1w7m","slide":2,"bbox":[794,310,330,220]}
+{"kind":"textbox","id":"sh/uxc3ylc7","slide":2,"text":"3.7%","textPreview":"3.7%","textChars":4,"textLines":1,"bbox":[818,334,282,64]}
+{"kind":"textbox","id":"sh/ji5snelo","slide":2,"text":"US adults using marijuana or CBD products as sleep aids","textPreview":"US adults using marijuana or CBD products as sleep aids","textChars":55,"textLines":1,"bbox":[818,408,282,108]}
+{"kind":"textbox","id":"sh/crmhk3q5","slide":2,"text":"Source: CDC/NCHS 2024 sleep-aid use report.","textPreview":"Source: CDC/NCHS 2024 sleep-aid use report.","textChars":43,"textLines":1,"bbox":[54,580,620,24]}
+{"kind":"textbox","id":"sh/1cfa9w3m","slide":2,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[1180,674,42,24]}
+{"kind":"notes","id":"nt/174ori","slide":2,"text":""}
+{"kind":"slide","id":"sl/k9nlwz","slide":3,"title":"SOMNARY STRATEGY","textShapes":9}
+{"kind":"textbox","id":"sh/val87ed8","slide":3,"text":"SOMNARY STRATEGY","textPreview":"SOMNARY STRATEGY","textChars":16,"textLines":1,"bbox":[54,28,280,24]}
+{"kind":"textbox","id":"sh/kre1w7mp","slide":3,"text":"The category has a trust gap, not just an information gap","textPreview":"The category has a trust gap, not just an information gap","textChars":57,"textLines":1,"bbox":[54,78,760,105]}
+{"kind":"textbox","id":"sh/dcbulwva","slide":3,"text":"The best wedge is where consumer behavior, product-label weakness, and safety uncertainty collide.","textPreview":"The best wedge is where consumer behavior, product-label weakness, and safety uncertainty collide.","textChars":98,"textLines":1,"bbox":[54,182,790,64]}
+{"kind":"shape","id":"sh/2x4nap4r","slide":3,"bbox":[54,254,1172,1]}
+{"kind":"shape","id":"sh/vixczed8","slide":3,"bbox":[78,319,8,8]}
+{"kind":"textbox","id":"sh/k3q5o7qp","slide":3,"text":"Melatonin use rose from 0.4% to 2.1% of US adults from 1999-2000 to 2017-2018.","textPreview":"Melatonin use rose from 0.4% to 2.1% of US adults from 1999-2000 to 2017-2018.","textChars":78,"textLines":1,"bbox":[102,310,986,38]}
+{"kind":"shape","id":"sh/donyd0z6","slide":3,"bbox":[78,379,8,8]}
+{"kind":"textbox","id":"sh/29gr2p8n","slide":3,"text":"JAMA found melatonin gummies ranged from 74% to 347% of the labeled amount.","textPreview":"JAMA found melatonin gummies ranged from 74% to 347% of the labeled amount.","textChars":75,"textLines":1,"bbox":[102,370,986,38]}
+{"kind":"shape","id":"sh/vu9knih4","slide":3,"bbox":[78,439,8,8]}
+{"kind":"textbox","id":"sh/3ylc7u54","slide":3,"text":"NCCIH says short-term melatonin appears relatively safe, but long-term safety is not established.","textPreview":"NCCIH says short-term melatonin appears relatively safe, but long-term safety is not established.","textChars":97,"textLines":1,"bbox":[102,430,986,38]}
+{"kind":"shape","id":"sh/adsji5sn","slide":3,"bbox":[78,499,8,8]}
+{"kind":"textbox","id":"sh/h4byhgn2","slide":3,"text":"CBT-I has first-line guideline support, but supplement marketing dominates the consumer conversation.","textPreview":"CBT-I has first-line guideline support, but supplement marketing dominates the consumer conversation.","textChars":101,"textLines":1,"bbox":[102,490,986,38]}
+{"kind":"textbox","id":"sh/sji5snel","slide":3,"text":"Implication: Somnary should sell clarity before it sells features.","textPreview":"Implication: Somnary should sell clarity before it sells features.","textChars":66,"textLines":1,"bbox":[78,586,930,36]}
+{"kind":"textbox","id":"sh/3m94fu18","slide":3,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[1180,674,42,24]}
+{"kind":"notes","id":"nt/k9nlwz","slide":3,"text":""}
+{"kind":"slide","id":"sl/3wllbx","slide":4,"title":"SOMNARY STRATEGY","textShapes":12}
+{"kind":"textbox","id":"sh/2t83itgf","slide":4,"text":"SOMNARY STRATEGY","textPreview":"SOMNARY STRATEGY","textChars":16,"textLines":1,"bbox":[54,28,280,24]}
+{"kind":"textbox","id":"sh/9knih4by","slide":4,"text":"Somnary wins by being the accountable evidence layer","textPreview":"Somnary wins by being the accountable evidence layer","textChars":52,"textLines":1,"bbox":[54,78,760,105]}
+{"kind":"textbox","id":"sh/kzupwb2h","slide":4,"text":"The moat is not sleep content. It is trusted interpretation.","textPreview":"The moat is not sleep content. It is trusted interpretation.","textChars":60,"textLines":1,"bbox":[54,182,790,64]}
+{"kind":"shape","id":"sh/rqd4vmtw","slide":4,"bbox":[54,254,1172,1]}
+{"kind":"shape","id":"sh/25kb6xkf","slide":4,"bbox":[54,306,260,230]}
+{"kind":"textbox","id":"sh/9w3m94fu","slide":4,"text":"Evidence grade","textPreview":"Evidence grade","textChars":14,"textLines":1,"bbox":[76,330,216,34]}
+{"kind":"textbox","id":"sh/kb6xkf6d","slide":4,"text":"Human evidence, effect size, replication, dose, form, and safety gates.","textPreview":"Human evidence, effect size, replication, dose, form, and safety gates.","textChars":71,"textLines":1,"bbox":[76,382,216,120]}
+{"kind":"shape","id":"sh/r2p8nqxs","slide":4,"bbox":[346,306,260,230]}
+{"kind":"textbox","id":"sh/2hwfyxob","slide":4,"text":"Label reality","textPreview":"Label reality","textChars":13,"textLines":1,"bbox":[368,330,216,34]}
+{"kind":"textbox","id":"sh/crmhk3q5","slide":4,"text":"Studied dose versus market dose, proprietary blends, standardization, and product QA.","textPreview":"Studied dose versus market dose, proprietary blends, standardization, and product QA.","textChars":85,"textLines":1,"bbox":[368,382,216,120]}
+{"kind":"shape","id":"sh/1cfa9w3m","slide":4,"bbox":[638,306,260,230]}
+{"kind":"textbox","id":"sh/ulwval87","slide":4,"text":"Safety boundary","textPreview":"Safety boundary","textChars":15,"textLines":1,"bbox":[660,330,216,34]}
+{"kind":"textbox","id":"sh/j6tovaho","slide":4,"text":"Children, pregnancy, medications, liver/kidney risk, next-day impairment, clinician routing.","textPreview":"Children, pregnancy, medications, liver/kidney risk, next-day impairment, clinician routing.","textChars":92,"textLines":1,"bbox":[660,382,216,120]}
+{"kind":"shape","id":"sh/c3ylc7u5","slide":4,"bbox":[930,306,260,230]}
+{"kind":"textbox","id":"sh/1kre1w7m","slide":4,"text":"Conflict-free stance","textPreview":"Conflict-free stance","textChars":20,"textLines":1,"bbox":[952,330,216,34]}
+{"kind":"textbox","id":"sh/uxc3ylc7","slide":4,"text":"No affiliate links, no brand money, public methodology, public corrections.","textPreview":"No affiliate links, no brand money, public methodology, public corrections.","textChars":75,"textLines":1,"bbox":[952,382,216,120]}
+{"kind":"textbox","id":"sh/ji5snelo","slide":4,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[1180,674,42,24]}
+{"kind":"notes","id":"nt/3wllbx","slide":4,"text":""}
+{"kind":"slide","id":"sl/gjj91d","slide":5,"title":"SOMNARY STRATEGY","textShapes":11}
+{"kind":"textbox","id":"sh/donyd0z6","slide":5,"text":"SOMNARY STRATEGY","textPreview":"SOMNARY STRATEGY","textChars":16,"textLines":1,"bbox":[54,28,280,24]}
+{"kind":"textbox","id":"sh/2x4nap4r","slide":5,"text":"Recommended audience: the evidence-seeking sleep improver","textPreview":"Recommended audience: the evidence-seeking sleep improver","textChars":57,"textLines":1,"bbox":[54,78,760,105]}
+{"kind":"textbox","id":"sh/vixczed8","slide":5,"text":"Do not build for everyone who sleeps. Build for people making a remedy decision.","textPreview":"Do not build for everyone who sleeps. Build for people making a remedy decision.","textChars":80,"textLines":1,"bbox":[54,182,790,64]}
+{"kind":"shape","id":"sh/kre1w7mp","slide":5,"bbox":[54,254,1172,1]}
+{"kind":"shape","id":"sh/dcbulwva","slide":5,"bbox":[54,306,520,260]}
+{"kind":"textbox","id":"sh/6psfil0r","slide":5,"text":"Primary persona","textPreview":"Primary persona","textChars":15,"textLines":1,"bbox":[86,334,250,30]}
+{"kind":"textbox","id":"sh/val87ed8","slide":5,"text":"Tired, skeptical, considering melatonin, magnesium, CBD, valerian, L-theanine, ashwagandha, or a sleep blend. Wants the truth without being sold a bottle.","textPreview":"Tired, skeptical, considering melatonin, magnesium, CBD, valerian, L-theanine, ashwagandha, or a sleep blend. Wants the truth without bei...","textChars":154,"textLines":1,"bbox":[86,382,440,116]}
+{"kind":"shape","id":"sh/knih4byh","slide":5,"bbox":[650,325,8,8]}
+{"kind":"textbox","id":"sh/d8bat47y","slide":5,"text":"Cautious caregivers and parents","textPreview":"Cautious caregivers and parents","textChars":31,"textLines":1,"bbox":[674,316,446,38]}
+{"kind":"shape","id":"sh/pkzupwb2","slide":5,"bbox":[650,371,8,8]}
+{"kind":"textbox","id":"sh/0z61032l","slide":5,"text":"Older adults and medication users","textPreview":"Older adults and medication users","textChars":33,"textLines":1,"bbox":[674,362,446,38]}
+{"kind":"shape","id":"sh/7ed8bat4","slide":5,"bbox":[650,417,8,8]}
+{"kind":"textbox","id":"sh/itgfmlkj","slide":5,"text":"Anxious poor sleepers","textPreview":"Anxious poor sleepers","textChars":21,"textLines":1,"bbox":[674,408,446,38]}
+{"kind":"shape","id":"sh/p8nqxs72","slide":5,"bbox":[650,463,8,8]}
+{"kind":"textbox","id":"sh/0nuxc3yl","slide":5,"text":"Shift workers and travelers","textPreview":"Shift workers and travelers","textChars":27,"textLines":1,"bbox":[674,454,446,38]}
+{"kind":"shape","id":"sh/72x4nap4","slide":5,"bbox":[650,509,8,8]}
+{"kind":"textbox","id":"sh/ih4byhgn","slide":5,"text":"Clinicians, pharmacists, journalists","textPreview":"Clinicians, pharmacists, journalists","textChars":36,"textLines":1,"bbox":[674,500,446,38]}
+{"kind":"textbox","id":"sh/p4r65wju","slide":5,"text":"05","textPreview":"05","textChars":2,"textLines":1,"bbox":[1180,674,42,24]}
+{"kind":"notes","id":"nt/gjj91d","slide":5,"text":""}
+{"kind":"slide","id":"sl/uolo4l","slide":6,"title":"SOMNARY STRATEGY","textShapes":18}
+{"kind":"textbox","id":"sh/d8bat47y","slide":6,"text":"SOMNARY STRATEGY","textPreview":"SOMNARY STRATEGY","textChars":16,"textLines":1,"bbox":[54,28,280,24]}
+{"kind":"textbox","id":"sh/2lszqtcj","slide":6,"text":"The IA should start from user intent, not remedy taxonomy","textPreview":"The IA should start from user intent, not remedy taxonomy","textChars":57,"textLines":1,"bbox":[54,78,760,105]}
+{"kind":"textbox","id":"sh/v6psfil0","slide":6,"text":"Most visitors arrive with a situation: a bottle, a goal, a child, a medication, or a symptom.","textPreview":"Most visitors arrive with a situation: a bottle, a goal, a child, a medication, or a symptom.","textChars":93,"textLines":1,"bbox":[54,182,790,64]}
+{"kind":"shape","id":"sh/kf6dcbul","slide":6,"bbox":[54,254,1172,1]}
+{"kind":"shape","id":"sh/d0z61032","slide":6,"bbox":[70,330,130,82]}
+{"kind":"textbox","id":"sh/29gr2p8n","slide":6,"text":"Start Here","textPreview":"Start Here","textChars":10,"textLines":1,"bbox":[82,354,106,35]}
+{"kind":"textbox","id":"sh/vu9knih4","slide":6,"text":">","textPreview":">","textChars":1,"textLines":1,"bbox":[208,352,30,28]}
+{"kind":"shape","id":"sh/k3q5o7qp","slide":6,"bbox":[235,330,130,82]}
+{"kind":"textbox","id":"sh/donyd0z6","slide":6,"text":"Remedies","textPreview":"Remedies","textChars":8,"textLines":1,"bbox":[247,354,106,35]}
+{"kind":"textbox","id":"sh/p0bi9s36","slide":6,"text":">","textPreview":">","textChars":1,"textLines":1,"bbox":[373,352,30,28]}
+{"kind":"shape","id":"sh/0fepkzup","slide":6,"bbox":[400,330,130,82]}
+{"kind":"textbox","id":"sh/bulwval8","slide":6,"text":"Goals","textPreview":"Goals","textChars":5,"textLines":1,"bbox":[412,354,106,35]}
+{"kind":"textbox","id":"sh/i9s36hcr","slide":6,"text":">","textPreview":">","textChars":1,"textLines":1,"bbox":[538,352,30,28]}
+{"kind":"shape","id":"sh/tovahoza","slide":6,"bbox":[565,330,130,82]}
+{"kind":"textbox","id":"sh/032lszqt","slide":6,"text":"Safety","textPreview":"Safety","textChars":6,"textLines":1,"bbox":[577,354,106,35]}
+{"kind":"textbox","id":"sh/bi9s36hc","slide":6,"text":">","textPreview":">","textChars":1,"textLines":1,"bbox":[703,352,30,28]}
+{"kind":"shape","id":"sh/ixczed8v","slide":6,"bbox":[730,330,130,82]}
+{"kind":"textbox","id":"sh/tcj6tova","slide":6,"text":"Label Checker","textPreview":"Label Checker","textChars":13,"textLines":1,"bbox":[742,354,106,35]}
+{"kind":"textbox","id":"sh/0rqd4vmt","slide":6,"text":">","textPreview":">","textChars":1,"textLines":1,"bbox":[868,352,30,28]}
+{"kind":"shape","id":"sh/gfmlkjm1","slide":6,"bbox":[895,330,130,82]}
+{"kind":"textbox","id":"sh/90je9cvi","slide":6,"text":"Evidence System","textPreview":"Evidence System","textChars":15,"textLines":1,"bbox":[907,354,106,35]}
+{"kind":"textbox","id":"sh/yd0z6103","slide":6,"text":">","textPreview":">","textChars":1,"textLines":1,"bbox":[1033,352,30,28]}
+{"kind":"shape","id":"sh/rytsvu9k","slide":6,"bbox":[1060,330,130,82]}
+{"kind":"textbox","id":"sh/g7adsji5","slide":6,"text":"Community","textPreview":"Community","textChars":9,"textLines":1,"bbox":[1072,354,106,35]}
+{"kind":"textbox","id":"sh/9s36hcrm","slide":6,"text":"Homepage job: answer “What is this, who is it for, what should I check first?” in under 8 seconds.","textPreview":"Homepage job: answer “What is this, who is it for, what should I check first?” in under 8 seconds.","textChars":98,"textLines":1,"bbox":[90,494,1020,42]}
+{"kind":"textbox","id":"sh/y1kre1w7","slide":6,"text":"06","textPreview":"06","textChars":2,"textLines":1,"bbox":[1180,674,42,24]}
+{"kind":"notes","id":"nt/uolo4l","slide":6,"text":""}
+{"kind":"slide","id":"sl/58irh1","slide":7,"title":"SOMNARY STRATEGY","textShapes":14}
+{"kind":"textbox","id":"sh/5wjudg7a","slide":7,"text":"SOMNARY STRATEGY","textPreview":"SOMNARY STRATEGY","textChars":16,"textLines":1,"bbox":[54,28,280,24]}
+{"kind":"textbox","id":"sh/y90je9cv","slide":7,"text":"The content engine should run on claim checks","textPreview":"The content engine should run on claim checks","textChars":45,"textLines":1,"bbox":[54,78,760,105]}
+{"kind":"textbox","id":"sh/nuxc3ylc","slide":7,"text":"Somnary should publish fewer generic tips and more evidence verdicts.","textPreview":"Somnary should publish fewer generic tips and more evidence verdicts.","textChars":69,"textLines":1,"bbox":[54,182,790,64]}
+{"kind":"shape","id":"sh/gn29gr2p","slide":7,"bbox":[54,254,1172,1]}
+{"kind":"shape","id":"sh/58z25kb6","slide":7,"bbox":[76,298,1120,46]}
+{"kind":"textbox","id":"sh/yhgn29gr","slide":7,"text":"Remedy truth pages","textPreview":"Remedy truth pages","textChars":18,"textLines":1,"bbox":[98,308,270,24]}
+{"kind":"textbox","id":"sh/n29gr2p8","slide":7,"text":"Deep evidence reviews and grade gates","textPreview":"Deep evidence reviews and grade gates","textChars":37,"textLines":1,"bbox":[392,308,720,24]}
+{"kind":"shape","id":"sh/czed8v6p","slide":7,"bbox":[76,360,1120,46]}
+{"kind":"textbox","id":"sh/5kb6xkf6","slide":7,"text":"Decision pages","textPreview":"Decision pages","textChars":14,"textLines":1,"bbox":[98,370,270,24]}
+{"kind":"textbox","id":"sh/x4nap4r6","slide":7,"text":"Should I try X for Y?","textPreview":"Should I try X for Y?","textChars":21,"textLines":1,"bbox":[392,370,720,24]}
+{"kind":"shape","id":"sh/8jqh0fep","slide":7,"bbox":[76,422,1120,46]}
+{"kind":"textbox","id":"sh/fyxobm58","slide":7,"text":"Safety pages","textPreview":"Safety pages","textChars":12,"textLines":1,"bbox":[98,432,270,24]}
+{"kind":"textbox","id":"sh/qd4vmtwr","slide":7,"text":"Audience and risk-specific boundaries","textPreview":"Audience and risk-specific boundaries","textChars":37,"textLines":1,"bbox":[392,432,720,24]}
+{"kind":"shape","id":"sh/xczed8v6","slide":7,"bbox":[76,484,1120,46]}
+{"kind":"textbox","id":"sh/8v6psfil","slide":7,"text":"Label pages","textPreview":"Label pages","textChars":11,"textLines":1,"bbox":[98,494,270,24]}
+{"kind":"textbox","id":"sh/fa9w3m94","slide":7,"text":"Dose, form, standardization, and proprietary blends","textPreview":"Dose, form, standardization, and proprietary blends","textChars":51,"textLines":1,"bbox":[392,494,720,24]}
+{"kind":"shape","id":"sh/qpg3ex0n","slide":7,"bbox":[76,546,1120,46]}
+{"kind":"textbox","id":"sh/1gvy90je","slide":7,"text":"Evidence watch","textPreview":"Evidence watch","textChars":14,"textLines":1,"bbox":[98,556,270,24]}
+{"kind":"textbox","id":"sh/8z25kb6x","slide":7,"text":"New trials, corrections, and grade changes","textPreview":"New trials, corrections, and grade changes","textChars":42,"textLines":1,"bbox":[392,556,720,24]}
+{"kind":"textbox","id":"sh/83itgfml","slide":7,"text":"07","textPreview":"07","textChars":2,"textLines":1,"bbox":[1180,674,42,24]}
+{"kind":"notes","id":"nt/58irh1","slide":7,"text":""}
+{"kind":"slide","id":"sl/boj055","slide":8,"title":"SOMNARY STRATEGY","textShapes":15}
+{"kind":"textbox","id":"sh/fmlkjm1c","slide":8,"text":"SOMNARY STRATEGY","textPreview":"SOMNARY STRATEGY","textChars":16,"textLines":1,"bbox":[54,28,280,24]}
+{"kind":"textbox","id":"sh/87ed8bat","slide":8,"text":"AI should explain the corpus, not become the clinician","textPreview":"AI should explain the corpus, not become the clinician","textChars":54,"textLines":1,"bbox":[54,78,760,105]}
+{"kind":"textbox","id":"sh/xs72x4na","slide":8,"text":"The assistant is valuable only if it stays inside Somnary’s reviewed evidence.","textPreview":"The assistant is valuable only if it stays inside Somnary’s reviewed evidence.","textChars":78,"textLines":1,"bbox":[54,182,790,64]}
+{"kind":"shape","id":"sh/qtcj6tov","slide":8,"bbox":[54,254,1172,1]}
+{"kind":"shape","id":"sh/je9cvixc","slide":8,"bbox":[84,314,480,240]}
+{"kind":"textbox","id":"sh/8z25kb6x","slide":8,"text":"Allowed","textPreview":"Allowed","textChars":7,"textLines":1,"bbox":[112,340,160,34]}
+{"kind":"shape","id":"sh/1gvy90je","slide":8,"bbox":[112,401,8,8]}
+{"kind":"textbox","id":"sh/qpg3ex0n","slide":8,"text":"Summarize reviewed pages","textPreview":"Summarize reviewed pages","textChars":24,"textLines":1,"bbox":[136,392,366,38]}
+{"kind":"shape","id":"sh/fa9w3m94","slide":8,"bbox":[112,439,8,8]}
+{"kind":"textbox","id":"sh/je9cvixc","slide":8,"text":"Compare evidence gates","textPreview":"Compare evidence gates","textChars":22,"textLines":1,"bbox":[136,430,366,38]}
+{"kind":"shape","id":"sh/qtcj6tov","slide":8,"bbox":[112,477,8,8]}
+{"kind":"textbox","id":"sh/1gvy90je","slide":8,"text":"Explain uncertainty","textPreview":"Explain uncertainty","textChars":19,"textLines":1,"bbox":[136,468,366,38]}
+{"kind":"shape","id":"sh/8z25kb6x","slide":8,"bbox":[112,515,8,8]}
+{"kind":"textbox","id":"sh/fmlkjm1c","slide":8,"text":"Route safety risks","textPreview":"Route safety risks","textChars":18,"textLines":1,"bbox":[136,506,366,38]}
+{"kind":"shape","id":"sh/q1orytsv","slide":8,"bbox":[640,314,480,240]}
+{"kind":"textbox","id":"sh/xs72x4na","slide":8,"text":"Not allowed","textPreview":"Not allowed","textChars":11,"textLines":1,"bbox":[668,340,190,34]}
+{"kind":"shape","id":"sh/87ed8bat","slide":8,"bbox":[668,401,8,8]}
+{"kind":"textbox","id":"sh/fyxobm58","slide":8,"text":"Diagnose conditions","textPreview":"Diagnose conditions","textChars":19,"textLines":1,"bbox":[692,392,366,38]}
+{"kind":"shape","id":"sh/qd4vmtwr","slide":8,"bbox":[668,439,8,8]}
+{"kind":"textbox","id":"sh/yhgn29gr","slide":8,"text":"Personalize dosage","textPreview":"Personalize dosage","textChars":18,"textLines":1,"bbox":[692,430,366,38]}
+{"kind":"shape","id":"sh/n29gr2p8","slide":8,"bbox":[668,477,8,8]}
+{"kind":"textbox","id":"sh/gn29gr2p","slide":8,"text":"Build supplement stacks","textPreview":"Build supplement stacks","textChars":23,"textLines":1,"bbox":[692,468,366,38]}
+{"kind":"shape","id":"sh/58z25kb6","slide":8,"bbox":[668,515,8,8]}
+{"kind":"textbox","id":"sh/y90je9cv","slide":8,"text":"Invent or outrank sources","textPreview":"Invent or outrank sources","textChars":25,"textLines":1,"bbox":[692,506,366,38]}
+{"kind":"textbox","id":"sh/nuxc3ylc","slide":8,"text":"Rule: AI may summarize Somnary. It may not outrank Somnary.","textPreview":"Rule: AI may summarize Somnary. It may not outrank Somnary.","textChars":59,"textLines":1,"bbox":[84,594,920,36]}
+{"kind":"textbox","id":"sh/gbq1oryt","slide":8,"text":"08","textPreview":"08","textChars":2,"textLines":1,"bbox":[1180,674,42,24]}
+{"kind":"notes","id":"nt/boj055","slide":8,"text":""}
+{"kind":"slide","id":"sl/1rub15","slide":9,"title":"SOMNARY STRATEGY","textShapes":16}
+{"kind":"textbox","id":"sh/8v6psfil","slide":9,"text":"SOMNARY STRATEGY","textPreview":"SOMNARY STRATEGY","textChars":16,"textLines":1,"bbox":[54,28,280,24]}
+{"kind":"textbox","id":"sh/fa9w3m94","slide":9,"text":"Growth should make bad claims visible","textPreview":"Growth should make bad claims visible","textChars":37,"textLines":1,"bbox":[54,78,760,105]}
+{"kind":"textbox","id":"sh/qpg3ex0n","slide":9,"text":"The repeatable hook is simple: “We checked the claim.”","textPreview":"The repeatable hook is simple: “We checked the claim.”","textChars":54,"textLines":1,"bbox":[54,182,790,64]}
+{"kind":"shape","id":"sh/x4nap4r6","slide":9,"bbox":[54,254,1172,1]}
+{"kind":"shape","id":"sh/8jqh0fep","slide":9,"bbox":[78,312,320,94]}
+{"kind":"textbox","id":"sh/fyxobm58","slide":9,"text":"SEO","textPreview":"SEO","textChars":3,"textLines":1,"bbox":[98,330,180,28]}
+{"kind":"textbox","id":"sh/qd4vmtwr","slide":9,"text":"Remedy + goal queries","textPreview":"Remedy + goal queries","textChars":21,"textLines":1,"bbox":[98,366,260,24]}
+{"kind":"shape","id":"sh/xs72x4na","slide":9,"bbox":[448,312,320,94]}
+{"kind":"textbox","id":"sh/87ed8bat","slide":9,"text":"Newsletter","textPreview":"Newsletter","textChars":10,"textLines":1,"bbox":[468,330,180,28]}
+{"kind":"textbox","id":"sh/ed8v6psf","slide":9,"text":"One claim checked weekly","textPreview":"One claim checked weekly","textChars":24,"textLines":1,"bbox":[468,366,260,24]}
+{"kind":"shape","id":"sh/7y1kre1w","slide":9,"bbox":[818,312,320,94]}
+{"kind":"textbox","id":"sh/wjudg7ad","slide":9,"text":"YouTube","textPreview":"YouTube","textChars":7,"textLines":1,"bbox":[838,330,180,28]}
+{"kind":"textbox","id":"sh/p4r65wju","slide":9,"text":"Label teardowns + explainers","textPreview":"Label teardowns + explainers","textChars":28,"textLines":1,"bbox":[838,366,260,24]}
+{"kind":"shape","id":"sh/i5sneloj","slide":9,"bbox":[78,450,320,94]}
+{"kind":"textbox","id":"sh/7qpg3ex0","slide":9,"text":"TikTok / IG","textPreview":"TikTok / IG","textChars":11,"textLines":1,"bbox":[98,468,180,28]}
+{"kind":"textbox","id":"sh/0bi9s36h","slide":9,"text":"Fast myth correction","textPreview":"Fast myth correction","textChars":20,"textLines":1,"bbox":[98,504,260,24]}
+{"kind":"shape","id":"sh/pwb2hwfy","slide":9,"bbox":[448,450,320,94]}
+{"kind":"textbox","id":"sh/itgfmlkj","slide":9,"text":"X.com","textPreview":"X.com","textChars":5,"textLines":1,"bbox":[468,468,180,28]}
+{"kind":"textbox","id":"sh/7ed8bat4","slide":9,"text":"Evidence threads + corrections","textPreview":"Evidence threads + corrections","textChars":30,"textLines":1,"bbox":[468,504,260,24]}
+{"kind":"shape","id":"sh/jqh0fepk","slide":9,"bbox":[818,450,320,94]}
+{"kind":"textbox","id":"sh/q5o7qpg3","slide":9,"text":"Partners","textPreview":"Partners","textChars":8,"textLines":1,"bbox":[838,468,180,28]}
+{"kind":"textbox","id":"sh/1w7mp0bi","slide":9,"text":"Pharmacists, sleep clinicians, skeptical health creators","textPreview":"Pharmacists, sleep clinicians, skeptical health creators","textChars":56,"textLines":1,"bbox":[838,504,260,24]}
+{"kind":"textbox","id":"sh/8bat47y1","slide":9,"text":"09","textPreview":"09","textChars":2,"textLines":1,"bbox":[1180,674,42,24]}
+{"kind":"notes","id":"nt/1rub15","slide":9,"text":""}
+{"kind":"slide","id":"sl/8g402c","slide":10,"title":"SOMNARY STRATEGY","textShapes":10}
+{"kind":"textbox","id":"sh/0nuxc3yl","slide":10,"text":"SOMNARY STRATEGY","textPreview":"SOMNARY STRATEGY","textChars":16,"textLines":1,"bbox":[54,28,280,24]}
+{"kind":"textbox","id":"sh/72x4nap4","slide":10,"text":"Community should submit claims, not prescribe remedies","textPreview":"Community should submit claims, not prescribe remedies","textChars":54,"textLines":1,"bbox":[54,78,760,105]}
+{"kind":"textbox","id":"sh/ih4byhgn","slide":10,"text":"The safe community loop is evidence contribution, not treatment advice.","textPreview":"The safe community loop is evidence contribution, not treatment advice.","textChars":71,"textLines":1,"bbox":[54,182,790,64]}
+{"kind":"shape","id":"sh/pkzupwb2","slide":10,"bbox":[54,254,1172,1]}
+{"kind":"shape","id":"sh/0z61032l","slide":10,"bbox":[96,327,8,8]}
+{"kind":"textbox","id":"sh/7ed8bat4","slide":10,"text":"Submit a claim or product label","textPreview":"Submit a claim or product label","textChars":31,"textLines":1,"bbox":[120,318,516,38]}
+{"kind":"shape","id":"sh/itgfmlkj","slide":10,"bbox":[96,385,8,8]}
+{"kind":"textbox","id":"sh/pwb2hwfy","slide":10,"text":"Vote on what Somnary checks next","textPreview":"Vote on what Somnary checks next","textChars":32,"textLines":1,"bbox":[120,376,516,38]}
+{"kind":"shape","id":"sh/0bi9s36h","slide":10,"bbox":[96,443,8,8]}
+{"kind":"textbox","id":"sh/u18jqh0f","slide":10,"text":"Report unclear pages and corrections","textPreview":"Report unclear pages and corrections","textChars":36,"textLines":1,"bbox":[120,434,516,38]}
+{"kind":"shape","id":"sh/jm1cfa9w","slide":10,"bbox":[96,501,8,8]}
+{"kind":"textbox","id":"sh/c7u54zid","slide":10,"text":"Share anecdotes only beside, never inside, evidence grades","textPreview":"Share anecdotes only beside, never inside, evidence grades","textChars":58,"textLines":1,"bbox":[120,492,516,38]}
+{"kind":"shape","id":"sh/1orytsvu","slide":10,"bbox":[750,296,360,278]}
+{"kind":"textbox","id":"sh/u9knih4b","slide":10,"text":"Avoid","textPreview":"Avoid","textChars":5,"textLines":1,"bbox":[790,328,180,42]}
+{"kind":"textbox","id":"sh/judg7ads","slide":10,"text":"Unmoderated advice threads, dosage guidance, supplement stacks, and disguised testimonials.","textPreview":"Unmoderated advice threads, dosage guidance, supplement stacks, and disguised testimonials.","textChars":91,"textLines":1,"bbox":[790,398,270,130]}
+{"kind":"textbox","id":"sh/cfa9w3m9","slide":10,"text":"10","textPreview":"10","textChars":2,"textLines":1,"bbox":[1180,674,42,24]}
+{"kind":"notes","id":"nt/8g402c","slide":10,"text":""}
+{"kind":"slide","id":"sl/r74uy7","slide":11,"title":"SOMNARY STRATEGY","textShapes":10}
+{"kind":"textbox","id":"sh/uxc3ylc7","slide":11,"text":"SOMNARY STRATEGY","textPreview":"SOMNARY STRATEGY","textChars":16,"textLines":1,"bbox":[54,28,280,24]}
+{"kind":"textbox","id":"sh/1kre1w7m","slide":11,"text":"The product roadmap should deepen checked decisions","textPreview":"The product roadmap should deepen checked decisions","textChars":51,"textLines":1,"bbox":[54,78,760,105]}
+{"kind":"textbox","id":"sh/c3ylc7u5","slide":11,"text":"Build tools that make the evidence layer easier to use.","textPreview":"Build tools that make the evidence layer easier to use.","textChars":55,"textLines":1,"bbox":[54,182,790,64]}
+{"kind":"shape","id":"sh/j6tovaho","slide":11,"bbox":[54,254,1172,1]}
+{"kind":"shape","id":"sh/ulwval87","slide":11,"bbox":[96,324,310,216]}
+{"kind":"textbox","id":"sh/1cfa9w3m","slide":11,"text":"Now","textPreview":"Now","textChars":3,"textLines":1,"bbox":[120,352,140,36]}
+{"kind":"textbox","id":"sh/crmhk3q5","slide":11,"text":"Start Here, Safety Hub, Melatonin Hub, newsletter, claim submission","textPreview":"Start Here, Safety Hub, Melatonin Hub, newsletter, claim submission","textChars":67,"textLines":1,"bbox":[120,408,250,90]}
+{"kind":"shape","id":"sh/j2t83itg","slide":11,"bbox":[456,324,310,216]}
+{"kind":"textbox","id":"sh/qh0fepkz","slide":11,"text":"Next","textPreview":"Next","textChars":4,"textLines":1,"bbox":[480,352,140,36]}
+{"kind":"textbox","id":"sh/s36hcrmh","slide":11,"text":"Label checker MVP, compare tool, audience pages, clinician handouts","textPreview":"Label checker MVP, compare tool, audience pages, clinician handouts","textChars":67,"textLines":1,"bbox":[480,408,250,90]}
+{"kind":"shape","id":"sh/hoza1gvy","slide":11,"bbox":[816,324,310,216]}
+{"kind":"textbox","id":"sh/a1gvy90j","slide":11,"text":"Later","textPreview":"Later","textChars":5,"textLines":1,"bbox":[840,352,140,36]}
+{"kind":"textbox","id":"sh/zidonyd0","slide":11,"text":"Scoped AI assistant, product QA, browser extension, public evidence API","textPreview":"Scoped AI assistant, product QA, browser extension, public evidence API","textChars":71,"textLines":1,"bbox":[840,408,250,90]}
+{"kind":"textbox","id":"sh/svu9knih","slide":11,"text":"11","textPreview":"11","textChars":2,"textLines":1,"bbox":[1180,674,42,24]}
+{"kind":"notes","id":"nt/r74uy7","slide":11,"text":""}
+{"kind":"slide","id":"sl/8ipiit","slide":12,"title":"SOMNARY STRATEGY","textShapes":10}
+{"kind":"textbox","id":"sh/loj2t83i","slide":12,"text":"SOMNARY STRATEGY","textPreview":"SOMNARY STRATEGY","textChars":16,"textLines":1,"bbox":[54,28,280,24]}
+{"kind":"textbox","id":"sh/ex0nuxc3","slide":12,"text":"Risk controls are part of the product, not legal boilerplate","textPreview":"Risk controls are part of the product, not legal boilerplate","textChars":60,"textLines":1,"bbox":[54,78,760,105]}
+{"kind":"textbox","id":"sh/3itgfmlk","slide":12,"text":"Health-adjacent trust requires restraint before launch velocity.","textPreview":"Health-adjacent trust requires restraint before launch velocity.","textChars":64,"textLines":1,"bbox":[54,182,790,64]}
+{"kind":"shape","id":"sh/wb2hwfyx","slide":12,"bbox":[54,254,1172,1]}
+{"kind":"shape","id":"sh/lwval87e","slide":12,"bbox":[92,323,8,8]}
+{"kind":"textbox","id":"sh/e9cvixcz","slide":12,"text":"Source-backed claims only, including ads and social posts","textPreview":"Source-backed claims only, including ads and social posts","textChars":57,"textLines":1,"bbox":[116,314,906,38]}
+{"kind":"shape","id":"sh/3q5o7qpg","slide":12,"bbox":[92,375,8,8]}
+{"kind":"textbox","id":"sh/sneloj2t","slide":12,"text":"Clear medical boundary near decision moments","textPreview":"Clear medical boundary near decision moments","textChars":44,"textLines":1,"bbox":[116,366,906,38]}
+{"kind":"shape","id":"sh/l87ed8ba","slide":12,"bbox":[92,427,8,8]}
+{"kind":"textbox","id":"sh/5kb6xkf6","slide":12,"text":"No testimonials implying efficacy beyond evidence","textPreview":"No testimonials implying efficacy beyond evidence","textChars":49,"textLines":1,"bbox":[116,418,906,38]}
+{"kind":"shape","id":"sh/czed8v6p","slide":12,"bbox":[92,479,8,8]}
+{"kind":"textbox","id":"sh/neloj2t8","slide":12,"text":"Disclosure for every collaboration or material connection","textPreview":"Disclosure for every collaboration or material connection","textChars":57,"textLines":1,"bbox":[116,470,906,38]}
+{"kind":"shape","id":"sh/ytsvu9kn","slide":12,"bbox":[92,531,8,8]}
+{"kind":"textbox","id":"sh/5sneloj2","slide":12,"text":"Legal review before product QA, paid partnerships, commerce, or personalized AI","textPreview":"Legal review before product QA, paid partnerships, commerce, or personalized AI","textChars":79,"textLines":1,"bbox":[116,522,906,38]}
+{"kind":"textbox","id":"sh/cbulwval","slide":12,"text":"FTC, FDA, endorsement, AI, and medical-advice boundaries should be operational checklists.","textPreview":"FTC, FDA, endorsement, AI, and medical-advice boundaries should be operational checklists.","textChars":90,"textLines":1,"bbox":[92,594,960,34]}
+{"kind":"textbox","id":"sh/nqxs72x4","slide":12,"text":"12","textPreview":"12","textChars":2,"textLines":1,"bbox":[1180,674,42,24]}
+{"kind":"notes","id":"nt/8ipiit","slide":12,"text":""}
+{"kind":"slide","id":"sl/a5wnwi","slide":13,"title":"SOMNARY STRATEGY","textShapes":10}
+{"kind":"textbox","id":"sh/nuxc3ylc","slide":13,"text":"SOMNARY STRATEGY","textPreview":"SOMNARY STRATEGY","textChars":16,"textLines":1,"bbox":[54,28,280,24]}
+{"kind":"textbox","id":"sh/gbq1oryt","slide":13,"text":"The first 90 days should prove the wedge","textPreview":"The first 90 days should prove the wedge","textChars":40,"textLines":1,"bbox":[54,78,760,105]}
+{"kind":"textbox","id":"sh/5wjudg7a","slide":13,"text":"Own melatonin and sleep blends before expanding into broad sleep wellness.","textPreview":"Own melatonin and sleep blends before expanding into broad sleep wellness.","textChars":74,"textLines":1,"bbox":[54,182,790,64]}
+{"kind":"shape","id":"sh/yhgn29gr","slide":13,"bbox":[54,254,1172,1]}
+{"kind":"shape","id":"sh/n29gr2p8","slide":13,"bbox":[110,316,290,242]}
+{"kind":"textbox","id":"sh/gn29gr2p","slide":13,"text":"30 days","textPreview":"30 days","textChars":7,"textLines":1,"bbox":[134,344,180,38]}
+{"kind":"textbox","id":"sh/58z25kb6","slide":13,"text":"Homepage routing\nStart Here\nMelatonin hub\nNewsletter CTA","textPreview":"Homepage routing | Start Here | Melatonin hub | Newsletter CTA","textChars":56,"textLines":4,"bbox":[134,410,220,110]}
+{"kind":"shape","id":"sh/ytsvu9kn","slide":13,"bbox":[460,316,290,242]}
+{"kind":"textbox","id":"sh/neloj2t8","slide":13,"text":"60 days","textPreview":"60 days","textChars":7,"textLines":1,"bbox":[484,344,180,38]}
+{"kind":"textbox","id":"sh/nap4r65w","slide":13,"text":"Audience pages\nLabel checker MVP\nCompare pages\nChannel templates","textPreview":"Audience pages | Label checker MVP | Compare pages | Channel templates","textChars":64,"textLines":4,"bbox":[484,410,220,110]}
+{"kind":"shape","id":"sh/upwb2hwf","slide":13,"bbox":[810,316,290,242]}
+{"kind":"textbox","id":"sh/5gbq1ory","slide":13,"text":"90 days","textPreview":"90 days","textChars":7,"textLines":1,"bbox":[834,344,180,38]}
+{"kind":"textbox","id":"sh/cvixczed","slide":13,"text":"Scoped AI prototype\nClinician handouts\nCollaboration pipeline\nPaid tests","textPreview":"Scoped AI prototype | Clinician handouts | Collaboration pipeline | Paid tests","textChars":72,"textLines":4,"bbox":[834,410,220,110]}
+{"kind":"textbox","id":"sh/nyd0z610","slide":13,"text":"13","textPreview":"13","textChars":2,"textLines":1,"bbox":[1180,674,42,24]}
+{"kind":"notes","id":"nt/a5wnwi","slide":13,"text":""}
+{"kind":"slide","id":"sl/yo1lbo","slide":14,"title":"The recommendation","textShapes":5}
+{"kind":"textbox","id":"sh/gn29gr2p","slide":14,"text":"The recommendation","textPreview":"The recommendation","textChars":18,"textLines":1,"bbox":[54,56,520,40]}
+{"kind":"textbox","id":"sh/n29gr2p8","slide":14,"text":"Make Somnary the place people check before they take a sleep remedy.","textPreview":"Make Somnary the place people check before they take a sleep remedy.","textChars":68,"textLines":1,"bbox":[54,130,900,160]}
+{"kind":"shape","id":"sh/yhgn29gr","slide":14,"bbox":[54,350,1050,142]}
+{"kind":"textbox","id":"sh/5wjudg7a","slide":14,"text":"Do this by turning evidence discipline into product structure: decision-first IA, claim-check content, label tools, scoped AI, safety routing, and public editorial accountability.","textPreview":"Do this by turning evidence discipline into product structure: decision-first IA, claim-check content, label tools, scoped AI, safety rou...","textChars":179,"textLines":1,"bbox":[88,384,982,72]}
+{"kind":"textbox","id":"sh/gbq1oryt","slide":14,"text":"Strategic guardrail: if it makes Somnary more like supplement marketing, do not ship it.","textPreview":"Strategic guardrail: if it makes Somnary more like supplement marketing, do not ship it.","textChars":88,"textLines":1,"bbox":[54,584,920,40]}
+{"kind":"textbox","id":"sh/nuxc3ylc","slide":14,"text":"14","textPreview":"14","textChars":2,"textLines":1,"bbox":[1180,674,42,24]}
+{"kind":"notes","id":"nt/yo1lbo","slide":14,"text":""}

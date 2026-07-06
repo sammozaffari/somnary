@@ -1,62 +1,107 @@
-# CLAUDE.md — Project memory (read this in full before every task)
+# CLAUDE.md — Somnary agent operating contract (v2, post-pivot)
 
-**Project name: somnary** (always lowercase in UI; wordmark is `somnary.` with a trailing period). Tagline pattern: `somnary · [N] remedies graded, [M] sources cited · zero brand money`.
+## LOCKED DECISIONS (owner-ratified 2026-07-06 — do not revisit, do not re-ask)
+- **D1 Framework: Astro.** SSG-first, content collections for the corpus, islands
+  only where interactivity is required (label checker, compare tool, assistant).
+- **D2 Monetization: tools-first, reader-funded.** No membership paywall on the
+  wiki. Revenue candidates in order: clinician handout exports, label-checker
+  pro features, supporter tier. No affiliate, no brand money — ever. Any ads must
+  pass the ad framework in the rulebook (source-backed, no treatment claims).
+- **D3 Brand: "Somnary", capitalized**, in prose, UI, and wordmark (`Somnary.`
+  with trailing period as the mark). Retire all lowercase-only styling; update
+  any doc or design asset that says otherwise when touched.
+- **D4 Stack builder: killed.** Never build combine-your-stack features or CTAs.
+  Salvage only the interaction-warning engine, surfaced through the compare tool
+  and safety router. AI never recommends supplement combinations.
+- **Rulebook: `/docs/strategy/06-decision-frameworks-operating-system.md` is
+  binding** for all content, design, ads, AI framing, and product decisions.
 
-You are building **somnary**, an **independent, evidence-graded sleep & natural-remedies wiki**.
-This file is your operating contract. The full rationale lives in `/docs/PROJECT_PLAN.md`
-and the task list in `/docs/BUILD_CHECKLIST.md`. Read both before starting any work.
+Somnary is an independent, evidence-graded reference for natural sleep remedies.
+This repo is run by an agent team in Claude Code. The human owner reviews at
+phase boundaries and human-gated items only. This file is the constitution;
+`/docs/strategy/06-decision-frameworks-operating-system.md` is the standing
+rulebook for every content, design, AI, ad, and product decision.
 
-## Start-of-task ritual (do this EVERY session, no exceptions)
-1. Read `/docs/PROJECT_PLAN.md` (skim section headers, read the section relevant to today's task in full).
-2. Read `/docs/BUILD_CHECKLIST.md` and state which checklist item you are working on.
-3. Confirm the item's acceptance criteria back to me before writing code.
-4. Do the work in small commits, and **push every commit to GitHub as you go** — never leave finished work only on the local machine.
-5. Before finishing: re-read the acceptance criteria, verify each one, tick the box, and report anything skipped or deferred.
+## Precedence of documents
+1. This file (non-negotiables + gates).
+2. `/docs/strategy/` package (01–07) — current strategy. Where it conflicts with
+   PROJECT_PLAN.md, the strategy package wins.
+3. `/docs/DESIGN_SYSTEM.md` — the ONLY source of visual tokens (evidence-teal
+   system from the v3 prototype). Never invent a value; if a token is missing,
+   open a `[HUMAN-GATE]` question.
+4. `/docs/PROJECT_PLAN.md` — historical rationale; superseded sections are marked.
+5. `/docs/BUILD_CHECKLIST.md` — the work queue. One item per session.
 
-**Push rule (applies to every session):** every change that's committed gets pushed to GitHub in the same session — ideally right after each commit. The remote is the source of truth; local-only work doesn't count as done. End every session with a clean `git status` and nothing unpushed.
+## NON-NEGOTIABLES (violating any of these breaks the product — halt and escalate)
+- Zero affiliate links, zero brand money, no commerce, no paid placement.
+- Every factual health claim cites a real, resolvable source (PMID / DOI /
+  ClinicalTrials.gov). The CI citation resolver must pass; the citation-auditor
+  agent must confirm each source supports the claim as written.
+- Community/anecdote data never influences or displays as setting a grade.
+- Weak evidence is shown and labeled weak. Grades reflect published HUMAN evidence.
+- Safety, interactions, and contraindications are prominent on every remedy and
+  decision page; "educational, not medical advice" appears near decisions, not
+  only in the footer. Be conservative on pregnancy, children, drug interactions.
+- All content pages are SSR/SSG. Never ship core content client-only.
+- AI features answer only from the reviewed corpus, cite back, refuse
+  personalized dosing/diagnosis, and route safety concerns to boundary pages.
+  Forbidden framings (from the rulebook): "take X tonight", "your ideal dose",
+  "this is safe for you", "combine these", any diagnosis.
+- No agent assigns or changes a tier grade. Grading is `[HUMAN-GATE]`, always.
 
-If a request conflicts with the NON-NEGOTIABLES below, STOP and flag it instead of proceeding.
+## Agent roles (definitions in `.claude/agents/`)
+- **planner** — reads this file + current checklist item; produces a task plan
+  with acceptance criteria; tags anything touching a non-negotiable or a
+  D-decision as `[HUMAN-GATE]`.
+- **builder** — implements on a branch; never merges its own work.
+- **evidence-editor** — drafts content source-first (sources pulled before
+  prose); follows the 10-part article skeleton (bottom line → who it applies to
+  → claims → what evidence shows → what it does NOT show → dose/label reality →
+  safety boundary → clinician questions → sources → review date + correction link).
+- **citation-auditor** — verifies every source resolves AND says what the page
+  claims; logs pass/fail rationale per claim; blocks merge on failure.
+- **design-guardian** — token-only styling; contrast checks; grades readable
+  without color alone; rejects wellness clichés and hidden disclaimers.
+- **compliance-reviewer** — TGA/FDA/FTC-safe language (describe evidence, never
+  promise outcomes), disclaimer placement, forbidden-framing lint on all copy.
 
-## NON-NEGOTIABLES (these define the product; violating them breaks it)
-- **Independence:** zero affiliate links, zero brand sponsorship, reader-funded only. No `rel=sponsored`, no commerce, no paid placement anywhere. Ever.
-- **Evidence firewall:** community/anecdote data must NEVER influence or display as if it sets a grade. Store and render it separately from the graded corpus.
-- **Cite or don't claim:** every factual health claim links to a real, resolvable source (PubMed ID, DOI, or ClinicalTrials.gov registry). No invented references. Build the link-resolver check; "0 hallucinated cites" must be enforceable, not aspirational.
-- **Crawlability:** all content pages are server-rendered or statically generated (SSR/SSG). Never ship core content as client-only rendering. (The reference site we are improving on hides its content from crawlers — do not repeat this.)
-- **Honesty about weak evidence:** weak data is labeled weak, shown not hidden. Tiers reflect published HUMAN evidence quality, not popularity.
-- **Medical safety:** every remedy page surfaces safety/interactions/contraindications prominently (not in fine print). Site-wide "educational, not medical advice" disclaimer. Be conservative on pregnancy, children, drug interactions.
+## Session protocol
+1. planner: read this file, the current BUILD_CHECKLIST item, and the relevant
+   strategy section. State the item ID and acceptance criteria in the plan.
+2. builder: implement in small commits on a branch named after the item
+   (e.g. `chk-2.1-melatonin-hub`). Commit messages reference the item.
+3. Reviewer agents run. All must pass. CI gates (citation resolver, token
+   linter, crawlability check, build) must be green.
+4. Merge automatically UNLESS the item is `[HUMAN-GATE]` — then open a PR and
+   post a summary for the owner.
+5. Append one line to the BUILD_CHECKLIST session log. Tick the box only when
+   every acceptance criterion is verified; report anything deferred.
 
-## Tech decisions (locked — confirm with me before changing any)
-- Framework: SSG/SSR (Next.js or Astro — confirm which is set in `package.json` before assuming).
-- Content model: structured (MDX or CMS). A remedy = { tier, verdict, claims[], data[], doses[], safety[], standardization, mechanism, sources[], aliases[] }. Non-supplement interventions reuse the same schema (adapted). The tier board, stack builder, search index, and Ask assistant all read this same structured data — do not duplicate content.
-- Citations are DATA, not prose: each source stored with its PMID/DOI so links can be auto-validated.
-- Search is build-time generated from structured content (names + aliases/latin names + outcomes + symptoms). Two surfaces, one index: ⌘K palette + crawlable /search page. See DESIGN_SYSTEM §2.13/§3.7 and PROJECT_PLAN §2a.
-- Design tokens come from `/docs/DESIGN_SYSTEM.md` (v1.2, locked). Never invent colors, spacing, or type — use the named tokens and obey that file's §5 guardrails. If a token is missing, ask; don't guess.
-- Styling: soft-light palette (warm off-white base, muted lavender/sage accents, desaturated S–F tier spectrum). Calm motion only.
+## Human gates (never auto-merge)
+- Tier grade assignment or change on any remedy.
+- Anything monetization, legal-page, or medical-boundary related.
+- Phase completion (owner reviews before the next phase starts).
+- Any missing design token, schema change, or new dependency with lock-in.
+- Publishing to external channels (newsletter, social) — agents draft only.
 
-## Build order (from PROJECT_PLAN §11 — do NOT jump ahead)
-1. Foundation: repo scaffold, design tokens wired in, methodology page, legal pages.
-2. ONE remedy page template, end-to-end (melatonin). All 12 blocks from PLAN §4.
-3. Core catalog (launch tier): ~25–30 remedy pages with real citations (§5.1).
-4. Search: build-time index + ⌘K palette + crawlable /search page (§2a).
-5. Tier board + outcome pages.
-6. Interventions: non-supplement sleep aids on the same rubric (§5a).
-7. Dispatch newsletter capture.
-8. Briefs + membership + paywall.
-9. Expansion catalog (ongoing, toward 100+) via the deep-research engine (§5b).
-10. Stack builder, Ask (RAG), community reports, PWA/app.
+## Content model (schema lives in code; keep in sync)
+remedy = { slug, name, tier `[HUMAN-GATE]`, verdict, bestFor[], notFor[],
+biggestRisk, studiedDose, claims[]↔data[] (each row cited), evidenceSummary,
+dosingReality, safety[], interactions[], standardization, mechanism,
+sources[]{pmid|doi|registry, title, year, type}, communityRead (separate store),
+reviewDate, changeLog[] }.
+Citations are DATA, never prose-only. Tier board, checkers, compare tool, and
+the assistant all read this one structure — never duplicate content.
 
-## Working style
-- Prefer Plan mode for anything touching more than one file or the content model. Show me the plan, wait for approval.
-- One checklist item per session. Don't batch unrelated work.
-- Small commits, each message referencing the checklist item (e.g. `feat(remedy): melatonin page template [CHK-2.1]`).
-- **Push after every commit.** Don't batch a session's work into one end-of-day push; push as each commit lands so GitHub always reflects the latest state. If a push fails, stop and surface it — don't keep working on top of unpushed work.
-- After every change, show the diff and let me approve before applying.
-- If you're unsure whether something violates a non-negotiable, assume it does and ask.
+## Definition of done (per item)
+- Acceptance criteria verified and ticked.
+- Server-rendered content confirmed in build output.
+- Every claim cited; resolver + auditor green.
+- Safety module present and prominent (remedy/decision pages).
+- Tokens only; no hardcoded style values.
+- Review date + correction link on every article-type page.
+- Session log line appended; branch merged or PR opened per gate rules.
 
-## Definition of done (per page/feature)
-- Acceptance criteria in BUILD_CHECKLIST ticked and verified.
-- Content server-rendered and crawlable (verify in build output).
-- Every claim cited; every citation link resolves.
-- Safety section present and prominent (for remedy pages).
-- Matches DESIGN_SYSTEM tokens; no hardcoded style values.
-- Committed with a checklist-referencing message **and pushed to GitHub** (verified: nothing left unpushed).
+## If unsure
+If a task might violate a non-negotiable, assume it does: stop, write the
+question into the PR/plan as `[HUMAN-GATE]`, and move to what can proceed.

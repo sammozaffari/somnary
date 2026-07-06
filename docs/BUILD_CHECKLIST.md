@@ -1,75 +1,149 @@
-# BUILD_CHECKLIST.md
+# BUILD_CHECKLIST.md (v2.1 — post-pivot, agent-run, reality-audited)
 
-Work top to bottom. One item per session. Do not start an item until the previous phase's items are ticked, unless I say otherwise. Each item has **acceptance criteria** — tick the box ONLY when every criterion is verified, and report any criterion you could not meet.
+Work top to bottom, one item per session. Reviewer agents + CI gates replace
+manual owner review except on items tagged `[HUMAN-GATE]`, which open a PR and
+wait. Tick a box only when every acceptance criterion is verified; report
+anything deferred in the session log.
 
-Legend: `[ ]` todo · `[~]` in progress · `[x]` done & verified
+Legend: `[ ]` todo · `[~]` partial (see note) · `[x]` done & verified · `HG` = [HUMAN-GATE]
 
-**Standing rule:** every commit is pushed to GitHub in the same session it's made — push as each commit lands, not in one batch at the end. An item isn't "done & verified" until its work is committed *and* on the remote. End every session with nothing unpushed.
+## Reality baseline (audited 2026-07-06, CHK-0.0)
 
----
+v2 of this checklist was drafted from the docs alone and assumed a greenfield.
+The repo is not greenfield: a full Astro site was built 2026-06-30 → 07-03
+under the **v1 checklist's numbering** (the `[CHK-x.y]` tags in git history
+before 2026-07-06 refer to v1 items, not the IDs below). Already live:
+20 remedy pages + 4 context pages (all citation-resolved, grades
+owner-approved via the v1 two-pass process), tier board, 7 outcome pages,
+methodology, legal pages, disclaimer component, ⌘K + `/search`, JSON-LD/OG
+per remedy, citation resolver in `prebuild`, content-index JSON (current;
+the .md mirror's per-row statuses are stale — trust the JSON).
 
-## Phase 0 — Repo & guardrails
-- [x] **CHK-0.1 Repo scaffold.** Init repo, `/docs` holds PROJECT_PLAN.md + this file + DESIGN_SYSTEM.md, CLAUDE.md at root. *Accept:* all four files present; `.gitignore` correct; first commit pushed to GitHub.
-- [x] **CHK-0.2 Framework decision committed.** Choose Next.js or Astro (SSG/SSR). *Accept:* `package.json` exists; a placeholder home route renders server-side; build output contains pre-rendered HTML (verify content is in the HTML, not injected by JS).
-- [x] **CHK-0.3 Design tokens wired.** Import tokens from DESIGN_SYSTEM.md into the styling layer (CSS vars / Tailwind config). *Accept:* a test component renders using named tokens only; no hardcoded hex/spacing in that component.
-- [x] **CHK-0.4 Content model defined.** Schema for a remedy per CLAUDE.md. *Accept:* type/schema file exists with all fields; a sample remedy validates against it; citations stored as structured objects with PMID/DOI fields.
-- [x] **CHK-0.5 Citation resolver.** Script/check that every source's PMID/DOI resolves to a real URL. *Accept:* runs against sample data; fails the build (or logs clearly) if a citation is unresolvable. This enforces "0 hallucinated cites."
-- [x] **CHK-0.6 Content index file.** A CSV/JSON registry of every planned remedy + intervention: name, aliases/latin name, planned tier, research status (not-started/drafting/cited/reviewed/live), source count. *Accept:* file exists; seeded from PLAN §5.1/§5.2/§5a; build can read it; it's the single source of truth for what's planned vs done.
-
-## Phase 1 — Methodology & legal (credibility spine — build BEFORE content)
-- [x] **CHK-1.1 Methodology page.** Publishes the full S–F rubric, evidence-gate chips, source hierarchy, claim-check policy, corrections policy. *Accept:* server-rendered; matches PLAN §3; rubric is specific enough that a reader could re-derive a grade.
-- [x] **CHK-1.2 Legal pages.** Medical-advice disclaimer, terms, privacy, disclosure (zero affiliate/brand money stated and true). *Accept:* disclaimer reachable site-wide; TGA/FDA-safe language (describe evidence, no disease-treatment promises); privacy policy covers AU Privacy Act + GDPR basics. — ⚠️ all four carry a PRE-LAUNCH marker: **require AU solicitor review (TGA/ACL/Privacy Act) before launch / before membership goes live.**
-- [x] **CHK-1.3 Disclaimer component.** Reusable, appears on every remedy page. *Accept:* renders on a test page; conservative wording re: pregnancy/children/interactions. — `Disclaimer.astro` (standard + compact); compact live in the global footer sitewide, standard test-rendered on home. **CHK-2.1: add `<Disclaimer variant="standard" />` to the remedy template.**
-
-## Phase 2 — The remedy page template (the most important UI work)
-- [x] **CHK-2.1 Melatonin page, all 12 blocks (PLAN §4).** header, verdict, claims-vs-data table, evidence summary, dosing reality, safety/interactions, standardization note, mechanism, sources, community read (walled off), Ask stub, SEO furniture. *Accept:* every block present; real citations that resolve; safety section prominent; claims-vs-data table footnoted row-by-row; server-rendered; uses design tokens. — **DONE.** `/r/melatonin` (tier A) built from one dynamic route `src/pages/r/[slug].astro` reading structured frontmatter (`melatonin.mdx`). All 12 blocks present as reusable components (Phase 3 inherits them): VerdictBand · ClaimsDataTable (strike-to-resolve, FIXED reveal engine, `.nodata` empty-state row) · DosingGrid · SafetyCallout (prominent, sev-caution) · SourcesList · CitationPopover (single shared, FIXED clamp) · MetadataCard · CommunityBar (firewall: "never affect the grade") · AskPanel (honest inert stub) + evidence-summary MDX body. **8 real citations, all verified against PubMed and resolving** (`verify:cites:online` green; 2 publisher DOIs are bot-walls (403/412) but their PMIDs resolve 200 — resolver updated to treat bot-block codes as warnings, not dead). Server-rendered HTML contains verdict/claims/findings/safety/tier (grepped `dist`); tokens-only (no hex/rgba/cubic-bezier); `astro check` 0 errors. Stat rows now read real **1 remedy / 8 sources** from the content index. **Deferred (annotated, not faked):** schema.org JSON-LD + OG image → CHK-2.2; brief promo → Phase 8; Ask backend → Phase 9. Not visually smoke-tested in a live browser (Chrome extension unavailable this session) — content is visible-by-default with JS off, so it can't render broken.
-- [x] **CHK-2.2 SEO furniture.** Question-format title, custom OG image slot, canonical URL, schema.org (MedicalWebPage/Article/FAQ). *Accept:* meta + JSON-LD present in rendered HTML; OG image renders. — **DONE.** Per-remedy **generated OG images** now ship: `src/pages/r/[slug]/og.png.ts` (satori→SVG, @resvg/resvg-js→PNG, build-time static, one branded 1200×630 card per remedy with the tier-color badge + name + verdict, Newsreader/Hanken fonts via @fontsource, all design tokens). Wired `og:image` + `twitter:card=summary_large_image` in Base. Verified: 19 valid 1200×630 PNGs, tier-specific (distinct per grade). Deps (satori, @resvg/resvg-js, @fontsource/*) added as devDependencies — build-time only. **JSON-LD + OG meta (all live remedy pages):** `src/lib/seo.ts` emits a schema.org @graph of MedicalWebPage + FAQPage (FAQ built from the real claims-vs-data; every source attached as a citation), injected in the remedy route; Base renders og:/twitter: tags site-wide; question-title + canonical already shipped in CHK-2.1. **Remaining:** the per-remedy *generated* OG image (satori/resvg + font) — deferred to a focused follow-up so a rasterizer dependency doesn't collide with the grade reviews. Once that lands, add og:image + twitter:card=summary_large_image and tick.
-- [~] **CHK-2.3 Tier badge + evidence-gate chips components.** *Accept:* reusable; desaturated tier colors per design system; chips render from structured data, not hardcoded. — **Built during CHK-1.1** (commit `de7b123`): `TierBadge.astro` (§2.2) + `EvidenceGateChip.astro` (§2.3), backed by single-source-of-truth `src/lib/tiers.ts` + `src/lib/evidence-gates.ts`. Phase 2 = verify + reuse, not construction.
-
-## Phase 3 — Core catalog (launch tier)
-- [x] **CHK-3.1 ~25–30 remedy pages (launch tier).** Per PLAN §5.1 spread (A/B/C/D/F). Each inherits the §4 template. *Accept:* each page meets CHK-2.1 criteria; grades follow the rubric; every citation resolves; tracked in the content index (CHK-0.6); aliases/latin names captured for search. — **DONE — LAUNCH TIER COMPLETE: 19 graded remedies live + `sleep-blends` context explainer (the full §5.1 set).** Final grades: melatonin A · magnesium B · l-theanine B · ashwagandha B · valerian C · tart-cherry C · l-tryptophan C · lemon-balm C · chamomile C · lavender C · passionflower D · hops D · magnolia-bark D · gaba D · glycine D · 5-htp D · cbd D · skullcap D · kava F. Every page: §4 template, cited claims (all PMIDs resolve 200; publisher DOIs bot-wall), safety prominent, JSON-LD (CHK-2.2), tokens-only. Second-review process throughout; grading precedent established (borderline breaks DOWN on unproven mechanism or non-independent evidence — gaba, glycine, skullcap). `skullcap` (tier D, final hedge verdict) shipped. `cbd` (tier D, clean not a hedge — controlled evidence points down; sev-caution + AU legal) shipped: da Silva 2025 meta-analysis (CBD-only no significant sleep effect; benefit from non-CBD cannabinoids) + Narayan 2024 pilot RCT (primary-insomnia outcomes null) + Ranum 2023 SR + Bonn-Miller 2017 (mislabeling). Efficacy and legality strictly separate; interactions/TGA status as clinician-guidance + context, not efficacy citations. `lavender` (tier C — approved) shipped: oral Silexan anxiety meta-analysis (Dold 2023, 5 RCTs, superior to placebo) + Kasper 2015 (sleep secondary to anxiety); verdict leads with the oral-vs-aromatherapy split; aromatherapy framed as blinding-limitation (not uncited empirical-null). `lemon-balm` (tier C — corrected UP from an initial D after verifying the standalone Bano 2023 n=100 PSQI RCT + Ghazizadeh 2021 anxiety meta-analysis; approved) shipped: an anxiolytic whose sleep benefit rides on the calm (not tested in insomnia); dropped Cases 2011 (no confirmed resolvable ID); both safety notes (sedation + anti-thyroid lab signal). `l-tryptophan` (tier C, sev-caution — approved) shipped: Sutanto 2022 meta-analysis (≥1g reduces WASO ~81 min/g + improves quality, but not latency/TST, 4 studies, not in insomnia) + Schneider-Helmert 1986 (dated latency finding) + Slutsker 1990 (EMS/contamination). Verdict leads with WASO-not-latency; serotonin-syndrome interaction + third-party-tested sourcing surfaced. Caught + corrected a wrong PMID (34015818 → neurosurgery paper) and a conference-abstract mixup during research. `glycine` (tier D by second-review call, down from proposed C) shipped: elegant SCN/NMDA body-temp mechanism (Kawai, rat) but **every human sleep trial is Ajinomoto's** (which sells it), small/high-risk-of-bias/unreplicated — the independent Soh 2024 review rates the evidence limited. Cited backbone built on firsthand-read sources (Soh + Kawai), NOT the unopened Yamadera (no PMID, DOI bot-walls). **Grading precedent (with gaba):** a borderline grade breaks DOWN when the mechanism is unproven OR the evidence is non-independent — somnary grades demonstrated, independent human benefit. `tart-cherry` (tier C — approved on condition the pivot was confirmed firsthand; done: the 2023 Stretton meta-analysis's NULL pooled effect read from the full-text deposit, Losso's 8 completers/+84 min from the PubMed abstract) shipped: real melatonin mechanism (Howatson) + small positive pilots (Losso, Pigeon) but null meta-analysis — the mirror image of chamomile. `chamomile` (tier C — corrected UP from an initial D proposal after verifying the Hieu 2019 meta-analysis; approved) shipped: Hieu 2019 (sleep-quality SMD −0.73, but insomnia null) + Zick 2011 (chronic-insomnia RCT null); verdict leads with the quality-vs-insomnia tension. `gaba` (tier D by second-review override of a proposed C coin-flip — mechanism-in-doubt breaks it down) shipped. `gaba` (tier D by second-review override of a proposed C coin-flip — mechanism-in-doubt breaks it down) shipped: Byun 2018 (single small unbalanced PSG RCT) + Boonstra 2015 (blood-brain-barrier uncertain); verdict leads with the weak premise; BBB-centered. Approved flagship set built (second-review sign-off): **kava** (F, sev-serious — Pittler/Ernst anxiety + Teschke + MMWR transplant cases/FDA advisory), **l-theanine** (B — Hidese + Lyon confirmed positive on objective actigraphy), **valerian** (C — 4 meta-analyses, Leach cross-herb phrasing), **5-htp** (D, sev-serious — Shell combination + Das EMS; serotonin-syndrome as clinician-guidance), **ashwagandha** (B, sev-caution — Cheah + Langade + Björnsson liver + Sharma thyroid; pregnancy as clinician-guidance). Removed the `_sample.mdx` fixture (valerian now the real validating page). `magnolia-bark` (tier D, solo) shipped — 2 verified citations (Talbott 2013 Relora combination on stress, not sleep; Qu 2012 honokiol NREM in mice); honest D (no standalone human sleep trial, mechanism preclinical). Provisional C→D on the evidence. `sleep-blends` shipped as the proprietary-blend-penalty explainer at `/sleep-blends` — a **context page (kind=context, ungraded), not a remedy**; shows F as an explicit transparency verdict (hidden doses ⇒ unfalsifiable ⇒ can't be graded), 0 efficacy citations, links to /methodology §3.2 + live ingredient pages. First "context page" type (bespoke, not the /r/ template). Stat refined: `liveRemedyCount` excludes context so "remedies graded" stays a truthful 4. `hops` (tier D) shipped — 3 verified citations (Salter&Brownie 2010 review; Franco 2012 non-alcoholic-beer actigraphy; Morin 2005 valerian-hops RCT), honest D (no standalone RCT, usually combined with valerian, one confounded beer signal). `passionflower` (tier D) shipped — 3 verified citations (Ngan 2011 tea RCT; Janda 2020 systematic review; Miyasaka 2007 Cochrane anxiety), honest D (one small subjective sleep trial, preclinical GABA mechanism, popular in blends). `magnesium` (tier B) shipped — 4 citations verified against PubMed/PMC + resolving (Mah&Pitre 2021 meta-analysis, Schuster 2025 RCT, Gröber 2015 review, Firoz 2001 bioavailability); honest B gate mix (3 positive + 3 caution); safety citations made first-class this session (`SafetyCallout` + schema `riskRow.sources`/`interactionsSources`, validated against `sources[]`, backward-compatible — melatonin unaffected). Content index: melatonin + magnesium `live` → stat rows read real 2 remedies / 12 sources.
-- [ ] **CHK-3.2 Standardization + dose-match data captured** for each botanical. *Accept:* the category-specific killers (PLAN §3.2) are present per page where relevant; proprietary-blend penalty logic documented.
-
-## Phase 4 — Search (scales with the catalog — wire early)
-- [x] **CHK-4.1 Build-time search index.** Generated from structured content (names + aliases/latin names + outcomes + symptoms). *Accept:* index builds from content, not hand-maintained; rebuilds on content change; F-grade items are findable by name (tier does not gate ranking). — **DONE.** `src/lib/search.ts` (`getSearchDocs()` reads the non-draft `remedies` collection + merges latin/category from the content index; `searchDocs()` ranks exact-name > alias/latin > compound > outcome/symptom > body, with punctuation/accent/apostrophe normalization; **tier never affects score**). `src/pages/search-index.json.ts` emits `dist/search-index.json` at build (4 live docs now, grows with the catalog). Both the ⌘K palette (CHK-4.2) and crawlable /search page (CHK-4.3) will read this one index.
-- [x] **CHK-4.2 Command palette (⌘K / `/`).** Per DESIGN_SYSTEM §2.13. *Accept:* keyboard-first (↑↓/Enter/Esc), grouped results with tier badges, full a11y (dialog/combobox/listbox roles, focus trap), reduced-motion respected. — **DONE.** `SearchPalette.astro` (trigger + modal), mounted in Nav; opens on ⌘K/Ctrl+K/"/", closes on Esc/scrim/route-change, focus returns to trigger; combobox+listbox roles, `aria-selected`/`aria-activedescendant`, Tab-trap; lazy-loads `/search-index.json`, ranks with the shared `search-rank` module; scrim-fade + rise motion, reduced-motion disables it. **Live browser interaction (open/keyboard) not yet visually confirmed** — dev server up for that.
-- [x] **CHK-4.3 Crawlable `/search?q=` page.** Per DESIGN_SYSTEM §3.7. *Accept:* server-rendered; deep-linkable; works with JS off; same index as the palette. — **DONE.** `src/pages/search.astro`, the project's **first SSR route** (`prerender=false` → Vercel serverless function; every other page stays static). Real `<form method=get>` works JS-off; deep-linkable `?q=`; grouped results with tier badges; empty state + suggested queries; same `getSearchDocs`+`searchDocs`. Live-tested on dev: 200, results/empty-state/no-JS form all render.
-
-## Phase 5 — Navigation surfaces
-- [x] **CHK-5.1 Tier board.** Ranks all remedies S–F, reads structured data. *Accept:* server-rendered; sortable/filterable; links to each page; shareable. — **DONE.** `/tiers` (DESIGN §3.3): reads the graded remedies from the content collection (single source of truth), ranks S→F, one section per tier (`170px 1fr` rail + `auto-fill minmax(280px)` card grid) with the new reusable `RemedyCard`. The **empty S tier renders the intentional dashed "nothing qualifies" panel** (`tiers.ts` emptyNote), not a missing section. Header + real stat row (19/61/0/$0) + tier legend; server-rendered/crawlable; shareable (per-remedy OG cards from CHK-2.2). Added to nav. Inherently sorted S→F; outcome-based filtering lives on the outcome pages (next). Verified: 6 tiers, 19 cards, empty-S panel, 0 errors.
-- [x] **CHK-5.2 Outcome pages (7).** Goal-first entry per PLAN §2.3. *Accept:* each maps to remedies by evidence; no anecdote-driven ranking. — **DONE.** `src/lib/outcomes.ts` is the single source of truth mapping the 7 standardized §2.3 goals (fall-asleep-faster, stay-asleep, sleep-quality, anxiety-driven-insomnia, jet-lag-shift-work, next-day-grogginess, vivid-dreams-rem) → the remedies with real human evidence for that goal. `/outcome/[slug].astro` (DESIGN §3.4): breadcrumb + goal title/dek, goal-switcher chips, **ranked list sorted by each remedy's own tier — best evidence first, never anecdote**, "what we're measuring" panel, "other goals" grid. A remedy appears under a goal only with human evidence pointing at *that* measure (e.g. l-tryptophan under stay-asleep, its WASO effect; not fall-asleep). cbd deliberately absent everywhere (null controlled evidence); kava appears under anxiety only, carrying its F + hepatotoxicity. Verified: 7 static pages, rankings correct (jet-lag → melatonin[A] before tart-cherry[C]; anxiety → ashwagandha[B]…kava[F]), 0 errors.
-- [x] **CHK-5.3 Home + stat row.** Hero with the "enemy" strike-through, disavowal stat row (remedies / sources / 0 hallucinated cites / $0 brand money). *Accept:* matches positioning §1; stats read from real data. — **DONE.** `src/pages/index.astro` (DESIGN §3.1): eyebrow (independent · evidence-graded · reader-funded) + the "enemy" headline ("the sleep-supplement internet is a ~~sales floor~~. this is the [evidence layer]."), dek, CTA row (tier board + methodology). Disavowal `StatRow` reads **real data** — `liveRemedyCount` (19) + summed live `sourceCount` (61) + 0 hallucinated + $0 brand money — never hardcoded, so the numbers can't overstate. "four ways to read" 2×2 grid (tier board / by-outcome / methodology / search) + 3-card outcome preview linking `/outcome/{id}`. Newsletter band deferred to Phase 7 (real-promises rule — no non-functional signup). Verified static/crawlable, 0 errors.
-
-## Phase 6 — Interventions (non-supplement)
-- [x] **CHK-6.1 Intervention template.** Adapt the §4 remedy template for behavioral/environmental/device interventions on the SAME S–F rubric. *Accept:* CBT-I page built end-to-end with real citations; graded on evidence; clearly part of the same evidence system, not a side blog. — **DONE via CBT-I (`/r/cbt-i`, tier S — the site's first).** Reused the graded `/r/[slug]` template on the same rubric (tier badge + evidence gates + claims-vs-data + cited sources), with a backward-compatible `format: 'intervention'` schema flag that adapts three things: the dose block is skipped (no dose), the "standardization" block reframes to fidelity ("what counts as the real thing"), and MetadataCard drops the compound/dose rows. Second-review-confirmed **S** (clears every S gate: 2 first-line guidelines at strongest-recommendation, multiple large independent meta-analyses, large effect g≈1.0 on insomnia severity, best safety profile on the site, durable at follow-up). 5 sources, **all PMIDs verified firsthand + resolve 200** (2 recalled PMIDs were wrong and corrected during research; 2 publisher DOIs bot-wall 403 with 200 PMIDs): ACP 2016 (27136449) + AASM 2021 (33164742) first-line guidelines, Trauer 2015 (26054060) + van Straten 2018 (28392168) meta-analyses, Espie 2019 digital-CBT-I RCT (30264137). Honest caveats prominent: consolidates sleep more than lengthens it (TST barely moves, pooled estimate n.s.), scoped to chronic insomnia, access/effort is the real barrier (digital CBT-I as the scaling answer). Tier board updated: the empty-S "nothing qualifies" panel yields to the real S entry; the board dek now reads "only one thing has earned the top tier, and it isn't a supplement." Stats now real **20 graded / 66 sources**. astro check 0 errors, build clean, OG image renders for tier S.
-- [ ] **CHK-6.2 First intervention batch.** CBT-I, sleep restriction, stimulus control, morning light, temperature/warm-bath, breathing/PMR, white noise, weighted blanket — per PLAN §5a. *Accept:* each cited + graded; honest where evidence is weaker than marketed (e.g. blue-light glasses); medical/context pages clearly labeled as non-graded. — **STARTED: CBT-I (tier S) shipped** as the first of the batch and the template-proving page (CHK-6.1). Remaining interventions (sleep restriction, stimulus control, morning light, temperature/warm-bath, breathing/PMR, white noise, weighted blanket) to be researched source-first in a fresh session.
-
-## Phase 7 — Funnel & membership
-- [ ] **CHK-7.1 Dispatch newsletter capture.** *Accept:* email capture works; privacy-compliant; no dark patterns.
-- [ ] **CHK-7.2 Briefs structure + paywall.** FREE vs locked labeling; membership tiers (annual + capped lifetime with real scarcity). *Accept:* paywall gates only briefs/exports, never the free wiki; billing integration stubbed or live per decision.
-
-## Phase 8 — Expansion & deep research (ongoing)
-- [ ] **CHK-8.1 Expansion catalog toward 100+.** Niche/traditional/under-studied remedies per PLAN §5.2. *Accept:* each meets CHK-2.1 bar; honest D/F grades shown not hidden; content index kept current.
-- [ ] **CHK-8.2 Deep-research cadence.** Periodic literature sweep + tier-change log ("how rankings change"); search-query backlog feeds the roadmap (§5b). *Accept:* a documented, repeatable process exists; at least one tier change logged publicly.
-
-## Phase 9 — Advanced
-- [ ] **CHK-9.1 Stack builder (the Lab).** Combine remedies → aggregate evidence grade + interaction warnings. *Accept:* interaction warnings surface; export gated to members.
-- [ ] **CHK-9.2 Ask (RAG).** Answers only from cited corpus; refuses/hedges off-corpus; cites back. *Accept:* never invents; every answer links to a source in the corpus.
-- [ ] **CHK-9.3 Community reports.** Anonymous, structured, threshold-gated, stored separately. *Accept:* no PII; never affects grades; firewall verified in code.
-- [ ] **CHK-9.4 PWA / app polish.** *Accept:* installable; core pages cached; mobile-first verified.
+**The pivot is therefore a migration:** old soft-light design → evidence-teal
+(DESIGN_SYSTEM v2), lowercase brand → "Somnary." (D3), tier-board-hero IA →
+decision-first IA (strategy 03). Items below are annotated with what already
+exists so sessions extend the site instead of rebuilding it.
 
 ---
 
-### Session log (Claude Code appends one line per session)
-<!-- e.g. 2026-06-29 — CHK-2.1 melatonin template done, all 12 blocks, 14 citations resolved. -->
-2026-06-30 — CHK-0.1 ticked (scaffold criteria already met). Starting Phase 0 CHK-0.2→0.6: Astro + tokens + content model + citation resolver + content index.
-2026-06-30 — Phase 0 complete. CHK-0.2 Astro (static, pre-rendered HTML verified). CHK-0.3 DESIGN_SYSTEM tokens wired (css vars + tailwind, verbatim; token-only probe). CHK-0.4 MDX content collection + Zod schema (all fields, structured cites; rejects bad entry). CHK-0.5 citation resolver (offline gate via prebuild + --online; sample Bent 2006 resolves 200). CHK-0.6 content index (48 planned entries; zod-validated loader read at build). All pushed.
-2026-07-03 — Deferred context pages shipped (solo): /ramelteon, /when-to-see-a-doctor, /melatonin-children. All three are CONTEXT, not graded remedies — no tier badge, no evidence-gate chips; a shared sage `ContextBanner` ("context — not a graded remedy") marks each, visually distinct from the /r/ template. `when-to-see-a-doctor` + `melatonin-children` are safety-forward with clinician-guidance framing: children carries a serious (tier-f) accidental-ingestion callout + Poison Help 1-800-222-1222; doctor carries a caution (tier-c) red-flag list (apnoea, chronic insomnia, RLS, narcolepsy, REM behaviour disorder, mood/self-harm) + crisis line 988. Citations are self-contained footnotes (new `Fn` + `ContextSources` components → verified PubMed links, not the remedy citation island). Every cited specific verified firsthand: AASM 2017 (PMID 27998379 — weak rec FOR ramelteon vs AGAINST OTC melatonin, re-read this session), Lelak 2022 MMWR (35653284, +530% pediatric ingestions), Erland 2017 (27855744, 83%-below-to-+478% label range) — Lelak/Erland reused from the melatonin page. Cohen 2023 JAMA gummies letter (37097362): PMID/title/authors verified, but no abstract/full-text was readable, so only its supported qualitative claim (gummies mislabelled + some contained CBD) is asserted — the specific percentages are NOT stated. Regulatory/mechanism facts (ramelteon prescription-only, MT1/MT2, non-scheduled; CBT-I first-line) framed as label/clinician guidance, not miscited. Wired into the footer as a "context · not graded" group (site-wide, non-orphan, crawlable) + in the sitemap. Content index: the three entries → researchStatus `live`, sourceCount kept 0 so their reused cites don't double-count the graded-corpus "sources cited" stat (stays 19/61). astro check 0 errors; build clean; grep-verified 0 tier badges / 0 gate chips, footnote refs match source anchors (1/3/1), all internal links resolve. Pushed.
-2026-06-30 — CHK-1.1 methodology page complete. /methodology renders all 9 sections + S–F rubric + 14 evidence gates + source hierarchy + cite/corrections policy (within 7 days · sammymoz@gmail.com), server-rendered, 0 hydration scripts. Built TierBadge + EvidenceGateChip (CHK-2.3 pulled forward, commit de7b123) on single-source-of-truth lib/tiers.ts + lib/evidence-gates.ts; added wordmark/nav/statrow/footer chrome into Base. Vercel adapter added earlier this session (somnary.vercel.app live). All pushed.
-2026-07-02 — CHK-3.1: approved flagship set built + pushed — kava (F), l-theanine (B), valerian (C), 5-htp (D), ashwagandha (B). All second-review-approved with citation fixes applied: kava paired the MMWR transplant/FDA source (PMID 12500906) since Teschke's abstract doesn't state failure/transplant; 5-htp cites Das only for EMS (its abstract doesn't confirm the serotonin-syndrome wording) and states the serotonergic interaction as clinician-guidance; ashwagandha thyroid caution now cited to Sharma 2018 (PMID 28829155), pregnancy as clinician-guidance, Björnsson liver kept prominent; valerian uses the agreed cross-herb Leach phrasing. Removed _sample.mdx fixture. Caught 2 more wrong PMIDs during research (MMWR, an earlier miss) — verification working. All PMIDs resolve 200 (several publisher DOIs bot-wall). 10 graded remedies live / 35 sources; search index auto-includes all 10. Pushed.
-2026-07-02 — CHK-4.1 done (search index foundation): src/lib/search.ts (build-time getSearchDocs from the remedies collection + shared searchDocs ranker, tier-agnostic, normalized matching) + src/pages/search-index.json.ts endpoint (emits dist/search-index.json, 4 live docs). Both search surfaces (⌘K palette 4.2, /search page 4.3) will read it. astro check clean; ranking sanity-tested (exact/alias/outcome/symptom, apostrophe+case normalization). Also this session: valerian proposal citation fix (Leach & Page reworded to cross-herb phrasing per reviewer default; queued, not built); skullcap researched to a C proposal (2025 standalone sleep RCT PMID 40362800 read firsthand — lifts it off D but single/industry/carryover-limited) — stop, sent for review. Pushed.
-2026-07-01 — CHK-3.1 (solo): hops page live (tier D). Source-first, 3 citations verified/resolving (Salter&Brownie 2010 PMID 20628685; Franco 2012 PMID 22815680 non-alcoholic-beer actigraphy; Morin 2005 PMID 16335333 valerian-hops RCT; Sleep DOI bot-walls 403 = warning). Honest D: no standalone hops RCT; the one near-solo signal is a small confounded non-alcoholic-beer study; otherwise bundled with valerian (modest combo trial, no PSG change). Dropped a hops safety review (Zanoli) that hit a CAPTCHA rather than cite unverified. Stat rows now real 4 remedies / 18 sources. All pushed.
-2026-07-01 — CHK-3.1 (solo): passionflower page live (tier D). Source-first, 3 citations pulled/read/verified against PubMed, all PMIDs resolve 200 (Ngan&Conduit 2011 PMID 21294203; Janda 2020 PMID 33352740; Miyasaka 2007 Cochrane PMID 17253512; 2 Wiley/Cochrane DOIs bot-wall 403 = warnings). Honest D landed cleanly (one small n=41 subjective-only tea RCT, no PSG change; whole literature = that single sleep study; anxiety evidence "too few to permit any conclusions"; GABA mechanism preclinical). No schema/template changes. Stat rows now real 3 remedies / 15 sources. Guessed a wrong Cochrane PMID during research and caught it on verification (resolved to a fetal-movement review) — corrected before shipping. All pushed.
-2026-07-01 — CHK-3.1 started: magnesium page live (tier B, first Phase-3 launch remedy). 4 citations pulled/read/verified against PubMed+PMC, all resolving (Mah&Pitre 2021 PMID 33865376; Schuster 2025 PMID 40918053; Gröber 2015 PMID 26404370; Firoz 2001 PMID 11794633). Numbers quoted from papers (SOL −17.36 min, low/very-low GRADE; ISI −3.9 vs −2.3, p=0.049, d≈0.2). Resolved the handoff's source-3 gap with real PMID/DOIs (Gröber covers renal + drug interactions; Firoz covers oxide ~4% absorption) instead of the URL-only NIH sheet — so no safety claim was softened. Made safety citations first-class (SafetyCallout renders CiteMarkers; schema riskRow.sources + interactionsSources, integrity-checked against sources[]; backward-compatible). Honest B gate mix. Stat rows now real 2 remedies / 12 sources. astro check clean, cites resolve, content server-rendered (grepped dist), melatonin regression-checked. All pushed.
-2026-07-01 — CHK-2.1 complete. Melatonin remedy template (`/r/melatonin`, tier A) end-to-end: one dynamic route `src/pages/r/[slug].astro` + `melatonin.mdx`, all 12 blocks as 10 reusable components (VerdictBand, ClaimsDataTable w/ FIXED strike-reveal, DosingGrid, SafetyCallout, MetadataCard, CommunityBar, AskPanel, SourcesList, CitationPopover, CiteMarker; + GateChip refactor so the §2.3 variant map has one home). 8 real citations verified against PubMed, all resolving (2 publisher DOIs bot-blocked 403/412 → resolver now treats bot-block codes as warnings not dead; every source also has a 200-resolving PMID). Tokens-only, `astro check` clean, server-rendered content grepped in `dist`. Stat rows read real 1 remedy / 8 sources (home `sourcesCited` un-hardcoded). Deferred honestly: JSON-LD/OG → CHK-2.2, brief promo → Phase 8, Ask backend → Phase 9. CHK-2.3 (badge/chips) now reused+verified but left [~] to keep one-item-per-session. All pushed.
-2026-06-30 — CHK-1.2 + CHK-1.3 complete. Four legal pages (/disclaimer /terms /privacy /disclosure) on a shared LegalPage layout, verbatim copy, brackets filled (NSW, sammymoz@gmail.com, no-analytics, self-funded, Vercel/US, 30 june 2026); each carries a PRE-LAUNCH legal-review marker. Disclaimer.astro (standard + compact) — compact wired into the global footer with links to all four legal pages sitewide; standard test-rendered on home (→ remedy template in CHK-2.1). Server-rendered, tokens only, 0 hydration scripts. All pushed. NOTE: legal copy is unreviewed template text — book AU solicitor review before launch/membership.
+## Phase 0 — Reconciliation, scaffold & guardrails
+- [x] **CHK-0.0 Doc reconciliation.** Move strategy package to `/docs/strategy/`;
+  mark superseded PROJECT_PLAN sections; rewrite DESIGN_SYSTEM.md from the v3
+  prototype `styles.css` (evidence-teal tokens); apply capitalized "Somnary"
+  across docs; delete stack-builder references (D4). *Accept:* no doc
+  contradicts CLAUDE.md's locked decisions; DESIGN_SYSTEM has zero TODOs except
+  flagged gaps. *(Done, PR #1. Owner ratified the three token gaps: G1 S-tier
+  `--grade-s #0d4f44`, G3 warn-chip `--safety-ink #a02c22`, G4 `--focus-ring`
+  3px primary @40%. Only G2 — undesigned future page types — remains open, not
+  a blocker. Merge is the owner's action.)*
+- [x] **CHK-0.1 Astro scaffold.** *(Pre-existing: Astro 5 + MDX + sitemap +
+  Vercel adapter; build verified green 2026-07-06; content pre-rendered in
+  dist HTML; pushed.)* `.claude/agents/` role files added in CHK-0.0 session.
+- [ ] **CHK-0.2 Evidence-teal reskin + token linter.** *(Reworded from "tokens
+  wired" — v1.2 tokens are wired; this item migrates them.)* Replace
+  `tailwind.config.mjs` + `src/styles` + all components with DESIGN_SYSTEM v2
+  tokens; wordmark → `Somnary.` (D3) site-wide. *Accept:* no v1.2 color/type
+  value remains; token linter exists and fails on hardcoded hex/spacing;
+  contrast rules of DESIGN_SYSTEM §8 hold on live pages. *(Unblocked — all
+  grade colors incl. S now defined; wire `--focus-ring` on all interactives.)*
+- [~] **CHK-0.3 Content model extension.** *(Schema exists in
+  `src/content.config.ts` with claims↔data, sources, doses, safety,
+  interactions, community, seo.)* Add missing fields per CLAUDE.md: `notFor[]`,
+  `biggestRisk`, `reviewDate`, `changeLog[]`; confirm `bestFor[]` shape.
+  *Accept:* sample remedy validates; tier field marked human-gated in schema
+  docs; existing 20 remedies migrated.
+- [~] **CHK-0.4 Citation resolver in CI + pre-commit.** *(Resolver exists —
+  `scripts/check-citations.mjs`, runs in `prebuild`, fails build on bad cite.)*
+  Missing: CI workflow, pre-commit hook, deliberate-fake-PMID regression test.
+- [ ] **CHK-0.5 CI gate suite.** Build + resolver + token lint + crawlability
+  check (grep built HTML for page content). *Accept:* all gates run on every PR
+  (no `.github/` exists yet); post-session hook appends to this file's session log.
+
+## Phase 1 — Credibility spine
+- [~] **CHK-1.1 Methodology page.** *(Exists, server-rendered, from v1 build.)*
+  Remaining: conformance pass against strategy 06 rubric wording + evidence-gate
+  chips + corrections policy; re-verify "a reader could re-derive a grade".
+- [~] **CHK-1.2 Legal pages.** `HG` *(Disclaimer, terms, privacy, disclosure
+  exist from v1 build.)* Remaining: disclosure must state D2 tools-first
+  funding (no membership paywall); owner sign-off on the updated set.
+- [x] **CHK-1.3 Disclaimer component.** *(Verified in built HTML: "educational,
+  not medical advice" near decisions on remedy pages, not footer-only;
+  conservative re pregnancy/children/interactions.)*
+- [ ] **CHK-1.4 Evidence change log page.** Public log of grade/source changes.
+  *Accept:* reads from `changeLog[]` (added in CHK-0.3); server-rendered.
+
+## Phase 2 — Melatonin Decision Hub (the template + the wedge)
+- [~] **CHK-2.1 Melatonin remedy page.** `HG` *(Exists: 12-block template,
+  grade A owner-approved, 8 cites verified.)* Remaining: new lead block —
+  grade / best-for / **not-for / biggest-risk** / studied-dose (needs CHK-0.3
+  fields) + decision-translation line per strategy 03.
+- [~] **CHK-2.2 Melatonin cluster pages.** *(melatonin-children exists.)*
+  Remaining: dose/timing, long-term uncertainty, gummy label accuracy
+  (JAMA 2023). *Accept:* each follows the 10-part article skeleton; safety
+  boundaries visible.
+- [x] **CHK-2.3 SEO furniture.** *(Verified in built HTML: JSON-LD + OG image +
+  canonical on remedy pages; question-format titles.)*
+- [x] **CHK-2.4 Tier badge + evidence-gate chip components.** *(Exist:
+  `TierBadge.astro`, `EvidenceGateChip.astro`; read structured data; legible
+  without color alone.)* Restyle lands with CHK-0.2.
+
+## Phase 3 — Decision-first surfaces
+- [ ] **CHK-3.1 Homepage.** Replace the v1 "enemy hero" with "Check a sleep
+  remedy before you take it" + checker search, situation route tiles
+  (melatonin / sleep blends / fall asleep / wake at night / medications /
+  children), trust strip, "how to read a grade". *Accept:* three clear decision
+  routes above the fold; no-affiliate promise visible. *(Search + StatRow
+  components already exist to reuse.)*
+- [ ] **CHK-3.2 Start Here page.** *Accept:* per strategy doc 03 brief.
+- [ ] **CHK-3.3 Safety hub / router.** Grid of boundary routes (apnea, chronic
+  insomnia, medications, children, urgent states). *(when-to-see-a-doctor page
+  exists as a route target.)* *Accept:* routes to clinician-boundary guidance,
+  never diagnosis.
+- [~] **CHK-3.4 Remedies overview (tier board).** *(Exists at `/tiers`,
+  server-rendered, from structured data.)* Remaining: demote from hero product
+  to overview framing; sortable.
+
+## Phase 4 — Label Checker MVP + funnel
+- [ ] **CHK-4.1 Label checker (static rules).** Paste a Supplement Facts panel →
+  flags proprietary blends, dose mismatch vs studied dose, melatonin >5 mg,
+  missing standardization, interaction flags. *Accept:* Astro island; rules
+  documented and source-backed; output uses allowed framings only.
+- [ ] **CHK-4.2 Newsletter capture + claim submission.** *Accept:* privacy-
+  compliant, no dark patterns; "send us a claim/label to check" form works.
+
+## Phase 5 — Catalog & audience expansion
+- [~] **CHK-5.1 Core catalog (20–30 remedies).** `HG` per grade. *(20 live,
+  grades owner-approved via v1 two-pass: full wedge list — sleep blends, CBD,
+  magnesium, valerian, L-theanine, ashwagandha, tart cherry, glycine — plus
+  C/D/F tiers.)* Remaining: verify standardization + dose-match captured per
+  botanical; document proprietary-blend penalty logic; expansion toward 30.
+- [~] **CHK-5.2 Audience pages.** *(melatonin-children exists.)* Remaining:
+  meds + supplements, older adults, jet lag/shift work, anxiety-driven
+  insomnia. *Accept:* 10-part skeleton; conservative safety framing.
+- [x] **CHK-5.3 Goals (outcome) pages + CBT-I hub.** *(7 outcome pages,
+  evidence-ranked, + CBT-I page at tier S, framed as strongest-evidence
+  intervention — live from v1 build.)* CBT-I S badge restyle lands with CHK-0.2
+  (S color now defined).
+
+## Phase 6 — Tools, AI, community, revenue
+- [ ] **CHK-6.1 Compare tool.** Compare remedies by goal, effect, safety, evidence
+  gates, who-should-avoid; interaction warnings surfaced (salvaged engine per D4).
+  *Accept:* never recommends combinations.
+- [ ] **CHK-6.2 Clinician handout export.** `HG` (first revenue surface per D2).
+  One-page PDF for pharmacist/GP discussion. *Accept:* content mirrors the page,
+  cited, disclaimer included.
+- [ ] **CHK-6.3 Scoped assistant (RAG).** Corpus-only, cites back, refuses
+  personalized dosing/diagnosis, routes to safety pages; refusal + hallucination
+  test suite. *(An `AskPanel.astro` stub exists from v1 — audit it against the
+  rulebook's forbidden framings before reuse.)* *Accept:* zero invented
+  citations in test runs; forbidden-framing lint passes.
+- [ ] **CHK-6.4 Community reports.** Anonymous, structured, threshold-gated,
+  stored separately. *Accept:* firewall verified in code; never touches grades.
+- [ ] **CHK-6.5 Supporter tier / label-checker pro.** `HG` scope + pricing.
+  *Accept:* free wiki never paywalled.
+
+---
+
+### Session log (agents append one line per session)
+<!-- 2026-07-06 — checklist v2 adopted; decisions D1–D4 locked. -->
+- 2026-07-06 · CHK-0.0 · strategy package → /docs/strategy/; DESIGN_SYSTEM v2 (evidence-teal) rewritten from v3 prototype with computed contrast; PROJECT_PLAN/DESIGN_BRIEF superseded sections marked; checklist reality-audited to v2.1; .claude/agents/ ×6 added; pivot-analysis baseline corrected. Build + resolver green. PR #1. Owner ratified token gaps: G1 `--grade-s #0d4f44`, G3 `--safety-ink #a02c22`, G4 `--focus-ring` 3px primary @40%; G2 (undesigned page types) remains open, non-blocking. Deferred: disclosure D2 update rides CHK-1.2.

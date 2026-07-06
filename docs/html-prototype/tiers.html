@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Somnary Prototype | Tier Board</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <nav class="shell nav" aria-label="Primary navigation">
+        <a class="brand" href="index.html"><span class="brand-mark">s</span>somnary</a>
+        <div class="nav-links"><a href="index.html">Start Here</a><a aria-current="page" href="tiers.html">Remedies</a><a href="outcome-fall-asleep.html">Goals</a><a href="safety.html">Safety</a><a href="label-checker.html">Label Checker</a><a href="remedy-melatonin.html">Evidence</a></div>
+        <div class="nav-actions"><a class="button secondary" href="index.html"><i data-lucide="search" class="icon"></i> Search</a><a class="button" href="label-checker.html">Check a remedy</a></div>
+      </nav>
+    </header>
+    <main class="shell">
+      <section class="page-hero">
+        <div class="breadcrumb">Home <span>/</span> Remedies</div>
+        <h1 class="page-title">Every remedy, graded</h1>
+        <p class="lede">Human evidence, label reality, and safety boundaries in one board. The grade is not popularity and never brand payout.</p>
+        <div class="hero-metrics" aria-label="Tier board summary">
+          <div class="hero-metric"><b>20</b><span>Remedies reviewed</span></div>
+          <div class="hero-metric"><b>66</b><span>Sources checked</span></div>
+          <div class="hero-metric"><b>0</b><span>Affiliate links</span></div>
+          <div class="hero-metric"><b>S-F</b><span>Evidence scale</span></div>
+        </div>
+      </section>
+
+      <section class="section split-layout">
+        <div>
+          <div class="tier-legend">
+            <div class="tier-cell"><b>S</b><strong>Exceptional</strong><span>Guideline-level evidence</span></div>
+            <div class="tier-cell"><b>A</b><strong>Strong</strong><span>Well supported in people</span></div>
+            <div class="tier-cell"><b>B</b><strong>Viable</strong><span>Small but real signal</span></div>
+            <div class="tier-cell"><b>C</b><strong>Mixed</strong><span>Limited or inconsistent</span></div>
+            <div class="tier-cell"><b>D</b><strong>Weak</strong><span>Claims outrun data</span></div>
+            <div class="tier-cell"><b>F</b><strong>Avoid</strong><span>Risk or no evidence</span></div>
+          </div>
+
+          <table class="data-table" style="margin-top:18px">
+            <thead><tr><th>Remedy</th><th>Grade</th><th>Best for</th><th>Key limitation</th><th>Safety</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Melatonin</strong></td><td><span class="grade a">A</span></td><td>Body-clock timing, sleep onset</td><td>Daytime drowsiness; not for everyone</td><td>Short-term use recommended</td></tr>
+              <tr><td><strong>Magnesium (Glycinate)</strong></td><td><span class="grade b">B+</span></td><td>Sleep quality, people with low intake</td><td>GI upset at high doses</td><td>Kidney disease caution</td></tr>
+              <tr><td><strong>L-Theanine</strong></td><td><span class="grade b">B</span></td><td>Anxiety-driven insomnia</td><td>Smaller studies</td><td>Very safe</td></tr>
+              <tr><td><strong>CBD</strong></td><td><span class="grade c">C+</span></td><td>Anxiety, pain, sleep quality</td><td>Mixed results, product variability</td><td>Interactions possible</td></tr>
+              <tr><td><strong>Valerian</strong></td><td><span class="grade c">C-</span></td><td>Sleep onset</td><td>Inconsistent results</td><td>May cause headache</td></tr>
+              <tr><td><strong>Sleep blends</strong></td><td><span class="grade d">D</span></td><td>Convenience</td><td>Proprietary blends hide doses</td><td>Harder to assess</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <aside class="side-panel">
+          <h3>Evidence you can trust</h3>
+          <div class="side-list">
+            <div><i data-lucide="layers" class="icon"></i><span>Human studies in people</span></div>
+            <div><i data-lucide="brain" class="icon"></i><span>Dose-response evaluated</span></div>
+            <div><i data-lucide="scan-search" class="icon"></i><span>Compared to placebo</span></div>
+            <div><i data-lucide="link" class="icon"></i><span>Sources checked and linked</span></div>
+          </div>
+          <hr style="border:0;border-top:var(--hairline);margin:22px 0" />
+          <h3>Not sure where to start?</h3>
+          <p style="color:var(--muted)">Answer three quick questions and route to the right goal, remedy, or safety page.</p>
+          <a class="button" href="index.html">Start quick guide</a>
+        </aside>
+      </section>
+    </main>
+    <footer class="footer"><div class="shell footer-grid"><span>Educational, not medical advice.</span><div class="footer-links"><a href="#">Methodology</a><a href="#">Disclosure</a><a href="#">Privacy</a></div></div></footer>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script><script src="script.js"></script>
+  </body>
+</html>
