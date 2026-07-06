@@ -1,6 +1,13 @@
-# somnary — Content Index Seed (CHK-0.6 / Phase 3 research runway)
+# Somnary — Content Index Seed (v1 CHK-0.6 / research runway)
 
-> **For Claude Code & the editor:** This seeds the content index. It is the worklist for Phase 3 (launch catalog) and later Phase 8 (expansion) + Phase 6 (interventions). It also feeds the search index (aliases/latin names are search fields).
+> **STATUS NOTE (2026-07-06, CHK-0.0):** the per-row `status` fields below are
+> **stale** — they were seeded before the catalog was built. The machine mirror
+> `src/data/content-index.json` is current (24 live entries as of this audit)
+> and is the **authoritative** status record; the build reads it. Use this .md
+> for aliases, provisional-tier hypotheses, and research pointers only. Phase
+> numbers in this file refer to the **v1** checklist, not BUILD_CHECKLIST v2.1.
+
+> **For Claude Code & the editor:** This seeds the content index. It is the worklist for the launch catalog and later expansion + interventions. It also feeds the search index (aliases/latin names are search fields).
 >
 > **CRITICAL — provisional tiers are NOT grades.** The `prov. tier` column is a *research starting hypothesis* to prioritize work, NOT a published grade. The real grade is assigned only after the source-first, two-pass process (PLAN §9): pull the meta-analyses/RCTs, read them, grade against the rubric, second-pass verify. A provisional tier may move up or down once the evidence is actually read — that's the process working, not a mistake. **Never ship a `prov. tier` to the live site as the grade.** The live grade comes from the remedy's own researched, cited page.
 >
