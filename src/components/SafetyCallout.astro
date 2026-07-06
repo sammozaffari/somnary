@@ -1,7 +1,10 @@
 ---
-// Safety & interactions — DESIGN_SYSTEM §2.12. TWO fixed severities only (§5 guardrail 8):
-// .sev-caution (tier-c) for A/B pages, .sev-serious (tier-f) for F-grade / documented harm. No
-// red, no flashing, no new severity. Head = sigil + title + severity tag; body = lead + .risk grid
+// Safety & interactions — DESIGN_SYSTEM v2 §3/§8. TWO fixed severities only:
+// .sev-caution (amber advisory) for A/B pages, .sev-serious (vermilion safety register —
+// warning-bg / vermilion / safety-ink) for F-grade / documented harm. Serious uses the
+// dedicated safety palette, never a grade color (guardrail: grades never imply safety).
+// Small text is always dark (raisin/ink); hues carry the signal via sigil/border/tag.
+// Head = sigil + title + severity tag; body = lead + .risk grid
 // (category / text), with pregnancy and interactions folded in as their own rows so nothing about
 // safety is buried; foot = "research reference · not medical advice". role="note". .risk 160px 1fr
 // → 1-col ≤640.
@@ -83,36 +86,32 @@ const sevWord = severity === 'serious' ? 'serious' : 'caution';
     border: 1px solid;
     padding: var(--sp-6);
   }
-  /* §2.12 severities — the two allowed tinted registers. */
+  /* Two allowed registers. Small text = --raisin (14:1); hue lives in sigil/border/tag. */
   .sev-caution {
-    background: var(--tier-c-tint);
-    border-color: var(--tier-c);
+    background: var(--grade-c-tint);
+    border-color: var(--grade-c);
   }
   .sev-caution .sigil {
-    background: var(--tier-c);
-  }
-  .sev-caution .title,
-  .sev-caution .cat,
-  .sev-caution .foot {
-    color: var(--tier-c-ink);
+    background: var(--grade-c);
   }
   .sev-caution .sev-tag {
-    background: var(--tier-c);
+    background: var(--grade-c);
+    color: var(--ink);      /* dark on amber — white on amber fails AA small */
   }
   .sev-serious {
-    background: var(--tier-f-tint);
-    border-color: var(--tier-f);
+    background: var(--warning-bg);
+    border-color: var(--vermilion);
   }
   .sev-serious .sigil {
-    background: var(--tier-f);
-  }
-  .sev-serious .title,
-  .sev-serious .cat,
-  .sev-serious .foot {
-    color: var(--tier-f-ink);
+    background: var(--vermilion);
   }
   .sev-serious .sev-tag {
-    background: var(--tier-f);
+    background: var(--safety-ink);   /* white on safety-ink 6.5:1 (vermilion fails small) */
+  }
+  .title,
+  .cat,
+  .foot {
+    color: var(--raisin);
   }
 
   .head {
@@ -195,7 +194,7 @@ const sevWord = severity === 'serious' ? 'serious' : 'caution';
     content: '—';
     position: absolute;
     left: 0;
-    color: var(--ink-faint);
+    color: var(--muted);
   }
 
   .foot {

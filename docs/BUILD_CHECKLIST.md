@@ -39,13 +39,15 @@ exists so sessions extend the site instead of rebuilding it.
 - [x] **CHK-0.1 Astro scaffold.** *(Pre-existing: Astro 5 + MDX + sitemap +
   Vercel adapter; build verified green 2026-07-06; content pre-rendered in
   dist HTML; pushed.)* `.claude/agents/` role files added in CHK-0.0 session.
-- [ ] **CHK-0.2 Evidence-teal reskin + token linter.** *(Reworded from "tokens
+- [~] **CHK-0.2 Evidence-teal reskin + token linter.** *(Reworded from "tokens
   wired" — v1.2 tokens are wired; this item migrates them.)* Replace
   `tailwind.config.mjs` + `src/styles` + all components with DESIGN_SYSTEM v2
   tokens; wordmark → `Somnary.` (D3) site-wide. *Accept:* no v1.2 color/type
   value remains; token linter exists and fails on hardcoded hex/spacing;
-  contrast rules of DESIGN_SYSTEM §8 hold on live pages. *(Unblocked — all
-  grade colors incl. S now defined; wire `--focus-ring` on all interactives.)*
+  contrast rules of DESIGN_SYSTEM §8 hold on live pages. *(Done in PR #2 —
+  build green through linter + resolver, zero v1.2 palette hex in built CSS,
+  D3 casing site-wide. Awaiting owner VISUAL review before merge, since the
+  session couldn't screenshot. Tick on merge.)*
 - [~] **CHK-0.3 Content model extension.** *(Schema exists in
   `src/content.config.ts` with claims↔data, sources, doses, safety,
   interactions, community, seo.)* Add missing fields per CLAUDE.md: `notFor[]`,
@@ -146,4 +148,5 @@ exists so sessions extend the site instead of rebuilding it.
 
 ### Session log (agents append one line per session)
 <!-- 2026-07-06 — checklist v2 adopted; decisions D1–D4 locked. -->
+- 2026-07-06 · CHK-0.2 · evidence-teal reskin. Central tokens (global.css + tailwind) → DESIGN_SYSTEM v2; Archivo + IBM Plex Sans (+ @fontsource for OG gen); TierBadge (filled/white letter) + Wordmark (Somnary., D3) redesigned; SafetyCallout serious→vermilion register; ~120 token refs swept across 31 files via 4 parallel agents; StatRow accent API renamed; OG generator reteal'd; brand word capitalized site-wide (URLs preserved); dead TokenProbe removed. New token linter (scripts/check-tokens.mjs) wired to prebuild — fails on retired names + hardcoded hex, warns on off-scale spacing. Build green through both gates; 0 v1.2 palette hex in built CSS. PR #2, awaiting owner visual review.
 - 2026-07-06 · CHK-0.0 · strategy package → /docs/strategy/; DESIGN_SYSTEM v2 (evidence-teal) rewritten from v3 prototype with computed contrast; PROJECT_PLAN/DESIGN_BRIEF superseded sections marked; checklist reality-audited to v2.1; .claude/agents/ ×6 added; pivot-analysis baseline corrected. Build + resolver green. PR #1. Owner ratified token gaps: G1 `--grade-s #0d4f44`, G3 `--safety-ink #a02c22`, G4 `--focus-ring` 3px primary @40%; G2 (undesigned page types) remains open, non-blocking. Deferred: disclosure D2 update rides CHK-1.2.

@@ -32,8 +32,8 @@ const suggestions = ['melatonin', 'magnesium', 'jet lag', "can't fall asleep", '
 ---
 
 <Base
-  title={q ? `search: ${q} — somnary` : 'search — somnary'}
-  description="search somnary: every remedy by name, alias, latin name, outcome, or symptom."
+  title={q ? `search: ${q} — Somnary` : 'search — Somnary'}
+  description="search Somnary: every remedy by name, alias, latin name, outcome, or symptom."
 >
   <main class="page">
     <header class="head">
@@ -141,7 +141,7 @@ const suggestions = ['melatonin', 'magnesium', 'jet lag', "can't fall asleep", '
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
     text-transform: uppercase;
-    color: var(--ink-faint);
+    color: var(--muted);
     margin: 0;
   }
   .head {
@@ -168,7 +168,7 @@ const suggestions = ['melatonin', 'magnesium', 'jet lag', "can't fall asleep", '
     box-shadow: var(--ring);
   }
   .mag {
-    color: var(--ink-faint);
+    color: var(--muted);
     font-size: var(--text-lg);
     line-height: 1;
   }
@@ -209,7 +209,7 @@ const suggestions = ['melatonin', 'magnesium', 'jet lag', "can't fall asleep", '
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
     text-transform: uppercase;
-    color: var(--ink-faint);
+    color: var(--muted);
     margin: 0 0 var(--sp-3);
   }
   .rows {
@@ -229,7 +229,7 @@ const suggestions = ['melatonin', 'magnesium', 'jet lag', "can't fall asleep", '
     transition: background var(--dur-fast) var(--ease-soft);
   }
   .row:hover {
-    background: var(--sunken);
+    background: var(--stone);
   }
   .row:focus-visible {
     outline: none;
@@ -250,12 +250,12 @@ const suggestions = ['melatonin', 'magnesium', 'jet lag', "can't fall asleep", '
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
     text-transform: uppercase;
-    color: var(--ink-faint);
+    color: var(--muted);
   }
   .row-dek {
     font-size: var(--text-sm);
     line-height: var(--lh-sm);
-    color: var(--ink-soft);
+    color: var(--muted);
   }
 
   .empty {
@@ -263,7 +263,7 @@ const suggestions = ['melatonin', 'magnesium', 'jet lag', "can't fall asleep", '
   }
   .empty-lead {
     font-size: var(--text-md);
-    color: var(--ink-soft);
+    color: var(--muted);
     margin: 0 0 var(--sp-4);
   }
   .empty-sub {
@@ -271,15 +271,15 @@ const suggestions = ['melatonin', 'magnesium', 'jet lag', "can't fall asleep", '
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
     text-transform: uppercase;
-    color: var(--ink-faint);
+    color: var(--muted);
     display: flex;
     flex-wrap: wrap;
     gap: var(--sp-2);
     align-items: center;
   }
   .chip {
-    color: var(--lavender-ink);
-    background: var(--lavender-tint);
+    color: var(--primary);
+    background: var(--primary-soft);
     border-radius: var(--r-pill);
     padding: 4px 10px;
     text-decoration: none;

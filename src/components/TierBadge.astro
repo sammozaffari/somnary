@@ -1,9 +1,9 @@
 ---
-// Tier badge — DESIGN_SYSTEM §2.2. Built during CHK-1.1 (front-loaded from CHK-2.3).
-// Square, tint background + 1px solid tier border, single serif glyph in the tier's -ink.
-// MANDATORY centering (§5 guardrail 4): line-height:1 + translateY(var(--grade-optical-shift));
-// the serif cap sits high otherwise. Always paired with a text grade label / aria-label —
-// never rely on color alone.
+// Grade badge — DESIGN_SYSTEM v2 §3. Filled grade color, WHITE Archivo glyph.
+// Header (big) variant uses the ratified gradient fill (grade → darker anchor).
+// Glyph sizes are kept in the "large text" band (≥18.66px bold) so white-on-grade-C
+// (3.64:1) clears WCAG AA large (3:1) at every size. Always paired with a text grade
+// label / aria-label — never color alone (§3, §10).
 import type { TierId } from '../lib/tiers';
 
 interface Props {
@@ -12,28 +12,33 @@ interface Props {
 }
 const { tier, size = 'card' } = Astro.props;
 
-// Badge dimensions are fixed px per §2.2 (no token scale covers them; glyph ≈ 0.58 × box).
+// box / glyph / radius per size. glyph ≥19px (large-text band) at inline and up.
 const SIZES = {
-  inline: { box: 26, glyph: 16, radius: 'var(--r-sm)' },
-  card: { box: 44, glyph: 26, radius: 'var(--r-sm)' },
-  header: { box: 78, glyph: 46, radius: 'var(--r-lg)' },
+  inline: { box: 30, glyph: 19, radius: 'var(--r-sm)', weight: 800, grad: false },
+  card:   { box: 44, glyph: 27, radius: 'var(--r-sm)', weight: 800, grad: false },
+  header: { box: 78, glyph: 50, radius: 'var(--r-lg)', weight: 900, grad: true },
 } as const;
 const s = SIZES[size];
 const lc = tier.toLowerCase();
+
+const fill = s.grad
+  ? `linear-gradient(145deg, var(--grade-${lc}), var(--grade-${lc}-anchor))`
+  : `var(--grade-${lc})`;
 
 const boxStyle = [
   `width:${s.box}px`,
   `height:${s.box}px`,
   `border-radius:${s.radius}`,
-  `background:var(--tier-${lc}-tint)`,
-  `border:1px solid var(--tier-${lc})`,
-  `color:var(--tier-${lc}-ink)`,
+  `background:${fill}`,
+  s.grad ? 'box-shadow:0 22px 50px rgba(0,76,80,.23)' : 'box-shadow:inset 0 0 0 1px rgba(255,255,255,.22)',
+  'color:#ffffff',
 ].join(';');
 const glyphStyle = [
   'font-family:var(--font-display)',
-  'font-weight:500',
+  `font-weight:${s.weight}`,
   'line-height:1',
   `font-size:${s.glyph}px`,
+  'letter-spacing:-0.06em',
   'transform:translateY(var(--grade-optical-shift))',
 ].join(';');
 ---

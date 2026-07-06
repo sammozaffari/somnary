@@ -45,7 +45,7 @@ const jsonLd = remedyJsonLd(d, canonical, site);
 ---
 
 <Base
-  title={`${d.seo.questionTitle} — somnary`}
+  title={`${d.seo.questionTitle} — Somnary`}
   description={d.oneLineVerdict}
   canonical={canonical}
   ogType="article"
@@ -55,7 +55,7 @@ const jsonLd = remedyJsonLd(d, canonical, site);
   <main class="remedy">
     {/* 1 — header */}
     <header class="head">
-      <p class="crumb"><a href="/">somnary</a> <span aria-hidden="true">›</span> {isIntervention ? 'interventions' : 'remedies'}</p>
+      <p class="crumb"><a href="/">Somnary</a> <span aria-hidden="true">›</span> {isIntervention ? 'interventions' : 'remedies'}</p>
       <div class="head-main">
         <TierBadge tier={d.tier} size="header" />
         <div class="head-text">
@@ -169,11 +169,11 @@ const jsonLd = remedyJsonLd(d, canonical, site);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
     text-transform: uppercase;
-    color: var(--ink-faint);
+    color: var(--muted);
     margin: 0;
   }
   .dot {
-    color: var(--lavender);
+    color: var(--primary);
   }
 
   /* header */
@@ -185,11 +185,11 @@ const jsonLd = remedyJsonLd(d, canonical, site);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
     text-transform: uppercase;
-    color: var(--ink-faint);
+    color: var(--muted);
     margin: 0 0 var(--sp-5);
   }
   .crumb a {
-    color: var(--ink-faint);
+    color: var(--muted);
     text-decoration: none;
   }
   .crumb a:hover {
@@ -212,7 +212,7 @@ const jsonLd = remedyJsonLd(d, canonical, site);
     font-family: var(--font-body);
     font-size: var(--text-md);
     line-height: var(--lh-md);
-    color: var(--ink-soft);
+    color: var(--muted);
     max-width: 60ch;
     margin: 0 0 var(--sp-3);
   }
@@ -221,7 +221,7 @@ const jsonLd = remedyJsonLd(d, canonical, site);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
     text-transform: uppercase;
-    color: var(--ink-faint);
+    color: var(--muted);
     margin: 0;
   }
 
@@ -262,7 +262,7 @@ const jsonLd = remedyJsonLd(d, canonical, site);
   .prose :global(p) {
     font-size: var(--text-base);
     line-height: var(--lh-base);
-    color: var(--ink-soft);
+    color: var(--muted);
     margin: 0 0 var(--sp-4);
   }
   .prose :global(strong) {
@@ -273,7 +273,7 @@ const jsonLd = remedyJsonLd(d, canonical, site);
     max-width: 68ch;
     font-size: var(--text-base);
     line-height: var(--lh-base);
-    color: var(--ink-soft);
+    color: var(--muted);
     margin: 0;
   }
 

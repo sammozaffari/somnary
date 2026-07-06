@@ -68,7 +68,7 @@ const { claims } = Astro.props;
   .header {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    background: var(--sunken);
+    background: var(--stone);
   }
   .h-claim,
   .h-data {
@@ -79,10 +79,10 @@ const { claims } = Astro.props;
     padding: var(--sp-3) var(--sp-5);
   }
   .h-claim {
-    color: var(--ink-faint);
+    color: var(--muted);
   }
   .h-data {
-    color: var(--sage-ink);
+    color: var(--eucalyptus);
   }
 
   .claimrow {
@@ -109,10 +109,10 @@ const { claims } = Astro.props;
     margin-bottom: var(--sp-2);
   }
   .c-label-claim {
-    color: var(--ink-faint);
+    color: var(--muted);
   }
   .c-label-data {
-    color: var(--sage-ink);
+    color: var(--eucalyptus);
   }
 
   .claim {
@@ -120,7 +120,7 @@ const { claims } = Astro.props;
     display: inline;
     font-size: 16px;
     line-height: var(--lh-base);
-    color: var(--ink-faint);
+    color: var(--muted);
   }
   /* the strike is a real element; FINAL state = drawn (scaleX(1)) so JS-off shows it struck */
   .strikeline {
@@ -129,7 +129,7 @@ const { claims } = Astro.props;
     right: 0;
     top: 50%;
     height: 1.5px;
-    background: var(--tier-d);
+    background: var(--grade-d);
     transform-origin: left;
     transform: scaleX(1);
     transition: transform var(--dur-slow) var(--ease-settle);
@@ -155,12 +155,12 @@ const { claims } = Astro.props;
     gap: var(--sp-2);
     font-family: var(--font-mono);
     font-size: 13px;
-    color: var(--ink-faint);
+    color: var(--muted);
   }
   .dash {
     width: 18px;
     height: 1px;
-    background: var(--line-strong);
+    background: var(--mineral);
     flex: none;
   }
 

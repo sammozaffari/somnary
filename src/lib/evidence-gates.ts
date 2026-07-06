@@ -5,7 +5,7 @@
  * either met or it isn't — no vibes.
  *
  * variant maps to DESIGN_SYSTEM §2.3 chip variants:
- *   positive → sage tint   ·   caution → tier-c tint   ·   neutral → sunken
+ *   positive → eucalyptus/pistachio   ·   caution → grade-c tint   ·   neutral → stone
  */
 export type GateVariant = 'positive' | 'caution' | 'neutral';
 

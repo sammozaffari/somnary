@@ -2,7 +2,7 @@ import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
 
 /**
- * somnary content model — the single structured source the tier board, stack builder,
+ * Somnary content model — the single structured source the tier board, stack builder,
  * search index and Ask assistant all read (CLAUDE.md "Tech decisions"). Authored as MDX
  * with this Zod schema validating frontmatter on every build. There is no schema-less or
  * plain-Markdown stage.

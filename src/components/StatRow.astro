@@ -2,8 +2,8 @@
 // Stat row — DESIGN_SYSTEM §2.7. Four equal cells over a 1px-gap grid (hairline dividers).
 // Presentational: the caller passes real, computed values (never hardcoded) — e.g. the
 // methodology page derives counts from src/lib/content-index.ts. Key figures may accent the
-// number (sage for "0", lavender for "$0").
-type Accent = 'sage' | 'lavender' | undefined;
+// number (eucalyptus for "0", primary for "$0").
+type Accent = 'eucalyptus' | 'primary' | undefined;
 interface Cell {
   value: string;
   label: string;
@@ -14,9 +14,9 @@ interface Props {
 }
 const { cells } = Astro.props;
 
-const accentColor: Record<'sage' | 'lavender', string> = {
-  sage: 'var(--sage-ink)',
-  lavender: 'var(--lavender-ink)',
+const accentColor: Record<'eucalyptus' | 'primary', string> = {
+  eucalyptus: 'var(--eucalyptus)',
+  primary: 'var(--primary)',
 };
 ---
 
@@ -44,7 +44,7 @@ const accentColor: Record<'sage' | 'lavender', string> = {
     overflow: hidden;
   }
   .cell {
-    background: var(--base);
+    background: var(--paper);
     padding: var(--sp-6) var(--sp-5); /* ~28px / 24px */
   }
   .num {
@@ -60,7 +60,7 @@ const accentColor: Record<'sage' | 'lavender', string> = {
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
     text-transform: uppercase;
-    color: var(--ink-faint);
+    color: var(--muted);
   }
   @media (max-width: 760px) {
     .statrow {
