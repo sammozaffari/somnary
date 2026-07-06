@@ -57,9 +57,10 @@ Verbatim from the prototype, with roles annotated.
   /* ---- safety (vermilion) — warnings ONLY, never decorative ---- */
   --vermilion:  #e34234;    /* icons, borders; see §8 before using as text */
   --warning-bg: #fff0ed;    /* urgent-card / warn-chip fill */
+  --safety-ink: #a02c22;    /* small safety text on --warning-bg — 6.58:1 (G3) */
 
   /* ---- grades (fills; letter always white, see §3) ---- */
-  /* --grade-s: [HUMAN-GATE] — not yet defined, see §9 G1 */
+  --grade-s: #0d4f44;       /* deep pine — apex of the green end, above A (G1) */
   --grade-a: #0a6f5c;
   --grade-b: #006b70;
   --grade-c: #b87900;
@@ -67,10 +68,11 @@ Verbatim from the prototype, with roles annotated.
   --grade-f: #b82432;
 
   /* ---- chrome ---- */
-  --shadow:   0 18px 60px rgba(0, 76, 80, 0.11);
-  --hairline: 1px solid rgba(9, 26, 24, 0.13);
-  --radius:   7px;
-  --page:     min(1460px, calc(100vw - 32px));
+  --shadow:      0 18px 60px rgba(0, 76, 80, 0.11);
+  --hairline:    1px solid rgba(9, 26, 24, 0.13);
+  --focus-ring:  0 0 0 3px rgba(0, 107, 112, 0.40);  /* :focus-visible, all interactives (G4) */
+  --radius:      7px;
+  --page:        min(1460px, calc(100vw - 32px));
 }
 ```
 
@@ -122,8 +124,13 @@ The scale is **S A B C D F** — there is no E. Grades are set only via
   `rgba(255,255,255,.22)` border.
 - **Big badge** (`.grade.big`, remedy lead block): 152×152px, letter 112px,
   gradient fill `linear-gradient(145deg, var(--grade-X), <darker anchor>)`
-  (A anchors to `#064d43`, B to `--primary-deep`), "GRADE" micro-label above,
-  verdict micro-label (e.g. "GOOD EVIDENCE") below.
+  (**S anchors to `#08382f`**, A to `#064d43`, B to `--primary-deep`), "GRADE"
+  micro-label above, verdict micro-label (e.g. "EXCEPTIONAL" for S, "GOOD
+  EVIDENCE" for A) below.
+- **S vs A:** both live at the green end by design — S is the deeper pine, A
+  the brighter green. They are adjacent because they are both "good"; the
+  letter (always shown) is what disambiguates them, never color alone. S is
+  reserved for guideline-level evidence (e.g. CBT-I) and is deliberately rare.
 - **Never color alone:** every badge is accompanied by the letter itself plus
   a text verdict/decision-translation (per strategy doc 03: S "make this the
   default pathway…" through F "risk… is the headline"). Screen-reader label:
@@ -133,8 +140,8 @@ The scale is **S A B C D F** — there is no E. Grades are set only via
   qualify. **Do not** set small white text on grade colors; for small text use
   the grade color as text on `--surface` (grade-c at 4.6:1 passes) or on its
   tint.
-- S-tier color: **undefined — `[HUMAN-GATE]`**, see §9 G1. Until ratified, no
-  component may render an S badge with an invented color.
+- **S-tier** = `--grade-s` `#0d4f44` (ratified 2026-07-06), white letter at
+  9.46:1 (AAA). Big-badge anchor `#08382f`.
 
 ## 4. Layout & chrome
 
@@ -161,8 +168,8 @@ Buttons (Archivo 800, 13px, min-height 42px, radius 7px):
 
 Chips/pills (999px, 30px min-height, 12px/650): neutral (white 0.84 alpha),
 **verified** (`--pistachio` fill, `#184437` text), **warn** (`--warning-bg`
-fill — see §8 and gap G3 for its text color), hero variants (white 0.14
-alpha; verified on hero = citron fill + `--action-ink`).
+fill, `--safety-ink` text), hero variants (white 0.14 alpha; verified on hero
+= citron fill + `--action-ink`).
 
 Cards on `rgba(255,255,255,0.9)`, hairline, radius 7: **route-card** (28px teal
 icon, 18–20px Archivo title, hover lift −2px), **evidence-card** (42px teal
@@ -187,6 +194,11 @@ One speed: **160ms ease** on `transform`, `background`, `border-color`,
 `box-shadow`. Hover lifts: buttons −1px, cards −2px. No entrance animations,
 parallax, or ambient motion — the prototype defines none; don't add any.
 
+**Focus:** every interactive element gets `:focus-visible { box-shadow:
+var(--focus-ring); outline: none; }` (3px `--primary` at 40% alpha). This is
+the one addition to the prototype's motion/state set — it defined no focus
+styling and shipping without it fails accessibility.
+
 ## 7. Breakpoints
 
 - **≤980px** — nav links hidden; hero/split/label-checker collapse to 1 col;
@@ -206,40 +218,37 @@ parallax, or ambient motion — the prototype defines none; don't add any.
 | white on `--primary` / `--primary-deep` | 6.29 / 9.77 | AA / AAA |
 | `--action-ink` on `--action` | 13.88 | AAA |
 | `--action` on primary / primary-deep | 5.24 / 8.14 | AA |
+| white letter on grade S | 9.46 | AAA |
 | white on grade A / B / D / F | 6.10 / 6.29 / 5.41 / 6.29 | AA |
 | white on grade C | **3.64** | large text only (§3) |
 | `--vermilion` on surface | 4.12 | **large text/icons only** |
-| `--vermilion` on `--warning-bg` | **3.72** | **fails AA small — see gap G3** |
+| `--safety-ink` on `--warning-bg` | 6.58 | AA small text |
 | `--eucalyptus` on surface | 4.92 | AA small text |
 | `#184437` on `--pistachio` | 9.75 | AAA |
 
 Rules: body text is `--ink`/`--raisin`/`--muted` only. `--soft` never below
 19px. Vermilion is for icons, borders, and ≥19px-bold text; small safety text
-is `--ink` on `--warning-bg` with vermilion iconography.
+is `--safety-ink` on `--warning-bg` with vermilion iconography.
 
-## 9. Flagged gaps (the only permitted TODOs)
+## 9. Gaps
 
-- **G1 · S-tier grade color — `[HUMAN-GATE]`.** The prototype colors only
-  A–F, yet the scale is S–F and CBT-I is already published at S. Owner must
-  ratify a token. Constraints: white letter contrast should match the A/B/D/F
-  band (≥5.4:1); must read as *above* A without implying "safe for everyone"
-  (rulebook); teal-family candidates for consideration: `#0d4f44`, `#08544e`,
-  `#123f3b`. The retired v1.2 S (`#3D7A54`) belongs to the old palette — do
-  not carry it over.
+**Resolved 2026-07-06 (owner-ratified):**
+- **G1 · S-tier grade color → `--grade-s` `#0d4f44`** (deep pine; big-badge
+  anchor `#08382f`). Apex of the green end, deeper than A; letter disambiguates
+  the two. Retired v1.2 S (`#3D7A54`) not carried over.
+- **G3 · Warn-chip text → `--safety-ink` `#a02c22`** (6.58:1 on
+  `--warning-bg`), a darkened vermilion in the safety family.
+- **G4 · Focus states → `--focus-ring`** (3px `--primary` @ 40% alpha) on
+  `:focus-visible` for all interactives.
+
+**Still open:**
 - **G2 · Un-designed page types.** Prototype covers one instance each of:
   home, tier board, remedy detail, outcome, safety router, label checker. No
   design exists for: article/evidence-watch, methodology/legal text pages,
   compare tool, assistant UI, community pages, newsletter/forms beyond the
   label-input pattern. Generalize from §5 primitives; if a new primitive or
-  token is needed, `[HUMAN-GATE]`.
-- **G3 · Warn-chip text token.** `.chip.warn` sets 12px vermilion text on
-  `--warning-bg` at 3.72:1 — an accessibility defect inherited from the
-  prototype. Migration should use a darker safety-ink (candidate `#a02c22`,
-  6.58:1 on `--warning-bg`) — token value needs `[HUMAN-GATE]` ratification.
-- **G4 · Focus states.** The prototype defines no `:focus-visible` styling.
-  Migration must add visible focus rings (suggest 3px `--primary` at 40%
-  alpha, matching v1.2's ring pattern) — flagging because the exact token is
-  not owner-ratified.
+  token is needed, `[HUMAN-GATE]`. (Not a blocker for CHK-0.2 — it reskins
+  existing page types, all of which have a prototype reference.)
 
 ## 10. Guardrails
 

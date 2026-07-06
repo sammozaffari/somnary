@@ -27,14 +27,15 @@ exists so sessions extend the site instead of rebuilding it.
 ---
 
 ## Phase 0 — Reconciliation, scaffold & guardrails
-- [~] **CHK-0.0 Doc reconciliation.** Move strategy package to `/docs/strategy/`;
+- [x] **CHK-0.0 Doc reconciliation.** Move strategy package to `/docs/strategy/`;
   mark superseded PROJECT_PLAN sections; rewrite DESIGN_SYSTEM.md from the v3
   prototype `styles.css` (evidence-teal tokens); apply capitalized "Somnary"
   across docs; delete stack-builder references (D4). *Accept:* no doc
   contradicts CLAUDE.md's locked decisions; DESIGN_SYSTEM has zero TODOs except
-  flagged gaps. **HG gaps awaiting owner: DESIGN_SYSTEM v2 §9 — G1 S-tier
-  color, G3 warn-chip text token, G4 focus-ring token.** *(This session: all
-  doc work done; PR open; ticks on owner sign-off.)*
+  flagged gaps. *(Done, PR #1. Owner ratified the three token gaps: G1 S-tier
+  `--grade-s #0d4f44`, G3 warn-chip `--safety-ink #a02c22`, G4 `--focus-ring`
+  3px primary @40%. Only G2 — undesigned future page types — remains open, not
+  a blocker. Merge is the owner's action.)*
 - [x] **CHK-0.1 Astro scaffold.** *(Pre-existing: Astro 5 + MDX + sitemap +
   Vercel adapter; build verified green 2026-07-06; content pre-rendered in
   dist HTML; pushed.)* `.claude/agents/` role files added in CHK-0.0 session.
@@ -43,8 +44,8 @@ exists so sessions extend the site instead of rebuilding it.
   `tailwind.config.mjs` + `src/styles` + all components with DESIGN_SYSTEM v2
   tokens; wordmark → `Somnary.` (D3) site-wide. *Accept:* no v1.2 color/type
   value remains; token linter exists and fails on hardcoded hex/spacing;
-  contrast rules of DESIGN_SYSTEM §8 hold on live pages. **Blocked on G1
-  (S-tier color) for the tier board and CBT-I page.**
+  contrast rules of DESIGN_SYSTEM §8 hold on live pages. *(Unblocked — all
+  grade colors incl. S now defined; wire `--focus-ring` on all interactives.)*
 - [~] **CHK-0.3 Content model extension.** *(Schema exists in
   `src/content.config.ts` with claims↔data, sources, doses, safety,
   interactions, community, seo.)* Add missing fields per CLAUDE.md: `notFor[]`,
@@ -121,7 +122,8 @@ exists so sessions extend the site instead of rebuilding it.
   insomnia. *Accept:* 10-part skeleton; conservative safety framing.
 - [x] **CHK-5.3 Goals (outcome) pages + CBT-I hub.** *(7 outcome pages,
   evidence-ranked, + CBT-I page at tier S, framed as strongest-evidence
-  intervention — live from v1 build.)* CBT-I S badge restyle blocked on G1.
+  intervention — live from v1 build.)* CBT-I S badge restyle lands with CHK-0.2
+  (S color now defined).
 
 ## Phase 6 — Tools, AI, community, revenue
 - [ ] **CHK-6.1 Compare tool.** Compare remedies by goal, effect, safety, evidence
@@ -144,4 +146,4 @@ exists so sessions extend the site instead of rebuilding it.
 
 ### Session log (agents append one line per session)
 <!-- 2026-07-06 — checklist v2 adopted; decisions D1–D4 locked. -->
-- 2026-07-06 · CHK-0.0 · strategy package → /docs/strategy/; DESIGN_SYSTEM v2 (evidence-teal) rewritten from v3 prototype with computed contrast + 4 flagged gaps (G1 S-tier color HG, G2 undesigned page types, G3 warn-chip contrast, G4 focus states); PROJECT_PLAN/DESIGN_BRIEF superseded sections marked; checklist reality-audited to v2.1; .claude/agents/ ×6 added; pivot-analysis baseline corrected. Build + resolver green. PR opened (HG: S-tier token). Deferred: owner sign-off on G1/G3/G4; disclosure D2 update rides CHK-1.2.
+- 2026-07-06 · CHK-0.0 · strategy package → /docs/strategy/; DESIGN_SYSTEM v2 (evidence-teal) rewritten from v3 prototype with computed contrast; PROJECT_PLAN/DESIGN_BRIEF superseded sections marked; checklist reality-audited to v2.1; .claude/agents/ ×6 added; pivot-analysis baseline corrected. Build + resolver green. PR #1. Owner ratified token gaps: G1 `--grade-s #0d4f44`, G3 `--safety-ink #a02c22`, G4 `--focus-ring` 3px primary @40%; G2 (undesigned page types) remains open, non-blocking. Deferred: disclosure D2 update rides CHK-1.2.
