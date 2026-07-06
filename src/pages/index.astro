@@ -16,8 +16,8 @@ const sourcesCited = contentIndex
 const statCells = [
   { value: String(remediesGraded), label: 'remedies graded' },
   { value: String(sourcesCited), label: 'sources cited' },
-  { value: '0', label: 'hallucinated cites', accent: 'sage' as const },
-  { value: '$0', label: 'brand money', accent: 'lavender' as const },
+  { value: '0', label: 'hallucinated cites', accent: 'eucalyptus' as const },
+  { value: '$0', label: 'brand money', accent: 'primary' as const },
 ];
 
 const ways = [
@@ -34,7 +34,7 @@ const outcomePreview = featured
 ---
 
 <Base
-  title="somnary: every natural sleep remedy, graded by the evidence"
+  title="Somnary: every natural sleep remedy, graded by the evidence"
   description="an independent, evidence-graded sleep & natural-remedies wiki. every remedy graded S–F by the strength of published human evidence, every claim cited, weak evidence labelled weak, zero brand money."
   canonical="https://somnary.vercel.app/"
 >
@@ -103,7 +103,7 @@ const outcomePreview = featured
     padding: var(--sp-9) var(--sp-7) var(--sp-9);
   }
   .dot {
-    color: var(--lavender);
+    color: var(--primary);
   }
   .eyebrow,
   .section-eyebrow {
@@ -111,7 +111,7 @@ const outcomePreview = featured
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
     text-transform: uppercase;
-    color: var(--ink-faint);
+    color: var(--muted);
     margin: 0;
   }
 
@@ -130,19 +130,19 @@ const outcomePreview = featured
   }
   .strike {
     text-decoration: line-through;
-    text-decoration-color: var(--tier-d);
+    text-decoration-color: var(--grade-d);
     text-decoration-thickness: 3px;
-    color: var(--ink-faint);
+    color: var(--muted);
   }
   .mark {
-    background: var(--lavender-tint);
+    background: var(--primary-soft);
     border-radius: var(--r-sm);
     padding: 0 0.08em;
   }
   .dek {
     font-size: var(--text-md);
     line-height: var(--lh-md);
-    color: var(--ink-soft);
+    color: var(--muted);
     max-width: 62ch;
     margin: 0 0 var(--sp-6);
   }
@@ -227,7 +227,7 @@ const outcomePreview = featured
   .way-dek {
     font-size: var(--text-sm);
     line-height: var(--lh-sm);
-    color: var(--ink-soft);
+    color: var(--muted);
     margin: 0;
   }
 
@@ -241,7 +241,7 @@ const outcomePreview = featured
     display: flex;
     flex-direction: column;
     gap: var(--sp-2);
-    background: var(--lavender-tint);
+    background: var(--primary-soft);
     border-radius: var(--r-lg);
     padding: var(--sp-6);
     text-decoration: none;
@@ -263,7 +263,7 @@ const outcomePreview = featured
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
     text-transform: uppercase;
-    color: var(--lavender-ink);
+    color: var(--primary);
     margin: 0;
   }
   .outcome-title {
@@ -276,7 +276,7 @@ const outcomePreview = featured
   .outcome-dek {
     font-size: var(--text-sm);
     line-height: var(--lh-sm);
-    color: var(--ink-soft);
+    color: var(--muted);
     margin: 0;
   }
   .all-outcomes {
@@ -284,11 +284,11 @@ const outcomePreview = featured
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
     text-transform: uppercase;
-    color: var(--ink-faint);
+    color: var(--muted);
     margin: var(--sp-5) 0 0;
   }
   .all-outcomes a {
-    color: var(--lavender-ink);
+    color: var(--primary);
   }
 
   @media (max-width: 760px) {

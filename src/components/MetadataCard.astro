@@ -1,7 +1,7 @@
 ---
 // Metadata "at a glance" card — DESIGN_SYSTEM §2.5. Sidebar summary: Grade (inline tier badge +
 // text label), Key compound, Studied dose, Best for, Safety flag (a chip). Unknown values render
-// "not established" in --ink-faint — never a blank cell (§5 guardrail 10).
+// "not established" in --muted — never a blank cell (§5 guardrail 10).
 import type { GateVariant } from '../lib/evidence-gates';
 import type { TierId } from '../lib/tiers';
 import TierBadge from './TierBadge.astro';
@@ -72,7 +72,7 @@ const showDoseRows = format !== 'intervention';
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
     text-transform: uppercase;
-    color: var(--ink-faint);
+    color: var(--muted);
     margin: 0 0 var(--sp-4);
   }
   .row {
@@ -92,7 +92,7 @@ const showDoseRows = format !== 'intervention';
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
     text-transform: uppercase;
-    color: var(--ink-faint);
+    color: var(--muted);
   }
   .value {
     font-size: var(--text-sm);
@@ -107,7 +107,7 @@ const showDoseRows = format !== 'intervention';
     gap: var(--sp-2);
   }
   .unknown {
-    color: var(--ink-faint);
+    color: var(--muted);
     font-style: italic;
   }
 </style>

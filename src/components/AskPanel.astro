@@ -22,12 +22,12 @@ const { remedyName } = Astro.props;
     />
     <button type="button" class="send" disabled aria-disabled="true" aria-label="send (coming soon)">→</button>
   </div>
-  <p class="stub-note">scoped assistant — arriving with the somnary corpus. it will never invent a source.</p>
+  <p class="stub-note">scoped assistant — arriving with the Somnary corpus. it will never invent a source.</p>
 </section>
 
 <style>
   .ask {
-    background: var(--lavender-tint);
+    background: var(--primary-soft);
     border-radius: var(--r-lg);
     padding: var(--sp-5);
   }
@@ -39,20 +39,20 @@ const { remedyName } = Astro.props;
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
     text-transform: uppercase;
-    color: var(--lavender-ink);
+    color: var(--primary);
     margin: 0 0 var(--sp-3);
   }
   .dot {
     width: 7px;
     height: 7px;
     border-radius: var(--r-pill);
-    background: var(--lavender);
+    background: var(--primary);
     flex: none;
   }
   .prompt {
     font-size: var(--text-sm);
     line-height: var(--lh-sm);
-    color: var(--ink-soft);
+    color: var(--muted);
     margin: 0 0 var(--sp-4);
   }
   .field {
@@ -73,7 +73,7 @@ const { remedyName } = Astro.props;
     border-radius: var(--r-pill);
   }
   .ask-input:disabled {
-    color: var(--ink-faint);
+    color: var(--muted);
     cursor: not-allowed;
   }
   .send {
@@ -85,18 +85,18 @@ const { remedyName } = Astro.props;
     justify-content: center;
     border: none;
     border-radius: var(--r-pill);
-    background: var(--lavender);
+    background: var(--primary);
     color: var(--surface);
     font-family: var(--font-mono);
   }
   .send:disabled {
-    background: var(--line-strong);
+    background: var(--mineral);
     cursor: not-allowed;
   }
   .stub-note {
     font-size: var(--text-sm);
     line-height: var(--lh-sm);
-    color: var(--ink-faint);
+    color: var(--muted);
     margin: var(--sp-3) 0 0;
   }
 </style>

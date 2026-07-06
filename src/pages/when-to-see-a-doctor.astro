@@ -46,7 +46,7 @@ const redFlags = [
 ---
 
 <Base
-  title="when to see a doctor about sleep: the limits of a supplement | somnary"
+  title="when to see a doctor about sleep: the limits of a supplement | Somnary"
   description="supplements are for mild, occasional sleeplessness. loud snoring with breathing pauses, months of insomnia, restless legs, acting out dreams, or sleep loss with low mood are signs to see a clinician, not to self-treat."
   canonical="https://somnary.vercel.app/when-to-see-a-doctor"
 >
@@ -55,7 +55,7 @@ const redFlags = [
       <p class="eyebrow">context · when to get professional help</p>
       <h1 class="title">when to see a doctor<span class="dot">.</span></h1>
       <p class="dek">
-        somnary grades remedies for mild, occasional sleeplessness. It doesn't diagnose, and some
+        Somnary grades remedies for mild, occasional sleeplessness. It doesn't diagnose, and some
         sleep problems need a clinician rather than anything on a shelf. This page is about
         recognising those: the honest edge of what a supplement can do.
       </p>
@@ -181,11 +181,11 @@ const redFlags = [
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
     text-transform: uppercase;
-    color: var(--ink-faint);
+    color: var(--muted);
     margin: 0;
   }
   .dot {
-    color: var(--lavender);
+    color: var(--primary);
   }
   .head {
     margin-bottom: var(--sp-6);
@@ -201,12 +201,12 @@ const redFlags = [
   .dek {
     font-size: var(--text-md);
     line-height: var(--lh-md);
-    color: var(--ink-soft);
+    color: var(--muted);
     max-width: 68ch;
     margin: 0;
   }
 
-  /* caution callout — §2.12 caution register (tier-c) */
+  /* caution callout — §2.12 caution register (grade-c) */
   .callout {
     border-radius: var(--r-lg);
     border: 1px solid;
@@ -214,8 +214,8 @@ const redFlags = [
     margin-top: var(--sp-7);
   }
   .sev-caution {
-    background: var(--tier-c-tint);
-    border-color: var(--tier-c);
+    background: var(--grade-c-tint);
+    border-color: var(--grade-c);
   }
   .callout-head {
     display: flex;
@@ -231,7 +231,7 @@ const redFlags = [
     height: 26px;
     flex: none;
     border-radius: var(--r-pill);
-    background: var(--tier-c);
+    background: var(--grade-c);
     color: var(--surface);
     font-family: var(--font-display);
     font-weight: 600;
@@ -242,7 +242,7 @@ const redFlags = [
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
     text-transform: uppercase;
-    color: var(--tier-c-ink);
+    color: var(--grade-c);
     margin: 0;
   }
   .callout-body {
@@ -293,7 +293,7 @@ const redFlags = [
   .flag-detail {
     font-size: var(--text-sm);
     line-height: var(--lh-sm);
-    color: var(--ink-soft);
+    color: var(--muted);
     margin: 0;
   }
 
@@ -303,7 +303,7 @@ const redFlags = [
   .prose p {
     font-size: var(--text-base);
     line-height: var(--lh-base);
-    color: var(--ink-soft);
+    color: var(--muted);
     margin: 0 0 var(--sp-4);
   }
   .prose strong {
@@ -317,11 +317,11 @@ const redFlags = [
   .prose li {
     font-size: var(--text-base);
     line-height: var(--lh-base);
-    color: var(--ink-soft);
+    color: var(--muted);
     margin-bottom: var(--sp-3);
   }
   .prose a {
-    color: var(--lavender-ink);
+    color: var(--primary);
   }
   .disclaimer-slot {
     margin-top: var(--sp-8);

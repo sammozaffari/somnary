@@ -45,7 +45,7 @@ export function remedyJsonLd(data: RemedyData, url: string, site: string): objec
         url,
         description: data.oneLineVerdict,
         about: { '@type': 'DietarySupplement', name: data.name },
-        isPartOf: { '@type': 'WebSite', name: 'somnary', url: site },
+        isPartOf: { '@type': 'WebSite', name: 'Somnary', url: site },
         ...(citation.length ? { citation } : {}),
       },
       {

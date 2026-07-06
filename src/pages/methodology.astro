@@ -17,8 +17,8 @@ const sourcesCited = contentIndex
 const statCells = [
   { value: String(remediesGraded), label: 'remedies graded' },
   { value: String(sourcesCited), label: 'sources cited' },
-  { value: '0', label: 'hallucinated cites', accent: 'sage' as const },
-  { value: '$0', label: 'brand money', accent: 'lavender' as const },
+  { value: '0', label: 'hallucinated cites', accent: 'eucalyptus' as const },
+  { value: '$0', label: 'brand money', accent: 'primary' as const },
 ];
 
 const sourceHierarchy = [
@@ -52,16 +52,16 @@ const killers = [
 ---
 
 <Base
-  title="how we grade — somnary methodology"
-  description="somnary grades every sleep remedy S to F by the strength of published human evidence. the full rubric, evidence gates, source hierarchy, citation policy, and corrections policy: specific enough to re-derive any grade."
+  title="how we grade — Somnary methodology"
+  description="Somnary grades every sleep remedy S to F by the strength of published human evidence. the full rubric, evidence gates, source hierarchy, citation policy, and corrections policy: specific enough to re-derive any grade."
 >
   <main class="page">
     <!-- header -->
     <header class="head">
-      <p class="eyebrow">methodology · how somnary grades</p>
+      <p class="eyebrow">methodology · how Somnary grades</p>
       <h1 class="title">how we grade<span class="dot">.</span></h1>
       <p class="dek">
-        somnary grades every sleep remedy from S to F by one thing only: the strength of the
+        Somnary grades every sleep remedy from S to F by one thing only: the strength of the
         published human evidence behind it. not popularity, not tradition, not how good the
         marketing is. this page is the rubric in full, specific enough that you could
         re-derive any grade on the site yourself. if you can’t check our work, we haven’t done
@@ -76,7 +76,7 @@ const killers = [
       <p class="principle-line">
         evidence over opinion. published over promised. weak data labeled weak, never buried.
       </p>
-      <p class="principle-sub">— the somnary editorial principle</p>
+      <p class="principle-sub">— the Somnary editorial principle</p>
     </aside>
 
     <!-- Section 1 — the two rubrics -->
@@ -84,7 +84,7 @@ const killers = [
       <p class="eyebrow">section 01</p>
       <h2 class="section-title">the two rubrics</h2>
       <div class="prose">
-        <p>somnary keeps two separate grading systems, and never lets them touch:</p>
+        <p>Somnary keeps two separate grading systems, and never lets them touch:</p>
         <ul>
           <li>
             <strong>the remedy grade (S–F)</strong>: set only by published human evidence.
@@ -302,7 +302,7 @@ const killers = [
           </li>
           <li><strong>no commerce.</strong> we don’t sell supplements.</li>
           <li>
-            <strong>reader-funded only.</strong> the only money somnary takes comes from readers
+            <strong>reader-funded only.</strong> the only money Somnary takes comes from readers
             who choose to support it. that’s the whole model, on purpose.
           </li>
         </ul>
@@ -332,7 +332,7 @@ const killers = [
 
     <!-- page footer strip (verbatim) -->
     <p class="footer-strip">
-      somnary · methodology v1 · educational, not medical advice · talk to a clinician before
+      Somnary · methodology v1 · educational, not medical advice · talk to a clinician before
       changing what you take, especially if you’re pregnant, on other medications, or managing a
       health condition.
     </p>
@@ -351,11 +351,11 @@ const killers = [
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
     text-transform: uppercase;
-    color: var(--ink-faint);
+    color: var(--muted);
     margin: 0;
   }
   .dot {
-    color: var(--lavender);
+    color: var(--primary);
   }
 
   /* header */
@@ -374,14 +374,14 @@ const killers = [
     font-family: var(--font-body);
     font-size: var(--text-md);
     line-height: var(--lh-md);
-    color: var(--ink-soft);
+    color: var(--muted);
     max-width: 68ch;
     margin: 0;
   }
 
   /* editorial-principle band */
   .principle {
-    background: var(--lavender-tint);
+    background: var(--primary-soft);
     border-radius: var(--r-xl);
     padding: var(--sp-7);
     margin: var(--sp-7) 0;
@@ -399,7 +399,7 @@ const killers = [
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
     text-transform: uppercase;
-    color: var(--lavender-ink);
+    color: var(--primary);
     margin: var(--sp-4) 0 0;
   }
 
@@ -423,7 +423,7 @@ const killers = [
   .prose p {
     font-size: var(--text-base);
     line-height: var(--lh-base);
-    color: var(--ink-soft);
+    color: var(--muted);
     margin: 0 0 var(--sp-4);
   }
   .prose strong {
@@ -437,11 +437,11 @@ const killers = [
   .prose li {
     font-size: var(--text-base);
     line-height: var(--lh-base);
-    color: var(--ink-soft);
+    color: var(--muted);
     margin-bottom: var(--sp-2);
   }
   .prose a {
-    color: var(--lavender-ink);
+    color: var(--primary);
   }
   .prose.note {
     margin-top: var(--sp-5);
@@ -465,8 +465,8 @@ const killers = [
     background: var(--surface);
   }
   .tier-row.serious {
-    background: var(--tier-f-tint);
-    border-color: var(--tier-f);
+    background: var(--grade-f-tint);
+    border-color: var(--grade-f);
   }
   .rail {
     display: flex;
@@ -479,7 +479,7 @@ const killers = [
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
     text-transform: uppercase;
-    color: var(--ink-faint);
+    color: var(--muted);
     margin: 0;
   }
   .tier-oneliner {
@@ -495,7 +495,7 @@ const killers = [
   }
   .examples {
     font-size: var(--text-sm);
-    color: var(--ink-soft);
+    color: var(--muted);
     margin: var(--sp-4) 0 0;
   }
   .examples-label {
@@ -503,11 +503,11 @@ const killers = [
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
     text-transform: uppercase;
-    color: var(--ink-faint);
+    color: var(--muted);
     margin-right: var(--sp-2);
   }
   .examples.empty {
-    color: var(--ink-faint);
+    color: var(--muted);
     font-style: italic;
   }
 
@@ -533,7 +533,7 @@ const killers = [
     margin: 0;
     font-size: var(--text-base);
     line-height: var(--lh-base);
-    color: var(--ink-soft);
+    color: var(--muted);
   }
 
   /* source hierarchy chain */
@@ -550,14 +550,14 @@ const killers = [
     font-family: var(--font-mono);
     font-size: var(--text-sm);
     color: var(--ink);
-    background: var(--sunken);
+    background: var(--stone);
     border-radius: var(--r-sm);
     padding: var(--sp-2) var(--sp-3);
   }
   .hierarchy li:not(:last-child)::after {
     content: '→';
     margin-left: var(--sp-3);
-    color: var(--ink-faint);
+    color: var(--muted);
   }
 
   /* corrections */
@@ -570,14 +570,14 @@ const killers = [
   .footer-strip {
     margin: var(--sp-8) 0 0;
     padding: var(--sp-5);
-    background: var(--sunken);
+    background: var(--stone);
     border-radius: var(--r-lg);
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
     line-height: var(--lh-sm);
     text-transform: uppercase;
-    color: var(--ink-faint);
+    color: var(--muted);
     text-align: center;
   }
 

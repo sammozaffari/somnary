@@ -21,7 +21,7 @@ const { variant = 'standard' } = Astro.props;
     <aside class="disc-standard" role="note" aria-label="medical disclaimer">
       <p class="disc-label">educational, not medical advice</p>
       <p class="disc-body">
-        somnary grades published evidence; it doesn’t diagnose, treat, or tell you what to take.
+        Somnary grades published evidence; it doesn’t diagnose, treat, or tell you what to take.
         talk to a doctor or pharmacist before starting, stopping, or changing any remedy or
         medication — especially if you’re pregnant, breastfeeding, on other medications, managing
         a health condition, or considering this for a child. “natural” doesn’t mean “safe.”
@@ -39,11 +39,11 @@ const { variant = 'standard' } = Astro.props;
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
     text-transform: uppercase;
-    color: var(--ink-faint);
+    color: var(--muted);
     line-height: var(--lh-sm);
   }
   .disc-compact a {
-    color: var(--lavender-ink);
+    color: var(--primary);
   }
 
   /* standard (per-page block) — calm, restrained; not the safety-callout severities */
@@ -59,16 +59,16 @@ const { variant = 'standard' } = Astro.props;
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
     text-transform: uppercase;
-    color: var(--ink-faint);
+    color: var(--muted);
   }
   .disc-body {
     margin: 0;
     font-size: var(--text-sm);
     line-height: var(--lh-sm);
-    color: var(--ink-soft);
+    color: var(--muted);
   }
   .disc-body a {
-    color: var(--lavender-ink);
+    color: var(--primary);
     white-space: nowrap;
   }
 </style>

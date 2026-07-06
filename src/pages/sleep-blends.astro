@@ -42,7 +42,7 @@ const rows = [
 ---
 
 <Base
-  title="what's wrong with proprietary 'sleep blends'? — somnary"
+  title="what's wrong with proprietary 'sleep blends'? — Somnary"
   description="why a proprietary sleep blend can't earn a real grade: hidden per-ingredient doses make its claims unfalsifiable. the proprietary-blend penalty, explained, with links to each ingredient's real evidence."
   canonical="https://somnary.vercel.app/sleep-blends"
 >
@@ -51,7 +51,7 @@ const rows = [
       <p class="eyebrow">explainer · the proprietary-blend penalty</p>
       <h1 class="title">sleep blends<span class="dot">.</span></h1>
       <p class="dek">
-        a “proprietary sleep blend” is the one product type somnary can’t grade on evidence, and
+        a “proprietary sleep blend” is the one product type Somnary can’t grade on evidence, and
         that’s the whole lesson. here’s why hidden doses defeat the evidence, and how to read a
         blend anyway.
       </p>
@@ -212,11 +212,11 @@ const rows = [
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
     text-transform: uppercase;
-    color: var(--ink-faint);
+    color: var(--muted);
     margin: 0;
   }
   .dot {
-    color: var(--lavender);
+    color: var(--primary);
   }
 
   .head {
@@ -234,19 +234,19 @@ const rows = [
     font-family: var(--font-body);
     font-size: var(--text-md);
     line-height: var(--lh-md);
-    color: var(--ink-soft);
+    color: var(--muted);
     max-width: 68ch;
     margin: 0;
   }
 
-  /* transparency verdict callout — tier-f tint, but clearly labelled not-an-efficacy-grade */
+  /* transparency verdict callout — grade-f tint, but clearly labelled not-an-efficacy-grade */
   .verdict {
     display: grid;
     grid-template-columns: auto 1fr;
     gap: var(--sp-6);
     align-items: start;
-    background: var(--tier-f-tint);
-    border: 1px solid var(--tier-f);
+    background: var(--grade-f-tint);
+    border: 1px solid var(--grade-f);
     border-radius: var(--r-xl);
     padding: var(--sp-6);
     margin-bottom: var(--sp-8);
@@ -256,7 +256,7 @@ const rows = [
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
     text-transform: uppercase;
-    color: var(--tier-f-ink);
+    color: var(--grade-f);
     margin: 0 0 var(--sp-3);
   }
   .verdict-text {
@@ -292,7 +292,7 @@ const rows = [
   .prose p {
     font-size: var(--text-base);
     line-height: var(--lh-base);
-    color: var(--ink-soft);
+    color: var(--muted);
     margin: 0 0 var(--sp-4);
   }
   .prose strong {
@@ -306,11 +306,11 @@ const rows = [
   .prose li {
     font-size: var(--text-base);
     line-height: var(--lh-base);
-    color: var(--ink-soft);
+    color: var(--muted);
     margin-bottom: var(--sp-3);
   }
   .prose a {
-    color: var(--lavender-ink);
+    color: var(--primary);
   }
 
   /* static implied-vs-verify table (not the animated claims table — no cited claims here) */
@@ -322,7 +322,7 @@ const rows = [
   .thead {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    background: var(--sunken);
+    background: var(--stone);
   }
   .th {
     font-family: var(--font-mono);
@@ -332,10 +332,10 @@ const rows = [
     padding: var(--sp-3) var(--sp-5);
   }
   .th-implied {
-    color: var(--ink-faint);
+    color: var(--muted);
   }
   .th-verify {
-    color: var(--sage-ink);
+    color: var(--eucalyptus);
   }
   .trow {
     display: grid;
@@ -348,7 +348,7 @@ const rows = [
     line-height: var(--lh-base);
   }
   .td-implied {
-    color: var(--ink-faint);
+    color: var(--muted);
     border-right: 1px solid var(--line);
   }
   .td-verify {
@@ -379,7 +379,7 @@ const rows = [
     transition: border-color var(--dur-fast) var(--ease-soft);
   }
   .links a:hover {
-    border-color: var(--line-strong);
+    border-color: var(--mineral);
   }
   .links a:focus-visible {
     outline: none;
