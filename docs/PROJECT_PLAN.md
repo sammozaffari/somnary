@@ -1,9 +1,22 @@
-# Project Plan — somnary
+# Project Plan — Somnary
+
+> **SUPERSEDED IN PART (2026-07-06).** This plan is historical rationale. Where
+> it conflicts with CLAUDE.md's locked decisions (D1–D4) or the strategy
+> package at `/docs/strategy/` (01–07), those win. Superseded here and marked
+> inline below: **membership/paywall monetization** (§1.2, §2 items 4–5, §5c,
+> §6, §11.8 — replaced by D2 tools-first), **stack builder / the Lab** (§2
+> item 4, `/lab` URL, §8, §11.10 — killed by D4), **lowercase `somnary.`
+> branding** (title, §1.3, §7 — replaced by D3 capitalized "Somnary"),
+> **soft-light lavender/sage design** (§7 — replaced by DESIGN_SYSTEM v2
+> evidence-teal), **Next.js option** (§8 — D1 locks Astro), and **remedy-first
+> IA framing** (§2 — strategy doc 03 makes the IA decision-first). Everything
+> else — grading rubric, citation discipline, remedy template, catalog scope,
+> editorial workflow, compliance — remains current thinking.
 
 *An independent, evidence-graded sleep & natural-remedies wiki.*
-*Working model: reptides' rigor and trust architecture, der-lukas's soft-light gallery aesthetic, monetized by membership (not commerce, not affiliate).*
+*Working model: reptides' rigor and trust architecture, ~~der-lukas's soft-light gallery aesthetic, monetized by membership~~ (not commerce, not affiliate). **[SUPERSEDED: evidence-teal design per DESIGN_SYSTEM v2; tools-first funding per D2.]***
 
-**Name:** somnary (always lowercase; wordmark `somnary.` with trailing period). From *somnus* (sleep) + the *-ary* of library/repository — "the sleep reference."
+**Name:** ~~somnary (always lowercase; wordmark `somnary.` with trailing period)~~ **[SUPERSEDED by D3: "Somnary" capitalized; wordmark `Somnary.`]** From *somnus* (sleep) + the *-ary* of library/repository — "the sleep reference."
 
 ---
 
@@ -24,14 +37,15 @@ Name what you're against, the way reptides strikes through "a sales floor." Cand
 Because you're NOT doing affiliate/commerce, your credibility rests on disavowals you can prove:
 - **zero affiliate links** — and mean it (no rel=sponsored anywhere)
 - **zero brand sponsorship** — no supplement company pays you
-- **reader-funded only** — membership is the sole revenue
+- **reader-funded only** — ~~membership is the sole revenue~~ **[SUPERSEDED by D2: tools-first — clinician handout exports, label-checker pro, supporter tier]**
 - **0 hallucinated citations** — every reference resolves to a real, checkable source (PubMed ID / DOI / registry)
 - **claims labeled, never buried** — weak evidence is shown as weak, not hidden
 
 These become your homepage stat row (mirroring reptides' "56 / 1,576 / 0 / $0").
 
 ### 1.3 Name & voice
-- **Name: somnary.** Coined from *somnus* (sleep) + *-ary* (library/repository) — reads as "the sleep reference." Always lowercase; wordmark is `somnary.` with a trailing period (mirrors `reptides.`).
+> **[SUPERSEDED by D3]** Brand is capitalized **"Somnary"** in prose, UI, and wordmark (`Somnary.` with trailing period). The lowercase styling below is retired.
+- **Name: somnary.** Coined from *somnus* (sleep) + *-ary* (library/repository) — reads as "the sleep reference." ~~Always lowercase; wordmark is `somnary.` with a trailing period (mirrors `reptides.`).~~
 - Voice: calm, declarative, skeptical-but-fair. Lowercase display type. Short sentences. No hype adjectives. Cite or don't claim.
 - Tagline pattern: "somnary · [N] remedies graded, [M] sources cited · zero brand money."
 - **Before launch:** verify the .com/.co domain is free and run a trademark check (USPTO + IP Australia) since the name is now locked.
@@ -51,8 +65,8 @@ Mirror reptides' "six ways to read," retargeted. Job-to-be-done framing, numbere
 1. **The Tier Board** *(free, the hook)* — every remedy ranked S–F by evidence. Shareable leaderboard.
 2. **The Wiki** *(free)* — one page per remedy. The core content unit. (Template in §4.)
 3. **By Outcome** *(free)* — goal-first entry: fall asleep faster / stay asleep / sleep quality / anxiety-driven insomnia / jet lag & shift work / next-day grogginess / vivid-dream or REM concerns.
-4. **Build Your Stack / The Lab** *(free walkthrough, paid export)* — combine remedies, see aggregate evidence grade + interaction warnings.
-5. **The Briefs** *(paid membership)* — long-form deep dives (the melatonin-timing dossier, the magnesium-form question, the ashwagandha-standardization mess).
+4. ~~**Build Your Stack / The Lab** *(free walkthrough, paid export)* — combine remedies, see aggregate evidence grade + interaction warnings.~~ **[SUPERSEDED by D4: stack builder killed. Only the interaction-warning engine survives, inside the compare tool + safety router. Never a combine-your-stack surface.]**
+5. ~~**The Briefs** *(paid membership)* — long-form deep dives~~ **[SUPERSEDED by D2: no membership paywall. Deep dives publish free; revenue = clinician handouts / label-checker pro / supporter tier.]** (the melatonin-timing dossier, the magnesium-form question, the ashwagandha-standardization mess).
 6. **The Methodology** *(free)* — grading rubric, source hierarchy, citation audit, corrections policy. The editorial spine.
 7. **Community Reports** *(free to read at thresholds)* — anonymous structured self-reports, sits beside evidence, never grades.
 8. **The Dispatch** *(free newsletter)* — monthly top-of-funnel.
@@ -75,8 +89,8 @@ Search is a first-class navigation surface, not an afterthought — with a large
 - `/tiers` board
 - `/r/{slug}` remedy pages (e.g. `/r/melatonin`)
 - `/outcome/{slug}`
-- `/lab` stack builder
-- `/briefs` + `/briefs/{slug}`
+- ~~`/lab` stack builder~~ **[SUPERSEDED by D4 — never build]**
+- ~~`/briefs` + `/briefs/{slug}`~~ **[SUPERSEDED by D2 — no paid briefs]**
 - `/methodology`
 - `/community` + `/community/{slug}`
 - `/search` (results page; palette is global overlay)
@@ -195,13 +209,18 @@ Breadth this large only works if the research is real (it's the whole brand). Ba
 
 ### 5c. Briefs & outcomes (as before)
 **By-outcome guides:** 7–10 to start (see §2).
-**Briefs (paid):** 8–12 deep dives to justify membership at launch.
+~~**Briefs (paid):** 8–12 deep dives to justify membership at launch.~~ **[SUPERSEDED by D2: deep dives publish free.]**
 
 Each page needs real citations — budget research time accordingly (see §9).
 
 ---
 
 ## 6. Monetization
+
+> **[SUPERSEDED IN FULL by D2 (2026-07-06).]** No membership paywall on the
+> wiki, ever. Revenue candidates in order: clinician handout exports,
+> label-checker pro features, supporter tier. Zero affiliate and zero brand
+> money still stand. The section below is retained for history only.
 
 reptides' exact model, since you scrapped affiliate:
 - **Free:** tier board, wiki, outcomes, methodology, community (at thresholds), dispatch newsletter.
@@ -213,6 +232,12 @@ reptides' exact model, since you scrapped affiliate:
 ---
 
 ## 7. Visual & UX direction (soft-light, der-lukas-flavored)
+
+> **[SUPERSEDED IN FULL (2026-07-06).]** The design direction is now the
+> evidence-teal system in `/docs/DESIGN_SYSTEM.md` v2, rewritten from the
+> user-accepted v3 prototype (`/docs/html-prototype/`). Soft-light
+> lavender/sage, lowercase display type, and der-lukas gallery framing are
+> retired. §7.5 (mobile-first, SSR/SSG crawlability) remains binding.
 
 ### 7.1 Palette
 - Base: warm off-white (#F7F5F0-ish), not stark white.
@@ -240,9 +265,9 @@ Tier letter badge · evidence-gate chip · claims-vs-data table · remedy card (
 
 ## 8. Technical build
 
-- **Stack:** SSR/SSG framework (Next.js / Astro) so content is crawlable — this is non-negotiable for an SEO-driven evidence site.
-- **Content model:** structured (CMS or MDX) — remedy = {tier, verdict, claims[], data[], doses[], safety[], sources[], aliases[]}. Structure enables the tier board, stack builder, search, and Ask to all read the same data. Interventions reuse the same schema (adapted fields).
-- **Design system:** locked in `/docs/DESIGN_SYSTEM.md` (v1.2). Build against named tokens only — see that file's §5 guardrails. Never invent colors/spacing/type.
+- **Stack:** SSR/SSG framework (~~Next.js /~~ Astro **[D1 locks Astro]**) so content is crawlable — this is non-negotiable for an SEO-driven evidence site.
+- **Content model:** structured (CMS or MDX) — remedy = {tier, verdict, claims[], data[], doses[], safety[], sources[], aliases[]}. Structure enables the tier board, ~~stack builder,~~ **[D4]** search, and Ask to all read the same data. Interventions reuse the same schema (adapted fields). *(Current schema lives in CLAUDE.md's content model + `src/content.config.ts`.)*
+- **Design system:** locked in `/docs/DESIGN_SYSTEM.md` (~~v1.2~~ **v2.0 evidence-teal**). Build against named tokens only — see that file's guardrails. Never invent colors/spacing/type.
 - **Search index:** generated at build time from structured content (Pagefind/FlexSearch/Fuse). Indexes names + aliases/latin names + outcomes + symptoms. Crawlable `/search` page + `⌘K` palette read the same index. See §2a + DESIGN_SYSTEM §2.13/§3.7.
 - **Citations as data:** store each source with PMID/DOI so you can auto-validate links resolve (your "0 hallucinated cites" guarantee needs a checker).
 - **Ask (RAG):** embed only your own cited corpus; the assistant must refuse or hedge when the corpus doesn't cover something — never invent. Cite back to source on every answer.
@@ -284,9 +309,9 @@ The credibility is in the research, and it can't be faked since you chose real c
 5. **Tier board + outcomes:** once enough pages exist to populate them.
 6. **Interventions:** first batch of non-supplement pages (CBT-I, light, temperature, breathing) — §5a. These often out-grade supplements and strengthen the thesis.
 7. **Dispatch newsletter:** start collecting emails from day one.
-8. **Briefs + membership + paywall:** launch paid layer once free content proves authority.
+8. ~~**Briefs + membership + paywall:** launch paid layer once free content proves authority.~~ **[SUPERSEDED by D2: revenue = clinician handouts / label-checker pro / supporter tier, per BUILD_CHECKLIST Phase 6.]**
 9. **Expansion catalog (ongoing):** grow toward 100+ via the deep-research engine (§5b), prioritized by search-demand backlog.
-10. **Stack builder, Ask, community, app:** post-launch, in roughly that order.
+10. ~~**Stack builder,**~~ **[D4]** Ask, community, app: post-launch, in roughly that order.
 
 ---
 

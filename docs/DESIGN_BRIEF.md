@@ -1,4 +1,13 @@
-# Design Brief — somnary
+# Design Brief — Somnary
+
+> **SUPERSEDED IN FULL (2026-07-06).** This is the brief that produced the
+> v1.2 soft-light system, now retired. The ratified design source is
+> `/docs/DESIGN_SYSTEM.md` v2 (evidence-teal, from the user-accepted v3
+> prototype at `/docs/html-prototype/`). Specific conflicts with locked
+> decisions: lowercase `somnary.` wordmark (D3: capitalized `Somnary.`),
+> lavender/sage palette (retired), component #10 paywall teaser (D2: no
+> membership paywall). Kept for historical rationale only — do not build
+> from this document.
 
 ## What this is
 **somnary** (always lowercase; wordmark `somnary.` with a trailing period) is an independent, evidence-graded wiki for natural sleep remedies (melatonin, magnesium, ashwagandha, valerian, L-theanine, etc.). Every remedy is graded S–F by the strength of published human evidence, every claim is cited to a real study. It is reader-funded — no affiliate links, no brand money, no commerce. Think "the evidence layer," not a supplement store.
