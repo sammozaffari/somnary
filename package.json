@@ -7,13 +7,17 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
+    "prepare": "git config core.hooksPath .githooks || true",
     "prebuild": "node scripts/check-tokens.mjs && node scripts/check-citations.mjs",
     "build": "astro build",
     "preview": "astro preview",
     "check": "astro check",
+    "verify": "npm run verify:tokens && npm run verify:cites && npm run verify:cites:selftest",
     "verify:tokens": "node scripts/check-tokens.mjs",
     "verify:cites": "node scripts/check-citations.mjs",
-    "verify:cites:online": "node scripts/check-citations.mjs --online"
+    "verify:cites:online": "node scripts/check-citations.mjs --online",
+    "verify:cites:selftest": "node scripts/test-resolver.mjs",
+    "verify:crawl": "node scripts/check-crawlable.mjs"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.0.8",

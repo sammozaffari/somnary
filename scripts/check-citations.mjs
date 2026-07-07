@@ -18,7 +18,9 @@ import { readdir, readFile } from 'node:fs/promises';
 import { join, relative } from 'node:path';
 import matter from 'gray-matter';
 
-const CONTENT_DIR = 'src/content/remedies';
+// Default corpus; overridable via env so the fake-PMID regression test (test-resolver.mjs)
+// can point the resolver at a throwaway fixture without touching the real content.
+const CONTENT_DIR = process.env.SOMNARY_CONTENT_DIR || 'src/content/remedies';
 const ONLINE = process.argv.includes('--online');
 
 // Identifier formats — must match the regexes in src/content.config.ts.

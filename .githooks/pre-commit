@@ -1,0 +1,6 @@
+#!/bin/sh
+# Somnary pre-commit — fast, offline gates (CHK-0.4/0.5). Full build/crawl run in CI.
+# Bypass in a pinch with `git commit --no-verify` (CI still enforces).
+echo "• pre-commit: token linter + citation resolver"
+node scripts/check-tokens.mjs || { echo "✖ token linter failed"; exit 1; }
+node scripts/check-citations.mjs || { echo "✖ citation resolver failed"; exit 1; }
