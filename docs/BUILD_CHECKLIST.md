@@ -48,7 +48,7 @@ exists so sessions extend the site instead of rebuilding it.
   Build green through linter + resolver; zero v1.2 palette hex in built CSS;
   D3 casing site-wide; visually verified via headless-Chrome screenshots of
   home/tiers/melatonin/cbt-i — S/A badge distinction confirmed.)*
-- [~] **CHK-0.3 Content model extension.** `HG` (schema change) *(Schema exists in
+- [x] **CHK-0.3 Content model extension.** `HG` (schema change) *(Schema exists in
   `src/content.config.ts` with claims↔data, sources, doses, safety,
   interactions, community, seo.)* Add missing fields per CLAUDE.md: `notFor[]`,
   `biggestRisk`, `reviewDate`, `changeLog[]`; confirm `bestFor[]` shape.
@@ -61,12 +61,23 @@ exists so sessions extend the site instead of rebuilding it.
   + a "reviewed <date> · correction link" line — that's CHK-2.1's template
   work and needs a real corrections destination; populate `notFor`/
   `biggestRisk` for the other 19 = evidence-editor sessions, not fabricated.)*
-- [~] **CHK-0.4 Citation resolver in CI + pre-commit.** *(Resolver exists —
+- [x] **CHK-0.4 Citation resolver in CI + pre-commit.** *(Resolver exists —
   `scripts/check-citations.mjs`, runs in `prebuild`, fails build on bad cite.)*
-  Missing: CI workflow, pre-commit hook, deliberate-fake-PMID regression test.
-- [ ] **CHK-0.5 CI gate suite.** Build + resolver + token lint + crawlability
+  *(Done, PR #4: resolver now honors `SOMNARY_CONTENT_DIR`; fake-PMID regression
+  test `scripts/test-resolver.mjs` (`verify:cites:selftest`) proves it fails on
+  a malformed id and passes a real one; runs in CI + `.githooks/pre-commit`.)*
+- [x] **CHK-0.5 CI gate suite.** Build + resolver + token lint + crawlability
   check (grep built HTML for page content). *Accept:* all gates run on every PR
   (no `.github/` exists yet); post-session hook appends to this file's session log.
+  *(Done, PR #4: `.github/workflows/ci.yml` runs token lint → resolver →
+  resolver self-test → build → crawlability on push+PR; `scripts/check-crawlable.mjs`
+  verifies content is server-rendered (20 pages + key routes); `.githooks/pre-commit`
+  wired via the `prepare` script. DEFERRED: the post-session session-log hook is a
+  Claude Code Stop hook / harness config, not repo CI — flagged for a settings pass.)*
+
+> **PHASE 0 COMPLETE (2026-07-07).** All guardrails in place: docs reconciled,
+> evidence-teal reskin, extended content model, and the full CI gate suite. Per
+> CLAUDE.md this phase boundary is a `[HUMAN-GATE]` — owner review before Phase 1.
 
 ## Phase 1 — Credibility spine
 - [~] **CHK-1.1 Methodology page.** *(Exists, server-rendered, from v1 build.)*
@@ -155,6 +166,7 @@ exists so sessions extend the site instead of rebuilding it.
 
 ### Session log (agents append one line per session)
 <!-- 2026-07-06 — checklist v2 adopted; decisions D1–D4 locked. -->
+- 2026-07-07 · CHK-0.4/0.5 · CI gate suite (completes Phase 0). Added .github/workflows/ci.yml (token lint → resolver → resolver self-test → build → crawlability, on push + PR); scripts/check-crawlable.mjs (asserts content is server-rendered — 20 remedy pages + home/tiers); scripts/test-resolver.mjs fake-PMID regression (resolver now honors SOMNARY_CONTENT_DIR); .githooks/pre-commit (token lint + resolver) wired via package.json `prepare`. All gates green locally. PR #4 (HG: Phase 0 completion boundary). Deferred: post-session session-log hook is harness config, not repo CI.
 - 2026-07-06 · CHK-0.3 · content model extension. Added notFor[]/biggestRisk/reviewDate(required)/changeLog[] + changeLogEntry shape to content.config.ts; tier marked [HUMAN-GATE] in schema. reviewDate seeded from each remedy's real git last-commit date across all 20 (honest, not fabricated). Melatonin populated with notFor/biggestRisk/changeLog from its own cited content as the worked template. Fixed a D4 "stack builder" leftover in the schema header comment. Build green. PR #3 (HG: schema change). Deferred: lead-block rendering + correction link (CHK-2.1), per-remedy notFor/biggestRisk population (evidence-editor).
 - 2026-07-06 · CHK-0.2 · evidence-teal reskin. Central tokens (global.css + tailwind) → DESIGN_SYSTEM v2; Archivo + IBM Plex Sans (+ @fontsource for OG gen); TierBadge (filled/white letter) + Wordmark (Somnary., D3) redesigned; SafetyCallout serious→vermilion register; ~120 token refs swept across 31 files via 4 parallel agents; StatRow accent API renamed; OG generator reteal'd; brand word capitalized site-wide (URLs preserved); dead TokenProbe removed. New token linter (scripts/check-tokens.mjs) wired to prebuild — fails on retired names + hardcoded hex, warns on off-scale spacing. Build green through both gates; 0 v1.2 palette hex in built CSS. PR #2, awaiting owner visual review.
 - 2026-07-06 · CHK-0.0 · strategy package → /docs/strategy/; DESIGN_SYSTEM v2 (evidence-teal) rewritten from v3 prototype with computed contrast; PROJECT_PLAN/DESIGN_BRIEF superseded sections marked; checklist reality-audited to v2.1; .claude/agents/ ×6 added; pivot-analysis baseline corrected. Build + resolver green. PR #1. Owner ratified token gaps: G1 `--grade-s #0d4f44`, G3 `--safety-ink #a02c22`, G4 `--focus-ring` 3px primary @40%; G2 (undesigned page types) remains open, non-blocking. Deferred: disclosure D2 update rides CHK-1.2.

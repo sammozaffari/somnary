@@ -1,0 +1,39 @@
+name: CI
+
+# Somnary CI gate suite (CHK-0.5). Every push to main and every PR runs the same
+# gates that guard the non-negotiables: tokens-only styling, "0 hallucinated cites",
+# schema validity, and SSR/SSG crawlability. A red check blocks merge.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  gates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Token linter (no retired tokens / hardcoded colors)
+        run: npm run verify:tokens
+
+      - name: Citation resolver (every source has a resolvable id)
+        run: npm run verify:cites
+
+      - name: Resolver self-test (a fake PMID must fail the gate)
+        run: npm run verify:cites:selftest
+
+      - name: Build (schema validation + SSG)
+        run: npm run build
+
+      - name: Crawlability (content is server-rendered, not client-only)
+        run: npm run verify:crawl
