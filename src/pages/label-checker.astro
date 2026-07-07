@@ -1,0 +1,351 @@
+---
+// Label checker (CHK-4.1) — a FREE tool (D2 tools-first; no paywall/pro/unlock anywhere). The
+// page SHELL is fully server-rendered and crawlable: the intro, the "rules this checker applies"
+// documentation (each rule's rationale + a source link), the privacy promise, and the allowed-
+// framing note are all static HTML, present with JS off. Only the paste→check→flag interaction is
+// a client island (<LabelChecker/>), which parses locally and sends nothing to a server.
+//
+// Framing (CLAUDE.md D4 + forbidden framings): the tool DESCRIBES label problems and ROUTES safety
+// questions to /safety. It never recommends a product, a dose, or a combination, never says a
+// product is safe for you, never diagnoses, and never assigns a grade to a pasted panel.
+import Base from '../layouts/Base.astro';
+import ContextBanner from '../components/ContextBanner.astro';
+import Disclaimer from '../components/Disclaimer.astro';
+import LabelChecker from '../components/LabelChecker.astro';
+
+// The five rules, documented server-side so the checker is never a black box. Each rationale is
+// drawn from ALREADY-CITED corpus content (no invented thresholds or stats); `links` point to
+// where that basis lives (the ingredient pages carry the PMIDs/DOIs). Rendered statically below.
+const rules = [
+  {
+    id: 'R1',
+    title: 'proprietary blends hide the dose',
+    rationale:
+      'a “proprietary blend” reports only one combined total, so the amount of each ingredient is hidden. with no per-ingredient amount, nothing in the blend can be checked against the dose a study actually used — the claim becomes unverifiable, not strong or weak.',
+    links: [
+      { href: '/sleep-blends', label: 'the proprietary-blend penalty' },
+      { href: '/methodology#rankings', label: 'methodology · §3.2' },
+    ],
+  },
+  {
+    id: 'R2',
+    title: 'melatonin above 5 mg is past the studied range',
+    rationale:
+      'pooled trials find melatonin’s modest benefit at low doses (about 0.5–5 mg); taking more has not been shown to work better, and larger doses mainly raise the odds of next-day grogginess. the flag describes that studied range — it is not a claim that 5 mg is “unsafe”.',
+    links: [
+      { href: '/melatonin-dose-timing', label: 'what the melatonin trials used' },
+      { href: '/melatonin-gummies', label: 'when the label ≠ the bottle' },
+      { href: '/r/melatonin', label: 'melatonin: the cited evidence' },
+    ],
+  },
+  {
+    id: 'R3',
+    title: 'a dose below the one studies used',
+    rationale:
+      'each ingredient page records the dose ranges the trials actually used. when a panel lists a matched ingredient below the lowest studied dose, the checker says so and shows the studied figure — so you can compare, not so it can tell you what to take. it only fires when a clean number parses; otherwise it stays silent.',
+    links: [
+      { href: '/methodology#rankings', label: 'how dose-match is judged' },
+    ],
+  },
+  {
+    id: 'R4',
+    title: 'a botanical with no standardized extract stated',
+    rationale:
+      'a botanical’s active content varies enormously by extract, so the studied effect attaches to a standardized extract at a stated potency (a withanolide %, a named extract like KSM-66 or Suntheanine). when a matched botanical appears with no such marker in the panel, the checker notes it.',
+    links: [
+      { href: '/r/valerian', label: 'standardization, in practice' },
+      { href: '/methodology#rankings', label: 'methodology · §3.2' },
+    ],
+  },
+  {
+    id: 'R5',
+    title: 'an ingredient with documented interaction cautions',
+    rationale:
+      'each ingredient page lists interaction cautions drawn from its cited safety section. the checker surfaces those per matched ingredient and routes you to the safety page. it never tells you to combine or avoid anything, and it never implies a combination is safe — an interaction is a question for a pharmacist or clinician.',
+    links: [
+      { href: '/safety', label: 'the safety boundary' },
+    ],
+  },
+];
+---
+
+<Base
+  title="label checker — read a supplement facts panel — Somnary"
+  description="paste a sleep-supplement facts panel and see documented label problems: proprietary blends, melatonin above the studied range, doses below what studies used, botanicals with no standardized extract, and interaction cautions. free, runs in your browser, describes label problems — it doesn't tell you what to take."
+  canonical="https://somnary.vercel.app/label-checker"
+>
+  <main class="page">
+    <header class="head">
+      <p class="eyebrow">tool · label checker</p>
+      <h1 class="title">label checker<span class="dot">.</span></h1>
+      <p class="dek">
+        paste the ingredients and amounts from a sleep-supplement label. the checker applies a short
+        list of documented rules and describes what it finds. it doesn’t grade the product, and it
+        doesn’t tell you what to take.
+      </p>
+    </header>
+
+    <ContextBanner
+      note="this tool checks pasted label text against a few documented rules. it doesn’t grade a product, diagnose anything, or replace a pharmacist or clinician."
+    />
+
+    <!-- allowed-framing note: what this tool does and does NOT do (compliance-visible, server-rendered) -->
+    <aside class="framing" role="note" aria-label="what this checker does">
+      <p class="framing-label">what this checker does</p>
+      <p class="framing-text">
+        it <strong>describes problems a label can have</strong>. it does not tell you what to take,
+        what dose is right for you, whether a product is safe for you, or what to combine. for
+        anything about your own situation, talk to a pharmacist or clinician.
+      </p>
+    </aside>
+
+    <div class="tool-slot">
+      <LabelChecker />
+    </div>
+
+    <!-- RULES DOCUMENTATION — server-rendered so the checker is never a black box (crawlable, JS-off) -->
+    <section class="section" aria-labelledby="rules-heading">
+      <p class="eyebrow">how it works</p>
+      <h2 id="rules-heading" class="section-title">rules this checker applies</h2>
+      <div class="prose">
+        <p>
+          the checker is a handful of static rules, not a model or a score. each one is documented
+          here with its reasoning and a link to the cited evidence it rests on. the thresholds come
+          from the ingredient pages themselves — nothing here is invented.
+        </p>
+      </div>
+      <ol class="rules">
+        {
+          rules.map((r) => (
+            <li class="rule">
+              <span class="rule-tag" aria-hidden="true">{r.id}</span>
+              <div class="rule-body">
+                <h3 class="rule-title">
+                  <span class="sr-tag">{r.id}. </span>
+                  {r.title}
+                </h3>
+                <p class="rule-rationale">{r.rationale}</p>
+                <ul class="rule-links">
+                  {r.links.map((l) => (
+                    <li>
+                      <a href={l.href}>{l.label} →</a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </li>
+          ))
+        }
+      </ol>
+    </section>
+
+    <!-- PRIVACY PROMISE — real and kept: the pasted text never leaves the device -->
+    <section class="section" aria-labelledby="privacy-heading">
+      <p class="eyebrow">privacy</p>
+      <h2 id="privacy-heading" class="section-title">your label text never leaves your device</h2>
+      <div class="prose">
+        <p>
+          this checker runs entirely in your browser. the text you paste is parsed on your own
+          device and is <strong>never sent to Somnary or anyone else</strong> — there is no upload,
+          no server that sees it, and nothing is stored or logged.
+        </p>
+        <p>
+          the only thing your browser downloads is this page and a static list of the remedies to
+          match against (<a href="/label-index.json">label-index.json</a>). your pasted text is
+          never part of any request. no accounts, no tracking of what you check, and the tool is
+          free — there is nothing to unlock.
+        </p>
+      </div>
+    </section>
+
+    <div class="disclaimer-slot">
+      <Disclaimer variant="standard" />
+    </div>
+  </main>
+</Base>
+
+<style>
+  .page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: var(--sp-8) var(--sp-7) var(--sp-9);
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0;
+  }
+  .dot {
+    color: var(--primary);
+  }
+
+  .head {
+    margin-bottom: var(--sp-6);
+  }
+  .title {
+    font-family: var(--font-display);
+    font-size: var(--text-3xl);
+    line-height: var(--lh-3xl);
+    letter-spacing: var(--tracking-tight);
+    color: var(--ink);
+    margin: var(--sp-3) 0 var(--sp-5);
+  }
+  .dek {
+    font-family: var(--font-body);
+    font-size: var(--text-md);
+    line-height: var(--lh-md);
+    color: var(--muted);
+    max-width: 68ch;
+    margin: 0;
+  }
+
+  /* allowed-framing note — calm, restrained (not a severity callout) */
+  .framing {
+    background: var(--surface);
+    border: var(--border-hairline);
+    border-radius: var(--r-lg);
+    padding: var(--sp-5);
+    margin: var(--sp-5) 0;
+  }
+  .framing-label {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 var(--sp-2);
+  }
+  .framing-text {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: 0;
+  }
+  .framing-text strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  .tool-slot {
+    margin: var(--sp-6) 0 var(--sp-8);
+  }
+
+  .section {
+    border-top: var(--border-hairline);
+    padding-top: var(--sp-6);
+    margin-top: var(--sp-8);
+  }
+  .section-title {
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    line-height: var(--lh-xl);
+    color: var(--ink);
+    margin: var(--sp-2) 0 var(--sp-5);
+  }
+  .prose {
+    max-width: 68ch;
+  }
+  .prose p {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--muted);
+    margin: 0 0 var(--sp-4);
+  }
+  .prose strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .prose a {
+    color: var(--primary);
+  }
+
+  /* rules documentation */
+  .rules {
+    list-style: none;
+    margin: var(--sp-6) 0 0;
+    padding: 0;
+  }
+  .rule {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--sp-5);
+    align-items: start;
+    padding: var(--sp-5) 0;
+    border-top: var(--border-hairline);
+  }
+  .rule-tag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    flex: none;
+    border-radius: var(--r-sm);
+    background: var(--stone);
+    color: var(--primary);
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    font-weight: 500;
+  }
+  .rule-title {
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    line-height: var(--lh-base);
+    color: var(--ink);
+    margin: 0 0 var(--sp-3);
+  }
+  .sr-tag {
+    color: var(--muted);
+  }
+  .rule-rationale {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--muted);
+    margin: 0 0 var(--sp-3);
+    max-width: 68ch;
+  }
+  .rule-links {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2) var(--sp-5);
+  }
+  .rule-links a {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--primary);
+    text-decoration: none;
+  }
+  .rule-links a:hover {
+    text-decoration: underline;
+  }
+  .rule-links a:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+    border-radius: var(--r-xs);
+  }
+
+  .disclaimer-slot {
+    margin-top: var(--sp-8);
+  }
+
+  @media (max-width: 640px) {
+    .page {
+      padding: var(--sp-6) var(--sp-5) var(--sp-8);
+    }
+    .title {
+      font-size: var(--text-2xl);
+    }
+    .rule {
+      grid-template-columns: 1fr;
+      gap: var(--sp-3);
+    }
+  }
+</style>
