@@ -10,6 +10,7 @@ import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import TierBadge from '../components/TierBadge.astro';
 import RemedyCard from '../components/RemedyCard.astro';
+import Disclaimer from '../components/Disclaimer.astro';
 import { TIERS, type TierId } from '../lib/tiers';
 import { contentIndex } from '../lib/content-index';
 
@@ -67,6 +68,7 @@ const sortModes = [
         behind each remedy — not popularity, not tradition, not the marketing. weak evidence is
         labelled weak and shown, never buried. sort it however helps.
       </p>
+      <Disclaimer variant="compact" />
     </header>
 
     <!-- overview legend: what each tier means + how many remedies sit in it -->
@@ -277,7 +279,7 @@ const sortModes = [
     color: var(--ink);
   }
   .seg[aria-pressed='true'] {
-    color: #ffffff;
+    color: var(--surface);
     background: var(--primary);
   }
   .seg:focus-visible {
