@@ -1,0 +1,240 @@
+---
+// Safety hub / router — CHK-3.3 (strategy 03 "Safety Hub"; DESIGN_SYSTEM §57-60 safety tokens,
+// §174-177 route-card + safety-card .urgent). NOT a graded remedy and NOT a diagnostic tool: it is
+// a NAVIGATIONAL router. Some sleep problems are a reason to see a clinician, not to check a shelf,
+// and this page points to the boundary pages that cover them. Every card names a boundary and says
+// what its destination covers — descriptive only, no new clinical claim (so no new citation is
+// needed; the CI resolver doesn't scan .astro). Each link resolves to an EXISTING route. The urgent
+// card alone wears the safety register (§57-60 vermilion); vermilion is never decorative.
+import Base from '../layouts/Base.astro';
+import ContextBanner from '../components/ContextBanner.astro';
+import Disclaimer from '../components/Disclaimer.astro';
+
+// Route grid. Four calm route-cards + one urgent safety-card. `register: 'urgent'` marks the only
+// card that carries the vermilion safety styling. Every href points to a page that exists today.
+const routes = [
+  {
+    href: '/when-to-see-a-doctor',
+    boundary: 'snoring with breathing pauses',
+    covers:
+      "why loud snoring with pauses, gasping, or heavy daytime sleepiness is a reason to ask a clinician about a sleep study — not something to self-treat.",
+  },
+  {
+    href: '/when-to-see-a-doctor',
+    boundary: 'insomnia most nights, for months',
+    covers:
+      'when persistent insomnia is a condition to treat properly rather than paper over nightly, and what to bring to the appointment.',
+  },
+  {
+    href: '/when-to-see-a-doctor',
+    boundary: 'you take medications or manage a condition',
+    covers:
+      'why the safety boundary comes before any remedy when other medicines or a health condition are in the picture — start with a clinician, not a shelf.',
+  },
+  {
+    href: '/melatonin-children',
+    boundary: 'you are considering this for a child',
+    covers:
+      "the most cautious page on the site: the accidental-ingestion risk, the label-accuracy problem, and why it's a pediatrician conversation first.",
+  },
+];
+
+const urgentRoute = {
+  href: '/when-to-see-a-doctor#urgent',
+  boundary: 'an urgent situation right now',
+  covers:
+    'crisis and emergency contacts: thoughts of self-harm, someone hard to wake or struggling to breathe, or a suspected overdose or poisoning.',
+};
+---
+
+<Base
+  title="sleep safety: when to see a clinician, not check a shelf | Somnary"
+  description="some sleep problems are a reason to see a clinician, not to check a shelf. a router to Somnary's safety boundaries: snoring with breathing pauses, months of insomnia, medications and conditions, children, and urgent situations."
+  canonical="https://somnary.vercel.app/safety"
+>
+  <main class="page">
+    <header class="head">
+      <p class="eyebrow">safety · where a remedy is the wrong question</p>
+      <h1 class="title">safety<span class="dot">.</span></h1>
+      <p class="dek">
+        Somnary grades remedies for mild, occasional sleeplessness. Some sleep problems are a reason
+        to see a clinician, not to check a shelf. This page routes you to the boundary that fits your
+        situation — each one covers what a supplement can't, and where the right next move is
+        professional help.
+      </p>
+    </header>
+
+    <ContextBanner
+      note="this is a router, not a remedy and not a diagnosis. it points to the boundary pages; it doesn't tell you which one applies to you — that's a conversation for a clinician."
+    />
+
+    <!-- disclaimer sits WITH the route grid, near the decisions (non-negotiable: not footer-only) -->
+    <div class="disclaimer-slot">
+      <Disclaimer variant="standard" />
+    </div>
+
+    <section class="section" aria-label="safety routes">
+      <p class="eyebrow">choose the boundary that fits</p>
+      <div class="grid">
+        {
+          routes.map((r) => (
+            <a class="route-card" href={r.href}>
+              <p class="card-boundary">{r.boundary}</p>
+              <p class="card-covers">{r.covers}</p>
+              <span class="card-go">{r.href.startsWith('/melatonin-children') ? 'melatonin in children →' : 'when to see a doctor →'}</span>
+            </a>
+          ))
+        }
+
+        <a class="safety-card urgent" href={urgentRoute.href}>
+          <span class="urgent-tag" aria-hidden="true">urgent</span>
+          <p class="card-boundary">{urgentRoute.boundary}</p>
+          <p class="card-covers">{urgentRoute.covers}</p>
+          <span class="card-go">crisis &amp; emergency contacts →</span>
+        </a>
+      </div>
+    </section>
+  </main>
+</Base>
+
+<style>
+  .page {
+    max-width: var(--page);
+    margin: 0 auto;
+    padding: var(--sp-8) var(--sp-7) var(--sp-9);
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0;
+  }
+  .dot {
+    color: var(--primary);
+  }
+  .head {
+    margin-bottom: var(--sp-6);
+  }
+  .title {
+    font-family: var(--font-display);
+    font-size: var(--text-3xl);
+    line-height: var(--lh-3xl);
+    letter-spacing: var(--tracking-tight);
+    color: var(--ink);
+    margin: var(--sp-3) 0 var(--sp-5);
+  }
+  .dek {
+    font-size: var(--text-md);
+    line-height: var(--lh-md);
+    color: var(--muted);
+    max-width: 68ch;
+    margin: 0;
+  }
+
+  .disclaimer-slot {
+    margin-top: var(--sp-6);
+  }
+
+  .section {
+    margin-top: var(--sp-8);
+  }
+  .section .eyebrow {
+    margin-bottom: var(--sp-5);
+  }
+
+  /* route grid */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--sp-4);
+  }
+
+  /* route-card recipe (§174-177): hairline, radius 7, hover lift −2px, teal-register text */
+  .route-card,
+  .safety-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+    background: var(--surface);
+    border: var(--border-hairline);
+    border-radius: var(--r-sm);
+    padding: var(--sp-6);
+    text-decoration: none;
+    color: var(--ink);
+    transition:
+      box-shadow var(--dur-base) var(--ease-settle),
+      transform var(--dur-base) var(--ease-settle);
+  }
+  .route-card:hover,
+  .safety-card:hover {
+    box-shadow: var(--shadow-lift);
+    transform: translateY(calc(-1 * var(--sp-1)));
+  }
+  .route-card:focus-visible,
+  .safety-card:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+  }
+
+  .card-boundary {
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    line-height: var(--lh-lg);
+    letter-spacing: var(--tracking-tight);
+    color: var(--ink);
+    margin: 0;
+  }
+  .card-covers {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: 0;
+  }
+  .card-go {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--primary);
+    margin-top: var(--sp-2);
+  }
+
+  /* safety-card .urgent (§174-177): --warning-bg fill + vermilion-alpha border + --safety-ink */
+  .safety-card.urgent {
+    background: var(--warning-bg);
+    border: 1px solid color-mix(in srgb, var(--vermilion) 40%, transparent);
+  }
+  .safety-card.urgent .card-boundary,
+  .safety-card.urgent .card-covers,
+  .safety-card.urgent .card-go {
+    color: var(--safety-ink);
+  }
+  .urgent-tag {
+    align-self: flex-start;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--surface);
+    background: var(--vermilion);
+    border-radius: var(--r-pill);
+    padding: var(--sp-1) var(--sp-3);
+    margin-bottom: var(--sp-2);
+  }
+
+  @media (max-width: 760px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media (max-width: 640px) {
+    .page {
+      padding: var(--sp-6) var(--sp-5) var(--sp-8);
+    }
+    .title {
+      font-size: var(--text-2xl);
+    }
+  }
+</style>
