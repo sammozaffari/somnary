@@ -9,7 +9,7 @@ import { TIERS } from '../lib/tiers';
 // Home — CHK-3.1 (strategy 03 "Homepage Above-The-Fold"; DESIGN_SYSTEM §1/§10).
 // Decision-first front door: route by intent, not by molecule. Replaces the v1 "enemy hero".
 // Three above-the-fold decision routes (check a remedy → /search · start from your problem →
-// #situations · read safety red flags → /when-to-see-a-doctor), then six situation tiles wired
+// #situations · read safety red flags → /safety), then six situation tiles wired
 // to REAL routes, the disavowal stat row read from actual data (never hardcoded), and a compact
 // "how to read a grade" legend. Citron --action is spent exactly ONCE (the hero primary CTA),
 // per the §10 budget. No search island is dropped here (SearchPalette has fixed IDs + a single
@@ -37,7 +37,7 @@ const popularChecks = [
 ];
 
 // Six situation tiles — labels verbatim from strategy 03, each wired to a route that resolves.
-// Medications tile → /when-to-see-a-doctor (the dedicated meds page is CHK-5.2; no dead link).
+// Medications tile → /safety (the safety router; the dedicated meds page is CHK-5.2; no dead link).
 const situations = [
   {
     href: '/r/melatonin',
@@ -60,7 +60,7 @@ const situations = [
     dek: 'the shorter list of remedies studied for staying asleep — wake after sleep onset, not just falling asleep.',
   },
   {
-    href: '/when-to-see-a-doctor',
+    href: '/safety',
     title: 'I use medications or have a health condition.',
     dek: 'using medications? start with the safety boundary — interactions and red flags come before any remedy.',
   },
@@ -89,7 +89,7 @@ const situations = [
       <div class="cta-row">
         <a class="cta cta-action" href="/search">Check a remedy →</a>
         <a class="cta cta-secondary" href="#situations">Start from your sleep problem</a>
-        <a class="cta cta-ghost" href="/when-to-see-a-doctor">Read safety red flags</a>
+        <a class="cta cta-ghost" href="/safety">Read safety red flags</a>
       </div>
       <div class="pills" aria-label="popular checks">
         <span class="pills-label">popular checks</span>
