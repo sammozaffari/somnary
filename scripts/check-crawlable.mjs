@@ -88,6 +88,35 @@ async function main() {
     }
   }
 
+  // Compare tool (CHK-6.1): the filter is a client island, but the FULL comparison — every remedy
+  // row + a grade signal + the D4 "comparing ≠ combining" framing + the per-remedy interaction
+  // routing — MUST be server-rendered (a no-JS user and a crawler see the whole table). Mirrors the
+  // label-checker assertion: prove the content survives with JS off.
+  const cmpPath = join(DIST, 'compare', 'index.html');
+  if (!(await exists(cmpPath))) {
+    misses.push(`compare: no built HTML at ${cmpPath}`);
+  } else {
+    const body = await readFile(cmpPath, 'utf8');
+    // Every non-draft remedy name must be in the static HTML (all rows server-rendered).
+    for (const f of files) {
+      const { data } = matter(await readFile(join(CONTENT_DIR, f), 'utf8'));
+      if (data.draft) continue;
+      if (data.name && !body.includes(data.name)) {
+        misses.push(`compare: remedy "${data.name}" not in server-rendered HTML`);
+      }
+    }
+    const needles = [
+      { re: /grade/i, why: 'grade signal (grades not server-rendered?)' },
+      { re: /not a tool for combining/i, why: 'D4 comparing-≠-combining framing' },
+      { re: /interaction cautions/i, why: 'per-remedy interaction register' },
+      { re: /\/medications-and-sleep-aids/i, why: 'interaction routing to medications page' },
+      { re: /educational, not medical advice/i, why: 'medical disclaimer' },
+    ];
+    for (const n of needles) {
+      if (!n.re.test(body)) misses.push(`compare: ${n.why} not in server-rendered HTML`);
+    }
+  }
+
   if (misses.length) {
     console.error(`\n✖ crawlability: ${misses.length} problem(s) — content may be client-only:\n`);
     for (const m of misses) console.error('   • ' + m);
