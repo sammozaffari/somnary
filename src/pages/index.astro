@@ -148,7 +148,7 @@ const situations = [
 
 <style>
   .home {
-    max-width: 1240px;
+    max-width: var(--page);
     margin: 0 auto;
     padding: var(--sp-9) var(--sp-7) var(--sp-9);
   }
@@ -198,7 +198,7 @@ const situations = [
   .cta {
     display: inline-flex;
     align-items: center;
-    min-height: 48px;
+    min-height: var(--sp-7);
     padding: 0 var(--sp-5);
     border-radius: var(--r-pill);
     font-family: var(--font-mono);
@@ -209,7 +209,7 @@ const situations = [
     transition: transform var(--dur-fast) var(--ease-soft);
   }
   .cta:hover {
-    transform: translateX(2px);
+    transform: translateY(-1px);
   }
   .cta:focus-visible {
     outline: none;
@@ -249,7 +249,7 @@ const situations = [
   .pill {
     display: inline-flex;
     align-items: center;
-    min-height: 34px;
+    min-height: var(--sp-6);
     padding: 0 var(--sp-4);
     border-radius: var(--r-pill);
     background: var(--surface);
@@ -300,7 +300,7 @@ const situations = [
   }
   .tile:hover {
     box-shadow: var(--shadow-lift);
-    transform: translateY(-3px);
+    transform: translateY(-2px);
   }
   .tile:focus-visible {
     outline: none;
