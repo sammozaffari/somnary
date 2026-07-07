@@ -1,13 +1,20 @@
 ---
 import Base from '../layouts/Base.astro';
 import StatRow from '../components/StatRow.astro';
+import Disclaimer from '../components/Disclaimer.astro';
+import TierBadge from '../components/TierBadge.astro';
 import { contentIndex, liveRemedyCount } from '../lib/content-index';
-import { OUTCOMES } from '../lib/outcomes';
+import { TIERS } from '../lib/tiers';
 
-// Home — CHK-5.3 (PLAN §1 positioning, DESIGN_SYSTEM §3.1). The hook + the disavowals, made real.
-// The "enemy" strike-through (PLAN §1.1) + the disavowal stat row read from actual data (never
-// hardcoded), so the numbers can't overstate. Newsletter band deferred to Phase 7 (CHK-7.1) — no
-// non-functional signup (real-promises rule).
+// Home — CHK-3.1 (strategy 03 "Homepage Above-The-Fold"; DESIGN_SYSTEM §1/§10).
+// Decision-first front door: route by intent, not by molecule. Replaces the v1 "enemy hero".
+// Three above-the-fold decision routes (check a remedy → /search · start from your problem →
+// #situations · read safety red flags → /when-to-see-a-doctor), then six situation tiles wired
+// to REAL routes, the disavowal stat row read from actual data (never hardcoded), and a compact
+// "how to read a grade" legend. Citron --action is spent exactly ONCE (the hero primary CTA),
+// per the §10 budget. No search island is dropped here (SearchPalette has fixed IDs + a single
+// trigger binding); the primary CTA is a plain crawlable anchor to /search plus popular-check
+// pills to real remedy routes. No newsletter/forms (CHK-4.2), no commerce, no stack-builder (D4).
 const remediesGraded = liveRemedyCount;
 const sourcesCited = contentIndex
   .filter((e) => e.researchStatus === 'live')
@@ -20,77 +27,120 @@ const statCells = [
   { value: '$0', label: 'brand money', accent: 'primary' as const },
 ];
 
-const ways = [
-  { href: '/tiers', title: 'the tier board', dek: 'every remedy ranked S–F by the evidence. the leaderboard, and the hook.' },
-  { href: '#by-outcome', title: 'by outcome', dek: 'start from your goal: fall asleep faster, stay asleep, jet lag, an anxious mind.' },
-  { href: '/methodology', title: 'the methodology', dek: 'the full S–F rubric and evidence gates, specific enough to re-derive any grade.' },
-  { href: '/search', title: 'search', dek: 'find any remedy by name, alias, latin name, compound, or symptom.' },
+// Popular-check pills → real remedy routes (verified present in src/content/remedies/).
+const popularChecks = [
+  { slug: 'melatonin', name: 'melatonin' },
+  { slug: 'magnesium', name: 'magnesium' },
+  { slug: 'valerian', name: 'valerian' },
+  { slug: 'l-theanine', name: 'L-theanine' },
+  { slug: 'ashwagandha', name: 'ashwagandha' },
 ];
 
-const featured = ['fall-asleep-faster', 'anxiety-driven-insomnia', 'jet-lag-shift-work'];
-const outcomePreview = featured
-  .map((id) => OUTCOMES.find((o) => o.id === id)!)
-  .map((o) => ({ ...o, count: o.remedies.length }));
+// Six situation tiles — labels verbatim from strategy 03, each wired to a route that resolves.
+// Medications tile → /when-to-see-a-doctor (the dedicated meds page is CHK-5.2; no dead link).
+const situations = [
+  {
+    href: '/r/melatonin',
+    title: 'I take or am considering melatonin.',
+    dek: 'the flagship decision hub: clock signal vs sedative, dose reality, the label-accuracy problem.',
+  },
+  {
+    href: '/sleep-blends',
+    title: 'I bought a sleep blend.',
+    dek: 'decode the label before you trust it — proprietary blends, missing doses, studied-dose mismatch.',
+  },
+  {
+    href: '/outcome/fall-asleep-faster',
+    title: 'I want to fall asleep faster.',
+    dek: 'remedies with human evidence aimed at sleep-onset latency, ranked by the strength of that evidence.',
+  },
+  {
+    href: '/outcome/stay-asleep',
+    title: 'I wake up at night.',
+    dek: 'the shorter list of remedies studied for staying asleep — wake after sleep onset, not just falling asleep.',
+  },
+  {
+    href: '/when-to-see-a-doctor',
+    title: 'I use medications or have a health condition.',
+    dek: 'using medications? start with the safety boundary — interactions and red flags come before any remedy.',
+  },
+  {
+    href: '/melatonin-children',
+    title: 'I am considering this for a child.',
+    dek: 'the most cautious page on the site: what the evidence does and does not support for kids.',
+  },
+];
 ---
 
 <Base
-  title="Somnary: every natural sleep remedy, graded by the evidence"
-  description="an independent, evidence-graded sleep & natural-remedies wiki. every remedy graded S–F by the strength of published human evidence, every claim cited, weak evidence labelled weak, zero brand money."
+  title="Somnary: check a sleep remedy before you take it"
+  description="an independent, evidence-graded reference for natural sleep remedies. every remedy graded S–F by the strength of published human evidence, every claim cited, safety boundaries first. no affiliate links, no brand money."
   canonical="https://somnary.vercel.app/"
 >
   <main class="home">
-    <!-- hero -->
+    <!-- hero — three above-the-fold decision routes -->
     <section class="hero">
       <p class="eyebrow">independent · evidence-graded · reader-funded</p>
-      <h1 class="headline">
-        the sleep-supplement internet is a <span class="strike">sales floor</span>. this is the
-        <span class="mark">evidence layer</span><span class="dot">.</span>
-      </h1>
+      <h1 class="headline">Check a sleep remedy before you take it<span class="dot">.</span></h1>
       <p class="dek">
-        every natural sleep remedy, graded S to F by the strength of the published human evidence.
-        every claim footnoted to a real study, weak evidence labelled weak and shown, and zero brand
-        money: no affiliate links, no supplement company pays us. we grade what the research shows,
-        not what sells.
+        Somnary grades natural sleep remedies by human evidence, label reality, and safety
+        boundaries. <span class="disavow">No affiliate links. No brand money.</span>
       </p>
       <div class="cta-row">
-        <a class="cta cta-primary" href="/tiers">see the tier board →</a>
-        <a class="cta cta-secondary" href="/methodology">how we grade</a>
+        <a class="cta cta-action" href="/search">Check a remedy →</a>
+        <a class="cta cta-secondary" href="#situations">Start from your sleep problem</a>
+        <a class="cta cta-ghost" href="/when-to-see-a-doctor">Read safety red flags</a>
+      </div>
+      <div class="pills" aria-label="popular checks">
+        <span class="pills-label">popular checks</span>
+        {
+          popularChecks.map((p) => (
+            <a class="pill" href={`/r/${p.slug}`}>
+              {p.name}
+            </a>
+          ))
+        }
       </div>
     </section>
 
     <StatRow cells={statCells} />
 
-    <!-- four ways to read -->
-    <section class="section">
-      <p class="section-eyebrow">four ways to read</p>
-      <div class="ways">
+    <!-- disclaimer — adjacent to the decision block, not footer-only -->
+    <Disclaimer />
+
+    <!-- situation route tiles — route by intent -->
+    <section class="section" id="situations">
+      <p class="section-eyebrow">what are you trying to decide?</p>
+      <div class="tiles">
         {
-          ways.map((w) => (
-            <a class="way" href={w.href}>
-              <p class="way-title">{w.title}<span class="dot">.</span></p>
-              <p class="way-dek">{w.dek}</p>
+          situations.map((t) => (
+            <a class="tile" href={t.href}>
+              <p class="tile-title">{t.title}</p>
+              <p class="tile-dek">{t.dek}</p>
             </a>
           ))
         }
       </div>
     </section>
 
-    <!-- outcome preview -->
-    <section class="section" id="by-outcome">
-      <p class="section-eyebrow">start from your goal</p>
-      <div class="outcomes">
+    <!-- how to read a grade — S–F legend, legible without color alone -->
+    <section class="section" id="how-to-read">
+      <p class="section-eyebrow">how to read a grade</p>
+      <ul class="legend">
         {
-          outcomePreview.map((o) => (
-            <a class="outcome" href={`/outcome/${o.id}`}>
-              <p class="outcome-meta">outcome · {o.count} remedies</p>
-              <p class="outcome-title">{o.title}<span class="dot">.</span></p>
-              <p class="outcome-dek">{o.dek}</p>
-            </a>
+          TIERS.map((t) => (
+            <li class="legend-row">
+              <TierBadge tier={t.id} size="inline" />
+              <span class="legend-name">{t.name}</span>
+              <span class="legend-trans">{t.decisionTranslation}</span>
+            </li>
           ))
         }
-      </div>
-      <p class="all-outcomes">
-        seven goals in all. <a href="/outcome/sleep-quality">browse every outcome →</a>
+      </ul>
+      <p class="legend-note">
+        A grade rates how strong the human evidence is — not whether a remedy is safe for you.
+        Safety lives on each remedy's page and the <a href="/when-to-see-a-doctor">safety boundary</a>.
+        <a href="/methodology">See the full S–F rubric →</a>
       </p>
     </section>
   </main>
@@ -126,30 +176,24 @@ const outcomePreview = featured
     letter-spacing: var(--tracking-tight);
     color: var(--ink);
     margin: var(--sp-4) 0 var(--sp-5);
-    max-width: 20ch;
-  }
-  .strike {
-    text-decoration: line-through;
-    text-decoration-color: var(--grade-d);
-    text-decoration-thickness: 3px;
-    color: var(--muted);
-  }
-  .mark {
-    background: var(--primary-soft);
-    border-radius: var(--r-sm);
-    padding: 0 0.08em;
+    max-width: 18ch;
   }
   .dek {
     font-size: var(--text-md);
     line-height: var(--lh-md);
     color: var(--muted);
-    max-width: 62ch;
+    max-width: 60ch;
     margin: 0 0 var(--sp-6);
+  }
+  .disavow {
+    color: var(--ink);
+    font-weight: 650;
   }
   .cta-row {
     display: flex;
     flex-wrap: wrap;
     gap: var(--sp-3);
+    margin-bottom: var(--sp-6);
   }
   .cta {
     display: inline-flex;
@@ -171,31 +215,76 @@ const outcomePreview = featured
     outline: none;
     box-shadow: var(--ring);
   }
-  .cta-primary {
-    background: var(--ink);
-    color: var(--surface);
+  /* citron --action: spent ONCE here (the hero primary CTA) — §10 budget */
+  .cta-action {
+    background: var(--action);
+    color: var(--action-ink);
   }
   .cta-secondary {
     background: var(--surface);
     color: var(--ink);
     border: var(--border-strong);
   }
+  .cta-ghost {
+    background: transparent;
+    color: var(--ink);
+    border: var(--border-hairline);
+  }
+
+  /* popular-check pills */
+  .pills {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--sp-2);
+  }
+  .pills-label {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-right: var(--sp-2);
+  }
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    min-height: 34px;
+    padding: 0 var(--sp-4);
+    border-radius: var(--r-pill);
+    background: var(--surface);
+    border: var(--border-hairline);
+    color: var(--ink);
+    font-size: var(--text-sm);
+    text-decoration: none;
+    transition:
+      border-color var(--dur-fast) var(--ease-soft),
+      box-shadow var(--dur-fast) var(--ease-soft);
+  }
+  .pill:hover {
+    border: var(--border-strong);
+  }
+  .pill:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+  }
 
   /* sections */
   .section {
     margin-top: var(--sp-9);
+    scroll-margin-top: var(--sp-8);
   }
   .section-eyebrow {
     margin-bottom: var(--sp-5);
   }
 
-  /* four ways to read — 2×2 */
-  .ways {
+  /* situation tiles — 2×3 route cards */
+  .tiles {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: var(--sp-4);
   }
-  .way {
+  .tile {
     display: flex;
     flex-direction: column;
     gap: var(--sp-2);
@@ -209,92 +298,93 @@ const outcomePreview = featured
       box-shadow var(--dur-base) var(--ease-settle),
       transform var(--dur-base) var(--ease-settle);
   }
-  .way:hover {
+  .tile:hover {
     box-shadow: var(--shadow-lift);
     transform: translateY(-3px);
   }
-  .way:focus-visible {
+  .tile:focus-visible {
     outline: none;
     box-shadow: var(--ring);
   }
-  .way-title {
+  .tile-title {
     font-family: var(--font-display);
     font-size: var(--text-xl);
     line-height: var(--lh-xl);
+    letter-spacing: var(--tracking-tight);
     color: var(--ink);
     margin: 0;
   }
-  .way-dek {
+  .tile-dek {
     font-size: var(--text-sm);
     line-height: var(--lh-sm);
     color: var(--muted);
     margin: 0;
   }
 
-  /* outcome preview — 3 col */
-  .outcomes {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--sp-4);
-  }
-  .outcome {
+  /* how to read a grade — S–F legend */
+  .legend {
+    list-style: none;
+    margin: 0;
+    padding: 0;
     display: flex;
     flex-direction: column;
-    gap: var(--sp-2);
-    background: var(--primary-soft);
+    background: var(--surface);
+    border: var(--border-hairline);
     border-radius: var(--r-lg);
-    padding: var(--sp-6);
-    text-decoration: none;
-    color: var(--ink);
-    transition:
-      box-shadow var(--dur-base) var(--ease-settle),
-      transform var(--dur-base) var(--ease-settle);
+    overflow: hidden;
   }
-  .outcome:hover {
-    box-shadow: var(--shadow-lift);
-    transform: translateY(-3px);
+  .legend-row {
+    display: grid;
+    grid-template-columns: auto 8ch 1fr;
+    align-items: center;
+    gap: var(--sp-4);
+    padding: var(--sp-4) var(--sp-5);
   }
-  .outcome:focus-visible {
-    outline: none;
-    box-shadow: var(--ring);
+  .legend-row + .legend-row {
+    border-top: var(--border-hairline);
   }
-  .outcome-meta {
+  .legend-name {
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
     text-transform: uppercase;
-    color: var(--primary);
-    margin: 0;
-  }
-  .outcome-title {
-    font-family: var(--font-display);
-    font-size: var(--text-xl);
-    line-height: var(--lh-xl);
     color: var(--ink);
-    margin: 0;
   }
-  .outcome-dek {
+  .legend-trans {
     font-size: var(--text-sm);
     line-height: var(--lh-sm);
     color: var(--muted);
-    margin: 0;
   }
-  .all-outcomes {
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
+  .legend-note {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
     color: var(--muted);
     margin: var(--sp-5) 0 0;
+    max-width: 70ch;
   }
-  .all-outcomes a {
+  .legend-note a {
     color: var(--primary);
   }
 
   @media (max-width: 760px) {
-    .ways,
-    .outcomes {
+    .tiles {
       grid-template-columns: 1fr;
+    }
+    .legend-row {
+      grid-template-columns: auto 1fr;
+      grid-template-areas:
+        'badge name'
+        'trans trans';
+      row-gap: var(--sp-2);
+    }
+    .legend-row :global(.tier-badge) {
+      grid-area: badge;
+    }
+    .legend-name {
+      grid-area: name;
+    }
+    .legend-trans {
+      grid-area: trans;
     }
   }
   @media (max-width: 640px) {
@@ -302,7 +392,7 @@ const outcomePreview = featured
       padding: var(--sp-7) var(--sp-5) var(--sp-8);
     }
     .headline {
-      font-size: 48px;
+      font-size: 52px;
     }
   }
 </style>
