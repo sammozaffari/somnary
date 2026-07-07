@@ -1,0 +1,424 @@
+---
+// melatonin dose & timing — CONTEXT page (CHK-2.2). NOT a graded remedy and NOT a dosing instruction:
+// it DESCRIBES what studies used, never what the reader should take. No tier badge, no gate chips.
+// Every specific is cited to a source verified firsthand and reused from the melatonin remedy corpus
+// where it fits: Ferracioli-Oda 2013 & Brzezinski 2005 (small onset effect), Auld 2017 (timing not
+// sedation), van Geijlswijk 2010 (advances the clock in DSPD), Zhdanova 2001 (0.3 mg physiological
+// dose ≥ 3 mg; 3 mg leaves melatonin elevated into daytime), Auger/AASM 2015 (strategically TIMED
+// melatonin for DSWPD), Erland 2017 (label ≠ content). Mirrors melatonin-children.astro exactly.
+import Base from '../layouts/Base.astro';
+import ContextBanner from '../components/ContextBanner.astro';
+import ContextSources from '../components/ContextSources.astro';
+import Disclaimer from '../components/Disclaimer.astro';
+import Fn from '../components/Fn.astro';
+
+const sources = [
+  {
+    n: 1,
+    cite: 'Ferracioli-Oda E, Qawasmi A, Bloch MH. Meta-analysis: melatonin for the treatment of primary sleep disorders. PLoS One. 2013;8(5):e63773.',
+    finding:
+      'pooled randomized trials: melatonin reduced the time to fall asleep by about 7 minutes and increased total sleep time by about 8 minutes versus placebo — a real but small effect, not sedation.',
+    pmid: '23691095',
+    doi: '10.1371/journal.pone.0063773',
+  },
+  {
+    n: 2,
+    cite: 'Brzezinski A, Vangel MG, Wurtman RJ, et al. Effects of exogenous melatonin on sleep: a meta-analysis. Sleep Med Rev. 2005;9(1):41–50.',
+    finding:
+      'across 17 studies, melatonin shortened sleep-onset latency by about 4 minutes and raised sleep efficiency by roughly 2%.',
+    pmid: '15649737',
+    doi: '10.1016/j.smrv.2004.06.004',
+  },
+  {
+    n: 3,
+    cite: 'Auld F, Maschauer EL, Morrison I, et al. Evidence for the efficacy of melatonin in the treatment of primary adult sleep disorders. Sleep Med Rev. 2017;34:10–22.',
+    finding:
+      'systematic review: the most convincing evidence was for reducing sleep-onset latency and for regulating sleep–wake timing (circadian problems) — a timing signal, not a sedative.',
+    pmid: '28648359',
+    doi: '10.1016/j.smrv.2016.06.005',
+  },
+  {
+    n: 4,
+    cite: 'van Geijlswijk IM, Korzilius HPLM, Smits MG. The use of exogenous melatonin in delayed sleep phase disorder: a meta-analysis. Sleep. 2010;33(12):1605–1614.',
+    finding:
+      'meta-analysis: in delayed sleep phase disorder, melatonin advanced the clock hour of sleep onset by about 0.67 hours and endogenous melatonin onset by about 1.18 hours.',
+    pmid: '21120122',
+    doi: '10.1093/sleep/33.12.1605',
+  },
+  {
+    n: 5,
+    cite: 'Zhdanova IV, Wurtman RJ, Regan MM, et al. Melatonin treatment for age-related insomnia. J Clin Endocrinol Metab. 2001;86(10):4727–4730.',
+    finding:
+      'a low, physiological 0.3 mg dose restored sleep efficiency in older adults, while a higher 3 mg dose caused lower body temperature and left plasma melatonin elevated into the daylight hours — carryover, not a bigger benefit.',
+    pmid: '11600532',
+  },
+  {
+    n: 6,
+    cite: 'Auger RR, Burgess HJ, Emens JS, et al. Clinical Practice Guideline for the Treatment of Intrinsic Circadian Rhythm Sleep-Wake Disorders (AASM). J Clin Sleep Med. 2015;11(10):1199–1236.',
+    finding:
+      'the American Academy of Sleep Medicine gives a positive (second-tier) endorsement of strategically TIMED melatonin for delayed sleep-wake phase disorder — the timing of the dose is the operative element.',
+    pmid: '26414986',
+    doi: '10.5664/jcsm.5100',
+  },
+  {
+    n: 7,
+    cite: 'Erland LAE, Saxena PK. Melatonin Natural Health Products and Supplements: Presence of Serotonin and Significant Variability of Melatonin Content. J Clin Sleep Med. 2017;13(2):275–281.',
+    finding:
+      'lab analysis of 30 supplements: actual melatonin content ranged from 83% below to 478% above the label — so the printed milligram is not a reliable dose.',
+    pmid: '27855744',
+    doi: '10.5664/jcsm.6462',
+  },
+];
+---
+
+<Base
+  title="melatonin dose and timing: what the studies used | Somnary"
+  description="melatonin works more like a clock signal than a sleeping pill: trials shaved only a few minutes off sleep onset, its real leverage is on the body clock, and higher doses weren't more effective. context describing what the research used — not a dosing instruction, not a grade."
+  canonical="https://somnary.vercel.app/melatonin-dose-timing"
+>
+  <main class="page">
+    <header class="head">
+      <p class="eyebrow">context · dose &amp; timing</p>
+      <h1 class="title">melatonin dose &amp; timing<span class="dot">.</span></h1>
+      <p class="dek">
+        Melatonin works less like a sleeping pill and more like a clock signal. In trials it shaved
+        only a few minutes off how long people took to fall asleep; its real leverage is on the timing
+        of the body clock. And across studies, higher doses were not more effective — the benefit
+        showed up at low, near-physiological amounts. This page describes what the research used. It is
+        not a dosing instruction, and not a grade.
+      </p>
+    </header>
+
+    <ContextBanner
+      note="the right dose and time depend on the person and the reason. this page describes what studies used, not what you should take — dosing decisions belong with a clinician or pharmacist."
+    />
+
+    <p class="who">
+      <span class="who-tag">who this is for</span>
+      anyone trying to make sense of the 3–10&nbsp;mg products on the shelf and vague &ldquo;take at
+      bedtime&rdquo; instructions, and wondering whether more, or later, is better. (describing the
+      evidence — not telling you what to take.)
+    </p>
+
+    <!-- safety boundary: more is not stronger; wrong time backfires (serious) -->
+    <section class="callout sev-serious" role="note" aria-label="dose and timing hazard">
+      <div class="callout-head">
+        <span class="sigil" aria-hidden="true">!</span>
+        <p class="callout-title">more is not stronger, and the wrong time can backfire</p>
+      </div>
+      <p class="callout-body">
+        In a controlled comparison, a low <strong>0.3&nbsp;mg</strong> dose restored normal sleep
+        efficiency in older adults, while a <strong>3&nbsp;mg</strong> dose lowered body temperature
+        and left melatonin elevated into the daytime — carryover, not a bigger benefit.<Fn n={5} />
+        Because melatonin is a timing signal, taken at the wrong hour it can shift the clock the
+        <strong>wrong way</strong>. Dose and timing for a circadian problem, in pregnancy, in children,
+        or alongside other medicines are clinician conversations — this page can't set them for you.
+      </p>
+    </section>
+
+    <!-- section 01: the claim -->
+    <section class="section">
+      <p class="eyebrow">section 01</p>
+      <h2 class="section-title">what people assume</h2>
+      <div class="prose">
+        <p>
+          The common belief is that a bigger dose knocks you out harder, and that you take it right at
+          bedtime like any sleeping pill. The shelf reinforces it: most products start at 3&nbsp;mg and
+          climb to 5 or 10&nbsp;mg, as if the milligrams were a strength dial. Both halves of that
+          picture — dose as sedative strength, and bedtime as the moment — are where the evidence
+          diverges from the marketing.
+        </p>
+      </div>
+    </section>
+
+    <!-- section 02: what the evidence shows -->
+    <section class="section">
+      <p class="eyebrow">section 02</p>
+      <h2 class="section-title">what the human evidence shows</h2>
+      <div class="prose">
+        <p>
+          Pooled randomized trials show a real but small onset effect: one meta-analysis found
+          melatonin shortened the time to fall asleep by about <strong>7 minutes</strong> and added
+          roughly <strong>8 minutes</strong> of total sleep;<Fn n={1} /> another, across 17 studies,
+          put the latency reduction near <strong>4 minutes</strong> with about a 2% gain in sleep
+          efficiency.<Fn n={2} /> A systematic review concluded its most convincing evidence was for
+          reducing sleep-onset latency and for circadian (body-clock) timing — not sedation.<Fn
+            n={3}
+          /> For a body clock that runs late, a meta-analysis found melatonin advanced the internal
+          clock by about <strong>0.67 hours</strong>,<Fn n={4} /> and sleep-medicine guidelines
+          endorse strategically <strong>timed</strong> melatonin for that disorder.<Fn n={6} /> On
+          dose, the low end did the work: 0.3&nbsp;mg restored sleep efficiency where 3&nbsp;mg mainly
+          produced daytime carryover.<Fn n={5} />
+        </p>
+      </div>
+    </section>
+
+    <!-- section 03: what it does NOT show -->
+    <section class="section">
+      <p class="eyebrow">section 03</p>
+      <h2 class="section-title">what the evidence does <em>not</em> show</h2>
+      <div class="prose">
+        <p>
+          The trials do not show that melatonin sedates you, that a higher dose works better, or that
+          there is a single correct time that fits everyone. The onset effect is measured in minutes,
+          not the knock-out that marketing implies.<Fn n={1} /><Fn n={2} /> &ldquo;Strategically
+          timed&rdquo; means the right hour depends on the person's clock and the reason for use — a
+          meta-analysis of one disorder is not a schedule for an individual.<Fn n={4} /><Fn n={6} />
+          And none of this establishes a dose or a time that is right, or safe, for you specifically.
+        </p>
+      </div>
+    </section>
+
+    <!-- section 04: dose / form / label reality -->
+    <section class="section">
+      <p class="eyebrow">section 04</p>
+      <h2 class="section-title">dose, form &amp; label reality</h2>
+      <div class="prose">
+        <p>
+          The doses studied cluster low — roughly <strong>0.3 to 5&nbsp;mg</strong> — while shelves
+          commonly sell 3 to 10&nbsp;mg, above what the trials needed.<Fn n={5} /> Form matters too:
+          immediate-release acts sooner, while prolonged-release is aimed at overnight maintenance.
+          And whatever the label says, the amount in the product may not match it — independent testing
+          of 30 supplements found content from <strong>83% below to 478% above</strong> the
+          label.<Fn n={7} /> So the printed milligram is a starting point for a conversation, not a
+          reliable dose.
+        </p>
+      </div>
+    </section>
+
+    <!-- section 05: take to your clinician -->
+    <section class="section">
+      <p class="eyebrow">section 05</p>
+      <h2 class="section-title">take these to a clinician or pharmacist</h2>
+      <ul class="ask">
+        <li>for my situation — jet lag, a late body clock, insomnia, something else — is melatonin a reasonable option at all?</li>
+        <li>if so, what studied dose range and what timing relative to my target sleep would you suggest?</li>
+        <li>immediate-release or prolonged-release — which fits the problem I'm trying to solve?</li>
+        <li>could melatonin interact with my other medicines or health conditions?</li>
+      </ul>
+    </section>
+
+    <!-- related: back to the graded hub + safety boundaries -->
+    <section class="section">
+      <p class="eyebrow">related</p>
+      <h2 class="section-title">read next</h2>
+      <ul class="related">
+        <li><a href="/r/melatonin">melatonin</a> — the full evidence grade and what the trials found.</li>
+        <li><a href="/melatonin-long-term">melatonin, long-term</a> — what nightly use over months and years does not tell us yet.</li>
+        <li><a href="/when-to-see-a-doctor">when to see a doctor</a> — the sleep problems that need a clinician, not a supplement.</li>
+      </ul>
+    </section>
+
+    <ContextSources sources={sources} />
+
+    <div class="disclaimer-slot">
+      <Disclaimer variant="standard" />
+    </div>
+
+    <p class="review-line">
+      reviewed 2026-07-07 · found an error? <a href="/methodology#corrections">corrections →</a>
+    </p>
+  </main>
+</Base>
+
+<style>
+  .page {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: var(--sp-8) var(--sp-7) var(--sp-9);
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0;
+  }
+  .dot {
+    color: var(--primary);
+  }
+  .head {
+    margin-bottom: var(--sp-6);
+  }
+  .title {
+    font-family: var(--font-display);
+    font-size: var(--text-3xl);
+    line-height: var(--lh-3xl);
+    letter-spacing: var(--tracking-tight);
+    color: var(--ink);
+    margin: var(--sp-3) 0 var(--sp-5);
+  }
+  .dek {
+    font-size: var(--text-md);
+    line-height: var(--lh-md);
+    color: var(--muted);
+    max-width: 68ch;
+    margin: 0;
+  }
+
+  /* who this is for */
+  .who {
+    max-width: 68ch;
+    margin: var(--sp-5) 0 0;
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+  }
+  .who-tag {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--primary);
+    margin-right: var(--sp-2);
+  }
+
+  /* safety callout — reuses the §2.12 serious register (grade-f), bespoke to this context page */
+  .callout {
+    border-radius: var(--r-lg);
+    border: 1px solid;
+    padding: var(--sp-6);
+    margin-top: var(--sp-7);
+  }
+  .sev-serious {
+    background: var(--grade-f-tint);
+    border-color: var(--grade-f);
+  }
+  .callout-head {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    margin-bottom: var(--sp-4);
+  }
+  .sigil {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    flex: none;
+    border-radius: var(--r-pill);
+    background: var(--grade-f);
+    color: var(--surface);
+    font-family: var(--font-display);
+    font-weight: 600;
+    line-height: 1;
+  }
+  .callout-title {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--grade-f);
+    margin: 0;
+  }
+  .callout-body {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--ink);
+    margin: 0;
+  }
+  .callout-body strong {
+    font-weight: 600;
+  }
+
+  .section {
+    border-top: var(--border-hairline);
+    padding-top: var(--sp-6);
+    margin-top: var(--sp-8);
+  }
+  .section-title {
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    line-height: var(--lh-xl);
+    color: var(--ink);
+    margin: var(--sp-2) 0 var(--sp-5);
+  }
+  .prose {
+    max-width: 68ch;
+  }
+  .prose p {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--muted);
+    margin: 0 0 var(--sp-4);
+  }
+  .prose strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .prose a {
+    color: var(--primary);
+  }
+
+  /* clinician questions */
+  .ask {
+    max-width: 68ch;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+  }
+  .ask li {
+    position: relative;
+    padding-left: var(--sp-6);
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--muted);
+  }
+  .ask li::before {
+    content: '?';
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--primary);
+  }
+
+  /* related / read-next links */
+  .related {
+    max-width: 68ch;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+  }
+  .related li {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--muted);
+  }
+  .related a {
+    color: var(--primary);
+  }
+
+  .disclaimer-slot {
+    margin-top: var(--sp-8);
+  }
+  .review-line {
+    margin-top: var(--sp-6);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .review-line a {
+    color: var(--primary);
+  }
+  @media (max-width: 640px) {
+    .page {
+      padding: var(--sp-6) var(--sp-5) var(--sp-8);
+    }
+    .title {
+      font-size: var(--text-2xl);
+    }
+  }
+</style>

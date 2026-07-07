@@ -1,0 +1,386 @@
+---
+// melatonin gummies — CONTEXT page (CHK-2.2), label-accuracy problem. NOT a graded remedy and NOT a
+// recommendation to take melatonin: it's context on why the number on a gummy label is unreliable.
+// No tier badge, no evidence-gate chips. Every specific is cited to a source verified firsthand:
+// Cohen 2023 JAMA (25 gummies, 88% mislabelled, 74–347% of label, undeclared CBD — read from PMC),
+// Erland 2017 (30 supplements, 83% below to 478% above label; 465% lot-to-lot; serotonin in 8),
+// Lelak 2022 MMWR (pediatric ingestions rose 530%). Mirrors melatonin-children.astro exactly.
+import Base from '../layouts/Base.astro';
+import ContextBanner from '../components/ContextBanner.astro';
+import ContextSources from '../components/ContextSources.astro';
+import Disclaimer from '../components/Disclaimer.astro';
+import Fn from '../components/Fn.astro';
+
+const sources = [
+  {
+    n: 1,
+    cite: 'Cohen PA, Avula B, Wang YH, Katragunta K, Khan I. Quantity of Melatonin and CBD in Melatonin Gummies Sold in the US. JAMA. 2023;329(16):1401–1402.',
+    finding:
+      'independent analysis of 25 melatonin gummy products sold in the US: 22 of 25 (88%) were inaccurately labelled, actual melatonin ranged from 74% to 347% of the labelled amount, five products declared CBD (measured 10.6–31.3 mg per serving), and one product contained no detectable melatonin at all — only 31.3 mg of CBD.',
+    pmid: '37097362',
+  },
+  {
+    n: 2,
+    cite: 'Erland LAE, Saxena PK. Melatonin Natural Health Products and Supplements: Presence of Serotonin and Significant Variability of Melatonin Content. J Clin Sleep Med. 2017;13(2):275–281.',
+    finding:
+      'lab analysis of 30 supplements: actual melatonin content ranged from 83% below to 478% above the label, varied up to 465% between lots of the same product, and serotonin was detected in eight products — so the number on the label is not a reliable dose.',
+    pmid: '27855744',
+    doi: '10.5664/jcsm.6462',
+  },
+  {
+    n: 3,
+    cite: 'Lelak K, Vohra V, Neuman MI, et al. Pediatric Melatonin Ingestions — United States, 2012–2021. MMWR Morb Mortal Wkly Rep. 2022;71(22):725–729.',
+    finding:
+      'reported pediatric melatonin ingestions rose 530% over the decade, the large majority unintentional in young children, with a rise in hospitalisations — the basis for treating melatonin as a medicine to lock away, not a sweet.',
+    pmid: '35653284',
+    doi: '10.15585/mmwr.mm7122a1',
+  },
+];
+---
+
+<Base
+  title="melatonin gummies: does the label match the dose? | Somnary"
+  description="melatonin gummies are the most popular form and the least reliable: independent lab testing keeps finding the amount in the gummy doesn't match the label, sometimes far more, sometimes none, sometimes undeclared CBD. context on the label-accuracy problem — not a grade."
+  canonical="https://somnary.vercel.app/melatonin-gummies"
+>
+  <main class="page">
+    <header class="head">
+      <p class="eyebrow">context · label accuracy</p>
+      <h1 class="title">melatonin gummies<span class="dot">.</span></h1>
+      <p class="dek">
+        Gummies are the most popular way to take melatonin and the least reliable. Independent lab
+        testing keeps finding that the amount in the gummy doesn't match the amount on the label —
+        sometimes far more, occasionally none at all, and sometimes an ingredient that isn't listed.
+        This page is context on that label-accuracy problem: not a grade, and not a recommendation to
+        take melatonin.
+      </p>
+    </header>
+
+    <ContextBanner
+      note="how much melatonin is actually in a gummy is a manufacturing-quality question, not a settled dose. this page explains what testing has found, and why it's a reason for caution."
+    />
+
+    <p class="who">
+      <span class="who-tag">who this is for</span>
+      anyone choosing, or already using, a melatonin gummy — especially for a child — who assumes the
+      number on the label is the dose in the bottle.
+    </p>
+
+    <!-- safety boundary: a candy-shaped, unpredictable medicine (serious) -->
+    <section class="callout sev-serious" role="note" aria-label="gummy dosing hazard">
+      <div class="callout-head">
+        <span class="sigil" aria-hidden="true">!</span>
+        <p class="callout-title">a gummy that looks like candy is still an unpredictable medicine</p>
+      </div>
+      <p class="callout-body">
+        Because gummies are flavoured and shaped like sweets, they're easy for a child to reach and
+        overtake — reported pediatric melatonin ingestions <strong>rose 530%</strong> between 2012 and
+        2021 in the United States.<Fn n={3} /> Combined with measured doses that can run
+        <strong>several times higher than the label</strong>,<Fn n={1} /> that is a real hazard. Keep
+        melatonin capped, out of reach, and treat it as a medicine. Giving melatonin to a child is a
+        clinician conversation, not a wiki decision.
+      </p>
+    </section>
+
+    <!-- section 01: the claim -->
+    <section class="section">
+      <p class="eyebrow">section 01</p>
+      <h2 class="section-title">what people assume</h2>
+      <div class="prose">
+        <p>
+          The everyday assumption is simple: the label tells you the dose. Someone buys a
+          &ldquo;1&nbsp;mg&rdquo; or &ldquo;3&nbsp;mg&rdquo; gummy and expects that amount, dose after
+          dose, bottle after bottle. The gummy's low, kid-friendly numbers are read as both gentle and
+          precise, and the flavoured, chewable form makes it feel more like a treat than a medicine.
+        </p>
+      </div>
+    </section>
+
+    <!-- section 02: what the evidence shows -->
+    <section class="section">
+      <p class="eyebrow">section 02</p>
+      <h2 class="section-title">what the testing actually found</h2>
+      <div class="prose">
+        <p>
+          An independent analysis published in <em>JAMA</em> in 2023 measured 25 melatonin gummy
+          products sold in the US. <strong>22 of 25 (88%)</strong> were inaccurately labelled, and the
+          actual melatonin ranged from <strong>74% to 347% of the labelled amount</strong>. Five
+          products declared CBD, measured at 10.6 to 31.3&nbsp;mg per serving; one product contained
+          <strong>no detectable melatonin at all</strong> — only 31.3&nbsp;mg of CBD.<Fn n={1} /> This
+          isn't unique to gummies. A broader lab analysis of 30 melatonin supplements found content
+          from <strong>83% below to 478% above</strong> the label, varying by up to
+          <strong>465% between lots</strong> of the same product, with serotonin detected in
+          eight.<Fn n={2} />
+        </p>
+      </div>
+    </section>
+
+    <!-- section 03: what it does NOT show -->
+    <section class="section">
+      <p class="eyebrow">section 03</p>
+      <h2 class="section-title">what these numbers do <em>not</em> tell you</h2>
+      <div class="prose">
+        <p>
+          These studies measured what is <em>in</em> the products, not what happens to a person who
+          takes them. They don't establish a safe dose, a harm threshold, or that any particular brand
+          is reliable. A single test also can't promise the next bottle, or the next lot, will measure
+          the same — lot-to-lot variation was itself large.<Fn n={2} /> &ldquo;88%
+          mislabelled&rdquo; is a quality-control finding about a market, not a verdict on the one
+          gummy in your hand. The honest takeaway is narrower and more useful: the printed milligram is
+          not something you can rely on.
+        </p>
+      </div>
+    </section>
+
+    <!-- section 04: dose / form / label reality -->
+    <section class="section">
+      <p class="eyebrow">section 04</p>
+      <h2 class="section-title">dose &amp; label reality</h2>
+      <div class="prose">
+        <p>
+          A gummy gives you the least control over dose of any form. You can't split it accurately, the
+          printed number may be off by multiples, and an undeclared ingredient such as CBD may be
+          present.<Fn n={1} /> If melatonin is used at all, third-party verification (USP&nbsp;Verified
+          or NSF) is the only signal that the contents were independently checked against the label —
+          and even that is a manufacturing check, not medical advice. Which form and which dose make
+          sense is a conversation for a pharmacist or clinician, not something a label can answer.
+        </p>
+      </div>
+    </section>
+
+    <!-- section 05: take to your clinician -->
+    <section class="section">
+      <p class="eyebrow">section 05</p>
+      <h2 class="section-title">take these to a clinician or pharmacist</h2>
+      <ul class="ask">
+        <li>is melatonin appropriate for me, or for my child, at all — given age, health, and any other medicines?</li>
+        <li>if so, what form and what studied dose range is reasonable, and is a gummy a sensible way to take it?</li>
+        <li>how would I choose a product whose contents have been independently verified against the label?</li>
+        <li>what should I watch for if a dose turns out to be much higher than the label suggested?</li>
+      </ul>
+    </section>
+
+    <!-- related: back to the graded hub + the child-safety boundary -->
+    <section class="section">
+      <p class="eyebrow">related</p>
+      <h2 class="section-title">read next</h2>
+      <ul class="related">
+        <li><a href="/r/melatonin">melatonin</a> — the full evidence grade and what the trials found.</li>
+        <li><a href="/melatonin-dose-timing">melatonin dose &amp; timing</a> — how much, and when, the studies actually used.</li>
+        <li><a href="/melatonin-children">melatonin in children</a> — the safety context behind the gummy-and-kids problem.</li>
+      </ul>
+    </section>
+
+    <ContextSources sources={sources} />
+
+    <div class="disclaimer-slot">
+      <Disclaimer variant="standard" />
+    </div>
+
+    <p class="review-line">
+      reviewed 2026-07-07 · found an error? <a href="/methodology#corrections">corrections →</a>
+    </p>
+  </main>
+</Base>
+
+<style>
+  .page {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: var(--sp-8) var(--sp-7) var(--sp-9);
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0;
+  }
+  .dot {
+    color: var(--primary);
+  }
+  .head {
+    margin-bottom: var(--sp-6);
+  }
+  .title {
+    font-family: var(--font-display);
+    font-size: var(--text-3xl);
+    line-height: var(--lh-3xl);
+    letter-spacing: var(--tracking-tight);
+    color: var(--ink);
+    margin: var(--sp-3) 0 var(--sp-5);
+  }
+  .dek {
+    font-size: var(--text-md);
+    line-height: var(--lh-md);
+    color: var(--muted);
+    max-width: 68ch;
+    margin: 0;
+  }
+
+  /* who this is for */
+  .who {
+    max-width: 68ch;
+    margin: var(--sp-5) 0 0;
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+  }
+  .who-tag {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--primary);
+    margin-right: var(--sp-2);
+  }
+
+  /* safety callout — reuses the §2.12 serious register (grade-f), bespoke to this context page */
+  .callout {
+    border-radius: var(--r-lg);
+    border: 1px solid;
+    padding: var(--sp-6);
+    margin-top: var(--sp-7);
+  }
+  .sev-serious {
+    background: var(--grade-f-tint);
+    border-color: var(--grade-f);
+  }
+  .callout-head {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    margin-bottom: var(--sp-4);
+  }
+  .sigil {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    flex: none;
+    border-radius: var(--r-pill);
+    background: var(--grade-f);
+    color: var(--surface);
+    font-family: var(--font-display);
+    font-weight: 600;
+    line-height: 1;
+  }
+  .callout-title {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--grade-f);
+    margin: 0;
+  }
+  .callout-body {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--ink);
+    margin: 0;
+  }
+  .callout-body strong {
+    font-weight: 600;
+  }
+
+  .section {
+    border-top: var(--border-hairline);
+    padding-top: var(--sp-6);
+    margin-top: var(--sp-8);
+  }
+  .section-title {
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    line-height: var(--lh-xl);
+    color: var(--ink);
+    margin: var(--sp-2) 0 var(--sp-5);
+  }
+  .prose {
+    max-width: 68ch;
+  }
+  .prose p {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--muted);
+    margin: 0 0 var(--sp-4);
+  }
+  .prose strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .prose a {
+    color: var(--primary);
+  }
+
+  /* clinician questions */
+  .ask {
+    max-width: 68ch;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+  }
+  .ask li {
+    position: relative;
+    padding-left: var(--sp-6);
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--muted);
+  }
+  .ask li::before {
+    content: '?';
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--primary);
+  }
+
+  /* related / read-next links */
+  .related {
+    max-width: 68ch;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+  }
+  .related li {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--muted);
+  }
+  .related a {
+    color: var(--primary);
+  }
+
+  .disclaimer-slot {
+    margin-top: var(--sp-8);
+  }
+  .review-line {
+    margin-top: var(--sp-6);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .review-line a {
+    color: var(--primary);
+  }
+  @media (max-width: 640px) {
+    .page {
+      padding: var(--sp-6) var(--sp-5) var(--sp-8);
+    }
+    .title {
+      font-size: var(--text-2xl);
+    }
+  }
+</style>
