@@ -6,9 +6,8 @@
 // evidence-summary block. The 12 PLAN §4 blocks are assembled below, each from a reusable component.
 import { getCollection, render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
-import { getTier } from '../../lib/tiers';
 import type { GateVariant } from '../../lib/evidence-gates';
-import TierBadge from '../../components/TierBadge.astro';
+import RemedyLeadBlock from '../../components/RemedyLeadBlock.astro';
 import VerdictBand from '../../components/VerdictBand.astro';
 import ClaimsDataTable from '../../components/ClaimsDataTable.astro';
 import DosingGrid from '../../components/DosingGrid.astro';
@@ -30,7 +29,6 @@ const { entry } = Astro.props;
 const d = entry.data;
 const { Content } = await render(entry);
 
-const tier = getTier(d.tier);
 const isIntervention = d.format === 'intervention';
 const studiedDose = d.doses.length ? d.doses[0].studiedDose : null;
 const safetyFlag: { label: string; variant: GateVariant } = {
@@ -53,22 +51,24 @@ const jsonLd = remedyJsonLd(d, canonical, site);
 >
   <script type="application/ld+json" is:inline set:html={JSON.stringify(jsonLd)} />
   <main class="remedy">
-    {/* 1 — header */}
+    {/* 1 — header (grade badge moves to the decision-first lead block below; CHK-2.1) */}
     <header class="head">
       <p class="crumb"><a href="/">Somnary</a> <span aria-hidden="true">›</span> {isIntervention ? 'interventions' : 'remedies'}</p>
-      <div class="head-main">
-        <TierBadge tier={d.tier} size="header" />
-        <div class="head-text">
-          <h1 class="title">{d.name}<span class="dot">.</span></h1>
-          <p class="dek">{d.oneLineVerdict}</p>
-          <p class="meta-line">
-            grade {d.tier} · {tier.name}
-            {d.keyCompound && <> · key compound: {d.keyCompound}</>}
-            {d.aliases.length > 0 && <> · also: {d.aliases.join(', ')}</>}
-          </p>
-        </div>
-      </div>
+      <h1 class="title">{d.name}<span class="dot">.</span></h1>
+      <p class="dek">{d.oneLineVerdict}</p>
     </header>
+
+    {/* 1b — decision-first lead block: grade + decision translation + best-for / not-for /
+        biggest-risk / studied-dose (CHK-2.1, strategy doc 03) */}
+    <RemedyLeadBlock
+      tier={d.tier}
+      format={d.format}
+      bestFor={d.bestFor}
+      notFor={d.notFor}
+      biggestRisk={d.biggestRisk}
+      studiedDose={studiedDose}
+      reviewDate={d.reviewDate}
+    />
 
     {/* 2 — verdict band */}
     <VerdictBand verdict={d.verdict} gates={d.evidenceGates} tier={d.tier} />
@@ -195,11 +195,6 @@ const jsonLd = remedyJsonLd(d, canonical, site);
   .crumb a:hover {
     color: var(--ink);
   }
-  .head-main {
-    display: flex;
-    gap: var(--sp-5);
-    align-items: flex-start;
-  }
   .title {
     font-family: var(--font-display);
     font-size: var(--text-3xl);
@@ -215,14 +210,6 @@ const jsonLd = remedyJsonLd(d, canonical, site);
     color: var(--muted);
     max-width: 60ch;
     margin: 0 0 var(--sp-3);
-  }
-  .meta-line {
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
-    color: var(--muted);
-    margin: 0;
   }
 
   /* body grid */
@@ -294,9 +281,6 @@ const jsonLd = remedyJsonLd(d, canonical, site);
   @media (max-width: 640px) {
     .remedy {
       padding: var(--sp-6) var(--sp-5) var(--sp-8);
-    }
-    .head-main {
-      gap: var(--sp-4);
     }
     .title {
       font-size: 46px;

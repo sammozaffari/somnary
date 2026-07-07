@@ -19,6 +19,7 @@ export interface Tier {
   letter: TierId; // glyph shown in the badge
   name: string; // tier word (lowercase)
   oneLiner: string; // verbatim one-line definition
+  decisionTranslation: string; // verbatim "decision translation" line (strategy doc 03) — the plain-language "so what should I do" after the grade
   typicalGates: GateId[]; // ids into evidence-gates.ts
   examples: string[]; // plain remedy names (illustrative)
   emptyNote?: string; // shown when a tier intentionally has no examples (S)
@@ -32,6 +33,7 @@ export const TIERS: readonly Tier[] = [
     name: 'proven',
     oneLiner:
       'multiple large human RCTs and meta-analyses agree on a clinically meaningful sleep benefit, with well-characterized safety.',
+    decisionTranslation: 'make this the default pathway before supplements when relevant.',
     typicalGates: [
       'meta-analysis-exists',
       'rct-n100',
@@ -49,6 +51,7 @@ export const TIERS: readonly Tier[] = [
     name: 'strong',
     oneLiner:
       'several RCTs and meta-analytic support; the effect is real even if modest, and safety is good.',
+    decisionTranslation: 'reasonable to discuss or consider for the studied use case.',
     typicalGates: ['meta-analysis-exists', 'rct-n100', 'effect-size-reported', 'no-safety-signal'],
     examples: ['melatonin (sleep-onset latency / circadian timing)'],
   },
@@ -58,6 +61,7 @@ export const TIERS: readonly Tier[] = [
     name: 'viable',
     oneLiner:
       'at least one decent RCT, or several smaller consistent trials. human data is present but thin.',
+    decisionTranslation: 'plausible but modest; expectations should be low.',
     typicalGates: ['rct-n100', 'effect-size-reported', 'no-safety-signal'],
     examples: ['magnesium', 'L-theanine', 'tart cherry', 'ashwagandha'],
   },
@@ -67,6 +71,7 @@ export const TIERS: readonly Tier[] = [
     name: 'mixed',
     oneLiner:
       'interesting mechanism, but human data is small, underpowered, or conflicting. popular beyond what the evidence supports.',
+    decisionTranslation: 'interesting but uncertain; do not rely on it.',
     typicalGates: ['heterogeneous-trials', 'no-safety-signal'],
     examples: ['valerian', 'glycine', 'lemon balm'],
   },
@@ -76,6 +81,7 @@ export const TIERS: readonly Tier[] = [
     name: 'weak',
     oneLiner:
       'minimal human evidence. the claims outrun the data; most support is animal or in-vitro.',
+    decisionTranslation: 'claims outrun evidence; avoid spending meaningful money.',
     typicalGates: ['mechanism-only', 'little-no-human-data'],
     examples: ['passionflower', 'most “sleep blend” botanicals'],
   },
@@ -85,6 +91,7 @@ export const TIERS: readonly Tier[] = [
     name: 'avoid / caution',
     oneLiner:
       'documented safety concerns, or effectively zero rigorous human evidence behind the active claim.',
+    decisionTranslation: 'risk, regulatory, or evidence problem is the headline.',
     typicalGates: ['safety-signal-present', 'little-no-human-data'],
     examples: ['kava (hepatotoxicity history)', 'high-dose stacks with interaction risk'],
     serious: true,

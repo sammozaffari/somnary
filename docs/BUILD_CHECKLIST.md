@@ -124,10 +124,24 @@ exists so sessions extend the site instead of rebuilding it.
 > `[HUMAN-GATE]` — owner review before Phase 2.
 
 ## Phase 2 — Melatonin Decision Hub (the template + the wedge)
-- [~] **CHK-2.1 Melatonin remedy page.** `HG` *(Exists: 12-block template,
+- [x] **CHK-2.1 Melatonin remedy page.** `HG` *(Exists: 12-block template,
   grade A owner-approved, 8 cites verified.)* Remaining: new lead block —
   grade / best-for / **not-for / biggest-risk** / studied-dose (needs CHK-0.3
-  fields) + decision-translation line per strategy 03.
+  fields) + decision-translation line per strategy 03. *(Done, branch
+  `chk-2.1-melatonin-lead-block` — PR awaiting owner sign-off. New
+  `RemedyLeadBlock.astro` renders an above-the-fold decision-first lead block
+  (152px grade badge + decision-translation + best-for/not-for/biggest-risk/
+  studied-dose grid + "reviewed <date> · corrections →") on the shared remedy
+  template for all 20 remedies; degrades gracefully where notFor/biggestRisk
+  aren't yet populated (rows OMITTED, never blank — absence must never read as
+  "no risk"). `decisionTranslation` added to all 6 tiers verbatim from strategy
+  03. Corrections link → real `/methodology#corrections` (existing inbox +
+  7-day SLA; anchor added). Build + token linter + resolver (66 cites, 20 files,
+  unchanged) + crawlability green; all 3 reviewers PASS. OWNER GATES flagged in
+  PR: (G-a) corrections target, (G-b) omit-empty-safety-rows framing, (G-c)
+  verdict micro-label uses tier word vs DESIGN §3's illustrative vocabulary +
+  whether badge aria-label should be "Grade B — {verdict}". Deferred (unchanged
+  scope): populate notFor/biggestRisk for the other 19 = evidence-editor work.)*
 - [~] **CHK-2.2 Melatonin cluster pages.** *(melatonin-children exists.)*
   Remaining: dose/timing, long-term uncertainty, gummy label accuracy
   (JAMA 2023). *Accept:* each follows the 10-part article skeleton; safety
@@ -196,6 +210,7 @@ exists so sessions extend the site instead of rebuilding it.
 ---
 
 ### Session log (agents append one line per session)
+- 2026-07-07 · CHK-2.1 · melatonin decision-first lead block. New `RemedyLeadBlock.astro` renders above-the-fold on the shared remedy template (`r/[slug].astro`): 152px grade badge (new `lead` size on TierBadge) + decision-translation line + best-for/not-for/biggest-risk/studied-dose grid + "reviewed <date> · corrections →". `decisionTranslation` added to all 6 tiers verbatim from strategy 03. Graceful empties (G-b): not-for/biggest-risk rows OMITTED when unpopulated — never blank, absence must never read as "no risk"; verified on magnesium (B, rows gone, 0 empty cells) + cbt-i (S, studied-dose omitted for intervention). Removed the duplicate 78px header badge. Corrections link → real `/methodology#corrections` (added `id`; existing inbox + 7-day SLA, nothing invented). Build + token lint + resolver (66 cites/20 files, unchanged) + crawlability green; citation-auditor / design-guardian / compliance-reviewer all PASS. PR awaiting owner sign-off (HG remedy page + corrections promise). Owner gates in PR: G-a corrections target, G-b empty-row omission, G-c verdict micro-label (tier word vs DESIGN §3 vocabulary + aria-label wording). Non-blocking note (compliance): per-page standard disclaimer still sits at bottom of `<main>` while the decision moment is now at top — pre-existing CHK-1.3 placement, not a regression; raise separately if owner wants it adjacent. Deferred (unchanged): notFor/biggestRisk for the other 19 = evidence-editor sessions.
 - 2026-07-07 · CHK-1.2 · legal pages reconciled to D2 (completes Phase 1). Rewrote the disclosure funding paragraph to owner-decided reality ("entirely self-funded for now, nothing monetised yet; reader-funded + tools-first; never a paywall on the evidence, never brand money; wiki free") — dropped the old "optional memberships" model. Cleared "before membership goes live" from disclosure/terms/privacy header comments → D2 wording. Corrections gmail + 7-day SLA kept per owner. Build green. PR #7 (HG: legal sign-off + Phase 1 boundary). Still-open minor: methodology's brand/product-QA line reads present-tense though no QA module exists — left for a later copy pass.
 - 2026-07-07 · CHK-1.4 · evidence change-log page. New server-rendered `/changelog` reads every remedy's changeLog[] (newest first; grade changes show from→to badges). Seeded an honest initial-publication entry per remedy (real reviewDate + tier + cited-source count — a true event) so the log is a real audit trail. Linked from Footer + methodology #rankings. Build/crawl/linter green; visually confirmed. PR #6. (Note: CHK-1.1 log line lives in the still-open PR #5.)
 <!-- 2026-07-06 — checklist v2 adopted; decisions D1–D4 locked. -->

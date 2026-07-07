@@ -1,0 +1,191 @@
+---
+// Remedy lead block — CHK-2.1 (DESIGN_SYSTEM §3 big-badge; strategy doc 03 "decision-first lead").
+// The decision-first opener on every remedy page: the big grade badge (with "GRADE" micro-label
+// and the tier word), the decision-translation line, and a compact best-for / not-for /
+// biggest-risk / studied-dose grid. It reuses ONLY already-cited structured fields from the remedy
+// — it introduces NO new factual claims (CLAUDE.md: citations are data).
+//
+// Graceful empties (CLAUDE.md conservative safety): the not-for and biggest-risk rows are OMITTED
+// entirely when absent. A blank or "no risk" row must never render — absence must never read as
+// "this is safe". best-for and studied-dose render "not established" when unknown (an unknown
+// value, not a hidden risk); the studied-dose row is omitted for interventions, which have no dose.
+//
+// Legible without color alone (DESIGN §3): the badge is always paired with the letter itself, the
+// "GRADE" label, and the tier word; every decision row is labeled in text.
+import type { TierId } from '../lib/tiers';
+import { getTier } from '../lib/tiers';
+import TierBadge from './TierBadge.astro';
+
+interface Props {
+  tier: TierId;
+  format?: 'supplement' | 'intervention';
+  bestFor: string[];
+  notFor: string[];
+  biggestRisk: string | null;
+  studiedDose: string | null;
+  reviewDate: string;
+}
+const { tier, format = 'supplement', bestFor, notFor, biggestRisk, studiedDose, reviewDate } =
+  Astro.props;
+const t = getTier(tier);
+
+const bestForText = bestFor.length ? bestFor.join(' · ') : null;
+const notForText = notFor.length ? notFor.join(' · ') : null;
+const showDose = format !== 'intervention';
+---
+
+<section class="lead" aria-label="grade and decision summary">
+  <div class="badge-stack">
+    <p class="micro">grade</p>
+    <TierBadge tier={tier} size="lead" />
+    <p class="tier-word">{t.name}</p>
+  </div>
+
+  <div class="decision">
+    <p class="translation">{t.decisionTranslation}</p>
+
+    <dl class="grid">
+      <div class="drow">
+        <dt class="dlabel">best for</dt>
+        <dd class="dvalue">{bestForText ?? <em class="unknown">not established</em>}</dd>
+      </div>
+
+      {notForText && (
+        <div class="drow">
+          <dt class="dlabel">not for</dt>
+          <dd class="dvalue">{notForText}</dd>
+        </div>
+      )}
+
+      {biggestRisk && (
+        <div class="drow">
+          <dt class="dlabel">biggest risk</dt>
+          <dd class="dvalue">{biggestRisk}</dd>
+        </div>
+      )}
+
+      {showDose && (
+        <div class="drow">
+          <dt class="dlabel">studied dose</dt>
+          <dd class="dvalue">{studiedDose ?? <em class="unknown">not established</em>}</dd>
+        </div>
+      )}
+    </dl>
+
+    <p class="review">
+      reviewed <time datetime={reviewDate}>{reviewDate}</time> · found an error?
+      <a href="/methodology#corrections">corrections →</a>
+    </p>
+  </div>
+</section>
+
+<style>
+  .lead {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--sp-7);
+    align-items: start;
+    padding: var(--sp-7);
+    background: var(--surface);
+    border: var(--border-hairline);
+    border-radius: var(--r-xl);
+  }
+
+  /* badge column: GRADE label · big badge · tier word */
+  .badge-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--sp-3);
+  }
+  .micro {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0;
+  }
+  .tier-word {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--ink);
+    margin: 0;
+  }
+
+  /* decision column */
+  .decision {
+    min-width: 0;
+  }
+  .translation {
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    line-height: var(--lh-lg);
+    color: var(--ink);
+    margin: 0 0 var(--sp-5);
+    max-width: 52ch;
+  }
+
+  .grid {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+  }
+  .drow {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: var(--sp-5);
+    align-items: baseline;
+    padding: var(--sp-3) 0;
+    border-top: var(--border-hairline);
+  }
+  .dlabel {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0;
+  }
+  .dvalue {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--ink);
+    margin: 0;
+  }
+  .unknown {
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  .review {
+    margin: var(--sp-5) 0 0;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .review a {
+    color: var(--primary);
+    text-decoration: none;
+  }
+  .review a:hover {
+    text-decoration: underline;
+  }
+
+  /* stack the badge above the decisions on narrow viewports */
+  @media (max-width: 640px) {
+    .lead {
+      grid-template-columns: 1fr;
+      gap: var(--sp-6);
+      padding: var(--sp-6);
+    }
+    .badge-stack {
+      align-items: flex-start;
+    }
+  }
+</style>
