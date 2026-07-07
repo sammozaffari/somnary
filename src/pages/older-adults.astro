@@ -1,0 +1,441 @@
+---
+// older adults + sleep aids — CONTEXT page (CHK-5.2, PR-B). NOT a graded remedy and NOT advice about
+// what to take: it's context on why the stakes of any sleep aid are HIGHER in later life (next-day
+// falls/impairment, slower drug clearance, anticholinergic load) and why the decision belongs with a
+// clinician or pharmacist. No tier badge, no evidence-gate chips, no plannedTier. Mirrors
+// medications-and-sleep-aids.astro / melatonin-gummies.astro structure exactly. Every specific is cited
+// to a source verified firsthand:
+//   1 AGS Beers Criteria 2023 (J Am Geriatr Soc 2023;71(7):2052–2081) — read the primary table firsthand:
+//     first-generation antihistamines (incl. diphenhydramine PO, doxylamine — the sedating ingredients in
+//     OTC "PM" products) are recommendation "Avoid" in older adults: highly anticholinergic, clearance
+//     reduced with age, tolerance develops as a hypnotic, cumulative anticholinergic exposure linked to
+//     falls/delirium/dementia. PMID 37139824.
+//   2 Glass BMJ 2005 — meta-analysis of 24 RCTs in adults ≥60: small sleep gain (~25 min) vs clear harm;
+//     NNT 13, NNH 6; cognitive events ~4.78x, psychomotor ~2.61x more common than placebo. PMID 16284208.
+//   3 Zhdanova 2001 (reused from melatonin corpus) — a LOW physiological 0.3 mg dose restored sleep
+//     efficiency in age-related insomnia; higher doses brought side effects. PMID 11600532 (verified).
+//   4 Culpepper & Wingertzahn 2015 (reused from /medications-and-sleep-aids) — diphenhydramine/doxylamine
+//     are H1 antihistamines with anticholinergic effects + next-day psychomotor impairment. PMID 27057416.
+// Shift-work-disorder / prescription-hypnotic specifics stay routed to a clinician — no directive to
+// start or stop anything appears here.
+import Base from '../layouts/Base.astro';
+import ContextBanner from '../components/ContextBanner.astro';
+import ContextSources from '../components/ContextSources.astro';
+import Disclaimer from '../components/Disclaimer.astro';
+import Fn from '../components/Fn.astro';
+
+const sources = [
+  {
+    n: 1,
+    cite: 'By the 2023 American Geriatrics Society Beers Criteria® Update Expert Panel. American Geriatrics Society 2023 updated AGS Beers Criteria® for potentially inappropriate medication use in older adults. J Am Geriatr Soc. 2023;71(7):2052–2081.',
+    finding:
+      'the standard geriatric-prescribing reference lists first-generation antihistamines — including the diphenhydramine and doxylamine inside most OTC “PM” sleep products — with a recommendation to AVOID in older adults (moderate quality of evidence, strong recommendation): they are highly anticholinergic, clearance falls with advanced age, tolerance to the sleep effect develops when used as a hypnotic, and cumulative anticholinergic exposure is associated with an increased risk of falls, delirium, and dementia.',
+    pmid: '37139824',
+    doi: '10.1111/jgs.18372',
+  },
+  {
+    n: 2,
+    cite: 'Glass J, Lanctôt KL, Herrmann N, Sproule BA, Busto UE. Sedative hypnotics in older people with insomnia: meta-analysis of risks and benefits. BMJ. 2005;331(7526):1169.',
+    finding:
+      'meta-analysis of 24 randomised trials (2,417 participants aged 60+): sedative hypnotics improved sleep only modestly (about 25 minutes of extra sleep) while adverse events were common — the number needed to harm for any adverse event was 6 (95% CI 4.7–7.1) against a number needed to treat for improved sleep of 13, with cognitive events roughly 4.78 times and psychomotor events roughly 2.61 times more common than placebo; the authors concluded the benefits may not justify the risks in older people.',
+    pmid: '16284208',
+  },
+  {
+    n: 3,
+    cite: 'Zhdanova IV, Wurtman RJ, Regan MM, Taylor JA, Shi JP, Leclair OU. Melatonin treatment for age-related insomnia. J Clin Endocrinol Metab. 2001;86(10):4727–4730.',
+    finding:
+      'in older adults with insomnia, a low physiological dose of 0.3 mg melatonin restored sleep efficiency (P < 0.0001) and returned nighttime plasma melatonin to normal levels, whereas a higher pharmacological dose produced side effects such as lowered body temperature — the studied dose in this group was small, not large.',
+    pmid: '11600532',
+  },
+  {
+    n: 4,
+    cite: 'Culpepper L, Wingertzahn MA. Over-the-Counter Agents for the Treatment of Occasional Disturbed Sleep or Transient Insomnia: A Systematic Review of Efficacy and Safety. Prim Care Companion CNS Disord. 2015;17(6):10.4088/PCC.15r01798.',
+    finding:
+      'systematic review of OTC sleep agents: the antihistamines diphenhydramine and doxylamine are nonselective H1 antagonists whose sedation comes with anticholinergic effects (dry mouth, blurred vision) and documented next-day psychomotor impairment, with limited and inconsistent efficacy evidence.',
+    pmid: '27057416',
+    doi: '10.4088/PCC.15r01798',
+  },
+];
+---
+
+<Base
+  title="older adults + sleep aids: why the stakes are higher | Somnary"
+  description="sleep changes with age, and so do the stakes of a sleep aid: the same drowsiness that helps at night is tied to next-day falls and impaired thinking, and the antihistamines in common OTC 'PM' products are flagged specifically for older adults. context on why a sleep aid in later life is a clinician conversation — not a grade, and not advice about what to take."
+  canonical="https://somnary.vercel.app/older-adults"
+>
+  <main class="page">
+    <header class="head">
+      <p class="eyebrow">context · older adults</p>
+      <h1 class="title">older adults + sleep aids<span class="dot">.</span></h1>
+      <p class="dek">
+        Sleep changes with age, and so do the stakes of anything taken for it. The same drowsiness
+        that helps at night doesn't always clear by morning — and in later life next-day sedation is
+        tied to falls and foggy thinking. Some of the most common over-the-counter &ldquo;PM&rdquo;
+        sleep products are flagged <em>specifically</em> for older adults. This page is context on why
+        a sleep aid in later life belongs in a conversation with a clinician or pharmacist — it is not
+        a grade, and it does not tell you what to take or what is safe for you.
+      </p>
+    </header>
+
+    <ContextBanner
+      note="whether a sleep aid fits later in life depends on your other medicines, your kidney and liver function, and your fall risk — a clinical question, not one a wiki can settle. this page describes what the evidence and geriatric guidelines document, and routes it to a clinician."
+    />
+
+    <p class="who">
+      <span class="who-tag">who this is for</span>
+      adults roughly 65 and older who are weighing a sleep aid — and the family members or carers
+      helping them decide — especially anyone already taking other medicines or with a history of
+      falls or unsteadiness.
+    </p>
+
+    <!-- safety boundary: next-day falls/impairment + anticholinergic load in later life (serious) -->
+    <section class="callout sev-serious" role="note" aria-label="older-adult sleep-aid hazard">
+      <div class="callout-head">
+        <span class="sigil" aria-hidden="true">!</span>
+        <p class="callout-title">in later life, a sleep aid's next-day fog can become a fall</p>
+      </div>
+      <p class="callout-body">
+        The drowsiness that helps at night doesn't always clear by morning, and in older adults
+        next-day sedation is tied to <strong>falls</strong> and impaired thinking. The antihistamines
+        that do the sedating in most OTC &ldquo;PM&rdquo; products — diphenhydramine and doxylamine —
+        are listed in the 2023 AGS Beers Criteria as potentially inappropriate in older adults, with a
+        recommendation to <strong>avoid</strong>: they are highly anticholinergic, and cumulative
+        anticholinergic use is linked to falls, delirium, and dementia.<Fn n={1} /> Prescription
+        sedative sleeping pills carry their own raised risk of harm in this age group,<Fn n={2} /> and
+        those antihistamines add next-day psychomotor impairment on their own.<Fn n={4} /> None of this
+        tells you what is safe for you. Whether any sleep aid fits belongs with a clinician or
+        pharmacist who can see your full medication list and fall risk — before you start. A new or
+        worsening sleep problem in later life can itself signal something that needs
+        <a href="/when-to-see-a-doctor">evaluation</a>, not a supplement.
+      </p>
+    </section>
+
+    <!-- section 01: what people assume -->
+    <section class="section">
+      <p class="eyebrow">section 01</p>
+      <h2 class="section-title">what people assume</h2>
+      <div class="prose">
+        <p>
+          OTC &ldquo;PM&rdquo; products and &ldquo;natural&rdquo; sleep aids read as a mild, low-stakes
+          way to handle a restless night, and the quiet assumption is that whatever is fine for a
+          younger adult is fine at any age. In later life that assumption is exactly where the trouble
+          starts: the body clears these ingredients more slowly, the structure of sleep itself changes,
+          and the margin between &ldquo;helps me sleep&rdquo; and &ldquo;leaves me unsteady
+          tomorrow&rdquo; narrows. The through-line of this page is that age raises the stakes of the
+          same product — which is why the decision moves from a shelf to a clinician.
+        </p>
+      </div>
+    </section>
+
+    <!-- section 02: what's actually documented -->
+    <section class="section">
+      <p class="eyebrow">section 02</p>
+      <h2 class="section-title">what's actually documented</h2>
+      <div class="prose">
+        <p>
+          Geriatric prescribing guidance is specific here. The 2023 AGS Beers Criteria — the standard
+          reference for medications that are potentially inappropriate in older adults — lists
+          first-generation antihistamines, including the diphenhydramine and doxylamine inside most OTC
+          &ldquo;PM&rdquo; products, with a recommendation to <strong>avoid</strong>: they are highly
+          anticholinergic, their clearance falls with age, tolerance to the sleep effect develops, and
+          cumulative anticholinergic exposure is associated with <strong>falls, delirium, and
+          dementia</strong>.<Fn n={1} /> A separate systematic review found those same antihistamines
+          also carry next-day psychomotor impairment.<Fn n={4} />
+        </p>
+        <p>
+          Prescription sedative sleeping pills don't escape this either. A <em>BMJ</em> meta-analysis
+          of 24 trials in adults over 60 found only a small sleep benefit — roughly
+          <strong>25 extra minutes</strong> — against clearly higher harm: the number needed to harm
+          for any adverse event was <strong>6</strong>, against a number needed to treat of 13, with
+          cognitive events about <strong>4.78 times</strong> and psychomotor events about
+          <strong>2.61 times</strong> more common than placebo; the authors concluded the benefits may
+          not justify the risks in older people.<Fn n={2} /> Melatonin sits differently: the trial most
+          cited in this group used a low physiological dose of <strong>0.3 mg</strong>, which restored
+          sleep efficiency and returned nighttime melatonin to normal, while a higher dose brought side
+          effects<Fn n={3} /> — a reminder that in older adults the amount studied was small.
+        </p>
+      </div>
+    </section>
+
+    <!-- section 03: what these findings do NOT show -->
+    <section class="section">
+      <p class="eyebrow">section 03</p>
+      <h2 class="section-title">what these findings do <em>not</em> show</h2>
+      <div class="prose">
+        <p>
+          These are population-level cautions and averages, not a verdict on you. Beers flags a class
+          as <em>potentially</em> inappropriate — that word is doing real work: it means review and
+          caution, not an absolute ban for every person.<Fn n={1} /> The sedative-hypnotic harms are
+          averages across trials, not a prediction for one individual,<Fn n={2} /> and the 0.3 mg
+          melatonin result is a single small study of sleep efficiency, not evidence of a safe
+          long-term dose or a reason to start.<Fn n={3} /> None of this can diagnose why sleep changed,
+          rank one option against another for your health, or replace a clinician who can weigh your
+          kidneys, liver, other medicines, and fall history. The honest takeaway is narrow: the stakes
+          are higher with age, so the decision belongs with a professional.
+        </p>
+      </div>
+    </section>
+
+    <!-- section 04: dose / label / timing reality -->
+    <section class="section">
+      <p class="eyebrow">section 04</p>
+      <h2 class="section-title">dose, label &amp; timing reality</h2>
+      <div class="prose">
+        <p>
+          The number on a box was not set with an older adult's slower drug clearance in mind, and OTC
+          &ldquo;PM&rdquo; labels don't flag the anticholinergic load they add to medicines already in
+          the cabinet.<Fn n={1} /><Fn n={4} /> Where melatonin has been studied in older adults, the
+          doses were low and physiological — the 0.3 mg used in the age-related insomnia trial is far
+          below the 5 or 10 mg common on shelves.<Fn n={3} /> This page describes what the studies
+          used; it does not tell you what to take. A pharmacist can check any ingredient against your
+          full list in minutes, and <a href="/melatonin-dose-timing">melatonin dose &amp; timing</a>
+          covers what the trials actually used. What fits <em>your</em> body and regimen is a question
+          only a clinician or pharmacist with the whole picture can answer — not a label, and not this
+          page.
+        </p>
+      </div>
+    </section>
+
+    <!-- section 05: take these to a clinician or pharmacist -->
+    <section class="section">
+      <p class="eyebrow">section 05</p>
+      <h2 class="section-title">take these to a clinician or pharmacist</h2>
+      <ul class="ask">
+        <li>here is my full medication list — does this sleep aid, or the antihistamine in this &ldquo;PM&rdquo; product, appear on the Beers list or interact with anything I take?</li>
+        <li>given any history of falls or unsteadiness, could this raise my risk overnight or the next morning?</li>
+        <li>do my kidney or liver function, or my age, change how long this stays in my system?</li>
+        <li>if melatonin is considered at all, what low dose and form have actually been studied in older adults?</li>
+        <li>has my sleep changed enough that it should be evaluated, rather than managed with a sleep aid?</li>
+      </ul>
+    </section>
+
+    <!-- related: the primary boundary + the interaction context + the graded hub + tools -->
+    <section class="section">
+      <p class="eyebrow">related</p>
+      <h2 class="section-title">read next</h2>
+      <ul class="related">
+        <li><a href="/safety">safety &amp; interactions</a> — the primary boundary: how Somnary handles interactions and when to route to a clinician.</li>
+        <li><a href="/medications-and-sleep-aids">medications &amp; sleep aids</a> — why interactions and timing are a pharmacist conversation before any sleep aid.</li>
+        <li><a href="/when-to-see-a-doctor">when to see a doctor</a> — the signs that a sleep change needs evaluation, not a supplement.</li>
+        <li><a href="/r/melatonin">melatonin</a> — the full evidence grade and what the trials found.</li>
+        <li><a href="/melatonin-dose-timing">melatonin dose &amp; timing</a> — how much, and when, the studies actually used.</li>
+        <li><a href="/r/cbt-i">CBT-I</a> — the non-drug approach to chronic insomnia, especially relevant when sleep-aid risks run higher.</li>
+      </ul>
+    </section>
+
+    <ContextSources sources={sources} />
+
+    <div class="disclaimer-slot">
+      <Disclaimer variant="standard" />
+    </div>
+
+    <p class="review-line">
+      reviewed 2026-07-08 · found an error? <a href="/methodology#corrections">corrections →</a>
+    </p>
+  </main>
+</Base>
+
+<style>
+  .page {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: var(--sp-8) var(--sp-7) var(--sp-9);
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0;
+  }
+  .dot {
+    color: var(--primary);
+  }
+  .head {
+    margin-bottom: var(--sp-6);
+  }
+  .title {
+    font-family: var(--font-display);
+    font-size: var(--text-3xl);
+    line-height: var(--lh-3xl);
+    letter-spacing: var(--tracking-tight);
+    color: var(--ink);
+    margin: var(--sp-3) 0 var(--sp-5);
+  }
+  .dek {
+    font-size: var(--text-md);
+    line-height: var(--lh-md);
+    color: var(--muted);
+    max-width: 68ch;
+    margin: 0;
+  }
+
+  /* who this is for */
+  .who {
+    max-width: 68ch;
+    margin: var(--sp-5) 0 0;
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+  }
+  .who-tag {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--primary);
+    margin-right: var(--sp-2);
+  }
+
+  /* safety callout — reuses the §2.12 serious register (grade-f), bespoke to this context page */
+  .callout {
+    border-radius: var(--r-lg);
+    border: 1px solid;
+    padding: var(--sp-6);
+    margin-top: var(--sp-7);
+  }
+  .sev-serious {
+    background: var(--grade-f-tint);
+    border-color: var(--grade-f);
+  }
+  .callout-head {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    margin-bottom: var(--sp-4);
+  }
+  .sigil {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    flex: none;
+    border-radius: var(--r-pill);
+    background: var(--grade-f);
+    color: var(--surface);
+    font-family: var(--font-display);
+    font-weight: 600;
+    line-height: 1;
+  }
+  .callout-title {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--grade-f);
+    margin: 0;
+  }
+  .callout-body {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--ink);
+    margin: 0;
+  }
+  .callout-body strong {
+    font-weight: 600;
+  }
+  .callout-body a {
+    color: var(--grade-f);
+  }
+
+  .section {
+    border-top: var(--border-hairline);
+    padding-top: var(--sp-6);
+    margin-top: var(--sp-8);
+  }
+  .section-title {
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    line-height: var(--lh-xl);
+    color: var(--ink);
+    margin: var(--sp-2) 0 var(--sp-5);
+  }
+  .prose {
+    max-width: 68ch;
+  }
+  .prose p {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--muted);
+    margin: 0 0 var(--sp-4);
+  }
+  .prose strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .prose a {
+    color: var(--primary);
+  }
+
+  /* clinician questions */
+  .ask {
+    max-width: 68ch;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+  }
+  .ask li {
+    position: relative;
+    padding-left: var(--sp-6);
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--muted);
+  }
+  .ask li::before {
+    content: '?';
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--primary);
+  }
+
+  /* related / read-next links */
+  .related {
+    max-width: 68ch;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+  }
+  .related li {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--muted);
+  }
+  .related a {
+    color: var(--primary);
+  }
+
+  .disclaimer-slot {
+    margin-top: var(--sp-8);
+  }
+  .review-line {
+    margin-top: var(--sp-6);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .review-line a {
+    color: var(--primary);
+  }
+  @media (max-width: 640px) {
+    .page {
+      padding: var(--sp-6) var(--sp-5) var(--sp-8);
+    }
+    .title {
+      font-size: var(--text-2xl);
+    }
+  }
+</style>

@@ -1,0 +1,413 @@
+---
+// jet lag + shift work — CONTEXT page (CHK-5.2, PR-B). NOT a graded remedy and NOT advice about what to
+// take: it's context on why jet lag and shift work are CIRCADIAN (clock-timing) problems, not sedation
+// problems — so melatonin's evidence here is about TIMING, not sedating you through a night — and why
+// shift-work sleep problems are a clinician conversation, not a self-treat. No tier badge, no
+// evidence-gate chips, no plannedTier. Mirrors medications-and-sleep-aids.astro structure exactly. Every
+// specific is cited to a source verified firsthand:
+//   1 Herxheimer & Petrie, Cochrane 2002 — 10 RCTs; in 9, melatonin taken close to the traveller's target
+//     bedtime at the DESTINATION reduced jet lag after flights crossing 5+ time zones (larger effect
+//     eastward); daily 0.5–5 mg similarly effective; taken at the WRONG time (early in the day) it could
+//     cause sleepiness and delay adaptation. The anchor NEW cite. PMID 12076414 / DOI 10.1002/14651858.CD001520.
+//   2 Auger et al. AASM 2015 (reused from corpus) — clinical practice guideline for INTRINSIC circadian
+//     rhythm sleep-wake disorders: conditional endorsement of strategically TIMED melatonin for DSWPD and
+//     for blind adults with N24SWD. NOTE (verified firsthand): it does NOT endorse melatonin for shift
+//     work disorder — so shift work stays routed to a clinician. PMID 26414986 / DOI 10.5664/jcsm.5100.
+// Shift-work disorder itself is kept NAVIGATIONAL (route to a clinician / when-to-see-a-doctor); no
+// clean melatonin-for-SWD endorsement exists, so none is cited. Drowsy-driving is a safety boundary, not
+// a cited statistic.
+import Base from '../layouts/Base.astro';
+import ContextBanner from '../components/ContextBanner.astro';
+import ContextSources from '../components/ContextSources.astro';
+import Disclaimer from '../components/Disclaimer.astro';
+import Fn from '../components/Fn.astro';
+
+const sources = [
+  {
+    n: 1,
+    cite: 'Herxheimer A, Petrie KJ. Melatonin for the prevention and treatment of jet lag. Cochrane Database Syst Rev. 2002;(2):CD001520.',
+    finding:
+      'Cochrane systematic review of ten randomised trials: in nine of them, melatonin taken close to the traveller’s target bedtime at the destination (about 10pm–midnight) reduced jet lag after flights crossing five or more time zones, with a larger effect for eastward travel; daily doses between 0.5 and 5 mg were similarly effective; and taken at the wrong time — early in the destination day — melatonin could cause sleepiness and delay adaptation, making clear the effect is about timing, not sedation.',
+    pmid: '12076414',
+    doi: '10.1002/14651858.CD001520',
+  },
+  {
+    n: 2,
+    cite: 'Auger RR, Burgess HJ, Emens JS, Deriy LV, Thomas SM, Sharkey KM. Clinical Practice Guideline for the Treatment of Intrinsic Circadian Rhythm Sleep-Wake Disorders (AASM). J Clin Sleep Med. 2015;11(10):1199–1236.',
+    finding:
+      'American Academy of Sleep Medicine clinical practice guideline for intrinsic circadian rhythm sleep-wake disorders: it gives a conditional endorsement of strategically TIMED melatonin for delayed sleep-wake phase disorder and for blind adults with non-24-hour disorder — melatonin used as a scheduled clock signal under clinical guidance, not a nightly sedative — and it does NOT endorse melatonin for shift work disorder.',
+    pmid: '26414986',
+    doi: '10.5664/jcsm.5100',
+  },
+];
+---
+
+<Base
+  title="jet lag + shift work: a clock problem, not a sedation problem | Somnary"
+  description="jet lag and shift work are circadian problems — your internal clock is out of step with the world's — so melatonin's evidence here is about timing, not sedating you to sleep. and shift-work sleep problems are a clinician conversation, not a self-treat. context on that distinction — not a grade, and not advice about what to take."
+  canonical="https://somnary.vercel.app/jet-lag-shift-work"
+>
+  <main class="page">
+    <header class="head">
+      <p class="eyebrow">context · circadian rhythm</p>
+      <h1 class="title">jet lag + shift work<span class="dot">.</span></h1>
+      <p class="dek">
+        Jet lag and shift work are <em>circadian</em> problems: your internal clock is out of step
+        with the world around you, not simply a matter of not being sleepy enough. That's why
+        melatonin's evidence here is about <em>timing</em> — nudging the clock — rather than sedating
+        you to sleep, and why persistent shift-work sleep trouble is a clinician conversation rather
+        than something to self-treat. This page is context on that distinction — it is not a grade, and
+        it does not tell you what to take or what is safe for you.
+      </p>
+    </header>
+
+    <ContextBanner
+      note="matching your clock to a new time zone or a night-shift schedule is a timing problem specific to your situation. this page describes what the circadian evidence documents, and routes shift-work sleep problems to a clinician."
+    />
+
+    <p class="who">
+      <span class="who-tag">who this is for</span>
+      travellers crossing several time zones, and people working night or rotating shifts, who are
+      weighing melatonin — or wondering why ordinary sleep advice isn't fixing the problem.
+    </p>
+
+    <!-- safety boundary: don't self-treat shift-work disorder + don't drive drowsy (serious) -->
+    <section class="callout sev-serious" role="note" aria-label="shift-work and drowsy-driving hazard">
+      <div class="callout-head">
+        <span class="sigil" aria-hidden="true">!</span>
+        <p class="callout-title">don't self-treat shift-work disorder, and never drive drowsy</p>
+      </div>
+      <p class="callout-body">
+        Persistent trouble sleeping or staying awake around night or rotating shifts can be
+        <strong>shift work disorder</strong> — a recognised circadian rhythm sleep-wake disorder that
+        belongs with a clinician who can assess it, not a supplement picked off a shelf. And the
+        sleepiness that comes with a disrupted clock is dangerous behind the wheel: <strong>drowsy
+        driving</strong> is a serious hazard, and no sleep aid removes it — if you are fighting to stay
+        awake, do not drive. Melatonin's evidence here is about shifting the clock's timing, not
+        sedating you through a shift, and it is not a treatment for a disorder. If shift work is
+        wrecking your sleep, that is a <a href="/when-to-see-a-doctor">clinician conversation</a>, not
+        a self-assembled fix.
+      </p>
+    </section>
+
+    <!-- section 01: what people assume -->
+    <section class="section">
+      <p class="eyebrow">section 01</p>
+      <h2 class="section-title">what people assume</h2>
+      <div class="prose">
+        <p>
+          The usual assumption is that jet lag and shift-work exhaustion are just tiredness — that the
+          fix is anything that makes you sleepy at the right moment. So melatonin gets reached for like
+          a sedative, and shift workers try to power through with the same tricks that work for an
+          ordinary late night. The framing this page pushes back on is that these are <em>clock</em>
+          problems: the issue isn't a shortage of sleepiness, it's that your internal timing is
+          pointing at the wrong hour — and a sedative doesn't move a clock.
+        </p>
+      </div>
+    </section>
+
+    <!-- section 02: what's actually documented -->
+    <section class="section">
+      <p class="eyebrow">section 02</p>
+      <h2 class="section-title">what's actually documented</h2>
+      <div class="prose">
+        <p>
+          For jet lag specifically, the evidence is unusually clear. A Cochrane review of ten
+          randomised trials found that in <strong>nine</strong> of them, melatonin taken close to the
+          traveller's target bedtime at the destination reduced jet lag after flights crossing
+          <strong>five or more time zones</strong>, with a larger effect for eastward travel; daily
+          doses between <strong>0.5 and 5 mg</strong> were similarly effective.<Fn n={1} /> The same
+          review makes the timing point sharply: taken at the wrong time — early in the destination day
+          — melatonin could <em>cause</em> sleepiness and delay adaptation.<Fn n={1} /> That is the
+          mechanism in one sentence: this is a timing signal, and the timing is what matters.
+        </p>
+        <p>
+          For the intrinsic clock disorders it covers, an AASM clinical practice guideline likewise
+          gives a conditional endorsement of strategically <strong>timed</strong> melatonin — for
+          delayed sleep-wake phase disorder, and for blind adults with non-24-hour disorder — again as
+          a scheduled clock signal under clinical guidance, not a nightly sedative.<Fn n={2} /> Notably,
+          that same guideline does <em>not</em> endorse melatonin for <strong>shift work
+          disorder</strong> — one reason shift work sits on the clinician side of the line.<Fn n={2} />
+        </p>
+      </div>
+    </section>
+
+    <!-- section 03: what these findings do NOT show -->
+    <section class="section">
+      <p class="eyebrow">section 03</p>
+      <h2 class="section-title">what these findings do <em>not</em> show</h2>
+      <div class="prose">
+        <p>
+          The jet-lag evidence describes what happened in trials of travellers; it doesn't tell you
+          what to take, when, or whether melatonin fits your health and medicines. &ldquo;Similarly
+          effective across 0.5 to 5 mg&rdquo; is a finding about trial averages, not a dose
+          instruction, and effectiveness for jet lag says nothing about safety alongside your other
+          medications or conditions.<Fn n={1} /> The circadian-disorder guidance is for specific
+          disorders diagnosed and assessed by a clinician — not a green light to self-diagnose.<Fn n={2} />
+          And the clearest gap is shift work: the evidence base is thinner, the guideline stops short
+          of endorsing melatonin, and shift work disorder itself needs professional assessment. None of
+          this diagnoses your sleep problem or ranks your options for you.
+        </p>
+      </div>
+    </section>
+
+    <!-- section 04: dose / form / timing reality -->
+    <section class="section">
+      <p class="eyebrow">section 04</p>
+      <h2 class="section-title">dose, form &amp; timing reality</h2>
+      <div class="prose">
+        <p>
+          Timing is the active ingredient here, which makes it the easy thing to get wrong — the same
+          milligrams that help when aligned to a destination night can backfire taken at the wrong
+          hour.<Fn n={1} /> In the jet-lag trials, travellers took melatonin close to bedtime at the
+          destination; the guideline use for clock disorders is scheduled to a person's specific rhythm
+          under guidance.<Fn n={1} /><Fn n={2} /> This page describes what those studies and guidelines
+          used — it is not a schedule for you to follow. <a href="/melatonin-dose-timing">melatonin
+          dose &amp; timing</a> covers the trial doses and timing in detail, and for a night-shift or
+          rotating pattern the right approach depends on your schedule and health in ways only a
+          clinician can map.
+        </p>
+      </div>
+    </section>
+
+    <!-- section 05: take these to a clinician or pharmacist -->
+    <section class="section">
+      <p class="eyebrow">section 05</p>
+      <h2 class="section-title">take these to a clinician or pharmacist</h2>
+      <ul class="ask">
+        <li>is my sleep problem jet lag that will pass, or a shift-related pattern that should be assessed?</li>
+        <li>could this be shift work disorder, and what evaluation would tell us?</li>
+        <li>if melatonin is considered for timing, when — relative to my schedule — was it actually studied, and does it fit my medicines and conditions?</li>
+        <li>how do I manage sleepiness safely around driving and work while my clock is disrupted?</li>
+        <li>what non-drug steps, such as light exposure and schedule, fit my situation?</li>
+      </ul>
+    </section>
+
+    <!-- related: the timing detail + the graded hub + the primary boundary -->
+    <section class="section">
+      <p class="eyebrow">related</p>
+      <h2 class="section-title">read next</h2>
+      <ul class="related">
+        <li><a href="/melatonin-dose-timing">melatonin dose &amp; timing</a> — what dose and timing the circadian trials actually used.</li>
+        <li><a href="/r/melatonin">melatonin</a> — the full evidence grade and what the trials found.</li>
+        <li><a href="/safety">safety &amp; interactions</a> — the primary boundary: how Somnary handles interactions and when to route to a clinician.</li>
+        <li><a href="/when-to-see-a-doctor">when to see a doctor</a> — the signs that disrupted sleep needs evaluation, not a supplement.</li>
+      </ul>
+    </section>
+
+    <ContextSources sources={sources} />
+
+    <div class="disclaimer-slot">
+      <Disclaimer variant="standard" />
+    </div>
+
+    <p class="review-line">
+      reviewed 2026-07-08 · found an error? <a href="/methodology#corrections">corrections →</a>
+    </p>
+  </main>
+</Base>
+
+<style>
+  .page {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: var(--sp-8) var(--sp-7) var(--sp-9);
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0;
+  }
+  .dot {
+    color: var(--primary);
+  }
+  .head {
+    margin-bottom: var(--sp-6);
+  }
+  .title {
+    font-family: var(--font-display);
+    font-size: var(--text-3xl);
+    line-height: var(--lh-3xl);
+    letter-spacing: var(--tracking-tight);
+    color: var(--ink);
+    margin: var(--sp-3) 0 var(--sp-5);
+  }
+  .dek {
+    font-size: var(--text-md);
+    line-height: var(--lh-md);
+    color: var(--muted);
+    max-width: 68ch;
+    margin: 0;
+  }
+
+  /* who this is for */
+  .who {
+    max-width: 68ch;
+    margin: var(--sp-5) 0 0;
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+  }
+  .who-tag {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--primary);
+    margin-right: var(--sp-2);
+  }
+
+  /* safety callout — reuses the §2.12 serious register (grade-f), bespoke to this context page */
+  .callout {
+    border-radius: var(--r-lg);
+    border: 1px solid;
+    padding: var(--sp-6);
+    margin-top: var(--sp-7);
+  }
+  .sev-serious {
+    background: var(--grade-f-tint);
+    border-color: var(--grade-f);
+  }
+  .callout-head {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    margin-bottom: var(--sp-4);
+  }
+  .sigil {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    flex: none;
+    border-radius: var(--r-pill);
+    background: var(--grade-f);
+    color: var(--surface);
+    font-family: var(--font-display);
+    font-weight: 600;
+    line-height: 1;
+  }
+  .callout-title {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--grade-f);
+    margin: 0;
+  }
+  .callout-body {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--ink);
+    margin: 0;
+  }
+  .callout-body strong {
+    font-weight: 600;
+  }
+  .callout-body a {
+    color: var(--grade-f);
+  }
+
+  .section {
+    border-top: var(--border-hairline);
+    padding-top: var(--sp-6);
+    margin-top: var(--sp-8);
+  }
+  .section-title {
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    line-height: var(--lh-xl);
+    color: var(--ink);
+    margin: var(--sp-2) 0 var(--sp-5);
+  }
+  .prose {
+    max-width: 68ch;
+  }
+  .prose p {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--muted);
+    margin: 0 0 var(--sp-4);
+  }
+  .prose strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .prose a {
+    color: var(--primary);
+  }
+
+  /* clinician questions */
+  .ask {
+    max-width: 68ch;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+  }
+  .ask li {
+    position: relative;
+    padding-left: var(--sp-6);
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--muted);
+  }
+  .ask li::before {
+    content: '?';
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--primary);
+  }
+
+  /* related / read-next links */
+  .related {
+    max-width: 68ch;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+  }
+  .related li {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--muted);
+  }
+  .related a {
+    color: var(--primary);
+  }
+
+  .disclaimer-slot {
+    margin-top: var(--sp-8);
+  }
+  .review-line {
+    margin-top: var(--sp-6);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .review-line a {
+    color: var(--primary);
+  }
+  @media (max-width: 640px) {
+    .page {
+      padding: var(--sp-6) var(--sp-5) var(--sp-8);
+    }
+    .title {
+      font-size: var(--text-2xl);
+    }
+  }
+</style>
