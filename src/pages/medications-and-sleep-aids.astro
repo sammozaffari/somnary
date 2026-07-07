@@ -1,0 +1,443 @@
+---
+// medications + supplements / sleep aids — CONTEXT page (CHK-5.2, PR-A). NOT a graded remedy and NOT
+// advice about what to take: it's context on why interactions and timing are a PHARMACIST conversation
+// BEFORE any sleep aid. No tier badge, no evidence-gate chips, no plannedTier. D4-critical register:
+// every interaction is surfaced as a QUESTION FOR A PHARMACIST, never a directive ("avoid X" / "combine
+// these" are forbidden). Mirrors melatonin-gummies.astro structure exactly. Every specific is cited to a
+// source verified firsthand:
+//   1 Sateia/AASM 2017 (reused from melatonin corpus) — weak recs AGAINST melatonin/diphenhydramine/
+//     valerian for chronic insomnia; routes to evaluation. PMID 27998379.
+//   2 Härtter 2000 — fluvoxamine coadministration raised oral melatonin AUC ~17-fold, Cmax ~12-fold
+//     (documented PK interaction; fluvoxamine slows melatonin clearance). PMID 10668847 (verified).
+//   3 Culpepper & Wingertzahn 2015 — OTC "PM" sleep agents diphenhydramine/doxylamine are sedating
+//     H1-antihistamines with anticholinergic effects + next-day psychomotor impairment. PMID 27057416.
+//   4 Teschke 2010 (reused from kava.mdx) — comedication with other drugs/supplements a documented kava
+//     hepatotoxicity risk factor in most of 14 cases. PMID 20720265 (verified).
+//   5 CDC MMWR 2002 (reused from kava.mdx) — 11 kava users developed liver failure needing transplant;
+//     FDA consumer advisory 2002. PMID 12500906.
+// Valerian additive-sedation stays NAVIGATIONAL (routes to /r/valerian) — the reused Shinjyo review does
+// not support an interaction claim, so it is not cited here.
+import Base from '../layouts/Base.astro';
+import ContextBanner from '../components/ContextBanner.astro';
+import ContextSources from '../components/ContextSources.astro';
+import Disclaimer from '../components/Disclaimer.astro';
+import Fn from '../components/Fn.astro';
+
+const sources = [
+  {
+    n: 1,
+    cite: 'Sateia MJ, Buysse DJ, Krystal AD, et al. Clinical Practice Guideline for the Pharmacologic Treatment of Chronic Insomnia in Adults (AASM). J Clin Sleep Med. 2017;13(2):307–349.',
+    finding:
+      'the American Academy of Sleep Medicine guideline reviewed the common over-the-counter sleep agents and issued weak recommendations that clinicians NOT use melatonin, diphenhydramine, or valerian for chronic insomnia — i.e. these are not established treatments, and the guideline points toward clinical evaluation rather than self-treatment.',
+    pmid: '27998379',
+    doi: '10.5664/jcsm.6470',
+  },
+  {
+    n: 2,
+    cite: 'Härtter S, Grözinger M, Weigmann H, Röschke J, Hiemke C. Increased bioavailability of oral melatonin after fluvoxamine coadministration. Clin Pharmacol Ther. 2000;67(1):1–6.',
+    finding:
+      'controlled pharmacokinetic study: coadministering the antidepressant fluvoxamine with oral melatonin produced a 17-fold higher melatonin AUC (area under the concentration–time curve) and a 12-fold higher peak serum concentration, because fluvoxamine inhibits the liver enzymes that clear melatonin — a documented, sizeable drug interaction for a supplement often assumed to be inert.',
+    pmid: '10668847',
+    doi: '10.1067/mcp.2000.104071',
+  },
+  {
+    n: 3,
+    cite: 'Culpepper L, Wingertzahn MA. Over-the-Counter Agents for the Treatment of Occasional Disturbed Sleep or Transient Insomnia: A Systematic Review of Efficacy and Safety. Prim Care Companion CNS Disord. 2015;17(6):10.4088/PCC.15r01798.',
+    finding:
+      'systematic review of OTC sleep agents (diphenhydramine, doxylamine, melatonin, valerian): the antihistamines diphenhydramine and doxylamine are nonselective H1 antagonists whose sedation comes with anticholinergic effects (dry mouth, blurred vision) and documented next-day psychomotor impairment, with limited and inconsistent efficacy evidence.',
+    pmid: '27057416',
+    doi: '10.4088/PCC.15r01798',
+  },
+  {
+    n: 4,
+    cite: 'Teschke R. Kava hepatotoxicity — a clinical review. Ann Hepatol. 2010;9(3):251–265.',
+    finding:
+      'clinical review with structured causality assessment of 14 worldwide cases: kava is potentially hepatotoxic, and comedication with other synthetic drugs and dietary/herbal supplements was a documented risk factor in most of the cases (alongside overdose, prolonged use, and poor raw-material quality).',
+    pmid: '20720265',
+  },
+  {
+    n: 5,
+    cite: 'Centers for Disease Control and Prevention. Hepatic Toxicity Possibly Associated with Kava-Containing Products — United States, Germany, and Switzerland, 1999–2002. MMWR Morb Mortal Wkly Rep. 2002;51(47):1065–1067.',
+    finding:
+      'surveillance report: 11 people who used kava products developed liver failure and underwent liver transplantation across the US and Europe, and the FDA issued a consumer advisory in 2002 — the documented harm behind treating kava as a serious-interaction question, not a casual sleep aid.',
+    pmid: '12500906',
+  },
+];
+---
+
+<Base
+  title="medications + sleep aids: what to ask a pharmacist first | Somnary"
+  description="'natural' does not mean 'free of drug interactions.' melatonin, kava, and the antihistamines in OTC 'PM' products all have documented interaction cautions. context on why interactions and timing are a pharmacist conversation before any sleep aid — not a grade, and not advice about what to take."
+  canonical="https://somnary.vercel.app/medications-and-sleep-aids"
+>
+  <main class="page">
+    <header class="head">
+      <p class="eyebrow">context · medications &amp; interactions</p>
+      <h1 class="title">medications + sleep aids<span class="dot">.</span></h1>
+      <p class="dek">
+        &ldquo;Natural&rdquo; does not mean &ldquo;free of drug interactions.&rdquo; Some sleep
+        supplements and over-the-counter sleep aids act on the same systems as medicines you may
+        already take, and a few have documented interaction cautions of their own. This page is
+        context on why interactions and timing belong in a conversation with a pharmacist or
+        clinician <em>before</em> any sleep aid — it is not a grade, and it does not tell you what to
+        take or what is safe for you.
+      </p>
+    </header>
+
+    <ContextBanner
+      note="whether a sleep aid fits with your current medications is a clinical question about your specific regimen, not something a wiki can settle. this page describes documented interaction cautions and routes them to a pharmacist."
+    />
+
+    <p class="who">
+      <span class="who-tag">who this is for</span>
+      anyone who takes a prescription or over-the-counter medication — or manages a health condition,
+      is pregnant or breastfeeding, or is considering a sleep aid for a child — and is weighing a
+      sleep supplement or an OTC sleep product on top of it.
+    </p>
+
+    <!-- safety boundary: additive sedation + anticholinergic load + serious supplement harms (serious) -->
+    <section class="callout sev-serious" role="note" aria-label="medication-interaction hazard">
+      <div class="callout-head">
+        <span class="sigil" aria-hidden="true">!</span>
+        <p class="callout-title">sedation, anticholinergic load, and liver risk can stack — ask before you start</p>
+      </div>
+      <p class="callout-body">
+        Sleep aids and the medicines you already take can act on the same systems. Sedating
+        ingredients — prescription sleep or anti-anxiety medicines, alcohol, and the antihistamines
+        (diphenhydramine, doxylamine) inside many OTC &ldquo;PM&rdquo; products — can
+        <strong>add up</strong>, and those antihistamines carry anticholinergic effects and next-day
+        impairment on their own.<Fn n={3} /> Some supplements also carry documented, serious harms:
+        kava is a documented cause of <strong>liver failure</strong>, and taking it alongside other
+        drugs or supplements is a recognised risk factor.<Fn n={4} /><Fn n={5} /> None of this tells
+        you what is safe for you. Whether any sleep aid fits with your current medications is a
+        question for a pharmacist or clinician — before you start, not after. If a symptom is severe
+        or new, that is a <a href="/when-to-see-a-doctor">doctor visit</a>, not a supplement decision.
+      </p>
+    </section>
+
+    <!-- section 01: what people assume -->
+    <section class="section">
+      <p class="eyebrow">section 01</p>
+      <h2 class="section-title">what people assume</h2>
+      <div class="prose">
+        <p>
+          The common assumption is that a &ldquo;natural&rdquo; sleep supplement, or an OTC product
+          you can buy without a prescription, sits in a separate category from &ldquo;real&rdquo;
+          medicine — gentle, low-stakes, and safe to add on top of whatever else is in the cabinet.
+          Melatonin in particular is often treated as inert, and the low, friendly numbers on OTC
+          &ldquo;PM&rdquo; boxes read as mild. The through-line of this page is that interactions
+          don't respect that category line: what matters is how an ingredient behaves alongside your
+          other medicines, at the time you take it.
+        </p>
+      </div>
+    </section>
+
+    <!-- section 02: what's actually documented -->
+    <section class="section">
+      <p class="eyebrow">section 02</p>
+      <h2 class="section-title">what's actually documented</h2>
+      <div class="prose">
+        <p>
+          Even melatonin has a documented drug interaction. In a controlled pharmacokinetic study,
+          taking the antidepressant fluvoxamine alongside oral melatonin raised melatonin blood levels
+          roughly <strong>17-fold</strong> by area-under-the-curve and about <strong>12-fold</strong>
+          at peak, because fluvoxamine slows the liver enzymes that clear melatonin.<Fn n={2} /> That
+          is one specific, well-measured example — not a claim that melatonin interacts with
+          everything, and not a statement about your regimen.
+        </p>
+        <p>
+          The antihistamines that do the sedating in most OTC &ldquo;PM&rdquo; and nighttime products
+          — diphenhydramine and doxylamine — are H1 antagonists whose drowsiness comes bundled with
+          <strong>anticholinergic effects</strong> (dry mouth, blurred vision) and documented next-day
+          psychomotor impairment.<Fn n={3} /> And some botanicals carry harms that make interactions a
+          serious matter: kava is potentially hepatotoxic, with comedication — taking it alongside
+          other drugs or supplements — a documented risk factor across reported liver-injury
+          cases.<Fn n={4} /> A national guideline that reviewed these same OTC agents went further,
+          issuing weak recommendations that clinicians <em>not</em> use melatonin, diphenhydramine, or
+          valerian for chronic insomnia, and pointing toward evaluation instead.<Fn n={1} />
+        </p>
+      </div>
+    </section>
+
+    <!-- section 03: what these findings do NOT show -->
+    <section class="section">
+      <p class="eyebrow">section 03</p>
+      <h2 class="section-title">what these findings do <em>not</em> show</h2>
+      <div class="prose">
+        <p>
+          Each of these is a documented caution from a specific study or case series — not a verdict
+          on the exact combination in your cabinet. A measured interaction in a pharmacology study
+          doesn't tell you what dose, if any, is right for you; the <em>absence</em> of a documented
+          interaction isn't proof that a pairing is safe, because most supplement–drug combinations
+          have simply never been studied. These findings can't diagnose why you're not sleeping,
+          can't rank one product against another for your situation, and can't substitute for a
+          clinician who can see your full medication list. The honest takeaway is narrow: interactions
+          and timing are real enough, and specific enough, that they belong in a professional
+          conversation — not a self-assembled stack.
+        </p>
+      </div>
+    </section>
+
+    <!-- section 04: dose / label / timing reality -->
+    <section class="section">
+      <p class="eyebrow">section 04</p>
+      <h2 class="section-title">dose, label &amp; timing reality</h2>
+      <div class="prose">
+        <p>
+          Timing and combination are exactly where interactions bite — an ingredient that is
+          uneventful on its own can behave differently taken at the same time as another medicine, or
+          when two sedating things overlap.<Fn n={2} /> Supplement labels don't list your drug
+          interactions, and an OTC &ldquo;PM&rdquo; box won't flag the anticholinergic load it adds to
+          medicines you already take.<Fn n={3} /> A pharmacist can check an ingredient against your
+          actual medication list in minutes; the <a href="/label-checker">label checker</a> can help
+          you read what's in a product and surface interaction cautions to raise, and
+          <a href="/melatonin-dose-timing">melatonin dose &amp; timing</a> covers what the melatonin
+          trials actually used. What fits <em>your</em> regimen, though, is a question only a clinician
+          or pharmacist with your full picture can answer — not a label, and not this page.
+        </p>
+      </div>
+    </section>
+
+    <!-- section 05: take these to a pharmacist or clinician -->
+    <section class="section">
+      <p class="eyebrow">section 05</p>
+      <h2 class="section-title">take these to a pharmacist or clinician</h2>
+      <ul class="ask">
+        <li>here is my full list of prescription and OTC medicines and supplements — does this sleep aid have any documented interaction with any of them?</li>
+        <li>could this add to sedation from anything I already take, and is the anticholinergic load a concern given my age and other medicines?</li>
+        <li>does the timing matter — should this be spaced apart from another medicine, and does it change how the other one works?</li>
+        <li>given my health conditions, pregnancy or breastfeeding, or a child's age, is a sleep aid appropriate at all, or should this be an evaluation instead?</li>
+        <li>what symptoms would mean I should stop and seek care rather than continue?</li>
+      </ul>
+    </section>
+
+    <!-- related: the primary boundary + the interaction-heavy remedies + the tools -->
+    <section class="section">
+      <p class="eyebrow">related</p>
+      <h2 class="section-title">read next</h2>
+      <ul class="related">
+        <li><a href="/safety">safety &amp; interactions</a> — the primary boundary: how Somnary handles interactions and when to route to a clinician.</li>
+        <li><a href="/when-to-see-a-doctor">when to see a doctor</a> — the signs that a sleep problem needs evaluation, not a supplement.</li>
+        <li><a href="/r/melatonin">melatonin</a> — the full evidence grade, including its documented interactions.</li>
+        <li><a href="/r/kava">kava</a> — why a documented liver-injury risk sits behind the interaction caution.</li>
+        <li><a href="/r/valerian">valerian</a> — a sedative herb with additive-sedation cautions worth raising with a pharmacist.</li>
+        <li><a href="/label-checker">label checker</a> — read what's actually in a product and surface interaction cautions to ask about.</li>
+      </ul>
+    </section>
+
+    <ContextSources sources={sources} />
+
+    <div class="disclaimer-slot">
+      <Disclaimer variant="standard" />
+    </div>
+
+    <p class="review-line">
+      reviewed 2026-07-08 · found an error? <a href="/methodology#corrections">corrections →</a>
+    </p>
+  </main>
+</Base>
+
+<style>
+  .page {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: var(--sp-8) var(--sp-7) var(--sp-9);
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0;
+  }
+  .dot {
+    color: var(--primary);
+  }
+  .head {
+    margin-bottom: var(--sp-6);
+  }
+  .title {
+    font-family: var(--font-display);
+    font-size: var(--text-3xl);
+    line-height: var(--lh-3xl);
+    letter-spacing: var(--tracking-tight);
+    color: var(--ink);
+    margin: var(--sp-3) 0 var(--sp-5);
+  }
+  .dek {
+    font-size: var(--text-md);
+    line-height: var(--lh-md);
+    color: var(--muted);
+    max-width: 68ch;
+    margin: 0;
+  }
+
+  /* who this is for */
+  .who {
+    max-width: 68ch;
+    margin: var(--sp-5) 0 0;
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+  }
+  .who-tag {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--primary);
+    margin-right: var(--sp-2);
+  }
+
+  /* safety callout — reuses the §2.12 serious register (grade-f), bespoke to this context page */
+  .callout {
+    border-radius: var(--r-lg);
+    border: 1px solid;
+    padding: var(--sp-6);
+    margin-top: var(--sp-7);
+  }
+  .sev-serious {
+    background: var(--grade-f-tint);
+    border-color: var(--grade-f);
+  }
+  .callout-head {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    margin-bottom: var(--sp-4);
+  }
+  .sigil {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    flex: none;
+    border-radius: var(--r-pill);
+    background: var(--grade-f);
+    color: var(--surface);
+    font-family: var(--font-display);
+    font-weight: 600;
+    line-height: 1;
+  }
+  .callout-title {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--grade-f);
+    margin: 0;
+  }
+  .callout-body {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--ink);
+    margin: 0;
+  }
+  .callout-body strong {
+    font-weight: 600;
+  }
+  .callout-body a {
+    color: var(--grade-f);
+  }
+
+  .section {
+    border-top: var(--border-hairline);
+    padding-top: var(--sp-6);
+    margin-top: var(--sp-8);
+  }
+  .section-title {
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    line-height: var(--lh-xl);
+    color: var(--ink);
+    margin: var(--sp-2) 0 var(--sp-5);
+  }
+  .prose {
+    max-width: 68ch;
+  }
+  .prose p {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--muted);
+    margin: 0 0 var(--sp-4);
+  }
+  .prose strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .prose a {
+    color: var(--primary);
+  }
+
+  /* clinician questions */
+  .ask {
+    max-width: 68ch;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+  }
+  .ask li {
+    position: relative;
+    padding-left: var(--sp-6);
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--muted);
+  }
+  .ask li::before {
+    content: '?';
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--primary);
+  }
+
+  /* related / read-next links */
+  .related {
+    max-width: 68ch;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+  }
+  .related li {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--muted);
+  }
+  .related a {
+    color: var(--primary);
+  }
+
+  .disclaimer-slot {
+    margin-top: var(--sp-8);
+  }
+  .review-line {
+    margin-top: var(--sp-6);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .review-line a {
+    color: var(--primary);
+  }
+  @media (max-width: 640px) {
+    .page {
+      padding: var(--sp-6) var(--sp-5) var(--sp-8);
+    }
+    .title {
+      font-size: var(--text-2xl);
+    }
+  }
+</style>
