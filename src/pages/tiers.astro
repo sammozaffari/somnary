@@ -1,15 +1,17 @@
 ---
-// Tier board — CHK-5.1 (PLAN §2.1 the hook; DESIGN_SYSTEM §3.3). Ranks every graded remedy S→F,
-// reading the structured grades from the content collection (single source of truth — no hand-kept
-// list). Server-rendered/static and crawlable. The empty S tier renders as an INTENTIONAL
-// dashed-border "nothing qualifies" panel (§3.3), not a missing section — the empty tier is the point.
+// Remedies overview / tier board — CHK-3.4 (strategy 03: Remedies is a nav-peer REFERENCE
+// OVERVIEW, not the site hero). Ranks every graded remedy S→F, reading the structured grades
+// from the content collection (single source of truth — no hand-kept list, no re-derived grade).
+// Server-rendered/static and crawlable: the flat, grade→name ordered grid below IS the canonical
+// content. The empty S tier surfaces its "nothing qualifies" note (from tiers.ts) so the
+// intentional-empty credibility signal survives. Sort control is progressive enhancement only —
+// with JS off, the server order (grade→name) stands as the content.
 import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
-import StatRow from '../components/StatRow.astro';
 import TierBadge from '../components/TierBadge.astro';
 import RemedyCard from '../components/RemedyCard.astro';
 import { TIERS, type TierId } from '../lib/tiers';
-import { contentIndex, liveRemedyCount } from '../lib/content-index';
+import { contentIndex } from '../lib/content-index';
 
 interface Card {
   slug: string;
@@ -17,7 +19,14 @@ interface Card {
   tier: TierId;
   oneLiner: string;
   keyCompound: string | null;
+  category: string;
 }
+
+// Category is a nav/sort facet that lives in the content-index store (already imported here);
+// the remedy content schema carries no `category` field, so we read it by slug rather than add
+// a schema field (a schema change is a [HUMAN-GATE]). No content is duplicated — this reads the
+// one existing registry.
+const categoryOf = new Map(contentIndex.map((e) => [e.slug, e.category]));
 
 const remedies = await getCollection('remedies', (e) => !e.data.draft);
 const byTier = new Map<TierId, Card[]>(TIERS.map((t) => [t.id, []]));
@@ -28,79 +37,126 @@ for (const e of remedies) {
     tier: e.data.tier,
     oneLiner: e.data.oneLineVerdict,
     keyCompound: e.data.keyCompound,
+    category: categoryOf.get(e.id) ?? '',
   });
 }
+// Within each tier, name A–Z. Rank = position in the S→F TIERS order.
 for (const arr of byTier.values()) arr.sort((a, b) => a.name.localeCompare(b.name));
+const rankOf = new Map<TierId, number>(TIERS.map((t, i) => [t.id, i]));
+// Canonical server order: grade(S→F) then name(A–Z). This flat list is the crawlable content.
+const ordered = TIERS.flatMap((t) => byTier.get(t.id)!);
 
-const sourcesCited = contentIndex
-  .filter((e) => e.researchStatus === 'live')
-  .reduce((n, e) => n + e.sourceCount, 0);
-const statCells = [
-  { value: String(liveRemedyCount), label: 'remedies graded' },
-  { value: String(sourcesCited), label: 'sources cited' },
-  { value: '0', label: 'hallucinated cites', accent: 'eucalyptus' as const },
-  { value: '$0', label: 'brand money', accent: 'primary' as const },
-];
+const sortModes = [
+  { key: 'grade', label: 'grade' },
+  { key: 'name', label: 'A–Z' },
+  { key: 'category', label: 'category' },
+] as const;
 ---
 
 <Base
-  title="the tier board: every sleep remedy, graded S–F | Somnary"
-  description="every natural sleep remedy ranked S to F by the strength of the published human evidence, not popularity. weak evidence labelled weak, shown not hidden. zero brand money."
+  title="every remedy we've reviewed, graded S–F | Somnary"
+  description="the full reference index of natural sleep remedies, each graded S to F by the strength of the published human evidence. sort by grade, alphabetically, or by category. weak evidence labelled weak, shown not hidden. zero brand money."
   canonical="https://somnary.vercel.app/tiers"
 >
   <main class="page">
     <header class="head">
-      <p class="eyebrow">the tier board · the hook</p>
-      <h1 class="title">every remedy, graded<span class="dot">.</span></h1>
+      <p class="eyebrow">remedies · reference overview</p>
+      <h1 class="title">every remedy we've reviewed<span class="dot">.</span></h1>
       <p class="dek">
-        every natural sleep remedy we've reviewed, ranked S to F by one thing only: the strength of
-        the published human evidence behind it. not popularity, not tradition, not the marketing.
-        weak evidence is labelled weak and shown, never buried. only one thing has earned the top
-        tier, and it isn't a supplement.
+        the full index, graded S–F by one thing only: the strength of the published human evidence
+        behind each remedy — not popularity, not tradition, not the marketing. weak evidence is
+        labelled weak and shown, never buried. sort it however helps.
       </p>
     </header>
 
-    <StatRow cells={statCells} />
-
-    <!-- legend -->
-    <div class="legend" aria-label="what the tiers mean">
+    <!-- overview legend: what each tier means + how many remedies sit in it -->
+    <div class="legend" aria-label="the tiers, and how many remedies sit in each">
       {
-        TIERS.map((t) => (
-          <div class="legend-item">
-            <TierBadge tier={t.id} size="inline" />
-            <span class="legend-name">{t.name}</span>
-          </div>
-        ))
+        TIERS.map((t) => {
+          const count = byTier.get(t.id)!.length;
+          const empty = count === 0;
+          return (
+            <div class:list={['legend-item', { wide: empty && !!t.emptyNote }]}>
+              <TierBadge tier={t.id} size="inline" />
+              <span class="legend-name">{t.name}</span>
+              <span class="legend-count">{count}</span>
+              {empty && t.emptyNote && <span class="legend-note">{t.emptyNote}</span>}
+            </div>
+          );
+        })
       }
     </div>
 
-    <!-- one section per tier, S→F -->
-    {
-      TIERS.map((t) => {
-        const cards = byTier.get(t.id)!;
-        return (
-          <section class:list={['tier-row', { serious: t.serious }]} aria-label={`tier ${t.id} — ${t.name}`}>
-            <div class="rail">
-              <TierBadge tier={t.id} size="header" />
-              <p class="rail-name">{t.name}</p>
-              <p class="rail-count">{cards.length} graded</p>
-            </div>
-            <div class="cards">
-              {cards.length > 0 ? (
-                cards.map((c) => <RemedyCard {...c} />)
-              ) : (
-                <div class="empty" role="note">
-                  <p class="empty-title">nothing qualifies — and that's the point</p>
-                  <p class="empty-body">{t.emptyNote ?? 'no remedy has met this bar yet.'}</p>
-                </div>
-              )}
-            </div>
-          </section>
-        );
-      })
-    }
+    <!-- sort control — progressive enhancement; server order (grade→name) is the default -->
+    <div class="controls">
+      <span id="sort-label" class="controls-label">sort</span>
+      <div class="segmented" role="group" aria-labelledby="sort-label">
+        {
+          sortModes.map((m) => (
+            <button
+              type="button"
+              class="seg"
+              data-sort={m.key}
+              aria-pressed={m.key === 'grade' ? 'true' : 'false'}
+            >
+              {m.label}
+            </button>
+          ))
+        }
+      </div>
+    </div>
+
+    <!-- canonical flat grid: ALL remedies, grade(S→F)→name(A–Z). This is the crawlable content. -->
+    <ul id="remedy-grid" class="grid">
+      {
+        ordered.map((c) => (
+          <li
+            class="cell"
+            data-rank={rankOf.get(c.tier)}
+            data-name={c.name.toLowerCase()}
+            data-category={c.category}
+          >
+            <RemedyCard
+              slug={c.slug}
+              name={c.name}
+              tier={c.tier}
+              oneLiner={c.oneLiner}
+              keyCompound={c.keyCompound}
+            />
+          </li>
+        ))
+      }
+    </ul>
   </main>
 </Base>
+
+<script>
+  // Sort island (CHK-3.4) — reorders the existing, server-rendered <li> nodes IN PLACE. It never
+  // creates content: with JS off, the server order (grade→name) stands. Stateless; default 'grade'
+  // simply restores the canonical order. No reorder animation, so prefers-reduced-motion is honored
+  // by construction (nothing moves with a transition).
+  const grid = document.getElementById('remedy-grid');
+  const buttons = Array.from(document.querySelectorAll<HTMLButtonElement>('.seg'));
+  if (grid && buttons.length) {
+    const items = Array.from(grid.querySelectorAll<HTMLLIElement>('li.cell'));
+    const num = (el: HTMLLIElement, k: string) => Number(el.dataset[k] ?? 0);
+    const str = (el: HTMLLIElement, k: string) => el.dataset[k] ?? '';
+    const comparators: Record<string, (a: HTMLLIElement, b: HTMLLIElement) => number> = {
+      grade: (a, b) => num(a, 'rank') - num(b, 'rank') || str(a, 'name').localeCompare(str(b, 'name')),
+      name: (a, b) => str(a, 'name').localeCompare(str(b, 'name')),
+      category: (a, b) =>
+        str(a, 'category').localeCompare(str(b, 'category')) || str(a, 'name').localeCompare(str(b, 'name')),
+    };
+    const apply = (key: string) => {
+      const cmp = comparators[key];
+      if (!cmp) return;
+      const sorted = [...items].sort(cmp);
+      grid.append(...sorted); // append() moves existing nodes — no re-render, no content change
+      for (const b of buttons) b.setAttribute('aria-pressed', String(b.dataset.sort === key));
+    };
+    for (const b of buttons) b.addEventListener('click', () => apply(b.dataset.sort ?? 'grade'));
+  }
+</script>
 
 <style>
   .page {
@@ -120,15 +176,15 @@ const statCells = [
     color: var(--primary);
   }
   .head {
-    margin-bottom: var(--sp-7);
+    margin-bottom: var(--sp-6);
   }
   .title {
     font-family: var(--font-display);
-    font-size: var(--text-display);
-    line-height: var(--lh-display);
+    font-size: var(--text-3xl);
+    line-height: var(--lh-3xl);
     letter-spacing: var(--tracking-tight);
     color: var(--ink);
-    margin: var(--sp-3) 0 var(--sp-5);
+    margin: var(--sp-3) 0 var(--sp-4);
   }
   .dek {
     font-size: var(--text-md);
@@ -138,12 +194,13 @@ const statCells = [
     margin: 0;
   }
 
-  /* legend */
+  /* overview legend */
   .legend {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--sp-5);
-    margin: var(--sp-6) 0 var(--sp-8);
+    gap: var(--sp-3) var(--sp-5);
+    align-items: center;
+    margin: var(--sp-6) 0;
     padding: var(--sp-4) var(--sp-5);
     background: var(--surface);
     border: var(--border-hairline);
@@ -154,90 +211,96 @@ const statCells = [
     align-items: center;
     gap: var(--sp-2);
   }
+  .legend-item.wide {
+    flex-basis: 100%;
+    flex-wrap: wrap;
+  }
   .legend-name {
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
     text-transform: uppercase;
+    color: var(--ink);
+  }
+  .legend-count {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
     color: var(--muted);
+  }
+  .legend-note {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    max-width: 68ch;
   }
 
-  /* tier rows */
-  .tier-row {
-    display: grid;
-    grid-template-columns: 170px 1fr;
-    gap: var(--sp-6);
-    align-items: start;
-    border-top: var(--border-hairline);
-    padding-top: var(--sp-7);
-    margin-top: var(--sp-7);
-  }
-  .rail {
+  /* sort control */
+  .controls {
     display: flex;
-    flex-direction: column;
-    gap: var(--sp-3);
-    align-items: flex-start;
-    position: sticky;
-    top: 88px;
+    align-items: center;
+    gap: var(--sp-4);
+    margin-bottom: var(--sp-6);
   }
-  .rail-name {
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
-    color: var(--ink);
-    margin: 0;
-  }
-  .rail-count {
+  .controls-label {
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
     text-transform: uppercase;
     color: var(--muted);
-    margin: 0;
   }
-  .cards {
+  .segmented {
+    display: inline-flex;
+    gap: var(--sp-1);
+    padding: var(--sp-1);
+    background: var(--surface);
+    border: var(--border-hairline);
+    border-radius: var(--r-pill);
+  }
+  .seg {
+    font-family: var(--font-display);
+    font-size: var(--text-xs);
+    font-weight: 800;
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--muted);
+    background: transparent;
+    border: none;
+    border-radius: var(--r-pill);
+    padding: var(--sp-2) var(--sp-4);
+    cursor: pointer;
+    transition:
+      color var(--dur-fast) var(--ease-soft),
+      background var(--dur-fast) var(--ease-soft);
+  }
+  .seg:hover {
+    color: var(--ink);
+  }
+  .seg[aria-pressed='true'] {
+    color: #ffffff;
+    background: var(--primary);
+  }
+  .seg:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+
+  /* canonical flat grid */
+  .grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: var(--sp-5);
-  }
-
-  /* intentional empty-tier panel (S) */
-  .empty {
-    grid-column: 1 / -1;
-    border: 2px dashed var(--mineral);
-    border-radius: var(--r-lg);
-    padding: var(--sp-6);
-    background: transparent;
-  }
-  .empty-title {
-    font-family: var(--font-display);
-    font-size: var(--text-xl);
-    line-height: var(--lh-xl);
-    color: var(--ink);
-    margin: 0 0 var(--sp-3);
-  }
-  .empty-body {
-    font-size: var(--text-base);
-    line-height: var(--lh-base);
-    color: var(--muted);
-    max-width: 60ch;
     margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .cell {
+    display: flex;
+  }
+  .cell > :global(.card) {
+    width: 100%;
   }
 
-  @media (max-width: 760px) {
-    .tier-row {
-      grid-template-columns: 1fr;
-      gap: var(--sp-5);
-    }
-    .rail {
-      position: static;
-      top: auto;
-      flex-direction: row;
-      align-items: center;
-      gap: var(--sp-4);
-    }
-  }
   @media (max-width: 640px) {
     .page {
       padding: var(--sp-6) var(--sp-5) var(--sp-8);
