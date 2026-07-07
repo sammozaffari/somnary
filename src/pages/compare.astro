@@ -190,12 +190,14 @@ const catFacets = [...new Set(rows.map((r) => r.category).filter(Boolean))].sort
               <div class="cell">
                 <dt class="k">goal</dt>
                 <dd class="v">
+                  {/* Goal cell renders outcomes[] only. bestFor[] is intentionally NOT shown here:
+                      on a side-by-side grid a per-remedy bestFor caveat that names another remedy
+                      (e.g. hops "usually alongside valerian") reads as a cross-remedy pairing signal,
+                      which D4 forbids. bestFor stays on each remedy's own page; outcomes are the clean
+                      goal signal for comparison. */}
                   <div class="chips">
                     {r.outcomes.map((o) => (
                       <span class="chip chip-goal">{o}</span>
-                    ))}
-                    {r.bestFor.map((b) => (
-                      <span class="chip chip-best">{b}</span>
                     ))}
                   </div>
                 </dd>
@@ -519,7 +521,7 @@ const catFacets = [...new Set(rows.map((r) => r.category).filter(Boolean))].sort
   }
   .cell {
     display: grid;
-    grid-template-columns: 128px 1fr;
+    grid-template-columns: var(--sp-10) 1fr;
     gap: var(--sp-4);
     padding: var(--sp-4) 0;
     border-top: var(--border-hairline);
@@ -558,12 +560,6 @@ const catFacets = [...new Set(rows.map((r) => r.category).filter(Boolean))].sort
     color: var(--primary-deep);
     background: var(--primary-soft);
   }
-  .chip-best {
-    color: var(--muted);
-    background: var(--stone);
-    white-space: normal;
-  }
-
   .avoid-list {
     margin: 0;
     padding: 0;
