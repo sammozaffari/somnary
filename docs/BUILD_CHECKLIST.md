@@ -197,7 +197,17 @@ exists so sessions extend the site instead of rebuilding it.
   bold-teal §1 hero is a deferrable design/scope choice (buildable token-only via
   color-mix, NOT a token gap); .home width now var(--page) i.e. site-shell 1460px.
   Deferred: CHK-3.2 Start-Here standalone, CHK-3.3 safety hub grid.)*
-- [ ] **CHK-3.2 Start Here page.** *Accept:* per strategy doc 03 brief.
+- [x] **CHK-3.2 Start Here page.** *Accept:* per strategy doc 03 brief. *(Done,
+  merged. New `/start-here` (navigational IA, no new claims/cites) implements the
+  doc-03 brief's 5 sections in order: (1) "what are you trying to decide?" = the 6
+  situation tiles; (2) "what Somnary grades" = scope prose + real StatRow; (3)
+  "when not to use this site" = conservative boundary routing → `/safety` with the
+  standard Disclaimer adjacent + explicit "this isn't a diagnosis… it's a signpost"
+  framing; (4) "how to read a grade" = S–F legend (TIERS + decisionTranslation +
+  grade≠safety note); (5) "most common checks" = melatonin/magnesium/sleep-blends/
+  cbd/valerian pills + corrections link. Nav gains "start here". compliance PASS
+  (section-3 boundary copy conservative/navigational/diagnosis-free) + design-guardian
+  PASS (clean). Build/token-lint/resolver(66,unchanged)/crawl green.)*
 - [x] **CHK-3.3 Safety hub / router.** Grid of boundary routes (apnea, chronic
   insomnia, medications, children, urgent states). *(when-to-see-a-doctor page
   exists as a route target.)* *Accept:* routes to clinician-boundary guidance,
@@ -234,6 +244,14 @@ exists so sessions extend the site instead of rebuilding it.
   code. Added a compact "educational, not medical advice" line near the index.
   design-guardian + compliance PASS; build/token-lint/resolver(66,unchanged)/crawl
   green. Deferred: filtering/faceting → compare tool CHK-6.1.)*
+
+> **PHASE 3 COMPLETE (2026-07-08).** Decision-first surfaces in place: decision-first
+> homepage (PR #10, CHK-3.1), Start Here page (CHK-3.2), safety hub/router (PR #12,
+> CHK-3.3), and the tier board demoted to a sortable reference overview (PR #11,
+> CHK-3.4). CHK-3.2/3.3/3.4 built + reviewed + self-merged under the owner's
+> 2026-07-08 autonomy grant (no grade/legal/monetization touched). Per CLAUDE.md a
+> phase boundary is `[HUMAN-GATE]` — flagged for owner post-hoc review; the owner
+> authorised proceeding without waiting.
 
 ## Phase 4 — Label Checker MVP + funnel
 - [ ] **CHK-4.1 Label checker (static rules).** Paste a Supplement Facts panel →
@@ -277,6 +295,7 @@ exists so sessions extend the site instead of rebuilding it.
 ---
 
 ### Session log (agents append one line per session)
+- 2026-07-08 · CHK-3.2 · Start Here page (completes Phase 3, autonomous merge). New `/start-here` navigational IA page — no new health claims, no citations. Implements the doc-03 brief's 5 sections in order: situation tiles · "what Somnary grades" scope prose + real StatRow (20/66/0/$0 computed) · "when not to use this site" boundary routing → /safety with standard Disclaimer adjacent + explicit "this isn't a diagnosis, it's a signpost" framing · S–F "how to read a grade" legend (TIERS + decisionTranslation + grade≠safety note) · "most common checks" pills (melatonin/magnesium/sleep-blends/cbd/valerian) + corrections link. Nav gains "start here". All 13 links resolve. compliance PASS (section-3 conservative/navigational/diagnosis-free, line-by-line) + design-guardian PASS (clean, no fixes). Build/token-lint/resolver(66,unchanged)/crawl green. Self-merged under owner autonomy grant. Added PHASE 3 COMPLETE marker.
 - 2026-07-08 · CHK-3.3 · safety hub / router (autonomous merge). New `/safety` page: 5-card boundary router (apnea/snoring · chronic insomnia · meds-or-condition · child · urgent) routing to REAL destinations only (/when-to-see-a-doctor ×3, /melatonin-children, /when-to-see-a-doctor#urgent — added the #urgent anchor). Copy is NAVIGATIONAL-only: names each boundary + what its already-cited destination covers, no new clinical claim, no diagnosis, no personalized advice. ContextBanner + standard Disclaimer above the grid; only the urgent card uses the vermilion safety register. Homepage "Read safety red flags" CTA + medications tile repointed to /safety; Nav gains "safety". compliance PASS (explicitly conservative/navigational/diagnosis-free); design-guardian FAIL→PASS (urgent-tag contrast --vermilion→--safety-ink; hover to §6 -2px). Build/token-lint/resolver(66,unchanged)/crawl green. Medical-boundary content self-merged under the owner's autonomy grant (compliance is the delegated safety gate); not a grade/legal/monetization hard gate. Deferred: meds page CHK-5.2; broader hub modules.
 - 2026-07-08 · CHK-3.4 · remedies overview demote + sortable (autonomous merge). Reframed `/tiers` from v1 site-hero to a reference overview (neutral eyebrow/H1/dek, hero StatRow removed, nav tiers→remedies, URL kept). SSG-first sortable: one server-rendered flat grid of all 20 cards in grade→name canonical order (JS-off safe, crawlable) + token-only segmented control (grade/A–Z/category) reordering existing <li> nodes in place (aria-pressed, keyboard, focus-ring). Grades READ-ONLY — AC-4 proven (zero edits to tiers.ts/remedies/content-index). Corrected a plan error: cbt-i IS tier S, so legend honestly shows S=1 (no fabricated "0"); empty-S note kept as data-driven code. Added compact "educational, not medical advice" near the index (compliance non-blocking note) + tokenized active-seg color. design-guardian + compliance PASS; build/token-lint/resolver(66,unchanged)/crawl green. Merged under owner autonomy grant (no grade/legal/monetization touched). Deferred: faceted filtering → CHK-6.1.
 - 2026-07-07 · CHK-3.1 · decision-first homepage (opens Phase 3). Replaced the v1 "enemy hero" (`index.astro`) with "Check a sleep remedy before you take it." + subhead carrying the visible no-affiliate promise ("No affiliate links. No brand money."). Three above-the-fold routes (Check a remedy →/search + popular-check pills · Start from your sleep problem →#situations · Read safety red flags →/when-to-see-a-doctor); six situation tiles wired to REAL routes (melatonin/sleep-blends/fall-asleep-faster/stay-asleep/when-to-see-a-doctor/melatonin-children — no dead links); StatRow keeps 4 real computed cells (20 remedies/66 sources/0 hallucinated/$0 brand — verified computed from content-index, not invented); standard Disclaimer moved adjacent to the decision block (not footer-only); S–F legend reuses TierBadge + each tier's decisionTranslation + "grade rates evidence, not safety" note. Added PHASE 2 COMPLETE marker + corrected Phase 1 marker (PR #7 merged). compliance PASS; design-guardian FAIL→PASS (fixed 3 raw-px sizing literals the linter's scope missed: 1240px→var(--page), cta 48px→--sp-7, pill 34px→--sp-6; hover lifts to §6 -1px/-2px). Build/token-lint/resolver(66,unchanged)/crawl green. Routed to PR (HG: front-door copy + phase boundary). Owner ratifies: search Option-a, medications→/when-to-see-a-doctor (meds page deferred CHK-5.2), whether to adopt the bold-teal §1 hero (buildable token-only via color-mix — a design/scope choice, not a token gap). Deferred: CHK-3.2/3.3.
