@@ -80,9 +80,21 @@ exists so sessions extend the site instead of rebuilding it.
 > CLAUDE.md this phase boundary is a `[HUMAN-GATE]` — owner review before Phase 1.
 
 ## Phase 1 — Credibility spine
-- [~] **CHK-1.1 Methodology page.** *(Exists, server-rendered, from v1 build.)*
+- [x] **CHK-1.1 Methodology page.** *(Exists, server-rendered, from v1 build.)*
   Remaining: conformance pass against strategy 06 rubric wording + evidence-gate
   chips + corrections policy; re-verify "a reader could re-derive a grade".
+  *(Done, PR #5. Conformance PASS: all 9 sections present — two-rubrics firewall,
+  S–F tiers + evidence-gate glossary (from structured data), source hierarchy,
+  cite-or-don't-claim, uncertainty, how-rankings-change, COI (D2-aligned:
+  reader-funded, no membership), corrections. Fixed one REAL-PROMISES violation:
+  Section 5 promised a "live claim-check counter (verified vs total)" that isn't
+  published anywhere → rewritten to describe what's actually enforced (inline
+  citations + resolver on every build). FLAGGED for owner: (a) corrections inbox
+  is a personal gmail (`sammymoz@gmail.com`) with a public 7-day SLA — confirm
+  it's monitored/keepable, or move to a dedicated address; (b) Section 1's
+  brand/product-QA "audit" is described present-tense but no QA module exists yet
+  — soften or build; (c) if you want a real verified-vs-total counter, it's a
+  small build.)*
 - [~] **CHK-1.2 Legal pages.** `HG` *(Disclaimer, terms, privacy, disclosure
   exist from v1 build.)* Remaining: disclosure must state D2 tools-first
   funding (no membership paywall); owner sign-off on the updated set.
@@ -166,6 +178,7 @@ exists so sessions extend the site instead of rebuilding it.
 
 ### Session log (agents append one line per session)
 <!-- 2026-07-06 — checklist v2 adopted; decisions D1–D4 locked. -->
+- 2026-07-07 · CHK-1.1 · methodology conformance pass. Verified the page conforms to strategy doc 06 + non-negotiables (9 sections, S–F rubric + gates from structured data, source hierarchy, COI D2-aligned, corrections). Fixed a real-promises violation: removed the un-built "live claim-check counter (verified vs total)" claim, rewrote to what's actually enforced (inline cites + resolver every build). Build green. PR #5. Flagged for owner: corrections inbox is a personal gmail with a public 7-day SLA (confirm/relocate); brand-QA "audit" framed present-tense but not built; optional real counter is a small build.
 - 2026-07-07 · CHK-0.4/0.5 · CI gate suite (completes Phase 0). Added .github/workflows/ci.yml (token lint → resolver → resolver self-test → build → crawlability, on push + PR); scripts/check-crawlable.mjs (asserts content is server-rendered — 20 remedy pages + home/tiers); scripts/test-resolver.mjs fake-PMID regression (resolver now honors SOMNARY_CONTENT_DIR); .githooks/pre-commit (token lint + resolver) wired via package.json `prepare`. All gates green locally. PR #4 (HG: Phase 0 completion boundary). Deferred: post-session session-log hook is harness config, not repo CI.
 - 2026-07-06 · CHK-0.3 · content model extension. Added notFor[]/biggestRisk/reviewDate(required)/changeLog[] + changeLogEntry shape to content.config.ts; tier marked [HUMAN-GATE] in schema. reviewDate seeded from each remedy's real git last-commit date across all 20 (honest, not fabricated). Melatonin populated with notFor/biggestRisk/changeLog from its own cited content as the worked template. Fixed a D4 "stack builder" leftover in the schema header comment. Build green. PR #3 (HG: schema change). Deferred: lead-block rendering + correction link (CHK-2.1), per-remedy notFor/biggestRisk population (evidence-editor).
 - 2026-07-06 · CHK-0.2 · evidence-teal reskin. Central tokens (global.css + tailwind) → DESIGN_SYSTEM v2; Archivo + IBM Plex Sans (+ @fontsource for OG gen); TierBadge (filled/white letter) + Wordmark (Somnary., D3) redesigned; SafetyCallout serious→vermilion register; ~120 token refs swept across 31 files via 4 parallel agents; StatRow accent API renamed; OG generator reteal'd; brand word capitalized site-wide (URLs preserved); dead TokenProbe removed. New token linter (scripts/check-tokens.mjs) wired to prebuild — fails on retired names + hardcoded hex, warns on off-scale spacing. Build green through both gates; 0 v1.2 palette hex in built CSS. PR #2, awaiting owner visual review.
