@@ -27,7 +27,6 @@ interface Row {
   decisionTranslation: string;
   verdict: string; // data.oneLineVerdict — used verbatim, never re-derived
   outcomes: string[];
-  bestFor: string[];
   gates: GateId[]; // the tier's typical evidence gates (tiers.ts → evidence-gates.ts), rendered by id
   notFor: string[];
   biggestRisk: string | null;
@@ -50,7 +49,6 @@ const rows: Row[] = remedies.map((e) => ({
   decisionTranslation: getTier(e.data.tier).decisionTranslation,
   verdict: e.data.oneLineVerdict,
   outcomes: e.data.outcomes,
-  bestFor: e.data.bestFor,
   // Evidence gates read from the TIER's typical-gates set (tiers.ts, the same source the
   // methodology page and tier rows use) rather than each remedy's own evidenceGates[]. Both are
   // owner-ratified "established sources" (per the CHK-6.1 spec), but a per-remedy gate label can
@@ -71,7 +69,8 @@ rows.sort((a, b) => (rankOf.get(a.tier)! - rankOf.get(b.tier)!) || a.name.locale
 
 // Goal filter facets = the DISTINCT outcome strings already in the corpus (frequency-ranked, then
 // A–Z). Nothing invented: each facet is a verbatim outcome, and a row matches it iff that outcome is
-// on the remedy's own outcomes[]. bestFor[] is shown in the goal cell but is not a filter token.
+// on the remedy's own outcomes[]. (bestFor[] is intentionally not rendered on the grid — see the
+// goal cell comment: a per-remedy bestFor caveat can name a sibling row and read as a pairing signal.)
 const goalCount = new Map<string, { label: string; n: number }>();
 for (const r of rows)
   for (const o of r.outcomes) {
