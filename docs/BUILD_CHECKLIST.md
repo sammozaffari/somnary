@@ -118,7 +118,7 @@ exists so sessions extend the site instead of rebuilding it.
   log is a real audit trail from day one. Linked from the Footer as "evidence
   log" + methodology `#rankings`. Visually confirmed.)*
 
-> **PHASE 1 COMPLETE (2026-07-07), pending PR #7 merge.** Credibility spine in
+> **PHASE 1 COMPLETE (2026-07-07), PR #7 merged.** Credibility spine in
 > place: methodology conforms (real-promise fixed), legal pages reconciled to
 > D2, disclaimer prominent, public evidence change-log live. Phase boundary is a
 > `[HUMAN-GATE]` — owner review before Phase 2.
@@ -167,6 +167,11 @@ exists so sessions extend the site instead of rebuilding it.
 - [x] **CHK-2.4 Tier badge + evidence-gate chip components.** *(Exist:
   `TierBadge.astro`, `EvidenceGateChip.astro`; read structured data; legible
   without color alone.)* Restyle lands with CHK-0.2.
+
+> **PHASE 2 COMPLETE (2026-07-07).** Melatonin decision hub in place: the
+> decision-first lead-block template (PR #8, CHK-2.1) + 3 cluster pages (PR #9,
+> CHK-2.2 — gummies/dose-timing/long-term). PRs #8 + #9 merged. Per CLAUDE.md
+> this phase boundary is a `[HUMAN-GATE]` — owner review before Phase 3.
 
 ## Phase 3 — Decision-first surfaces
 - [ ] **CHK-3.1 Homepage.** Replace the v1 "enemy hero" with "Check a sleep
