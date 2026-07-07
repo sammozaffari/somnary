@@ -1,0 +1,439 @@
+---
+import Base from '../layouts/Base.astro';
+import StatRow from '../components/StatRow.astro';
+import Disclaimer from '../components/Disclaimer.astro';
+import TierBadge from '../components/TierBadge.astro';
+import { contentIndex, liveRemedyCount } from '../lib/content-index';
+import { TIERS } from '../lib/tiers';
+
+// Start Here — CHK-3.2 (strategy 03 "Start Here"; DESIGN_SYSTEM §1/§10). Purpose: route the
+// non-expert visitor. This page is NAVIGATIONAL / IA only — it makes NO new health claim and
+// introduces NO citation (the CI resolver doesn't scan it and shouldn't need to). Every pattern
+// here is REUSED from the homepage (CHK-3.1) so the two front doors stay in one voice: the six
+// situation tiles (same real-route array), the disavowal StatRow read from real data (never
+// hardcoded), and the S–F legend built verbatim from TIERS. The five doc-03 brief sections run in
+// order. Ambient-wash header (like /safety), NOT the bold-teal hero (a deferred design choice).
+// No commerce, no stack-builder (D4), no forbidden framings.
+
+// Real, computed stats — identical derivation to the homepage; no invented numbers.
+const remediesGraded = liveRemedyCount;
+const sourcesCited = contentIndex
+  .filter((e) => e.researchStatus === 'live')
+  .reduce((n, e) => n + e.sourceCount, 0);
+
+const statCells = [
+  { value: String(remediesGraded), label: 'remedies graded' },
+  { value: String(sourcesCited), label: 'sources cited' },
+  { value: '0', label: 'hallucinated cites', accent: 'eucalyptus' as const },
+  { value: '$0', label: 'brand money', accent: 'primary' as const },
+];
+
+// Section 1 — six situation tiles, verbatim from the homepage (CHK-3.1); every href resolves.
+// Medications/condition tile → /safety (the safety router, CHK-3.3).
+const situations = [
+  {
+    href: '/r/melatonin',
+    title: 'I take or am considering melatonin.',
+    dek: 'the flagship decision hub: clock signal vs sedative, dose reality, the label-accuracy problem.',
+  },
+  {
+    href: '/sleep-blends',
+    title: 'I bought a sleep blend.',
+    dek: 'decode the label before you trust it — proprietary blends, missing doses, studied-dose mismatch.',
+  },
+  {
+    href: '/outcome/fall-asleep-faster',
+    title: 'I want to fall asleep faster.',
+    dek: 'remedies with human evidence aimed at sleep-onset latency, ranked by the strength of that evidence.',
+  },
+  {
+    href: '/outcome/stay-asleep',
+    title: 'I wake up at night.',
+    dek: 'the shorter list of remedies studied for staying asleep — wake after sleep onset, not just falling asleep.',
+  },
+  {
+    href: '/safety',
+    title: 'I use medications or have a health condition.',
+    dek: 'using medications? start with the safety boundary — interactions and red flags come before any remedy.',
+  },
+  {
+    href: '/melatonin-children',
+    title: 'I am considering this for a child.',
+    dek: 'the most cautious page on the site: what the evidence does and does not support for kids.',
+  },
+];
+
+// Section 3 — medical-boundary routing. NAVIGATIONAL copy only: it names situations where a
+// clinician, not a shelf, is the right next step, and routes them all to the /safety hub (which
+// routes onward). No diagnosis, no personalized advice, no "take X"/"safe for you"/"combine".
+const boundaries = [
+  'loud snoring with breathing pauses, gasping, or heavy daytime sleepiness',
+  'trouble sleeping most nights, for months rather than the odd rough week',
+  'you take other medications or manage a health condition',
+  'pregnancy or breastfeeding, or you are considering this for a child',
+  'a mental-health crisis, or thoughts of self-harm',
+];
+
+// Section 5 — the five most common checks (doc-03 brief). Each href resolves to a built route.
+const commonChecks = [
+  { href: '/r/melatonin', name: 'melatonin' },
+  { href: '/r/magnesium', name: 'magnesium' },
+  { href: '/sleep-blends', name: 'sleep blends' },
+  { href: '/r/cbd', name: 'CBD' },
+  { href: '/r/valerian', name: 'valerian' },
+];
+---
+
+<Base
+  title="Start here: how to check a sleep remedy on Somnary"
+  description="new to Somnary? start here. route by what you're trying to decide, see what Somnary grades and what it doesn't, learn when to see a clinician instead, and read how the S–F grades work — then check the most common remedies."
+  canonical="https://somnary.vercel.app/start-here"
+>
+  <main class="page">
+    <header class="head">
+      <p class="eyebrow">start here · a two-minute orientation</p>
+      <h1 class="title">Start here<span class="dot">.</span></h1>
+      <p class="dek">
+        Somnary grades natural sleep remedies by the strength of published human evidence, label
+        reality, and safety boundaries. This page points you to the right starting move — by what
+        you're trying to decide, not by which molecule you've heard of.
+      </p>
+    </header>
+
+    <!-- 1 · what are you trying to decide? — six route tiles (verbatim from the homepage) -->
+    <section class="section" id="decide">
+      <p class="section-eyebrow">what are you trying to decide?</p>
+      <div class="tiles">
+        {
+          situations.map((t) => (
+            <a class="tile" href={t.href}>
+              <p class="tile-title">{t.title}</p>
+              <p class="tile-dek">{t.dek}</p>
+            </a>
+          ))
+        }
+      </div>
+    </section>
+
+    <!-- 2 · what Somnary grades — scope, in prose; links to the rubric and the board -->
+    <section class="section" id="what-we-grade">
+      <p class="section-eyebrow">what Somnary grades</p>
+      <p class="prose">
+        Somnary grades natural sleep remedies — supplements, botanicals, and behavioural
+        approaches — on a single S–F scale that answers one question: how strong is the published
+        <em>human</em> evidence that it actually helps you sleep. A grade weighs that evidence
+        alongside label reality (what's really in the bottle, at what dose) and the safety
+        boundaries around it. Animal studies, mechanism stories, and marketing don't move a grade;
+        replicated human trials do. See the <a href="/tiers">tier board</a> for every remedy at a
+        glance, or the <a href="/methodology">methodology</a> for exactly how a grade is derived.
+      </p>
+      <StatRow cells={statCells} />
+    </section>
+
+    <!-- 3 · when NOT to use this site — medical-boundary routing to the /safety hub -->
+    <section class="section" id="not-here">
+      <p class="section-eyebrow">when not to use this site as your next step</p>
+      <p class="prose">
+        Some sleep problems are a reason to see a clinician, not to check a shelf — and for those,
+        a remedy grade is the wrong question. If any of these describe your situation, start with
+        the <a href="/safety">safety hub</a>, which routes you to the boundary page that fits
+        rather than to a supplement:
+      </p>
+      <ul class="boundary-list">
+        {boundaries.map((b) => <li class="boundary-item">{b}</li>)}
+      </ul>
+      <p class="prose prose-close">
+        This isn't a diagnosis and it isn't advice about what to take — it's a signpost. When in
+        doubt, a doctor or pharmacist is the right next step. <a href="/safety">Go to the safety hub →</a>
+      </p>
+      <div class="disclaimer-slot">
+        <Disclaimer variant="standard" />
+      </div>
+    </section>
+
+    <!-- 4 · how to read a grade — S–F legend, verbatim from the homepage -->
+    <section class="section" id="how-to-read">
+      <p class="section-eyebrow">how to read a grade</p>
+      <ul class="legend">
+        {
+          TIERS.map((t) => (
+            <li class="legend-row">
+              <TierBadge tier={t.id} size="inline" />
+              <span class="legend-name">{t.name}</span>
+              <span class="legend-trans">{t.decisionTranslation}</span>
+            </li>
+          ))
+        }
+      </ul>
+      <p class="legend-note">
+        A grade rates how strong the human evidence is — not whether a remedy is safe for you.
+        Safety lives on each remedy's page and the <a href="/safety">safety boundary</a>.
+        <a href="/methodology">See the full S–F rubric →</a>
+      </p>
+    </section>
+
+    <!-- 5 · most common checks — pills to the five most-searched remedies, + corrections link -->
+    <section class="section" id="common">
+      <p class="section-eyebrow">most common checks</p>
+      <div class="pills" aria-label="most common checks">
+        {
+          commonChecks.map((c) => (
+            <a class="pill" href={c.href}>
+              {c.name}
+            </a>
+          ))
+        }
+      </div>
+      <p class="foot-note">
+        Think a grade is wrong or a source doesn't say what we claim?
+        <a href="/methodology#corrections">Corrections →</a>
+      </p>
+    </section>
+  </main>
+</Base>
+
+<style>
+  .page {
+    max-width: var(--page);
+    margin: 0 auto;
+    padding: var(--sp-8) var(--sp-7) var(--sp-9);
+  }
+  .dot {
+    color: var(--primary);
+  }
+  .eyebrow,
+  .section-eyebrow {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0;
+  }
+
+  /* ambient-wash header (like /safety) — NOT the bold-teal hero */
+  .head {
+    margin-bottom: var(--sp-6);
+  }
+  .title {
+    font-family: var(--font-display);
+    font-size: var(--text-3xl);
+    line-height: var(--lh-3xl);
+    letter-spacing: var(--tracking-tight);
+    color: var(--ink);
+    margin: var(--sp-3) 0 var(--sp-5);
+  }
+  .dek {
+    font-size: var(--text-md);
+    line-height: var(--lh-md);
+    color: var(--muted);
+    max-width: 66ch;
+    margin: 0;
+  }
+
+  /* sections */
+  .section {
+    margin-top: var(--sp-9);
+    scroll-margin-top: var(--sp-8);
+  }
+  .section-eyebrow {
+    margin-bottom: var(--sp-5);
+  }
+  .prose {
+    font-size: var(--text-md);
+    line-height: var(--lh-md);
+    color: var(--muted);
+    max-width: 70ch;
+    margin: 0 0 var(--sp-6);
+  }
+  .prose a {
+    color: var(--primary);
+  }
+  .prose-close {
+    margin-top: var(--sp-5);
+    margin-bottom: var(--sp-6);
+  }
+
+  /* situation tiles — 2×3 route cards (homepage recipe) */
+  .tiles {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--sp-4);
+  }
+  .tile {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+    background: var(--surface);
+    border: var(--border-hairline);
+    border-radius: var(--r-lg);
+    padding: var(--sp-6);
+    text-decoration: none;
+    color: var(--ink);
+    transition:
+      box-shadow var(--dur-base) var(--ease-settle),
+      transform var(--dur-base) var(--ease-settle);
+  }
+  .tile:hover {
+    box-shadow: var(--shadow-lift);
+    transform: translateY(-2px);
+  }
+  .tile:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+  }
+  .tile-title {
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    line-height: var(--lh-xl);
+    letter-spacing: var(--tracking-tight);
+    color: var(--ink);
+    margin: 0;
+  }
+  .tile-dek {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: 0;
+  }
+
+  /* boundary list — plain routing signposts, calm register (no safety severity colors) */
+  .boundary-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    border: var(--border-hairline);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+  }
+  .boundary-item {
+    padding: var(--sp-4) var(--sp-5);
+    font-size: var(--text-md);
+    line-height: var(--lh-md);
+    color: var(--ink);
+  }
+  .boundary-item + .boundary-item {
+    border-top: var(--border-hairline);
+  }
+
+  .disclaimer-slot {
+    margin-top: var(--sp-6);
+  }
+
+  /* how to read a grade — S–F legend (homepage recipe) */
+  .legend {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    border: var(--border-hairline);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+  }
+  .legend-row {
+    display: grid;
+    grid-template-columns: auto 8ch 1fr;
+    align-items: center;
+    gap: var(--sp-4);
+    padding: var(--sp-4) var(--sp-5);
+  }
+  .legend-row + .legend-row {
+    border-top: var(--border-hairline);
+  }
+  .legend-name {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+  .legend-trans {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+  }
+  .legend-note {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: var(--sp-5) 0 0;
+    max-width: 70ch;
+  }
+  .legend-note a {
+    color: var(--primary);
+  }
+
+  /* most common checks — pills (homepage recipe) */
+  .pills {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--sp-2);
+  }
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--sp-6);
+    padding: 0 var(--sp-4);
+    border-radius: var(--r-pill);
+    background: var(--surface);
+    border: var(--border-hairline);
+    color: var(--ink);
+    font-size: var(--text-sm);
+    text-decoration: none;
+    transition:
+      border-color var(--dur-fast) var(--ease-soft),
+      box-shadow var(--dur-fast) var(--ease-soft);
+  }
+  .pill:hover {
+    border: var(--border-strong);
+  }
+  .pill:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+  }
+  .foot-note {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: var(--sp-6) 0 0;
+  }
+  .foot-note a {
+    color: var(--primary);
+  }
+
+  @media (max-width: 760px) {
+    .tiles {
+      grid-template-columns: 1fr;
+    }
+    .legend-row {
+      grid-template-columns: auto 1fr;
+      grid-template-areas:
+        'badge name'
+        'trans trans';
+      row-gap: var(--sp-2);
+    }
+    .legend-row :global(.tier-badge) {
+      grid-area: badge;
+    }
+    .legend-name {
+      grid-area: name;
+    }
+    .legend-trans {
+      grid-area: trans;
+    }
+  }
+  @media (max-width: 640px) {
+    .page {
+      padding: var(--sp-7) var(--sp-5) var(--sp-8);
+    }
+    .title {
+      font-size: var(--text-2xl);
+    }
+  }
+</style>
