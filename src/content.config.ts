@@ -2,7 +2,7 @@ import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
 
 /**
- * Somnary content model — the single structured source the tier board, stack builder,
+ * Somnary content model — the single structured source the tier board, compare tool,
  * search index and Ask assistant all read (CLAUDE.md "Tech decisions"). Authored as MDX
  * with this Zod schema validating frontmatter on every build. There is no schema-less or
  * plain-Markdown stage.
@@ -13,7 +13,22 @@ import { glob } from 'astro/loaders';
  * table (DESIGN_SYSTEM §2.4) is inherently row-paired with a per-row citation.
  */
 
+// tier is [HUMAN-GATE]: no agent assigns or changes a grade (CLAUDE.md non-negotiable).
+// The enum only constrains the shape; the VALUE is owner-ratified, never set by tooling.
 const tier = z.enum(['S', 'A', 'B', 'C', 'D', 'F']);
+
+/**
+ * Evidence change-log entry (CHK-1.4 evidence-change-log page reads changeLog[]). Records a
+ * dated, public change to a page's grade, sources, or content. `fromTier`/`toTier` are set
+ * only on grade changes (themselves [HUMAN-GATE]).
+ */
+const changeLogEntry = z.object({
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'date must be YYYY-MM-DD'),
+  type: z.enum(['review', 'grade', 'source', 'correction']).default('review'),
+  note: z.string(),
+  fromTier: tier.optional(),
+  toTier: tier.optional(),
+});
 
 /**
  * A citation, stored as DATA not prose (CLAUDE.md "Citations are DATA"): each carries a
@@ -112,6 +127,12 @@ const remedies = defineCollection({
       verdict: z.string(), // 2–3 sentence verdict block
       keyCompound: z.string().nullable().default(null),
       bestFor: z.array(z.string()).default([]),
+      // Lead-block fields (DESIGN_SYSTEM decision-first lead; strategy doc 03). notFor and
+      // biggestRisk are editorial judgments drawn from the page's OWN cited content — optional
+      // so a page validates before the evidence-editor populates them, but the lead block
+      // renders them when present.
+      notFor: z.array(z.string()).default([]),
+      biggestRisk: z.string().nullable().default(null),
       outcomes: z.array(z.string()).default([]), // search field
       symptoms: z.array(z.string()).default([]), // search field
       claims: z.array(claimRow).default([]),
@@ -131,6 +152,11 @@ const remedies = defineCollection({
         ogImage: z.string().optional(),
         canonical: z.string().optional(),
       }),
+      // Review date + correction link on every article-type page (CLAUDE.md Definition of Done).
+      // Required so no page ships without it; value is the real last-reviewed date (seeded from
+      // each file's git history — never a fabricated date, per the real-promises rule).
+      reviewDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'reviewDate must be YYYY-MM-DD'),
+      changeLog: z.array(changeLogEntry).default([]),
       draft: z.boolean().default(false),
     })
     // Integrity: every footnote (claims, risks, interactions) must exist in sources[].

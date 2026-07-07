@@ -48,12 +48,19 @@ exists so sessions extend the site instead of rebuilding it.
   Build green through linter + resolver; zero v1.2 palette hex in built CSS;
   D3 casing site-wide; visually verified via headless-Chrome screenshots of
   home/tiers/melatonin/cbt-i — S/A badge distinction confirmed.)*
-- [~] **CHK-0.3 Content model extension.** *(Schema exists in
+- [~] **CHK-0.3 Content model extension.** `HG` (schema change) *(Schema exists in
   `src/content.config.ts` with claims↔data, sources, doses, safety,
   interactions, community, seo.)* Add missing fields per CLAUDE.md: `notFor[]`,
   `biggestRisk`, `reviewDate`, `changeLog[]`; confirm `bestFor[]` shape.
   *Accept:* sample remedy validates; tier field marked human-gated in schema
-  docs; existing 20 remedies migrated.
+  docs; existing 20 remedies migrated. *(Done in PR #3: 4 fields added +
+  changeLogEntry shape; tier marked `[HUMAN-GATE]` in schema; `reviewDate`
+  required, seeded from each file's real git date (never fabricated) on all
+  20; melatonin populated as the worked lead-block template. Build green.
+  DEFERRED (downstream, flagged): render the lead-block `notFor`/`biggestRisk`
+  + a "reviewed <date> · correction link" line — that's CHK-2.1's template
+  work and needs a real corrections destination; populate `notFor`/
+  `biggestRisk` for the other 19 = evidence-editor sessions, not fabricated.)*
 - [~] **CHK-0.4 Citation resolver in CI + pre-commit.** *(Resolver exists —
   `scripts/check-citations.mjs`, runs in `prebuild`, fails build on bad cite.)*
   Missing: CI workflow, pre-commit hook, deliberate-fake-PMID regression test.
@@ -148,5 +155,6 @@ exists so sessions extend the site instead of rebuilding it.
 
 ### Session log (agents append one line per session)
 <!-- 2026-07-06 — checklist v2 adopted; decisions D1–D4 locked. -->
+- 2026-07-06 · CHK-0.3 · content model extension. Added notFor[]/biggestRisk/reviewDate(required)/changeLog[] + changeLogEntry shape to content.config.ts; tier marked [HUMAN-GATE] in schema. reviewDate seeded from each remedy's real git last-commit date across all 20 (honest, not fabricated). Melatonin populated with notFor/biggestRisk/changeLog from its own cited content as the worked template. Fixed a D4 "stack builder" leftover in the schema header comment. Build green. PR #3 (HG: schema change). Deferred: lead-block rendering + correction link (CHK-2.1), per-remedy notFor/biggestRisk population (evidence-editor).
 - 2026-07-06 · CHK-0.2 · evidence-teal reskin. Central tokens (global.css + tailwind) → DESIGN_SYSTEM v2; Archivo + IBM Plex Sans (+ @fontsource for OG gen); TierBadge (filled/white letter) + Wordmark (Somnary., D3) redesigned; SafetyCallout serious→vermilion register; ~120 token refs swept across 31 files via 4 parallel agents; StatRow accent API renamed; OG generator reteal'd; brand word capitalized site-wide (URLs preserved); dead TokenProbe removed. New token linter (scripts/check-tokens.mjs) wired to prebuild — fails on retired names + hardcoded hex, warns on off-scale spacing. Build green through both gates; 0 v1.2 palette hex in built CSS. PR #2, awaiting owner visual review.
 - 2026-07-06 · CHK-0.0 · strategy package → /docs/strategy/; DESIGN_SYSTEM v2 (evidence-teal) rewritten from v3 prototype with computed contrast; PROJECT_PLAN/DESIGN_BRIEF superseded sections marked; checklist reality-audited to v2.1; .claude/agents/ ×6 added; pivot-analysis baseline corrected. Build + resolver green. PR #1. Owner ratified token gaps: G1 `--grade-s #0d4f44`, G3 `--safety-ink #a02c22`, G4 `--focus-ring` 3px primary @40%; G2 (undesigned page types) remains open, non-blocking. Deferred: disclosure D2 update rides CHK-1.2.
