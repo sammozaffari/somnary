@@ -1,0 +1,656 @@
+---
+// Compare tool — CHK-6.1. Compares how each remedy stands ON ITS OWN across grade, goal, effect,
+// evidence gates, who-should-avoid, and (D4 salvage) per-remedy interaction cautions. It is NOT a
+// combine-your-stack tool: comparing two remedies here is never a suggestion to take both, and there
+// is ZERO cross-remedy interaction aggregation — every interaction cell is strictly per-remedy.
+//
+// ARCHITECTURE (mirrors tiers.astro, SSG non-negotiable): ALL 20 non-draft remedies are
+// server-rendered as row cards in canonical grade(S→F)→name order — that flat list IS the crawlable
+// content a no-JS user and a crawler see. A scoped <script> island then only HIDES existing rows by
+// goal + category (it toggles [hidden] on nodes it never created); with JS off every row stands.
+// No schema change (category is read from content-index by slug), no new endpoint, no new citations —
+// every dimension is read from the ONE existing corpus structure.
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import TierBadge from '../components/TierBadge.astro';
+import EvidenceGateChip from '../components/EvidenceGateChip.astro';
+import ContextBanner from '../components/ContextBanner.astro';
+import Disclaimer from '../components/Disclaimer.astro';
+import type { GateId } from '../lib/evidence-gates';
+import { TIERS, getTier, type TierId } from '../lib/tiers';
+import { contentIndex } from '../lib/content-index';
+
+interface Row {
+  slug: string;
+  name: string;
+  tier: TierId;
+  decisionTranslation: string;
+  verdict: string; // data.oneLineVerdict — used verbatim, never re-derived
+  outcomes: string[];
+  gates: GateId[]; // the tier's typical evidence gates (tiers.ts → evidence-gates.ts), rendered by id
+  notFor: string[];
+  biggestRisk: string | null;
+  interactions: string[];
+  category: string;
+}
+
+// slug → keyed goal token (a stable slug of an existing outcome string; invents no new taxonomy).
+const goalKey = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
+// Category lives in the content-index registry, not the remedy schema (a schema change is a
+// [HUMAN-GATE]); read it by slug exactly as tiers.astro does. No content is duplicated.
+const categoryOf = new Map(contentIndex.map((e) => [e.slug, e.category]));
+
+const remedies = await getCollection('remedies', (e) => !e.data.draft);
+const rows: Row[] = remedies.map((e) => ({
+  slug: e.id,
+  name: e.data.name,
+  tier: e.data.tier,
+  decisionTranslation: getTier(e.data.tier).decisionTranslation,
+  verdict: e.data.oneLineVerdict,
+  outcomes: e.data.outcomes,
+  // Evidence gates read from the TIER's typical-gates set (tiers.ts, the same source the
+  // methodology page and tier rows use) rather than each remedy's own evidenceGates[]. Both are
+  // owner-ratified "established sources" (per the CHK-6.1 spec), but a per-remedy gate label can
+  // encode STUDY CONTEXT ("usually combined with valerian" on hops) that is a fair evidence caveat
+  // on a solo remedy page yet misreads as a combination signal on a side-by-side compare grid (D4,
+  // the #1 risk here). The tier-level gates carry no per-remedy combination language. The hops gate
+  // label itself is left untouched — a content change is out of scope and [HUMAN-GATE].
+  gates: getTier(e.data.tier).typicalGates,
+  notFor: e.data.notFor,
+  biggestRisk: e.data.biggestRisk,
+  interactions: e.data.safety.interactions,
+  category: categoryOf.get(e.id) ?? '',
+}));
+
+// Canonical server order: grade(S→F) then name(A–Z). This flat list is the crawlable content.
+const rankOf = new Map<TierId, number>(TIERS.map((t, i) => [t.id, i]));
+rows.sort((a, b) => (rankOf.get(a.tier)! - rankOf.get(b.tier)!) || a.name.localeCompare(b.name));
+
+// Goal filter facets = the DISTINCT outcome strings already in the corpus (frequency-ranked, then
+// A–Z). Nothing invented: each facet is a verbatim outcome, and a row matches it iff that outcome is
+// on the remedy's own outcomes[]. (bestFor[] is intentionally not rendered on the grid — see the
+// goal cell comment: a per-remedy bestFor caveat can name a sibling row and read as a pairing signal.)
+const goalCount = new Map<string, { label: string; n: number }>();
+for (const r of rows)
+  for (const o of r.outcomes) {
+    const k = goalKey(o);
+    const g = goalCount.get(k) ?? { label: o, n: 0 };
+    g.n += 1;
+    goalCount.set(k, g);
+  }
+const goalFacets = [...goalCount.entries()]
+  .map(([key, v]) => ({ key, label: v.label, n: v.n }))
+  .sort((a, b) => b.n - a.n || a.label.localeCompare(b.label));
+
+// Category filter facets = the DISTINCT categories among the rendered remedies (A–Z).
+const catFacets = [...new Set(rows.map((r) => r.category).filter(Boolean))].sort((a, b) =>
+  a.localeCompare(b),
+);
+---
+
+<Base
+  title="compare natural sleep remedies side by side | Somnary"
+  description="compare every reviewed natural sleep remedy on its own evidence grade, goal, effect, evidence gates, who-should-avoid, and documented interaction cautions. this is not a tool for combining remedies — comparing two here is not a suggestion to take both. zero brand money."
+  canonical="https://somnary.vercel.app/compare"
+>
+  <main class="page">
+    <header class="head">
+      <p class="eyebrow">tool · compare</p>
+      <h1 class="title">compare remedies<span class="dot">.</span></h1>
+      <p class="dek">
+        every reviewed remedy, side by side on the things that decide it: the evidence grade, what
+        it's studied for, the one-line effect, the evidence gates behind the grade, who should avoid
+        it, and any documented interaction cautions. narrow the list by goal or category — the full
+        table stands with filters off.
+      </p>
+    </header>
+
+    {/* D4 framing — comparing is NOT combining. Rendered at the top, before any comparison. */}
+    <ContextBanner
+      note="this compares how each remedy stands on its own evidence and safety. it is not a tool for combining remedies, and comparing two here is not a suggestion to take both."
+    />
+
+    {/* standard medical disclaimer, adjacent to the decisions — not footer-only */}
+    <div class="disclaimer-top">
+      <Disclaimer variant="standard" />
+    </div>
+
+    {/* what this compares — states the grade/safety distinction the whole page rests on */}
+    <aside class="framing" role="note" aria-label="what this comparison shows">
+      <p class="framing-label">how to read this</p>
+      <p class="framing-text">
+        each row is a remedy judged <strong>on its own</strong>. the grade rates the strength of the
+        published human evidence — <strong>it rates evidence, not safety</strong>, so always read the
+        who-should-avoid and interaction notes separately. interaction cautions are listed
+        per remedy and are a question for a pharmacist or clinician; nothing here evaluates any
+        remedy alongside another.
+      </p>
+    </aside>
+
+    {/* filters — progressive enhancement. Server order (grade→name), all rows shown, is the default. */}
+    <div class="filters">
+      <div class="facet-row">
+        <span id="goal-label" class="filters-label">goal</span>
+        <div class="facet-group facet-goal" role="group" aria-labelledby="goal-label">
+          <button type="button" class="facet" data-goal="all" aria-pressed="true">all goals</button>
+          {
+            goalFacets.map((g) => (
+              <button type="button" class="facet" data-goal={g.key} aria-pressed="false">
+                {g.label}
+              </button>
+            ))
+          }
+        </div>
+      </div>
+      <div class="facet-row">
+        <span id="cat-label" class="filters-label">category</span>
+        <div class="facet-group facet-cat" role="group" aria-labelledby="cat-label">
+          <button type="button" class="facet" data-cat="all" aria-pressed="true">all categories</button>
+          {
+            catFacets.map((c) => (
+              <button type="button" class="facet" data-cat={c} aria-pressed="false">
+                {c}
+              </button>
+            ))
+          }
+        </div>
+      </div>
+      <p id="compare-count" class="filters-count" aria-live="polite">showing all {rows.length} remedies</p>
+    </div>
+
+    {/* canonical flat comparison: ALL remedies, grade(S→F)→name(A–Z). This is the crawlable content. */}
+    <ul id="compare-grid" class="grid">
+      {
+        rows.map((r) => (
+          <li
+            class="row"
+            data-rank={rankOf.get(r.tier)}
+            data-name={r.name.toLowerCase()}
+            data-category={r.category}
+            data-goals={r.outcomes.map(goalKey).join(' ')}
+          >
+            <div class="row-head">
+              <TierBadge tier={r.tier} size="card" />
+              <div class="head-text">
+                <a class="name" href={`/r/${r.slug}`} aria-label={`read ${r.name} — grade ${r.tier}`}>
+                  {r.name}
+                  <span class="dot">.</span>
+                </a>
+                <p class="verdict">{r.verdict}</p>
+                <p class="decision">
+                  <span class="grade-k">grade {r.tier} · {getTier(r.tier).name}</span>
+                  {r.decisionTranslation}
+                </p>
+              </div>
+            </div>
+
+            <dl class="cells">
+              <div class="cell">
+                <dt class="k">goal</dt>
+                <dd class="v">
+                  {/* Goal cell renders outcomes[] only. bestFor[] is intentionally NOT shown here:
+                      on a side-by-side grid a per-remedy bestFor caveat that names another remedy
+                      (e.g. hops "usually alongside valerian") reads as a cross-remedy pairing signal,
+                      which D4 forbids. bestFor stays on each remedy's own page; outcomes are the clean
+                      goal signal for comparison. */}
+                  <div class="chips">
+                    {r.outcomes.map((o) => (
+                      <span class="chip chip-goal">{o}</span>
+                    ))}
+                  </div>
+                </dd>
+              </div>
+
+              <div class="cell">
+                <dt class="k">evidence gates</dt>
+                <dd class="v">
+                  <div class="chips">
+                    {r.gates.map((g) => (
+                      <EvidenceGateChip id={g} />
+                    ))}
+                  </div>
+                </dd>
+              </div>
+
+              {/* who-should-avoid — OMITTED when empty; absence must NEVER read as "no risk" (CHK-2.1). */}
+              {(r.notFor.length > 0 || r.biggestRisk) && (
+                <div class="cell">
+                  <dt class="k">who should avoid</dt>
+                  <dd class="v">
+                    {r.notFor.length > 0 && (
+                      <ul class="avoid-list">
+                        {r.notFor.map((n) => (
+                          <li>{n}</li>
+                        ))}
+                      </ul>
+                    )}
+                    {r.biggestRisk && <p class="risk-line">{r.biggestRisk}</p>}
+                  </dd>
+                </div>
+              )}
+
+              {/* interaction cautions — PER REMEDY ONLY (D4 salvage, mirrors label-rules R5).
+                  OMITTED when empty. No cross-remedy aggregation anywhere on this page. */}
+              {r.interactions.length > 0 && (
+                <div class="cell cell-int">
+                  <dt class="k">interaction cautions</dt>
+                  <dd class="v">
+                    <p class="int-line">
+                      {r.name} has documented interaction cautions ({r.interactions.join('; ')}). this
+                      is a question for a pharmacist or clinician.
+                    </p>
+                    <p class="int-links">
+                      <a href="/safety">read the safety boundary →</a>
+                      <a href="/medications-and-sleep-aids">medications &amp; sleep aids →</a>
+                    </p>
+                  </dd>
+                </div>
+              )}
+
+              <div class="cell">
+                <dt class="k">category</dt>
+                <dd class="v"><span class="cat">{r.category}</span></dd>
+              </div>
+            </dl>
+          </li>
+        ))
+      }
+    </ul>
+
+    <p id="compare-empty" class="empty" hidden>
+      no reviewed remedy matches that goal and that category. clear a filter to widen the list.
+    </p>
+  </main>
+</Base>
+
+<script>
+  // Filter island (CHK-6.1) — mirrors tiers.astro: it only HIDES existing, server-rendered rows.
+  // It never creates content, so with JS off every row stands (the crawl check proves server-render).
+  // Hiding is an instant [hidden] toggle with no transition, so prefers-reduced-motion is honored by
+  // construction. Two single-select facets (goal, category); a row shows iff it matches BOTH.
+  const grid = document.getElementById('compare-grid');
+  const countEl = document.getElementById('compare-count');
+  const emptyEl = document.getElementById('compare-empty');
+  const goalBtns = Array.from(document.querySelectorAll<HTMLButtonElement>('.facet-goal .facet'));
+  const catBtns = Array.from(document.querySelectorAll<HTMLButtonElement>('.facet-cat .facet'));
+
+  if (grid && goalBtns.length && catBtns.length) {
+    const rows = Array.from(grid.querySelectorAll<HTMLLIElement>('li.row'));
+    const total = rows.length;
+    let activeGoal = 'all';
+    let activeCat = 'all';
+
+    const apply = () => {
+      let shown = 0;
+      for (const row of rows) {
+        const goals = (row.dataset.goals ?? '').split(' ').filter(Boolean);
+        const cat = row.dataset.category ?? '';
+        const okGoal = activeGoal === 'all' || goals.includes(activeGoal);
+        const okCat = activeCat === 'all' || cat === activeCat;
+        const visible = okGoal && okCat;
+        row.hidden = !visible;
+        if (visible) shown += 1;
+      }
+      if (emptyEl) emptyEl.hidden = shown > 0;
+      if (countEl) {
+        countEl.textContent =
+          shown === total ? `showing all ${total} remedies` : `showing ${shown} of ${total} remedies`;
+      }
+    };
+
+    const wire = (btns: HTMLButtonElement[], set: (v: string) => void, key: 'goal' | 'cat') => {
+      for (const b of btns)
+        b.addEventListener('click', () => {
+          set(b.dataset[key] ?? 'all');
+          for (const other of btns) other.setAttribute('aria-pressed', String(other === b));
+          apply();
+        });
+    };
+    wire(goalBtns, (v) => (activeGoal = v), 'goal');
+    wire(catBtns, (v) => (activeCat = v), 'cat');
+  }
+</script>
+
+<style>
+  .page {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: var(--sp-8) var(--sp-7) var(--sp-9);
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0;
+  }
+  .dot {
+    color: var(--primary);
+  }
+  .head {
+    margin-bottom: var(--sp-6);
+  }
+  .title {
+    font-family: var(--font-display);
+    font-size: var(--text-3xl);
+    line-height: var(--lh-3xl);
+    letter-spacing: var(--tracking-tight);
+    color: var(--ink);
+    margin: var(--sp-3) 0 var(--sp-4);
+  }
+  .dek {
+    font-size: var(--text-md);
+    line-height: var(--lh-md);
+    color: var(--muted);
+    max-width: 70ch;
+    margin: 0;
+  }
+
+  .disclaimer-top {
+    margin: var(--sp-5) 0;
+  }
+
+  /* how-to-read framing */
+  .framing {
+    background: var(--surface);
+    border: var(--border-hairline);
+    border-radius: var(--r-lg);
+    padding: var(--sp-5);
+    margin-bottom: var(--sp-6);
+  }
+  .framing-label {
+    margin: 0 0 var(--sp-2);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .framing-text {
+    margin: 0;
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    max-width: 74ch;
+  }
+  .framing-text strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  /* filters */
+  .filters {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+    margin-bottom: var(--sp-6);
+  }
+  .facet-row {
+    display: flex;
+    align-items: baseline;
+    gap: var(--sp-4);
+    flex-wrap: wrap;
+  }
+  .filters-label {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--muted);
+    flex: none;
+    min-width: var(--sp-8);
+  }
+  .facet-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2);
+  }
+  .facet {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--muted);
+    background: var(--surface);
+    border: var(--border-hairline);
+    border-radius: var(--r-pill);
+    padding: var(--sp-2) var(--sp-4);
+    cursor: pointer;
+    transition:
+      color var(--dur-fast) var(--ease-soft),
+      background var(--dur-fast) var(--ease-soft),
+      border-color var(--dur-fast) var(--ease-soft);
+  }
+  .facet:hover {
+    color: var(--ink);
+  }
+  .facet[aria-pressed='true'] {
+    color: var(--surface);
+    background: var(--primary);
+    border-color: var(--primary);
+  }
+  .facet:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+  .filters-count {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* comparison grid */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: var(--sp-5);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .row {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+    background: var(--surface);
+    border: var(--border-hairline);
+    border-radius: var(--r-lg);
+    padding: var(--sp-5);
+  }
+  .row[hidden] {
+    display: none;
+  }
+
+  .row-head {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--sp-3);
+  }
+  .head-text {
+    min-width: 0;
+  }
+  .name {
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    line-height: 1.1;
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .name:hover {
+    color: var(--primary);
+  }
+  .name:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+    border-radius: var(--r-xs);
+  }
+  .verdict {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: var(--sp-2) 0 0;
+  }
+  .decision {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: var(--sp-3) 0 0;
+  }
+  .grade-k {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--ink);
+    margin-bottom: var(--sp-1);
+  }
+
+  /* labelled cells */
+  .cells {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin: 0;
+  }
+  .cell {
+    display: grid;
+    grid-template-columns: var(--sp-10) 1fr;
+    gap: var(--sp-4);
+    padding: var(--sp-4) 0;
+    border-top: var(--border-hairline);
+  }
+  .k {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0;
+  }
+  .v {
+    margin: 0;
+    min-width: 0;
+  }
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2);
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: normal;
+    text-transform: none;
+    line-height: 1;
+    /* §2.3 chip padding is a literal spec value (no token covers 5/11px) — matches GateChip. */
+    padding: 5px 11px;
+    border-radius: var(--r-pill);
+    white-space: nowrap;
+  }
+  .chip-goal {
+    color: var(--primary-deep);
+    background: var(--primary-soft);
+  }
+  .avoid-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+  }
+  .avoid-list li {
+    position: relative;
+    padding-left: var(--sp-4);
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--ink);
+  }
+  .avoid-list li::before {
+    content: '—';
+    position: absolute;
+    left: 0;
+    color: var(--muted);
+  }
+  .risk-line {
+    margin: var(--sp-3) 0 0;
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--ink);
+  }
+
+  /* interaction cell — the D4-salvage register, per remedy only */
+  .cell-int {
+    background: var(--grade-c-tint);
+    border-radius: var(--r-md);
+    padding: var(--sp-4);
+    border-top: none;
+  }
+  .int-line {
+    margin: 0;
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--ink);
+  }
+  .int-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2) var(--sp-5);
+    margin: var(--sp-3) 0 0;
+  }
+  .int-links a {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--primary);
+    text-decoration: none;
+  }
+  .int-links a:hover {
+    color: var(--primary-deep);
+  }
+  .int-links a:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+    border-radius: var(--r-xs);
+  }
+
+  .cat {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--ink);
+  }
+
+  .empty {
+    margin: var(--sp-6) 0 0;
+    padding: var(--sp-6);
+    background: var(--surface);
+    border: var(--border-hairline);
+    border-radius: var(--r-lg);
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    text-align: center;
+  }
+
+  @media (max-width: 640px) {
+    .page {
+      padding: var(--sp-6) var(--sp-5) var(--sp-8);
+    }
+    .title {
+      font-size: var(--text-2xl);
+    }
+    .cell {
+      grid-template-columns: 1fr;
+      gap: var(--sp-2);
+    }
+  }
+</style>

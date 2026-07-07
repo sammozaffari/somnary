@@ -106,6 +106,8 @@ const sortModes = [
           ))
         }
       </div>
+      <!-- CHK-3.4 deferred faceting now lives in the compare tool (CHK-6.1): filter by goal/category. -->
+      <a class="compare-link" href="/compare">compare remedies side by side →</a>
     </div>
 
     <!-- canonical flat grid: ALL remedies, grade(S→F)→name(A–Z). This is the crawlable content. -->
@@ -243,6 +245,25 @@ const sortModes = [
     align-items: center;
     gap: var(--sp-4);
     margin-bottom: var(--sp-6);
+    flex-wrap: wrap;
+  }
+  .compare-link {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--primary);
+    text-decoration: none;
+    margin-left: auto;
+    transition: color var(--dur-fast) var(--ease-soft);
+  }
+  .compare-link:hover {
+    color: var(--primary-deep);
+  }
+  .compare-link:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+    border-radius: var(--r-xs);
   }
   .controls-label {
     font-family: var(--font-mono);
