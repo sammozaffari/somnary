@@ -1,0 +1,192 @@
+---
+// Evidence change log (CHK-1.4) — the public, auditable record of every page's publication
+// and every subsequent change to a grade, source, or claim. Reads changeLog[] from the content
+// model (CHK-0.3); server-rendered so the history is crawlable and can't be quietly edited away.
+// "how rankings change" (methodology §07) points here.
+import Base from '../layouts/Base.astro';
+import TierBadge from '../components/TierBadge.astro';
+import { getCollection } from 'astro:content';
+import { getTier, type TierId } from '../lib/tiers';
+
+type Row = {
+  date: string;
+  type: 'review' | 'grade' | 'source' | 'correction';
+  note: string;
+  fromTier?: TierId;
+  toTier?: TierId;
+  slug: string;
+  name: string;
+  currentTier: TierId;
+};
+
+const remedies = await getCollection('remedies', (e) => !e.data.draft);
+const rows: Row[] = remedies
+  .flatMap((e) =>
+    (e.data.changeLog ?? []).map((c) => ({
+      ...c,
+      slug: e.id,
+      name: e.data.name,
+      currentTier: e.data.tier as TierId,
+    }))
+  )
+  // newest first; ISO YYYY-MM-DD sorts lexically. Tie-break by name for stable order.
+  .sort((a, b) => (a.date === b.date ? a.name.localeCompare(b.name) : b.date < a.date ? -1 : 1));
+
+const typeLabel: Record<Row['type'], string> = {
+  review: 'published',
+  grade: 'grade change',
+  source: 'sources',
+  correction: 'correction',
+};
+---
+
+<Base
+  title="evidence change log — Somnary"
+  description="Somnary's public, auditable record: when every remedy page was published, and every change to a grade, source, or claim since. Grades move when the evidence moves; the history stays visible."
+>
+  <main class="page">
+    <header class="head">
+      <p class="eyebrow">evidence system · the audit trail</p>
+      <h1 class="title">evidence change log<span class="dot">.</span></h1>
+      <p class="dek">
+        a grade is a snapshot of the evidence at a point in time. when the evidence moves — a new
+        trial, a failed replication, a safety signal — the grade moves, and it gets logged here in
+        public. this is the full record, newest first: when each page was published, and every
+        change to it since. nothing is quietly edited away.
+      </p>
+    </header>
+
+    <ol class="log" aria-label="evidence changes, newest first">
+      {
+        rows.map((r) => (
+          <li class="entry">
+            <time class="date" datetime={r.date}>{r.date}</time>
+            <div class="entry-body">
+              <p class="entry-head">
+                <a class="remedy" href={`/r/${r.slug}`}>{r.name}</a>
+                <span class:list={['type', `type-${r.type}`]}>{typeLabel[r.type]}</span>
+                {r.type === 'grade' && r.fromTier && r.toTier && (
+                  <span class="grade-move" aria-label={`grade changed from ${r.fromTier} to ${r.toTier}`}>
+                    <TierBadge tier={r.fromTier} size="inline" />
+                    <span class="arrow" aria-hidden="true">→</span>
+                    <TierBadge tier={r.toTier} size="inline" />
+                  </span>
+                )}
+              </p>
+              <p class="note">{r.note}</p>
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+
+    <p class="foot">
+      grades are set only by published human evidence and only ever changed by a human editor
+      (see <a href="/methodology#rankings">how rankings change</a>). community reports never move a
+      grade. found an error? corrections are public — see the <a href="/methodology">methodology</a>.
+    </p>
+  </main>
+</Base>
+
+<style>
+  .page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: var(--sp-8) var(--sp-7) var(--sp-9);
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0;
+  }
+  .title {
+    font-family: var(--font-display);
+    font-size: var(--text-3xl);
+    line-height: var(--lh-3xl);
+    letter-spacing: var(--tracking-tight);
+    color: var(--ink);
+    margin: var(--sp-3) 0 var(--sp-4);
+  }
+  .dot { color: var(--primary); }
+  .dek {
+    max-width: 60ch;
+    font-size: var(--text-md);
+    line-height: var(--lh-md);
+    color: var(--muted);
+    margin: 0 0 var(--sp-8);
+  }
+
+  .log {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .entry {
+    display: grid;
+    grid-template-columns: 128px 1fr;
+    gap: var(--sp-5);
+    padding: var(--sp-5) 0;
+    border-top: var(--border-hairline);
+  }
+  .entry:last-child { border-bottom: var(--border-hairline); }
+  .date {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--muted);
+    padding-top: 2px;
+  }
+  .entry-head {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--sp-3);
+    margin: 0 0 var(--sp-2);
+  }
+  .remedy {
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .remedy:hover { color: var(--primary); }
+  .type {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--muted);
+    background: var(--stone);
+    border-radius: var(--r-pill);
+    padding: 2px var(--sp-3);
+  }
+  .type-grade { color: var(--primary); background: var(--primary-soft); }
+  .type-correction { color: var(--safety-ink); background: var(--warning-bg); }
+  .grade-move {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-2);
+  }
+  .arrow { color: var(--muted); }
+  .note {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--raisin);
+    margin: 0;
+  }
+
+  .foot {
+    margin-top: var(--sp-8);
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+  }
+  .foot a { color: var(--primary); text-decoration: none; }
+  .foot a:hover { text-decoration: underline; }
+
+  @media (max-width: 640px) {
+    .entry { grid-template-columns: 1fr; gap: var(--sp-2); }
+  }
+</style>
