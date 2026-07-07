@@ -62,6 +62,32 @@ async function main() {
     if (!new RegExp(r.needle, 'i').test(body)) misses.push(`${r.label}: "${r.needle}" not in server-rendered HTML`);
   }
 
+  // Label checker (CHK-4.1): the tool is a client island, but its RULES DOCUMENTATION, privacy
+  // promise, and allowed-framing note MUST be server-rendered — the checker can never be a black
+  // box. Assert each of those is present in the static HTML (proof it survives with JS off).
+  const lcPath = join(DIST, 'label-checker', 'index.html');
+  if (!(await exists(lcPath))) {
+    misses.push(`label-checker: no built HTML at ${lcPath}`);
+  } else {
+    const body = await readFile(lcPath, 'utf8');
+    const needles = [
+      { re: /rules this checker applies/i, why: 'rules documentation heading' },
+      { re: /proprietary blend/i, why: 'R1 rationale' },
+      { re: /studied range/i, why: 'R2 rationale' },
+      { re: /standardized extract/i, why: 'R4 rationale' },
+      { re: /interaction cautions/i, why: 'R5 rationale' },
+      { re: /never leaves your device|never sent to Somnary/i, why: 'privacy promise' },
+      { re: /it doesn.t tell you what to take|describes problems a label can have/i, why: 'allowed-framing note' },
+    ];
+    for (const n of needles) {
+      if (!n.re.test(body)) misses.push(`label-checker: ${n.why} not in server-rendered HTML`);
+    }
+    // R3 rule id must be documented too (the five rules are all present server-side).
+    for (const id of ['R1', 'R2', 'R3', 'R4', 'R5']) {
+      if (!body.includes(id)) misses.push(`label-checker: rule ${id} not documented in static HTML`);
+    }
+  }
+
   if (misses.length) {
     console.error(`\n✖ crawlability: ${misses.length} problem(s) — content may be client-only:\n`);
     for (const m of misses) console.error('   • ' + m);
