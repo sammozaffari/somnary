@@ -174,12 +174,29 @@ exists so sessions extend the site instead of rebuilding it.
 > this phase boundary is a `[HUMAN-GATE]` — owner review before Phase 3.
 
 ## Phase 3 — Decision-first surfaces
-- [ ] **CHK-3.1 Homepage.** Replace the v1 "enemy hero" with "Check a sleep
+- [x] **CHK-3.1 Homepage.** Replace the v1 "enemy hero" with "Check a sleep
   remedy before you take it" + checker search, situation route tiles
   (melatonin / sleep blends / fall asleep / wake at night / medications /
   children), trust strip, "how to read a grade". *Accept:* three clear decision
   routes above the fold; no-affiliate promise visible. *(Search + StatRow
-  components already exist to reuse.)*
+  components already exist to reuse.)* *(Done, branch `chk-3.1-homepage` — PR
+  awaiting owner sign-off (HG: front-door copy + Phase 2→3 boundary). Rewrote
+  index.astro: enemy hero → "Check a sleep remedy before you take it." + subhead
+  "No affiliate links. No brand money."; 3 above-the-fold routes (Check a remedy
+  →/search + popular-check pills · Start from your sleep problem →#situations ·
+  Read safety red flags →/when-to-see-a-doctor); 6 situation tiles all wired to
+  REAL routes; StatRow keeps the 4 real computed cells (20/66/0/$0); standard
+  Disclaimer moved adjacent to the decision block (not footer-only); S–F "how to
+  read a grade" legend reusing TierBadge + each tier's decisionTranslation, with
+  an explicit "grade rates evidence, not safety" note. compliance + design-guardian
+  PASS (design FAIL on 3 raw-px sizing literals fixed → var(--page)/--sp-7/--sp-6,
+  hover aligned to §6). Build/token-lint/resolver(66,unchanged)/crawl green.
+  Adopted defaults (owner to ratify in PR): search=Option-a (/search anchor +
+  pills, no 2nd SearchPalette island); medications tile →/when-to-see-a-doctor
+  (dedicated meds page deferred CHK-5.2). Flag: hero kept on ambient wash — the
+  bold-teal §1 hero is a deferrable design/scope choice (buildable token-only via
+  color-mix, NOT a token gap); .home width now var(--page) i.e. site-shell 1460px.
+  Deferred: CHK-3.2 Start-Here standalone, CHK-3.3 safety hub grid.)*
 - [ ] **CHK-3.2 Start Here page.** *Accept:* per strategy doc 03 brief.
 - [ ] **CHK-3.3 Safety hub / router.** Grid of boundary routes (apnea, chronic
   insomnia, medications, children, urgent states). *(when-to-see-a-doctor page
@@ -231,6 +248,7 @@ exists so sessions extend the site instead of rebuilding it.
 ---
 
 ### Session log (agents append one line per session)
+- 2026-07-07 · CHK-3.1 · decision-first homepage (opens Phase 3). Replaced the v1 "enemy hero" (`index.astro`) with "Check a sleep remedy before you take it." + subhead carrying the visible no-affiliate promise ("No affiliate links. No brand money."). Three above-the-fold routes (Check a remedy →/search + popular-check pills · Start from your sleep problem →#situations · Read safety red flags →/when-to-see-a-doctor); six situation tiles wired to REAL routes (melatonin/sleep-blends/fall-asleep-faster/stay-asleep/when-to-see-a-doctor/melatonin-children — no dead links); StatRow keeps 4 real computed cells (20 remedies/66 sources/0 hallucinated/$0 brand — verified computed from content-index, not invented); standard Disclaimer moved adjacent to the decision block (not footer-only); S–F legend reuses TierBadge + each tier's decisionTranslation + "grade rates evidence, not safety" note. Added PHASE 2 COMPLETE marker + corrected Phase 1 marker (PR #7 merged). compliance PASS; design-guardian FAIL→PASS (fixed 3 raw-px sizing literals the linter's scope missed: 1240px→var(--page), cta 48px→--sp-7, pill 34px→--sp-6; hover lifts to §6 -1px/-2px). Build/token-lint/resolver(66,unchanged)/crawl green. Routed to PR (HG: front-door copy + phase boundary). Owner ratifies: search Option-a, medications→/when-to-see-a-doctor (meds page deferred CHK-5.2), whether to adopt the bold-teal §1 hero (buildable token-only via color-mix — a design/scope choice, not a token gap). Deferred: CHK-3.2/3.3.
 - 2026-07-07 · CHK-2.2 · melatonin cluster pages (×3). Added ungraded context pages `/melatonin-gummies`, `/melatonin-dose-timing`, `/melatonin-long-term`, each mirroring the melatonin-children exemplar (Base + ContextBanner + inline `.sev-serious` callout + Fn/ContextSources + standard Disclaimer) and hitting all 10 skeleton parts incl. a new part-10 review-date + `/methodology#corrections` line. SOURCE-FIRST via evidence-editor: every PMID/DOI pulled and verified online before prose; dose-timing describes only what STUDIES used (never instructs a dose); long-term framed strictly as an evidence GAP (Besag CNS Drugs 2019 + AASM-Sateia), never an asserted harm — no [HUMAN-GATE] fired. Builder wired content-index registration (kind:context, plannedTier:null, sourceCount:0 — no graded-corpus inflation), bidirectional cross-links (hub↔cluster, cluster→children/when-to-see-a-doctor), Footer context nav. IMPORTANT: the CI resolver does NOT scan .astro pages, so the citation-auditor's manual online verification is the real gate — it confirmed 13/13 claim↔source pairs (Cohen JAMA 2023 exact figures recovered from PMC full text since PubMed carries no abstract). compliance + design-guardian PASS; build/token-lint/resolver(66,unchanged)/crawl green. Routed to PR (new public medical-boundary content) for owner review, not auto-merged. Adds id="corrections" to methodology.astro (same anchor CHK-2.1 adds — trivial merge overlap). Deferred: other hub modules (jet-lag/DSPD, hub index) + retrofitting melatonin-children with part-10 line.
 - 2026-07-07 · CHK-2.1 · melatonin decision-first lead block. New `RemedyLeadBlock.astro` renders above-the-fold on the shared remedy template (`r/[slug].astro`): 152px grade badge (new `lead` size on TierBadge) + decision-translation line + best-for/not-for/biggest-risk/studied-dose grid + "reviewed <date> · corrections →". `decisionTranslation` added to all 6 tiers verbatim from strategy 03. Graceful empties (G-b): not-for/biggest-risk rows OMITTED when unpopulated — never blank, absence must never read as "no risk"; verified on magnesium (B, rows gone, 0 empty cells) + cbt-i (S, studied-dose omitted for intervention). Removed the duplicate 78px header badge. Corrections link → real `/methodology#corrections` (added `id`; existing inbox + 7-day SLA, nothing invented). Build + token lint + resolver (66 cites/20 files, unchanged) + crawlability green; citation-auditor / design-guardian / compliance-reviewer all PASS. PR #8 merged (owner sign-off). Owner gates surfaced in PR: G-a corrections target, G-b empty-row omission, G-c verdict micro-label (tier word vs DESIGN §3 vocabulary + aria-label wording). Non-blocking note (compliance): per-page standard disclaimer still sits at bottom of `<main>` while the decision moment is now at top — pre-existing CHK-1.3 placement, not a regression; raise separately if owner wants it adjacent. Deferred (unchanged): notFor/biggestRisk for the other 19 = evidence-editor sessions.
 - 2026-07-07 · CHK-1.2 · legal pages reconciled to D2 (completes Phase 1). Rewrote the disclosure funding paragraph to owner-decided reality ("entirely self-funded for now, nothing monetised yet; reader-funded + tools-first; never a paywall on the evidence, never brand money; wiki free") — dropped the old "optional memberships" model. Cleared "before membership goes live" from disclosure/terms/privacy header comments → D2 wording. Corrections gmail + 7-day SLA kept per owner. Build green. PR #7 (HG: legal sign-off + Phase 1 boundary). Still-open minor: methodology's brand/product-QA line reads present-tense though no QA module exists — left for a later copy pass.
