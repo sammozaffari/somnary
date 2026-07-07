@@ -101,8 +101,14 @@ exists so sessions extend the site instead of rebuilding it.
 - [x] **CHK-1.3 Disclaimer component.** *(Verified in built HTML: "educational,
   not medical advice" near decisions on remedy pages, not footer-only;
   conservative re pregnancy/children/interactions.)*
-- [ ] **CHK-1.4 Evidence change log page.** Public log of grade/source changes.
+- [x] **CHK-1.4 Evidence change log page.** Public log of grade/source changes.
   *Accept:* reads from `changeLog[]` (added in CHK-0.3); server-rendered.
+  *(Done, PR #6: `/changelog` — flattens every remedy's `changeLog[]`, newest
+  first, server-rendered (crawlable); grade-change entries render from→to
+  badges. Seeded an honest "initial publication" entry per remedy from its real
+  reviewDate + tier + cited-source count (a true event, not fabricated), so the
+  log is a real audit trail from day one. Linked from the Footer as "evidence
+  log" + methodology `#rankings`. Visually confirmed.)*
 
 ## Phase 2 — Melatonin Decision Hub (the template + the wedge)
 - [~] **CHK-2.1 Melatonin remedy page.** `HG` *(Exists: 12-block template,
@@ -177,6 +183,7 @@ exists so sessions extend the site instead of rebuilding it.
 ---
 
 ### Session log (agents append one line per session)
+- 2026-07-07 · CHK-1.4 · evidence change-log page. New server-rendered `/changelog` reads every remedy's changeLog[] (newest first; grade changes show from→to badges). Seeded an honest initial-publication entry per remedy (real reviewDate + tier + cited-source count — a true event) so the log is a real audit trail. Linked from Footer + methodology #rankings. Build/crawl/linter green; visually confirmed. PR #6. (Note: CHK-1.1 log line lives in the still-open PR #5.)
 <!-- 2026-07-06 — checklist v2 adopted; decisions D1–D4 locked. -->
 - 2026-07-07 · CHK-1.1 · methodology conformance pass. Verified the page conforms to strategy doc 06 + non-negotiables (9 sections, S–F rubric + gates from structured data, source hierarchy, COI D2-aligned, corrections). Fixed a real-promises violation: removed the un-built "live claim-check counter (verified vs total)" claim, rewrote to what's actually enforced (inline cites + resolver every build). Build green. PR #5. Flagged for owner: corrections inbox is a personal gmail with a public 7-day SLA (confirm/relocate); brand-QA "audit" framed present-tense but not built; optional real counter is a small build.
 - 2026-07-07 · CHK-0.4/0.5 · CI gate suite (completes Phase 0). Added .github/workflows/ci.yml (token lint → resolver → resolver self-test → build → crawlability, on push + PR); scripts/check-crawlable.mjs (asserts content is server-rendered — 20 remedy pages + home/tiers); scripts/test-resolver.mjs fake-PMID regression (resolver now honors SOMNARY_CONTENT_DIR); .githooks/pre-commit (token lint + resolver) wired via package.json `prepare`. All gates green locally. PR #4 (HG: Phase 0 completion boundary). Deferred: post-session session-log hook is harness config, not repo CI.
