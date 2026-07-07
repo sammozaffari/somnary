@@ -1,0 +1,388 @@
+---
+// melatonin long-term use — CONTEXT page (CHK-2.2). NOT a graded remedy. Framed as an EVIDENCE GAP:
+// the page characterizes what long-term/developmental data is MISSING, and never asserts a proven
+// long-term or developmental harm (that would be a HUMAN-GATE). No tier badge, no gate chips.
+// Every specific is cited to a source verified firsthand: Besag 2019 (short-term AEs mild; scarcity
+// of long-term RCTs limits safety conclusions; insufficient data on at-risk groups incl pre-adolescent
+// children), Sateia/AASM 2017 (weak, low-certainty recommendation against melatonin for chronic
+// insomnia), Erland 2017 (label ≠ content). Mirrors melatonin-children.astro exactly.
+import Base from '../layouts/Base.astro';
+import ContextBanner from '../components/ContextBanner.astro';
+import ContextSources from '../components/ContextSources.astro';
+import Disclaimer from '../components/Disclaimer.astro';
+import Fn from '../components/Fn.astro';
+
+const sources = [
+  {
+    n: 1,
+    cite: 'Besag FMC, Vasey MJ, Lao KSJ, Wong ICK. Adverse Events Associated with Melatonin for the Treatment of Primary or Secondary Sleep Disorders: A Systematic Review. CNS Drugs. 2019;33(12):1167–1186.',
+    finding:
+      'systematic review of melatonin adverse events: short-term events were few and generally mild to moderate (most commonly daytime sleepiness, headache, dizziness), BUT the scarcity of long-term randomized trials limits any conclusion about the safety of continuous melatonin over extended periods, and there are insufficient robust data to appraise concerns in at-risk groups including pre-adolescent children.',
+    pmid: '31722088',
+    doi: '10.1007/s40263-019-00680-w',
+  },
+  {
+    n: 2,
+    cite: 'Sateia MJ, Buysse DJ, Krystal AD, et al. Clinical Practice Guideline for the Pharmacologic Treatment of Chronic Insomnia in Adults (AASM). J Clin Sleep Med. 2017;13(2):307–349.',
+    finding:
+      'the American Academy of Sleep Medicine suggests clinicians NOT use melatonin for sleep-onset or sleep-maintenance insomnia in adults — a recommendation graded weak, reflecting low-certainty evidence.',
+    pmid: '27998379',
+    doi: '10.5664/jcsm.6470',
+  },
+  {
+    n: 3,
+    cite: 'Erland LAE, Saxena PK. Melatonin Natural Health Products and Supplements: Presence of Serotonin and Significant Variability of Melatonin Content. J Clin Sleep Med. 2017;13(2):275–281.',
+    finding:
+      'lab analysis of 30 supplements: actual melatonin content ranged from 83% below to 478% above the label and varied up to 465% between lots — so a "consistent nightly dose" may not be consistent at all.',
+    pmid: '27855744',
+    doi: '10.5664/jcsm.6462',
+  },
+];
+---
+
+<Base
+  title="melatonin for long-term use: what we don't know | Somnary"
+  description="most melatonin trials run days to a few weeks, leaving a real gap: the safety of taking it every night for months or years is not established, in adults or especially in children. context on that evidence gap — absence of long-term evidence is not proof of harm, and not proof of safety. not a grade."
+  canonical="https://somnary.vercel.app/melatonin-long-term"
+>
+  <main class="page">
+    <header class="head">
+      <p class="eyebrow">context · evidence gap</p>
+      <h1 class="title">melatonin, long-term<span class="dot">.</span></h1>
+      <p class="dek">
+        Most melatonin trials are short — days to a few weeks. That leaves a genuine gap: the safety of
+        taking melatonin every night for months or years has not been established, in adults or
+        especially in children. This page is about that gap. Absence of long-term evidence is not the
+        same as proof of harm — and it is not proof of safety either. This is context, not a grade.
+      </p>
+    </header>
+
+    <ContextBanner
+      note="this page describes an evidence gap, not a proven long-term harm. whether ongoing nightly melatonin makes sense for you is a clinician decision — the research can't answer it yet."
+    />
+
+    <p class="who">
+      <span class="who-tag">who this is for</span>
+      anyone who has drifted into taking melatonin every night, or is weighing indefinite use — for
+      themselves or a child — and wants to know what the long-term evidence actually says.
+    </p>
+
+    <!-- safety boundary: the long-term data doesn't exist yet (serious) -->
+    <section class="callout sev-serious" role="note" aria-label="long-term evidence gap">
+      <div class="callout-head">
+        <span class="sigil" aria-hidden="true">!</span>
+        <p class="callout-title">the long-term data doesn't exist yet — don't treat nightly use as settled</p>
+      </div>
+      <p class="callout-body">
+        A 2019 systematic review of melatonin's adverse events found short-term side effects were
+        generally mild, but concluded that the <strong>scarcity of long-term randomized trials</strong>
+        limits any conclusion about the safety of continuous melatonin over extended periods, and that
+        there are <strong>insufficient robust data</strong> to appraise concerns in at-risk groups,
+        including pre-adolescent children.<Fn n={1} /> Ongoing nightly use — particularly in children,
+        in pregnancy, or with other medicines — is a decision to make with a clinician, not by default.
+      </p>
+    </section>
+
+    <!-- section 01: the claim -->
+    <section class="section">
+      <p class="eyebrow">section 01</p>
+      <h2 class="section-title">what people assume</h2>
+      <div class="prose">
+        <p>
+          The assumption is that because melatonin is a hormone the body already makes, and is sold
+          beside the vitamins, taking it every night indefinitely must be harmless. &ldquo;Natural
+          and gentle&rdquo; slides easily into &ldquo;fine forever.&rdquo; That leap is exactly what
+          the long-term evidence has not been able to confirm.
+        </p>
+      </div>
+    </section>
+
+    <!-- section 02: what the evidence shows -->
+    <section class="section">
+      <p class="eyebrow">section 02</p>
+      <h2 class="section-title">what the human evidence shows — over the short term</h2>
+      <div class="prose">
+        <p>
+          Over the short term, melatonin is generally well tolerated: the 2019 review found adverse
+          events were few and generally mild to moderate, most commonly daytime sleepiness, headache,
+          and dizziness.<Fn n={1} /> But even the short-term picture is modest and uncertain. For
+          chronic insomnia specifically, the American Academy of Sleep Medicine reviewed the evidence
+          and <strong>suggests clinicians not use melatonin</strong> — a recommendation it graded
+          <strong>weak</strong> because the underlying certainty is low.<Fn n={2} /> So the strongest
+          statement the evidence supports is about small effects, studied over short windows.
+        </p>
+      </div>
+    </section>
+
+    <!-- section 03: what it does NOT show — the whole point -->
+    <section class="section">
+      <p class="eyebrow">section 03</p>
+      <h2 class="section-title">what the evidence does <em>not</em> show — the whole point of this page</h2>
+      <div class="prose">
+        <p>
+          This is the section that matters most, and it is mostly about what is missing. The evidence
+          does <strong>not</strong> establish that nightly melatonin is safe over months or years: the
+          long-term randomized trials that would answer that question are scarce.<Fn n={1} /> It does
+          <strong>not</strong> establish that ongoing use is safe in children or during development —
+          the same review found insufficient robust data to appraise concerns in pre-adolescent
+          children, which means the question is <em>open</em>, not answered either way.<Fn n={1} /> And
+          it does not show that &ldquo;natural&rdquo; implies safe for indefinite use. None of this is
+          evidence of a proven long-term harm; it is evidence of an <strong>evidence gap</strong>. The
+          honest position is to name the uncertainty, not to fill it in either direction.
+        </p>
+      </div>
+    </section>
+
+    <!-- section 04: dose / form / label reality -->
+    <section class="section">
+      <p class="eyebrow">section 04</p>
+      <h2 class="section-title">what widens the gap: duration &amp; label reality</h2>
+      <div class="prose">
+        <p>
+          Two familiar problems widen the gap. Most trials ran for days to weeks, not the months or
+          years over which people actually take melatonin — so long-term use runs past where the data
+          stops.<Fn n={1} /> And even setting duration aside, the amount in a product may not match its
+          label: independent testing of 30 supplements found content from <strong>83% below to 478%
+          above</strong> the label, varying up to 465% between lots.<Fn n={3} /> A &ldquo;consistent
+          nightly dose&rdquo; may not be consistent at all — which makes any long-run exposure harder
+          to reason about, not easier.
+        </p>
+      </div>
+    </section>
+
+    <!-- section 05: take to your clinician -->
+    <section class="section">
+      <p class="eyebrow">section 05</p>
+      <h2 class="section-title">take these to a clinician or pharmacist</h2>
+      <ul class="ask">
+        <li>I've been taking melatonin nightly for a while — is that still appropriate, or should I reassess?</li>
+        <li>is there a reason to take breaks, taper, or stop, rather than continue indefinitely?</li>
+        <li>for a child, or during pregnancy, what does the lack of long-term data mean for my situation specifically?</li>
+        <li>are there non-drug approaches that would reduce how much I rely on it over time?</li>
+      </ul>
+    </section>
+
+    <!-- related: back to the graded hub + safety boundaries -->
+    <section class="section">
+      <p class="eyebrow">related</p>
+      <h2 class="section-title">read next</h2>
+      <ul class="related">
+        <li><a href="/r/melatonin">melatonin</a> — the full evidence grade and what the trials found.</li>
+        <li><a href="/melatonin-dose-timing">melatonin dose &amp; timing</a> — what the studies used, and why more is not stronger.</li>
+        <li><a href="/when-to-see-a-doctor">when to see a doctor</a> — the sleep problems that need a clinician, not a supplement.</li>
+      </ul>
+    </section>
+
+    <ContextSources sources={sources} />
+
+    <div class="disclaimer-slot">
+      <Disclaimer variant="standard" />
+    </div>
+
+    <p class="review-line">
+      reviewed 2026-07-07 · found an error? <a href="/methodology#corrections">corrections →</a>
+    </p>
+  </main>
+</Base>
+
+<style>
+  .page {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: var(--sp-8) var(--sp-7) var(--sp-9);
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0;
+  }
+  .dot {
+    color: var(--primary);
+  }
+  .head {
+    margin-bottom: var(--sp-6);
+  }
+  .title {
+    font-family: var(--font-display);
+    font-size: var(--text-3xl);
+    line-height: var(--lh-3xl);
+    letter-spacing: var(--tracking-tight);
+    color: var(--ink);
+    margin: var(--sp-3) 0 var(--sp-5);
+  }
+  .dek {
+    font-size: var(--text-md);
+    line-height: var(--lh-md);
+    color: var(--muted);
+    max-width: 68ch;
+    margin: 0;
+  }
+
+  /* who this is for */
+  .who {
+    max-width: 68ch;
+    margin: var(--sp-5) 0 0;
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+  }
+  .who-tag {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--primary);
+    margin-right: var(--sp-2);
+  }
+
+  /* safety callout — reuses the §2.12 serious register (grade-f), bespoke to this context page */
+  .callout {
+    border-radius: var(--r-lg);
+    border: 1px solid;
+    padding: var(--sp-6);
+    margin-top: var(--sp-7);
+  }
+  .sev-serious {
+    background: var(--grade-f-tint);
+    border-color: var(--grade-f);
+  }
+  .callout-head {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    margin-bottom: var(--sp-4);
+  }
+  .sigil {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    flex: none;
+    border-radius: var(--r-pill);
+    background: var(--grade-f);
+    color: var(--surface);
+    font-family: var(--font-display);
+    font-weight: 600;
+    line-height: 1;
+  }
+  .callout-title {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--grade-f);
+    margin: 0;
+  }
+  .callout-body {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--ink);
+    margin: 0;
+  }
+  .callout-body strong {
+    font-weight: 600;
+  }
+
+  .section {
+    border-top: var(--border-hairline);
+    padding-top: var(--sp-6);
+    margin-top: var(--sp-8);
+  }
+  .section-title {
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    line-height: var(--lh-xl);
+    color: var(--ink);
+    margin: var(--sp-2) 0 var(--sp-5);
+  }
+  .prose {
+    max-width: 68ch;
+  }
+  .prose p {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--muted);
+    margin: 0 0 var(--sp-4);
+  }
+  .prose strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .prose a {
+    color: var(--primary);
+  }
+
+  /* clinician questions */
+  .ask {
+    max-width: 68ch;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+  }
+  .ask li {
+    position: relative;
+    padding-left: var(--sp-6);
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--muted);
+  }
+  .ask li::before {
+    content: '?';
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--primary);
+  }
+
+  /* related / read-next links */
+  .related {
+    max-width: 68ch;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+  }
+  .related li {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--muted);
+  }
+  .related a {
+    color: var(--primary);
+  }
+
+  .disclaimer-slot {
+    margin-top: var(--sp-8);
+  }
+  .review-line {
+    margin-top: var(--sp-6);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .review-line a {
+    color: var(--primary);
+  }
+  @media (max-width: 640px) {
+    .page {
+      padding: var(--sp-6) var(--sp-5) var(--sp-8);
+    }
+    .title {
+      font-size: var(--text-2xl);
+    }
+  }
+</style>
