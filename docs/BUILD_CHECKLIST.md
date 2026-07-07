@@ -95,9 +95,17 @@ exists so sessions extend the site instead of rebuilding it.
   brand/product-QA "audit" is described present-tense but no QA module exists yet
   — soften or build; (c) if you want a real verified-vs-total counter, it's a
   small build.)*
-- [~] **CHK-1.2 Legal pages.** `HG` *(Disclaimer, terms, privacy, disclosure
+- [x] **CHK-1.2 Legal pages.** `HG` *(Disclaimer, terms, privacy, disclosure
   exist from v1 build.)* Remaining: disclosure must state D2 tools-first
   funding (no membership paywall); owner sign-off on the updated set.
+  *(Done, PR #7 — awaiting owner legal sign-off. Rewrote the disclosure funding
+  paragraph to D2 reality per owner decision: "entirely self-funded for now,
+  nothing monetised yet; reader-funded + tools-first; if it ever charges it's
+  optional reader support or practical tools, never a paywall on the evidence,
+  never brand money; wiki stays free" — the old "optional memberships" model is
+  gone. Cleared the "before membership goes live" comments from all three legal
+  pages → D2 wording. Corrections SLA kept as-is per owner (real & keepable).
+  No membership/paywall-as-funding refs remain. Build green.)*
 - [x] **CHK-1.3 Disclaimer component.** *(Verified in built HTML: "educational,
   not medical advice" near decisions on remedy pages, not footer-only;
   conservative re pregnancy/children/interactions.)*
@@ -109,6 +117,11 @@ exists so sessions extend the site instead of rebuilding it.
   reviewDate + tier + cited-source count (a true event, not fabricated), so the
   log is a real audit trail from day one. Linked from the Footer as "evidence
   log" + methodology `#rankings`. Visually confirmed.)*
+
+> **PHASE 1 COMPLETE (2026-07-07), pending PR #7 merge.** Credibility spine in
+> place: methodology conforms (real-promise fixed), legal pages reconciled to
+> D2, disclaimer prominent, public evidence change-log live. Phase boundary is a
+> `[HUMAN-GATE]` — owner review before Phase 2.
 
 ## Phase 2 — Melatonin Decision Hub (the template + the wedge)
 - [~] **CHK-2.1 Melatonin remedy page.** `HG` *(Exists: 12-block template,
@@ -183,6 +196,7 @@ exists so sessions extend the site instead of rebuilding it.
 ---
 
 ### Session log (agents append one line per session)
+- 2026-07-07 · CHK-1.2 · legal pages reconciled to D2 (completes Phase 1). Rewrote the disclosure funding paragraph to owner-decided reality ("entirely self-funded for now, nothing monetised yet; reader-funded + tools-first; never a paywall on the evidence, never brand money; wiki free") — dropped the old "optional memberships" model. Cleared "before membership goes live" from disclosure/terms/privacy header comments → D2 wording. Corrections gmail + 7-day SLA kept per owner. Build green. PR #7 (HG: legal sign-off + Phase 1 boundary). Still-open minor: methodology's brand/product-QA line reads present-tense though no QA module exists — left for a later copy pass.
 - 2026-07-07 · CHK-1.4 · evidence change-log page. New server-rendered `/changelog` reads every remedy's changeLog[] (newest first; grade changes show from→to badges). Seeded an honest initial-publication entry per remedy (real reviewDate + tier + cited-source count — a true event) so the log is a real audit trail. Linked from Footer + methodology #rankings. Build/crawl/linter green; visually confirmed. PR #6. (Note: CHK-1.1 log line lives in the still-open PR #5.)
 <!-- 2026-07-06 — checklist v2 adopted; decisions D1–D4 locked. -->
 - 2026-07-07 · CHK-1.1 · methodology conformance pass. Verified the page conforms to strategy doc 06 + non-negotiables (9 sections, S–F rubric + gates from structured data, source hierarchy, COI D2-aligned, corrections). Fixed a real-promises violation: removed the un-built "live claim-check counter (verified vs total)" claim, rewrote to what's actually enforced (inline cites + resolver every build). Build green. PR #5. Flagged for owner: corrections inbox is a personal gmail with a public 7-day SLA (confirm/relocate); brand-QA "audit" framed present-tense but not built; optional real counter is a small build.
