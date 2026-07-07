@@ -8,15 +8,17 @@ import type { TierId } from '../lib/tiers';
 
 interface Props {
   tier: TierId;
-  size?: 'inline' | 'card' | 'header';
+  size?: 'inline' | 'card' | 'header' | 'lead';
 }
 const { tier, size = 'card' } = Astro.props;
 
 // box / glyph / radius per size. glyph ≥19px (large-text band) at inline and up.
+// `lead` is the remedy lead-block "big badge" (DESIGN §3: 152×152, letter 112, gradient fill).
 const SIZES = {
-  inline: { box: 30, glyph: 19, radius: 'var(--r-sm)', weight: 800, grad: false },
-  card:   { box: 44, glyph: 27, radius: 'var(--r-sm)', weight: 800, grad: false },
-  header: { box: 78, glyph: 50, radius: 'var(--r-lg)', weight: 900, grad: true },
+  inline: { box: 30,  glyph: 19,  radius: 'var(--r-sm)', weight: 800, grad: false },
+  card:   { box: 44,  glyph: 27,  radius: 'var(--r-sm)', weight: 800, grad: false },
+  header: { box: 78,  glyph: 50,  radius: 'var(--r-lg)', weight: 900, grad: true },
+  lead:   { box: 152, glyph: 112, radius: 'var(--r-lg)', weight: 900, grad: true },
 } as const;
 const s = SIZES[size];
 const lc = tier.toLowerCase();
