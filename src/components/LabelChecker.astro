@@ -1,0 +1,325 @@
+---
+// Label checker island (CHK-4.1) — the ONLY interactive part of /label-checker. Mirrors the
+// SearchPalette pattern: static markup + scoped tokens-only <style> + a scoped <script> that
+// imports the pure rules (src/lib/label-rules) and lazy-loads /label-index.json. Everything runs
+// in the browser: the pasted text is parsed locally and NEVER sent anywhere (the page's privacy
+// promise). The server-rendered shell (rules documentation, privacy promise) lives in the page,
+// so the checker is progressive enhancement over already-crawlable content, not a black box.
+// DESIGN_SYSTEM §5: label-input (dashed --mineral border, --paper fill) + flag rows (vermilion
+// icon, hairline dividers). No paywall / pro / "unlock" anywhere — this MVP is free (D2).
+---
+
+<section class="checker" aria-labelledby="lc-heading">
+  <h2 id="lc-heading" class="lc-title">check a supplement facts panel</h2>
+  <p class="lc-sub">
+    paste the ingredients and amounts from a label below. the check runs entirely in your browser.
+  </p>
+
+  <label class="lc-label" for="lc-input">supplement facts text</label>
+  <textarea
+    id="lc-input"
+    class="label-input"
+    rows="7"
+    spellcheck="false"
+    autocomplete="off"
+    placeholder="e.g.&#10;Melatonin 10 mg&#10;Valerian Root 100 mg&#10;L-Theanine 200 mg"
+    data-lc-input></textarea>
+
+  <div class="lc-actions">
+    <button type="button" class="btn-check" data-lc-check>check the label</button>
+    <button type="button" class="btn-clear" data-lc-clear hidden>clear</button>
+  </div>
+
+  <!-- results: aria-live so flags are announced; server-rendered empty until the user checks -->
+  <div class="lc-results" role="region" aria-live="polite" aria-label="label observations" data-lc-results>
+    <p class="lc-idle" data-lc-idle>no label checked yet.</p>
+  </div>
+</section>
+
+<style>
+  .checker {
+    background: var(--surface);
+    border: var(--border-hairline);
+    border-radius: var(--r-lg);
+    padding: var(--sp-6);
+  }
+  .lc-title {
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    line-height: var(--lh-base);
+    color: var(--ink);
+    margin: 0 0 var(--sp-2);
+  }
+  .lc-sub {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: 0 0 var(--sp-5);
+  }
+  .lc-label {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: var(--sp-2);
+  }
+
+  /* label-input — DESIGN_SYSTEM §5: dashed border, paper fill */
+  .label-input {
+    width: 100%;
+    box-sizing: border-box;
+    resize: vertical;
+    min-height: 140px;
+    border: 1px dashed var(--mineral);
+    background: var(--paper);
+    border-radius: var(--r-md);
+    padding: var(--sp-4);
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--ink);
+  }
+  .label-input::placeholder {
+    color: var(--muted);
+  }
+  .label-input:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+    border-color: var(--primary);
+  }
+
+  .lc-actions {
+    display: flex;
+    gap: var(--sp-3);
+    margin-top: var(--sp-4);
+  }
+  .btn-check,
+  .btn-clear {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    min-height: 42px;
+    padding: 0 var(--sp-5);
+    border-radius: var(--r-sm);
+    cursor: pointer;
+    transition: background var(--dur-fast) var(--ease-soft), border-color var(--dur-fast) var(--ease-soft);
+  }
+  .btn-check {
+    background: var(--primary);
+    color: var(--surface);
+    border: 1px solid var(--primary);
+  }
+  .btn-check:hover {
+    background: var(--primary-deep);
+    border-color: var(--primary-deep);
+  }
+  .btn-clear {
+    background: var(--surface);
+    color: var(--muted);
+    border: var(--border-hairline);
+  }
+  .btn-clear:hover {
+    border-color: var(--mineral);
+    color: var(--ink);
+  }
+  .btn-check:focus-visible,
+  .btn-clear:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+  }
+  .btn-clear[hidden] {
+    display: none;
+  }
+
+  .lc-results {
+    margin-top: var(--sp-6);
+  }
+  .lc-idle,
+  .lc-count {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 var(--sp-4);
+  }
+  .lc-idle[hidden] {
+    display: none;
+  }
+
+  /* empty (no flags) — honest, not an endorsement; calm, not a severity callout */
+  .lc-empty {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    background: var(--paper);
+    border: var(--border-hairline);
+    border-radius: var(--r-md);
+    padding: var(--sp-4) var(--sp-5);
+    margin: 0;
+  }
+
+  /* flag rows — DESIGN_SYSTEM §5: vermilion icon + hairline dividers */
+  .flag-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-top: var(--border-hairline);
+  }
+  .flag-row {
+    display: grid;
+    grid-template-columns: 24px 1fr auto;
+    gap: var(--sp-4);
+    align-items: start;
+    padding: var(--sp-4) 0;
+    border-bottom: var(--border-hairline);
+  }
+  .flag-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: var(--r-xs);
+    background: var(--warning-bg);
+    color: var(--vermilion);
+    font-family: var(--font-display);
+    font-weight: 700;
+    line-height: 1;
+  }
+  .flag-body {
+    min-width: 0;
+  }
+  .flag-text {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--ink);
+    margin: 0 0 var(--sp-2);
+  }
+  .flag-link {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--primary);
+    text-decoration: none;
+  }
+  .flag-link:hover {
+    text-decoration: underline;
+  }
+  .flag-link:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+    border-radius: var(--r-xs);
+  }
+  .flag-rule {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  @media (max-width: 640px) {
+    .flag-row {
+      grid-template-columns: 24px 1fr;
+    }
+    .flag-rule {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  import { checkLabel, EMPTY_STATE, type LabelEntry } from '../lib/label-rules';
+
+  const input = document.querySelector<HTMLTextAreaElement>('[data-lc-input]');
+  const checkBtn = document.querySelector<HTMLButtonElement>('[data-lc-check]');
+  const clearBtn = document.querySelector<HTMLButtonElement>('[data-lc-clear]');
+  const results = document.querySelector<HTMLElement>('[data-lc-results]');
+
+  if (input && checkBtn && clearBtn && results) {
+    const IDLE_HTML = '<p class="lc-idle">no label checked yet.</p>';
+    let entries: LabelEntry[] | null = null;
+    let loading = false;
+
+    // Human-readable name for each rule id (matches the server-rendered rules documentation).
+    const RULE_LABEL: Record<string, string> = {
+      R1: 'rule R1 · proprietary blend',
+      R2: 'rule R2 · high-dose melatonin',
+      R3: 'rule R3 · dose vs studied dose',
+      R4: 'rule R4 · missing standardization',
+      R5: 'rule R5 · interaction caution',
+    };
+
+    const esc = (s: string) =>
+      s.replace(/[&<>"']/g, (c) =>
+        ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c] as string,
+      );
+
+    const loadEntries = async (): Promise<LabelEntry[]> => {
+      if (entries) return entries;
+      if (loading) return [];
+      loading = true;
+      try {
+        const res = await fetch('/label-index.json');
+        entries = (await res.json()) as LabelEntry[];
+      } catch {
+        entries = [];
+      }
+      loading = false;
+      return entries;
+    };
+
+    const renderEmpty = () => {
+      results.innerHTML = `<p class="lc-empty">${esc(EMPTY_STATE)}</p>`;
+    };
+
+    const render = (flags: ReturnType<typeof checkLabel>) => {
+      if (flags.length === 0) {
+        renderEmpty();
+        return;
+      }
+      const rows = flags
+        .map((f) => {
+          const ruleName = RULE_LABEL[f.rule] ?? f.rule;
+          return (
+            `<li class="flag-row">` +
+            `<span class="flag-icon" aria-hidden="true">!</span>` +
+            `<div class="flag-body">` +
+            `<p class="flag-text">${esc(f.text)}</p>` +
+            `<a class="flag-link" href="${esc(f.href)}">${esc(f.linkLabel)} →</a>` +
+            `</div>` +
+            `<span class="flag-rule" title="${esc(ruleName)}" aria-label="${esc(ruleName)}">${esc(f.rule)}</span>` +
+            `</li>`
+          );
+        })
+        .join('');
+      const noun = flags.length === 1 ? 'observation' : 'observations';
+      results.innerHTML =
+        `<p class="lc-count">${flags.length} ${noun} — described, not a grade or a recommendation.</p>` +
+        `<ul class="flag-list">${rows}</ul>`;
+    };
+
+    const run = async () => {
+      const list = await loadEntries();
+      const flags = checkLabel(input.value, list);
+      render(flags);
+      clearBtn.hidden = input.value.trim().length === 0;
+    };
+
+    checkBtn.addEventListener('click', run);
+    clearBtn.addEventListener('click', () => {
+      input.value = '';
+      results.innerHTML = IDLE_HTML;
+      clearBtn.hidden = true;
+      input.focus();
+    });
+
+    // warm the index on first focus so the first check feels instant (still no data leaves the page)
+    input.addEventListener('focus', () => void loadEntries(), { once: true });
+  }
+</script>
