@@ -254,10 +254,28 @@ exists so sessions extend the site instead of rebuilding it.
 > authorised proceeding without waiting.
 
 ## Phase 4 — Label Checker MVP + funnel
-- [ ] **CHK-4.1 Label checker (static rules).** Paste a Supplement Facts panel →
+- [x] **CHK-4.1 Label checker (static rules).** Paste a Supplement Facts panel →
   flags proprietary blends, dose mismatch vs studied dose, melatonin >5 mg,
   missing standardization, interaction flags. *Accept:* Astro island; rules
-  documented and source-backed; output uses allowed framings only.
+  documented and source-backed; output uses allowed framings only. *(Done,
+  merged under owner autonomy grant — FREE tool, not a monetization gate.
+  New `/label-checker`: SSG shell (server-rendered "rules this checker applies"
+  doc with per-rule source links, privacy promise, allowed-framing note,
+  ContextBanner + Disclaimer) + a client-only island (paste→check→flag; nothing
+  POSTed — pasted text never leaves the browser, only a GET of the static
+  /label-index.json). 5 rules read EXISTING cited data (no schema change, no new
+  cites, no new deps): R1 proprietary-blend, R2 melatonin>5mg (framed as the
+  studied 0.5–5mg range, grogginess clause verbatim-cited from melatonin.mdx —
+  NOT a "5mg unsafe" claim), R3 dose<studied-floor, R4 botanical missing
+  standardization, R5 interaction cautions (D4-salvage: routes to pharmacist +
+  /safety, NEVER recommends/forbids a combination). Output = fixed templates,
+  all vetted verbatim. compliance-reviewer PASS (exhaustive per-string:
+  descriptive/navigational/diagnosis-free/D4-clean; privacy promise verified
+  real) + design-guardian PASS (token/§5 primitives/contrast/no fabricated grade).
+  Extended check-crawlable.mjs to assert the rules doc is server-rendered.
+  Build/token-lint/resolver(66,unchanged)/crawl green. Deferred: OCR/image
+  upload, %DV math, form-mismatch/3rd-party-testing modules, pro features
+  (CHK-6.5).)*
 - [ ] **CHK-4.2 Newsletter capture + claim submission.** *Accept:* privacy-
   compliant, no dark patterns; "send us a claim/label to check" form works.
 
@@ -295,6 +313,7 @@ exists so sessions extend the site instead of rebuilding it.
 ---
 
 ### Session log (agents append one line per session)
+- 2026-07-08 · CHK-4.1 · Label Checker MVP (opens Phase 4, autonomous merge). New `/label-checker` — SSG shell (server-rendered rules documentation with per-rule source links, real client-only privacy promise, allowed-framing note, ContextBanner + Disclaimer) + client island (paste→check→flag; NOTHING POSTed — pasted text stays in the browser, only a GET of the static /label-index.json). Mirrors the SearchPalette island + search-index.json.ts prerender pattern. 5 rules read EXISTING cited data — NO schema change, NO new citations (resolver 66/20 unchanged), NO new deps: R1 proprietary-blend, R2 melatonin>5mg (framed vs the studied 0.5–5mg range; grogginess clause verbatim-cited from melatonin.mdx, not a "5mg unsafe" claim), R3 dose<studied-floor (silent when unparseable — no false flags), R4 botanical missing standardized extract, R5 interaction cautions (D4-salvage — routes to pharmacist/clinician + /safety, NEVER recommends/forbids a combination; multi-sedation string is a routing observation only). Output = fixed templates; harness-tested (R1/R2/R3/R4/R5 fire correctly; out-of-corpus + at-floor ingredients produce no false flags). compliance-reviewer PASS (exhaustive per-string verdict: descriptive/navigational/diagnosis-free/D4-clean; privacy promise verified — no POST of pasted text) + design-guardian PASS (§5 label-input/flag-row primitives, contrast §8, renders NO fabricated grade for a panel). Extended scripts/check-crawlable.mjs to assert the rules doc is server-rendered. Nav gains "label checker". Build/token-lint/crawl green. Self-merged under owner autonomy grant (free tool, not monetization/legal/grade). Deferred: OCR/upload, %DV math, form-mismatch/3rd-party modules, pro features CHK-6.5.
 - 2026-07-08 · CHK-3.2 · Start Here page (completes Phase 3, autonomous merge). New `/start-here` navigational IA page — no new health claims, no citations. Implements the doc-03 brief's 5 sections in order: situation tiles · "what Somnary grades" scope prose + real StatRow (20/66/0/$0 computed) · "when not to use this site" boundary routing → /safety with standard Disclaimer adjacent + explicit "this isn't a diagnosis, it's a signpost" framing · S–F "how to read a grade" legend (TIERS + decisionTranslation + grade≠safety note) · "most common checks" pills (melatonin/magnesium/sleep-blends/cbd/valerian) + corrections link. Nav gains "start here". All 13 links resolve. compliance PASS (section-3 conservative/navigational/diagnosis-free, line-by-line) + design-guardian PASS (clean, no fixes). Build/token-lint/resolver(66,unchanged)/crawl green. Self-merged under owner autonomy grant. Added PHASE 3 COMPLETE marker.
 - 2026-07-08 · CHK-3.3 · safety hub / router (autonomous merge). New `/safety` page: 5-card boundary router (apnea/snoring · chronic insomnia · meds-or-condition · child · urgent) routing to REAL destinations only (/when-to-see-a-doctor ×3, /melatonin-children, /when-to-see-a-doctor#urgent — added the #urgent anchor). Copy is NAVIGATIONAL-only: names each boundary + what its already-cited destination covers, no new clinical claim, no diagnosis, no personalized advice. ContextBanner + standard Disclaimer above the grid; only the urgent card uses the vermilion safety register. Homepage "Read safety red flags" CTA + medications tile repointed to /safety; Nav gains "safety". compliance PASS (explicitly conservative/navigational/diagnosis-free); design-guardian FAIL→PASS (urgent-tag contrast --vermilion→--safety-ink; hover to §6 -2px). Build/token-lint/resolver(66,unchanged)/crawl green. Medical-boundary content self-merged under the owner's autonomy grant (compliance is the delegated safety gate); not a grade/legal/monetization hard gate. Deferred: meds page CHK-5.2; broader hub modules.
 - 2026-07-08 · CHK-3.4 · remedies overview demote + sortable (autonomous merge). Reframed `/tiers` from v1 site-hero to a reference overview (neutral eyebrow/H1/dek, hero StatRow removed, nav tiers→remedies, URL kept). SSG-first sortable: one server-rendered flat grid of all 20 cards in grade→name canonical order (JS-off safe, crawlable) + token-only segmented control (grade/A–Z/category) reordering existing <li> nodes in place (aria-pressed, keyboard, focus-ring). Grades READ-ONLY — AC-4 proven (zero edits to tiers.ts/remedies/content-index). Corrected a plan error: cbt-i IS tier S, so legend honestly shows S=1 (no fabricated "0"); empty-S note kept as data-driven code. Added compact "educational, not medical advice" near the index (compliance non-blocking note) + tokenized active-seg color. design-guardian + compliance PASS; build/token-lint/resolver(66,unchanged)/crawl green. Merged under owner autonomy grant (no grade/legal/monetization touched). Deferred: faceted filtering → CHK-6.1.
