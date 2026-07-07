@@ -61,9 +61,10 @@ const rules = [
     id: 'R5',
     title: 'an ingredient with documented interaction cautions',
     rationale:
-      'each ingredient page lists interaction cautions drawn from its cited safety section. the checker surfaces those per matched ingredient and routes you to the safety page. it never tells you to combine or avoid anything, and it never implies a combination is safe — an interaction is a question for a pharmacist or clinician.',
+      'each ingredient page lists interaction cautions drawn from its cited safety section. the checker surfaces those per matched ingredient and routes you to the safety boundary and the medications & sleep aids context. it never tells you to combine or avoid anything, and it never implies a combination is safe — an interaction is a question for a pharmacist or clinician.',
     links: [
       { href: '/safety', label: 'the safety boundary' },
+      { href: '/medications-and-sleep-aids', label: 'medications & sleep aids' },
     ],
   },
 ];

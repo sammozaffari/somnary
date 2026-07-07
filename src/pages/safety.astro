@@ -26,10 +26,10 @@ const routes = [
       'when persistent insomnia is a condition to treat properly rather than paper over nightly, and what to bring to the appointment.',
   },
   {
-    href: '/when-to-see-a-doctor',
+    href: '/medications-and-sleep-aids',
     boundary: 'you take medications or manage a condition',
     covers:
-      'why the safety boundary comes before any remedy when other medicines or a health condition are in the picture — start with a clinician, not a shelf.',
+      'why interactions and timing are a pharmacist conversation before any sleep aid — the documented cautions to raise, and the questions to bring to a clinician.',
   },
   {
     href: '/melatonin-children',
@@ -81,7 +81,7 @@ const urgentRoute = {
             <a class="route-card" href={r.href}>
               <p class="card-boundary">{r.boundary}</p>
               <p class="card-covers">{r.covers}</p>
-              <span class="card-go">{r.href.startsWith('/melatonin-children') ? 'melatonin in children →' : 'when to see a doctor →'}</span>
+              <span class="card-go">{r.href.startsWith('/melatonin-children') ? 'melatonin in children →' : r.href.startsWith('/medications-and-sleep-aids') ? 'medications & sleep aids →' : 'when to see a doctor →'}</span>
             </a>
           ))
         }
