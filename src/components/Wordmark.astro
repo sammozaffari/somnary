@@ -1,8 +1,9 @@
 ---
-// Wordmark — DESIGN_SYSTEM v3. Circular oxblood mark carrying a crescent moon (sleep)
-// + "Somnary" logotype in Instrument Sans. Capitalized "Somnary", NO trailing period —
-// the moon mark is the brand symbol (D3 amended by owner 2026-07-08). Do NOT lowercase.
-// Linked → wraps in <a> (focus ring applies); mark is decorative (aria-hidden).
+// Wordmark — DESIGN_SYSTEM v3. The brand symbol is a crescent moon in a circular oxblood
+// disc (D3 amended by owner 2026-07-08). In the nav the moon mark stands ALONE — the
+// "Somnary" logotype text was dropped per owner 2026-07-09; the mark is enlarged to carry
+// the brand on its own. The accessible name stays "Somnary" via aria-label so the link is
+// still announced/read as the brand. Linked → wraps in <a> (focus ring applies).
 interface Props {
   href?: string;
 }
@@ -15,7 +16,6 @@ const { href = '/' } = Astro.props;
       <path d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z"/>
     </svg>
   </span>
-  <span class="logotype">Somnary</span>
 </a>
 
 <style>
@@ -25,12 +25,13 @@ const { href = '/' } = Astro.props;
     gap: var(--sp-2);
     text-decoration: none;
   }
-  /* filled oxblood disc carrying a white crescent moon — prototype .brand-mark */
+  /* filled oxblood disc carrying a white crescent moon — the standalone brand mark.
+     Enlarged (was 27px) now that it carries the nav on its own. */
   .mark {
     display: grid;
     place-items: center;
-    width: 27px;
-    height: 27px;
+    width: 40px;
+    height: 40px;
     flex: none;
     border-radius: var(--r-pill);
     background: var(--primary);
@@ -38,15 +39,7 @@ const { href = '/' } = Astro.props;
     line-height: 1;
   }
   .mark svg {
-    width: 15px;
-    height: 15px;
-  }
-  .logotype {
-    font-family: var(--font-display);
-    font-weight: 700; /* Instrument Sans caps at 700 */
-    font-size: 27px;
-    letter-spacing: -0.04em;
-    color: var(--ink);
-    line-height: 1;
+    width: 23px;
+    height: 23px;
   }
 </style>
