@@ -32,6 +32,9 @@ jobs:
       - name: Resolver self-test (a fake PMID must fail the gate)
         run: npm run verify:cites:selftest
 
+      - name: Botanical completeness (every botanical has standardization + a studied dose)
+        run: npm run verify:botanical
+
       - name: Build (schema validation + SSG)
         run: npm run build
 
