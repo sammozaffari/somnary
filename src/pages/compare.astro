@@ -173,10 +173,8 @@ const catFacets = [...new Set(rows.map((r) => r.category).filter(Boolean))].sort
             <div class="row-head">
               <TierBadge tier={r.tier} size="card" />
               <div class="head-text">
-                <a class="name" href={`/r/${r.slug}`} aria-label={`read ${r.name} — grade ${r.tier}`}>
-                  {r.name}
-                  <span class="dot">.</span>
-                </a>
+                <a class="name" href={`/r/${r.slug}`} aria-label={`read ${r.name} — grade ${r.tier}`}
+                  >{r.name}<span class="dot">.</span></a>
                 <p class="verdict">{r.verdict}</p>
                 <p class="decision">
                   <span class="grade-k">grade {r.tier} · {getTier(r.tier).name}</span>
