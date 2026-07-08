@@ -31,18 +31,19 @@ const sourceHierarchy = [
   'anecdote',
 ];
 
-const killers = [
+const killers: { term: string; body: string; link?: { href: string; text: string } }[] = [
   {
     term: 'standardization.',
     body: 'if a product doesn’t quantify its active constituent (withanolides in ashwagandha, valerenic acid in valerian, the L-theanine purity), then “it works” is unfalsifiable, because no two bottles are the same. unstandardized remedies are downgraded.',
   },
   {
     term: 'dose-match.',
-    body: 'the dose that worked in a trial is often far higher than what’s actually in the capsules on sale. where the market dose doesn’t match the studied dose, we say so, and it pulls the grade down.',
+    body: 'a grade is earned at the specific dose a trial actually used, so the studied dose is the yardstick. the dose that worked in a trial is often higher than what’s in the capsules on sale; where the per-ingredient dose is below — or simply not disclosed against — the studied dose, the trial result doesn’t transfer, and it pulls the grade down.',
   },
   {
     term: 'the proprietary-blend penalty.',
-    body: 'a label that says “sleep blend 500 mg” without a per-ingredient breakdown is automatically downgraded. if you can’t see how much of each thing is in it, the claim can’t be checked. and we don’t grade on faith.',
+    body: 'this is the dose-match failure taken to its limit. a label that reports only a combined total (“sleep blend 500 mg”) hides the per-ingredient dose entirely, so there is no dose left to match against any studied dose. the claim can’t be checked, and we don’t grade on faith, so a hidden-dose blend is downgraded on principle. the full walk-through is here:',
+    link: { href: '/sleep-blends', text: 'how a hidden-dose blend defeats its own evidence' },
   },
   {
     term: 'form and bioavailability.',
@@ -201,6 +202,12 @@ const killers = [
           killers.map((k) => (
             <p>
               <strong>{k.term}</strong> {k.body}
+              {k.link && (
+                <>
+                  {' '}
+                  <a href={k.link.href}>{k.link.text}</a>.
+                </>
+              )}
             </p>
           ))
         }
