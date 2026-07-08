@@ -9,9 +9,9 @@ import LegalPage from '../layouts/LegalPage.astro';
 
 <LegalPage
   title="privacy"
-  eyebrow="privacy · last updated 30 june 2026"
+  eyebrow="privacy · last updated 9 july 2026"
   description="Somnary's privacy policy. we collect as little as possible: no data selling, no ad-tracking, and most of the site works without collecting anything that identifies you."
-  lastUpdated="30 june 2026"
+  lastUpdated="9 july 2026"
 >
   <p class="lead">
     Somnary is built to need as little of your data as possible. this policy explains what we
@@ -26,9 +26,18 @@ import LegalPage from '../layouts/LegalPage.astro';
   <h2>1. what we collect</h2>
   <ul>
     <li>
-      <strong>newsletter (the dispatch):</strong> the dispatch newsletter isn’t live yet. when
-      it launches, subscribing will store your email address, only to send you the newsletter.
-      nothing else.
+      <strong>newsletter (the dispatch):</strong> the dispatch newsletter isn’t publishing yet,
+      but you can leave your email to be told when it launches. if you do, we store just that
+      email address (in our database, hosted by Supabase — see “sharing” below), only to send you
+      a note when the dispatch starts. nothing else, no spam, and you can ask us to remove it any
+      time.
+    </li>
+    <li>
+      <strong>claim / label submissions:</strong> if you send us a sleep claim or a product label
+      to check, we store what you submit (and your email only if you choose to add one) to help us
+      decide what to research and to run the correction process. these are also stored in our
+      Supabase database. please don’t include personal health details — we don’t need them and ask
+      you not to send them.
     </li>
     <li>
       <strong>analytics:</strong> we currently run no analytics: no third-party scripts, no
@@ -73,9 +82,11 @@ import LegalPage from '../layouts/LegalPage.astro';
 
   <h2>5. sharing</h2>
   <p>
-    we only share data with the service providers that run the site for us, currently our host,
-    Vercel. if we add an email tool (for the dispatch) or analytics, we’ll name them here. each is
-    bound to handle data for us alone. we may disclose information if required by law.
+    we share data with the service providers that run the site for us: our host, Vercel, and
+    Supabase, which stores the email addresses and claim/label submissions described above (its
+    servers are the database behind those two forms). if we add an email-sending tool (for the
+    dispatch) or analytics, we’ll name them here too. each is bound to handle data for us alone. we
+    may disclose information if required by law.
   </p>
 
   <h2>6. retention</h2>

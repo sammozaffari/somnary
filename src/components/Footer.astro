@@ -26,6 +26,11 @@ const context = [
   { href: '/ramelteon', label: 'ramelteon' },
   { href: '/sleep-blends', label: 'sleep blends' },
 ];
+// Participate — reader-facing ways to engage (CHK-4.2). Kept distinct from legal + context.
+const participate = [
+  { href: '/dispatch', label: 'the dispatch' },
+  { href: '/submit-a-claim', label: 'submit a claim' },
+];
 ---
 
 <footer class="footer">
@@ -40,6 +45,16 @@ const context = [
     <span class="group-label">context · not graded</span>
     <ul class="linkrow">
       {context.map((l) => (
+        <li>
+          <a href={l.href}>{l.label}</a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+  <nav class="reflinks" aria-label="participate">
+    <span class="group-label">participate</span>
+    <ul class="linkrow">
+      {participate.map((l) => (
         <li>
           <a href={l.href}>{l.label}</a>
         </li>

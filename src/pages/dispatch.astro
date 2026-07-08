@@ -1,0 +1,182 @@
+---
+// The dispatch (CHK-4.2) — the notify-me page for Somnary's future newsletter. The SHELL is
+// server-rendered and crawlable: what the dispatch will be, when it starts (not yet), and the
+// reader-funded / no-brand-money stance. Only the email capture is an enhanced form island
+// (<NewsletterForm/>), which degrades to a plain POST with JS off.
+//
+// HONESTY (real-promises rule, D2): the newsletter does NOT publish yet. Nothing here promises a
+// cadence, a subscriber count, or content you'll receive now. It collects an email so we can send
+// ONE note when it launches. No brand money, no sponsorship — consistent with /privacy.
+import Base from '../layouts/Base.astro';
+import ContextBanner from '../components/ContextBanner.astro';
+import Disclaimer from '../components/Disclaimer.astro';
+import NewsletterForm from '../components/NewsletterForm.astro';
+---
+
+<Base
+  title="the dispatch — evidence updates & the correction log — Somnary"
+  description="the dispatch is Somnary's future email: evidence updates and the public correction log, when a remedy's grade or evidence changes. it isn't publishing yet — leave your email and we'll tell you once, when it launches. reader-funded, no brand money, no spam."
+  canonical="https://somnary.vercel.app/dispatch"
+>
+  <main class="page">
+    <header class="head">
+      <p class="eyebrow">the dispatch</p>
+      <h1 class="title">The dispatch</h1>
+      <p class="dek">
+        an occasional email about what changed in the evidence: when a remedy’s grade moves, when a
+        new trial shifts the picture, and what landed in the public correction log. it isn’t
+        publishing yet — leave your email and we’ll tell you once, when it launches.
+      </p>
+    </header>
+
+    <ContextBanner
+      note="the dispatch isn’t live yet. this page collects an email so we can notify you when it starts — it doesn’t sign you up for anything today."
+    />
+
+    <div class="form-slot">
+      <NewsletterForm />
+    </div>
+
+    <section class="section" aria-labelledby="what-heading">
+      <p class="eyebrow">what it will be</p>
+      <h2 id="what-heading" class="section-title">What the dispatch will carry</h2>
+      <div class="prose">
+        <p>
+          Somnary grades published human evidence for natural sleep remedies, and that evidence
+          moves. the dispatch is how we’ll tell you when it does — plainly, without hype.
+        </p>
+        <ul class="bullets">
+          <li><strong>evidence updates:</strong> when a new trial or review changes what a grade rests on.</li>
+          <li>
+            <strong>the correction log:</strong> what we got wrong and fixed, drawn from the public
+            <a href="/changelog">evidence change-log</a>.
+          </li>
+          <li><strong>new pages:</strong> when a remedy or context page is published or substantially revised.</li>
+        </ul>
+        <p>
+          what it will <strong>not</strong> be: no product picks, no “take this tonight”, no doses
+          for you, no sponsored anything. it describes evidence — it never tells you what to take.
+        </p>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="funding-heading">
+      <p class="eyebrow">how it’s funded</p>
+      <h2 id="funding-heading" class="section-title">Reader-funded, no brand money</h2>
+      <div class="prose">
+        <p>
+          Somnary takes zero affiliate links and zero brand money — that’s core to what it is. the
+          dispatch is part of the same promise: your email is used only to send you the dispatch,
+          it’s never sold or shared, and every issue will carry a one-click unsubscribe. you can
+          ask us to remove you any time at
+          <a href="mailto:sammymoz@gmail.com">sammymoz@gmail.com</a>. how we handle your data is in
+          the <a href="/privacy">privacy policy</a>.
+        </p>
+      </div>
+    </section>
+
+    <div class="disclaimer-slot">
+      <Disclaimer variant="standard" />
+    </div>
+  </main>
+</Base>
+
+<style>
+  .page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: var(--sp-8) var(--sp-7) var(--sp-9);
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0;
+  }
+  .head {
+    margin-bottom: var(--sp-6);
+  }
+  .title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-3xl);
+    line-height: var(--lh-3xl);
+    letter-spacing: var(--tracking-tight);
+    color: var(--ink);
+    margin: var(--sp-3) 0 var(--sp-5);
+  }
+  .dek {
+    font-family: var(--font-body);
+    font-size: var(--text-md);
+    line-height: var(--lh-md);
+    color: var(--muted);
+    max-width: 68ch;
+    margin: 0;
+  }
+
+  .form-slot {
+    margin: var(--sp-6) 0 var(--sp-8);
+  }
+
+  .section {
+    border-top: var(--border-hairline);
+    padding-top: var(--sp-6);
+    margin-top: var(--sp-8);
+  }
+  .section-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-xl);
+    line-height: var(--lh-xl);
+    color: var(--ink);
+    margin: var(--sp-2) 0 var(--sp-5);
+  }
+  .prose {
+    max-width: 68ch;
+  }
+  .prose p {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--muted);
+    margin: 0 0 var(--sp-4);
+  }
+  .prose strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .prose a {
+    color: var(--primary);
+  }
+  .bullets {
+    margin: 0 0 var(--sp-4);
+    padding-left: var(--sp-5);
+  }
+  .bullets li {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--muted);
+    margin: 0 0 var(--sp-2);
+  }
+  .bullets strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .bullets a {
+    color: var(--primary);
+  }
+
+  .disclaimer-slot {
+    margin-top: var(--sp-8);
+  }
+
+  @media (max-width: 640px) {
+    .page {
+      padding: var(--sp-6) var(--sp-5) var(--sp-8);
+    }
+    .title {
+      font-size: var(--text-2xl);
+    }
+  }
+</style>

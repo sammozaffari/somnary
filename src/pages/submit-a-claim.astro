@@ -1,0 +1,164 @@
+---
+// Submit a claim / label (CHK-4.2) — a reader can send a sleep claim or a product label that
+// seems off. The SHELL is server-rendered and crawlable: how submissions are used (to prioritize
+// research, feeding the correction process), and what we can and can't do with them. Only the
+// form is an enhanced island (<ClaimSubmitForm/>), degrading to a plain POST with JS off.
+//
+// Framing (D4 + forbidden framings): we DESCRIBE how the queue works and route personal-health
+// questions away — this is not a support desk, not medical advice, and never a place we tell
+// someone what to take. Cross-links to /changelog (the correction process) and /label-checker.
+import Base from '../layouts/Base.astro';
+import ContextBanner from '../components/ContextBanner.astro';
+import Disclaimer from '../components/Disclaimer.astro';
+import ClaimSubmitForm from '../components/ClaimSubmitForm.astro';
+---
+
+<Base
+  title="submit a claim or label — help us prioritize what we research — Somnary"
+  description="found a sleep claim or a product label that seems off? send it to Somnary. we read submissions to decide what to research and cover next — it feeds the public correction process. not medical advice; we can't reply to everyone."
+  canonical="https://somnary.vercel.app/submit-a-claim"
+>
+  <main class="page">
+    <header class="head">
+      <p class="eyebrow">submit a claim or label</p>
+      <h1 class="title">Send us a claim or label</h1>
+      <p class="dek">
+        found a sleep claim or a product label that seems off? send it and we’ll consider it for
+        review. we read every submission to decide what to research and cover next — it’s one of
+        the ways the tier board and the correction log stay honest.
+      </p>
+    </header>
+
+    <ContextBanner
+      note="this is how you flag something for us to look into — it isn’t a support channel or a place for a personal health question, and we can’t reply to everyone."
+    />
+
+    <div class="form-slot">
+      <ClaimSubmitForm />
+    </div>
+
+    <section class="section" aria-labelledby="use-heading">
+      <p class="eyebrow">how we use it</p>
+      <h2 id="use-heading" class="section-title">What happens to a submission</h2>
+      <div class="prose">
+        <p>
+          submissions go into a queue we read to <strong>prioritize what we research</strong>. a
+          claim that keeps coming up, or a label that looks misleading, helps us decide which remedy
+          or context page to write or revise next.
+        </p>
+        <p>
+          if something you send reveals an error already on the site, it feeds the
+          <strong>correction process</strong>: we log the change publicly on the
+          <a href="/changelog">evidence change-log</a>, with what changed and when. we grade
+          published human evidence — we don’t act on a single anecdote, and a submission never sets
+          or changes a grade on its own.
+        </p>
+        <p>
+          we can’t reply to everyone, and this isn’t medical advice. for anything about your own
+          situation, talk to a pharmacist or clinician — start at the
+          <a href="/safety">safety boundary</a>.
+        </p>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="label-heading">
+      <p class="eyebrow">checking a label yourself</p>
+      <h2 id="label-heading" class="section-title">Want to check a label first?</h2>
+      <div class="prose">
+        <p>
+          if you have the ingredients and amounts in hand, the free
+          <a href="/label-checker">label checker</a> describes documented problems a panel can have
+          — proprietary blends, doses outside the studied range, missing standardization — right in
+          your browser. if it turns up something worth flagging, send it here.
+        </p>
+      </div>
+    </section>
+
+    <div class="disclaimer-slot">
+      <Disclaimer variant="standard" />
+    </div>
+  </main>
+</Base>
+
+<style>
+  .page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: var(--sp-8) var(--sp-7) var(--sp-9);
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0;
+  }
+  .head {
+    margin-bottom: var(--sp-6);
+  }
+  .title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-3xl);
+    line-height: var(--lh-3xl);
+    letter-spacing: var(--tracking-tight);
+    color: var(--ink);
+    margin: var(--sp-3) 0 var(--sp-5);
+  }
+  .dek {
+    font-family: var(--font-body);
+    font-size: var(--text-md);
+    line-height: var(--lh-md);
+    color: var(--muted);
+    max-width: 68ch;
+    margin: 0;
+  }
+
+  .form-slot {
+    margin: var(--sp-6) 0 var(--sp-8);
+  }
+
+  .section {
+    border-top: var(--border-hairline);
+    padding-top: var(--sp-6);
+    margin-top: var(--sp-8);
+  }
+  .section-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-xl);
+    line-height: var(--lh-xl);
+    color: var(--ink);
+    margin: var(--sp-2) 0 var(--sp-5);
+  }
+  .prose {
+    max-width: 68ch;
+  }
+  .prose p {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--muted);
+    margin: 0 0 var(--sp-4);
+  }
+  .prose strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .prose a {
+    color: var(--primary);
+  }
+
+  .disclaimer-slot {
+    margin-top: var(--sp-8);
+  }
+
+  @media (max-width: 640px) {
+    .page {
+      padding: var(--sp-6) var(--sp-5) var(--sp-8);
+    }
+    .title {
+      font-size: var(--text-2xl);
+    }
+  }
+</style>
