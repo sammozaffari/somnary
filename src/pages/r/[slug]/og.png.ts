@@ -24,8 +24,8 @@ const GRADE: Record<TierId, { fill: string; anchor: string }> = {
   S: { fill: '#274B3F', anchor: '#1B3A30' },
   A: { fill: '#3F6A57', anchor: '#2E5343' },
   B: { fill: '#47695A', anchor: '#35564A' },
-  C: { fill: '#B0791F', anchor: '#8A5D12' },
-  D: { fill: '#A65A2E', anchor: '#82441F' },
+  C: { fill: '#8F5E12', anchor: '#6E470E' },
+  D: { fill: '#9A4F28', anchor: '#78401F' },
   F: { fill: '#96323E', anchor: '#77232D' },
 };
 

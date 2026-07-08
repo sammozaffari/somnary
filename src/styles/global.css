@@ -59,8 +59,8 @@
   --grade-s: #274B3F; --grade-s-tint: #E5EBE7; --grade-s-anchor: #1B3A30;
   --grade-a: #3F6A57; --grade-a-tint: #E7EEE9; --grade-a-anchor: #2E5343;
   --grade-b: #47695A; --grade-b-tint: #E8EDE9; --grade-b-anchor: #35564A;
-  --grade-c: #B0791F; --grade-c-tint: #F5EEDD; --grade-c-anchor: #8A5D12;
-  --grade-d: #A65A2E; --grade-d-tint: #F5E8DF; --grade-d-anchor: #82441F;
+  --grade-c: #8F5E12; --grade-c-tint: #F5EEDD; --grade-c-anchor: #6E470E;
+  --grade-d: #9A4F28; --grade-d-tint: #F5E8DF; --grade-d-anchor: #78401F;
   --grade-f: #96323E; --grade-f-tint: #F5E4E5; --grade-f-anchor: #77232D;
 
   /* ---- type scale: size / line-height (weight + tracking in notes) ---- */

@@ -9,8 +9,8 @@ const grade = {
   s: { DEFAULT: '#274B3F', tint: '#E5EBE7', anchor: '#1B3A30' },
   a: { DEFAULT: '#3F6A57', tint: '#E7EEE9', anchor: '#2E5343' },
   b: { DEFAULT: '#47695A', tint: '#E8EDE9', anchor: '#35564A' },
-  c: { DEFAULT: '#B0791F', tint: '#F5EEDD', anchor: '#8A5D12' },
-  d: { DEFAULT: '#A65A2E', tint: '#F5E8DF', anchor: '#82441F' },
+  c: { DEFAULT: '#8F5E12', tint: '#F5EEDD', anchor: '#6E470E' },
+  d: { DEFAULT: '#9A4F28', tint: '#F5E8DF', anchor: '#78401F' },
   f: { DEFAULT: '#96323E', tint: '#F5E4E5', anchor: '#77232D' },
 };
 

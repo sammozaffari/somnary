@@ -71,8 +71,8 @@ and `tailwind.config.mjs` exactly.
   --grade-s: #274B3F;       /* deep pine — apex of the green end, above A (G1) */
   --grade-a: #3F6A57;
   --grade-b: #47695A;
-  --grade-c: #B0791F;
-  --grade-d: #A65A2E;
+  --grade-c: #8F5E12;
+  --grade-d: #9A4F28;
   --grade-f: #96323E;
 
   /* ---- chrome (warm-neutral shadow tint) ---- */
@@ -150,10 +150,12 @@ The scale is **S A B C D F** — there is no E. Grades are set only via
   a text verdict/decision-translation (per strategy doc 03: S "make this the
   default pathway…" through F "risk… is the headline"). Screen-reader label:
   "Grade B — good evidence".
-- **Contrast constraint:** white on `--grade-c` `#B0791F` is **3.75:1** — passes
-  WCAG AA only as large text (≥18.66px bold). Grade letters (23px/112px, 700)
-  qualify. **Do not** set small white text on grade colors; for small text use
-  the grade color as text on `--surface` or on its tint.
+- **Contrast constraint:** the amber/burnt grades C/D were darkened so grade-colored
+  *small* text clears AA on their tints — grade-C `#8F5E12` as text on `--grade-c-tint`
+  = **4.81:1**, grade-D `#9A4F28` on `--grade-d-tint` = **4.96:1** (both AA small).
+  White letter on every grade fill is ≥5:1 except none below AA-large. **Do not** set
+  small white text on a grade fill; for small grade-colored text use the grade color on
+  `--surface` or on its tint (now valid for all six).
 - **S-tier** = `--grade-s` `#274B3F` (retuned for the warm ground), white letter at
   9.70:1 (AAA). Big-badge anchor `#1B3A30`.
 
@@ -232,8 +234,9 @@ styling and shipping without it fails accessibility.
 | white on `--primary` / `--primary-deep` | 9.92 / 12.28 | AAA |
 | `--action-ink` (white) on `--action` | 9.92 | AAA |
 | white letter on grade S | 9.70 | AAA |
-| white on grade A / B / D / F | 6.16 / 6.11 / 5.09 / 7.44 | AA |
-| white on grade C | **3.75** | large text only (§3) |
+| white on grade A / B / F | 6.16 / 6.11 / 7.44 | AA |
+| white on grade C / D (darkened) | 5.56 / 5.96 | AA |
+| grade-C / grade-D text on their tint | 4.81 / 4.96 | AA small (§3) |
 | `--vermilion` on surface | 4.12 | **large text/icons only** |
 | `--safety-ink` on `--warning-bg` | 6.37 | AA small text |
 | `--eucalyptus` on surface | 6.16 | AA small text |
