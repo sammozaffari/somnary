@@ -1,7 +1,7 @@
 ---
-// Wordmark — DESIGN_SYSTEM v3 (brand casing D3, unchanged). Circular oxblood mark
-// carrying a crescent moon (sleep) + "Somnary" logotype in Instrument Sans + oxblood
-// period. Capitalized "Somnary." is the ratified mark (D3) — do NOT lowercase.
+// Wordmark — DESIGN_SYSTEM v3. Circular oxblood mark carrying a crescent moon (sleep)
+// + "Somnary" logotype in Instrument Sans. Capitalized "Somnary", NO trailing period —
+// the moon mark is the brand symbol (D3 amended by owner 2026-07-08). Do NOT lowercase.
 // Linked → wraps in <a> (focus ring applies); mark is decorative (aria-hidden).
 interface Props {
   href?: string;
@@ -15,7 +15,7 @@ const { href = '/' } = Astro.props;
       <path d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z"/>
     </svg>
   </span>
-  <span class="logotype">Somnary<span class="dot">.</span></span>
+  <span class="logotype">Somnary</span>
 </a>
 
 <style>
@@ -48,9 +48,5 @@ const { href = '/' } = Astro.props;
     letter-spacing: -0.04em;
     color: var(--ink);
     line-height: 1;
-  }
-  /* trailing-period dot in oxblood --primary (D3 mark) */
-  .dot {
-    color: var(--primary);
   }
 </style>

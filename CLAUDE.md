@@ -7,9 +7,11 @@
   wiki. Revenue candidates in order: clinician handout exports, label-checker
   pro features, supporter tier. No affiliate, no brand money — ever. Any ads must
   pass the ad framework in the rulebook (source-backed, no treatment claims).
-- **D3 Brand: "Somnary", capitalized**, in prose, UI, and wordmark (`Somnary.`
-  with trailing period as the mark). Retire all lowercase-only styling; update
-  any doc or design asset that says otherwise when touched.
+- **D3 Brand: "Somnary", capitalized**, in prose, UI, and wordmark. Retire all
+  lowercase-only styling; update any doc or design asset that says otherwise when
+  touched. *(Amended by owner 2026-07-08: the trailing-period mark is dropped —
+  the wordmark is "Somnary" (no period), and the crescent-moon disc is the brand
+  symbol. The earlier `Somnary.` trailing-period form is retired.)*
 - **D4 Stack builder: killed.** Never build combine-your-stack features or CTAs.
   Salvage only the interaction-warning engine, surfaced through the compare tool
   and safety router. AI never recommends supplement combinations.
