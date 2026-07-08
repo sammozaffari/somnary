@@ -158,10 +158,12 @@
     background: var(--pistachio);
     border-color: var(--eucalyptus);
   }
+  /* neutral, NOT the reserved safety register — a form error is not a health warning */
   .nf-status[data-tone='err'] {
-    color: var(--safety-ink);
-    background: var(--warning-bg);
-    border-color: var(--vermilion);
+    color: var(--ink);
+    background: var(--surface);
+    border-color: var(--ink);
+    font-weight: 600;
   }
 
   @media (max-width: 640px) {
