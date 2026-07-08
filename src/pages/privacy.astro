@@ -3,15 +3,16 @@
 // advice — review by an AU solicitor (TGA / ACL / Privacy Act) before launch, and again before
 // any paid tool or reader-support tier ships (D2: tools-first, reader-funded; no membership paywall).
 // Bracketed tooling has been resolved to the ACTUAL current stack: no analytics, no email tool
-// yet; host = Vercel (US).
+// yet; host = Vercel (US); the optional on-page assistant (CHK-6.3) sends the user's question +
+// the reviewed page content to Google's Gemini API — disclosed in §1 and §5. [HUMAN-GATE: legal].
 import LegalPage from '../layouts/LegalPage.astro';
 ---
 
 <LegalPage
   title="privacy"
-  eyebrow="privacy · last updated 30 june 2026"
+  eyebrow="privacy · last updated 8 july 2026"
   description="Somnary's privacy policy. we collect as little as possible: no data selling, no ad-tracking, and most of the site works without collecting anything that identifies you."
-  lastUpdated="30 june 2026"
+  lastUpdated="8 july 2026"
 >
   <p class="lead">
     Somnary is built to need as little of your data as possible. this policy explains what we
@@ -40,6 +41,16 @@ import LegalPage from '../layouts/LegalPage.astro';
       <strong>search queries:</strong> sitewide search isn’t live yet. when it is, searches you
       run may be logged in aggregate, anonymised form to help us decide what to research and
       cover next. we won’t tie searches to your identity.
+    </li>
+    <li>
+      <strong>the on-page assistant (“ask this page”):</strong> when you send a question to the
+      optional assistant, the text of your question and the reviewed content of the page you’re on
+      are sent to Google (the Gemini API) to generate the answer. we don’t attach your name, email,
+      or an account (we don’t have one for you), and we don’t log your questions to build a profile
+      of you. Google processes the request as our AI provider under its API terms. because your
+      question leaves our servers to reach Google, please don’t type anything into the assistant
+      that identifies you or that you consider sensitive. the feature is optional: every page and
+      its sources work fully without it.
     </li>
     <li>
       <strong>community reports (when launched):</strong> these are anonymous by design: no
@@ -73,9 +84,11 @@ import LegalPage from '../layouts/LegalPage.astro';
 
   <h2>5. sharing</h2>
   <p>
-    we only share data with the service providers that run the site for us, currently our host,
-    Vercel. if we add an email tool (for the dispatch) or analytics, we’ll name them here. each is
-    bound to handle data for us alone. we may disclose information if required by law.
+    we share data with the service providers that run the site for us: our host, Vercel (US), and
+    — only when you use the optional on-page assistant — Google, which processes your question and
+    the page content through its Gemini API to generate the answer. if we add an email tool (for
+    the dispatch) or analytics, we’ll name them here. each is bound to handle data for us alone. we
+    may disclose information if required by law.
   </p>
 
   <h2>6. retention</h2>
@@ -95,7 +108,9 @@ import LegalPage from '../layouts/LegalPage.astro';
   <h2>8. data location</h2>
   <p>
     our service providers may store data outside australia. our host, Vercel, operates globally
-    and may process data in the United States. we choose providers with appropriate safeguards.
+    and may process data in the United States, and Google (the Gemini API, used only for the
+    on-page assistant) may likewise process your question in the United States. we choose providers
+    with appropriate safeguards.
   </p>
 
   <h2>9. children</h2>

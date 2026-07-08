@@ -75,6 +75,9 @@ const CRISIS =
 const DOSING =
   /\b(how much|how many|what dose|what dosage|how many mg|how much mg)\b[^.?!]*\b(should i|do i|can i|to take|to give|to use|for me|for my|for a|per night|each night)\b/i;
 const DOSING2 = /\b(how much|how many)\b[^.?!]*\b(take|give|use|need|dose)\b/i;
+// Personal-amount framings that skip "how much": "is 10mg too much for me", "a good dose for me".
+const DOSING3 =
+  /\b(too much|too little|too many|a good|the right|the proper|the ideal|the best|the correct|enough)\b[^.?!]*\bfor (me|my)\b/i;
 
 // Diagnosis: asking us to name/confirm a condition in them.
 const DIAGNOSIS =
@@ -86,7 +89,7 @@ const SAFE_FOR_ME =
 
 // Mixing with the user's meds / combining products (D4).
 const COMBINE =
-  /\b(mix|combine|combining|stack|stacking|take together|together with|alongside|on top of)\b[^.?!]*\b(medication|meds|medicine|prescription|antidepressant|ssri|snri|maoi|warfarin|blood thinner|blood pressure|antihistamine|sedative|benzo\w*|ambien|zolpidem|zoloft|prozac|lexapro|xanax|alcohol|birth control|the pill)\b|\bcombine\b[^.?!]*\band\b|\b(mix|combine|take)\b[^.?!]*\bwith my\b|\bcan i (take|use)\b[^.?!]*\bwith\b[^.?!]*\b(medication|meds|medicine|prescription|antidepressant|warfarin|alcohol)\b/i;
+  /\b(mix|combine|combining|stack|stacking|take together|together with|alongside|on top of)\b[^.?!]*\b(medication|meds|medicine|prescription|antidepressant|ssri|snri|maoi|warfarin|blood thinner|blood pressure|antihistamine|sedative|benzo\w*|ambien|zolpidem|zoloft|prozac|lexapro|xanax|alcohol|birth control|the pill)\b|\bcombine\b[^.?!]*\band\b|\b(mix|combine|take)\b[^.?!]*\bwith my\b|\bcan i (take|use)\b[^.?!]*\bwith\b[^.?!]*\b(medication|meds|medicine|prescription|antidepressant|warfarin|alcohol)\b|\b(interact|interacts|interaction|interfere|interferes)\b[^.?!]*\b(with )?my\b/i;
 
 // Start/stop/replace a prescription.
 const STOP_RX =
@@ -102,7 +105,7 @@ export function classify(question: string): ClassifyResult {
   if (CRISIS.test(q)) return { kind: 'refuse', category: 'crisis', message: MSG.crisis, route: ROUTES.urgent };
   if (STOP_RX.test(q)) return { kind: 'refuse', category: 'stop-prescription', message: MSG.stopRx, route: ROUTES.clinician };
   if (COMBINE.test(q)) return { kind: 'refuse', category: 'combine-meds', message: MSG.combine, route: ROUTES.meds };
-  if (DOSING.test(q) || DOSING2.test(q)) return { kind: 'refuse', category: 'personal-dosing', message: MSG.dosing, route: ROUTES.clinician };
+  if (DOSING.test(q) || DOSING2.test(q) || DOSING3.test(q)) return { kind: 'refuse', category: 'personal-dosing', message: MSG.dosing, route: ROUTES.clinician };
   if (DIAGNOSIS.test(q)) return { kind: 'refuse', category: 'diagnosis', message: MSG.diagnosis, route: ROUTES.clinician };
   if (SAFE_FOR_ME.test(q)) return { kind: 'refuse', category: 'safe-for-me', message: MSG.safeForMe, route: ROUTES.safety };
   return { kind: 'allow' };
