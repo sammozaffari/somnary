@@ -1,0 +1,421 @@
+---
+// anxiety + sleep — CONTEXT page (CHK-5.2, PR-C). The MOST sensitive page in the set: mental-health
+// boundary. NOT a graded remedy, NOT a diagnosis, NOT a screen, and NOT treatment for anxiety. It is
+// PREDOMINANTLY NAVIGATIONAL: it describes, in plain experiential terms, the widely-recognised two-way
+// anxiety<->insomnia loop, then ROUTES — the sleep side to CBT-I (/r/cbt-i) and the anxiety side to a
+// clinician; distress/crisis to /when-to-see-a-doctor#urgent. No tier badge, no evidence-gate chips, no
+// plannedTier. Mirrors older-adults.astro / medications-and-sleep-aids.astro structure exactly. No line
+// diagnoses, screens for, or claims any supplement treats/reduces anxiety. The ONLY substantive evidence
+// point is CBT-I for chronic insomnia (an insomnia therapy, never framed as an anxiety treatment). Both
+// sources are corpus-reused from cbt-i.mdx and were re-verified firsthand against PubMed:
+//   1 Qaseem/ACP 2016 (Ann Intern Med 2016;165(2):125–133) — ACP strong recommendation that ALL adults
+//     receive CBT-I as the INITIAL treatment for chronic insomnia, before pharmacotherapy. PMID 27136449.
+//   2 van Straten 2018 (Sleep Med Rev 2018;38:3–16) — meta-analysis, 87 RCTs; large effect on insomnia
+//     severity (g≈0.98) that held up "with or without comorbid disease". Supports the NARROW claim that
+//     CBT-I's benefit is not limited to isolated insomnia — NOT that it treats anxiety. PMID 28392168.
+// l-theanine / ashwagandha are cross-linked ONLY, explicitly labelled weak sleep evidence and NOT anxiety
+// treatments — framed as things people ask about, routed to their evidence pages. No supplement claim is
+// source-backed here because none is made. The two-way loop is described experientially (what people
+// report), not asserted as an epidemiological effect, so it carries no citation.
+import Base from '../layouts/Base.astro';
+import ContextBanner from '../components/ContextBanner.astro';
+import ContextSources from '../components/ContextSources.astro';
+import Disclaimer from '../components/Disclaimer.astro';
+import Fn from '../components/Fn.astro';
+
+const sources = [
+  {
+    n: 1,
+    cite: 'Qaseem A, Kansagara D, Forciea MA, Cooke M, Denberg TD. Management of Chronic Insomnia Disorder in Adults: A Clinical Practice Guideline From the American College of Physicians. Ann Intern Med. 2016;165(2):125–133.',
+    finding:
+      'the American College of Physicians issued a strong recommendation (moderate-quality evidence) that all adult patients receive cognitive behavioural therapy for insomnia (CBT-I) as the initial treatment for chronic insomnia disorder, before pharmacotherapy — establishing a non-drug approach as first-line for the sleep problem, and pointing toward clinical evaluation rather than self-treatment.',
+    pmid: '27136449',
+    doi: '10.7326/M15-2175',
+  },
+  {
+    n: 2,
+    cite: 'van Straten A, van der Zweerde T, Kleiboer A, Cuijpers P, Morin CM, Lancee J. Cognitive and behavioral therapies in the treatment of insomnia: A meta-analysis. Sleep Med Rev. 2018;38:3–16.',
+    finding:
+      'meta-analysis of 87 randomised trials (118 treatments): CBT-I produced a large effect on insomnia severity (Hedges g ≈ 0.98) that the authors described as robust — similar for patients with or without comorbid disease, younger or older, and using or not using sleep medication. This supports only that CBT-I\'s benefit for the SLEEP problem is not limited to isolated insomnia; it is not evidence that CBT-I treats any coexisting condition.',
+    pmid: '28392168',
+    doi: '10.1016/j.smrv.2017.02.001',
+  },
+];
+---
+
+<Base
+  title="anxiety and sleep: where each side belongs | Somnary"
+  description="worry and sleeplessness often feed each other. this page describes that two-way pattern plainly, points the sleep side to the best-evidenced non-drug approach, and routes the anxiety side to a clinician — it is not a grade, it does not assess or treat anxiety, and it does not tell you what to take."
+  canonical="https://somnary.vercel.app/anxiety-and-sleep"
+>
+  <main class="page">
+    <header class="head">
+      <p class="eyebrow">context · anxiety &amp; sleep</p>
+      <h1 class="title">anxiety + sleep<span class="dot">.</span></h1>
+      <p class="dek">
+        When worry and sleeplessness feed each other, the sleep problem and the anxiety are two
+        questions, not one — and they belong in different places. This page describes that common
+        two-way pattern in plain terms and points each side toward the right kind of help: the sleep
+        side toward the best-evidenced non-drug approach, the anxiety side toward a clinician. It is
+        not a grade, it does not assess, screen for, or treat anxiety, and it does not tell you what
+        to take or what is safe for you.
+      </p>
+    </header>
+
+    <ContextBanner
+      note="whether anxious sleeplessness is anxiety, insomnia, or both — and what to do about each — is a clinical question about you, not something a wiki can settle or screen for. this page describes a widely-recognised pattern and routes each side to the right kind of help."
+    />
+
+    <p class="who">
+      <span class="who-tag">who this is for</span>
+      anyone whose nights and worries seem tangled together — lying awake with a racing mind, or
+      finding that rough nights leave the next day more on-edge — and who wants to know where the
+      sleep side and the anxiety side each belong. it is not a way to work out whether you have an
+      anxiety condition; only a clinician can do that.
+    </p>
+
+    <!-- safety boundary: MH boundary — the anxiety side belongs with a clinician; distress routes to #urgent (serious) -->
+    <section class="callout sev-serious" role="note" aria-label="mental-health boundary">
+      <div class="callout-head">
+        <span class="sigil" aria-hidden="true">!</span>
+        <p class="callout-title">the anxiety side needs a person, not a page — and distress needs help now</p>
+      </div>
+      <p class="callout-body">
+        This page can describe a pattern; it cannot assess or treat anxiety, and it is no substitute
+        for a clinician. If worry, panic, or low mood is a regular weight — or if it is affecting your
+        days as much as your nights — that belongs with a doctor or mental-health professional who can
+        look at the whole picture. And if you are in distress, or having any
+        <strong>thoughts of self-harm</strong>, please don't wait for an appointment: reach help now —
+        <a href="/when-to-see-a-doctor#urgent">crisis and emergency contacts are here</a>. Nothing on
+        this page tells you what is safe for you or what to take.
+      </p>
+    </section>
+
+    <!-- section 01: the pattern people notice -->
+    <section class="section">
+      <p class="eyebrow">section 01</p>
+      <h2 class="section-title">the pattern people notice</h2>
+      <div class="prose">
+        <p>
+          Plenty of people know this one from the inside: the mind speeds up at lights-out, the day's
+          worries get louder in the quiet, and sleep won't come — then a short, broken night leaves
+          the next day feeling more on-edge, which makes the following night harder still. Anxiety and
+          insomnia often travel together, and people commonly describe them feeding each other in both
+          directions: worry making sleep hard, poor sleep sharpening the next day's worry. Naming that
+          loop can be useful.
+        </p>
+        <p>
+          What this page will <em>not</em> do is tell you what the loop means for you. Whether what
+          you're experiencing is anxiety, insomnia, both, or something else is a clinical judgement,
+          and only a clinician who can see the whole picture is in a position to make it. There is no
+          checklist here for a reason: a wiki cannot diagnose or screen, and this page does not try to.
+        </p>
+      </div>
+    </section>
+
+    <!-- section 02: what the evidence points to (on the SLEEP side only) -->
+    <section class="section">
+      <p class="eyebrow">section 02</p>
+      <h2 class="section-title">what the evidence points to, on the sleep side</h2>
+      <div class="prose">
+        <p>
+          For the sleep side of that loop, the best-evidenced approach to chronic insomnia is not a
+          supplement but a structured therapy: cognitive behavioural therapy for insomnia (CBT-I). A
+          national guideline recommends that <strong>all</strong> adults receive CBT-I as the
+          <em>initial</em> treatment for chronic insomnia, before any sleeping pill.<Fn n={1} /> And
+          its benefit is not confined to people whose insomnia stands alone: in a meta-analysis of 87
+          randomised trials, the effect on insomnia severity was <strong>large</strong> (about
+          g = 0.98) and held up whether or not people also had a coexisting health condition.<Fn n={2} />
+        </p>
+        <p>
+          In plain terms, having something else going on alongside the insomnia is not, by itself, a
+          reason to assume CBT-I won't help the sleep. That is exactly why a coexisting anxiety is a
+          reason to <em>raise</em> CBT-I with a clinician — not a reason to rule it out. What it can
+          look like, and how to reach a trained provider or a validated digital programme, is on the
+          <a href="/r/cbt-i">CBT-I page</a>.
+        </p>
+      </div>
+    </section>
+
+    <!-- section 03: what these findings do NOT show -->
+    <section class="section">
+      <p class="eyebrow">section 03</p>
+      <h2 class="section-title">what these findings do <em>not</em> show</h2>
+      <div class="prose">
+        <p>
+          None of this says CBT-I treats anxiety. It is an insomnia therapy; the evidence here is
+          about <em>sleep</em> outcomes, and the finding that its benefit holds up alongside coexisting
+          conditions is not the same as a finding that it resolves them.<Fn n={2} /> These results also
+          can't tell you which side of your own loop to start with, can't diagnose why you're not
+          sleeping, and can't stand in for a clinician who can weigh the whole picture. The honest
+          takeaway is narrow: for the sleep side there is a well-evidenced, non-drug option worth
+          asking about, and the anxiety side is its own conversation with a professional.
+        </p>
+      </div>
+    </section>
+
+    <!-- section 04: the supplements people ask about (part 6 — form/label reality, reframed) -->
+    <section class="section">
+      <p class="eyebrow">section 04</p>
+      <h2 class="section-title">the supplements people ask about</h2>
+      <div class="prose">
+        <p>
+          People carrying anxious, racing-mind nights often ask about calming supplements —
+          <a href="/r/l-theanine">l-theanine</a>, <a href="/r/ashwagandha">ashwagandha</a>, and the
+          like. Two things are worth being straight about. First, on Somnary these are graded on their
+          <em>sleep</em> evidence — which is thin, and is about sleep, not anxiety; you can read the
+          exact grade on each page. Second, none of them is an established treatment for anxiety, and
+          this page is not suggesting otherwise.
+        </p>
+        <p>
+          Whether any supplement has a place in an anxious-sleep picture — and whether it fits with
+          anything you already take — is a conversation for a clinician or pharmacist, not a self-serve
+          decision, and not something this page can settle. &ldquo;Natural&rdquo; does not mean
+          &ldquo;without interactions&rdquo;; how Somnary handles that is on the
+          <a href="/safety">safety &amp; interactions</a> page.
+        </p>
+      </div>
+    </section>
+
+    <!-- section 05: take these to a clinician -->
+    <section class="section">
+      <p class="eyebrow">section 05</p>
+      <h2 class="section-title">take these to a clinician</h2>
+      <ul class="ask">
+        <li>my nights and my worry seem to feed each other — can we look at the sleep and the anxiety together, rather than one at a time?</li>
+        <li>is cognitive behavioural therapy for insomnia (CBT-I) an option for me, and does it still make sense given everything else that's going on?</li>
+        <li>how would I find a trained CBT-I provider, or a validated digital programme, from here?</li>
+        <li>if I've wondered about a calming supplement, is there any reason not to, given my health and anything I already take?</li>
+        <li>what changes in my mood, worry, or sleep would mean I should come back sooner?</li>
+      </ul>
+    </section>
+
+    <!-- related: the primary boundary + the crisis route + the graded intervention + the weak-evidence supplements -->
+    <section class="section">
+      <p class="eyebrow">related</p>
+      <h2 class="section-title">read next</h2>
+      <ul class="related">
+        <li><a href="/safety">safety &amp; interactions</a> — the primary boundary: how Somnary handles interactions and when to route to a clinician.</li>
+        <li><a href="/when-to-see-a-doctor">when to see a doctor</a> — the signs that a sleep problem needs evaluation, and the crisis and emergency contacts.</li>
+        <li><a href="/r/cbt-i">CBT-I</a> — the non-drug, guideline-first approach to chronic insomnia, and how to reach it.</li>
+        <li><a href="/r/l-theanine">l-theanine</a> — the full sleep grade and how thin the evidence is, before asking about it.</li>
+        <li><a href="/r/ashwagandha">ashwagandha</a> — the full sleep grade, and why it is a clinician conversation, not an anxiety treatment.</li>
+      </ul>
+    </section>
+
+    <ContextSources sources={sources} />
+
+    <div class="disclaimer-slot">
+      <Disclaimer variant="standard" />
+    </div>
+
+    <p class="review-line">
+      reviewed 2026-07-08 · found an error? <a href="/methodology#corrections">corrections →</a>
+    </p>
+  </main>
+</Base>
+
+<style>
+  .page {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: var(--sp-8) var(--sp-7) var(--sp-9);
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0;
+  }
+  .dot {
+    color: var(--primary);
+  }
+  .head {
+    margin-bottom: var(--sp-6);
+  }
+  .title {
+    font-family: var(--font-display);
+    font-size: var(--text-3xl);
+    line-height: var(--lh-3xl);
+    letter-spacing: var(--tracking-tight);
+    color: var(--ink);
+    margin: var(--sp-3) 0 var(--sp-5);
+  }
+  .dek {
+    font-size: var(--text-md);
+    line-height: var(--lh-md);
+    color: var(--muted);
+    max-width: 68ch;
+    margin: 0;
+  }
+
+  /* who this is for */
+  .who {
+    max-width: 68ch;
+    margin: var(--sp-5) 0 0;
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+  }
+  .who-tag {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--primary);
+    margin-right: var(--sp-2);
+  }
+
+  /* safety callout — reuses the §2.12 serious register (grade-f), bespoke to this context page */
+  .callout {
+    border-radius: var(--r-lg);
+    border: 1px solid;
+    padding: var(--sp-6);
+    margin-top: var(--sp-7);
+  }
+  .sev-serious {
+    background: var(--grade-f-tint);
+    border-color: var(--grade-f);
+  }
+  .callout-head {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    margin-bottom: var(--sp-4);
+  }
+  .sigil {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    flex: none;
+    border-radius: var(--r-pill);
+    background: var(--grade-f);
+    color: var(--surface);
+    font-family: var(--font-display);
+    font-weight: 600;
+    line-height: 1;
+  }
+  .callout-title {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--grade-f);
+    margin: 0;
+  }
+  .callout-body {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--ink);
+    margin: 0;
+  }
+  .callout-body strong {
+    font-weight: 600;
+  }
+  .callout-body a {
+    color: var(--grade-f);
+  }
+
+  .section {
+    border-top: var(--border-hairline);
+    padding-top: var(--sp-6);
+    margin-top: var(--sp-8);
+  }
+  .section-title {
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    line-height: var(--lh-xl);
+    color: var(--ink);
+    margin: var(--sp-2) 0 var(--sp-5);
+  }
+  .prose {
+    max-width: 68ch;
+  }
+  .prose p {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--muted);
+    margin: 0 0 var(--sp-4);
+  }
+  .prose strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .prose a {
+    color: var(--primary);
+  }
+
+  /* clinician questions */
+  .ask {
+    max-width: 68ch;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+  }
+  .ask li {
+    position: relative;
+    padding-left: var(--sp-6);
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--muted);
+  }
+  .ask li::before {
+    content: '?';
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--primary);
+  }
+
+  /* related / read-next links */
+  .related {
+    max-width: 68ch;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+  }
+  .related li {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--muted);
+  }
+  .related a {
+    color: var(--primary);
+  }
+
+  .disclaimer-slot {
+    margin-top: var(--sp-8);
+  }
+  .review-line {
+    margin-top: var(--sp-6);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .review-line a {
+    color: var(--primary);
+  }
+  @media (max-width: 640px) {
+    .page {
+      padding: var(--sp-6) var(--sp-5) var(--sp-8);
+    }
+    .title {
+      font-size: var(--text-2xl);
+    }
+  }
+</style>
