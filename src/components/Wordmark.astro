@@ -1,7 +1,7 @@
 ---
-// Wordmark — DESIGN_SYSTEM v3 (brand casing D3, unchanged). Circular oxblood mark +
-// "Somnary" logotype in Instrument Sans + oxblood period. Capitalized "Somnary." is the
-// ratified mark (D3) — do NOT lowercase.
+// Wordmark — DESIGN_SYSTEM v3 (brand casing D3, unchanged). Circular oxblood mark
+// carrying a crescent moon (sleep) + "Somnary" logotype in Instrument Sans + oxblood
+// period. Capitalized "Somnary." is the ratified mark (D3) — do NOT lowercase.
 // Linked → wraps in <a> (focus ring applies); mark is decorative (aria-hidden).
 interface Props {
   href?: string;
@@ -10,7 +10,11 @@ const { href = '/' } = Astro.props;
 ---
 
 <a class="wordmark" href={href} aria-label="Somnary — home">
-  <span class="mark" aria-hidden="true">S</span>
+  <span class="mark" aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="currentColor" role="img" aria-hidden="true">
+      <path d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z"/>
+    </svg>
+  </span>
   <span class="logotype">Somnary<span class="dot">.</span></span>
 </a>
 
@@ -21,7 +25,7 @@ const { href = '/' } = Astro.props;
     gap: var(--sp-2);
     text-decoration: none;
   }
-  /* filled oxblood disc with a white cap — prototype .brand-mark */
+  /* filled oxblood disc carrying a white crescent moon — prototype .brand-mark */
   .mark {
     display: grid;
     place-items: center;
@@ -31,10 +35,11 @@ const { href = '/' } = Astro.props;
     border-radius: var(--r-pill);
     background: var(--primary);
     color: #ffffff;
-    font-family: var(--font-display);
-    font-weight: 700; /* Instrument Sans caps at 700 */
-    font-size: 14px;
     line-height: 1;
+  }
+  .mark svg {
+    width: 15px;
+    height: 15px;
   }
   .logotype {
     font-family: var(--font-display);
