@@ -1,73 +1,78 @@
 /* Global stylesheet — Tailwind layers + design tokens.
-   Tokens below are DESIGN_SYSTEM.md v2 §1 (evidence-teal), the source of truth
-   that component specs reference directly (e.g. var(--grade-d), var(--ink)).
-   tailwind.config.mjs mirrors the same values as utility classes. Never
-   hardcode raw values — see DESIGN_SYSTEM §10 guardrails.
+   Tokens below are DESIGN_SYSTEM.md v3 §1 (warm/oxblood · Instrument Sans), the
+   source of truth that component specs reference directly (e.g. var(--grade-d),
+   var(--ink)). tailwind.config.mjs mirrors the same values as utility classes.
+   Never hardcode raw values — see DESIGN_SYSTEM §10 guardrails.
 
-   MIGRATION NOTE (CHK-0.2): the "legacy aliases" block near the bottom maps the
-   retired v1.2 token names (--base, --tier-*, --lavender*, --ink-soft/faint) to
-   the new values so any not-yet-swept usage still renders in the teal system.
-   The token linter removes these once the sweep is complete. */
+   v3 RE-SKIN NOTE: token NAMES are unchanged from v2 (evidence-teal); only their
+   VALUES changed, so every component inherits the warm/oxblood palette + Instrument
+   Sans automatically. Oxblood (--primary) is now both brand AND action (citron
+   retired). The safety register (--vermilion / --warning-bg / --safety-ink) stays a
+   DISTINCT red-orange — never oxblood. */
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* ---- DESIGN_SYSTEM v2 §1 — :root tokens ---- */
+/* ---- DESIGN_SYSTEM v3 §1 — :root tokens (warm/oxblood · Instrument Sans) ---- */
 :root {
-  /* ---- type families ---- */
-  --font-display: "Archivo", "IBM Plex Sans", system-ui, sans-serif;
-  --font-body:    "IBM Plex Sans", system-ui, -apple-system, sans-serif;
+  /* ---- type families ----
+     The self-hosted variable file (@fontsource-variable/instrument-sans) registers
+     its @font-face family as "Instrument Sans Variable"; it is listed FIRST so the
+     self-hosted font actually binds. "Instrument Sans" is kept in the stack as the
+     static-family fallback (matches the OG generator's family + any static install). */
+  --font-display: "Instrument Sans Variable", "Instrument Sans", system-ui, -apple-system, sans-serif;
+  --font-body:    "Instrument Sans Variable", "Instrument Sans", system-ui, -apple-system, sans-serif;
   --font-mono:    "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
 
-  /* ---- surfaces (cool off-whites) ---- */
-  --paper:   #f5f7f3;
-  --surface: #ffffff;
-  --stone:   #e5ece8;
-  --mineral: #cbd9d3;
+  /* ---- surfaces (warm off-whites) ---- */
+  --paper:   #FCFAF2;
+  --surface: #FFFFFF;
+  --stone:   #EEE8DA;
+  --mineral: #DBD5CD;
 
   /* ---- text ---- */
-  --ink:    #091a18;   /* 16.6:1 on paper */
-  --raisin: #12302e;   /* 14.1:1 on surface — secondary emphasis */
-  --muted:  #53635f;   /* 5.9:1 on paper — supporting (AA small) */
-  --soft:   #7a8a86;   /* 3.6:1 — LARGE/decorative text only */
+  --ink:    #171512;   /* primary text on paper/surface */
+  --raisin: #2B2028;   /* secondary emphasis */
+  --muted:  #5C574F;   /* supporting (AA small) */
+  --soft:   #8C867B;   /* LARGE/decorative text only */
 
-  /* ---- primary (evidence teal) ---- */
-  --primary:      #006b70;   /* brand, links, accents; AA text on white 6.3:1 */
-  --primary-deep: #004c50;
-  --primary-soft: #dff2ee;
+  /* ---- primary (oxblood) — brand, links, accents ---- */
+  --primary:      #7E1F2B;
+  --primary-deep: #661722;
+  --primary-soft: #F6E7E3;
 
-  /* ---- action (citron) — hero primary CTA ONLY ---- */
-  --action:     #b8ff5c;
-  --action-ink: #12220d;
+  /* ---- action (now oxblood) — primary CTA ---- */
+  --action:     #7E1F2B;
+  --action-ink: #FFFFFF;
 
-  /* ---- positive / secondary accent ---- */
-  --eucalyptus: #007f70;
-  --pistachio:  #e8f7d8;
+  /* ---- positive / secondary accent (green) ---- */
+  --eucalyptus: #3F6A57;
+  --pistachio:  #E9F2DB;
 
-  /* ---- safety (vermilion) — warnings ONLY ---- */
-  --vermilion:  #e34234;
-  --warning-bg: #fff0ed;
-  --safety-ink: #a02c22;   /* 6.58:1 on --warning-bg */
+  /* ---- safety (vermilion) — warnings ONLY · DISTINCT from oxblood ---- */
+  --vermilion:  #E34234;
+  --warning-bg: #FDECE7;
+  --safety-ink: #A02C22;
 
-  /* ---- grades: fill · tint wash (letter always white — DESIGN_SYSTEM §3) ---- */
-  --grade-s: #0d4f44; --grade-s-tint: #e2eae9; --grade-s-anchor: #08382f;
-  --grade-a: #0a6f5c; --grade-a-tint: #e2eeeb; --grade-a-anchor: #064d43;
-  --grade-b: #006b70; --grade-b-tint: #e0edee; --grade-b-anchor: #004c50;
-  --grade-c: #b87900; --grade-c-tint: #f6efe0; --grade-c-anchor: #8f5e00;
-  --grade-d: #b14a2b; --grade-d-tint: #f6e9e6; --grade-d-anchor: #8c3a21;
-  --grade-f: #b82432; --grade-f-tint: #f6e5e6; --grade-f-anchor: #911c27;
+  /* ---- grades: fill · tint wash · big-badge gradient anchor (letter always white — §3) ---- */
+  --grade-s: #274B3F; --grade-s-tint: #E5EBE7; --grade-s-anchor: #1B3A30;
+  --grade-a: #3F6A57; --grade-a-tint: #E7EEE9; --grade-a-anchor: #2E5343;
+  --grade-b: #47695A; --grade-b-tint: #E8EDE9; --grade-b-anchor: #35564A;
+  --grade-c: #8F5E12; --grade-c-tint: #F5EEDD; --grade-c-anchor: #6E470E;
+  --grade-d: #9A4F28; --grade-d-tint: #F5E8DF; --grade-d-anchor: #78401F;
+  --grade-f: #96323E; --grade-f-tint: #F5E4E5; --grade-f-anchor: #77232D;
 
   /* ---- type scale: size / line-height (weight + tracking in notes) ---- */
-  --text-display: clamp(64px, 8vw, 128px); --lh-display: 0.92;  /* Archivo 900, -0.067em */
-  --text-3xl:     clamp(38px, 4.3vw, 66px); --lh-3xl:    1.00;  /* Archivo 900, -0.065em (h2) */
-  --text-2xl:     42px;   --lh-2xl:     1.05;  /* Archivo 800, -0.06em (stat numerals) */
-  --text-xl:      32px;   --lh-xl:      1.10;  /* Archivo 700, -0.04em */
-  --text-lg:      21px;   --lh-lg:      1.20;  /* Archivo 700, -0.025em (h3) */
-  --text-md:      18px;   --lh-md:      1.40;  /* IBM Plex 500 (lede) */
-  --text-base:    16px;   --lh-base:    1.45;  /* IBM Plex 400 (body) */
-  --text-sm:      14px;   --lh-sm:      1.50;  /* IBM Plex 400 */
-  --text-xs:      12px;   --lh-xs:      1.40;  /* IBM Plex 600, 0.09em, UPPERCASE */
+  --text-display: clamp(64px, 8vw, 128px); --lh-display: 0.92;  /* Instrument Sans 700, -0.067em */
+  --text-3xl:     clamp(38px, 4.3vw, 66px); --lh-3xl:    1.00;  /* Instrument Sans 700, -0.065em (h2) */
+  --text-2xl:     42px;   --lh-2xl:     1.05;  /* Instrument Sans 700, -0.06em (stat numerals) */
+  --text-xl:      32px;   --lh-xl:      1.10;  /* Instrument Sans 700, -0.04em */
+  --text-lg:      21px;   --lh-lg:      1.20;  /* Instrument Sans 600, -0.025em (h3) */
+  --text-md:      18px;   --lh-md:      1.40;  /* Instrument Sans 500 (lede) */
+  --text-base:    16px;   --lh-base:    1.45;  /* Instrument Sans 400 (body) */
+  --text-sm:      14px;   --lh-sm:      1.50;  /* Instrument Sans 400 */
+  --text-xs:      12px;   --lh-xs:      1.40;  /* Instrument Sans 600, 0.09em, UPPERCASE */
   --tracking-tight: -0.04em;
   --tracking-label:  0.09em;
 
@@ -79,20 +84,20 @@
   --r-xs: 3px; --r-sm: 7px; --r-md: 11px; --r-lg: 16px; --r-xl: 24px; --r-pill: 999px;
 
   /* ---- borders ---- */
-  --line:          rgba(9, 26, 24, 0.13);   /* hairline color (grids/dividers) */
+  --line:          rgba(23, 21, 18, 0.13);   /* hairline color (grids/dividers) */
   --hairline:      1px solid var(--line);
   --border-hairline: var(--hairline);
   --border-strong: 1px solid var(--mineral);
 
-  /* ---- elevation (teal-tinted) ---- */
-  --shadow-sm:   0 1px 2px rgba(0,76,80,.05), 0 1px 3px rgba(0,76,80,.06);
-  --shadow-md:   0 18px 60px rgba(0,76,80,.11);
-  --shadow-lift: 0 28px 90px rgba(0,76,80,.24);
+  /* ---- elevation (warm-neutral tint) ---- */
+  --shadow-sm:   0 1px 2px rgba(23,21,18,.05), 0 1px 3px rgba(23,21,18,.06);
+  --shadow-md:   0 18px 60px rgba(23,21,18,.10);
+  --shadow-lift: 0 24px 70px rgba(23,21,18,.16);
 
   /* ---- a11y + brand mechanics ---- */
-  --focus-ring:          0 0 0 3px rgba(0, 107, 112, 0.40);  /* :focus-visible */
+  --focus-ring:          0 0 0 3px rgba(126, 31, 43, 0.40);  /* :focus-visible (oxblood) */
   --ring:                var(--focus-ring);
-  --grade-optical-shift: 0.02em;  /* Archivo-cap optical-center nudge in grade badges */
+  --grade-optical-shift: 0.02em;  /* cap optical-center nudge in grade badges */
 
   /* ---- motion ---- */
   --dur-instant: 120ms; --dur-fast: 160ms; --dur-base: 320ms; --dur-slow: 560ms; --dur-ambient: 2800ms;
@@ -103,12 +108,12 @@
   --page: min(1460px, calc(100vw - 32px));
 }
 
-/* ---- DESIGN_SYSTEM v2 §1 — base document ---- */
+/* ---- DESIGN_SYSTEM v3 §1 — base document ---- */
 @layer base {
   body {
     background:
-      radial-gradient(circle at 12% 0%, rgba(0, 107, 112, 0.10), transparent 28%),
-      linear-gradient(180deg, #fbfdfb 0%, var(--paper) 45%, #eef4ef 100%);
+      radial-gradient(circle at 12% 0%, rgba(126, 31, 43, 0.06), transparent 28%),
+      linear-gradient(180deg, #FEFDF9 0%, var(--paper) 45%, #F4EFE2 100%);
     background-attachment: fixed;
     color: var(--ink);
     font-family: var(--font-body);

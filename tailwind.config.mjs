@@ -1,48 +1,52 @@
 /** @type {import('tailwindcss').Config} */
 
-// somnaryTheme — DESIGN_SYSTEM.md v2 (evidence-teal), verbatim values. Do not
-// re-derive or "improve" any value (DESIGN_SYSTEM §10 guardrails). Grade colors
-// and their contrast are ratified and final (§3, §8).
+// somnaryTheme — DESIGN_SYSTEM.md v3 (warm/oxblood · Instrument Sans), verbatim
+// values. Do not re-derive or "improve" any value (DESIGN_SYSTEM §10 guardrails).
+// Mirrors the :root token VALUES in src/styles/global.css (names unchanged from v2).
+// Grade colors and their contrast are ratified and final (§3, §8).
 //
 const grade = {
-  s: { DEFAULT: '#0d4f44', tint: '#e2eae9', anchor: '#08382f' },
-  a: { DEFAULT: '#0a6f5c', tint: '#e2eeeb', anchor: '#064d43' },
-  b: { DEFAULT: '#006b70', tint: '#e0edee', anchor: '#004c50' },
-  c: { DEFAULT: '#b87900', tint: '#f6efe0', anchor: '#8f5e00' },
-  d: { DEFAULT: '#b14a2b', tint: '#f6e9e6', anchor: '#8c3a21' },
-  f: { DEFAULT: '#b82432', tint: '#f6e5e6', anchor: '#911c27' },
+  s: { DEFAULT: '#274B3F', tint: '#E5EBE7', anchor: '#1B3A30' },
+  a: { DEFAULT: '#3F6A57', tint: '#E7EEE9', anchor: '#2E5343' },
+  b: { DEFAULT: '#47695A', tint: '#E8EDE9', anchor: '#35564A' },
+  c: { DEFAULT: '#8F5E12', tint: '#F5EEDD', anchor: '#6E470E' },
+  d: { DEFAULT: '#9A4F28', tint: '#F5E8DF', anchor: '#78401F' },
+  f: { DEFAULT: '#96323E', tint: '#F5E4E5', anchor: '#77232D' },
 };
 
 const somnaryTheme = {
   colors: {
-    // surfaces
-    paper: '#f5f7f3', surface: '#ffffff', stone: '#e5ece8', mineral: '#cbd9d3',
+    // surfaces (warm off-whites)
+    paper: '#FCFAF2', surface: '#FFFFFF', stone: '#EEE8DA', mineral: '#DBD5CD',
     // text
-    ink: '#091a18', raisin: '#12302e', muted: '#53635f', soft: '#7a8a86',
-    // primary (evidence teal)
-    primary: { DEFAULT: '#006b70', deep: '#004c50', soft: '#dff2ee' },
-    // action (citron) — hero CTA only
-    action: { DEFAULT: '#b8ff5c', ink: '#12220d' },
-    // secondary accent
-    eucalyptus: '#007f70', pistachio: '#e8f7d8',
-    // safety
-    vermilion: { DEFAULT: '#e34234', bg: '#fff0ed', ink: '#a02c22' },
+    ink: '#171512', raisin: '#2B2028', muted: '#5C574F', soft: '#8C867B',
+    // primary (oxblood)
+    primary: { DEFAULT: '#7E1F2B', deep: '#661722', soft: '#F6E7E3' },
+    // action (oxblood) — primary CTA
+    action: { DEFAULT: '#7E1F2B', ink: '#FFFFFF' },
+    // secondary accent (green)
+    eucalyptus: '#3F6A57', pistachio: '#E9F2DB',
+    // safety (vermilion) — DISTINCT from oxblood
+    vermilion: { DEFAULT: '#E34234', bg: '#FDECE7', ink: '#A02C22' },
     // grades
     grade,
     // borders as color (hairline)
-    line: { DEFAULT: 'rgba(9,26,24,0.13)', strong: '#cbd9d3' },
+    line: { DEFAULT: 'rgba(23,21,18,0.13)', strong: '#DBD5CD' },
   },
   fontFamily: {
-    display: ['Archivo', '"IBM Plex Sans"', 'system-ui', 'sans-serif'],
-    body:    ['"IBM Plex Sans"', 'system-ui', 'sans-serif'],
+    // "Instrument Sans Variable" is the @font-face family from the self-hosted variable
+    // package; listed first so it binds. "Instrument Sans" kept as static fallback.
+    display: ['"Instrument Sans Variable"', '"Instrument Sans"', 'system-ui', '-apple-system', 'sans-serif'],
+    body:    ['"Instrument Sans Variable"', '"Instrument Sans"', 'system-ui', '-apple-system', 'sans-serif'],
     mono:    ['"IBM Plex Mono"', 'ui-monospace', 'monospace'],
   },
   fontSize: {
-    display: ['clamp(64px, 8vw, 128px)', { lineHeight: '0.92', letterSpacing: '-0.067em', fontWeight: '900' }],
-    '3xl':   ['clamp(38px, 4.3vw, 66px)', { lineHeight: '1.0', letterSpacing: '-0.065em', fontWeight: '900' }],
-    '2xl':   ['42px', { lineHeight: '1.05', letterSpacing: '-0.06em', fontWeight: '800' }],
+    // Instrument Sans caps at 700; former Archivo 800/900 display weights map to 700.
+    display: ['clamp(64px, 8vw, 128px)', { lineHeight: '0.92', letterSpacing: '-0.067em', fontWeight: '700' }],
+    '3xl':   ['clamp(38px, 4.3vw, 66px)', { lineHeight: '1.0', letterSpacing: '-0.065em', fontWeight: '700' }],
+    '2xl':   ['42px', { lineHeight: '1.05', letterSpacing: '-0.06em', fontWeight: '700' }],
     xl:      ['32px', { lineHeight: '1.10', letterSpacing: '-0.04em', fontWeight: '700' }],
-    lg:      ['21px', { lineHeight: '1.20', letterSpacing: '-0.025em', fontWeight: '700' }],
+    lg:      ['21px', { lineHeight: '1.20', letterSpacing: '-0.025em', fontWeight: '600' }],
     md:      ['18px', { lineHeight: '1.40', fontWeight: '500' }],
     base:    ['16px', { lineHeight: '1.45', fontWeight: '400' }],
     sm:      ['14px', { lineHeight: '1.50', fontWeight: '400' }],
@@ -51,10 +55,10 @@ const somnaryTheme = {
   spacing: { 1:'4px',2:'8px',3:'12px',4:'16px',5:'24px',6:'32px',7:'48px',8:'64px',9:'96px',10:'128px' },
   borderRadius: { xs:'3px', sm:'7px', md:'11px', lg:'16px', xl:'24px', pill:'999px' },
   boxShadow: {
-    sm:   '0 1px 2px rgba(0,76,80,.05), 0 1px 3px rgba(0,76,80,.06)',
-    md:   '0 18px 60px rgba(0,76,80,.11)',
-    lift: '0 28px 90px rgba(0,76,80,.24)',
-    ring: '0 0 0 3px rgba(0,107,112,.40)',
+    sm:   '0 1px 2px rgba(23,21,18,.05), 0 1px 3px rgba(23,21,18,.06)',
+    md:   '0 18px 60px rgba(23,21,18,.10)',
+    lift: '0 24px 70px rgba(23,21,18,.16)',
+    ring: '0 0 0 3px rgba(126,31,43,.40)',
   },
   transitionDuration: { instant:'120ms', fast:'160ms', base:'320ms', slow:'560ms', ambient:'2800ms' },
   transitionTimingFunction: {

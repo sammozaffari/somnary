@@ -1,7 +1,7 @@
 // Per-remedy Open Graph image (CHK-2.2, the last Phase-2 thread). Build-time generated: satori turns
 // a flexbox card into SVG, resvg rasterizes to PNG, one static image per remedy at /r/{slug}/og.png.
-// Branded with the real design tokens (DESIGN_SYSTEM v2 evidence-teal: paper base, filled
-// grade badge with white letter, Archivo display + IBM Plex Sans body) so every share
+// Branded with the real design tokens (DESIGN_SYSTEM v3 warm/oxblood: warm paper base, filled
+// grade badge with white letter, Instrument Sans display + body) so every share
 // surface renders a share-ready card.
 import type { APIRoute, GetStaticPaths } from 'astro';
 import { getCollection } from 'astro:content';
@@ -13,30 +13,30 @@ import type { TierId } from '../../../lib/tiers';
 
 export const prerender = true;
 
-// design tokens (literal hex — satori needs real values, not CSS vars; these ARE DESIGN_SYSTEM v2 §1)
-const INK = '#091a18';
-const MUTED = '#53635f';
-const SOFT = '#7a8a86';
-const PAPER = '#f5f7f3';
-const PRIMARY = '#006b70';
+// design tokens (literal hex — satori needs real values, not CSS vars; these ARE DESIGN_SYSTEM v3 §1)
+const INK = '#171512';
+const MUTED = '#5C574F';
+const SOFT = '#8C867B';
+const PAPER = '#FCFAF2';
+const PRIMARY = '#7E1F2B';
 // grade fill · darker gradient anchor · white letter (DESIGN_SYSTEM §3)
 const GRADE: Record<TierId, { fill: string; anchor: string }> = {
-  S: { fill: '#0d4f44', anchor: '#08382f' },
-  A: { fill: '#0a6f5c', anchor: '#064d43' },
-  B: { fill: '#006b70', anchor: '#004c50' },
-  C: { fill: '#b87900', anchor: '#8f5e00' },
-  D: { fill: '#b14a2b', anchor: '#8c3a21' },
-  F: { fill: '#b82432', anchor: '#911c27' },
+  S: { fill: '#274B3F', anchor: '#1B3A30' },
+  A: { fill: '#3F6A57', anchor: '#2E5343' },
+  B: { fill: '#47695A', anchor: '#35564A' },
+  C: { fill: '#8F5E12', anchor: '#6E470E' },
+  D: { fill: '#9A4F28', anchor: '#78401F' },
+  F: { fill: '#96323E', anchor: '#77232D' },
 };
 
 const fontFile = (pkg: string, file: string) =>
   readFileSync(join(process.cwd(), 'node_modules/@fontsource', pkg, 'files', file));
 
+// Instrument Sans (static @fontsource weights) for display + body; caps at 700.
 const fonts = [
-  { name: 'Archivo', data: fontFile('archivo', 'archivo-latin-800-normal.woff'), weight: 800 as const, style: 'normal' as const },
-  { name: 'Archivo', data: fontFile('archivo', 'archivo-latin-900-normal.woff'), weight: 900 as const, style: 'normal' as const },
-  { name: 'IBM Plex Sans', data: fontFile('ibm-plex-sans', 'ibm-plex-sans-latin-400-normal.woff'), weight: 400 as const, style: 'normal' as const },
-  { name: 'IBM Plex Sans', data: fontFile('ibm-plex-sans', 'ibm-plex-sans-latin-600-normal.woff'), weight: 600 as const, style: 'normal' as const },
+  { name: 'Instrument Sans', data: fontFile('instrument-sans', 'instrument-sans-latin-400-normal.woff'), weight: 400 as const, style: 'normal' as const },
+  { name: 'Instrument Sans', data: fontFile('instrument-sans', 'instrument-sans-latin-600-normal.woff'), weight: 600 as const, style: 'normal' as const },
+  { name: 'Instrument Sans', data: fontFile('instrument-sans', 'instrument-sans-latin-700-normal.woff'), weight: 700 as const, style: 'normal' as const },
 ];
 
 // tiny hyperscript for satori element objects
@@ -55,12 +55,12 @@ function card(name: string, tier: TierId, dek: string) {
       justifyContent: 'space-between',
       backgroundColor: PAPER,
       padding: '68px 76px',
-      fontFamily: 'IBM Plex Sans',
+      fontFamily: 'Instrument Sans',
     },
     [
       // top row: wordmark + grade badge (filled, white letter)
       h({ justifyContent: 'space-between', alignItems: 'flex-start' }, [
-        h({ fontFamily: 'Archivo', fontWeight: 800, fontSize: '36px', color: INK, letterSpacing: '-0.04em' }, [
+        h({ fontFamily: 'Instrument Sans', fontWeight: 700, fontSize: '36px', color: INK, letterSpacing: '-0.04em' }, [
           h({}, 'Somnary'),
           h({ color: PRIMARY }, '.'),
         ]),
@@ -73,12 +73,12 @@ function card(name: string, tier: TierId, dek: string) {
             borderRadius: '20px',
             background: `linear-gradient(145deg, ${g.fill}, ${g.anchor})`,
           },
-          h({ fontFamily: 'Archivo', fontWeight: 900, fontSize: '104px', color: '#ffffff', lineHeight: 1, letterSpacing: '-0.06em' }, tier),
+          h({ fontFamily: 'Instrument Sans', fontWeight: 700, fontSize: '104px', color: '#ffffff', lineHeight: 1, letterSpacing: '-0.06em' }, tier),
         ),
       ]),
       // middle: name + verdict
       h({ flexDirection: 'column' }, [
-        h({ fontFamily: 'Archivo', fontWeight: 900, fontSize: '96px', color: INK, lineHeight: 1.0, letterSpacing: '-0.05em' }, [
+        h({ fontFamily: 'Instrument Sans', fontWeight: 700, fontSize: '96px', color: INK, lineHeight: 1.0, letterSpacing: '-0.05em' }, [
           h({}, name),
           h({ color: PRIMARY }, '.'),
         ]),
