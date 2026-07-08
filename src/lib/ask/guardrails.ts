@@ -186,16 +186,18 @@ export interface FramingPattern {
   label: string;
 }
 
+// Each pattern-definition line necessarily contains the phrase it matches; the FRAMING-LINT-OK
+// sentinel tells the lint these are the detector's own source, not shipped user copy.
 export const FORBIDDEN_FRAMINGS: FramingPattern[] = [
-  { re: /\btake\s+[a-z0-9-]+\s+tonight\b/i, label: '"take X tonight"' },
-  { re: /\byou should take\b/i, label: '"you should take …"' },
-  { re: /\bi(?:'d| would)? recommend\b[^.?!]*\btak\w+/i, label: '"I recommend taking …"' },
-  { re: /\byour (ideal|best|optimal|correct|right|recommended|perfect) dose\b/i, label: '"your ideal dose"' },
-  { re: /\bis safe for you\b/i, label: '"this is safe for you"' },
-  { re: /\bsafe for you to (take|use)\b/i, label: '"safe for you to take"' },
-  { re: /\bcombine (these|those|them|your)\b/i, label: '"combine these"' },
-  { re: /\bstack (these|those|them|of)\b/i, label: '"stack these"' },
-  { re: /\byou (probably|likely|might|may|must) have\b[^.?!]*\b(apnea|insomnia|anxiety|depress\w*|disorder)\b/i, label: '"you probably have <condition>"' },
+  { re: /\btake\s+[a-z0-9-]+\s+tonight\b/i, label: 'take X tonight' }, // FRAMING-LINT-OK
+  { re: /\byou should take\b/i, label: 'you should take' }, // FRAMING-LINT-OK
+  { re: /\bi(?:'d| would)? recommend\b[^.?!]*\btak\w+/i, label: 'I recommend taking' }, // FRAMING-LINT-OK
+  { re: /\byour (ideal|best|optimal|correct|right|recommended|perfect) dose\b/i, label: 'your ideal dose' }, // FRAMING-LINT-OK
+  { re: /\bis safe for you\b/i, label: 'this is safe for you' }, // FRAMING-LINT-OK
+  { re: /\bsafe for you to (take|use)\b/i, label: 'safe for you to take' }, // FRAMING-LINT-OK
+  { re: /\bcombine (these|those|them|your)\b/i, label: 'combine these' }, // FRAMING-LINT-OK
+  { re: /\bstack (these|those|them|of)\b/i, label: 'stack these' }, // FRAMING-LINT-OK
+  { re: /\byou (probably|likely|might|may|must) have\b[^.?!]*\b(apnea|insomnia|anxiety|depress\w*|disorder)\b/i, label: 'you probably have a condition' }, // FRAMING-LINT-OK
 ];
 
 /** Returns the labels of any forbidden framings found in the text (empty = clean). */
