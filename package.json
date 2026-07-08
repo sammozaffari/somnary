@@ -17,6 +17,7 @@
     "verify:cites": "node scripts/check-citations.mjs",
     "verify:cites:online": "node scripts/check-citations.mjs --online",
     "verify:cites:selftest": "node scripts/test-resolver.mjs",
+    "verify:botanical": "node scripts/check-botanical-completeness.mjs",
     "verify:crawl": "node scripts/check-crawlable.mjs"
   },
   "dependencies": {
