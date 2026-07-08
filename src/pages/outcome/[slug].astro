@@ -39,7 +39,7 @@ const others = OUTCOMES.filter((o) => o.id !== outcome.id);
     <header class="head">
       <p class="crumb"><a href="/">Somnary</a> <span aria-hidden="true">›</span> by outcome</p>
       <p class="eyebrow">by outcome · best evidence first</p>
-      <h1 class="title">{outcome.title}<span class="dot">.</span></h1>
+      <h1 class="title">{outcome.title}</h1>
       <p class="dek">{outcome.dek}: ranked by the strength of the human evidence, not by popularity.</p>
     </header>
 
@@ -90,7 +90,7 @@ const others = OUTCOMES.filter((o) => o.id !== outcome.id);
         {
           others.map((o) => (
             <a class="other" href={`/outcome/${o.id}`}>
-              <p class="other-title">{o.title}<span class="dot">.</span></p>
+              <p class="other-title">{o.title}</p>
               <p class="other-dek">{o.dek}</p>
             </a>
           ))

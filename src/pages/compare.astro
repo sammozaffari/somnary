@@ -97,7 +97,7 @@ const catFacets = [...new Set(rows.map((r) => r.category).filter(Boolean))].sort
   <main class="page">
     <header class="head">
       <p class="eyebrow">tool · compare</p>
-      <h1 class="title">compare remedies<span class="dot">.</span></h1>
+      <h1 class="title">Compare remedies</h1>
       <p class="dek">
         every reviewed remedy, side by side on the things that decide it: the evidence grade, what
         it's studied for, the one-line effect, the evidence gates behind the grade, who should avoid
@@ -174,7 +174,7 @@ const catFacets = [...new Set(rows.map((r) => r.category).filter(Boolean))].sort
               <TierBadge tier={r.tier} size="card" />
               <div class="head-text">
                 <a class="name" href={`/r/${r.slug}`} aria-label={`read ${r.name} — grade ${r.tier}`}
-                  >{r.name}<span class="dot">.</span></a>
+                  >{r.name}</a>
                 <p class="verdict">{r.verdict}</p>
                 <p class="decision">
                   <span class="grade-k">grade {r.tier} · {getTier(r.tier).name}</span>
