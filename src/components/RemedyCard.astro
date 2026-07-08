@@ -18,7 +18,7 @@ const { slug, name, tier, oneLiner, keyCompound } = Astro.props;
 <a class="card" href={`/r/${slug}`} aria-label={`${name} — grade ${tier}`}>
   <div class="top">
     <TierBadge tier={tier} size="card" />
-    <span class="name">{name}<span class="dot">.</span></span>
+    <span class="name">{name}</span>
   </div>
   {keyCompound && <p class="meta">{keyCompound}</p>}
   <p class="dek">{oneLiner}</p>
