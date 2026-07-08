@@ -34,3 +34,10 @@ out/
 docs/strategy/docx-render/
 docs/html-prototype/screenshots/
 docs/html-prototype/screenshots-v2/
+
+# Stray top-level strategy dupes (canonical lives in docs/strategy/) + scratch crops
+/docs/0[0-9]-*.md
+/docs/Somnary_Strategy_Pitch_Deck*
+/docs/Somnary_Strategy_Report.docx
+/docs/sources-and-research-notes.md
+/docs/design-reference/crop_*.png
