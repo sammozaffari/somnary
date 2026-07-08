@@ -26,7 +26,7 @@ export interface SearchDoc {
  * "can't" → "cant", then turn any remaining punctuation into spaces so "l-theanine" ↔ "l theanine".
  * Applied to both the query and every field before comparison.
  */
-function norm(s: string): string {
+export function norm(s: string): string {
   return s
     .toLowerCase()
     .normalize('NFKD')
