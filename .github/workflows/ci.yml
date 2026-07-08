@@ -35,6 +35,12 @@ jobs:
       - name: Botanical completeness (every botanical has standardization + a studied dose)
         run: npm run verify:botanical
 
+      - name: Forbidden-framing lint (assistant copy has no forbidden AI framings)
+        run: npm run verify:framing
+
+      - name: Scoped-assistant guardrails (refusal + hallucination suite, mocked Gemini)
+        run: npm run verify:ask
+
       - name: Build (schema validation + SSG)
         run: npm run build
 

@@ -1,28 +1,48 @@
 ---
-// Ask panel — DESIGN_SYSTEM §2.9 (sidebar "ask" variant). Shipped as an HONEST, inert stub:
-// the RAG assistant is Phase 9 (CHK-9.2), so this must NOT look or behave as if it answers
-// (real-promises rule). The input is disabled and the caption says plainly it's not live yet and
-// will answer only from this page's cited sources. No script — nothing to submit.
+// Ask panel — DESIGN_SYSTEM §2.9 (sidebar "ask" variant). CHK-6.3: the scoped RAG assistant is now
+// LIVE. It answers ONLY from THIS page's cited sources (page-scoped), routes personal-medical /
+// dosing / diagnosis / crisis questions to the boundary pages, and never invents a citation — all
+// enforced server-side in /api/ask (the GEMINI_API_KEY is read there, never in this island). This
+// component POSTs { question, slug } and renders the structured, cited answer. Tokens only.
 interface Props {
   remedyName: string;
+  slug: string;
 }
-const { remedyName } = Astro.props;
+const { remedyName, slug } = Astro.props;
 ---
 
-<section class="ask" aria-label="ask about this remedy">
+<section class="ask" aria-label="ask about this remedy" data-ask data-slug={slug}>
   <p class="ask-label"><span class="dot" aria-hidden="true"></span> ask</p>
-  <p class="prompt">questions about {remedyName}? the assistant will answer only from the cited sources on this page.</p>
-  <div class="field">
+  <p class="prompt">questions about {remedyName}? the assistant answers only from the cited sources on this page.</p>
+  <form class="field" data-ask-form>
     <input
       type="text"
       class="ask-input"
-      placeholder="not live yet"
-      disabled
-      aria-label={`ask about ${remedyName} (coming soon)`}
+      name="question"
+      placeholder={`ask about ${remedyName}…`}
+      autocomplete="off"
+      maxlength="500"
+      aria-label={`ask about ${remedyName}`}
+      data-ask-input
     />
-    <button type="button" class="send" disabled aria-disabled="true" aria-label="send (coming soon)">→</button>
+    <button type="submit" class="send" aria-label="send question" data-ask-send>→</button>
+  </form>
+
+  <div class="answer" data-ask-answer hidden aria-live="polite">
+    <p class="a-status" data-ask-statusline hidden></p>
+    <div class="a-body" data-ask-body></div>
+    <a class="a-route" data-ask-route hidden></a>
+    <div class="a-cites" data-ask-cites hidden>
+      <p class="a-cites-label">sources cited</p>
+      <ul class="a-cite-list" data-ask-cite-list></ul>
+    </div>
   </div>
-  <p class="stub-note">scoped assistant — arriving with the Somnary corpus. it will never invent a source.</p>
+
+  <p class="privacy-note">
+    your question is sent to Google's Gemini API to generate the answer. don't include personal or
+    identifying details.
+  </p>
+  <p class="stub-note">scoped to this page's evidence — it will never invent a source. educational, not medical advice.</p>
 </section>
 
 <style>
@@ -72,9 +92,9 @@ const { remedyName } = Astro.props;
     border: var(--border-hairline);
     border-radius: var(--r-pill);
   }
-  .ask-input:disabled {
-    color: var(--muted);
-    cursor: not-allowed;
+  .ask-input:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
   }
   .send {
     width: 30px;
@@ -88,15 +108,230 @@ const { remedyName } = Astro.props;
     background: var(--primary);
     color: var(--surface);
     font-family: var(--font-mono);
+    cursor: pointer;
   }
-  .send:disabled {
+  .send:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+  }
+  .send[disabled] {
     background: var(--mineral);
-    cursor: not-allowed;
+    cursor: progress;
   }
-  .stub-note {
+
+  /* answer region */
+  .answer {
+    margin-top: var(--sp-4);
+    padding-top: var(--sp-4);
+    border-top: var(--border-hairline);
+  }
+  .a-status {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 var(--sp-3);
+  }
+  .a-body :global(p) {
     font-size: var(--text-sm);
+    line-height: var(--lh-base);
+    color: var(--ink);
+    margin: 0 0 var(--sp-3);
+  }
+  .a-body :global(p.a-head) {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 var(--sp-1);
+  }
+  .a-body :global(a.ask-cref) {
+    color: var(--primary);
+    text-decoration: none;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+  }
+  .a-route {
+    display: inline-block;
+    margin-top: var(--sp-2);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--primary);
+    text-decoration: none;
+  }
+  .a-route:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+    border-radius: var(--r-sm);
+  }
+  .a-cites {
+    margin-top: var(--sp-4);
+  }
+  .a-cites-label {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 var(--sp-2);
+  }
+  .a-cite-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+  }
+  .a-cite-list :global(li) {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+  }
+  .a-cite-list :global(a) {
+    color: var(--primary);
+    text-decoration: none;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+  }
+
+  .privacy-note,
+  .stub-note {
+    font-size: var(--text-xs);
     line-height: var(--lh-sm);
     color: var(--muted);
     margin: var(--sp-3) 0 0;
   }
 </style>
+
+<script>
+  interface AskCitation {
+    n: number;
+    title: string;
+    idLabel: string;
+    url: string;
+    href: string;
+  }
+  interface AskResponse {
+    status: 'answered' | 'refused' | 'no-evidence' | 'error';
+    answer: string;
+    citations: AskCitation[];
+    route: { href: string; label: string } | null;
+  }
+
+  const panels = document.querySelectorAll<HTMLElement>('[data-ask]');
+  panels.forEach((panel) => {
+    const slug = panel.dataset.slug ?? '';
+    const form = panel.querySelector<HTMLFormElement>('[data-ask-form]');
+    const input = panel.querySelector<HTMLInputElement>('[data-ask-input]');
+    const send = panel.querySelector<HTMLButtonElement>('[data-ask-send]');
+    const answer = panel.querySelector<HTMLElement>('[data-ask-answer]');
+    const statusLine = panel.querySelector<HTMLElement>('[data-ask-statusline]');
+    const body = panel.querySelector<HTMLElement>('[data-ask-body]');
+    const routeEl = panel.querySelector<HTMLAnchorElement>('[data-ask-route]');
+    const citesWrap = panel.querySelector<HTMLElement>('[data-ask-cites]');
+    const citeList = panel.querySelector<HTMLUListElement>('[data-ask-cite-list]');
+    if (!form || !input || !send || !answer || !statusLine || !body || !routeEl || !citesWrap || !citeList) return;
+
+    const esc = (s: string) =>
+      s.replace(/[&<>"']/g, (c) =>
+        ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c] as string,
+      );
+
+    const STATUS_LABEL: Record<AskResponse['status'], string> = {
+      answered: 'from this page’s cited evidence',
+      refused: 'this needs a person, not a page',
+      'no-evidence': 'not in this page’s evidence',
+      error: 'could not answer',
+    };
+
+    const setBusy = (busy: boolean) => {
+      send.disabled = busy;
+      input.disabled = busy;
+    };
+
+    const render = (res: AskResponse) => {
+      answer.hidden = false;
+      statusLine.hidden = false;
+      statusLine.textContent = STATUS_LABEL[res.status] ?? '';
+
+      // Link the [n] markers that map to a returned citation; escape everything else.
+      const byN = new Map(res.citations.map((c) => [String(c.n), c]));
+      const paragraphs = res.answer.split(/\n{2,}/).filter((p) => p.trim());
+      body.innerHTML = paragraphs
+        .map((p) => {
+          const linked = esc(p).replace(/\[(\d{1,3})\]/g, (m, d) => {
+            const c = byN.get(d);
+            return c ? `<a class="ask-cref" href="${esc(c.href)}">[${esc(d)}]</a>` : m;
+          });
+          // "Bottom line:" style leading label → its own de-emphasized head line.
+          const head = linked.match(/^([A-Z][^:]{2,40}):\s*/);
+          if (head) {
+            return `<p class="a-head">${head[1]}</p><p>${linked.slice(head[0].length)}</p>`;
+          }
+          return `<p>${linked}</p>`;
+        })
+        .join('');
+
+      if (res.route) {
+        routeEl.hidden = false;
+        routeEl.href = res.route.href;
+        routeEl.textContent = `→ ${res.route.label}`;
+      } else {
+        routeEl.hidden = true;
+        routeEl.removeAttribute('href');
+      }
+
+      if (res.citations.length) {
+        citesWrap.hidden = false;
+        citeList.innerHTML = res.citations
+          .map(
+            (c) =>
+              `<li>[${c.n}] ${esc(c.title)} — ` +
+              `<a href="${esc(c.href)}">on this page</a> · ` +
+              `<a href="${esc(c.url)}" target="_blank" rel="noopener noreferrer">${esc(c.idLabel)} ↗</a></li>`,
+          )
+          .join('');
+      } else {
+        citesWrap.hidden = true;
+        citeList.innerHTML = '';
+      }
+    };
+
+    const showPlain = (status: AskResponse['status'], text: string) =>
+      render({ status, answer: text, citations: [], route: null });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const question = input.value.trim();
+      if (question.length < 3) return;
+      setBusy(true);
+      answer.hidden = false;
+      statusLine.hidden = false;
+      statusLine.textContent = 'thinking…';
+      body.innerHTML = '';
+      routeEl.hidden = true;
+      citesWrap.hidden = true;
+      try {
+        const res = await fetch('/api/ask', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question, slug }),
+        });
+        if (!res.ok) {
+          showPlain('error', 'Something went wrong. You can read this page’s evidence and cited sources above. This is educational, not medical advice.');
+          return;
+        }
+        render((await res.json()) as AskResponse);
+      } catch {
+        showPlain('error', 'Something went wrong reaching the assistant. You can read this page’s evidence and cited sources above. This is educational, not medical advice.');
+      } finally {
+        setBusy(false);
+      }
+    });
+  });
+</script>
