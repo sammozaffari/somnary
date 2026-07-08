@@ -77,14 +77,30 @@ light to carry a white letter):
 
 ## 4. Type
 
-**Target pairing: Söhne (display) + Inter (body)** — matches the mockup's type strip.
+**The mockup's display face is Söhne** (Klim Type Foundry). Confirmed by letterform analysis of the
+reference (`crop_*` studies of the hero, "Display" sample, and "Melatonin" heading):
 
-- **Söhne** is a commercial Klim Type Foundry face (paid license, self-host). **Not embeddable for
-  free.** Options: (a) buy the web license; (b) substitute a free neo-grotesque (e.g. **Inter Tight**,
-  or **Geist**) for display and keep Inter for body — visually close, zero cost. **Owner decision (Q3).**
-- **Inter** (body) is open-source (OFL) — free to self-host, no CDN.
-- The preview renders in a **system neo-grotesque** (`system-ui` → SF Pro on your Apple devices) because
-  the Artifact/preview can't embed the commercial face. Treat the preview's *shapes* as indicative, not final.
+- Neo-grotesque, Akzidenz-Grotesk lineage: vertical-sided `M`, horizontal terminals on `e`/`s`,
+  round-but-not-geometric bowls, double-story `a` with a modest tail, straight-tailed `y`, flat-topped `t`.
+- **Single-story `g`** (visible in "si**g**nal" on the Melatonin subhead) — the decisive tell that
+  separates Söhne from Helvetica and Inter (both double-story `g`).
+
+### Free stand-ins, ranked (Söhne is paid)
+| Option | Match | Cost / note |
+|---|---|---|
+| **Söhne** (license) | exact | paid Klim web license, self-host |
+| **Hanken Grotesk** ⭐ | ~90% — **same single-story `g`**; **already bundled** (`@fontsource/hanken-grotesk`) | free, **zero new dependency** |
+| Inter / Inter Display | good UI grotesque, but **double-story `g`** | free; already the mockup's *body* face |
+| Geist | clean neo-grotesque | free |
+
+**Recommendation:** for a free build, **Hanken Grotesk** is the closest match to the mockup's display
+face (the `g` tell) and it's already a project dependency — no license, no new dep. Reserve a Söhne
+license only if you want the mockup replicated exactly. Body stays Inter (or Hanken for a single-family
+system).
+
+**Preview note:** the preview now **embeds Hanken Grotesk** (base64 data-URIs, weights 400–800) so it
+renders identically on every device — not the earlier `system-ui`/SF-Pro fallback (which is why the
+first pass read "close but off"). **Owner decision (Q3):** Söhne license vs Hanken Grotesk (free, installed).
 
 **Scale** (from the mockup): Display 800 · H1 650 32/40 · H2 600 24/32 · H3 550 20/28 · Body 400 16/24
 · Small 400 14/20 · Caption 400 12/16 · Label 600 11/16. Tight tracking on display (`-0.02em`).
@@ -144,8 +160,8 @@ Estimated: a focused re-skin, mostly token-level + a font swap + a contrast pass
   (teal brand vs vermilion safety) so a red always means "caution." If oxblood is the primary CTA,
   a red button no longer uniquely signals danger. Options: (a) accept it (context disambiguates);
   (b) reserve a distinct deeper/brighter red for safety only. **Your call.**
-- **Q3 — Display font.** Buy Söhne's web license, or substitute a free neo-grotesque (Inter Tight /
-  Geist) for display? Body is Inter (free) either way.
+- **Q3 — Display font.** Buy Söhne's web license, or use **Hanken Grotesk** (free, already installed,
+  same single-story `g` — recommended; see §4)? The preview now embeds Hanken Grotesk so you can judge it.
 - **Q4 — Scope of first cut.** Migrate the whole site at once, or ship v3 behind a preview route
   first for a side-by-side before committing?
 
