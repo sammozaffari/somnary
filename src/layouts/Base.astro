@@ -1,7 +1,12 @@
 ---
 // Base document layout. Imports the global stylesheet (Tailwind layers + DESIGN_SYSTEM
-// tokens) and loads the three brand typefaces per §1c. Server-rendered shell so content
-// is crawlable from day one.
+// tokens) and self-hosts the brand typefaces (DESIGN_SYSTEM v3 §2). Server-rendered
+// shell so content is crawlable from day one.
+// Typefaces (self-hosted via @fontsource — no CDN): Instrument Sans (variable weight
+// axis) for display + body; IBM Plex Mono (400/500) for data/citations only.
+import '@fontsource-variable/instrument-sans';
+import '@fontsource/ibm-plex-mono/400.css';
+import '@fontsource/ibm-plex-mono/500.css';
 import '../styles/global.css';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
@@ -47,13 +52,9 @@ const { title, description, canonical, ogType = 'website', ogImage } = Astro.pro
     {description && <meta name="twitter:description" content={description} />}
     {ogImage && <meta name="twitter:image" content={ogImage} />}
 
-    {/* Brand typefaces — DESIGN_SYSTEM v2 §2 (Archivo display + IBM Plex Sans body) */}
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap"
-    />
+    {/* Brand typefaces are self-hosted via @fontsource (imported in the frontmatter,
+        bundled by Astro) — DESIGN_SYSTEM v3 §2: Instrument Sans display+body, IBM Plex
+        Mono for data. No Google Fonts CDN. */}
   </head>
   <body>
     <Nav />

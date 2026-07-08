@@ -24,6 +24,9 @@
     "@astrojs/mdx": "^4.0.8",
     "@astrojs/sitemap": "^3.2.1",
     "@astrojs/vercel": "^8.2.11",
+    "@fontsource-variable/instrument-sans": "^5.2.8",
+    "@fontsource/ibm-plex-mono": "^5.2.7",
+    "@fontsource/instrument-sans": "^5.2.8",
     "astro": "^5.2.5",
     "zod": "^3.25.76"
   },
