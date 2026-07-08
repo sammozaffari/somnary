@@ -1,0 +1,305 @@
+<style>
+  :root{
+    /* ground + surfaces */
+    --chalk:#FCFAF2; --surface:#FFFFFF; --stone:#EEE8DA; --mineral:#DBD5CD;
+    /* text */
+    --ink:#171512; --slate:#6A6862; --raisin:#2B2028;
+    /* the one bold accent */
+    --oxblood:#7E1F2B; --oxblood-deep:#661722; --oxblood-tint:#F6E7E3;
+    /* evidence / nature */
+    --eucalyptus:#6C8A7A; --eucalyptus-deep:#3F5A4C; --pistachio:#E9F2DB;
+    /* grade ramp: green → amber → oxblood */
+    --g-s:#274B3F; --g-a:#3F6A57; --g-b:#6C8A7A; --g-c:#B07A2E; --g-d:#A0522D; --g-f:#7E1F2B;
+    /* type */
+    --display:"Söhne","Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+    --body:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+    --sp:1rem;
+    --maxw:1120px;
+    --r:14px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--chalk);color:var(--ink);
+    font-family:var(--body);font-size:16px;line-height:1.5;
+    -webkit-font-smoothing:antialiased;}
+  h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;letter-spacing:-0.02em;}
+  a{color:inherit;}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px;}
+  .eyebrow{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--oxblood);}
+  .muted{color:var(--slate);}
+  button,.btn{font-family:var(--display);cursor:pointer;}
+  a:focus-visible,button:focus-visible{outline:3px solid var(--oxblood);outline-offset:2px;border-radius:6px;}
+
+  /* proposal ribbon */
+  .ribbon{background:var(--raisin);color:#F3ECE0;font-size:12.5px;letter-spacing:.02em;
+    padding:9px 24px;text-align:center;}
+  .ribbon b{color:#fff;font-weight:600;}
+  .ribbon .tag{display:inline-block;background:var(--oxblood);color:#fff;font-weight:600;
+    padding:1px 8px;border-radius:20px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;margin-right:8px;}
+
+  /* nav */
+  nav{border-bottom:1px solid var(--mineral);background:color-mix(in srgb,var(--chalk) 88%, #fff);}
+  .nav{display:flex;align-items:center;gap:28px;height:66px;}
+  .mark{font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:-0.03em;}
+  .mark .dot{color:var(--oxblood);}
+  .nav .links{display:flex;gap:22px;font-size:14px;color:var(--slate);margin-left:8px;}
+  .nav .links a{text-decoration:none;}
+  .nav .links a:hover{color:var(--ink);}
+  .nav .right{margin-left:auto;display:flex;align-items:center;gap:16px;}
+  .btn-primary{background:var(--oxblood);color:#fff;border:none;font-weight:600;font-size:14px;
+    padding:10px 18px;border-radius:9px;letter-spacing:.01em;}
+  .btn-primary:hover{background:var(--oxblood-deep);}
+  .btn-ghost{background:transparent;border:1px solid var(--mineral);color:var(--ink);font-weight:600;
+    font-size:14px;padding:10px 18px;border-radius:9px;}
+
+  /* hero */
+  .hero{display:grid;grid-template-columns:1.35fr .85fr;gap:56px;padding:64px 0 40px;}
+  .hero h1{font-size:clamp(38px,5.2vw,60px);line-height:1.02;font-weight:800;}
+  .hero h1 .before{color:var(--oxblood);}
+  .hero .sub{font-size:19px;line-height:1.5;color:var(--slate);max-width:34ch;margin:22px 0 26px;}
+  .search{display:flex;gap:10px;background:var(--surface);border:1px solid var(--mineral);
+    border-radius:12px;padding:8px 8px 8px 16px;box-shadow:0 1px 0 rgba(23,21,18,.03);}
+  .search input{border:none;flex:1;font-family:var(--body);font-size:15px;background:transparent;color:var(--ink);}
+  .search input::placeholder{color:#9a938a;}
+  .search input:focus{outline:none;}
+  .pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;align-items:center;}
+  .pills .lbl{font-size:12px;color:var(--slate);margin-right:2px;}
+  .pill{font-size:13px;padding:5px 12px;border:1px solid var(--mineral);border-radius:20px;
+    background:var(--surface);text-decoration:none;color:var(--ink);}
+  .pill:hover{border-color:var(--oxblood);color:var(--oxblood);}
+
+  .trust{border:1px solid var(--mineral);border-radius:var(--r);background:var(--surface);
+    padding:8px 4px;display:flex;flex-direction:column;justify-content:center;}
+  .trust .row{display:flex;gap:14px;padding:16px 18px;}
+  .trust .row+.row{border-top:1px solid var(--stone);}
+  .trust .ic{width:34px;height:34px;flex:none;border-radius:9px;display:grid;place-items:center;
+    background:var(--pistachio);color:var(--eucalyptus-deep);}
+  .trust .ic svg{width:18px;height:18px;}
+  .trust b{font-family:var(--display);font-weight:600;font-size:14.5px;display:block;}
+  .trust span{font-size:13px;color:var(--slate);line-height:1.4;}
+
+  /* section scaffolding */
+  section{padding:44px 0;}
+  .sec-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:22px;gap:16px;}
+  .sec-head h2{font-size:26px;font-weight:650;}
+  .sec-head .link{font-size:13px;color:var(--oxblood);text-decoration:none;font-weight:600;}
+  .divider{height:1px;background:var(--mineral);}
+
+  /* situation tiles */
+  .tiles{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;}
+  .tile{border:1px solid var(--mineral);border-radius:var(--r);background:var(--surface);
+    padding:18px 14px;text-decoration:none;color:var(--ink);display:flex;flex-direction:column;gap:12px;
+    transition:transform .12s ease,border-color .12s ease;}
+  .tile:hover{transform:translateY(-2px);border-color:var(--eucalyptus);}
+  .tile .ti{width:40px;height:40px;border-radius:10px;background:var(--stone);display:grid;place-items:center;color:var(--raisin);}
+  .tile .ti svg{width:20px;height:20px;}
+  .tile b{font-family:var(--display);font-weight:550;font-size:14px;line-height:1.25;}
+
+  /* grading pillars */
+  .pillars{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;}
+  .pillar{display:flex;flex-direction:column;gap:8px;}
+  .pillar .n{font-family:var(--display);font-weight:700;font-size:15px;color:var(--oxblood);
+    width:30px;height:30px;border-radius:50%;border:1.5px solid var(--oxblood);display:grid;place-items:center;}
+  .pillar b{font-family:var(--display);font-weight:600;font-size:13px;letter-spacing:.02em;text-transform:uppercase;}
+  .pillar span{font-size:13.5px;color:var(--slate);line-height:1.45;}
+
+  /* tier board excerpt */
+  .board{border:1px solid var(--mineral);border-radius:var(--r);overflow:hidden;background:var(--surface);}
+  .board .scale{display:grid;grid-template-columns:repeat(6,1fr);border-bottom:1px solid var(--mineral);}
+  .board .scale div{padding:14px 12px;text-align:center;border-right:1px solid var(--stone);}
+  .board .scale div:last-child{border-right:none;}
+  .grade{font-family:var(--display);font-weight:800;font-size:19px;width:34px;height:34px;border-radius:8px;
+    display:inline-grid;place-items:center;color:#fff;}
+  .g-s{background:var(--g-s);}.g-a{background:var(--g-a);}.g-b{background:var(--g-b);}
+  .g-c{background:var(--g-c);}.g-d{background:var(--g-d);}.g-f{background:var(--g-f);}
+  .scale .cap{font-size:11px;color:var(--slate);margin-top:8px;display:block;line-height:1.3;}
+  table{width:100%;border-collapse:collapse;font-size:14px;}
+  th{text-align:left;font-family:var(--display);font-weight:600;font-size:11px;letter-spacing:.08em;
+    text-transform:uppercase;color:var(--slate);padding:12px 16px;border-bottom:1px solid var(--mineral);}
+  td{padding:13px 16px;border-bottom:1px solid var(--stone);vertical-align:middle;}
+  tr:last-child td{border-bottom:none;}
+  td .rname{font-weight:600;}
+  td .badge-sm{font-family:var(--display);font-weight:800;font-size:13px;width:26px;height:26px;border-radius:6px;
+    display:inline-grid;place-items:center;color:#fff;}
+  .verified{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--eucalyptus-deep);
+    background:var(--pistachio);padding:3px 9px;border-radius:20px;font-weight:600;}
+
+  /* design-system appendix */
+  .appendix{background:var(--stone);border-top:1px solid var(--mineral);margin-top:24px;}
+  .appendix .wrap{padding:40px 24px;}
+  .ap-grid{display:grid;grid-template-columns:1.1fr 1fr .9fr;gap:40px;}
+  .swatches{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+  .sw{display:flex;flex-direction:column;gap:6px;}
+  .sw .chip{height:52px;border-radius:8px;border:1px solid rgba(23,21,18,.08);}
+  .sw small{font-size:11px;color:var(--slate);}
+  .sw b{font-size:12px;font-family:var(--display);font-weight:600;}
+  .typerow{display:flex;align-items:baseline;gap:14px;padding:8px 0;border-bottom:1px solid var(--mineral);}
+  .typerow .t{font-family:var(--display);}
+  .typerow .m{margin-left:auto;font-size:11px;color:var(--slate);font-variant-numeric:tabular-nums;}
+  .ui-samples{display:flex;flex-wrap:wrap;gap:10px;align-items:center;}
+  .chip-active{background:var(--raisin);color:#fff;font-weight:600;font-size:13px;padding:7px 14px;border-radius:20px;}
+  .chip-neutral{background:var(--surface);border:1px solid var(--mineral);font-size:13px;padding:7px 14px;border-radius:20px;}
+  .ap-h{font-family:var(--display);font-weight:600;font-size:12px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--slate);margin-bottom:16px;}
+
+  footer{background:var(--raisin);color:#E8DFD2;padding:26px 0;font-size:13px;}
+  footer .wrap{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;}
+  footer .no{display:flex;gap:18px;color:#B9AE9E;}
+
+  @media (max-width:900px){
+    .hero{grid-template-columns:1fr;gap:32px;padding:40px 0 28px;}
+    .tiles{grid-template-columns:repeat(3,1fr);}
+    .pillars{grid-template-columns:repeat(2,1fr);}
+    .ap-grid{grid-template-columns:1fr;gap:28px;}
+    .board{overflow-x:auto;}
+  }
+  @media (max-width:560px){
+    .tiles{grid-template-columns:repeat(2,1fr);}
+    .nav .links{display:none;}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;}}
+</style>
+
+<div class="ribbon"><span class="tag">Proposal</span> Somnary <b>Design System v3</b> — warm / oxblood direction. A preview for sign-off; the live site still runs the ratified evidence-teal system.</div>
+
+<nav>
+  <div class="wrap nav">
+    <span class="mark">somnary<span class="dot">.</span></span>
+    <div class="links">
+      <a href="#">Start Here</a><a href="#">Remedies</a><a href="#">Goals</a>
+      <a href="#">Safety</a><a href="#">Label Checker</a><a href="#">Evidence</a>
+    </div>
+    <div class="right">
+      <button class="btn-primary">Check a remedy</button>
+    </div>
+  </div>
+</nav>
+
+<div class="wrap">
+  <section class="hero">
+    <div>
+      <p class="eyebrow">Evidence before hype</p>
+      <h1>Check a sleep remedy <span class="before">before</span> you take it</h1>
+      <p class="sub">Somnary grades natural sleep remedies by human evidence, label reality, and safety boundaries — before you buy or take anything.</p>
+      <div class="search">
+        <input placeholder="Search melatonin, magnesium, CBD, sleep blends…" aria-label="Search remedies">
+        <button class="btn-primary">Check remedy</button>
+      </div>
+      <div class="pills">
+        <span class="lbl">Popular</span>
+        <a class="pill" href="#">Melatonin</a><a class="pill" href="#">Magnesium</a>
+        <a class="pill" href="#">CBD</a><a class="pill" href="#">L-Theanine</a>
+        <a class="pill" href="#">Valerian</a><a class="pill" href="#">Sleep blends</a>
+      </div>
+    </div>
+    <aside class="trust">
+      <div class="row"><span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8 12h8"/></svg></span><div><b>No affiliate links</b><span>We don't earn from brands.</span></div></div>
+      <div class="row"><span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></span><div><b>No brand money</b><span>No paid placements, no sponsorships.</span></div></div>
+      <div class="row"><span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg></span><div><b>Sources checked</b><span>Every claim linked to the evidence.</span></div></div>
+      <div class="row"><span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19h16M7 16V9M12 16V5M17 16v-4"/></svg></span><div><b>Human evidence first</b><span>Studies in people, not marketing copy.</span></div></div>
+    </aside>
+  </section>
+
+  <div class="divider"></div>
+
+  <section>
+    <div class="sec-head"><h2>Start from what fits your situation</h2><a class="link" href="#">View all →</a></div>
+    <div class="tiles">
+      <a class="tile" href="#"><span class="ti" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg></span><b>I take melatonin</b></a>
+      <a class="tile" href="#"><span class="ti" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 8h12l-1 12H7L6 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg></span><b>I bought a sleep blend</b></a>
+      <a class="tile" href="#"><span class="ti" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 12h9M13 7l5 5-5 5"/></svg></span><b>I want to fall asleep faster</b></a>
+      <a class="tile" href="#"><span class="ti" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 14A8 8 0 1 1 10 4a6 6 0 0 0 10 10z"/></svg></span><b>I wake up at night</b></a>
+      <a class="tile" href="#"><span class="ti" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="9" r="4"/><circle cx="15" cy="15" r="4"/></svg></span><b>I use medications</b></a>
+      <a class="tile" href="#"><span class="ti" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3"/><path d="M6 20a6 6 0 0 1 12 0"/></svg></span><b>I'm checking this for a child</b></a>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2>How Somnary grades remedies</h2><a class="link" href="#">See the grading system →</a></div>
+    <div class="pillars">
+      <div class="pillar"><span class="n">1</span><b>Human evidence</b><span>Quality, consistency, effect size, and replication in human studies.</span></div>
+      <div class="pillar"><span class="n">2</span><b>Label reality</b><span>Dose accuracy, form, standardization, and transparency.</span></div>
+      <div class="pillar"><span class="n">3</span><b>Safety boundary</b><span>Risks, interactions, and who should avoid or use caution.</span></div>
+      <div class="pillar"><span class="n">4</span><b>Evidence integrity</b><span>Bias, conflicts of interest, and study quality.</span></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2>Every remedy, graded</h2><a class="link" href="#">See all remedies →</a></div>
+    <div class="board">
+      <div class="scale">
+        <div><span class="grade g-s">S</span><span class="cap">Exceptional</span></div>
+        <div><span class="grade g-a">A</span><span class="cap">Good</span></div>
+        <div><span class="grade g-b">B</span><span class="cap">Mixed</span></div>
+        <div><span class="grade g-c">C</span><span class="cap">Limited</span></div>
+        <div><span class="grade g-d">D</span><span class="cap">Poor</span></div>
+        <div><span class="grade g-f">F</span><span class="cap">Avoid</span></div>
+      </div>
+      <table>
+        <thead><tr><th>Remedy</th><th>Grade</th><th>Best for</th><th>Key limitation</th><th>Sourcing</th></tr></thead>
+        <tbody>
+          <tr><td class="rname">Melatonin</td><td><span class="badge-sm g-a">A</span></td><td>Body-clock timing</td><td>Not for everyone</td><td><span class="verified">✓ Source checked</span></td></tr>
+          <tr><td class="rname">Magnesium (Glycinate)</td><td><span class="badge-sm g-b">B</span></td><td>Sleep quality</td><td>Smaller studies</td><td><span class="verified">✓ Source checked</span></td></tr>
+          <tr><td class="rname">L-Theanine</td><td><span class="badge-sm g-b">B</span></td><td>Anxiety-driven insomnia</td><td>Thin evidence</td><td><span class="verified">✓ Source checked</span></td></tr>
+          <tr><td class="rname">CBD</td><td><span class="badge-sm g-c">C</span></td><td>Anxiety, pain</td><td>Product variability</td><td><span class="verified">✓ Source checked</span></td></tr>
+          <tr><td class="rname">Sleep blends</td><td><span class="badge-sm g-d">D</span></td><td>Convenience</td><td>Proprietary blends hide doses</td><td><span class="verified">✓ Source checked</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<div class="appendix">
+  <div class="wrap">
+    <p class="eyebrow" style="color:var(--slate);margin-bottom:20px;">Design system v3 — tokens</p>
+    <div class="ap-grid">
+      <div>
+        <div class="ap-h">Color palette</div>
+        <div class="swatches">
+          <div class="sw"><div class="chip" style="background:#FCFAF2"></div><b>Chalk White</b><small>#FCFAF2</small></div>
+          <div class="sw"><div class="chip" style="background:#EEE8DA"></div><b>Soft Stone</b><small>#EEE8DA</small></div>
+          <div class="sw"><div class="chip" style="background:#DBD5CD"></div><b>Mineral Gray</b><small>#DBD5CD</small></div>
+          <div class="sw"><div class="chip" style="background:#6A6862"></div><b>Slate Gray</b><small>#6A6862</small></div>
+          <div class="sw"><div class="chip" style="background:#171512"></div><b>Ink Black</b><small>#171512</small></div>
+          <div class="sw"><div class="chip" style="background:#2B2028"></div><b>Deep Raisin</b><small>#2B2028</small></div>
+          <div class="sw"><div class="chip" style="background:#7E1F2B"></div><b>Oxblood</b><small>#7E1F2B</small></div>
+          <div class="sw"><div class="chip" style="background:#6C8A7A"></div><b>Eucalyptus</b><small>#6C8A7A</small></div>
+          <div class="sw"><div class="chip" style="background:#E9F2DB"></div><b>Pistachio</b><small>#E9F2DB</small></div>
+        </div>
+      </div>
+      <div>
+        <div class="ap-h">Type scale · Söhne / Inter</div>
+        <div class="typerow"><span class="t" style="font-weight:800;font-size:30px;">Display</span><span class="m">800 · 33/30</span></div>
+        <div class="typerow"><span class="t" style="font-weight:650;font-size:23px;">Heading one</span><span class="m">650 · 32/40</span></div>
+        <div class="typerow"><span class="t" style="font-weight:600;font-size:19px;">Heading two</span><span class="m">600 · 24/32</span></div>
+        <div class="typerow"><span class="t" style="font-weight:550;font-size:16px;">Heading three</span><span class="m">550 · 20/28</span></div>
+        <div class="typerow"><span class="t" style="font-weight:400;font-size:15px;">Body copy</span><span class="m">400 · 16/24</span></div>
+        <div class="typerow"><span class="t" style="font-weight:600;font-size:11px;letter-spacing:.1em;text-transform:uppercase;">Label</span><span class="m">600 · 11/16</span></div>
+      </div>
+      <div>
+        <div class="ap-h">UI elements</div>
+        <div class="ui-samples" style="margin-bottom:22px;">
+          <button class="btn-primary">Primary button</button>
+          <button class="btn-ghost">Secondary</button>
+        </div>
+        <div class="ui-samples" style="margin-bottom:26px;">
+          <span class="chip-active">Chip active</span>
+          <span class="chip-neutral">Chip neutral</span>
+        </div>
+        <div class="ap-h">Semantic</div>
+        <div style="display:flex;flex-direction:column;gap:8px;font-size:13px;">
+          <span style="color:var(--eucalyptus-deep);">● Positive — eucalyptus / pistachio</span>
+          <span style="color:var(--g-c);">▲ Caution — amber</span>
+          <span style="color:var(--oxblood);">✕ Danger / safety — oxblood</span>
+          <span class="muted">○ Neutral — slate</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span class="mark" style="color:#fff;font-size:18px;">somnary<span style="color:#E88;">.</span></span>
+    <div class="no"><span>Zero affiliate links</span><span>Zero brand money</span><span>Reader-supported</span></div>
+  </div>
+</footer>
