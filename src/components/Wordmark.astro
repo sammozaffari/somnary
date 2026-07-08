@@ -1,6 +1,7 @@
 ---
-// Wordmark — DESIGN_SYSTEM v2 (brand casing D3). Circular teal mark + "Somnary"
-// logotype + teal period. Capitalized "Somnary." is the ratified mark (D3).
+// Wordmark — DESIGN_SYSTEM v3 (brand casing D3, unchanged). Circular oxblood mark +
+// "Somnary" logotype in Instrument Sans + oxblood period. Capitalized "Somnary." is the
+// ratified mark (D3) — do NOT lowercase.
 // Linked → wraps in <a> (focus ring applies); mark is decorative (aria-hidden).
 interface Props {
   href?: string;
@@ -20,7 +21,7 @@ const { href = '/' } = Astro.props;
     gap: var(--sp-2);
     text-decoration: none;
   }
-  /* filled teal disc with a white cap — prototype .brand-mark */
+  /* filled oxblood disc with a white cap — prototype .brand-mark */
   .mark {
     display: grid;
     place-items: center;
@@ -31,18 +32,19 @@ const { href = '/' } = Astro.props;
     background: var(--primary);
     color: #ffffff;
     font-family: var(--font-display);
-    font-weight: 800;
+    font-weight: 700; /* Instrument Sans caps at 700 */
     font-size: 14px;
     line-height: 1;
   }
   .logotype {
     font-family: var(--font-display);
-    font-weight: 800;
+    font-weight: 700; /* Instrument Sans caps at 700 */
     font-size: 27px;
     letter-spacing: -0.04em;
     color: var(--ink);
     line-height: 1;
   }
+  /* trailing-period dot in oxblood --primary (D3 mark) */
   .dot {
     color: var(--primary);
   }
