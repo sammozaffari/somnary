@@ -6,17 +6,17 @@ import Wordmark from './Wordmark.astro';
 import SearchPalette from './SearchPalette.astro';
 
 const links = [
-  { href: '/start-here', label: 'start here' },
-  { href: '/tiers', label: 'remedies' },
-  { href: '/label-checker', label: 'label checker' },
-  { href: '/compare', label: 'compare' },
-  { href: '/safety', label: 'safety' },
-  { href: '/methodology', label: 'methodology' },
+  { href: '/start-here', label: 'Start here' },
+  { href: '/tiers', label: 'Remedies' },
+  { href: '/label-checker', label: 'Label checker' },
+  { href: '/compare', label: 'Compare' },
+  { href: '/safety', label: 'Safety' },
+  { href: '/methodology', label: 'Methodology' },
 ];
 const path = Astro.url.pathname.replace(/\/$/, '') || '/';
 ---
 
-<nav class="nav" aria-label="primary">
+<nav class="nav" aria-label="Primary">
   <Wordmark />
   <ul class="links">
     {
@@ -63,7 +63,6 @@ const path = Astro.url.pathname.replace(/\/$/, '') || '/';
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     color: var(--muted);
     text-decoration: none;
     transition: color var(--dur-fast) var(--ease-soft);

@@ -15,11 +15,11 @@ import { TIERS } from '../lib/tiers';
 // pills to real remedy routes. No newsletter/forms (CHK-4.2), no commerce, no stack-builder (D4).
 // Popular-check pills → real remedy routes (verified present in src/content/remedies/).
 const popularChecks = [
-  { slug: 'melatonin', name: 'melatonin' },
-  { slug: 'magnesium', name: 'magnesium' },
-  { slug: 'valerian', name: 'valerian' },
+  { slug: 'melatonin', name: 'Melatonin' },
+  { slug: 'magnesium', name: 'Magnesium' },
+  { slug: 'valerian', name: 'Valerian' },
   { slug: 'l-theanine', name: 'L-theanine' },
-  { slug: 'ashwagandha', name: 'ashwagandha' },
+  { slug: 'ashwagandha', name: 'Ashwagandha' },
 ];
 
 // Six situation tiles — labels verbatim from strategy 03, each wired to a route that resolves.
@@ -28,32 +28,32 @@ const situations = [
   {
     href: '/r/melatonin',
     title: "I'm considering melatonin, or already take it",
-    dek: 'the flagship decision hub: clock signal vs sedative, dose reality, the label-accuracy problem.',
+    dek: 'The flagship decision hub: clock signal vs sedative, dose reality, the label-accuracy problem.',
   },
   {
     href: '/sleep-blends',
     title: 'I bought a sleep blend',
-    dek: 'decode the label before you trust it — proprietary blends, missing doses, studied-dose mismatch.',
+    dek: 'Decode the label before you trust it — proprietary blends, missing doses, studied-dose mismatch.',
   },
   {
     href: '/outcome/fall-asleep-faster',
     title: 'I want to fall asleep faster',
-    dek: 'remedies with human evidence aimed at sleep-onset latency, ranked by the strength of that evidence.',
+    dek: 'Remedies with human evidence aimed at sleep-onset latency, ranked by the strength of that evidence.',
   },
   {
     href: '/outcome/stay-asleep',
     title: 'I keep waking up at night',
-    dek: 'the shorter list of remedies studied for staying asleep — wake after sleep onset, not just falling asleep.',
+    dek: 'The shorter list of remedies studied for staying asleep — wake after sleep onset, not just falling asleep.',
   },
   {
     href: '/safety',
     title: 'I take medications or have a health condition',
-    dek: 'using medications? start with the safety boundary — interactions and red flags come before any remedy.',
+    dek: 'Using medications? Start with the safety boundary — interactions and red flags come before any remedy.',
   },
   {
     href: '/melatonin-children',
     title: "I'm considering this for a child",
-    dek: 'the most cautious page on the site: what the evidence does and does not support for kids.',
+    dek: 'The most cautious page on the site: what the evidence does and does not support for kids.',
   },
 ];
 ---
@@ -66,7 +66,7 @@ const situations = [
   <main class="home">
     <!-- hero — three above-the-fold decision routes -->
     <section class="hero">
-      <p class="eyebrow">independent · evidence-graded · reader-funded</p>
+      <p class="eyebrow">Independent · evidence-graded · reader-funded</p>
       <h1 class="headline">Check a sleep remedy before you take it</h1>
       <p class="dek">
         Every sleep supplement, graded on real science — not the hype on the label.
@@ -76,8 +76,8 @@ const situations = [
         <a class="cta cta-secondary" href="#situations">Start from your sleep problem</a>
         <a class="cta cta-ghost" href="/safety">Read safety red flags</a>
       </div>
-      <div class="pills" aria-label="popular checks">
-        <span class="pills-label">popular checks</span>
+      <div class="pills" aria-label="Popular checks">
+        <span class="pills-label">Popular checks</span>
         {
           popularChecks.map((p) => (
             <a class="pill" href={`/r/${p.slug}`}>
@@ -93,7 +93,7 @@ const situations = [
 
     <!-- situation route tiles — route by intent -->
     <section class="section" id="situations">
-      <p class="section-eyebrow">what are you trying to decide?</p>
+      <p class="section-eyebrow">What are you trying to decide?</p>
       <div class="tiles">
         {
           situations.map((t) => (
@@ -108,7 +108,7 @@ const situations = [
 
     <!-- how to read a grade — S–F legend, legible without color alone -->
     <section class="section" id="how-to-read">
-      <p class="section-eyebrow">how to read a grade</p>
+      <p class="section-eyebrow">How to read a grade</p>
       <ul class="legend">
         {
           TIERS.map((t) => (
@@ -143,7 +143,6 @@ const situations = [
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     color: var(--muted);
     margin: 0;
   }
@@ -188,7 +187,6 @@ const situations = [
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     text-decoration: none;
     transition: transform var(--dur-fast) var(--ease-soft);
   }
@@ -226,7 +224,6 @@ const situations = [
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     color: var(--muted);
     margin-right: var(--sp-2);
   }
@@ -332,7 +329,6 @@ const situations = [
     font-weight: 700;
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     color: var(--ink);
   }
   .legend-trans {

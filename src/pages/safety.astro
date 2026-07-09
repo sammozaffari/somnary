@@ -15,46 +15,46 @@ import Disclaimer from '../components/Disclaimer.astro';
 const routes = [
   {
     href: '/when-to-see-a-doctor',
-    boundary: 'snoring with breathing pauses',
+    boundary: 'Snoring with breathing pauses',
     covers:
-      "why loud snoring with pauses, gasping, or heavy daytime sleepiness is a reason to ask a clinician about a sleep study — not something to self-treat.",
+      "Why loud snoring with pauses, gasping, or heavy daytime sleepiness is a reason to ask a clinician about a sleep study — not something to self-treat.",
   },
   {
     href: '/when-to-see-a-doctor',
-    boundary: 'insomnia most nights, for months',
+    boundary: 'Insomnia most nights, for months',
     covers:
-      'when persistent insomnia is a condition to treat properly rather than paper over nightly, and what to bring to the appointment.',
+      'When persistent insomnia is a condition to treat properly rather than paper over nightly, and what to bring to the appointment.',
   },
   {
     href: '/medications-and-sleep-aids',
-    boundary: 'you take medications or manage a condition',
+    boundary: 'You take medications or manage a condition',
     covers:
-      'why interactions and timing are a pharmacist conversation before any sleep aid — the documented cautions to raise, and the questions to bring to a clinician.',
+      'Why interactions and timing are a pharmacist conversation before any sleep aid — the documented cautions to raise, and the questions to bring to a clinician.',
   },
   {
     href: '/melatonin-children',
-    boundary: 'you are considering this for a child',
+    boundary: 'You are considering this for a child',
     covers:
-      "the most cautious page on the site: the accidental-ingestion risk, the label-accuracy problem, and why it's a pediatrician conversation first.",
+      "The most cautious page on the site: the accidental-ingestion risk, the label-accuracy problem, and why it's a pediatrician conversation first.",
   },
 ];
 
 const urgentRoute = {
   href: '/when-to-see-a-doctor#urgent',
-  boundary: 'an urgent situation right now',
+  boundary: 'An urgent situation right now',
   covers:
-    'crisis and emergency contacts: thoughts of self-harm, someone hard to wake or struggling to breathe, or a suspected overdose or poisoning.',
+    'Crisis and emergency contacts: thoughts of self-harm, someone hard to wake or struggling to breathe, or a suspected overdose or poisoning.',
 };
 ---
 
 <Base
-  title="sleep safety: when to see a clinician, not check a shelf | Somnary"
-  description="some sleep problems are a reason to see a clinician, not to check a shelf. a router to Somnary's safety boundaries: snoring with breathing pauses, months of insomnia, medications and conditions, children, and urgent situations."
+  title="Sleep safety: when to see a clinician, not check a shelf | Somnary"
+  description="Some sleep problems are a reason to see a clinician, not to check a shelf. A router to Somnary's safety boundaries: snoring with breathing pauses, months of insomnia, medications and conditions, children, and urgent situations."
   canonical="https://somnary.vercel.app/safety"
 >
   <main class="page">
     <header class="head">
-      <p class="eyebrow">safety · where a remedy is the wrong question</p>
+      <p class="eyebrow">Safety · Where a remedy is the wrong question</p>
       <h1 class="title">Safety</h1>
       <p class="dek">
         Somnary grades remedies for mild, occasional sleeplessness. Some sleep problems are a reason
@@ -65,7 +65,7 @@ const urgentRoute = {
     </header>
 
     <ContextBanner
-      note="this is a router, not a remedy and not a diagnosis. it points to the boundary pages; it doesn't tell you which one applies to you — that's a conversation for a clinician."
+      note="This is a router, not a remedy and not a diagnosis. It points to the boundary pages; it doesn't tell you which one applies to you — that's a conversation for a clinician."
     />
 
     <!-- disclaimer sits WITH the route grid, near the decisions (non-negotiable: not footer-only) -->
@@ -73,24 +73,24 @@ const urgentRoute = {
       <Disclaimer variant="standard" />
     </div>
 
-    <section class="section" aria-label="safety routes">
-      <p class="eyebrow">choose the boundary that fits</p>
+    <section class="section" aria-label="Safety routes">
+      <p class="eyebrow">Choose the boundary that fits</p>
       <div class="grid">
         {
           routes.map((r) => (
             <a class="route-card" href={r.href}>
               <p class="card-boundary">{r.boundary}</p>
               <p class="card-covers">{r.covers}</p>
-              <span class="card-go">{r.href.startsWith('/melatonin-children') ? 'melatonin in children →' : r.href.startsWith('/medications-and-sleep-aids') ? 'medications & sleep aids →' : 'when to see a doctor →'}</span>
+              <span class="card-go">{r.href.startsWith('/melatonin-children') ? 'Melatonin in children →' : r.href.startsWith('/medications-and-sleep-aids') ? 'Medications & sleep aids →' : 'When to see a doctor →'}</span>
             </a>
           ))
         }
 
         <a class="safety-card urgent" href={urgentRoute.href}>
-          <span class="urgent-tag" aria-hidden="true">urgent</span>
+          <span class="urgent-tag" aria-hidden="true">Urgent</span>
           <p class="card-boundary">{urgentRoute.boundary}</p>
           <p class="card-covers">{urgentRoute.covers}</p>
-          <span class="card-go">crisis &amp; emergency contacts →</span>
+          <span class="card-go">Crisis &amp; emergency contacts →</span>
         </a>
       </div>
     </section>
@@ -107,7 +107,6 @@ const urgentRoute = {
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     color: var(--muted);
     margin: 0;
   }
@@ -197,7 +196,6 @@ const urgentRoute = {
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     color: var(--primary);
     margin-top: var(--sp-2);
   }
@@ -217,7 +215,6 @@ const urgentRoute = {
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     color: var(--surface);
     background: var(--safety-ink);
     border-radius: var(--r-pill);

@@ -22,10 +22,10 @@ const sourcesCited = contentIndex
   .reduce((n, e) => n + e.sourceCount, 0);
 
 const statCells = [
-  { value: String(remediesGraded), label: 'remedies graded' },
-  { value: String(sourcesCited), label: 'sources cited' },
-  { value: '0', label: 'hallucinated cites', accent: 'eucalyptus' as const },
-  { value: '$0', label: 'brand money', accent: 'primary' as const },
+  { value: String(remediesGraded), label: 'Remedies graded' },
+  { value: String(sourcesCited), label: 'Sources cited' },
+  { value: '0', label: 'Hallucinated cites', accent: 'eucalyptus' as const },
+  { value: '$0', label: 'Brand money', accent: 'primary' as const },
 ];
 
 // Section 1 — six situation tiles, verbatim from the homepage (CHK-3.1); every href resolves.
@@ -34,32 +34,32 @@ const situations = [
   {
     href: '/r/melatonin',
     title: 'I take or am considering melatonin.',
-    dek: 'the flagship decision hub: clock signal vs sedative, dose reality, the label-accuracy problem.',
+    dek: 'The flagship decision hub: clock signal vs sedative, dose reality, the label-accuracy problem.',
   },
   {
     href: '/sleep-blends',
     title: 'I bought a sleep blend.',
-    dek: 'decode the label before you trust it — proprietary blends, missing doses, studied-dose mismatch.',
+    dek: 'Decode the label before you trust it — proprietary blends, missing doses, studied-dose mismatch.',
   },
   {
     href: '/outcome/fall-asleep-faster',
     title: 'I want to fall asleep faster.',
-    dek: 'remedies with human evidence aimed at sleep-onset latency, ranked by the strength of that evidence.',
+    dek: 'Remedies with human evidence aimed at sleep-onset latency, ranked by the strength of that evidence.',
   },
   {
     href: '/outcome/stay-asleep',
     title: 'I wake up at night.',
-    dek: 'the shorter list of remedies studied for staying asleep — wake after sleep onset, not just falling asleep.',
+    dek: 'The shorter list of remedies studied for staying asleep — wake after sleep onset, not just falling asleep.',
   },
   {
     href: '/safety',
     title: 'I use medications or have a health condition.',
-    dek: 'using medications? start with the safety boundary — interactions and red flags come before any remedy.',
+    dek: 'Using medications? Start with the safety boundary — interactions and red flags come before any remedy.',
   },
   {
     href: '/melatonin-children',
     title: 'I am considering this for a child.',
-    dek: 'the most cautious page on the site: what the evidence does and does not support for kids.',
+    dek: 'The most cautious page on the site: what the evidence does and does not support for kids.',
   },
 ];
 
@@ -67,31 +67,31 @@ const situations = [
 // clinician, not a shelf, is the right next step, and routes them all to the /safety hub (which
 // routes onward). No diagnosis, no personalized advice, no "take X"/"safe for you"/"combine".
 const boundaries = [
-  'loud snoring with breathing pauses, gasping, or heavy daytime sleepiness',
-  'trouble sleeping most nights, for months rather than the odd rough week',
-  'you take other medications or manage a health condition',
-  'pregnancy or breastfeeding, or you are considering this for a child',
-  'a mental-health crisis, or thoughts of self-harm',
+  'Loud snoring with breathing pauses, gasping, or heavy daytime sleepiness',
+  'Trouble sleeping most nights, for months rather than the odd rough week',
+  'You take other medications or manage a health condition',
+  'Pregnancy or breastfeeding, or you are considering this for a child',
+  'A mental-health crisis, or thoughts of self-harm',
 ];
 
 // Section 5 — the five most common checks (doc-03 brief). Each href resolves to a built route.
 const commonChecks = [
-  { href: '/r/melatonin', name: 'melatonin' },
-  { href: '/r/magnesium', name: 'magnesium' },
-  { href: '/sleep-blends', name: 'sleep blends' },
+  { href: '/r/melatonin', name: 'Melatonin' },
+  { href: '/r/magnesium', name: 'Magnesium' },
+  { href: '/sleep-blends', name: 'Sleep blends' },
   { href: '/r/cbd', name: 'CBD' },
-  { href: '/r/valerian', name: 'valerian' },
+  { href: '/r/valerian', name: 'Valerian' },
 ];
 ---
 
 <Base
   title="Start here: how to check a sleep remedy on Somnary"
-  description="new to Somnary? start here. route by what you're trying to decide, see what Somnary grades and what it doesn't, learn when to see a clinician instead, and read how the S–F grades work — then check the most common remedies."
+  description="New to Somnary? Start here. Route by what you're trying to decide, see what Somnary grades and what it doesn't, learn when to see a clinician instead, and read how the S–F grades work — then check the most common remedies."
   canonical="https://somnary.vercel.app/start-here"
 >
   <main class="page">
     <header class="head">
-      <p class="eyebrow">start here · a two-minute orientation</p>
+      <p class="eyebrow">Start here · A two-minute orientation</p>
       <h1 class="title">Start here</h1>
       <p class="dek">
         Somnary grades natural sleep remedies by the strength of published human evidence, label
@@ -102,7 +102,7 @@ const commonChecks = [
 
     <!-- 1 · what are you trying to decide? — six route tiles (verbatim from the homepage) -->
     <section class="section" id="decide">
-      <p class="section-eyebrow">what are you trying to decide?</p>
+      <p class="section-eyebrow">What are you trying to decide?</p>
       <div class="tiles">
         {
           situations.map((t) => (
@@ -117,7 +117,7 @@ const commonChecks = [
 
     <!-- 2 · what Somnary grades — scope, in prose; links to the rubric and the board -->
     <section class="section" id="what-we-grade">
-      <p class="section-eyebrow">what Somnary grades</p>
+      <p class="section-eyebrow">What Somnary grades</p>
       <p class="prose">
         Somnary grades natural sleep remedies — supplements, botanicals, and behavioural
         approaches — on a single S–F scale that answers one question: how strong is the published
@@ -132,7 +132,7 @@ const commonChecks = [
 
     <!-- 3 · when NOT to use this site — medical-boundary routing to the /safety hub -->
     <section class="section" id="not-here">
-      <p class="section-eyebrow">when not to use this site as your next step</p>
+      <p class="section-eyebrow">When not to use this site as your next step</p>
       <p class="prose">
         Some sleep problems are a reason to see a clinician, not to check a shelf — and for those,
         a remedy grade is the wrong question. If any of these describe your situation, start with
@@ -153,7 +153,7 @@ const commonChecks = [
 
     <!-- 4 · how to read a grade — S–F legend, verbatim from the homepage -->
     <section class="section" id="how-to-read">
-      <p class="section-eyebrow">how to read a grade</p>
+      <p class="section-eyebrow">How to read a grade</p>
       <ul class="legend">
         {
           TIERS.map((t) => (
@@ -174,8 +174,8 @@ const commonChecks = [
 
     <!-- 5 · most common checks — pills to the five most-searched remedies, + corrections link -->
     <section class="section" id="common">
-      <p class="section-eyebrow">most common checks</p>
-      <div class="pills" aria-label="most common checks">
+      <p class="section-eyebrow">Most common checks</p>
+      <div class="pills" aria-label="Most common checks">
         {
           commonChecks.map((c) => (
             <a class="pill" href={c.href}>
@@ -206,7 +206,6 @@ const commonChecks = [
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     color: var(--muted);
     margin: 0;
   }
@@ -351,7 +350,6 @@ const commonChecks = [
     font-weight: 700;
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     color: var(--ink);
   }
   .legend-trans {

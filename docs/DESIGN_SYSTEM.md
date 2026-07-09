@@ -18,11 +18,19 @@ v2 citron `--action` is retired and `--action` now resolves to oxblood. The
 is the only warning/danger color — safety is NEVER oxblood. Grades are retuned for
 the warm ground (see §3).
 
-**Typography (v3):** **Instrument Sans** for display AND body, self-hosted via
-`@fontsource-variable/instrument-sans` (no Google Fonts CDN). IBM Plex Mono
-(`@fontsource/ibm-plex-mono`, self-hosted) is retained for `--font-mono` only
-(data/citations). Instrument Sans caps at weight **700**; former Archivo 800/900
-display weights render at 700 — that is intentional and fine.
+**Typography (v3):** **Instrument Sans is the ONLY typeface site-wide** — display,
+body, data, and citations — self-hosted via `@fontsource-variable/instrument-sans`
+(no Google Fonts CDN). **IBM Plex Mono is retired (owner, 2026-07-09).** The
+`--font-mono` alias is kept for compatibility but now resolves to Instrument Sans;
+there is no separate mono face anywhere. Instrument Sans caps at weight **700**;
+former Archivo 800/900 display weights render at 700 — that is intentional and fine.
+
+**Casing (owner, 2026-07-09):** the house voice is **Sentence case** — first word
+plus proper nouns capitalized. This applies to headings, labels, nav, and body
+alike. The old all-lowercase house voice is retired, and Title Case is not used.
+The former ALL-CAPS label/eyebrow treatment is **dropped**: micro-labels, kickers,
+and table headers render in Sentence case, keeping only their letterspacing.
+(Brand wordmark casing is unchanged — see below.)
 
 **Brand casing (D3, unchanged):** wordmark is `Somnary.` — **capitalized**,
 trailing period, the period dot in oxblood `--primary`. Do not lowercase. Brand
@@ -106,10 +114,11 @@ border-radius: 24px;
 |---|---|---|
 | Display / headings / buttons / brand | **Instrument Sans** (400–700) | weight 600–700, tight tracking |
 | Body / UI | **Instrument Sans** (400–700) | base 16px / 1.45 |
-| Data / citations | **IBM Plex Mono** (400–500) | `--font-mono` only |
+| Data / citations | **Instrument Sans** (400–500) | mono retired; `--font-mono` resolves to Instrument Sans |
 
-All display + body type is Instrument Sans (all-sans — no serif anywhere), self-hosted
-via `@fontsource-variable/instrument-sans`. **Instrument Sans caps at weight 700**; any
+All type — display, body, data, citations — is Instrument Sans (all-sans, no serif and
+no mono anywhere), self-hosted via `@fontsource-variable/instrument-sans`. **Instrument
+Sans caps at weight 700**; any
 spec below asking for 800/900 renders at 700 (intentional). Use these sizes; don't invent.
 
 > **Font-stack note:** the variable package registers its `@font-face` family as
@@ -127,7 +136,7 @@ spec below asking for 800/900 renders at 700 (intentional). Use these sizes; don
 | lede | `clamp(18px, 1.6vw, 23px)` / 1.34 | 400–500 | — | hero/page subheads, `--muted` (white 0.78–0.82 alpha on oxblood) |
 | body | 16px / 1.45 | 400 | — | default |
 | support | 13–14px | 400–600 | — | card body, nav links, footer |
-| micro | 11–12px | 600–700 | +0.09–0.11em, UPPERCASE | eyebrow/kicker/meta-label (`--primary`), table headers |
+| micro | 11–12px | 600–700 | +0.09–0.11em, Sentence case | eyebrow/kicker/meta-label (`--primary`), table headers |
 
 ## 3. Grade system (S–F)
 
@@ -194,7 +203,7 @@ stat), **update-card** (eucalyptus kicker), **safety-card** (vermilion icon;
 (rank circle 34px + content + grade), **side-panel / module** (22px padding,
 19px h3).
 
-Structured surfaces: **data-table** (`--surface`, uppercase 11px headers on
+Structured surfaces: **data-table** (`--surface`, Sentence-case 11px headers on
 `rgba(238,232,218,0.62)`, 15px cell padding), **tier-legend** (6-up strip,
 24px oxblood/green grade letters), **check-panel** (white 0.96, search input 48px +
 popular pills), **trust-stack** (on hero: `rgba(23,21,18,0.28)` fill, white 0.22

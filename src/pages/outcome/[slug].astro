@@ -32,19 +32,19 @@ const others = OUTCOMES.filter((o) => o.id !== outcome.id);
 
 <Base
   title={`${outcome.title}: best sleep remedies by evidence | Somnary`}
-  description={`${outcome.dek}. the natural sleep remedies with real human evidence for this goal, ranked S–F by the strength of that evidence, not by popularity.`}
+  description={`${outcome.dek}. The natural sleep remedies with real human evidence for this goal, ranked S–F by the strength of that evidence, not by popularity.`}
   canonical={`https://somnary.vercel.app/outcome/${outcome.id}`}
 >
   <main class="page">
     <header class="head">
-      <p class="crumb"><a href="/">Somnary</a> <span aria-hidden="true">›</span> by outcome</p>
-      <p class="eyebrow">by outcome · best evidence first</p>
+      <p class="crumb"><a href="/">Somnary</a> <span aria-hidden="true">›</span> By outcome</p>
+      <p class="eyebrow">By outcome · best evidence first</p>
       <h1 class="title">{outcome.title}</h1>
       <p class="dek">{outcome.dek}: ranked by the strength of the human evidence, not by popularity.</p>
     </header>
 
     <!-- goal switcher -->
-    <nav class="switcher" aria-label="switch goal">
+    <nav class="switcher" aria-label="Switch goal">
       {
         OUTCOMES.map((o) => (
           <a
@@ -59,7 +59,7 @@ const others = OUTCOMES.filter((o) => o.id !== outcome.id);
     </nav>
 
     <!-- ranked list -->
-    <ol class="ranked" aria-label={`remedies for ${outcome.title}, best evidence first`}>
+    <ol class="ranked" aria-label={`Remedies for ${outcome.title}, best evidence first`}>
       {
         items.map((r, i) => (
           <li>
@@ -70,7 +70,7 @@ const others = OUTCOMES.filter((o) => o.id !== outcome.id);
                 <span class="row-name">{r.name}</span>
                 <span class="row-note">{r.oneLiner}</span>
               </span>
-              <span class="row-grade">grade {r.tier}</span>
+              <span class="row-grade">Grade {r.tier}</span>
             </a>
           </li>
         ))
@@ -79,13 +79,13 @@ const others = OUTCOMES.filter((o) => o.id !== outcome.id);
 
     <!-- what we're measuring -->
     <section class="measuring">
-      <p class="measuring-label">what we're measuring</p>
+      <p class="measuring-label">What we're measuring</p>
       <p class="measuring-body">{outcome.measuring}</p>
     </section>
 
     <!-- other goals -->
     <section class="section">
-      <p class="eyebrow">other goals</p>
+      <p class="eyebrow">Other goals</p>
       <div class="others">
         {
           others.map((o) => (
@@ -113,7 +113,6 @@ const others = OUTCOMES.filter((o) => o.id !== outcome.id);
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     color: var(--muted);
     margin: 0;
   }
@@ -124,7 +123,6 @@ const others = OUTCOMES.filter((o) => o.id !== outcome.id);
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     color: var(--muted);
     margin: 0 0 var(--sp-5);
   }
@@ -163,7 +161,6 @@ const others = OUTCOMES.filter((o) => o.id !== outcome.id);
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     color: var(--muted);
     background: var(--surface);
     border: var(--border-hairline);
@@ -241,7 +238,6 @@ const others = OUTCOMES.filter((o) => o.id !== outcome.id);
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     color: var(--muted);
     white-space: nowrap;
   }
@@ -261,7 +257,6 @@ const others = OUTCOMES.filter((o) => o.id !== outcome.id);
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     color: var(--muted);
     margin: 0;
   }

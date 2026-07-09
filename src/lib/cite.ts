@@ -47,17 +47,17 @@ export function sourceIdLabel(s: CiteSource): string {
 /** Human-readable design tag for the popover (schema `type` → words). */
 export function sourceTypeLabel(type: string): string {
   const MAP: Record<string, string> = {
-    'meta-analysis': 'meta-analysis',
-    'systematic-review': 'systematic review',
-    rct: 'randomized trial',
-    cohort: 'cohort study',
-    'case-series': 'case series',
-    animal: 'animal study',
-    'in-vitro': 'in-vitro',
-    registry: 'trial registry',
-    guideline: 'clinical guideline',
-    review: 'review',
-    other: 'source',
+    'meta-analysis': 'Meta-analysis',
+    'systematic-review': 'Systematic review',
+    rct: 'Randomized trial',
+    cohort: 'Cohort study',
+    'case-series': 'Case series',
+    animal: 'Animal study',
+    'in-vitro': 'In-vitro',
+    registry: 'Trial registry',
+    guideline: 'Clinical guideline',
+    review: 'Review',
+    other: 'Source',
   };
   return MAP[type] ?? type;
 }

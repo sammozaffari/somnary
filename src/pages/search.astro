@@ -16,10 +16,10 @@ const results = q ? searchDocs(q, docs) : [];
 
 // group by kind (only 'remedy' today; interventions/outcomes/context join as they ship)
 const KIND_LABEL: Record<string, string> = {
-  remedy: 'remedies',
-  intervention: 'interventions',
-  outcome: 'outcomes',
-  context: 'context',
+  remedy: 'Remedies',
+  intervention: 'Interventions',
+  outcome: 'Outcomes',
+  context: 'Context',
 };
 const groups = new Map<string, typeof results>();
 for (const r of results) {
@@ -32,28 +32,28 @@ const suggestions = ['melatonin', 'magnesium', 'jet lag', "can't fall asleep", '
 ---
 
 <Base
-  title={q ? `search: ${q} — Somnary` : 'search — Somnary'}
-  description="search Somnary: every remedy by name, alias, latin name, outcome, or symptom."
+  title={q ? `Search: ${q} — Somnary` : 'Search — Somnary'}
+  description="Search Somnary: every remedy by name, alias, Latin name, outcome, or symptom."
 >
   <main class="page">
     <header class="head">
-      <p class="eyebrow">search</p>
-      <h1 class="title">{q ? <>results for “{q}”</> : 'search the wiki'}</h1>
+      <p class="eyebrow">Search</p>
+      <h1 class="title">{q ? <>Results for “{q}”</> : 'Search the wiki'}</h1>
 
       {/* real <form> GET → works with JS off; the palette is the enhanced surface */}
       <form class="searchbar" role="search" method="get" action="/search">
-        <label for="q" class="sr-only">search remedies, outcomes, and symptoms</label>
+        <label for="q" class="sr-only">Search remedies, outcomes, and symptoms</label>
         <span class="mag" aria-hidden="true">⌕</span>
         <input
           type="search"
           id="q"
           name="q"
           value={q}
-          placeholder="a remedy, a compound, an outcome, a symptom…"
+          placeholder="A remedy, a compound, an outcome, a symptom…"
           autocomplete="off"
           autofocus
         />
-        <button type="submit">search</button>
+        <button type="submit">Search</button>
       </form>
     </header>
 
@@ -88,9 +88,9 @@ const suggestions = ['melatonin', 'magnesium', 'jet lag', "can't fall asleep", '
     {
       q && results.length === 0 && (
         <div class="empty">
-          <p class="empty-lead">no matches. try a compound, an outcome, or a symptom.</p>
+          <p class="empty-lead">No matches. Try a compound, an outcome, or a symptom.</p>
           <p class="empty-sub">
-            popular:
+            Popular:
             {suggestions.map((s) => (
               <a class="chip" href={`/search?q=${encodeURIComponent(s)}`}>
                 {s}
@@ -104,9 +104,9 @@ const suggestions = ['melatonin', 'magnesium', 'jet lag', "can't fall asleep", '
     {
       !q && (
         <div class="empty">
-          <p class="empty-lead">search remedies by name, alias, latin name, outcome, or symptom.</p>
+          <p class="empty-lead">Search remedies by name, alias, Latin name, outcome, or symptom.</p>
           <p class="empty-sub">
-            try:
+            Try:
             {suggestions.map((s) => (
               <a class="chip" href={`/search?q=${encodeURIComponent(s)}`}>
                 {s}
@@ -140,7 +140,6 @@ const suggestions = ['melatonin', 'magnesium', 'jet lag', "can't fall asleep", '
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     color: var(--muted);
     margin: 0;
   }
@@ -190,7 +189,6 @@ const suggestions = ['melatonin', 'magnesium', 'jet lag', "can't fall asleep", '
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     color: var(--surface);
     background: var(--ink);
     border: none;
@@ -209,7 +207,6 @@ const suggestions = ['melatonin', 'magnesium', 'jet lag', "can't fall asleep", '
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     color: var(--muted);
     margin: 0 0 var(--sp-3);
   }
@@ -250,7 +247,6 @@ const suggestions = ['melatonin', 'magnesium', 'jet lag', "can't fall asleep", '
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     color: var(--muted);
   }
   .row-dek {
@@ -271,7 +267,6 @@ const suggestions = ['melatonin', 'magnesium', 'jet lag', "can't fall asleep", '
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     color: var(--muted);
     display: flex;
     flex-wrap: wrap;

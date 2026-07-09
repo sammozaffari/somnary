@@ -36,7 +36,7 @@ export const GATES: readonly EvidenceGate[] = [
   // --- positive ---
   {
     id: 'meta-analysis-exists',
-    label: 'meta-analysis exists',
+    label: 'Meta-analysis exists',
     variant: 'positive',
     meaning:
       'at least one systematic review or meta-analysis has pooled the human trials for this remedy and sleep.',
@@ -50,65 +50,65 @@ export const GATES: readonly EvidenceGate[] = [
   },
   {
     id: 'effect-size-reported',
-    label: 'effect size reported',
+    label: 'Effect size reported',
     variant: 'positive',
     meaning:
       'the trials report how much it helped (e.g. minutes of sleep-onset latency reduced), not just “significant.”',
   },
   {
     id: 'independent-replication',
-    label: 'independent replication',
+    label: 'Independent replication',
     variant: 'positive',
     meaning:
       'more than one independent research group found a consistent effect — not a single lab’s result.',
   },
   {
     id: 'standardized-extract',
-    label: 'standardized extract',
+    label: 'Standardized extract',
     variant: 'positive',
     meaning:
       'the studied product quantifies its active constituent (e.g. withanolide %), so the dose is reproducible.',
   },
   {
     id: 'studied-dose-matches-market',
-    label: 'studied dose matches market',
+    label: 'Studied dose matches market',
     variant: 'positive',
     meaning: 'the dose proven in trials is the dose typically sold — not a fraction of it.',
   },
   {
     id: 'no-safety-signal',
-    label: 'no major safety signal',
+    label: 'No major safety signal',
     variant: 'positive',
     meaning: 'no serious safety concern in the human literature at studied doses.',
   },
   // --- caution ---
   {
     id: 'effect-size-small',
-    label: 'effect size small',
+    label: 'Effect size small',
     variant: 'caution',
     meaning: 'the benefit is real but modest — worth knowing before you expect much.',
   },
   {
     id: 'heterogeneous-trials',
-    label: 'heterogeneous trials',
+    label: 'Heterogeneous trials',
     variant: 'caution',
     meaning: 'trials disagree or use very different methods, so the picture is muddy.',
   },
   {
     id: 'unstandardized',
-    label: 'unstandardized',
+    label: 'Unstandardized',
     variant: 'caution',
     meaning: 'the active constituent isn’t quantified, so potency varies bottle to bottle.',
   },
   {
     id: 'dose-mismatch',
-    label: 'dose mismatch',
+    label: 'Dose mismatch',
     variant: 'caution',
     meaning: 'products commonly sell less (or more) than the dose that was actually studied.',
   },
   {
     id: 'safety-signal-present',
-    label: 'safety signal present',
+    label: 'Safety signal present',
     variant: 'caution',
     meaning:
       'there is a documented safety concern — read the safety section before anything else.',
@@ -116,13 +116,13 @@ export const GATES: readonly EvidenceGate[] = [
   // --- neutral ---
   {
     id: 'mechanism-only',
-    label: 'mechanism only',
+    label: 'Mechanism only',
     variant: 'neutral',
     meaning: 'support is biological plausibility or animal/in-vitro work — not human outcomes.',
   },
   {
     id: 'little-no-human-data',
-    label: 'little/no human data',
+    label: 'Little/no human data',
     variant: 'neutral',
     meaning: 'few or no human sleep trials exist for this remedy.',
   },

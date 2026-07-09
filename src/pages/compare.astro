@@ -90,25 +90,25 @@ const catFacets = [...new Set(rows.map((r) => r.category).filter(Boolean))].sort
 ---
 
 <Base
-  title="compare natural sleep remedies side by side | Somnary"
-  description="compare every reviewed natural sleep remedy on its own evidence grade, goal, effect, evidence gates, who-should-avoid, and documented interaction cautions. this is not a tool for combining remedies — comparing two here is not a suggestion to take both. zero brand money."
+  title="Compare natural sleep remedies side by side | Somnary"
+  description="Compare every reviewed natural sleep remedy on its own evidence grade, goal, effect, evidence gates, who-should-avoid, and documented interaction cautions. This is not a tool for combining remedies — comparing two here is not a suggestion to take both. Zero brand money."
   canonical="https://somnary.vercel.app/compare"
 >
   <main class="page">
     <header class="head">
-      <p class="eyebrow">tool · compare</p>
+      <p class="eyebrow">Tool · compare</p>
       <h1 class="title">Compare remedies</h1>
       <p class="dek">
-        every reviewed remedy, side by side on the things that decide it: the evidence grade, what
+        Every reviewed remedy, side by side on the things that decide it: the evidence grade, what
         it's studied for, the one-line effect, the evidence gates behind the grade, who should avoid
-        it, and any documented interaction cautions. narrow the list by goal or category — the full
+        it, and any documented interaction cautions. Narrow the list by goal or category — the full
         table stands with filters off.
       </p>
     </header>
 
     {/* D4 framing — comparing is NOT combining. Rendered at the top, before any comparison. */}
     <ContextBanner
-      note="this compares how each remedy stands on its own evidence and safety. it is not a tool for combining remedies, and comparing two here is not a suggestion to take both."
+      note="This compares how each remedy stands on its own evidence and safety. It is not a tool for combining remedies, and comparing two here is not a suggestion to take both."
     />
 
     {/* standard medical disclaimer, adjacent to the decisions — not footer-only */}
@@ -117,12 +117,12 @@ const catFacets = [...new Set(rows.map((r) => r.category).filter(Boolean))].sort
     </div>
 
     {/* what this compares — states the grade/safety distinction the whole page rests on */}
-    <aside class="framing" role="note" aria-label="what this comparison shows">
-      <p class="framing-label">how to read this</p>
+    <aside class="framing" role="note" aria-label="What this comparison shows">
+      <p class="framing-label">How to read this</p>
       <p class="framing-text">
-        each row is a remedy judged <strong>on its own</strong>. the grade rates the strength of the
+        Each row is a remedy judged <strong>on its own</strong>. The grade rates the strength of the
         published human evidence — <strong>it rates evidence, not safety</strong>, so always read the
-        who-should-avoid and interaction notes separately. interaction cautions are listed
+        who-should-avoid and interaction notes separately. Interaction cautions are listed
         per remedy and are a question for a pharmacist or clinician; nothing here evaluates any
         remedy alongside another.
       </p>
@@ -131,9 +131,9 @@ const catFacets = [...new Set(rows.map((r) => r.category).filter(Boolean))].sort
     {/* filters — progressive enhancement. Server order (grade→name), all rows shown, is the default. */}
     <div class="filters">
       <div class="facet-row">
-        <span id="goal-label" class="filters-label">goal</span>
+        <span id="goal-label" class="filters-label">Goal</span>
         <div class="facet-group facet-goal" role="group" aria-labelledby="goal-label">
-          <button type="button" class="facet" data-goal="all" aria-pressed="true">all goals</button>
+          <button type="button" class="facet" data-goal="all" aria-pressed="true">All goals</button>
           {
             goalFacets.map((g) => (
               <button type="button" class="facet" data-goal={g.key} aria-pressed="false">
@@ -144,9 +144,9 @@ const catFacets = [...new Set(rows.map((r) => r.category).filter(Boolean))].sort
         </div>
       </div>
       <div class="facet-row">
-        <span id="cat-label" class="filters-label">category</span>
+        <span id="cat-label" class="filters-label">Category</span>
         <div class="facet-group facet-cat" role="group" aria-labelledby="cat-label">
-          <button type="button" class="facet" data-cat="all" aria-pressed="true">all categories</button>
+          <button type="button" class="facet" data-cat="all" aria-pressed="true">All categories</button>
           {
             catFacets.map((c) => (
               <button type="button" class="facet" data-cat={c} aria-pressed="false">
@@ -156,7 +156,7 @@ const catFacets = [...new Set(rows.map((r) => r.category).filter(Boolean))].sort
           }
         </div>
       </div>
-      <p id="compare-count" class="filters-count" aria-live="polite">showing all {rows.length} remedies</p>
+      <p id="compare-count" class="filters-count" aria-live="polite">Showing all {rows.length} remedies</p>
     </div>
 
     {/* canonical flat comparison: ALL remedies, grade(S→F)→name(A–Z). This is the crawlable content. */}
@@ -173,11 +173,11 @@ const catFacets = [...new Set(rows.map((r) => r.category).filter(Boolean))].sort
             <div class="row-head">
               <TierBadge tier={r.tier} size="card" />
               <div class="head-text">
-                <a class="name" href={`/r/${r.slug}`} aria-label={`read ${r.name} — grade ${r.tier}`}
+                <a class="name" href={`/r/${r.slug}`} aria-label={`Read ${r.name} — grade ${r.tier}`}
                   >{r.name}</a>
                 <p class="verdict">{r.verdict}</p>
                 <p class="decision">
-                  <span class="grade-k">grade {r.tier} · {getTier(r.tier).name}</span>
+                  <span class="grade-k">Grade {r.tier} · {getTier(r.tier).name}</span>
                   {r.decisionTranslation}
                 </p>
               </div>
@@ -185,7 +185,7 @@ const catFacets = [...new Set(rows.map((r) => r.category).filter(Boolean))].sort
 
             <dl class="cells">
               <div class="cell">
-                <dt class="k">goal</dt>
+                <dt class="k">Goal</dt>
                 <dd class="v">
                   {/* Goal cell renders outcomes[] only. bestFor[] is intentionally NOT shown here:
                       on a side-by-side grid a per-remedy bestFor caveat that names another remedy
@@ -201,7 +201,7 @@ const catFacets = [...new Set(rows.map((r) => r.category).filter(Boolean))].sort
               </div>
 
               <div class="cell">
-                <dt class="k">evidence gates</dt>
+                <dt class="k">Evidence gates</dt>
                 <dd class="v">
                   <div class="chips">
                     {r.gates.map((g) => (
@@ -214,7 +214,7 @@ const catFacets = [...new Set(rows.map((r) => r.category).filter(Boolean))].sort
               {/* who-should-avoid — OMITTED when empty; absence must NEVER read as "no risk" (CHK-2.1). */}
               {(r.notFor.length > 0 || r.biggestRisk) && (
                 <div class="cell">
-                  <dt class="k">who should avoid</dt>
+                  <dt class="k">Who should avoid</dt>
                   <dd class="v">
                     {r.notFor.length > 0 && (
                       <ul class="avoid-list">
@@ -232,22 +232,22 @@ const catFacets = [...new Set(rows.map((r) => r.category).filter(Boolean))].sort
                   OMITTED when empty. No cross-remedy aggregation anywhere on this page. */}
               {r.interactions.length > 0 && (
                 <div class="cell cell-int">
-                  <dt class="k">interaction cautions</dt>
+                  <dt class="k">Interaction cautions</dt>
                   <dd class="v">
                     <p class="int-line">
-                      {r.name} has documented interaction cautions ({r.interactions.join('; ')}). this
+                      {r.name} has documented interaction cautions ({r.interactions.join('; ')}). This
                       is a question for a pharmacist or clinician.
                     </p>
                     <p class="int-links">
-                      <a href="/safety">read the safety boundary →</a>
-                      <a href="/medications-and-sleep-aids">medications &amp; sleep aids →</a>
+                      <a href="/safety">Read the safety boundary →</a>
+                      <a href="/medications-and-sleep-aids">Medications &amp; sleep aids →</a>
                     </p>
                   </dd>
                 </div>
               )}
 
               <div class="cell">
-                <dt class="k">category</dt>
+                <dt class="k">Category</dt>
                 <dd class="v"><span class="cat">{r.category}</span></dd>
               </div>
             </dl>
@@ -257,7 +257,7 @@ const catFacets = [...new Set(rows.map((r) => r.category).filter(Boolean))].sort
     </ul>
 
     <p id="compare-empty" class="empty" hidden>
-      no reviewed remedy matches that goal and that category. clear a filter to widen the list.
+      No reviewed remedy matches that goal and that category. Clear a filter to widen the list.
     </p>
   </main>
 </Base>
@@ -293,7 +293,7 @@ const catFacets = [...new Set(rows.map((r) => r.category).filter(Boolean))].sort
       if (emptyEl) emptyEl.hidden = shown > 0;
       if (countEl) {
         countEl.textContent =
-          shown === total ? `showing all ${total} remedies` : `showing ${shown} of ${total} remedies`;
+          shown === total ? `Showing all ${total} remedies` : `Showing ${shown} of ${total} remedies`;
       }
     };
 
@@ -320,7 +320,6 @@ const catFacets = [...new Set(rows.map((r) => r.category).filter(Boolean))].sort
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     color: var(--muted);
     margin: 0;
   }
@@ -364,7 +363,6 @@ const catFacets = [...new Set(rows.map((r) => r.category).filter(Boolean))].sort
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     color: var(--muted);
   }
   .framing-text {
@@ -396,7 +394,6 @@ const catFacets = [...new Set(rows.map((r) => r.category).filter(Boolean))].sort
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     color: var(--muted);
     flex: none;
     min-width: var(--sp-8);
@@ -410,7 +407,6 @@ const catFacets = [...new Set(rows.map((r) => r.category).filter(Boolean))].sort
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     color: var(--muted);
     background: var(--surface);
     border: var(--border-hairline);
@@ -439,7 +435,6 @@ const catFacets = [...new Set(rows.map((r) => r.category).filter(Boolean))].sort
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     color: var(--muted);
   }
 
@@ -505,7 +500,6 @@ const catFacets = [...new Set(rows.map((r) => r.category).filter(Boolean))].sort
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     color: var(--ink);
     margin-bottom: var(--sp-1);
   }
@@ -528,7 +522,6 @@ const catFacets = [...new Set(rows.map((r) => r.category).filter(Boolean))].sort
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     color: var(--muted);
     margin: 0;
   }
@@ -609,7 +602,6 @@ const catFacets = [...new Set(rows.map((r) => r.category).filter(Boolean))].sort
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     color: var(--primary);
     text-decoration: none;
   }

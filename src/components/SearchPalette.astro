@@ -10,17 +10,17 @@
   type="button"
   class="search-trigger"
   aria-haspopup="dialog"
-  aria-label="search (press ⌘K)"
+  aria-label="Search (press ⌘K)"
   data-search-open
 >
   <span class="st-mag" aria-hidden="true">⌕</span>
-  <span class="st-label">search</span>
+  <span class="st-label">Search</span>
   <kbd class="st-hint" aria-hidden="true">⌘K</kbd>
 </button>
 
 <div class="search-overlay" data-search-overlay hidden>
   <div class="scrim" data-search-scrim></div>
-  <div class="palette" role="dialog" aria-modal="true" aria-label="search Somnary">
+  <div class="palette" role="dialog" aria-modal="true" aria-label="Search Somnary">
     <div class="p-input-row">
       <span class="p-mag" aria-hidden="true">⌕</span>
       <input
@@ -30,15 +30,15 @@
         aria-expanded="false"
         aria-controls="p-listbox"
         aria-autocomplete="list"
-        aria-label="search remedies, outcomes, and symptoms"
-        placeholder="a remedy, a compound, an outcome, a symptom…"
+        aria-label="Search remedies, outcomes, and symptoms"
+        placeholder="A remedy, a compound, an outcome, a symptom…"
         autocomplete="off"
         spellcheck="false"
         data-search-input
       />
     </div>
-    <ul id="p-listbox" class="p-list" role="listbox" aria-label="search results" data-search-list></ul>
-    <p class="p-hint" data-search-hint>type to search · ↑↓ to move · enter to open · esc to close</p>
+    <ul id="p-listbox" class="p-list" role="listbox" aria-label="Search results" data-search-list></ul>
+    <p class="p-hint" data-search-hint>Type to search · ↑↓ to move · enter to open · esc to close</p>
   </div>
 </div>
 
@@ -72,7 +72,6 @@
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
   }
   .st-hint {
     font-family: var(--font-mono);
@@ -179,7 +178,6 @@
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     color: var(--muted);
     padding: var(--sp-3) var(--sp-3) var(--sp-2);
   }
@@ -228,14 +226,12 @@
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     color: var(--muted);
   }
   .p-list :global(.p-grade) {
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     color: var(--muted);
   }
 
@@ -244,7 +240,6 @@
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     color: var(--muted);
     padding: var(--sp-3) var(--sp-5);
     margin: 0;
@@ -294,10 +289,10 @@
     let active = -1;
 
     const KIND_LABEL: Record<string, string> = {
-      remedy: 'remedies',
-      intervention: 'interventions',
-      outcome: 'outcomes',
-      context: 'context',
+      remedy: 'Remedies',
+      intervention: 'Interventions',
+      outcome: 'Outcomes',
+      context: 'Context',
     };
 
     const loadDocs = async () => {
@@ -347,9 +342,9 @@
       input.setAttribute('aria-expanded', options.length ? 'true' : 'false');
       const q = input.value.trim();
       if (q && options.length === 0) {
-        hint.textContent = 'no matches — try a compound, an outcome, or a symptom';
+        hint.textContent = 'No matches — try a compound, an outcome, or a symptom';
       } else {
-        hint.textContent = 'type to search · ↑↓ to move · enter to open · esc to close';
+        hint.textContent = 'Type to search · ↑↓ to move · enter to open · esc to close';
       }
       syncActive();
     };
