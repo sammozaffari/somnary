@@ -135,83 +135,117 @@
   .lc-results {
     margin-top: var(--sp-6);
   }
-  .lc-idle,
-  .lc-count {
+  /* Results are injected via innerHTML, so they carry no scoped data-cid — every
+     result selector must be :global() under .lc-results (the static, scoped parent)
+     or it renders unstyled. */
+  .lc-results :global(.lc-idle) {
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
     color: var(--muted);
-    margin: 0 0 var(--sp-4);
+    margin: 0;
   }
-  .lc-idle[hidden] {
+  .lc-results :global(.lc-idle[hidden]) {
     display: none;
   }
 
-  /* empty (no flags) — honest, not an endorsement; calm, not a severity callout */
-  .lc-empty {
-    font-size: var(--text-sm);
-    line-height: var(--lh-sm);
-    color: var(--muted);
+  /* results panel — a distinct card, clearly separated from the input above, with a
+     header so it reads as an answer, not an unformatted error block */
+  .lc-results :global(.lc-panel) {
     background: var(--paper);
     border: var(--border-hairline);
     border-radius: var(--r-md);
-    padding: var(--sp-4) var(--sp-5);
+    padding: var(--sp-5);
+  }
+  .lc-results :global(.lc-head) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--sp-2) var(--sp-4);
+    padding-bottom: var(--sp-4);
+    margin-bottom: var(--sp-4);
+    border-bottom: var(--border-hairline);
+  }
+  .lc-results :global(.lc-head-title) {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--text-md);
+    color: var(--ink);
+  }
+  .lc-results :global(.lc-count) {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
     margin: 0;
   }
 
-  /* flag rows — DESIGN_SYSTEM §5: vermilion icon + hairline dividers */
-  .flag-list {
+  /* empty (no flags) — honest, not an endorsement; calm, informational */
+  .lc-results :global(.lc-empty) {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: 0;
+  }
+
+  /* flag rows — observations about the label. Neutral/informational marker, NOT the
+     vermilion safety register (these are label notes, not health warnings). */
+  .lc-results :global(.flag-list) {
     list-style: none;
     margin: 0;
     padding: 0;
-    border-top: var(--border-hairline);
   }
-  .flag-row {
+  .lc-results :global(.flag-row) {
     display: grid;
     grid-template-columns: 24px 1fr auto;
     gap: var(--sp-4);
     align-items: start;
     padding: var(--sp-4) 0;
-    border-bottom: var(--border-hairline);
+    border-top: var(--border-hairline);
   }
-  .flag-icon {
+  .lc-results :global(.flag-row:first-child) {
+    border-top: none;
+    padding-top: 0;
+  }
+  .lc-results :global(.flag-icon) {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     width: 24px;
     height: 24px;
     border-radius: var(--r-xs);
-    background: var(--warning-bg);
-    color: var(--vermilion);
+    background: var(--surface);
+    border: var(--border-hairline);
+    color: var(--muted);
     font-family: var(--font-display);
     font-weight: 700;
     line-height: 1;
   }
-  .flag-body {
+  .lc-results :global(.flag-body) {
     min-width: 0;
   }
-  .flag-text {
+  .lc-results :global(.flag-text) {
     font-size: var(--text-sm);
     line-height: var(--lh-sm);
     color: var(--ink);
     margin: 0 0 var(--sp-2);
   }
-  .flag-link {
+  .lc-results :global(.flag-link) {
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
     color: var(--primary);
     text-decoration: none;
   }
-  .flag-link:hover {
+  .lc-results :global(.flag-link:hover) {
     text-decoration: underline;
   }
-  .flag-link:focus-visible {
+  .lc-results :global(.flag-link:focus-visible) {
     outline: none;
     box-shadow: var(--ring);
     border-radius: var(--r-xs);
   }
-  .flag-rule {
+  .lc-results :global(.flag-rule) {
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
@@ -220,10 +254,10 @@
   }
 
   @media (max-width: 640px) {
-    .flag-row {
+    .lc-results :global(.flag-row) {
       grid-template-columns: 24px 1fr;
     }
-    .flag-rule {
+    .lc-results :global(.flag-rule) {
       display: none;
     }
   }
@@ -271,7 +305,11 @@
     };
 
     const renderEmpty = () => {
-      results.innerHTML = `<p class="lc-empty">${esc(EMPTY_STATE)}</p>`;
+      results.innerHTML =
+        `<div class="lc-panel">` +
+        `<div class="lc-head"><span class="lc-head-title">What the label shows</span></div>` +
+        `<p class="lc-empty">${esc(EMPTY_STATE)}</p>` +
+        `</div>`;
     };
 
     const render = (flags: ReturnType<typeof checkLabel>) => {
@@ -296,8 +334,13 @@
         .join('');
       const noun = flags.length === 1 ? 'observation' : 'observations';
       results.innerHTML =
-        `<p class="lc-count">${flags.length} ${noun} — described, not a grade or a recommendation.</p>` +
-        `<ul class="flag-list">${rows}</ul>`;
+        `<div class="lc-panel">` +
+        `<div class="lc-head">` +
+        `<span class="lc-head-title">What the label shows</span>` +
+        `<span class="lc-count">${flags.length} ${noun} — described, not a grade or a recommendation.</span>` +
+        `</div>` +
+        `<ul class="flag-list">${rows}</ul>` +
+        `</div>`;
     };
 
     const run = async () => {
