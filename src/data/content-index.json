@@ -1042,5 +1042,29 @@
     "sourceCount": 5,
     "sourceTarget": null,
     "notes": "Grading-expansion batch (CHK-5.1); sources verified firsthand; tier owner-ratified."
+  },
+  {
+    "name": "OTC antihistamine sleep aids",
+    "slug": "otc-antihistamines",
+    "kind": "context",
+    "aliases": [
+      "diphenhydramine",
+      "benadryl",
+      "zzzquil",
+      "tylenol pm",
+      "advil pm",
+      "doxylamine",
+      "unisom",
+      "pm sleep aid",
+      "antihistamine for sleep",
+      "sleep aid tolerance"
+    ],
+    "latin": null,
+    "category": "OTC sleep-aid context",
+    "plannedTier": null,
+    "researchStatus": "live",
+    "sourceCount": 0,
+    "sourceTarget": null,
+    "notes": "LIVE at /otc-antihistamines — context on the decision behind using a sedating first-gen antihistamine (diphenhydramine/doxylamine) for sleep: tolerance fades within days, next-day impairment, anticholinergic load + observational dementia association, Beers avoid in older adults, doxylamine pregnancy-nausea use framed accurately, children routed to a clinician. Goes deeper than /medications-and-sleep-aids and cross-links it. NOT a graded remedy. sourceCount 0: context .astro pages add nothing to the graded-corpus tally."
   }
 ]
