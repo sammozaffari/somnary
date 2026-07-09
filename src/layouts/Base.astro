@@ -3,10 +3,9 @@
 // tokens) and self-hosts the brand typefaces (DESIGN_SYSTEM v3 §2). Server-rendered
 // shell so content is crawlable from day one.
 // Typefaces (self-hosted via @fontsource — no CDN): Instrument Sans (variable weight
-// axis) for display + body; IBM Plex Mono (400/500) for data/citations only.
+// axis) for everything. IBM Plex Mono retired 2026-07-09 (owner) — the mono font is gone
+// site-wide; --font-mono now aliases Instrument Sans (see global.css).
 import '@fontsource-variable/instrument-sans';
-import '@fontsource/ibm-plex-mono/400.css';
-import '@fontsource/ibm-plex-mono/500.css';
 import '../styles/global.css';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';

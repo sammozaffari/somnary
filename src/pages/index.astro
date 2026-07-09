@@ -1,9 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
-import StatRow from '../components/StatRow.astro';
 import Disclaimer from '../components/Disclaimer.astro';
 import TierBadge from '../components/TierBadge.astro';
-import { contentIndex, liveRemedyCount } from '../lib/content-index';
 import { TIERS } from '../lib/tiers';
 
 // Home — CHK-3.1 (strategy 03 "Homepage Above-The-Fold"; DESIGN_SYSTEM §1/§10).
@@ -15,18 +13,6 @@ import { TIERS } from '../lib/tiers';
 // per the §10 budget. No search island is dropped here (SearchPalette has fixed IDs + a single
 // trigger binding); the primary CTA is a plain crawlable anchor to /search plus popular-check
 // pills to real remedy routes. No newsletter/forms (CHK-4.2), no commerce, no stack-builder (D4).
-const remediesGraded = liveRemedyCount;
-const sourcesCited = contentIndex
-  .filter((e) => e.researchStatus === 'live')
-  .reduce((n, e) => n + e.sourceCount, 0);
-
-const statCells = [
-  { value: String(remediesGraded), label: 'remedies graded' },
-  { value: String(sourcesCited), label: 'sources cited' },
-  { value: '0', label: 'hallucinated cites', accent: 'eucalyptus' as const },
-  { value: '$0', label: 'brand money', accent: 'primary' as const },
-];
-
 // Popular-check pills → real remedy routes (verified present in src/content/remedies/).
 const popularChecks = [
   { slug: 'melatonin', name: 'melatonin' },
@@ -41,32 +27,32 @@ const popularChecks = [
 const situations = [
   {
     href: '/r/melatonin',
-    title: 'I take or am considering melatonin.',
+    title: "I'm considering melatonin, or already take it",
     dek: 'the flagship decision hub: clock signal vs sedative, dose reality, the label-accuracy problem.',
   },
   {
     href: '/sleep-blends',
-    title: 'I bought a sleep blend.',
+    title: 'I bought a sleep blend',
     dek: 'decode the label before you trust it — proprietary blends, missing doses, studied-dose mismatch.',
   },
   {
     href: '/outcome/fall-asleep-faster',
-    title: 'I want to fall asleep faster.',
+    title: 'I want to fall asleep faster',
     dek: 'remedies with human evidence aimed at sleep-onset latency, ranked by the strength of that evidence.',
   },
   {
     href: '/outcome/stay-asleep',
-    title: 'I wake up at night.',
+    title: 'I keep waking up at night',
     dek: 'the shorter list of remedies studied for staying asleep — wake after sleep onset, not just falling asleep.',
   },
   {
     href: '/safety',
-    title: 'I use medications or have a health condition.',
+    title: 'I take medications or have a health condition',
     dek: 'using medications? start with the safety boundary — interactions and red flags come before any remedy.',
   },
   {
     href: '/melatonin-children',
-    title: 'I am considering this for a child.',
+    title: "I'm considering this for a child",
     dek: 'the most cautious page on the site: what the evidence does and does not support for kids.',
   },
 ];
@@ -84,7 +70,6 @@ const situations = [
       <h1 class="headline">Check a sleep remedy before you take it</h1>
       <p class="dek">
         Every sleep supplement, graded on real science — not the hype on the label.
-        <span class="disavow">No affiliate links. No brand money.</span>
       </p>
       <div class="cta-row">
         <a class="cta cta-action" href="/search">Check a remedy →</a>
@@ -102,8 +87,6 @@ const situations = [
         }
       </div>
     </section>
-
-    <StatRow cells={statCells} />
 
     <!-- disclaimer — adjacent to the decision block, not footer-only -->
     <Disclaimer />
