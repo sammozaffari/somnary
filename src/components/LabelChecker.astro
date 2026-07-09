@@ -10,12 +10,12 @@
 ---
 
 <section class="checker" aria-labelledby="lc-heading">
-  <h2 id="lc-heading" class="lc-title">check a supplement facts panel</h2>
+  <h2 id="lc-heading" class="lc-title">Check a supplement facts panel</h2>
   <p class="lc-sub">
-    paste the ingredients and amounts from a label below. the check runs entirely in your browser.
+    Paste the ingredients and amounts from a label below. The check runs entirely in your browser.
   </p>
 
-  <label class="lc-label" for="lc-input">supplement facts text</label>
+  <label class="lc-label" for="lc-input">Supplement facts text</label>
   <textarea
     id="lc-input"
     class="label-input"
@@ -26,13 +26,13 @@
     data-lc-input></textarea>
 
   <div class="lc-actions">
-    <button type="button" class="btn-check" data-lc-check>check the label</button>
-    <button type="button" class="btn-clear" data-lc-clear hidden>clear</button>
+    <button type="button" class="btn-check" data-lc-check>Check the label</button>
+    <button type="button" class="btn-clear" data-lc-clear hidden>Clear</button>
   </div>
 
   <!-- results: aria-live so flags are announced; server-rendered empty until the user checks -->
-  <div class="lc-results" role="region" aria-live="polite" aria-label="label observations" data-lc-results>
-    <p class="lc-idle" data-lc-idle>no label checked yet.</p>
+  <div class="lc-results" role="region" aria-live="polite" aria-label="Label observations" data-lc-results>
+    <p class="lc-idle" data-lc-idle>No label checked yet.</p>
   </div>
 </section>
 
@@ -61,7 +61,6 @@
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     color: var(--muted);
     margin-bottom: var(--sp-2);
   }
@@ -100,7 +99,6 @@
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     min-height: 42px;
     padding: 0 var(--sp-5);
     border-radius: var(--r-sm);
@@ -142,7 +140,6 @@
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     color: var(--muted);
     margin: 0 0 var(--sp-4);
   }
@@ -203,7 +200,6 @@
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     color: var(--primary);
     text-decoration: none;
   }
@@ -242,17 +238,17 @@
   const results = document.querySelector<HTMLElement>('[data-lc-results]');
 
   if (input && checkBtn && clearBtn && results) {
-    const IDLE_HTML = '<p class="lc-idle">no label checked yet.</p>';
+    const IDLE_HTML = '<p class="lc-idle">No label checked yet.</p>';
     let entries: LabelEntry[] | null = null;
     let loading = false;
 
     // Human-readable name for each rule id (matches the server-rendered rules documentation).
     const RULE_LABEL: Record<string, string> = {
-      R1: 'rule R1 · proprietary blend',
-      R2: 'rule R2 · high-dose melatonin',
-      R3: 'rule R3 · dose vs studied dose',
-      R4: 'rule R4 · missing standardization',
-      R5: 'rule R5 · interaction caution',
+      R1: 'Rule R1 · proprietary blend',
+      R2: 'Rule R2 · high-dose melatonin',
+      R3: 'Rule R3 · dose vs studied dose',
+      R4: 'Rule R4 · missing standardization',
+      R5: 'Rule R5 · interaction caution',
     };
 
     const esc = (s: string) =>

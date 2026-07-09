@@ -21,28 +21,28 @@ interface Props {
 const { claims } = Astro.props;
 ---
 
-<div class="claims-table" role="table" aria-label="what's claimed versus what the studies show">
+<div class="claims-table" role="table" aria-label="What's claimed versus what the studies show">
   <div class="header" role="row">
-    <div class="h-claim" role="columnheader">what's claimed</div>
-    <div class="h-data" role="columnheader">what the studies show</div>
+    <div class="h-claim" role="columnheader">What's claimed</div>
+    <div class="h-data" role="columnheader">What the studies show</div>
   </div>
 
   {
     claims.map((c) => (
       <div class="claimrow" role="row">
         <div class="claim-cell" role="cell">
-          <span class="c-label c-label-claim" aria-hidden="true">claimed</span>
+          <span class="c-label c-label-claim" aria-hidden="true">Claimed</span>
           <span class="claim">
             {c.claimed}
             <span class="strikeline" aria-hidden="true" />
           </span>
         </div>
         <div class="data-cell" role="cell">
-          <span class="c-label c-label-data" aria-hidden="true">studies show</span>
+          <span class="c-label c-label-data" aria-hidden="true">Studies show</span>
           {c.studiesShow === null ? (
             <span class="nodata">
               <span class="dash" aria-hidden="true" />
-              no human sleep trial tests this claim
+              No human sleep trial tests this claim
             </span>
           ) : (
             <span class="data-text">
@@ -75,7 +75,6 @@ const { claims } = Astro.props;
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     padding: var(--sp-3) var(--sp-5);
   }
   .h-claim {
@@ -105,7 +104,6 @@ const { claims } = Astro.props;
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     margin-bottom: var(--sp-2);
   }
   .c-label-claim {

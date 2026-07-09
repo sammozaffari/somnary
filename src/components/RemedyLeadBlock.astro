@@ -34,9 +34,9 @@ const notForText = notFor.length ? notFor.join(' · ') : null;
 const showDose = format !== 'intervention';
 ---
 
-<section class="lead" aria-label="grade and decision summary">
+<section class="lead" aria-label="Grade and decision summary">
   <div class="badge-stack">
-    <p class="micro">grade</p>
+    <p class="micro">Grade</p>
     <TierBadge tier={tier} size="lead" />
     <p class="tier-word">{t.name}</p>
   </div>
@@ -46,34 +46,34 @@ const showDose = format !== 'intervention';
 
     <dl class="grid">
       <div class="drow">
-        <dt class="dlabel">best for</dt>
-        <dd class="dvalue">{bestForText ?? <em class="unknown">not established</em>}</dd>
+        <dt class="dlabel">Best for</dt>
+        <dd class="dvalue">{bestForText ?? <em class="unknown">Not established</em>}</dd>
       </div>
 
       {notForText && (
         <div class="drow">
-          <dt class="dlabel">not for</dt>
+          <dt class="dlabel">Not for</dt>
           <dd class="dvalue">{notForText}</dd>
         </div>
       )}
 
       {biggestRisk && (
         <div class="drow">
-          <dt class="dlabel">biggest risk</dt>
+          <dt class="dlabel">Biggest risk</dt>
           <dd class="dvalue">{biggestRisk}</dd>
         </div>
       )}
 
       {showDose && (
         <div class="drow">
-          <dt class="dlabel">studied dose</dt>
-          <dd class="dvalue">{studiedDose ?? <em class="unknown">not established</em>}</dd>
+          <dt class="dlabel">Studied dose</dt>
+          <dd class="dvalue">{studiedDose ?? <em class="unknown">Not established</em>}</dd>
         </div>
       )}
     </dl>
 
     <p class="review">
-      reviewed <time datetime={reviewDate}>{reviewDate}</time> · found an error?
+      Reviewed <time datetime={reviewDate}>{reviewDate}</time> · found an error?
       <a href="/methodology#corrections">corrections →</a>
     </p>
   </div>
@@ -102,7 +102,6 @@ const showDose = format !== 'intervention';
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     color: var(--muted);
     margin: 0;
   }
@@ -110,7 +109,6 @@ const showDose = format !== 'intervention';
     font-family: var(--font-mono);
     font-size: var(--text-sm);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     color: var(--ink);
     margin: 0;
   }
@@ -146,7 +144,6 @@ const showDose = format !== 'intervention';
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     color: var(--muted);
     margin: 0;
   }
@@ -166,7 +163,6 @@ const showDose = format !== 'intervention';
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     color: var(--muted);
   }
   .review a {

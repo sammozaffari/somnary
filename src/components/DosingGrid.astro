@@ -19,19 +19,19 @@ const { doses } = Astro.props;
     doses.map((d) => (
       <div class="dose">
         <div class="cell">
-          <p class="lbl">form</p>
+          <p class="lbl">Form</p>
           <p class="val val-form">{d.form}</p>
         </div>
         <div class="cell">
-          <p class="lbl">studied dose</p>
+          <p class="lbl">Studied dose</p>
           <p class="val">{d.studiedDose}</p>
         </div>
         <div class="cell">
-          <p class="lbl">timing</p>
+          <p class="lbl">Timing</p>
           <p class="val">{d.timing}</p>
         </div>
         <div class="cell">
-          <p class="lbl">vs. the market</p>
+          <p class="lbl">Vs. the market</p>
           <p class="val">{d.marketComparison}</p>
         </div>
       </div>
@@ -61,7 +61,6 @@ const { doses } = Astro.props;
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     color: var(--muted);
     margin: 0 0 var(--sp-2);
   }

@@ -16,8 +16,8 @@ interface Props {
 const { sources } = Astro.props;
 ---
 
-<section class="sources" aria-label="sources">
-  <p class="sources-label">sources</p>
+<section class="sources" aria-label="Sources">
+  <p class="sources-label">Sources</p>
   <ol class="list">
     {
       sources.map((s) => (
@@ -52,7 +52,6 @@ const { sources } = Astro.props;
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     color: var(--muted);
     margin: 0 0 var(--sp-5);
   }

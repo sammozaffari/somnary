@@ -9,20 +9,20 @@ interface Props {
 const { remedyName } = Astro.props;
 ---
 
-<section class="ask" aria-label="ask about this remedy">
-  <p class="ask-label"><span class="dot" aria-hidden="true"></span> ask</p>
-  <p class="prompt">questions about {remedyName}? the assistant will answer only from the cited sources on this page.</p>
+<section class="ask" aria-label="Ask about this remedy">
+  <p class="ask-label"><span class="dot" aria-hidden="true"></span> Ask</p>
+  <p class="prompt">Questions about {remedyName}? The assistant will answer only from the cited sources on this page.</p>
   <div class="field">
     <input
       type="text"
       class="ask-input"
-      placeholder="not live yet"
+      placeholder="Not live yet"
       disabled
-      aria-label={`ask about ${remedyName} (coming soon)`}
+      aria-label={`Ask about ${remedyName} (coming soon)`}
     />
-    <button type="button" class="send" disabled aria-disabled="true" aria-label="send (coming soon)">→</button>
+    <button type="button" class="send" disabled aria-disabled="true" aria-label="Send (coming soon)">→</button>
   </div>
-  <p class="stub-note">scoped assistant — arriving with the Somnary corpus. it will never invent a source.</p>
+  <p class="stub-note">Scoped assistant — arriving with the Somnary corpus. It will never invent a source.</p>
 </section>
 
 <style>
@@ -38,7 +38,6 @@ const { remedyName } = Astro.props;
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     color: var(--primary);
     margin: 0 0 var(--sp-3);
   }

@@ -4,40 +4,40 @@
 import Disclaimer from './Disclaimer.astro';
 
 const legal = [
-  { href: '/methodology', label: 'methodology' },
-  { href: '/changelog', label: 'evidence log' },
-  { href: '/disclaimer', label: 'disclaimer' },
-  { href: '/terms', label: 'terms' },
-  { href: '/privacy', label: 'privacy' },
-  { href: '/disclosure', label: 'disclosure' },
+  { href: '/methodology', label: 'Methodology' },
+  { href: '/changelog', label: 'Evidence log' },
+  { href: '/disclaimer', label: 'Disclaimer' },
+  { href: '/terms', label: 'Terms' },
+  { href: '/privacy', label: 'Privacy' },
+  { href: '/disclosure', label: 'Disclosure' },
 ];
 // Educational context pages — not graded remedies. Kept in their own labelled group so they're
 // site-wide discoverable (crawlable, no orphans) and never read as part of the graded catalog.
 const context = [
-  { href: '/when-to-see-a-doctor', label: 'when to see a doctor' },
-  { href: '/medications-and-sleep-aids', label: 'medications & sleep aids' },
-  { href: '/older-adults', label: 'older adults' },
-  { href: '/jet-lag-shift-work', label: 'jet lag & shift work' },
-  { href: '/anxiety-and-sleep', label: 'anxiety & sleep' },
-  { href: '/melatonin-children', label: 'melatonin in children' },
-  { href: '/melatonin-dose-timing', label: 'melatonin dose & timing' },
-  { href: '/melatonin-gummies', label: 'melatonin gummies' },
-  { href: '/melatonin-long-term', label: 'melatonin, long-term' },
-  { href: '/ramelteon', label: 'ramelteon' },
-  { href: '/sleep-blends', label: 'sleep blends' },
+  { href: '/when-to-see-a-doctor', label: 'When to see a doctor' },
+  { href: '/medications-and-sleep-aids', label: 'Medications & sleep aids' },
+  { href: '/older-adults', label: 'Older adults' },
+  { href: '/jet-lag-shift-work', label: 'Jet lag & shift work' },
+  { href: '/anxiety-and-sleep', label: 'Anxiety & sleep' },
+  { href: '/melatonin-children', label: 'Melatonin in children' },
+  { href: '/melatonin-dose-timing', label: 'Melatonin dose & timing' },
+  { href: '/melatonin-gummies', label: 'Melatonin gummies' },
+  { href: '/melatonin-long-term', label: 'Melatonin, long-term' },
+  { href: '/ramelteon', label: 'Ramelteon' },
+  { href: '/sleep-blends', label: 'Sleep blends' },
 ];
 ---
 
 <footer class="footer">
   <div class="row">
     <span class="brand">Somnary</span>
-    <p class="independence">zero affiliate links · zero brand money · reader-funded.</p>
+    <p class="independence">Zero affiliate links · zero brand money · reader-funded.</p>
   </div>
   <div class="disclaimer">
     <Disclaimer variant="compact" />
   </div>
-  <nav class="reflinks" aria-label="context">
-    <span class="group-label">context · not graded</span>
+  <nav class="reflinks" aria-label="Context">
+    <span class="group-label">Context · not graded</span>
     <ul class="linkrow">
       {context.map((l) => (
         <li>
@@ -46,7 +46,7 @@ const context = [
       ))}
     </ul>
   </nav>
-  <ul class="legal" aria-label="legal">
+  <ul class="legal" aria-label="Legal">
     {legal.map((l) => (
       <li>
         <a href={l.href}>{l.label}</a>
@@ -79,7 +79,6 @@ const context = [
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     color: var(--muted);
   }
   .disclaimer {
@@ -96,7 +95,6 @@ const context = [
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
   }
   .legal a {
     color: var(--muted);
@@ -117,7 +115,6 @@ const context = [
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     color: var(--eucalyptus);
   }
   .linkrow {
@@ -130,7 +127,6 @@ const context = [
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
   }
   .linkrow a {
     color: var(--muted);

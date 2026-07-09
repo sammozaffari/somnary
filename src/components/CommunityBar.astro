@@ -13,8 +13,8 @@ const pct = Math.max(0, Math.min(100, Math.round((reportsCount / target) * 100))
 const tooFew = reportsCount < 10;
 ---
 
-<section class="community" aria-label="community read">
-  <p class="c-header">community read</p>
+<section class="community" aria-label="Community read">
+  <p class="c-header">Community read</p>
   <p class="figure">{reportsCount} <span class="of">/ {target}</span></p>
   <div
     class="track"
@@ -29,9 +29,9 @@ const tooFew = reportsCount < 10;
   <p class="caption">
     {
       tooFew
-        ? 'too few reports to show a pattern yet.'
-        : 'aggregated anonymous self-reports.'
-    } community reports never affect the grade — the grade is set by published evidence alone.
+        ? 'Too few reports to show a pattern yet.'
+        : 'Aggregated anonymous self-reports.'
+    } Community reports never affect the grade — the grade is set by published evidence alone.
   </p>
 </section>
 
@@ -46,7 +46,6 @@ const tooFew = reportsCount < 10;
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     color: var(--muted);
     margin: 0 0 var(--sp-3);
   }

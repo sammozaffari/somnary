@@ -22,11 +22,11 @@ const bestForText = bestFor.length ? bestFor.join(', ') : null;
 const showDoseRows = format !== 'intervention';
 ---
 
-<aside class="meta-card" aria-label="at a glance">
-  <p class="meta-header">at a glance</p>
+<aside class="meta-card" aria-label="At a glance">
+  <p class="meta-header">At a glance</p>
 
   <div class="row">
-    <span class="label">grade</span>
+    <span class="label">Grade</span>
     <span class="value grade-value">
       <TierBadge tier={tier} size="inline" />
       <span>grade {tier}</span>
@@ -35,25 +35,25 @@ const showDoseRows = format !== 'intervention';
 
   {showDoseRows && (
     <div class="row">
-      <span class="label">key compound</span>
-      <span class="value">{keyCompound ?? <em class="unknown">not established</em>}</span>
+      <span class="label">Key compound</span>
+      <span class="value">{keyCompound ?? <em class="unknown">Not established</em>}</span>
     </div>
   )}
 
   {showDoseRows && (
     <div class="row">
-      <span class="label">studied dose</span>
-      <span class="value">{studiedDose ?? <em class="unknown">not established</em>}</span>
+      <span class="label">Studied dose</span>
+      <span class="value">{studiedDose ?? <em class="unknown">Not established</em>}</span>
     </div>
   )}
 
   <div class="row">
-    <span class="label">best for</span>
-    <span class="value">{bestForText ?? <em class="unknown">not established</em>}</span>
+    <span class="label">Best for</span>
+    <span class="value">{bestForText ?? <em class="unknown">Not established</em>}</span>
   </div>
 
   <div class="row row-flag">
-    <span class="label">safety flag</span>
+    <span class="label">Safety flag</span>
     <span class="value">
       <GateChip label={safetyFlag.label} variant={safetyFlag.variant} />
     </span>
@@ -71,7 +71,6 @@ const showDoseRows = format !== 'intervention';
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     color: var(--muted);
     margin: 0 0 var(--sp-4);
   }
@@ -91,7 +90,6 @@ const showDoseRows = format !== 'intervention';
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     color: var(--muted);
   }
   .value {

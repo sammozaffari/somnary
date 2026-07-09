@@ -32,7 +32,7 @@ const { Content } = await render(entry);
 const isIntervention = d.format === 'intervention';
 const studiedDose = d.doses.length ? d.doses[0].studiedDose : null;
 const safetyFlag: { label: string; variant: GateVariant } = {
-  label: d.safety.severity === 'serious' ? 'serious — see safety' : 'caution — see safety',
+  label: d.safety.severity === 'serious' ? 'Serious — see safety' : 'Caution — see safety',
   variant: 'caution',
 };
 
@@ -53,7 +53,7 @@ const jsonLd = remedyJsonLd(d, canonical, site);
   <main class="remedy">
     {/* 1 — header (grade badge moves to the decision-first lead block below; CHK-2.1) */}
     <header class="head">
-      <p class="crumb"><a href="/">Somnary</a> <span aria-hidden="true">›</span> {isIntervention ? 'interventions' : 'remedies'}</p>
+      <p class="crumb"><a href="/">Somnary</a> <span aria-hidden="true">›</span> {isIntervention ? 'Interventions' : 'Remedies'}</p>
       <h1 class="title">{d.name}</h1>
       <p class="dek">{d.oneLineVerdict}</p>
     </header>
@@ -77,23 +77,23 @@ const jsonLd = remedyJsonLd(d, canonical, site);
       <div class="main">
         {/* 3 — claims vs data */}
         <section class="block">
-          <p class="eyebrow">claims vs. data</p>
-          <h2 class="block-title">what's claimed, what's shown</h2>
+          <p class="eyebrow">Claims vs. data</p>
+          <h2 class="block-title">What's claimed, what's shown</h2>
           <ClaimsDataTable claims={d.claims} />
         </section>
 
         {/* 4 — evidence summary (MDX body) */}
         <section class="block">
-          <p class="eyebrow">evidence summary</p>
-          <h2 class="block-title">what the trials actually found</h2>
+          <p class="eyebrow">Evidence summary</p>
+          <h2 class="block-title">What the trials actually found</h2>
           <div class="prose"><Content /></div>
         </section>
 
         {/* 5 — dosing reality (supplements only; interventions have no dose) */}
         {d.doses.length > 0 && (
           <section class="block">
-            <p class="eyebrow">dosing reality</p>
-            <h2 class="block-title">the studied dose vs. the shelf</h2>
+            <p class="eyebrow">Dosing reality</p>
+            <h2 class="block-title">The studied dose vs. the shelf</h2>
             <DosingGrid doses={d.doses} />
           </section>
         )}
@@ -112,22 +112,22 @@ const jsonLd = remedyJsonLd(d, canonical, site);
 
         {/* 7 — standardization note (reframed as fidelity for interventions) */}
         <section class="block">
-          <p class="eyebrow">{isIntervention ? 'the real version' : 'standardization'}</p>
-          <h2 class="block-title">{isIntervention ? 'what counts as the real thing' : 'what to look for on a label'}</h2>
+          <p class="eyebrow">{isIntervention ? 'The real version' : 'Standardization'}</p>
+          <h2 class="block-title">{isIntervention ? 'What counts as the real thing' : 'What to look for on a label'}</h2>
           <p class="prose-p">{d.standardization}</p>
         </section>
 
         {/* 8 — mechanism */}
         <section class="block">
-          <p class="eyebrow">mechanism</p>
-          <h2 class="block-title">how it's thought to work</h2>
+          <p class="eyebrow">Mechanism</p>
+          <h2 class="block-title">How it's thought to work</h2>
           <p class="prose-p">{d.mechanism}</p>
         </section>
 
         {/* 9 — sources */}
         <section class="block">
-          <p class="eyebrow">sources</p>
-          <h2 class="block-title">every claim, footnoted</h2>
+          <p class="eyebrow">Sources</p>
+          <h2 class="block-title">Every claim, footnoted</h2>
           <SourcesList sources={d.sources} />
         </section>
       </div>
@@ -168,7 +168,6 @@ const jsonLd = remedyJsonLd(d, canonical, site);
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     color: var(--muted);
     margin: 0;
   }
@@ -184,7 +183,6 @@ const jsonLd = remedyJsonLd(d, canonical, site);
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     color: var(--muted);
     margin: 0 0 var(--sp-5);
   }

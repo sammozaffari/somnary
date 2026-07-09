@@ -1,58 +1,941 @@
 [
-  {"name": "melatonin", "slug": "melatonin", "kind": "remedy", "aliases": ["n-acetyl-5-methoxytryptamine"], "latin": "N-acetyl-5-methoxytryptamine", "category": "hormone / circadian", "plannedTier": "A", "researchStatus": "live", "sourceCount": 8, "sourceTarget": null, "notes": "reference template (CHK-2.1); 8 citations verified against PubMed. Strongest use is circadian timing (jet lag, DSPD); modest effect on sleep-onset; AASM advises against for chronic insomnia."},
-  {"name": "magnesium", "slug": "magnesium", "kind": "remedy", "aliases": ["mg", "magnesium glycinate", "magnesium threonate", "magnesium citrate", "magnesium bisglycinate", "magnesium oxide"], "latin": null, "category": "mineral", "plannedTier": "B", "researchStatus": "live", "sourceCount": 4, "sourceTarget": "Mah & Pitre 2021 meta-analysis (BMC Complement Med Ther, PMID 33865376 — ~17 min SOL, GRADE low, n=151); Schuster 2025 bisglycinate RCT (DOI 10.2147/NSS.S524348, n=155, d=0.2); Hausenblas 2024 L-threonate RCT (Sleep Med X, DOI 10.1016/j.sleepx.2024.100121)", "notes": "the honesty test case. meta-analysis exists but small & low-quality; effect real but modest; form matters hugely (glycinate/threonate vs oxide bioavailability, §3.2). B, not A."},
-  {"name": "l-theanine", "slug": "l-theanine", "kind": "remedy", "aliases": ["theanine", "n-ethyl-l-glutamine", "suntheanine", "l-γ-glutamylethylamide"], "latin": "L-γ-glutamylethylamide", "category": "amino acid", "plannedTier": "B", "researchStatus": "live", "sourceCount": 2, "sourceTarget": "Rao 2015; Hidese 2019 4-week RCT (200–400 mg, relaxation/quality) — note most trials are anxiety/relaxation-adjacent, sleep is a secondary outcome", "notes": "good safety, plausible mechanism (alpha-waves, no sedation). Effect is on subjective quality/latency, not a knockout. Dose-match usually fine."},
-  {"name": "ashwagandha", "slug": "ashwagandha", "kind": "remedy", "aliases": ["withania somnifera", "indian ginseng", "winter cherry", "ksm-66", "shoden"], "latin": "Withania somnifera", "category": "botanical (adaptogen)", "plannedTier": "B", "researchStatus": "live", "sourceCount": 4, "sourceTarget": "Cheah 2021 systematic review/meta-analysis on sleep (PMID ~34559859 — verify); Langade 2019/2020 RCTs (root extract 600 mg); standardization = withanolide %", "notes": "§3.2 standardization central — KSM-66/Shoden standardized; generic 'ashwagandha 500 mg' often isn't. Safety: rare liver-injury case reports + thyroid/pregnancy cautions (sev-caution, note hepatotoxicity signal)."},
-  {"name": "tart cherry", "slug": "tart-cherry", "kind": "remedy", "aliases": ["prunus cerasus", "montmorency cherry", "tart cherry juice", "cherrypharm"], "latin": "Prunus cerasus", "category": "food / botanical", "plannedTier": "C", "researchStatus": "live", "sourceCount": 4, "sourceTarget": "Losso 2018 pilot RCT (insomnia, n=8 — tiny); Howatson 2012 (melatonin content + sleep); pooled reviews on tart cherry & sleep", "notes": "provisional B/C. Mechanism = actual melatonin + tryptophan/anti-inflammatory. Human trials SMALL. Dose-match: juice vs concentrate vs capsule varies wildly."},
-  {"name": "glycine", "slug": "glycine", "kind": "remedy", "aliases": ["aminoacetic acid", "2-aminoacetic acid"], "latin": "aminoacetic acid", "category": "amino acid", "plannedTier": "D", "researchStatus": "live", "sourceCount": 3, "sourceTarget": "Yamadera 2007 & Inagawa 2006 (3 g before bed, subjective quality + PSG — small Japanese RCTs, some industry-linked); Bannai/Kawai work", "notes": "provisional B/C. Decent mechanism (core body temp drop via peripheral vasodilation). Trials small/few, some Ajinomoto-funded — note conflict. C if replication thin."},
-  {"name": "valerian", "slug": "valerian", "kind": "remedy", "aliases": ["valeriana officinalis", "all-heal", "garden valerian", "valerenic acid"], "latin": "Valeriana officinalis", "category": "botanical", "plannedTier": "C", "researchStatus": "live", "sourceCount": 4, "sourceTarget": "Bent 2006 systematic review (Am J Med, PMID 17145239 — mixed, methodological problems); Fernández-San-Martín 2010 meta-analysis; Cochrane-adjacent reviews", "notes": "classic 'popular > evidence.' Meta-analyses exist but heterogeneous, high risk of bias. §3.2 standardization (valerenic acid) all over the place. Honest C — do NOT inflate to B for fame."},
-  {"name": "lemon balm", "slug": "lemon-balm", "kind": "remedy", "aliases": ["melissa officinalis"], "latin": "Melissa officinalis", "category": "botanical", "plannedTier": "C", "researchStatus": "live", "sourceCount": 2, "sourceTarget": "Cases 2011 (anxiety+sleep, small); often studied in combination (with valerian) → confounded", "notes": "provisional C/D. Mostly combination trials → hard to isolate. Thin."},
-  {"name": "gaba", "slug": "gaba", "kind": "remedy", "aliases": ["gamma-aminobutyric acid", "pharmagaba"], "latin": "gamma-aminobutyric acid", "category": "amino acid / neurotransmitter", "plannedTier": "D", "researchStatus": "live", "sourceCount": 2, "sourceTarget": "small RCTs (Byun 2018, latency); the crux is oral bioavailability / blood-brain-barrier penetration", "notes": "provisional C/D. Big mechanistic controversy — does oral GABA even cross the BBB? Lead with that honesty; the 'does it reach the brain' debate is the story."},
-  {"name": "5-htp", "slug": "5-htp", "kind": "remedy", "aliases": ["5-hydroxytryptophan", "oxitriptan", "griffonia simplicifolia"], "latin": "5-hydroxytryptophan", "category": "amino acid / precursor", "plannedTier": "D", "researchStatus": "live", "sourceCount": 2, "sourceTarget": "sleep RCTs sparse, often combined with GABA; key safety item = serotonergic interaction (SSRIs/MAOIs) + historical EMS concern", "notes": "SAFETY-heavy page — serotonin-syndrome risk, EMS history (sev-caution/serious). Efficacy thin → C, safety flag prominent."},
-  {"name": "magnolia bark", "slug": "magnolia-bark", "kind": "remedy", "aliases": ["magnolia officinalis", "houpu", "honokiol", "magnolol"], "latin": "Magnolia officinalis", "category": "botanical (TCM)", "plannedTier": "D", "researchStatus": "live", "sourceCount": 2, "sourceTarget": "mostly preclinical (honokiol GABA-A modulation); human sleep RCTs scarce; menopause-combination trials exist (confounded)", "notes": "provisional C/D — strong mechanism, weak human data → likely D unless human trials found."},
-  {"name": "l-tryptophan", "slug": "l-tryptophan", "kind": "remedy", "aliases": ["tryptophan", "trp"], "latin": "L-tryptophan", "category": "amino acid / precursor", "plannedTier": "C", "researchStatus": "live", "sourceCount": 3, "sourceTarget": "older meta-analyses (1980s, 1 g+ for latency); EMS/contamination history (1989) — safety", "notes": "provisional B/C. Has older RCT support for sleep latency (→ B upside), but data is dated + EMS safety history needs a clear note."},
-  {"name": "chamomile", "slug": "chamomile", "kind": "remedy", "aliases": ["matricaria chamomilla", "matricaria recutita", "apigenin", "chamomile tea", "german chamomile"], "latin": "Matricaria chamomilla", "category": "botanical", "plannedTier": "C", "researchStatus": "live", "sourceCount": 2, "sourceTarget": "Zick 2011 (chamomile extract RCT, modest); Chang 2016 (postnatal women); apigenin mechanism preclinical", "notes": "provisional C/D. Separate chamomile-as-tea (cultural) from apigenin-as-isolated-compound. Human RCTs small/modest."},
-  {"name": "passionflower", "slug": "passionflower", "kind": "remedy", "aliases": ["passiflora incarnata", "maypop"], "latin": "Passiflora incarnata", "category": "botanical", "plannedTier": "D", "researchStatus": "live", "sourceCount": 3, "sourceTarget": "Ngan 2011 (tea, small); mostly small/combination trials", "notes": "popular in 'sleep blends,' minimal standalone human data → D. An honest example of a D done well."},
-  {"name": "hops", "slug": "hops", "kind": "remedy", "aliases": ["humulus lupulus"], "latin": "Humulus lupulus", "category": "botanical", "plannedTier": "D", "researchStatus": "live", "sourceCount": 3, "sourceTarget": "almost always studied WITH valerian → confounded; standalone data scarce", "notes": "the valerian-hops combination confound is the whole story. D standalone."},
-  {"name": "lavender", "slug": "lavender", "kind": "remedy", "aliases": ["lavandula angustifolia", "silexan", "lavender oil", "lavender aromatherapy", "lavender oral"], "latin": "Lavandula angustifolia", "category": "botanical / aromatherapy", "plannedTier": "C", "researchStatus": "live", "sourceCount": 2, "sourceTarget": "Silexan (oral lavender oil) anxiety RCTs (Kasper) — decent but anxiety-primary; aromatherapy sleep trials weaker/unblindable", "notes": "provisional C/D. IMPORTANT: separate oral Silexan (real RCTs, anxiety→sleep) from aromatherapy (weak, unblindable). Could split into two entries."},
-  {"name": "skullcap", "slug": "skullcap", "kind": "remedy", "aliases": ["scutellaria lateriflora", "scutellaria baicalensis", "baikal skullcap"], "latin": "Scutellaria lateriflora", "category": "botanical", "plannedTier": "D", "researchStatus": "live", "sourceCount": 4, "sourceTarget": "minimal human sleep data; note american vs chinese skullcap differ; hepatotoxicity reports (often adulteration)", "notes": "D. Safety note re: liver (historically tied to germander adulteration)."},
-  {"name": "sleep blends", "slug": "sleep-blends", "kind": "context", "aliases": ["proprietary sleep blend", "sleep gummy stack", "sleep stack"], "latin": null, "category": "concept / explainer", "plannedTier": null, "researchStatus": "live", "sourceCount": 0, "sourceTarget": null, "notes": "LIVE at /sleep-blends — context/explainer, NOT a graded remedy. Shows the proprietary-blend penalty (§3.2): hidden doses make claims unfalsifiable, so a blend can't be graded on efficacy (F = transparency verdict). No efficacy citations; links to methodology + ingredient pages."},
-  {"name": "cbd", "slug": "cbd", "kind": "remedy", "aliases": ["cannabidiol"], "latin": "cannabidiol", "category": "cannabinoid", "plannedTier": "D", "researchStatus": "live", "sourceCount": 4, "sourceTarget": null, "notes": "legal/safety context is AU-specific; separate CBD-for-sleep evidence from CBD:THC ratios."},
-  {"name": "kava", "slug": "kava", "kind": "remedy", "aliases": ["piper methysticum", "kava kava", "kavalactones"], "latin": "Piper methysticum", "category": "botanical", "plannedTier": "F", "researchStatus": "live", "sourceCount": 3, "sourceTarget": "hepatotoxicity literature (Teschke reviews); anxiety RCTs (Pittler/Ernst — it DOES work for anxiety)", "notes": "model F entry. F is SAFETY-driven, not efficacy-driven — real anxiolytic evidence but documented hepatotoxicity, used for sleep off anxiety data. sev-serious callout. Proves F isn't 'doesn't work.'"},
-  {"name": "cbt-i", "slug": "cbt-i", "kind": "intervention", "aliases": ["cognitive behavioral therapy for insomnia", "cognitive behavioural therapy for insomnia"], "latin": null, "category": "behavioral", "plannedTier": "S", "researchStatus": "live", "sourceCount": 5, "sourceTarget": "ACP 2016 + AASM 2021 first-line guidelines; Trauer 2015 + van Straten 2018 meta-analyses; Espie 2019 digital-CBT-I RCT (all verified firsthand)", "notes": "GRADED S — the site's first and only S, and the thesis in action: the strongest-graded sleep intervention isn't a supplement. Scoped to chronic insomnia; honest caveat that it consolidates sleep more than it lengthens it (total sleep time barely moves)."},
-  {"name": "sleep restriction therapy", "slug": "sleep-restriction", "kind": "intervention", "aliases": ["bedtime restriction", "sleep restriction"], "latin": null, "category": "behavioral", "plannedTier": "A", "researchStatus": "not-started", "sourceCount": 0, "sourceTarget": "component of CBT-I with its own RCT base", "notes": null},
-  {"name": "stimulus control", "slug": "stimulus-control", "kind": "intervention", "aliases": ["stimulus control therapy"], "latin": null, "category": "behavioral", "plannedTier": "A", "researchStatus": "not-started", "sourceCount": 0, "sourceTarget": "behavioral, good evidence base", "notes": "provisional A/B."},
-  {"name": "morning bright light", "slug": "morning-bright-light", "kind": "intervention", "aliases": ["morning light exposure", "light therapy", "bright light therapy", "morning light"], "latin": null, "category": "light / circadian", "plannedTier": "A", "researchStatus": "not-started", "sourceCount": 0, "sourceTarget": "circadian literature — strong for phase/timing", "notes": "provisional A/B."},
-  {"name": "warm bath before bed", "slug": "warm-bath", "kind": "intervention", "aliases": ["warm shower", "passive body heating", "warm-bath effect"], "latin": null, "category": "body-based", "plannedTier": "B", "researchStatus": "not-started", "sourceCount": 0, "sourceTarget": "Haghayegh 2019 systematic review/meta-analysis (the 'warm-bath effect' has real RCTs)", "notes": null},
-  {"name": "breathing protocols", "slug": "breathing-protocols", "kind": "intervention", "aliases": ["4-7-8 breathing", "slow breathing", "paced breathing"], "latin": null, "category": "body-based", "plannedTier": "C", "researchStatus": "not-started", "sourceCount": 0, "sourceTarget": "HRV / relaxation data", "notes": "provisional C/B."},
-  {"name": "progressive muscle relaxation", "slug": "pmr", "kind": "intervention", "aliases": ["pmr", "jacobson relaxation"], "latin": null, "category": "body-based", "plannedTier": "B", "researchStatus": "not-started", "sourceCount": 0, "sourceTarget": "established relaxation-therapy evidence base", "notes": null},
-  {"name": "white noise", "slug": "white-noise", "kind": "intervention", "aliases": ["pink noise", "broadband noise"], "latin": null, "category": "environmental", "plannedTier": "C", "researchStatus": "not-started", "sourceCount": 0, "sourceTarget": "mixed trials, some positive", "notes": "honest about weak/heterogeneous data."},
-  {"name": "weighted blanket", "slug": "weighted-blanket", "kind": "intervention", "aliases": ["gravity blanket"], "latin": null, "category": "environmental", "plannedTier": "C", "researchStatus": "not-started", "sourceCount": 0, "sourceTarget": "small RCTs, anxiety-adjacent", "notes": null},
-  {"name": "sleep hygiene", "slug": "sleep-hygiene", "kind": "intervention", "aliases": ["sleep hygiene education"], "latin": null, "category": "behavioral", "plannedTier": "C", "researchStatus": "not-started", "sourceCount": 0, "sourceTarget": null, "notes": "honest: weak AS A STANDALONE despite being everywhere."},
-  {"name": "blue-light glasses", "slug": "blue-light-glasses", "kind": "intervention", "aliases": ["blue blockers", "blue-light blocking glasses", "amber glasses"], "latin": null, "category": "light / circadian", "plannedTier": "C", "researchStatus": "not-started", "sourceCount": 0, "sourceTarget": "evening blue-light reduction trials — weaker than marketed", "notes": "provisional C/D — honest downgrade; model 'popular but overstated,' likely D."},
-  {"name": "taurine", "slug": "taurine", "kind": "remedy", "aliases": ["2-aminoethanesulfonic acid"], "latin": "2-aminoethanesulfonic acid", "category": "amino acid", "plannedTier": "D", "researchStatus": "not-started", "sourceCount": 0, "sourceTarget": null, "notes": null},
-  {"name": "phenibut", "slug": "phenibut", "kind": "remedy", "aliases": ["beta-phenyl-gaba", "fenibut"], "latin": "β-phenyl-GABA", "category": "amino acid", "plannedTier": "F", "researchStatus": "not-started", "sourceCount": 0, "sourceTarget": null, "notes": "F — dependence/withdrawal; safety must be prominent (sev-serious)."},
-  {"name": "saffron", "slug": "saffron", "kind": "remedy", "aliases": ["crocus sativus", "affron", "crocin"], "latin": "Crocus sativus", "category": "botanical", "plannedTier": "C", "researchStatus": "not-started", "sourceCount": 0, "sourceTarget": null, "notes": null},
-  {"name": "ziziphus", "slug": "ziziphus", "kind": "remedy", "aliases": ["ziziphus jujuba", "suanzaoren", "jujube seed", "sour date seed", "ziziphus spinosa"], "latin": "Ziziphus jujuba", "category": "botanical (TCM)", "plannedTier": "C", "researchStatus": "not-started", "sourceCount": 0, "sourceTarget": null, "notes": null},
-  {"name": "bacopa", "slug": "bacopa", "kind": "remedy", "aliases": ["bacopa monnieri", "brahmi", "water hyssop"], "latin": "Bacopa monnieri", "category": "botanical (ayurvedic)", "plannedTier": "D", "researchStatus": "not-started", "sourceCount": 0, "sourceTarget": null, "notes": null},
-  {"name": "reishi", "slug": "reishi", "kind": "remedy", "aliases": ["ganoderma lucidum", "lingzhi"], "latin": "Ganoderma lucidum", "category": "botanical (mushroom / TCM)", "plannedTier": "D", "researchStatus": "not-started", "sourceCount": 0, "sourceTarget": null, "notes": null},
-  {"name": "jatamansi", "slug": "jatamansi", "kind": "remedy", "aliases": ["nardostachys jatamansi", "spikenard"], "latin": "Nardostachys jatamansi", "category": "botanical (ayurvedic)", "plannedTier": "D", "researchStatus": "not-started", "sourceCount": 0, "sourceTarget": null, "notes": null},
-  {"name": "california poppy", "slug": "california-poppy", "kind": "remedy", "aliases": ["eschscholzia californica"], "latin": "Eschscholzia californica", "category": "botanical", "plannedTier": "D", "researchStatus": "not-started", "sourceCount": 0, "sourceTarget": null, "notes": null},
-  {"name": "st john's wort", "slug": "st-johns-wort", "kind": "remedy", "aliases": ["hypericum perforatum"], "latin": "Hypericum perforatum", "category": "botanical", "plannedTier": "F", "researchStatus": "not-started", "sourceCount": 0, "sourceTarget": null, "notes": "interaction caution — CYP450 induction + serotonergic; safety-driven, not a sleep remedy per se."},
-  {"name": "kiwifruit", "slug": "kiwifruit", "kind": "remedy", "aliases": ["actinidia deliciosa", "kiwi"], "latin": "Actinidia deliciosa", "category": "food", "plannedTier": "D", "researchStatus": "not-started", "sourceCount": 0, "sourceTarget": null, "notes": null},
-  {"name": "inositol", "slug": "inositol", "kind": "remedy", "aliases": ["myo-inositol", "vitamin b8"], "latin": "myo-inositol", "category": "other", "plannedTier": "D", "researchStatus": "not-started", "sourceCount": 0, "sourceTarget": null, "notes": null},
-  {"name": "cbn", "slug": "cbn", "kind": "remedy", "aliases": ["cannabinol"], "latin": "cannabinol", "category": "cannabinoid", "plannedTier": "D", "researchStatus": "not-started", "sourceCount": 0, "sourceTarget": null, "notes": null},
-  {"name": "l-ornithine", "slug": "l-ornithine", "kind": "remedy", "aliases": ["ornithine"], "latin": "L-ornithine", "category": "amino acid", "plannedTier": "D", "researchStatus": "not-started", "sourceCount": 0, "sourceTarget": null, "notes": null},
-  {"name": "iron (for rls)", "slug": "iron-rls", "kind": "remedy", "aliases": ["ferritin", "iron supplementation", "restless legs"], "latin": null, "category": "mineral (RLS context)", "plannedTier": "C", "researchStatus": "not-started", "sourceCount": 0, "sourceTarget": null, "notes": "RLS-specific — iron/ferritin repletion; frame as context, not a general sleep aid."},
-  {"name": "homeopathic sleep aids", "slug": "homeopathic-sleep-aids", "kind": "remedy", "aliases": ["homeopathy", "moon milk"], "latin": null, "category": "concept / probably-not", "plannedTier": "F", "researchStatus": "not-started", "sourceCount": 0, "sourceTarget": null, "notes": "the 'probably not' file — graded F/D with the evidence shown."},
-  {"name": "ramelteon", "slug": "ramelteon", "kind": "context", "aliases": ["rozerem", "melatonin receptor agonist"], "latin": null, "category": "prescription context", "plannedTier": null, "researchStatus": "live", "sourceCount": 0, "sourceTarget": null, "notes": "Rx melatonin-receptor agonist — /ramelteon context page, NOT graded. sourceCount kept 0: its one cite (AASM 2017) is already counted on the melatonin page, so it adds nothing to the graded-corpus 'sources cited' tally."},
-  {"name": "when to see a doctor", "slug": "when-to-see-a-doctor", "kind": "context", "aliases": ["sleep apnea", "cpap", "chronic insomnia"], "latin": null, "category": "medical context", "plannedTier": null, "researchStatus": "live", "sourceCount": 0, "sourceTarget": null, "notes": "/when-to-see-a-doctor red-flag context page, NOT graded. sourceCount 0 for the same reason (its AASM 2017 cite is already counted on the melatonin page)."},
-  {"name": "melatonin in children", "slug": "melatonin-children", "kind": "context", "aliases": ["high-dose melatonin", "melatonin kids", "pediatric melatonin"], "latin": null, "category": "safety context", "plannedTier": null, "researchStatus": "live", "sourceCount": 0, "sourceTarget": "Lelak 2022 MMWR + Erland 2017 (both reused from the melatonin page) + Cohen 2023 JAMA gummies letter (PMID 37097362, verified firsthand)", "notes": "fold-in: prominent safety section on the melatonin page PLUS the /melatonin-children context page — NOT a separately-graded remedy. sourceCount kept 0 so its reused Lelak/Erland cites aren't double-counted in the graded-corpus tally."},
-  {"name": "melatonin gummies", "slug": "melatonin-gummies", "kind": "context", "aliases": ["melatonin gummy", "gummy melatonin", "melatonin gummies dose", "melatonin gummy label"], "latin": null, "category": "label-accuracy context", "plannedTier": null, "researchStatus": "live", "sourceCount": 0, "sourceTarget": "Cohen 2023 JAMA gummies letter (PMID 37097362) + Erland 2017 + Lelak 2022 MMWR — all reused from the melatonin page/corpus", "notes": "LIVE at /melatonin-gummies — context/explainer on the label-accuracy problem (measured melatonin 74–347% of label; some products contained undeclared CBD; one had none), NOT a graded remedy and NOT a recommendation to take melatonin. sourceCount kept 0 so its reused Cohen/Erland/Lelak cites aren't double-counted in the graded-corpus tally."},
-  {"name": "melatonin dose & timing", "slug": "melatonin-dose-timing", "kind": "context", "aliases": ["melatonin dose", "melatonin timing", "how much melatonin", "when to take melatonin", "melatonin dosage"], "latin": null, "category": "dose & timing context", "plannedTier": null, "researchStatus": "live", "sourceCount": 0, "sourceTarget": "Ferracioli-Oda 2013, Brzezinski 2005, Auld 2017, van Geijlswijk 2010, Zhdanova 2001, Auger/AASM 2015, Erland 2017 — all reused from the melatonin corpus", "notes": "LIVE at /melatonin-dose-timing — context DESCRIBING what studies used (low ~0.3–5 mg doses; timing as the operative element, not sedation), NOT a dosing instruction and NOT a graded remedy. sourceCount kept 0 so its reused cites aren't double-counted in the graded-corpus tally."},
-  {"name": "melatonin long-term use", "slug": "melatonin-long-term", "kind": "context", "aliases": ["melatonin long term", "melatonin nightly", "melatonin every night", "long-term melatonin"], "latin": null, "category": "evidence-gap context", "plannedTier": null, "researchStatus": "live", "sourceCount": 0, "sourceTarget": "Besag 2019, Sateia/AASM 2017, Erland 2017 — all reused from the melatonin corpus", "notes": "LIVE at /melatonin-long-term — context framing the long-term/developmental EVIDENCE GAP (never asserts a proven long-term harm — that would be a HUMAN-GATE), NOT a graded remedy. sourceCount kept 0 so its reused cites aren't double-counted in the graded-corpus tally."},
-  {"name": "medications & sleep aids", "slug": "medications-and-sleep-aids", "kind": "context", "aliases": ["drug interactions", "sleep aids and medications", "supplement drug interactions", "sleeping pills", "otc sleep aids", "medication interactions"], "latin": null, "category": "medications & interactions context", "plannedTier": null, "researchStatus": "live", "sourceCount": 0, "sourceTarget": "Sateia/AASM 2017 (reused from melatonin corpus) + Teschke 2010 & CDC MMWR 2002 (reused from kava) + Härtter 2000 (melatonin–fluvoxamine PK interaction, PMID 10668847) + Culpepper 2015 (OTC antihistamine sleep agents, PMID 27057416)", "notes": "LIVE at /medications-and-sleep-aids (CHK-5.2 PR-A) — context on why interactions and timing are a pharmacist conversation BEFORE any sleep aid (D4 register: every interaction surfaced as a question for a pharmacist, never 'avoid X'/'combine these'), NOT a graded remedy and NOT advice about what to take. sourceCount kept 0: a context .astro page adds nothing to the graded-corpus tally (the CI resolver scans remedy .mdx only)."},
-  {"name": "older adults + sleep aids", "slug": "older-adults", "kind": "context", "aliases": ["seniors", "elderly", "older people sleep"], "latin": null, "category": "older-adults safety context", "plannedTier": null, "researchStatus": "live", "sourceCount": 0, "sourceTarget": "AGS Beers Criteria 2023 (PMID 37139824) + Glass BMJ 2005 sedative-hypnotics meta-analysis (PMID 16284208) — both new; Zhdanova 2001 (reused from melatonin corpus) + Culpepper 2015 (reused from /medications-and-sleep-aids)", "notes": "LIVE at /older-adults (CHK-5.2 PR-B) — context on why the stakes of any sleep aid are HIGHER in later life (next-day falls/impairment, slower clearance, anticholinergic load, OTC 'PM' antihistamines flagged by Beers), routed to a clinician/pharmacist, NOT a graded remedy and NOT advice about what to take. sourceCount kept 0: a context .astro page adds nothing to the graded-corpus tally (the CI resolver scans remedy .mdx only)."},
-  {"name": "jet lag + shift work", "slug": "jet-lag-shift-work", "kind": "context", "aliases": ["jet lag", "shift work", "shift work disorder", "circadian", "travel sleep"], "latin": null, "category": "circadian context", "plannedTier": null, "researchStatus": "live", "sourceCount": 0, "sourceTarget": "Herxheimer & Petrie Cochrane 2002 melatonin-for-jet-lag review (PMID 12076414) — new anchor; Auger/AASM 2015 intrinsic circadian-disorder guideline (reused from melatonin corpus)", "notes": "LIVE at /jet-lag-shift-work (CHK-5.2 PR-B) — context on why jet lag and shift work are CIRCADIAN (clock-timing) problems, not sedation problems, so melatonin's evidence here is about timing; shift work disorder is routed to a clinician (the AASM guideline does not endorse melatonin for it). NOT a graded remedy and NOT advice about what to take. sourceCount kept 0: a context .astro page adds nothing to the graded-corpus tally (the CI resolver scans remedy .mdx only)."},
-  {"name": "anxiety & sleep", "slug": "anxiety-and-sleep", "kind": "context", "aliases": ["anxiety insomnia", "racing thoughts at night", "worry keeping me awake", "anxious can't sleep"], "latin": null, "category": "mental-health boundary context", "plannedTier": null, "researchStatus": "live", "sourceCount": 0, "sourceTarget": "Qaseem/ACP 2016 (PMID 27136449) + van Straten 2018 meta-analysis (PMID 28392168) — both reused from the cbt-i corpus", "notes": "LIVE at /anxiety-and-sleep (CHK-5.2 PR-C) — the most boundary-sensitive context page: describes the widely-recognised two-way anxiety<->insomnia loop plainly and ROUTES the sleep side to CBT-I and the anxiety side to a clinician (distress/crisis to /when-to-see-a-doctor#urgent). Does NOT diagnose, screen for, or treat anxiety; the only substantive evidence point is CBT-I for chronic insomnia, never framed as an anxiety treatment. NOT a graded remedy and NOT advice about what to take. sourceCount kept 0: a context .astro page adds nothing to the graded-corpus tally (the CI resolver scans remedy .mdx only)."}
+  {
+    "name": "melatonin",
+    "slug": "melatonin",
+    "kind": "remedy",
+    "aliases": [
+      "n-acetyl-5-methoxytryptamine"
+    ],
+    "latin": "N-acetyl-5-methoxytryptamine",
+    "category": "Hormone / circadian",
+    "plannedTier": "A",
+    "researchStatus": "live",
+    "sourceCount": 8,
+    "sourceTarget": null,
+    "notes": "reference template (CHK-2.1); 8 citations verified against PubMed. Strongest use is circadian timing (jet lag, DSPD); modest effect on sleep-onset; AASM advises against for chronic insomnia."
+  },
+  {
+    "name": "magnesium",
+    "slug": "magnesium",
+    "kind": "remedy",
+    "aliases": [
+      "mg",
+      "magnesium glycinate",
+      "magnesium threonate",
+      "magnesium citrate",
+      "magnesium bisglycinate",
+      "magnesium oxide"
+    ],
+    "latin": null,
+    "category": "Mineral",
+    "plannedTier": "B",
+    "researchStatus": "live",
+    "sourceCount": 4,
+    "sourceTarget": "Mah & Pitre 2021 meta-analysis (BMC Complement Med Ther, PMID 33865376 — ~17 min SOL, GRADE low, n=151); Schuster 2025 bisglycinate RCT (DOI 10.2147/NSS.S524348, n=155, d=0.2); Hausenblas 2024 L-threonate RCT (Sleep Med X, DOI 10.1016/j.sleepx.2024.100121)",
+    "notes": "the honesty test case. meta-analysis exists but small & low-quality; effect real but modest; form matters hugely (glycinate/threonate vs oxide bioavailability, §3.2). B, not A."
+  },
+  {
+    "name": "l-theanine",
+    "slug": "l-theanine",
+    "kind": "remedy",
+    "aliases": [
+      "theanine",
+      "n-ethyl-l-glutamine",
+      "suntheanine",
+      "l-γ-glutamylethylamide"
+    ],
+    "latin": "L-γ-glutamylethylamide",
+    "category": "Amino acid",
+    "plannedTier": "B",
+    "researchStatus": "live",
+    "sourceCount": 2,
+    "sourceTarget": "Rao 2015; Hidese 2019 4-week RCT (200–400 mg, relaxation/quality) — note most trials are anxiety/relaxation-adjacent, sleep is a secondary outcome",
+    "notes": "good safety, plausible mechanism (alpha-waves, no sedation). Effect is on subjective quality/latency, not a knockout. Dose-match usually fine."
+  },
+  {
+    "name": "ashwagandha",
+    "slug": "ashwagandha",
+    "kind": "remedy",
+    "aliases": [
+      "withania somnifera",
+      "indian ginseng",
+      "winter cherry",
+      "ksm-66",
+      "shoden"
+    ],
+    "latin": "Withania somnifera",
+    "category": "Botanical (adaptogen)",
+    "plannedTier": "B",
+    "researchStatus": "live",
+    "sourceCount": 4,
+    "sourceTarget": "Cheah 2021 systematic review/meta-analysis on sleep (PMID ~34559859 — verify); Langade 2019/2020 RCTs (root extract 600 mg); standardization = withanolide %",
+    "notes": "§3.2 standardization central — KSM-66/Shoden standardized; generic 'ashwagandha 500 mg' often isn't. Safety: rare liver-injury case reports + thyroid/pregnancy cautions (sev-caution, note hepatotoxicity signal)."
+  },
+  {
+    "name": "tart cherry",
+    "slug": "tart-cherry",
+    "kind": "remedy",
+    "aliases": [
+      "prunus cerasus",
+      "montmorency cherry",
+      "tart cherry juice",
+      "cherrypharm"
+    ],
+    "latin": "Prunus cerasus",
+    "category": "Food / botanical",
+    "plannedTier": "C",
+    "researchStatus": "live",
+    "sourceCount": 4,
+    "sourceTarget": "Losso 2018 pilot RCT (insomnia, n=8 — tiny); Howatson 2012 (melatonin content + sleep); pooled reviews on tart cherry & sleep",
+    "notes": "provisional B/C. Mechanism = actual melatonin + tryptophan/anti-inflammatory. Human trials SMALL. Dose-match: juice vs concentrate vs capsule varies wildly."
+  },
+  {
+    "name": "glycine",
+    "slug": "glycine",
+    "kind": "remedy",
+    "aliases": [
+      "aminoacetic acid",
+      "2-aminoacetic acid"
+    ],
+    "latin": "aminoacetic acid",
+    "category": "Amino acid",
+    "plannedTier": "D",
+    "researchStatus": "live",
+    "sourceCount": 3,
+    "sourceTarget": "Yamadera 2007 & Inagawa 2006 (3 g before bed, subjective quality + PSG — small Japanese RCTs, some industry-linked); Bannai/Kawai work",
+    "notes": "provisional B/C. Decent mechanism (core body temp drop via peripheral vasodilation). Trials small/few, some Ajinomoto-funded — note conflict. C if replication thin."
+  },
+  {
+    "name": "valerian",
+    "slug": "valerian",
+    "kind": "remedy",
+    "aliases": [
+      "valeriana officinalis",
+      "all-heal",
+      "garden valerian",
+      "valerenic acid"
+    ],
+    "latin": "Valeriana officinalis",
+    "category": "Botanical",
+    "plannedTier": "C",
+    "researchStatus": "live",
+    "sourceCount": 4,
+    "sourceTarget": "Bent 2006 systematic review (Am J Med, PMID 17145239 — mixed, methodological problems); Fernández-San-Martín 2010 meta-analysis; Cochrane-adjacent reviews",
+    "notes": "classic 'popular > evidence.' Meta-analyses exist but heterogeneous, high risk of bias. §3.2 standardization (valerenic acid) all over the place. Honest C — do NOT inflate to B for fame."
+  },
+  {
+    "name": "lemon balm",
+    "slug": "lemon-balm",
+    "kind": "remedy",
+    "aliases": [
+      "melissa officinalis"
+    ],
+    "latin": "Melissa officinalis",
+    "category": "Botanical",
+    "plannedTier": "C",
+    "researchStatus": "live",
+    "sourceCount": 2,
+    "sourceTarget": "Cases 2011 (anxiety+sleep, small); often studied in combination (with valerian) → confounded",
+    "notes": "provisional C/D. Mostly combination trials → hard to isolate. Thin."
+  },
+  {
+    "name": "gaba",
+    "slug": "gaba",
+    "kind": "remedy",
+    "aliases": [
+      "gamma-aminobutyric acid",
+      "pharmagaba"
+    ],
+    "latin": "gamma-aminobutyric acid",
+    "category": "Amino acid / neurotransmitter",
+    "plannedTier": "D",
+    "researchStatus": "live",
+    "sourceCount": 2,
+    "sourceTarget": "small RCTs (Byun 2018, latency); the crux is oral bioavailability / blood-brain-barrier penetration",
+    "notes": "provisional C/D. Big mechanistic controversy — does oral GABA even cross the BBB? Lead with that honesty; the 'does it reach the brain' debate is the story."
+  },
+  {
+    "name": "5-htp",
+    "slug": "5-htp",
+    "kind": "remedy",
+    "aliases": [
+      "5-hydroxytryptophan",
+      "oxitriptan",
+      "griffonia simplicifolia"
+    ],
+    "latin": "5-hydroxytryptophan",
+    "category": "Amino acid / precursor",
+    "plannedTier": "D",
+    "researchStatus": "live",
+    "sourceCount": 2,
+    "sourceTarget": "sleep RCTs sparse, often combined with GABA; key safety item = serotonergic interaction (SSRIs/MAOIs) + historical EMS concern",
+    "notes": "SAFETY-heavy page — serotonin-syndrome risk, EMS history (sev-caution/serious). Efficacy thin → C, safety flag prominent."
+  },
+  {
+    "name": "magnolia bark",
+    "slug": "magnolia-bark",
+    "kind": "remedy",
+    "aliases": [
+      "magnolia officinalis",
+      "houpu",
+      "honokiol",
+      "magnolol"
+    ],
+    "latin": "Magnolia officinalis",
+    "category": "Botanical (TCM)",
+    "plannedTier": "D",
+    "researchStatus": "live",
+    "sourceCount": 2,
+    "sourceTarget": "mostly preclinical (honokiol GABA-A modulation); human sleep RCTs scarce; menopause-combination trials exist (confounded)",
+    "notes": "provisional C/D — strong mechanism, weak human data → likely D unless human trials found."
+  },
+  {
+    "name": "l-tryptophan",
+    "slug": "l-tryptophan",
+    "kind": "remedy",
+    "aliases": [
+      "tryptophan",
+      "trp"
+    ],
+    "latin": "L-tryptophan",
+    "category": "Amino acid / precursor",
+    "plannedTier": "C",
+    "researchStatus": "live",
+    "sourceCount": 3,
+    "sourceTarget": "older meta-analyses (1980s, 1 g+ for latency); EMS/contamination history (1989) — safety",
+    "notes": "provisional B/C. Has older RCT support for sleep latency (→ B upside), but data is dated + EMS safety history needs a clear note."
+  },
+  {
+    "name": "chamomile",
+    "slug": "chamomile",
+    "kind": "remedy",
+    "aliases": [
+      "matricaria chamomilla",
+      "matricaria recutita",
+      "apigenin",
+      "chamomile tea",
+      "german chamomile"
+    ],
+    "latin": "Matricaria chamomilla",
+    "category": "Botanical",
+    "plannedTier": "C",
+    "researchStatus": "live",
+    "sourceCount": 2,
+    "sourceTarget": "Zick 2011 (chamomile extract RCT, modest); Chang 2016 (postnatal women); apigenin mechanism preclinical",
+    "notes": "provisional C/D. Separate chamomile-as-tea (cultural) from apigenin-as-isolated-compound. Human RCTs small/modest."
+  },
+  {
+    "name": "passionflower",
+    "slug": "passionflower",
+    "kind": "remedy",
+    "aliases": [
+      "passiflora incarnata",
+      "maypop"
+    ],
+    "latin": "Passiflora incarnata",
+    "category": "Botanical",
+    "plannedTier": "D",
+    "researchStatus": "live",
+    "sourceCount": 3,
+    "sourceTarget": "Ngan 2011 (tea, small); mostly small/combination trials",
+    "notes": "popular in 'sleep blends,' minimal standalone human data → D. An honest example of a D done well."
+  },
+  {
+    "name": "hops",
+    "slug": "hops",
+    "kind": "remedy",
+    "aliases": [
+      "humulus lupulus"
+    ],
+    "latin": "Humulus lupulus",
+    "category": "Botanical",
+    "plannedTier": "D",
+    "researchStatus": "live",
+    "sourceCount": 3,
+    "sourceTarget": "almost always studied WITH valerian → confounded; standalone data scarce",
+    "notes": "the valerian-hops combination confound is the whole story. D standalone."
+  },
+  {
+    "name": "lavender",
+    "slug": "lavender",
+    "kind": "remedy",
+    "aliases": [
+      "lavandula angustifolia",
+      "silexan",
+      "lavender oil",
+      "lavender aromatherapy",
+      "lavender oral"
+    ],
+    "latin": "Lavandula angustifolia",
+    "category": "Botanical / aromatherapy",
+    "plannedTier": "C",
+    "researchStatus": "live",
+    "sourceCount": 2,
+    "sourceTarget": "Silexan (oral lavender oil) anxiety RCTs (Kasper) — decent but anxiety-primary; aromatherapy sleep trials weaker/unblindable",
+    "notes": "provisional C/D. IMPORTANT: separate oral Silexan (real RCTs, anxiety→sleep) from aromatherapy (weak, unblindable). Could split into two entries."
+  },
+  {
+    "name": "skullcap",
+    "slug": "skullcap",
+    "kind": "remedy",
+    "aliases": [
+      "scutellaria lateriflora",
+      "scutellaria baicalensis",
+      "baikal skullcap"
+    ],
+    "latin": "Scutellaria lateriflora",
+    "category": "Botanical",
+    "plannedTier": "D",
+    "researchStatus": "live",
+    "sourceCount": 4,
+    "sourceTarget": "minimal human sleep data; note american vs chinese skullcap differ; hepatotoxicity reports (often adulteration)",
+    "notes": "D. Safety note re: liver (historically tied to germander adulteration)."
+  },
+  {
+    "name": "sleep blends",
+    "slug": "sleep-blends",
+    "kind": "context",
+    "aliases": [
+      "proprietary sleep blend",
+      "sleep gummy stack",
+      "sleep stack"
+    ],
+    "latin": null,
+    "category": "Concept / explainer",
+    "plannedTier": null,
+    "researchStatus": "live",
+    "sourceCount": 0,
+    "sourceTarget": null,
+    "notes": "LIVE at /sleep-blends — context/explainer, NOT a graded remedy. Shows the proprietary-blend penalty (§3.2): hidden doses make claims unfalsifiable, so a blend can't be graded on efficacy (F = transparency verdict). No efficacy citations; links to methodology + ingredient pages."
+  },
+  {
+    "name": "cbd",
+    "slug": "cbd",
+    "kind": "remedy",
+    "aliases": [
+      "cannabidiol"
+    ],
+    "latin": "cannabidiol",
+    "category": "Cannabinoid",
+    "plannedTier": "D",
+    "researchStatus": "live",
+    "sourceCount": 4,
+    "sourceTarget": null,
+    "notes": "legal/safety context is AU-specific; separate CBD-for-sleep evidence from CBD:THC ratios."
+  },
+  {
+    "name": "kava",
+    "slug": "kava",
+    "kind": "remedy",
+    "aliases": [
+      "piper methysticum",
+      "kava kava",
+      "kavalactones"
+    ],
+    "latin": "Piper methysticum",
+    "category": "Botanical",
+    "plannedTier": "F",
+    "researchStatus": "live",
+    "sourceCount": 3,
+    "sourceTarget": "hepatotoxicity literature (Teschke reviews); anxiety RCTs (Pittler/Ernst — it DOES work for anxiety)",
+    "notes": "model F entry. F is SAFETY-driven, not efficacy-driven — real anxiolytic evidence but documented hepatotoxicity, used for sleep off anxiety data. sev-serious callout. Proves F isn't 'doesn't work.'"
+  },
+  {
+    "name": "cbt-i",
+    "slug": "cbt-i",
+    "kind": "intervention",
+    "aliases": [
+      "cognitive behavioral therapy for insomnia",
+      "cognitive behavioural therapy for insomnia"
+    ],
+    "latin": null,
+    "category": "Behavioral",
+    "plannedTier": "S",
+    "researchStatus": "live",
+    "sourceCount": 5,
+    "sourceTarget": "ACP 2016 + AASM 2021 first-line guidelines; Trauer 2015 + van Straten 2018 meta-analyses; Espie 2019 digital-CBT-I RCT (all verified firsthand)",
+    "notes": "GRADED S — the site's first and only S, and the thesis in action: the strongest-graded sleep intervention isn't a supplement. Scoped to chronic insomnia; honest caveat that it consolidates sleep more than it lengthens it (total sleep time barely moves)."
+  },
+  {
+    "name": "sleep restriction therapy",
+    "slug": "sleep-restriction",
+    "kind": "intervention",
+    "aliases": [
+      "bedtime restriction",
+      "sleep restriction"
+    ],
+    "latin": null,
+    "category": "Behavioral",
+    "plannedTier": "A",
+    "researchStatus": "not-started",
+    "sourceCount": 0,
+    "sourceTarget": "component of CBT-I with its own RCT base",
+    "notes": null
+  },
+  {
+    "name": "stimulus control",
+    "slug": "stimulus-control",
+    "kind": "intervention",
+    "aliases": [
+      "stimulus control therapy"
+    ],
+    "latin": null,
+    "category": "Behavioral",
+    "plannedTier": "A",
+    "researchStatus": "not-started",
+    "sourceCount": 0,
+    "sourceTarget": "behavioral, good evidence base",
+    "notes": "provisional A/B."
+  },
+  {
+    "name": "morning bright light",
+    "slug": "morning-bright-light",
+    "kind": "intervention",
+    "aliases": [
+      "morning light exposure",
+      "light therapy",
+      "bright light therapy",
+      "morning light"
+    ],
+    "latin": null,
+    "category": "Light / circadian",
+    "plannedTier": "A",
+    "researchStatus": "not-started",
+    "sourceCount": 0,
+    "sourceTarget": "circadian literature — strong for phase/timing",
+    "notes": "provisional A/B."
+  },
+  {
+    "name": "warm bath before bed",
+    "slug": "warm-bath",
+    "kind": "intervention",
+    "aliases": [
+      "warm shower",
+      "passive body heating",
+      "warm-bath effect"
+    ],
+    "latin": null,
+    "category": "Body-based",
+    "plannedTier": "B",
+    "researchStatus": "not-started",
+    "sourceCount": 0,
+    "sourceTarget": "Haghayegh 2019 systematic review/meta-analysis (the 'warm-bath effect' has real RCTs)",
+    "notes": null
+  },
+  {
+    "name": "breathing protocols",
+    "slug": "breathing-protocols",
+    "kind": "intervention",
+    "aliases": [
+      "4-7-8 breathing",
+      "slow breathing",
+      "paced breathing"
+    ],
+    "latin": null,
+    "category": "Body-based",
+    "plannedTier": "C",
+    "researchStatus": "not-started",
+    "sourceCount": 0,
+    "sourceTarget": "HRV / relaxation data",
+    "notes": "provisional C/B."
+  },
+  {
+    "name": "progressive muscle relaxation",
+    "slug": "pmr",
+    "kind": "intervention",
+    "aliases": [
+      "pmr",
+      "jacobson relaxation"
+    ],
+    "latin": null,
+    "category": "Body-based",
+    "plannedTier": "B",
+    "researchStatus": "not-started",
+    "sourceCount": 0,
+    "sourceTarget": "established relaxation-therapy evidence base",
+    "notes": null
+  },
+  {
+    "name": "white noise",
+    "slug": "white-noise",
+    "kind": "intervention",
+    "aliases": [
+      "pink noise",
+      "broadband noise"
+    ],
+    "latin": null,
+    "category": "Environmental",
+    "plannedTier": "C",
+    "researchStatus": "not-started",
+    "sourceCount": 0,
+    "sourceTarget": "mixed trials, some positive",
+    "notes": "honest about weak/heterogeneous data."
+  },
+  {
+    "name": "weighted blanket",
+    "slug": "weighted-blanket",
+    "kind": "intervention",
+    "aliases": [
+      "gravity blanket"
+    ],
+    "latin": null,
+    "category": "Environmental",
+    "plannedTier": "C",
+    "researchStatus": "not-started",
+    "sourceCount": 0,
+    "sourceTarget": "small RCTs, anxiety-adjacent",
+    "notes": null
+  },
+  {
+    "name": "sleep hygiene",
+    "slug": "sleep-hygiene",
+    "kind": "intervention",
+    "aliases": [
+      "sleep hygiene education"
+    ],
+    "latin": null,
+    "category": "Behavioral",
+    "plannedTier": "C",
+    "researchStatus": "not-started",
+    "sourceCount": 0,
+    "sourceTarget": null,
+    "notes": "honest: weak AS A STANDALONE despite being everywhere."
+  },
+  {
+    "name": "blue-light glasses",
+    "slug": "blue-light-glasses",
+    "kind": "intervention",
+    "aliases": [
+      "blue blockers",
+      "blue-light blocking glasses",
+      "amber glasses"
+    ],
+    "latin": null,
+    "category": "Light / circadian",
+    "plannedTier": "C",
+    "researchStatus": "not-started",
+    "sourceCount": 0,
+    "sourceTarget": "evening blue-light reduction trials — weaker than marketed",
+    "notes": "provisional C/D — honest downgrade; model 'popular but overstated,' likely D."
+  },
+  {
+    "name": "taurine",
+    "slug": "taurine",
+    "kind": "remedy",
+    "aliases": [
+      "2-aminoethanesulfonic acid"
+    ],
+    "latin": "2-aminoethanesulfonic acid",
+    "category": "Amino acid",
+    "plannedTier": "D",
+    "researchStatus": "not-started",
+    "sourceCount": 0,
+    "sourceTarget": null,
+    "notes": null
+  },
+  {
+    "name": "phenibut",
+    "slug": "phenibut",
+    "kind": "remedy",
+    "aliases": [
+      "beta-phenyl-gaba",
+      "fenibut"
+    ],
+    "latin": "β-phenyl-GABA",
+    "category": "Amino acid",
+    "plannedTier": "F",
+    "researchStatus": "not-started",
+    "sourceCount": 0,
+    "sourceTarget": null,
+    "notes": "F — dependence/withdrawal; safety must be prominent (sev-serious)."
+  },
+  {
+    "name": "saffron",
+    "slug": "saffron",
+    "kind": "remedy",
+    "aliases": [
+      "crocus sativus",
+      "affron",
+      "crocin"
+    ],
+    "latin": "Crocus sativus",
+    "category": "Botanical",
+    "plannedTier": "C",
+    "researchStatus": "not-started",
+    "sourceCount": 0,
+    "sourceTarget": null,
+    "notes": null
+  },
+  {
+    "name": "ziziphus",
+    "slug": "ziziphus",
+    "kind": "remedy",
+    "aliases": [
+      "ziziphus jujuba",
+      "suanzaoren",
+      "jujube seed",
+      "sour date seed",
+      "ziziphus spinosa"
+    ],
+    "latin": "Ziziphus jujuba",
+    "category": "Botanical (TCM)",
+    "plannedTier": "C",
+    "researchStatus": "not-started",
+    "sourceCount": 0,
+    "sourceTarget": null,
+    "notes": null
+  },
+  {
+    "name": "bacopa",
+    "slug": "bacopa",
+    "kind": "remedy",
+    "aliases": [
+      "bacopa monnieri",
+      "brahmi",
+      "water hyssop"
+    ],
+    "latin": "Bacopa monnieri",
+    "category": "Botanical (ayurvedic)",
+    "plannedTier": "D",
+    "researchStatus": "not-started",
+    "sourceCount": 0,
+    "sourceTarget": null,
+    "notes": null
+  },
+  {
+    "name": "reishi",
+    "slug": "reishi",
+    "kind": "remedy",
+    "aliases": [
+      "ganoderma lucidum",
+      "lingzhi"
+    ],
+    "latin": "Ganoderma lucidum",
+    "category": "Botanical (mushroom / TCM)",
+    "plannedTier": "D",
+    "researchStatus": "not-started",
+    "sourceCount": 0,
+    "sourceTarget": null,
+    "notes": null
+  },
+  {
+    "name": "jatamansi",
+    "slug": "jatamansi",
+    "kind": "remedy",
+    "aliases": [
+      "nardostachys jatamansi",
+      "spikenard"
+    ],
+    "latin": "Nardostachys jatamansi",
+    "category": "Botanical (ayurvedic)",
+    "plannedTier": "D",
+    "researchStatus": "not-started",
+    "sourceCount": 0,
+    "sourceTarget": null,
+    "notes": null
+  },
+  {
+    "name": "california poppy",
+    "slug": "california-poppy",
+    "kind": "remedy",
+    "aliases": [
+      "eschscholzia californica"
+    ],
+    "latin": "Eschscholzia californica",
+    "category": "Botanical",
+    "plannedTier": "D",
+    "researchStatus": "not-started",
+    "sourceCount": 0,
+    "sourceTarget": null,
+    "notes": null
+  },
+  {
+    "name": "st john's wort",
+    "slug": "st-johns-wort",
+    "kind": "remedy",
+    "aliases": [
+      "hypericum perforatum"
+    ],
+    "latin": "Hypericum perforatum",
+    "category": "Botanical",
+    "plannedTier": "F",
+    "researchStatus": "not-started",
+    "sourceCount": 0,
+    "sourceTarget": null,
+    "notes": "interaction caution — CYP450 induction + serotonergic; safety-driven, not a sleep remedy per se."
+  },
+  {
+    "name": "kiwifruit",
+    "slug": "kiwifruit",
+    "kind": "remedy",
+    "aliases": [
+      "actinidia deliciosa",
+      "kiwi"
+    ],
+    "latin": "Actinidia deliciosa",
+    "category": "Food",
+    "plannedTier": "D",
+    "researchStatus": "not-started",
+    "sourceCount": 0,
+    "sourceTarget": null,
+    "notes": null
+  },
+  {
+    "name": "inositol",
+    "slug": "inositol",
+    "kind": "remedy",
+    "aliases": [
+      "myo-inositol",
+      "vitamin b8"
+    ],
+    "latin": "myo-inositol",
+    "category": "Other",
+    "plannedTier": "D",
+    "researchStatus": "not-started",
+    "sourceCount": 0,
+    "sourceTarget": null,
+    "notes": null
+  },
+  {
+    "name": "cbn",
+    "slug": "cbn",
+    "kind": "remedy",
+    "aliases": [
+      "cannabinol"
+    ],
+    "latin": "cannabinol",
+    "category": "Cannabinoid",
+    "plannedTier": "D",
+    "researchStatus": "not-started",
+    "sourceCount": 0,
+    "sourceTarget": null,
+    "notes": null
+  },
+  {
+    "name": "l-ornithine",
+    "slug": "l-ornithine",
+    "kind": "remedy",
+    "aliases": [
+      "ornithine"
+    ],
+    "latin": "L-ornithine",
+    "category": "Amino acid",
+    "plannedTier": "D",
+    "researchStatus": "not-started",
+    "sourceCount": 0,
+    "sourceTarget": null,
+    "notes": null
+  },
+  {
+    "name": "iron (for rls)",
+    "slug": "iron-rls",
+    "kind": "remedy",
+    "aliases": [
+      "ferritin",
+      "iron supplementation",
+      "restless legs"
+    ],
+    "latin": null,
+    "category": "Mineral (RLS context)",
+    "plannedTier": "C",
+    "researchStatus": "not-started",
+    "sourceCount": 0,
+    "sourceTarget": null,
+    "notes": "RLS-specific — iron/ferritin repletion; frame as context, not a general sleep aid."
+  },
+  {
+    "name": "homeopathic sleep aids",
+    "slug": "homeopathic-sleep-aids",
+    "kind": "remedy",
+    "aliases": [
+      "homeopathy",
+      "moon milk"
+    ],
+    "latin": null,
+    "category": "Concept / probably-not",
+    "plannedTier": "F",
+    "researchStatus": "not-started",
+    "sourceCount": 0,
+    "sourceTarget": null,
+    "notes": "the 'probably not' file — graded F/D with the evidence shown."
+  },
+  {
+    "name": "ramelteon",
+    "slug": "ramelteon",
+    "kind": "context",
+    "aliases": [
+      "rozerem",
+      "melatonin receptor agonist"
+    ],
+    "latin": null,
+    "category": "Prescription context",
+    "plannedTier": null,
+    "researchStatus": "live",
+    "sourceCount": 0,
+    "sourceTarget": null,
+    "notes": "Rx melatonin-receptor agonist — /ramelteon context page, NOT graded. sourceCount kept 0: its one cite (AASM 2017) is already counted on the melatonin page, so it adds nothing to the graded-corpus 'sources cited' tally."
+  },
+  {
+    "name": "when to see a doctor",
+    "slug": "when-to-see-a-doctor",
+    "kind": "context",
+    "aliases": [
+      "sleep apnea",
+      "cpap",
+      "chronic insomnia"
+    ],
+    "latin": null,
+    "category": "Medical context",
+    "plannedTier": null,
+    "researchStatus": "live",
+    "sourceCount": 0,
+    "sourceTarget": null,
+    "notes": "/when-to-see-a-doctor red-flag context page, NOT graded. sourceCount 0 for the same reason (its AASM 2017 cite is already counted on the melatonin page)."
+  },
+  {
+    "name": "melatonin in children",
+    "slug": "melatonin-children",
+    "kind": "context",
+    "aliases": [
+      "high-dose melatonin",
+      "melatonin kids",
+      "pediatric melatonin"
+    ],
+    "latin": null,
+    "category": "Safety context",
+    "plannedTier": null,
+    "researchStatus": "live",
+    "sourceCount": 0,
+    "sourceTarget": "Lelak 2022 MMWR + Erland 2017 (both reused from the melatonin page) + Cohen 2023 JAMA gummies letter (PMID 37097362, verified firsthand)",
+    "notes": "fold-in: prominent safety section on the melatonin page PLUS the /melatonin-children context page — NOT a separately-graded remedy. sourceCount kept 0 so its reused Lelak/Erland cites aren't double-counted in the graded-corpus tally."
+  },
+  {
+    "name": "melatonin gummies",
+    "slug": "melatonin-gummies",
+    "kind": "context",
+    "aliases": [
+      "melatonin gummy",
+      "gummy melatonin",
+      "melatonin gummies dose",
+      "melatonin gummy label"
+    ],
+    "latin": null,
+    "category": "Label-accuracy context",
+    "plannedTier": null,
+    "researchStatus": "live",
+    "sourceCount": 0,
+    "sourceTarget": "Cohen 2023 JAMA gummies letter (PMID 37097362) + Erland 2017 + Lelak 2022 MMWR — all reused from the melatonin page/corpus",
+    "notes": "LIVE at /melatonin-gummies — context/explainer on the label-accuracy problem (measured melatonin 74–347% of label; some products contained undeclared CBD; one had none), NOT a graded remedy and NOT a recommendation to take melatonin. sourceCount kept 0 so its reused Cohen/Erland/Lelak cites aren't double-counted in the graded-corpus tally."
+  },
+  {
+    "name": "melatonin dose & timing",
+    "slug": "melatonin-dose-timing",
+    "kind": "context",
+    "aliases": [
+      "melatonin dose",
+      "melatonin timing",
+      "how much melatonin",
+      "when to take melatonin",
+      "melatonin dosage"
+    ],
+    "latin": null,
+    "category": "Dose & timing context",
+    "plannedTier": null,
+    "researchStatus": "live",
+    "sourceCount": 0,
+    "sourceTarget": "Ferracioli-Oda 2013, Brzezinski 2005, Auld 2017, van Geijlswijk 2010, Zhdanova 2001, Auger/AASM 2015, Erland 2017 — all reused from the melatonin corpus",
+    "notes": "LIVE at /melatonin-dose-timing — context DESCRIBING what studies used (low ~0.3–5 mg doses; timing as the operative element, not sedation), NOT a dosing instruction and NOT a graded remedy. sourceCount kept 0 so its reused cites aren't double-counted in the graded-corpus tally."
+  },
+  {
+    "name": "melatonin long-term use",
+    "slug": "melatonin-long-term",
+    "kind": "context",
+    "aliases": [
+      "melatonin long term",
+      "melatonin nightly",
+      "melatonin every night",
+      "long-term melatonin"
+    ],
+    "latin": null,
+    "category": "Evidence-gap context",
+    "plannedTier": null,
+    "researchStatus": "live",
+    "sourceCount": 0,
+    "sourceTarget": "Besag 2019, Sateia/AASM 2017, Erland 2017 — all reused from the melatonin corpus",
+    "notes": "LIVE at /melatonin-long-term — context framing the long-term/developmental EVIDENCE GAP (never asserts a proven long-term harm — that would be a HUMAN-GATE), NOT a graded remedy. sourceCount kept 0 so its reused cites aren't double-counted in the graded-corpus tally."
+  },
+  {
+    "name": "medications & sleep aids",
+    "slug": "medications-and-sleep-aids",
+    "kind": "context",
+    "aliases": [
+      "drug interactions",
+      "sleep aids and medications",
+      "supplement drug interactions",
+      "sleeping pills",
+      "otc sleep aids",
+      "medication interactions"
+    ],
+    "latin": null,
+    "category": "Medications & interactions context",
+    "plannedTier": null,
+    "researchStatus": "live",
+    "sourceCount": 0,
+    "sourceTarget": "Sateia/AASM 2017 (reused from melatonin corpus) + Teschke 2010 & CDC MMWR 2002 (reused from kava) + Härtter 2000 (melatonin–fluvoxamine PK interaction, PMID 10668847) + Culpepper 2015 (OTC antihistamine sleep agents, PMID 27057416)",
+    "notes": "LIVE at /medications-and-sleep-aids (CHK-5.2 PR-A) — context on why interactions and timing are a pharmacist conversation BEFORE any sleep aid (D4 register: every interaction surfaced as a question for a pharmacist, never 'avoid X'/'combine these'), NOT a graded remedy and NOT advice about what to take. sourceCount kept 0: a context .astro page adds nothing to the graded-corpus tally (the CI resolver scans remedy .mdx only)."
+  },
+  {
+    "name": "older adults + sleep aids",
+    "slug": "older-adults",
+    "kind": "context",
+    "aliases": [
+      "seniors",
+      "elderly",
+      "older people sleep"
+    ],
+    "latin": null,
+    "category": "Older-adults safety context",
+    "plannedTier": null,
+    "researchStatus": "live",
+    "sourceCount": 0,
+    "sourceTarget": "AGS Beers Criteria 2023 (PMID 37139824) + Glass BMJ 2005 sedative-hypnotics meta-analysis (PMID 16284208) — both new; Zhdanova 2001 (reused from melatonin corpus) + Culpepper 2015 (reused from /medications-and-sleep-aids)",
+    "notes": "LIVE at /older-adults (CHK-5.2 PR-B) — context on why the stakes of any sleep aid are HIGHER in later life (next-day falls/impairment, slower clearance, anticholinergic load, OTC 'PM' antihistamines flagged by Beers), routed to a clinician/pharmacist, NOT a graded remedy and NOT advice about what to take. sourceCount kept 0: a context .astro page adds nothing to the graded-corpus tally (the CI resolver scans remedy .mdx only)."
+  },
+  {
+    "name": "jet lag + shift work",
+    "slug": "jet-lag-shift-work",
+    "kind": "context",
+    "aliases": [
+      "jet lag",
+      "shift work",
+      "shift work disorder",
+      "circadian",
+      "travel sleep"
+    ],
+    "latin": null,
+    "category": "Circadian context",
+    "plannedTier": null,
+    "researchStatus": "live",
+    "sourceCount": 0,
+    "sourceTarget": "Herxheimer & Petrie Cochrane 2002 melatonin-for-jet-lag review (PMID 12076414) — new anchor; Auger/AASM 2015 intrinsic circadian-disorder guideline (reused from melatonin corpus)",
+    "notes": "LIVE at /jet-lag-shift-work (CHK-5.2 PR-B) — context on why jet lag and shift work are CIRCADIAN (clock-timing) problems, not sedation problems, so melatonin's evidence here is about timing; shift work disorder is routed to a clinician (the AASM guideline does not endorse melatonin for it). NOT a graded remedy and NOT advice about what to take. sourceCount kept 0: a context .astro page adds nothing to the graded-corpus tally (the CI resolver scans remedy .mdx only)."
+  },
+  {
+    "name": "anxiety & sleep",
+    "slug": "anxiety-and-sleep",
+    "kind": "context",
+    "aliases": [
+      "anxiety insomnia",
+      "racing thoughts at night",
+      "worry keeping me awake",
+      "anxious can't sleep"
+    ],
+    "latin": null,
+    "category": "Mental-health boundary context",
+    "plannedTier": null,
+    "researchStatus": "live",
+    "sourceCount": 0,
+    "sourceTarget": "Qaseem/ACP 2016 (PMID 27136449) + van Straten 2018 meta-analysis (PMID 28392168) — both reused from the cbt-i corpus",
+    "notes": "LIVE at /anxiety-and-sleep (CHK-5.2 PR-C) — the most boundary-sensitive context page: describes the widely-recognised two-way anxiety<->insomnia loop plainly and ROUTES the sleep side to CBT-I and the anxiety side to a clinician (distress/crisis to /when-to-see-a-doctor#urgent). Does NOT diagnose, screen for, or treat anxiety; the only substantive evidence point is CBT-I for chronic insomnia, never framed as an anxiety treatment. NOT a graded remedy and NOT advice about what to take. sourceCount kept 0: a context .astro page adds nothing to the graded-corpus tally (the CI resolver scans remedy .mdx only)."
+  }
 ]

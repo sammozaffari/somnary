@@ -26,7 +26,7 @@ const payload = sources.map((s) => ({
 
 <script type="application/json" id="cite-data" set:html={JSON.stringify(payload)} />
 
-<div class="cite-pop" role="dialog" aria-label="citation" tabindex="-1" hidden>
+<div class="cite-pop" role="dialog" aria-label="Citation" tabindex="-1" hidden>
   <p class="cp-head"><span class="cp-n"></span> · <span class="cp-type"></span></p>
   <p class="cp-title"></p>
   <p class="cp-line"></p>
@@ -73,7 +73,6 @@ const payload = sources.map((s) => ({
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     color: var(--primary);
     margin: 0 0 var(--sp-3);
   }
@@ -103,7 +102,6 @@ const payload = sources.map((s) => ({
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     color: var(--primary);
     text-decoration: none;
   }
@@ -170,7 +168,7 @@ const payload = sources.map((s) => ({
         const el = q(sel);
         if (el) el.textContent = txt;
       };
-      setText('.cp-n', `citation ${n}`);
+      setText('.cp-n', `Citation ${n}`);
       setText('.cp-type', s.typeLabel);
       setText('.cp-title', s.title);
       setText('.cp-line', s.sourceLine);
@@ -180,7 +178,7 @@ const payload = sources.map((s) => ({
         link.href = s.url;
         link.textContent = `${s.idLabel} ↗`;
       }
-      pop.setAttribute('aria-label', `citation ${n}`);
+      pop.setAttribute('aria-label', `Citation ${n}`);
       pop.hidden = false;
       clamp(marker); // initial
       requestAnimationFrame(() => clamp(marker)); // after paint

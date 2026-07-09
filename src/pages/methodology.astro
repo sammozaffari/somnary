@@ -15,57 +15,57 @@ const sourcesCited = contentIndex
   .reduce((n, e) => n + e.sourceCount, 0);
 
 const statCells = [
-  { value: String(remediesGraded), label: 'remedies graded' },
-  { value: String(sourcesCited), label: 'sources cited' },
-  { value: '0', label: 'hallucinated cites', accent: 'eucalyptus' as const },
-  { value: '$0', label: 'brand money', accent: 'primary' as const },
+  { value: String(remediesGraded), label: 'Remedies graded' },
+  { value: String(sourcesCited), label: 'Sources cited' },
+  { value: '0', label: 'Hallucinated cites', accent: 'eucalyptus' as const },
+  { value: '$0', label: 'Brand money', accent: 'primary' as const },
 ];
 
 const sourceHierarchy = [
-  'meta-analysis / systematic review',
-  'randomized controlled trial',
-  'cohort study',
-  'case series',
-  'animal study',
-  'in-vitro',
-  'anecdote',
+  'Meta-analysis / systematic review',
+  'Randomized controlled trial',
+  'Cohort study',
+  'Case series',
+  'Animal study',
+  'In-vitro',
+  'Anecdote',
 ];
 
 const killers: { term: string; body: string; link?: { href: string; text: string } }[] = [
   {
-    term: 'standardization.',
-    body: 'if a product doesn’t quantify its active constituent (withanolides in ashwagandha, valerenic acid in valerian, the L-theanine purity), then “it works” is unfalsifiable, because no two bottles are the same. unstandardized remedies are downgraded.',
+    term: 'Standardization.',
+    body: 'If a product doesn’t quantify its active constituent (withanolides in ashwagandha, valerenic acid in valerian, the L-theanine purity), then “it works” is unfalsifiable, because no two bottles are the same. Unstandardized remedies are downgraded.',
   },
   {
-    term: 'dose-match.',
-    body: 'a grade is earned at the specific dose a trial actually used, so the studied dose is the yardstick. the dose that worked in a trial is often higher than what’s in the capsules on sale; where the per-ingredient dose is below — or simply not disclosed against — the studied dose, the trial result doesn’t transfer, and it pulls the grade down.',
+    term: 'Dose-match.',
+    body: 'A grade is earned at the specific dose a trial actually used, so the studied dose is the yardstick. The dose that worked in a trial is often higher than what’s in the capsules on sale; where the per-ingredient dose is below — or simply not disclosed against — the studied dose, the trial result doesn’t transfer, and it pulls the grade down.',
   },
   {
-    term: 'the proprietary-blend penalty.',
-    body: 'this is the dose-match failure taken to its limit. a label that reports only a combined total (“sleep blend 500 mg”) hides the per-ingredient dose entirely, so there is no dose left to match against any studied dose. the claim can’t be checked, and we don’t grade on faith, so a hidden-dose blend is downgraded on principle. the full walk-through is here:',
+    term: 'The proprietary-blend penalty.',
+    body: 'This is the dose-match failure taken to its limit. A label that reports only a combined total (“sleep blend 500 mg”) hides the per-ingredient dose entirely, so there is no dose left to match against any studied dose. The claim can’t be checked, and we don’t grade on faith, so a hidden-dose blend is downgraded on principle. The full walk-through is here:',
     link: { href: '/sleep-blends', text: 'how a hidden-dose blend defeats its own evidence' },
   },
   {
-    term: 'form and bioavailability.',
-    body: 'form matters enormously: magnesium glycinate behaves differently from oxide; immediate-release melatonin differently from extended-release. grades and dosing notes specify the form the evidence actually supports.',
+    term: 'Form and bioavailability.',
+    body: 'Form matters enormously: magnesium glycinate behaves differently from oxide; immediate-release melatonin differently from extended-release. Grades and dosing notes specify the form the evidence actually supports.',
   },
 ];
 ---
 
 <Base
-  title="how we grade — Somnary methodology"
-  description="Somnary grades every sleep remedy S to F by the strength of published human evidence. the full rubric, evidence gates, source hierarchy, citation policy, and corrections policy: specific enough to re-derive any grade."
+  title="How we grade — Somnary methodology"
+  description="Somnary grades every sleep remedy S to F by the strength of published human evidence. The full rubric, evidence gates, source hierarchy, citation policy, and corrections policy: specific enough to re-derive any grade."
 >
   <main class="page">
     <!-- header -->
     <header class="head">
-      <p class="eyebrow">methodology · how Somnary grades</p>
+      <p class="eyebrow">Methodology · How Somnary grades</p>
       <h1 class="title">How we grade</h1>
       <p class="dek">
         Somnary grades every sleep remedy from S to F by one thing only: the strength of the
-        published human evidence behind it. not popularity, not tradition, not how good the
-        marketing is. this page is the rubric in full, specific enough that you could
-        re-derive any grade on the site yourself. if you can’t check our work, we haven’t done
+        published human evidence behind it. Not popularity, not tradition, not how good the
+        marketing is. This page is the rubric in full, specific enough that you could
+        re-derive any grade on the site yourself. If you can’t check our work, we haven’t done
         our job.
       </p>
     </header>
@@ -75,36 +75,36 @@ const killers: { term: string; body: string; link?: { href: string; text: string
     <!-- editorial-principle band -->
     <aside class="principle">
       <p class="principle-line">
-        evidence over opinion. published over promised. weak data labeled weak, never buried.
+        Evidence over opinion. Published over promised. Weak data labeled weak, never buried.
       </p>
-      <p class="principle-sub">— the Somnary editorial principle</p>
+      <p class="principle-sub">— The Somnary editorial principle</p>
     </aside>
 
     <!-- Section 1 — the two rubrics -->
     <section class="section">
-      <p class="eyebrow">section 01</p>
+      <p class="eyebrow">Section 01</p>
       <h2 class="section-title">The two rubrics</h2>
       <div class="prose">
         <p>Somnary keeps two separate grading systems, and never lets them touch:</p>
         <ul>
           <li>
-            <strong>the remedy grade (S–F)</strong>: set only by published human evidence.
-            this is the grade you see on every page.
+            <strong>The remedy grade (S–F)</strong>: set only by published human evidence.
+            This is the grade you see on every page.
           </li>
           <li>
-            <strong>the brand/product QA check</strong> is a separate, optional audit of
-            whether a specific product is third-party tested and honestly labeled. it never
+            <strong>The brand/product QA check</strong> is a separate, optional audit of
+            whether a specific product is third-party tested and honestly labeled. It never
             changes a remedy’s evidence grade.
           </li>
         </ul>
         <p>
-          we also keep a third thing fully walled off: <strong>community reports</strong>,
-          what readers tell us about their own experience. those sit beside the evidence as
-          context. they never move a grade. anecdote is the missing column, not the verdict.
+          We also keep a third thing fully walled off: <strong>community reports</strong>,
+          what readers tell us about their own experience. Those sit beside the evidence as
+          context. They never move a grade. Anecdote is the missing column, not the verdict.
         </p>
         <p>
-          mixing these is how every other supplement site loses the plot. a remedy with
-          glowing reviews and zero trials is still a D. a remedy with strong trials sold by a
+          Mixing these is how every other supplement site loses the plot. A remedy with
+          glowing reviews and zero trials is still a D. A remedy with strong trials sold by a
           sloppy brand is still graded on its evidence, with the brand problem flagged
           separately.
         </p>
@@ -113,16 +113,16 @@ const killers: { term: string; body: string; link?: { href: string; text: string
 
     <!-- Section 2 — the tier system (renders from src/lib/tiers.ts) -->
     <section class="section">
-      <p class="eyebrow">section 02</p>
+      <p class="eyebrow">Section 02</p>
       <h2 class="section-title">The tier system (S–F)</h2>
       <div class="prose">
         <p>
-          the grade answers one question: how strong is the human evidence that this actually
+          The grade answers one question: how strong is the human evidence that this actually
           helps you sleep?
         </p>
         <p>
-          higher letters mean stronger, more consistent, better-replicated evidence in people,
-          not a bigger effect, and not how well-known the remedy is. tiers move when the
+          Higher letters mean stronger, more consistent, better-replicated evidence in people,
+          not a bigger effect, and not how well-known the remedy is. Tiers move when the
           evidence moves (see <a href="#rankings">how rankings change</a>).
         </p>
       </div>
@@ -134,7 +134,7 @@ const killers: { term: string; body: string; link?: { href: string; text: string
               <div class="rail">
                 <TierBadge tier={tier.id} size="header" />
                 <p class="rail-name">
-                  tier {tier.letter} · {tier.name}
+                  Tier {tier.letter} · {tier.name}
                 </p>
               </div>
               <div class="tier-body">
@@ -146,7 +146,7 @@ const killers: { term: string; body: string; link?: { href: string; text: string
                 </div>
                 {tier.examples.length > 0 ? (
                   <p class="examples">
-                    <span class="examples-label">examples</span> {tier.examples.join(' · ')}
+                    <span class="examples-label">Examples</span> {tier.examples.join(' · ')}
                   </p>
                 ) : (
                   <p class="examples empty">{tier.emptyNote}</p>
@@ -158,20 +158,20 @@ const killers: { term: string; body: string; link?: { href: string; text: string
       </div>
 
       <p class="prose note">
-        <strong>how to read a grade:</strong> the letter is the headline; the evidence-gate
-        chips on each remedy page show exactly which tests it passed or failed. the grade is
-        never a black box. it’s the sum of the gates, visible at a glance.
+        <strong>How to read a grade:</strong> the letter is the headline; the evidence-gate
+        chips on each remedy page show exactly which tests it passed or failed. The grade is
+        never a black box. It’s the sum of the gates, visible at a glance.
       </p>
     </section>
 
     <!-- Section 3 — the evidence gates (renders from src/lib/evidence-gates.ts) -->
     <section class="section">
-      <p class="eyebrow">section 03</p>
+      <p class="eyebrow">Section 03</p>
       <h2 class="section-title">The evidence gates</h2>
       <div class="prose">
         <p>
-          these are the specific, checkable tests behind every grade. each remedy page displays
-          the gates it meets as chips, so the grade documents itself. a gate is either met or it
+          These are the specific, checkable tests behind every grade. Each remedy page displays
+          the gates it meets as chips, so the grade documents itself. A gate is either met or it
           isn’t — no vibes.
         </p>
       </div>
@@ -191,11 +191,11 @@ const killers: { term: string; body: string; link?: { href: string; text: string
 
     <!-- Section 4 — category-specific killers -->
     <section class="section">
-      <p class="eyebrow">section 04</p>
+      <p class="eyebrow">Section 04</p>
       <h2 class="section-title">The category-specific killers</h2>
       <div class="prose">
         <p>
-          botanicals and supplements fail in ways prescription drugs don’t. these dimensions can
+          Botanicals and supplements fail in ways prescription drugs don’t. These dimensions can
           cap or downgrade a grade no matter how promising the mechanism sounds:
         </p>
         {
@@ -216,33 +216,33 @@ const killers: { term: string; body: string; link?: { href: string; text: string
 
     <!-- Section 5 — how citations work -->
     <section class="section">
-      <p class="eyebrow">section 05</p>
+      <p class="eyebrow">Section 05</p>
       <h2 class="section-title">How citations work (cite or don’t claim)</h2>
       <div class="prose">
         <p>
-          every factual claim on this site points to a real, resolvable source: a PubMed ID, a
-          DOI, or a clinical-trial registry entry. no exceptions, and no invented references.
+          Every factual claim on this site points to a real, resolvable source: a PubMed ID, a
+          DOI, or a clinical-trial registry entry. No exceptions, and no invented references.
         </p>
-        <p><strong>the source hierarchy.</strong> when sources disagree, the higher tier wins:</p>
+        <p><strong>The source hierarchy.</strong> When sources disagree, the higher tier wins:</p>
       </div>
-      <ol class="hierarchy" aria-label="source hierarchy, strongest first">
+      <ol class="hierarchy" aria-label="Source hierarchy, strongest first">
         {sourceHierarchy.map((s) => <li>{s}</li>)}
       </ol>
       <div class="prose">
         <p>
-          the highest-quality source available sets the claim. weaker evidence isn’t deleted;
+          The highest-quality source available sets the claim. Weaker evidence isn’t deleted;
           it’s shown and labeled as weaker, so you can see the full picture.
         </p>
         <p>
-          <strong>zero hallucinated cites.</strong> every citation is checked to resolve to a
+          <strong>Zero hallucinated cites.</strong> Every citation is checked to resolve to a
           real source and checked by a human to confirm it actually says what we claim it says.
-          AI helps us draft and synthesize; it never gets the final word on a reference. the
+          AI helps us draft and synthesize; it never gets the final word on a reference. The
           count of hallucinated citations on this site is, and must stay, zero.
         </p>
         <p>
-          <strong>the backing is shown, not tallied.</strong> every factual claim is linked
+          <strong>The backing is shown, not tallied.</strong> Every factual claim is linked
           inline to the specific source behind it, and the citation resolver re-checks on every
-          build that each one resolves. you don’t have to trust a headline number: the mapping
+          build that each one resolves. You don’t have to trust a headline number: the mapping
           is visible on every page, in the claims-vs-data table and the footnotes.
         </p>
       </div>
@@ -250,43 +250,43 @@ const killers: { term: string; body: string; link?: { href: string; text: string
 
     <!-- Section 6 — how uncertainty is handled -->
     <section class="section">
-      <p class="eyebrow">section 06</p>
+      <p class="eyebrow">Section 06</p>
       <h2 class="section-title">How uncertainty is handled</h2>
       <div class="prose">
         <p>
-          weak evidence is the normal state for most natural sleep remedies. we treat saying so
+          Weak evidence is the normal state for most natural sleep remedies. We treat saying so
           as a feature, not a failure.
         </p>
         <p>
-          when the data is thin, the page says thin. when a claim has no human trial behind it,
+          When the data is thin, the page says thin. When a claim has no human trial behind it,
           the claims-vs-data table shows “no human sleep trial tests this claim” rather than
-          quietly dropping the row. a near-empty remedy page isn’t a broken page. it’s an honest
-          one. the absence of evidence is information, and we show it.
+          quietly dropping the row. A near-empty remedy page isn’t a broken page. It’s an honest
+          one. The absence of evidence is information, and we show it.
         </p>
         <p>
-          we never round weak data up to sound more useful, and we never round strong data down
-          to sound more cautious. the grade reflects what’s published, today.
+          We never round weak data up to sound more useful, and we never round strong data down
+          to sound more cautious. The grade reflects what’s published, today.
         </p>
       </div>
     </section>
 
     <!-- Section 7 — how rankings change -->
     <section class="section" id="rankings">
-      <p class="eyebrow">section 07</p>
+      <p class="eyebrow">Section 07</p>
       <h2 class="section-title">How rankings change</h2>
       <div class="prose">
         <p>
-          tiers are not fixed. a grade is a snapshot of the evidence at a point in time, and the
+          Tiers are not fixed. A grade is a snapshot of the evidence at a point in time, and the
           evidence moves:
         </p>
         <ul>
-          <li>a new well-powered RCT or meta-analysis can raise (or lower) a tier.</li>
-          <li>a safety signal can drop a remedy to F regardless of efficacy.</li>
-          <li>a failed replication can pull a grade down.</li>
+          <li>A new well-powered RCT or meta-analysis can raise (or lower) a tier.</li>
+          <li>A safety signal can drop a remedy to F regardless of efficacy.</li>
+          <li>A failed replication can pull a grade down.</li>
         </ul>
         <p>
-          when a grade changes, we log it publicly (what changed, which new evidence drove it,
-          and when), so the history is auditable. we run a periodic deep-research sweep for new
+          When a grade changes, we log it publicly (what changed, which new evidence drove it,
+          and when), so the history is auditable. We run a periodic deep-research sweep for new
           trials, retractions, and updated reviews, and we prioritize re-reviews by what readers
           are actually searching for.
         </p>
@@ -295,27 +295,27 @@ const killers: { term: string; body: string; link?: { href: string; text: string
 
     <!-- Section 8 — conflicts of interest -->
     <section class="section">
-      <p class="eyebrow">section 08</p>
+      <p class="eyebrow">Section 08</p>
       <h2 class="section-title">Conflicts of interest</h2>
       <div class="prose">
-        <p>this is the part that makes the rest credible:</p>
+        <p>This is the part that makes the rest credible:</p>
         <ul>
           <li>
-            <strong>zero affiliate links.</strong> we never earn a commission when you buy
-            anything. no rel=sponsored, anywhere.
+            <strong>Zero affiliate links.</strong> We never earn a commission when you buy
+            anything. No rel=sponsored, anywhere.
           </li>
           <li>
-            <strong>zero brand money.</strong> no supplement company pays us, sponsors us, or
+            <strong>Zero brand money.</strong> No supplement company pays us, sponsors us, or
             sees a grade before you do.
           </li>
-          <li><strong>no commerce.</strong> we don’t sell supplements.</li>
+          <li><strong>No commerce.</strong> We don’t sell supplements.</li>
           <li>
-            <strong>reader-funded only.</strong> the only money Somnary takes comes from readers
-            who choose to support it. that’s the whole model, on purpose.
+            <strong>Reader-funded only.</strong> The only money Somnary takes comes from readers
+            who choose to support it. That’s the whole model, on purpose.
           </li>
         </ul>
         <p>
-          we grade brands and products honestly precisely because we earn nothing from them. if
+          We grade brands and products honestly precisely because we earn nothing from them. If
           any of this ever changes, we’ll disclose it loudly, at the top of the page, not in the
           footer.
         </p>
@@ -324,23 +324,23 @@ const killers: { term: string; body: string; link?: { href: string; text: string
 
     <!-- Section 9 — corrections -->
     <section class="section corrections" id="corrections">
-      <p class="eyebrow">section 09</p>
+      <p class="eyebrow">Section 09</p>
       <h2 class="section-title">Corrections</h2>
       <div class="prose">
         <p>
-          found something wrong (a citation that doesn’t resolve, a number that’s off, a grade
-          you think the evidence doesn’t support)? tell us. corrections are public and we aim to
+          Found something wrong (a citation that doesn’t resolve, a number that’s off, a grade
+          you think the evidence doesn’t support)? Tell us. Corrections are public and we aim to
           fix verified errors <strong>within 7 days</strong>.
         </p>
         <p class="inbox">
-          corrections inbox: <a href="mailto:sammymoz@gmail.com">sammymoz@gmail.com</a>
+          Corrections inbox: <a href="mailto:sammymoz@gmail.com">sammymoz@gmail.com</a>
         </p>
       </div>
     </section>
 
     <!-- page footer strip (verbatim) -->
     <p class="footer-strip">
-      Somnary · methodology v1 · educational, not medical advice · talk to a clinician before
+      Somnary · Methodology v1 · Educational, not medical advice · Talk to a clinician before
       changing what you take, especially if you’re pregnant, on other medications, or managing a
       health condition.
     </p>
@@ -358,7 +358,6 @@ const killers: { term: string; body: string; link?: { href: string; text: string
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     color: var(--muted);
     margin: 0;
   }
@@ -407,7 +406,6 @@ const killers: { term: string; body: string; link?: { href: string; text: string
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     color: var(--primary);
     margin: var(--sp-4) 0 0;
   }
@@ -488,7 +486,6 @@ const killers: { term: string; body: string; link?: { href: string; text: string
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     color: var(--muted);
     margin: 0;
   }
@@ -512,7 +509,6 @@ const killers: { term: string; body: string; link?: { href: string; text: string
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     color: var(--muted);
     margin-right: var(--sp-2);
   }
@@ -586,7 +582,6 @@ const killers: { term: string; body: string; link?: { href: string; text: string
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
     line-height: var(--lh-sm);
-    text-transform: uppercase;
     color: var(--muted);
     text-align: center;
   }

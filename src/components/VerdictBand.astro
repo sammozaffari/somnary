@@ -16,11 +16,11 @@ const { verdict, gates, tier } = Astro.props;
 const t = getTier(tier);
 ---
 
-<section class="verdict-band" aria-label="verdict">
+<section class="verdict-band" aria-label="Verdict">
   <p class="statement">{verdict}</p>
   <div class="side">
     <p class="grade-note">
-      graded <strong>{t.id}</strong> · {t.name} — the strength of the published human evidence,
+      Graded <strong>{t.id}</strong> · {t.name} — the strength of the published human evidence,
       not popularity.
     </p>
     <div class="chips">
