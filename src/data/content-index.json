@@ -527,9 +527,9 @@
     ],
     "latin": "2-aminoethanesulfonic acid",
     "category": "Amino acid",
-    "plannedTier": "D",
-    "researchStatus": "not-started",
-    "sourceCount": 0,
+    "plannedTier": "F",
+    "researchStatus": "live",
+    "sourceCount": 5,
     "sourceTarget": null,
     "notes": null
   },
@@ -560,9 +560,9 @@
     ],
     "latin": "Crocus sativus",
     "category": "Botanical",
-    "plannedTier": "C",
-    "researchStatus": "not-started",
-    "sourceCount": 0,
+    "plannedTier": "B",
+    "researchStatus": "live",
+    "sourceCount": 7,
     "sourceTarget": null,
     "notes": null
   },
@@ -597,8 +597,8 @@
     "latin": "Bacopa monnieri",
     "category": "Botanical (ayurvedic)",
     "plannedTier": "D",
-    "researchStatus": "not-started",
-    "sourceCount": 0,
+    "researchStatus": "live",
+    "sourceCount": 7,
     "sourceTarget": null,
     "notes": null
   },
@@ -613,8 +613,8 @@
     "latin": "Ganoderma lucidum",
     "category": "Botanical (mushroom / TCM)",
     "plannedTier": "D",
-    "researchStatus": "not-started",
-    "sourceCount": 0,
+    "researchStatus": "live",
+    "sourceCount": 8,
     "sourceTarget": null,
     "notes": null
   },
@@ -706,8 +706,8 @@
     "latin": "cannabinol",
     "category": "Cannabinoid",
     "plannedTier": "D",
-    "researchStatus": "not-started",
-    "sourceCount": 0,
+    "researchStatus": "live",
+    "sourceCount": 6,
     "sourceTarget": null,
     "notes": null
   },
@@ -937,5 +937,110 @@
     "sourceCount": 0,
     "sourceTarget": "Qaseem/ACP 2016 (PMID 27136449) + van Straten 2018 meta-analysis (PMID 28392168) — both reused from the cbt-i corpus",
     "notes": "LIVE at /anxiety-and-sleep (CHK-5.2 PR-C) — the most boundary-sensitive context page: describes the widely-recognised two-way anxiety<->insomnia loop plainly and ROUTES the sleep side to CBT-I and the anxiety side to a clinician (distress/crisis to /when-to-see-a-doctor#urgent). Does NOT diagnose, screen for, or treat anxiety; the only substantive evidence point is CBT-I for chronic insomnia, never framed as an anxiety treatment. NOT a graded remedy and NOT advice about what to take. sourceCount kept 0: a context .astro page adds nothing to the graded-corpus tally (the CI resolver scans remedy .mdx only)."
+  },
+  {
+    "name": "Vitamin D",
+    "slug": "vitamin-d",
+    "kind": "remedy",
+    "aliases": [
+      "cholecalciferol",
+      "vitamin d3",
+      "25-hydroxyvitamin d"
+    ],
+    "latin": "Cholecalciferol (vitamin D3)",
+    "category": "Vitamin",
+    "plannedTier": "C",
+    "researchStatus": "live",
+    "sourceCount": 6,
+    "sourceTarget": null,
+    "notes": "Grading-expansion batch (CHK-5.1); sources verified firsthand; tier owner-ratified."
+  },
+  {
+    "name": "Lemon verbena",
+    "slug": "lemon-verbena",
+    "kind": "remedy",
+    "aliases": [
+      "lippia citriodora",
+      "aloysia citriodora",
+      "aloysia triphylla",
+      "verbena"
+    ],
+    "latin": "Aloysia citriodora",
+    "category": "Botanical",
+    "plannedTier": "D",
+    "researchStatus": "live",
+    "sourceCount": 4,
+    "sourceTarget": null,
+    "notes": "Grading-expansion batch (CHK-5.1); sources verified firsthand; tier owner-ratified."
+  },
+  {
+    "name": "Iron",
+    "slug": "iron",
+    "kind": "remedy",
+    "aliases": [
+      "ferrous sulfate",
+      "ferrous bisglycinate",
+      "ferric carboxymaltose",
+      "ferritin"
+    ],
+    "latin": "",
+    "category": "Mineral",
+    "plannedTier": "B",
+    "researchStatus": "live",
+    "sourceCount": 7,
+    "sourceTarget": null,
+    "notes": "Grading-expansion batch (CHK-5.1); sources verified firsthand; tier owner-ratified."
+  },
+  {
+    "name": "Zinc",
+    "slug": "zinc",
+    "kind": "remedy",
+    "aliases": [
+      "zinc gluconate",
+      "zinc picolinate",
+      "zinc sulfate"
+    ],
+    "latin": "",
+    "category": "Mineral",
+    "plannedTier": "D",
+    "researchStatus": "live",
+    "sourceCount": 6,
+    "sourceTarget": null,
+    "notes": "Grading-expansion batch (CHK-5.1); sources verified firsthand; tier owner-ratified."
+  },
+  {
+    "name": "Apigenin",
+    "slug": "apigenin",
+    "kind": "remedy",
+    "aliases": [
+      "4',5,7-trihydroxyflavone",
+      "chamomile flavonoid"
+    ],
+    "latin": "",
+    "category": "Botanical / flavonoid",
+    "plannedTier": "D",
+    "researchStatus": "live",
+    "sourceCount": 5,
+    "sourceTarget": null,
+    "notes": "Grading-expansion batch (CHK-5.1); sources verified firsthand; tier owner-ratified."
+  },
+  {
+    "name": "Jujube",
+    "slug": "jujube",
+    "kind": "remedy",
+    "aliases": [
+      "ziziphus jujuba",
+      "ziziphi spinosae semen",
+      "suanzaoren",
+      "spiny date seed",
+      "jujube seed"
+    ],
+    "latin": "Ziziphus jujuba",
+    "category": "Botanical (TCM)",
+    "plannedTier": "D",
+    "researchStatus": "live",
+    "sourceCount": 5,
+    "sourceTarget": null,
+    "notes": "Grading-expansion batch (CHK-5.1); sources verified firsthand; tier owner-ratified."
   }
 ]
