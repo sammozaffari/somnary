@@ -1,0 +1,506 @@
+---
+// OTC antihistamine sleep aids — CONTEXT page (content-otc-antihistamines). NOT a graded remedy and
+// NOT advice about what to take: it's context on the specific decision behind reaching for a sedating
+// first-generation antihistamine for sleep — diphenhydramine (Benadryl, ZzzQuil, Tylenol/Advil PM) and
+// doxylamine (Unisom SleepTabs). No tier badge, no evidence-gate chips, no plannedTier. Goes DEEPER than
+// /medications-and-sleep-aids (which frames antihistamines as one of several PHARMACIST-interaction
+// examples): here the decision axis is tolerance, next-day impairment, anticholinergic load, and
+// "not a long-term fix" — cross-links the interactions page rather than repeating it. Every specific is
+// cited to a source verified firsthand:
+//   1 Richardson 2002 — RCT crossover, 15 healthy men, diphenhydramine 50 mg twice daily vs placebo x4d:
+//     day-1 sedation significant, but by day 4 indistinguishable from placebo — tolerance to the sedative
+//     effect complete by end of 3 days. PMID 12352276 (verified firsthand).
+//   2 Culpepper & Wingertzahn 2015 (reused from /medications-and-sleep-aids and /older-adults) —
+//     diphenhydramine/doxylamine are nonselective H1 antagonists: sedation bundled with anticholinergic
+//     effects + documented next-day psychomotor impairment; efficacy evidence limited/inconsistent.
+//     PMID 27057416 (verified firsthand).
+//   3 Gray 2015 JAMA Intern Med — prospective cohort (~3,434 adults ≥65, no dementia at baseline):
+//     higher cumulative anticholinergic exposure ASSOCIATED with incident dementia, dose-response,
+//     adjusted HR 1.54 (95% CI 1.21–1.96) at the highest exposure; first-generation antihistamines
+//     among the most common anticholinergics used. OBSERVATIONAL — association, not proven cause.
+//     PMID 25621434 (verified firsthand).
+//   4 AGS Beers Criteria 2023 (reused from /older-adults) — first-generation antihistamines
+//     (diphenhydramine, doxylamine) = AVOID in older adults: highly anticholinergic, reduced clearance,
+//     tolerance as a hypnotic, cumulative anticholinergic exposure linked to falls/delirium/dementia.
+//     PMID 37139824 (verified firsthand).
+//   5 Sateia/AASM 2017 (reused from /medications-and-sleep-aids) — weak recommendation AGAINST
+//     diphenhydramine for CHRONIC insomnia; routes to evaluation, not self-treatment. PMID 27998379.
+//   6 Koren 2010 — RCT (n=256): delayed-release doxylamine + pyridoxine (B6) effective and well tolerated
+//     for nausea and vomiting of pregnancy — the CLINICIAN-DIRECTED pregnancy use, cited so the pregnancy
+//     framing is accurate, not alarmist. NCT00614445. PMID 20843504 (verified firsthand).
+// Children: conservative boundary only — no directive, no "sedate a child" framing; routed to a clinician.
+import Base from '../layouts/Base.astro';
+import ContextBanner from '../components/ContextBanner.astro';
+import ContextSources from '../components/ContextSources.astro';
+import Disclaimer from '../components/Disclaimer.astro';
+import Fn from '../components/Fn.astro';
+
+const sources = [
+  {
+    n: 1,
+    cite: 'Richardson GS, Roehrs TA, Rosenthal L, Koshorek G, Roth T. Tolerance to daytime sedative effects of H1 antihistamines. J Clin Psychopharmacol. 2002;22(5):511–515.',
+    finding:
+      'randomised, double-blind, crossover trial in 15 healthy men given diphenhydramine 50 mg twice daily or placebo for 4 days: on day 1 both objective and subjective sleepiness were significantly higher on diphenhydramine than placebo, but by day 4 sleepiness was indistinguishable from placebo — the first objective confirmation that tolerance to the sedative effect of a first-generation antihistamine develops fast, complete by the end of 3 days of dosing.',
+    pmid: '12352276',
+    doi: '10.1097/00004714-200210000-00012',
+  },
+  {
+    n: 2,
+    cite: 'Culpepper L, Wingertzahn MA. Over-the-Counter Agents for the Treatment of Occasional Disturbed Sleep or Transient Insomnia: A Systematic Review of Efficacy and Safety. Prim Care Companion CNS Disord. 2015;17(6):10.4088/PCC.15r01798.',
+    finding:
+      'systematic review of OTC sleep agents: the antihistamines diphenhydramine and doxylamine are nonselective H1 antagonists whose sedation comes bundled with anticholinergic effects (dry mouth, blurred vision) and documented next-day psychomotor impairment, with limited and inconsistent efficacy evidence for sleep.',
+    pmid: '27057416',
+    doi: '10.4088/PCC.15r01798',
+  },
+  {
+    n: 3,
+    cite: 'Gray SL, Anderson ML, Dublin S, et al. Cumulative use of strong anticholinergics and incident dementia: a prospective cohort study. JAMA Intern Med. 2015;175(3):401–407.',
+    finding:
+      'prospective cohort of older adults (65+) followed over time: higher cumulative anticholinergic exposure was associated with a higher risk of incident dementia in a dose-response pattern, reaching an adjusted hazard ratio of 1.54 (95% CI 1.21–1.96) at the highest cumulative exposure versus no use — with first-generation antihistamines among the most commonly used anticholinergic drugs. This is an observational association, not proof that these drugs cause dementia.',
+    pmid: '25621434',
+    doi: '10.1001/jamainternmed.2014.7663',
+  },
+  {
+    n: 4,
+    cite: 'By the 2023 American Geriatrics Society Beers Criteria® Update Expert Panel. American Geriatrics Society 2023 updated AGS Beers Criteria® for potentially inappropriate medication use in older adults. J Am Geriatr Soc. 2023;71(7):2052–2081.',
+    finding:
+      'the standard geriatric-prescribing reference lists first-generation antihistamines — including the diphenhydramine and doxylamine inside most OTC “PM” sleep products — with a recommendation to AVOID in older adults (strong recommendation): they are highly anticholinergic, clearance falls with advanced age, tolerance to the sleep effect develops when used as a hypnotic, and cumulative anticholinergic exposure is associated with an increased risk of falls, delirium, and dementia.',
+    pmid: '37139824',
+    doi: '10.1111/jgs.18372',
+  },
+  {
+    n: 5,
+    cite: 'Sateia MJ, Buysse DJ, Krystal AD, et al. Clinical Practice Guideline for the Pharmacologic Treatment of Chronic Insomnia in Adults (AASM). J Clin Sleep Med. 2017;13(2):307–349.',
+    finding:
+      'the American Academy of Sleep Medicine guideline issued a weak recommendation that clinicians NOT use diphenhydramine for chronic insomnia — it is not an established treatment for ongoing sleeplessness, and the guideline points toward clinical evaluation rather than continued self-treatment.',
+    pmid: '27998379',
+    doi: '10.5664/jcsm.6470',
+  },
+  {
+    n: 6,
+    cite: 'Koren G, Clark S, Hankins GDV, et al. Effectiveness of delayed-release doxylamine and pyridoxine for nausea and vomiting of pregnancy: a randomized placebo controlled trial. Am J Obstet Gynecol. 2010;203(6):571.e1–571.e7. ClinicalTrials.gov NCT00614445.',
+    finding:
+      'randomised, double-blind, placebo-controlled trial (256 pregnant participants): a delayed-release combination of doxylamine and pyridoxine (vitamin B6) significantly improved nausea and vomiting of pregnancy and was well tolerated — the basis for doxylamine’s clinician-directed use for pregnancy nausea specifically, a different purpose from taking it for sleep.',
+    pmid: '20843504',
+    doi: '10.1016/j.ajog.2010.07.030',
+  },
+];
+---
+
+<Base
+  title="OTC antihistamine sleep aids: what the evidence says about using them for sleep | Somnary"
+  description="The antihistamine in most 'PM' and OTC sleep products — diphenhydramine (Benadryl, ZzzQuil, Tylenol/Advil PM) and doxylamine (Unisom) — is a sedating first-generation allergy drug used off-label for sleep. Tolerance to the sedation builds within days, next-day grogginess is documented, and the anticholinergic load matters most for older adults. Context on why these are at most an occasional, short-term option — not a grade, and not advice about what to take."
+  canonical="https://somnary.vercel.app/otc-antihistamines"
+>
+  <main class="page">
+    <header class="head">
+      <p class="eyebrow">Context · OTC sleep aids</p>
+      <h1 class="title">OTC antihistamine sleep aids</h1>
+      <p class="dek">
+        The drowsiness in most over-the-counter &ldquo;PM&rdquo; and nighttime sleep products comes
+        from a sedating first-generation <em>allergy</em> antihistamine —
+        <strong>diphenhydramine</strong> (Benadryl, ZzzQuil, the &ldquo;PM&rdquo; in Tylenol PM and
+        Advil PM) or <strong>doxylamine</strong> (Unisom SleepTabs) — used off its original purpose to
+        get to sleep. The sedation is real on the first night, but tolerance to it builds within days,
+        the next-day grogginess is documented, and the anticholinergic effects carry their own weight,
+        especially with age. This page is context on why these are, at most, an occasional short-term
+        option — it is not a grade, and it does not tell you what to take or what is safe for you.
+      </p>
+    </header>
+
+    <ContextBanner
+      note="Whether an OTC antihistamine fits a given night depends on your age, your other medicines, and your health — a clinical question, not one a wiki can settle. This page describes what the human evidence and geriatric guidelines document, and routes the decision to a clinician or pharmacist."
+    />
+
+    <p class="who">
+      <span class="who-tag">Who this is for</span>
+      Anyone reaching for a &ldquo;PM&rdquo; or OTC sleep product for the occasional bad night and
+      wondering what it actually does — and anyone tempted to use one night after night. Older adults,
+      pregnancy, and children carry added stakes and are called out below.
+    </p>
+
+    <!-- safety boundary: tolerance + next-day impairment + anticholinergic load / dementia association (serious) -->
+    <section class="callout sev-serious" role="note" aria-label="OTC antihistamine sleep-aid hazard">
+      <div class="callout-head">
+        <span class="sigil" aria-hidden="true">!</span>
+        <p class="callout-title">The sedation fades within days — this is not a long-term fix</p>
+      </div>
+      <p class="callout-body">
+        In a controlled trial the sleepiness from diphenhydramine was gone by the fourth night of
+        nightly use — tolerance to the sedative effect was complete within about three days.<Fn n={1} />
+        The drowsiness also doesn't always clear by morning: these drugs carry documented next-day
+        psychomotor impairment, and anticholinergic effects like dry mouth, constipation, urinary
+        retention, and confusion.<Fn n={2} /><Fn n={4} /> In older adults that load matters more — higher cumulative
+        anticholinergic exposure is <em>associated</em> with dementia in observational data,<Fn n={3} />
+        and geriatric prescribing guidance lists these antihistamines as ones to <strong>avoid</strong>
+        after 65.<Fn n={4} /> None of this tells you what is safe for you. For anything beyond the
+        occasional night, a national guideline advises against diphenhydramine for chronic insomnia and
+        points to <a href="/when-to-see-a-doctor">evaluation</a> instead.<Fn n={5} /> Ongoing
+        sleeplessness is a clinician conversation, not a nightly pill.
+      </p>
+    </section>
+
+    <!-- section 01: what people assume -->
+    <section class="section">
+      <p class="eyebrow">Section 01</p>
+      <h2 class="section-title">What people assume</h2>
+      <div class="prose">
+        <p>
+          Because you can buy them without a prescription and their main job is allergies, OTC
+          &ldquo;PM&rdquo; products read as a mild, low-stakes way to knock yourself out — something you
+          can lean on for a while if the nights keep being rough. The quiet assumptions are that the
+          effect holds if you keep taking it, that it's out of your system by morning, and that an
+          allergy drug repurposed for sleep is basically harmless. The human evidence pushes back on all
+          three, and the through-line of this page is narrow: these can help an <em>occasional</em>
+          night, but they were never a long-term answer, and who you are — your age especially — changes
+          the stakes.
+        </p>
+      </div>
+    </section>
+
+    <!-- section 02: what's actually documented -->
+    <section class="section">
+      <p class="eyebrow">Section 02</p>
+      <h2 class="section-title">What's actually documented</h2>
+      <div class="prose">
+        <p>
+          The tolerance is measured, not folklore. In a randomised, double-blind crossover trial,
+          healthy men took diphenhydramine 50 mg twice daily or placebo for four days: on day 1 the
+          drug produced significantly more sleepiness than placebo, but by day 4 the two were
+          <strong>indistinguishable</strong> — tolerance to the sedative effect was complete by the end
+          of three days.<Fn n={1} /> So the thing that helps on the first night is largely gone within a
+          week of nightly use. A systematic review of OTC sleep agents adds the rest of the picture:
+          diphenhydramine and doxylamine are nonselective H1 antihistamines whose sedation comes bundled
+          with <strong>anticholinergic effects</strong> — dry mouth and blurred vision, and (in the
+          wider anticholinergic class) constipation, urinary retention, and confusion — and documented
+          <strong>next-day psychomotor impairment</strong>, on top of efficacy evidence for sleep the
+          review called limited and inconsistent.<Fn n={2} /><Fn n={4} />
+        </p>
+        <p>
+          The anticholinergic load is where the longer-term concern sits. A prospective cohort of adults
+          65 and older found that higher <em>cumulative</em> anticholinergic exposure was associated with
+          a higher risk of dementia in a dose-response pattern — an adjusted hazard ratio of about
+          <strong>1.54</strong> at the highest exposure versus no use — with first-generation
+          antihistamines among the most commonly used drugs in that class.<Fn n={3} /> Geriatric
+          prescribing guidance draws the practical line: the 2023 AGS Beers Criteria list first-generation
+          antihistamines, including the diphenhydramine and doxylamine in OTC &ldquo;PM&rdquo; products,
+          with a recommendation to <strong>avoid</strong> in older adults — highly anticholinergic,
+          cleared more slowly with age, and tolerance-prone as a sleep aid.<Fn n={4} /> And for ongoing
+          sleeplessness specifically, the American Academy of Sleep Medicine issued a weak recommendation
+          <em>against</em> using diphenhydramine for chronic insomnia.<Fn n={5} />
+        </p>
+      </div>
+    </section>
+
+    <!-- section 03: what these findings do NOT show -->
+    <section class="section">
+      <p class="eyebrow">Section 03</p>
+      <h2 class="section-title">What these findings do <em>not</em> show</h2>
+      <div class="prose">
+        <p>
+          These are population-level findings, and each has limits worth naming. The dementia link is an
+          <strong>observational association</strong>: the cohort tracked cumulative exposure and risk, but
+          it cannot prove these drugs <em>cause</em> dementia, and much of the exposure in such studies
+          comes from anticholinergics taken for other reasons, not occasional sleep use.<Fn n={3} /> The
+          tolerance trial was small and short, in healthy young men at a set dose — it shows the sedation
+          fades fast, not what happens for any one person over months.<Fn n={1} /> Beers flags a class as
+          <em>potentially</em> inappropriate: review and caution, not an absolute ban for every
+          individual.<Fn n={4} /> None of this can diagnose why your sleep is off, rank these against
+          other options for your health, or tell you a dose that is right or safe for you. The honest
+          takeaway is bounded: the sedation doesn't last, the drugs aren't inert, and the stakes climb
+          with age — so anything past the occasional night belongs with a clinician.
+        </p>
+      </div>
+    </section>
+
+    <!-- section 04: dose / label / timing reality -->
+    <section class="section">
+      <p class="eyebrow">Section 04</p>
+      <h2 class="section-title">Dose, label &amp; timing reality</h2>
+      <div class="prose">
+        <p>
+          Labels compound the confusion. The same sedating antihistamine appears under many names —
+          Benadryl, ZzzQuil, the &ldquo;PM&rdquo; suffix on Tylenol PM and Advil PM — and a
+          &ldquo;PM&rdquo; combination product also carries a full dose of a pain reliever
+          (acetaminophen or ibuprofen) you may not actually need for sleep. An OTC box won't flag the
+          anticholinergic load it adds to medicines already in your cabinet, and it won't mention that the
+          sedative effect is expected to wane within days of nightly use.<Fn n={1} /><Fn n={2} /> Because
+          it clears slowly relative to a night's sleep, the drowsiness can spill into the next morning as
+          impaired alertness and <strong>driving risk</strong>.<Fn n={2} /> This page describes what the
+          studies used and found; it does not tell you what to take, how much, or when. A pharmacist can
+          check any &ldquo;PM&rdquo; ingredient against your full medication list in minutes —
+          <a href="/medications-and-sleep-aids">medications &amp; sleep aids</a> covers why that
+          interaction check comes first, and the <a href="/label-checker">label checker</a> can help you
+          see what's actually in a product.
+        </p>
+      </div>
+    </section>
+
+    <!-- section 05: pregnancy, breastfeeding, children -->
+    <section class="section">
+      <p class="eyebrow">Section 05</p>
+      <h2 class="section-title">Pregnancy, breastfeeding &amp; children</h2>
+      <div class="prose">
+        <p>
+          <strong>Pregnancy is a nuance, not a blanket scare.</strong> Doxylamine — one of the two
+          sleep-aid antihistamines here — is, combined with vitamin B6 (pyridoxine), a
+          <em>clinician-directed</em> treatment for nausea and vomiting of pregnancy, supported by a
+          randomised placebo-controlled trial.<Fn n={6} /> That is a specific medical use, prescribed and
+          monitored, for a different problem than sleep. It does not mean an OTC sleep product is a
+          do-it-yourself option during pregnancy: for sleep in pregnancy or while breastfeeding, whether
+          any antihistamine fits is a question for the clinician who knows your pregnancy — not a label,
+          and not this page.
+        </p>
+        <p>
+          <strong>Children are a hard boundary.</strong> OTC antihistamines should not be used to sedate
+          a child, and this page does not cover doing so. A child who isn't sleeping needs a clinician who
+          can look at why — see <a href="/when-to-see-a-doctor">when to see a doctor</a>. That decision
+          belongs to a pediatric clinician, full stop.
+        </p>
+      </div>
+    </section>
+
+    <!-- section 06: take these to a clinician or pharmacist -->
+    <section class="section">
+      <p class="eyebrow">Section 06</p>
+      <h2 class="section-title">Take these to a clinician or pharmacist</h2>
+      <ul class="ask">
+        <li>I've been using a &ldquo;PM&rdquo; product for more than a few nights — given that the sedation is known to fade, is this still doing anything, and should I stop?</li>
+        <li>Here is my full medication list — does the antihistamine in this product add anticholinergic load or interact with anything I take?</li>
+        <li>Given my age or any history of falls or confusion, is this one of the antihistamines I should avoid?</li>
+        <li>Could this leave me impaired or unsafe to drive the next morning?</li>
+        <li>I'm pregnant or breastfeeding — is any sleep antihistamine appropriate, or is this a conversation about something else entirely?</li>
+        <li>My sleep problem is ongoing — should this be evaluated, or is a non-drug approach like CBT-I the better route?</li>
+      </ul>
+    </section>
+
+    <!-- related: interactions context + older adults + evaluation + the non-drug route + tools -->
+    <section class="section">
+      <p class="eyebrow">Related</p>
+      <h2 class="section-title">Read next</h2>
+      <ul class="related">
+        <li><a href="/medications-and-sleep-aids">Medications &amp; sleep aids</a> — why interactions and anticholinergic load are a pharmacist conversation before any sleep aid.</li>
+        <li><a href="/older-adults">Older adults + sleep aids</a> — why the falls, confusion, and anticholinergic stakes of these products climb with age.</li>
+        <li><a href="/when-to-see-a-doctor">When to see a doctor</a> — the signs that ongoing sleeplessness needs evaluation, not a nightly OTC pill.</li>
+        <li><a href="/r/cbt-i">CBT-I</a> — the first-line, non-drug approach to chronic insomnia, and what to reach for instead of a long-term sleep aid.</li>
+        <li><a href="/safety">Safety &amp; interactions</a> — the primary boundary: how Somnary handles interactions and when to route to a clinician.</li>
+        <li><a href="/label-checker">Label checker</a> — see which sedating antihistamine is actually in a &ldquo;PM&rdquo; product.</li>
+      </ul>
+    </section>
+
+    <ContextSources sources={sources} />
+
+    <div class="disclaimer-slot">
+      <Disclaimer variant="standard" />
+    </div>
+
+    <p class="review-line">
+      Reviewed 2026-07-09 · Found an error? <a href="/methodology#corrections">Corrections →</a>
+    </p>
+  </main>
+</Base>
+
+<style>
+  .page {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: var(--sp-8) var(--sp-7) var(--sp-9);
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+    margin: 0;
+  }
+  .dot {
+    color: var(--primary);
+  }
+  .head {
+    margin-bottom: var(--sp-6);
+  }
+  .title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-3xl);
+    line-height: var(--lh-3xl);
+    letter-spacing: var(--tracking-tight);
+    color: var(--ink);
+    margin: var(--sp-3) 0 var(--sp-5);
+  }
+  .dek {
+    font-size: var(--text-md);
+    line-height: var(--lh-md);
+    color: var(--muted);
+    max-width: 68ch;
+    margin: 0;
+  }
+
+  /* who this is for */
+  .who {
+    max-width: 68ch;
+    margin: var(--sp-5) 0 0;
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+  }
+  .who-tag {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--primary);
+    margin-right: var(--sp-2);
+  }
+
+  /* safety callout — reuses the §2.12 serious register (grade-f), bespoke to this context page */
+  .callout {
+    border-radius: var(--r-lg);
+    border: 1px solid;
+    padding: var(--sp-6);
+    margin-top: var(--sp-7);
+  }
+  .sev-serious {
+    background: var(--grade-f-tint);
+    border-color: var(--grade-f);
+  }
+  .callout-head {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    margin-bottom: var(--sp-4);
+  }
+  .sigil {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    flex: none;
+    border-radius: var(--r-pill);
+    background: var(--grade-f);
+    color: var(--surface);
+    font-family: var(--font-display);
+    font-weight: 600;
+    line-height: 1;
+  }
+  .callout-title {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--grade-f);
+    margin: 0;
+  }
+  .callout-body {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--ink);
+    margin: 0;
+  }
+  .callout-body strong {
+    font-weight: 600;
+  }
+  .callout-body a {
+    color: var(--grade-f);
+  }
+
+  .section {
+    border-top: var(--border-hairline);
+    padding-top: var(--sp-6);
+    margin-top: var(--sp-8);
+  }
+  .section-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-xl);
+    line-height: var(--lh-xl);
+    color: var(--ink);
+    margin: var(--sp-2) 0 var(--sp-5);
+  }
+  .prose {
+    max-width: 68ch;
+  }
+  .prose p {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--muted);
+    margin: 0 0 var(--sp-4);
+  }
+  .prose strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .prose a {
+    color: var(--primary);
+  }
+
+  /* clinician questions */
+  .ask {
+    max-width: 68ch;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+  }
+  .ask li {
+    position: relative;
+    padding-left: var(--sp-6);
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--muted);
+  }
+  .ask li::before {
+    content: '?';
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--primary);
+  }
+
+  /* related / read-next links */
+  .related {
+    max-width: 68ch;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+  }
+  .related li {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--muted);
+  }
+  .related a {
+    color: var(--primary);
+  }
+
+  .disclaimer-slot {
+    margin-top: var(--sp-8);
+  }
+  .review-line {
+    margin-top: var(--sp-6);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+  }
+  .review-line a {
+    color: var(--primary);
+  }
+  @media (max-width: 640px) {
+    .page {
+      padding: var(--sp-6) var(--sp-5) var(--sp-8);
+    }
+    .title {
+      font-weight: 700;
+      font-size: var(--text-2xl);
+    }
+  }
+</style>
