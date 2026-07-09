@@ -23,7 +23,11 @@
      static-family fallback (matches the OG generator's family + any static install). */
   --font-display: "Instrument Sans Variable", "Instrument Sans", system-ui, -apple-system, sans-serif;
   --font-body:    "Instrument Sans Variable", "Instrument Sans", system-ui, -apple-system, sans-serif;
-  --font-mono:    "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
+  /* IBM Plex Mono RETIRED 2026-07-09 (owner: remove the mono font entirely). This token now
+     maps to Instrument Sans and is kept only as an alias so the existing var(--font-mono) usages
+     don't each need editing — nothing renders in a monospace face anymore. Where digits must line
+     up (data tables, stat values) use font-variant-numeric: tabular-nums, not a mono family. */
+  --font-mono:    "Instrument Sans Variable", "Instrument Sans", system-ui, -apple-system, sans-serif;
 
   /* ---- surfaces (warm off-whites) ---- */
   --paper:   #FCFAF2;
