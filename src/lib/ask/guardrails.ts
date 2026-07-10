@@ -69,7 +69,7 @@ const MSG = {
 // Ordered most-urgent first. Patterns err toward refusing/routing (safety over coverage).
 
 const CRISIS =
-  /\b(kill myself|killing myself|end my life|end it all|suicid\w*|self[-\s]?harm|hurt myself|harm myself|overdos\w*|took (a whole|the whole|too many|too much)|whole bottle|can'?t wake|cannot wake|won'?t wake|unrousable|unconscious|unresponsive|not breathing|stopped breathing)\b/i;
+  /\b(kill myself|killing myself|end my life|end it all|suicid\w*|self[-\s]?harm|hurt myself|harm myself|overdos(ed|ing)\b|(took|swallow\w*|taken)[^.?!]*overdos\w*|took (a whole|the whole|too many|too much)|whole bottle|can'?t wake|cannot wake|won'?t wake|unrousable|unconscious|unresponsive|not breathing|stopped breathing)\b/i;
 
 // Personalized dosing: "how much / how many … (should I / to give / for me)", "what dose for me".
 const DOSING =
@@ -78,6 +78,9 @@ const DOSING2 = /\b(how much|how many)\b[^.?!]*\b(take|give|use|need|dose)\b/i;
 // Personal-amount framings that skip "how much": "is 10mg too much for me", "a good dose for me".
 const DOSING3 =
   /\b(too much|too little|too many|a good|the right|the proper|the ideal|the best|the correct|enough)\b[^.?!]*\bfor (me|my)\b/i;
+// General dose-AMOUNT questions that skip "for me": "is 10mg too much", "is that an overdose".
+const DOSING4 =
+  /\bis\b[^.?!]*\b(too much|too little|too many|too high|too strong|too big|an overdose|the right amount|the correct amount)\b/i;
 
 // Diagnosis: asking us to name/confirm a condition in them.
 const DIAGNOSIS =
@@ -86,6 +89,13 @@ const DIAGNOSIS =
 // Is it safe / okay FOR ME (personal), incl. pregnancy/child/condition framings.
 const SAFE_FOR_ME =
   /\b(safe|okay|ok|alright|fine|dangerous|risky|harmful|bad)\b[^.?!]*\b(for me|for my|in my case|with my|during (my )?pregnan\w*|while pregnan\w*|while breast[-\s]?feed\w*|for my (kid|child|son|daughter|baby|toddler|infant)|at my age)\b|\bcan i (take|use|try|have)\b/i;
+
+// General SAFETY-JUDGMENT questions that skip "for me": "is it safe to take 10mg", "is melatonin
+// bad", "is that dangerous", "can you overdose". A reference can't make a safety call on a dose or
+// product — route these to the safety boundary rather than answer or return "no evidence".
+// ("safety"/"safely" don't match \bsafe\b, so factual "what's the safety profile" still answers.)
+const SAFE_GENERAL =
+  /\bis\b[^.?!]*\b(safe|unsafe|dangerous|risky|harmful|toxic|bad|poison\w*)\b|\b(safe|unsafe|dangerous|risky|harmful|toxic|bad)\b[^.?!]*\bto (take|use|swallow|have)\b|\bcan (you|i|one|someone|anyone) (overdose|take too much|have too much)\b|\bhow (safe|dangerous|risky|bad)\b/i;
 
 // Mixing with the user's meds / combining products (D4).
 const COMBINE =
@@ -105,9 +115,9 @@ export function classify(question: string): ClassifyResult {
   if (CRISIS.test(q)) return { kind: 'refuse', category: 'crisis', message: MSG.crisis, route: ROUTES.urgent };
   if (STOP_RX.test(q)) return { kind: 'refuse', category: 'stop-prescription', message: MSG.stopRx, route: ROUTES.clinician };
   if (COMBINE.test(q)) return { kind: 'refuse', category: 'combine-meds', message: MSG.combine, route: ROUTES.meds };
-  if (DOSING.test(q) || DOSING2.test(q) || DOSING3.test(q)) return { kind: 'refuse', category: 'personal-dosing', message: MSG.dosing, route: ROUTES.clinician };
+  if (DOSING.test(q) || DOSING2.test(q) || DOSING3.test(q) || DOSING4.test(q)) return { kind: 'refuse', category: 'personal-dosing', message: MSG.dosing, route: ROUTES.clinician };
   if (DIAGNOSIS.test(q)) return { kind: 'refuse', category: 'diagnosis', message: MSG.diagnosis, route: ROUTES.clinician };
-  if (SAFE_FOR_ME.test(q)) return { kind: 'refuse', category: 'safe-for-me', message: MSG.safeForMe, route: ROUTES.safety };
+  if (SAFE_FOR_ME.test(q) || SAFE_GENERAL.test(q)) return { kind: 'refuse', category: 'safe-for-me', message: MSG.safeForMe, route: ROUTES.safety };
   return { kind: 'allow' };
 }
 
