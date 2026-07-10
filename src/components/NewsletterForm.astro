@@ -1,0 +1,219 @@
+---
+// Newsletter capture form (CHK-4.2). Progressive enhancement over a real HTML form:
+//   - No JS: the <form method="POST" action="/api/subscribe"> full-page POSTs and the API
+//     returns JSON (the browser shows it — acceptable no-JS fallback; the enhanced path is the
+//     norm). The shell around it is server-rendered and crawlable.
+//   - With JS: an inline <script> intercepts submit, POSTs via fetch, and shows inline
+//     success/error text in an aria-live region without a page reload.
+//
+// HONEST COPY (real-promises rule): the dispatch does NOT publish yet. We collect an email only
+// to notify people WHEN it launches. No subscriber counts, no cadence claims. No dark patterns:
+// one field, clear purpose, no pre-checked boxes, a link to /privacy, and how to unsubscribe.
+// Bot handling is a hidden honeypot (`website`) — no CAPTCHA.
+---
+
+<form class="nf" method="POST" action="/api/subscribe" data-nf-form novalidate>
+  <div class="nf-field">
+    <label class="nf-label" for="nf-email">your email</label>
+    <div class="nf-row">
+      <input
+        type="email"
+        id="nf-email"
+        name="email"
+        class="nf-input"
+        required
+        autocomplete="email"
+        spellcheck="false"
+        placeholder="you@example.com"
+        aria-describedby="nf-purpose"
+        data-nf-email
+      />
+      <button type="submit" class="nf-submit" data-nf-submit>notify me</button>
+    </div>
+  </div>
+
+  <!-- honeypot: hidden from people + AT, off the tab order. A filled value = bot. -->
+  <div class="nf-hp" aria-hidden="true">
+    <label for="nf-website">leave this field empty</label>
+    <input type="text" id="nf-website" name="website" tabindex="-1" autocomplete="off" />
+  </div>
+
+  <p id="nf-purpose" class="nf-purpose">
+    the dispatch isn’t publishing yet. leave your email and we’ll send you a single note when it
+    launches — nothing else, no spam. unsubscribe any time (every email carries a one-click
+    unsubscribe), or ask us to remove you at
+    <a href="mailto:sammymoz@gmail.com">sammymoz@gmail.com</a>. see how we handle it in the
+    <a href="/privacy">privacy policy</a>.
+  </p>
+
+  <!-- inline status, announced politely; empty until JS responds -->
+  <p class="nf-status" role="status" aria-live="polite" data-nf-status hidden></p>
+</form>
+
+<style>
+  .nf {
+    background: var(--surface);
+    border: var(--border-hairline);
+    border-radius: var(--r-lg);
+    padding: var(--sp-6);
+  }
+  .nf-field {
+    margin: 0;
+  }
+  .nf-label {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: var(--sp-2);
+  }
+  .nf-row {
+    display: flex;
+    gap: var(--sp-3);
+    flex-wrap: wrap;
+  }
+  .nf-input {
+    flex: 1;
+    min-width: 220px;
+    box-sizing: border-box;
+    border: 1px solid var(--mineral);
+    background: var(--paper);
+    border-radius: var(--r-md);
+    padding: 0 var(--sp-4);
+    min-height: 46px;
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    color: var(--ink);
+  }
+  .nf-input::placeholder {
+    color: var(--muted);
+  }
+  .nf-input:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+    border-color: var(--primary);
+  }
+  .nf-submit {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    min-height: 46px;
+    padding: 0 var(--sp-5);
+    border-radius: var(--r-sm);
+    cursor: pointer;
+    background: var(--primary);
+    color: var(--surface);
+    border: 1px solid var(--primary);
+    transition: background var(--dur-fast) var(--ease-soft), border-color var(--dur-fast) var(--ease-soft);
+  }
+  .nf-submit:hover {
+    background: var(--primary-deep);
+    border-color: var(--primary-deep);
+  }
+  .nf-submit:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+  }
+  .nf-submit[disabled] {
+    opacity: 0.6;
+    cursor: default;
+  }
+
+  /* honeypot — visually hidden, kept in the accessibility tree off-limits (aria-hidden on wrap) */
+  .nf-hp {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  .nf-purpose {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: var(--sp-4) 0 0;
+    max-width: 60ch;
+  }
+  .nf-purpose a {
+    color: var(--primary);
+  }
+
+  .nf-status {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    margin: var(--sp-4) 0 0;
+    padding: var(--sp-3) var(--sp-4);
+    border-radius: var(--r-md);
+    border: var(--border-hairline);
+  }
+  .nf-status[hidden] {
+    display: none;
+  }
+  .nf-status[data-tone='ok'] {
+    color: var(--eucalyptus);
+    background: var(--pistachio);
+    border-color: var(--eucalyptus);
+  }
+  /* neutral, NOT the reserved safety register — a form error is not a health warning */
+  .nf-status[data-tone='err'] {
+    color: var(--ink);
+    background: var(--surface);
+    border-color: var(--ink);
+    font-weight: 600;
+  }
+
+  @media (max-width: 640px) {
+    .nf {
+      padding: var(--sp-5);
+    }
+    .nf-submit {
+      flex: 1;
+    }
+  }
+</style>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>('[data-nf-form]');
+  const email = document.querySelector<HTMLInputElement>('[data-nf-email]');
+  const submit = document.querySelector<HTMLButtonElement>('[data-nf-submit]');
+  const status = document.querySelector<HTMLElement>('[data-nf-status]');
+
+  if (form && email && submit && status) {
+    const show = (message: string, tone: 'ok' | 'err') => {
+      status.textContent = message;
+      status.dataset.tone = tone;
+      status.hidden = false;
+    };
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      status.hidden = true;
+      submit.disabled = true;
+      try {
+        const res = await fetch(form.action, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json', accept: 'application/json' },
+          body: JSON.stringify({
+            email: email.value,
+            website: (form.elements.namedItem('website') as HTMLInputElement)?.value ?? '',
+          }),
+        });
+        const data = (await res.json().catch(() => ({}))) as { ok?: boolean; message?: string; error?: string };
+        if (data.ok) {
+          show(data.message ?? 'thanks — we’ll be in touch when the dispatch launches.', 'ok');
+          form.reset();
+        } else {
+          show(data.error ?? 'something went wrong — please try again.', 'err');
+        }
+      } catch {
+        show('couldn’t reach the server — please try again in a moment.', 'err');
+      } finally {
+        submit.disabled = false;
+      }
+    });
+  }
+</script>
