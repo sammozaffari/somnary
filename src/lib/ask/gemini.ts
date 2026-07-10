@@ -39,7 +39,10 @@ export interface GeminiResult {
 }
 
 const ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models';
-const DEFAULT_MODEL = 'gemini-2.0-flash';
+// gemini-flash-lite-latest is on the FREE tier (verified 2026-07-10); the pinned gemini-2.0-flash
+// models now return 429 "limit: 0" (Google moved 2.0 to paid-only). Flash-Lite is cheaper and has
+// higher free-tier limits — good fit for a scoped, low-volume RAG assistant. Overridable via opts.
+const DEFAULT_MODEL = 'gemini-flash-lite-latest';
 
 /** Call generateContent. Resolves to a GeminiResult; never throws for network/auth failures. */
 export async function callGemini(req: GeminiRequest): Promise<GeminiResult> {
