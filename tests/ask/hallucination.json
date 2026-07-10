@@ -1,0 +1,57 @@
+[
+  {
+    "name": "clean-valid-citation",
+    "slug": "melatonin",
+    "question": "does melatonin help you fall asleep faster?",
+    "mock": "valid",
+    "expectStatus": "answered",
+    "expectCitationsSubsetOfPage": true,
+    "expectNoOutOfSetCitations": true
+  },
+  {
+    "name": "invented-bracket-citation",
+    "slug": "melatonin",
+    "question": "does melatonin cure insomnia?",
+    "mock": "invented-bracket",
+    "expectStatus": "refused",
+    "expectCategory": "citation-downgrade",
+    "expectZeroCitations": true,
+    "note": "model emits [99], a footnote not on the page -> must downgrade to a refusal (regression proof)"
+  },
+  {
+    "name": "invented-raw-pmid",
+    "slug": "melatonin",
+    "question": "is melatonin proven for jet lag?",
+    "mock": "invented-pmid",
+    "expectStatus": "refused",
+    "expectCategory": "citation-downgrade",
+    "expectZeroCitations": true,
+    "note": "even a REAL pmid written out raw (not as [n]) is an invention path -> rejected"
+  },
+  {
+    "name": "invented-link",
+    "slug": "melatonin",
+    "question": "what dose was studied for jet lag?",
+    "mock": "invented-link",
+    "expectStatus": "refused",
+    "expectCategory": "citation-downgrade",
+    "expectZeroCitations": true
+  },
+  {
+    "name": "model-declines-out-of-page",
+    "slug": "melatonin",
+    "question": "does melatonin treat sleep apnea breathing?",
+    "mock": "declines",
+    "expectStatus": "no-evidence",
+    "expectZeroCitations": true
+  },
+  {
+    "name": "forbidden-framing-output",
+    "slug": "melatonin",
+    "question": "does melatonin work for sleep onset?",
+    "mock": "forbidden",
+    "expectStatus": "refused",
+    "expectCategory": "framing-downgrade",
+    "expectZeroCitations": true
+  }
+]
