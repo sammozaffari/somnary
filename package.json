@@ -18,7 +18,10 @@
     "verify:cites:online": "node scripts/check-citations.mjs --online",
     "verify:cites:selftest": "node scripts/test-resolver.mjs",
     "verify:botanical": "node scripts/check-botanical-completeness.mjs",
-    "verify:crawl": "node scripts/check-crawlable.mjs"
+    "verify:crawl": "node scripts/check-crawlable.mjs",
+    "verify:framing": "node scripts/check-forbidden-framing.mjs && node scripts/check-forbidden-framing.mjs --selftest",
+    "verify:ask": "node scripts/test-ask.mjs",
+    "verify:ask:online": "node scripts/test-ask.mjs --online"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.0.8",

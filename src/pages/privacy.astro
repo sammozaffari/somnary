@@ -9,9 +9,9 @@ import LegalPage from '../layouts/LegalPage.astro';
 
 <LegalPage
   title="Privacy"
-  eyebrow="Privacy · Last updated 30 June 2026"
+  eyebrow="Privacy · Last updated 10 July 2026"
   description="Somnary's privacy policy. We collect as little as possible: no data selling, no ad-tracking, and most of the site works without collecting anything that identifies you."
-  lastUpdated="30 June 2026"
+  lastUpdated="10 July 2026"
 >
   <p class="lead">
     Somnary is built to need as little of your data as possible. This policy explains what we
@@ -50,6 +50,16 @@ import LegalPage from '../layouts/LegalPage.astro';
       <strong>Corrections / emails:</strong> if you email us, we keep your message and address to
       reply and to track the correction.
     </li>
+    <li>
+      <strong>The on-page assistant (“ask this page”):</strong> when you send a question to the
+      optional assistant, the text of your question and the reviewed content of the page you’re on
+      are sent to Google (the Gemini API) to generate the answer. We don’t attach your name, email,
+      or an account (we don’t have one for you), and we don’t log your questions to build a profile
+      of you. Google processes the request as our AI provider under its API terms. Because your
+      question leaves our servers to reach Google, please don’t type anything into the assistant
+      that identifies you or that you consider sensitive. The feature is optional: every page and
+      its sources work fully without it.
+    </li>
   </ul>
 
   <h2>2. What we don’t do</h2>
@@ -73,9 +83,11 @@ import LegalPage from '../layouts/LegalPage.astro';
 
   <h2>5. Sharing</h2>
   <p>
-    We only share data with the service providers that run the site for us, currently our host,
-    Vercel. If we add an email tool (for the dispatch) or analytics, we’ll name them here. Each is
-    bound to handle data for us alone. We may disclose information if required by law.
+    We share data with the service providers that run the site for us: our host, Vercel, and —
+    only when you use the optional on-page assistant — Google, which processes your question and
+    the page content through its Gemini API to generate the answer. If we add an email tool (for
+    the dispatch) or analytics, we’ll name them here. Each is bound to handle data for us alone. We
+    may disclose information if required by law.
   </p>
 
   <h2>6. Retention</h2>
@@ -95,7 +107,9 @@ import LegalPage from '../layouts/LegalPage.astro';
   <h2>8. Data location</h2>
   <p>
     Our service providers may store data outside Australia. Our host, Vercel, operates globally
-    and may process data in the United States. We choose providers with appropriate safeguards.
+    and may process data in the United States, and Google (the Gemini API, used only for the
+    on-page assistant) may likewise process your question in the United States. We choose providers
+    with appropriate safeguards.
   </p>
 
   <h2>9. Children</h2>
