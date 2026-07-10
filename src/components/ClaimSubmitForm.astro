@@ -12,7 +12,7 @@
 
 <form class="cf" method="POST" action="/api/submit-claim" data-cf-form novalidate>
   <div class="cf-field">
-    <label class="cf-label" for="cf-submission">the claim or label text</label>
+    <label class="cf-label" for="cf-submission">The claim or label text</label>
     <textarea
       id="cf-submission"
       name="submission"
@@ -22,13 +22,13 @@
       minlength="20"
       maxlength="5000"
       spellcheck="true"
-      placeholder="e.g. “this gummy says 10 mg melatonin is clinically proven for deep sleep” — paste the claim, or the ingredients/amounts from the label, and what seems off."
+      placeholder="E.g. “this gummy says 10 mg melatonin is clinically proven for deep sleep” — paste the claim, or the ingredients/amounts from the label, and what seems off."
       aria-describedby="cf-note"
       data-cf-submission></textarea>
   </div>
 
   <div class="cf-field">
-    <label class="cf-label" for="cf-product">product or brand <span class="cf-optional">(optional)</span></label>
+    <label class="cf-label" for="cf-product">Product or brand <span class="cf-optional">(optional)</span></label>
     <input
       type="text"
       id="cf-product"
@@ -36,13 +36,13 @@
       class="cf-input"
       maxlength="200"
       autocomplete="off"
-      placeholder="what it’s called, if you know"
+      placeholder="What it’s called, if you know"
       data-cf-product
     />
   </div>
 
   <div class="cf-field">
-    <label class="cf-label" for="cf-email">your email <span class="cf-optional">(optional — only if you want a reply)</span></label>
+    <label class="cf-label" for="cf-email">Your email <span class="cf-optional">(optional — only if you want a reply)</span></label>
     <input
       type="email"
       id="cf-email"
@@ -57,19 +57,19 @@
 
   <!-- honeypot -->
   <div class="cf-hp" aria-hidden="true">
-    <label for="cf-website">leave this field empty</label>
+    <label for="cf-website">Leave this field empty</label>
     <input type="text" id="cf-website" name="website" tabindex="-1" autocomplete="off" />
   </div>
 
   <p id="cf-note" class="cf-note">
-    this isn’t medical advice and we can’t look at your personal situation — please don’t include
-    personal health details. we read submissions to decide what to research next; we can’t reply to
-    everyone. an email is only used if you want a reply. see the
+    This isn’t medical advice and we can’t look at your personal situation — please don’t include
+    personal health details. We read submissions to decide what to research next; we can’t reply to
+    everyone. An email is only used if you want a reply. See the
     <a href="/privacy">privacy policy</a>.
   </p>
 
   <div class="cf-actions">
-    <button type="submit" class="cf-submit" data-cf-submit>send it</button>
+    <button type="submit" class="cf-submit" data-cf-submit>Send it</button>
   </div>
 
   <p class="cf-status" role="status" aria-live="polite" data-cf-status hidden></p>
@@ -90,7 +90,6 @@
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     color: var(--muted);
     margin-bottom: var(--sp-2);
   }
@@ -157,7 +156,6 @@
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     min-height: 46px;
     padding: 0 var(--sp-5);
     border-radius: var(--r-sm);
@@ -246,13 +244,13 @@
         });
         const data = (await res.json().catch(() => ({}))) as { ok?: boolean; message?: string; error?: string };
         if (data.ok) {
-          show(data.message ?? 'thanks — we’ll consider it for review.', 'ok');
+          show(data.message ?? 'Thanks — we’ll consider it for review.', 'ok');
           form.reset();
         } else {
-          show(data.error ?? 'something went wrong — please try again.', 'err');
+          show(data.error ?? 'Something went wrong — please try again.', 'err');
         }
       } catch {
-        show('couldn’t reach the server — please try again in a moment.', 'err');
+        show('Couldn’t reach the server — please try again in a moment.', 'err');
       } finally {
         submit.disabled = false;
       }

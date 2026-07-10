@@ -14,7 +14,7 @@
 
 <form class="nf" method="POST" action="/api/subscribe" data-nf-form novalidate>
   <div class="nf-field">
-    <label class="nf-label" for="nf-email">your email</label>
+    <label class="nf-label" for="nf-email">Your email</label>
     <div class="nf-row">
       <input
         type="email"
@@ -28,21 +28,21 @@
         aria-describedby="nf-purpose"
         data-nf-email
       />
-      <button type="submit" class="nf-submit" data-nf-submit>notify me</button>
+      <button type="submit" class="nf-submit" data-nf-submit>Notify me</button>
     </div>
   </div>
 
   <!-- honeypot: hidden from people + AT, off the tab order. A filled value = bot. -->
   <div class="nf-hp" aria-hidden="true">
-    <label for="nf-website">leave this field empty</label>
+    <label for="nf-website">Leave this field empty</label>
     <input type="text" id="nf-website" name="website" tabindex="-1" autocomplete="off" />
   </div>
 
   <p id="nf-purpose" class="nf-purpose">
-    the dispatch isn’t publishing yet. leave your email and we’ll send you a single note when it
-    launches — nothing else, no spam. unsubscribe any time (every email carries a one-click
+    The dispatch isn’t publishing yet. Leave your email and we’ll send you a single note when it
+    launches — nothing else, no spam. Unsubscribe any time (every email carries a one-click
     unsubscribe), or ask us to remove you at
-    <a href="mailto:sammymoz@gmail.com">sammymoz@gmail.com</a>. see how we handle it in the
+    <a href="mailto:sammymoz@gmail.com">sammymoz@gmail.com</a>. See how we handle it in the
     <a href="/privacy">privacy policy</a>.
   </p>
 
@@ -65,7 +65,6 @@
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     color: var(--muted);
     margin-bottom: var(--sp-2);
   }
@@ -99,7 +98,6 @@
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     min-height: 46px;
     padding: 0 var(--sp-5);
     border-radius: var(--r-sm);
@@ -204,13 +202,13 @@
         });
         const data = (await res.json().catch(() => ({}))) as { ok?: boolean; message?: string; error?: string };
         if (data.ok) {
-          show(data.message ?? 'thanks — we’ll be in touch when the dispatch launches.', 'ok');
+          show(data.message ?? 'Thanks — we’ll be in touch when the dispatch launches.', 'ok');
           form.reset();
         } else {
-          show(data.error ?? 'something went wrong — please try again.', 'err');
+          show(data.error ?? 'Something went wrong — please try again.', 'err');
         }
       } catch {
-        show('couldn’t reach the server — please try again in a moment.', 'err');
+        show('Couldn’t reach the server — please try again in a moment.', 'err');
       } finally {
         submit.disabled = false;
       }
