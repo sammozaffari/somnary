@@ -2,6 +2,7 @@
 import Base from '../layouts/Base.astro';
 import Disclaimer from '../components/Disclaimer.astro';
 import TierBadge from '../components/TierBadge.astro';
+import HeroAnswerCard from '../components/HeroAnswerCard.astro';
 import { TIERS } from '../lib/tiers';
 
 // Home — CHK-3.1 (strategy 03 "Homepage Above-The-Fold"; DESIGN_SYSTEM §1/§10).
@@ -64,28 +65,35 @@ const situations = [
   canonical="https://somnary.vercel.app/"
 >
   <main class="home">
-    <!-- hero — three above-the-fold decision routes -->
+    <!-- hero — decision routes (left) + a LIVE answer card (right) -->
     <section class="hero">
-      <p class="eyebrow">Independent · evidence-graded · reader-funded</p>
-      <h1 class="headline">Check a sleep remedy before you take it</h1>
-      <p class="dek">
-        Every sleep supplement, graded on real science — not the hype on the label.
-      </p>
-      <div class="cta-row">
-        <a class="cta cta-action" href="/search">Check a remedy →</a>
-        <a class="cta cta-secondary" href="#situations">Start from your sleep problem</a>
-        <a class="cta cta-ghost" href="/safety">Read safety red flags</a>
+      <div class="hero-main">
+        <p class="eyebrow">Independent · evidence-graded · reader-funded</p>
+        <h1 class="headline">Check a sleep remedy before you take it</h1>
+        <p class="dek">
+          Every sleep supplement, graded on real science — not the hype on the label.
+        </p>
+        <div class="cta-row">
+          <a class="cta cta-action" href="/search">Check a remedy →</a>
+          <a class="cta cta-secondary" href="#situations">Start from your sleep problem</a>
+          <a class="cta cta-ghost" href="/safety">Read safety red flags</a>
+        </div>
+        <!-- popular checks double as the answer-card switcher (JS); plain links with no JS -->
+        <div class="pills" aria-label="Popular checks">
+          <span class="pills-label">Popular checks</span>
+          {
+            popularChecks.map((p) => (
+              <a class="pill" href={`/r/${p.slug}`} data-answer-pill={p.slug}>
+                {p.name}
+              </a>
+            ))
+          }
+        </div>
       </div>
-      <div class="pills" aria-label="Popular checks">
-        <span class="pills-label">Popular checks</span>
-        {
-          popularChecks.map((p) => (
-            <a class="pill" href={`/r/${p.slug}`}>
-              {p.name}
-            </a>
-          ))
-        }
-      </div>
+
+      <aside class="hero-aside" aria-label="Live remedy answer">
+        <HeroAnswerCard slugs={popularChecks.map((p) => p.slug)} />
+      </aside>
     </section>
 
     <!-- disclaimer — adjacent to the decision block, not footer-only -->
@@ -112,10 +120,11 @@ const situations = [
       <ul class="legend">
         {
           TIERS.map((t) => (
-            <li class="legend-row">
-              <TierBadge tier={t.id} size="inline" />
-              <span class="legend-name">{t.name}</span>
-              <span class="legend-trans">{t.decisionTranslation}</span>
+            <li class="legend-item">
+              <TierBadge tier={t.id} size="card" />
+              <span class="legend-name">
+                <span class="legend-letter">{t.id}</span> {t.name}
+              </span>
             </li>
           ))
         }
@@ -127,13 +136,36 @@ const situations = [
       </p>
     </section>
   </main>
+
+  {/* Answer-card switcher: pills toggle which card shows. No JS → pills stay plain links. */}
+  <script>
+    const pills = document.querySelectorAll<HTMLAnchorElement>('[data-answer-pill]');
+    const cards = document.querySelectorAll<HTMLElement>('[data-answer-card]');
+    function select(slug: string | null) {
+      cards.forEach((c) => {
+        c.hidden = c.dataset.answerCard !== slug;
+      });
+      pills.forEach((p) => {
+        if (p.dataset.answerPill === slug) p.setAttribute('aria-current', 'true');
+        else p.removeAttribute('aria-current');
+      });
+    }
+    pills.forEach((p) => {
+      p.addEventListener('click', (e) => {
+        e.preventDefault();
+        select(p.dataset.answerPill ?? null);
+      });
+    });
+    // mark the default-visible card's pill active (only when JS is present)
+    if (pills.length) select(pills[0].dataset.answerPill ?? null);
+  </script>
 </Base>
 
 <style>
   .home {
     max-width: var(--page);
     margin: 0 auto;
-    padding: var(--sp-9) var(--sp-7) var(--sp-9);
+    padding: var(--sp-8) var(--sp-7) var(--sp-8);
   }
   .dot {
     color: var(--primary);
@@ -147,15 +179,31 @@ const situations = [
     margin: 0;
   }
 
-  /* hero */
+  /* hero — decision routes (left) + live answer card (right); stacks below 900px */
   .hero {
-    margin-bottom: var(--sp-8);
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--sp-7);
+    margin-bottom: var(--sp-7);
+  }
+  .hero-main {
+    min-width: 0;
+  }
+  .hero-aside {
+    min-width: 0;
+  }
+  @media (min-width: 900px) {
+    .hero {
+      grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+      gap: var(--sp-8);
+      align-items: start;
+    }
   }
   .headline {
     font-family: var(--font-display);
-    font-size: var(--text-display);
+    font-size: var(--text-3xl);
     font-weight: 700;
-    line-height: var(--lh-display);
+    line-height: var(--lh-3xl);
     letter-spacing: var(--tracking-tight);
     color: var(--ink);
     margin: var(--sp-4) 0 var(--sp-5);
@@ -167,10 +215,6 @@ const situations = [
     color: var(--muted);
     max-width: 60ch;
     margin: 0 0 var(--sp-6);
-  }
-  .disavow {
-    color: var(--ink);
-    font-weight: 650;
   }
   .cta-row {
     display: flex;
@@ -249,6 +293,12 @@ const situations = [
     outline: none;
     box-shadow: var(--ring);
   }
+  /* active pill = the answer card currently shown (JS switcher only) */
+  .pill[aria-current='true'] {
+    border: var(--border-strong);
+    background: var(--primary-soft);
+    color: var(--primary-deep);
+  }
 
   /* sections */
   .section {
@@ -302,39 +352,35 @@ const situations = [
     margin: 0;
   }
 
-  /* how to read a grade — S–F legend */
+  /* how to read a grade — one horizontal strip of six badges (was six stacked rows) */
   .legend {
     list-style: none;
     margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
+    padding: var(--sp-5);
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: var(--sp-4);
     background: var(--surface);
     border: var(--border-hairline);
     border-radius: var(--r-lg);
-    overflow: hidden;
   }
-  .legend-row {
-    display: grid;
-    grid-template-columns: auto 8ch 1fr;
+  .legend-item {
+    display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: var(--sp-4);
-    padding: var(--sp-4) var(--sp-5);
+    gap: var(--sp-2);
+    text-align: center;
   }
-  .legend-row + .legend-row {
-    border-top: var(--border-hairline);
-  }
+  /* letter + tier name — legible without color alone (the badge glyph is the letter, echoed here) */
   .legend-name {
     font-family: var(--font-mono);
-    font-weight: 700;
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    color: var(--ink);
-  }
-  .legend-trans {
-    font-size: var(--text-sm);
-    line-height: var(--lh-sm);
     color: var(--muted);
+  }
+  .legend-letter {
+    font-weight: 700;
+    color: var(--ink);
   }
   .legend-note {
     font-size: var(--text-sm);
@@ -351,30 +397,14 @@ const situations = [
     .tiles {
       grid-template-columns: 1fr;
     }
-    .legend-row {
-      grid-template-columns: auto 1fr;
-      grid-template-areas:
-        'badge name'
-        'trans trans';
-      row-gap: var(--sp-2);
-    }
-    .legend-row :global(.tier-badge) {
-      grid-area: badge;
-    }
-    .legend-name {
-      grid-area: name;
-    }
-    .legend-trans {
-      grid-area: trans;
+    /* six badges wrap to two rows of three on narrow viewports */
+    .legend {
+      grid-template-columns: repeat(3, 1fr);
     }
   }
   @media (max-width: 640px) {
     .home {
-      padding: var(--sp-7) var(--sp-5) var(--sp-8);
-    }
-    .headline {
-      font-weight: 700;
-      font-size: 52px;
+      padding: var(--sp-7) var(--sp-5) var(--sp-7);
     }
   }
 </style>
