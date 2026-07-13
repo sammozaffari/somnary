@@ -113,7 +113,7 @@ border-radius: 24px;
 | Role | Family | Notes |
 |---|---|---|
 | Display / headings / buttons / brand | **Instrument Sans** (400–700) | weight 600–700, tight tracking |
-| Body / UI | **Instrument Sans** (400–700) | base 16px / 1.45 |
+| Body / UI | **Instrument Sans** (400–700) | base 16px / 1.6 (reading legibility), no tracking |
 | Data / citations | **Instrument Sans** (400–500) | mono retired; `--font-mono` resolves to Instrument Sans |
 
 All type — display, body, data, citations — is Instrument Sans (all-sans, no serif and
@@ -134,7 +134,7 @@ spec below asking for 800/900 renders at 700 (intentional). Use these sizes; don
 | h3 | 19–21px | 600–700 | −0.025em | panel/module headings |
 | stat | 42px (34px in hero metrics) | 700 | −0.06em | evidence-card / hero-metric numerals |
 | lede | `clamp(18px, 1.6vw, 23px)` / 1.34 | 400–500 | — | hero/page subheads, `--muted` (white 0.78–0.82 alpha on oxblood) |
-| body | 16px / 1.45 | 400 | — | default |
+| body | 16px / 1.6 | 400 | — | default (reading text) |
 | support | 13–14px | 400–600 | — | card body, nav links, footer |
 | micro | 11–12px | 600–700 | +0.09–0.11em, Sentence case | eyebrow/kicker/meta-label (`--primary`), table headers |
 
