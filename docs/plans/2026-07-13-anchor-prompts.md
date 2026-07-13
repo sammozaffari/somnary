@@ -33,9 +33,9 @@ that consistency is what makes the set read as one artist.
 
 ---
 
-## 3. GABA — family: Compound as molecule
+## 3. GABA — family: Compound as molecule  *(revised — bolder for small sizes)*
 
-> The skeletal molecular structure of the GABA molecule (gamma-aminobutyric acid), a short open zig-zag carbon chain with an amino group at one end and a carboxylic acid group at the other, drawn as bold carved straight lines with filled solid circular node dots at the atoms, slightly imperfect as if cut by hand, rendered as a traditional hand-carved linocut block print.
+> A bold ball-and-stick model of the GABA molecule (gamma-aminobutyric acid): a simple zig-zag of large solid filled circular atoms joined by short thick straight bonds, an amino group at one end and a paired-oxygen carboxyl group at the other, drawn large and heavy with generous margins so it reads clearly as a chunky molecule even when tiny, slightly imperfect as if cut by hand, rendered as a traditional hand-carved linocut block print.
 >
 > Style: bold, confident carved shapes with the character of a hand-pulled relief print — slightly irregular edges, sparse carved hatching and gouge marks for depth and texture, small intentional gaps where the ink didn't fully take. Flat and graphic: solid black ink on a pure white background, exactly two tones, no gradients, no gray, no color, no halftone.
 >
@@ -45,9 +45,9 @@ that consistency is what makes the set read as one artist.
 
 ---
 
-## 4. Melatonin — family: Formulated / vessel
+## 4. Melatonin — family: Formulated / vessel  *(revised — simpler, bolder)*
 
-> A small rounded apothecary pill bottle with a smooth unlabeled body, three round tablets spilled beside it on the ground, and a thin crescent moon floating in the space above the bottle, rendered as a traditional hand-carved linocut block print.
+> A single bold apothecary pill bottle standing upright as the clear central subject, smooth unlabeled body with a rounded shoulder and cap, filling most of the frame's height, with just two round tablets resting at its base and one small crescent moon tucked beside the bottle's shoulder, heavy simple outlines and minimal internal detail, rendered as a traditional hand-carved linocut block print.
 >
 > Style: bold, confident carved shapes with the character of a hand-pulled relief print — slightly irregular edges, sparse carved hatching and gouge marks for depth and texture, small intentional gaps where the ink didn't fully take. Flat and graphic: solid black ink on a pure white background, exactly two tones, no gradients, no gray, no color, no halftone.
 >
@@ -83,9 +83,9 @@ that consistency is what makes the set read as one artist.
 
 ---
 
-## 7. CBT-i — family: Intervention / instrument
+## 7. CBT-i — family: Intervention / instrument  *(revised — clock dropped, bolder)*
 
-> A neatly made single bed seen in side profile with a plump pillow and a folded turned-down blanket, and a round old-fashioned wind-up alarm clock with two bells floating in the space above the footboard, rendered as a traditional hand-carved linocut block print.
+> A single made bed seen in clean side profile as the sole subject, with a bold headboard and footboard, one plump pillow, and a neatly turned-down blanket, drawn with heavy simple outlines and very little internal detail, no clock and no other objects, rendered as a traditional hand-carved linocut block print.
 >
 > Style: bold, confident carved shapes with the character of a hand-pulled relief print — slightly irregular edges, sparse carved hatching and gouge marks for depth and texture, small intentional gaps where the ink didn't fully take. Flat and graphic: solid black ink on a pure white background, exactly two tones, no gradients, no gray, no color, no halftone.
 >
