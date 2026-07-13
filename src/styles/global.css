@@ -74,7 +74,7 @@
   --text-xl:      32px;   --lh-xl:      1.10;  /* Instrument Sans 700, -0.04em */
   --text-lg:      21px;   --lh-lg:      1.20;  /* Instrument Sans 600, -0.025em (h3) */
   --text-md:      18px;   --lh-md:      1.40;  /* Instrument Sans 500 (lede) */
-  --text-base:    16px;   --lh-base:    1.45;  /* Instrument Sans 400 (body) */
+  --text-base:    16px;   --lh-base:    1.60;  /* Instrument Sans 400 (body reading — looser for legibility) */
   --text-sm:      14px;   --lh-sm:      1.50;  /* Instrument Sans 400 */
   --text-xs:      12px;   --lh-xs:      1.40;  /* Instrument Sans 600, 0.09em, UPPERCASE */
   --tracking-tight: -0.04em;
@@ -123,6 +123,7 @@
     font-family: var(--font-body);
     font-size: var(--text-base);
     line-height: var(--lh-base);
+    letter-spacing: normal;  /* reading text: no tracking/kerning adjustment */
   }
   ::selection { background: var(--primary-soft); }
   :focus-visible { box-shadow: var(--focus-ring); outline: none; }
