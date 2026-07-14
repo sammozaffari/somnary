@@ -7,7 +7,7 @@
 // so a missing asset never breaks layout.
 interface Props {
   slug: string;
-  size?: 'inline' | 'card' | 'lead';
+  size?: 'chip' | 'inline' | 'card' | 'spot' | 'lead';
   class?: string;
 }
 
@@ -45,6 +45,10 @@ const classes = ['remedy-icon', `is-${size}`, className].filter(Boolean).join(' 
     -webkit-mask: var(--icon) center / contain no-repeat;
     mask: var(--icon) center / contain no-repeat;
   }
+  .is-chip {
+    width: 20px;
+    height: 20px;
+  }
   .is-inline {
     width: 32px;
     height: 32px;
@@ -52,6 +56,10 @@ const classes = ['remedy-icon', `is-${size}`, className].filter(Boolean).join(' 
   .is-card {
     width: 48px;
     height: 48px;
+  }
+  .is-spot {
+    width: 64px;
+    height: 64px;
   }
   .is-lead {
     width: 120px;
