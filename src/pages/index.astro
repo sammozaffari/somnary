@@ -94,11 +94,10 @@ const situations = [
         </div>
         <!-- popular checks double as the answer-card switcher (JS); plain links with no JS -->
         <div class="pills" aria-label="Popular checks">
-          <span class="pills-label">Popular checks</span>
           {
             popularChecks.map((p) => (
               <a class="pill" href={`/r/${p.slug}`} data-answer-pill={p.slug}>
-                <RemedyIcon slug={p.slug} size="chip" />
+                <RemedyIcon slug={p.slug} size="pill" />
                 {p.name}
               </a>
             ))
@@ -122,7 +121,7 @@ const situations = [
           situations.map((t) => (
             <a class="tile" href={t.href}>
               <span class="tile-icon">
-                <t.Icon size={22} strokeWidth={1.75} aria-hidden="true" />
+                <t.Icon size={26} strokeWidth={1.75} aria-hidden="true" />
               </span>
               <p class="tile-title">{t.title}</p>
               <p class="tile-dek">{t.dek}</p>
@@ -157,25 +156,70 @@ const situations = [
 
   {/* Answer-card switcher: pills toggle which card shows. No JS → pills stay plain links. */}
   <script>
-    const pills = document.querySelectorAll<HTMLAnchorElement>('[data-answer-pill]');
+    // Spotlight carousel: pills switch the visible answer card AND auto-advance through them.
+    // No JS → pills stay plain <a> links and every card is real crawlable content.
+    const pillEls = Array.from(
+      document.querySelectorAll<HTMLAnchorElement>('[data-answer-pill]'),
+    );
     const cards = document.querySelectorAll<HTMLElement>('[data-answer-card]');
-    function select(slug: string | null) {
+    const strip = document.querySelector<HTMLElement>('.pills');
+    const hero = document.querySelector<HTMLElement>('.hero');
+    const slugs = pillEls.map((p) => p.dataset.answerPill ?? '');
+    let current = 0;
+
+    function show(i: number) {
+      current = (i + slugs.length) % slugs.length;
+      const slug = slugs[current];
       cards.forEach((c) => {
         c.hidden = c.dataset.answerCard !== slug;
       });
-      pills.forEach((p) => {
-        if (p.dataset.answerPill === slug) p.setAttribute('aria-current', 'true');
+      pillEls.forEach((p, idx) => {
+        if (idx === current) p.setAttribute('aria-current', 'true');
         else p.removeAttribute('aria-current');
       });
+      // keep the active pill centered within the (scrollable) strip — scoped, no page scroll
+      const active = pillEls[current];
+      if (active && strip) {
+        const a = active.getBoundingClientRect();
+        const s = strip.getBoundingClientRect();
+        strip.scrollBy({ left: a.left - s.left - (s.width - a.width) / 2, behavior: 'smooth' });
+      }
     }
-    pills.forEach((p) => {
+
+    // Auto-advance. Pause/Stop (WCAG 2.2.2): pauses on hover/focus; off under reduced motion.
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let timer: ReturnType<typeof setInterval> | null = null;
+    function stop() {
+      if (timer) {
+        clearInterval(timer);
+        timer = null;
+      }
+    }
+    function start() {
+      if (reduce || timer || slugs.length < 2) return;
+      timer = setInterval(() => show(current + 1), 4500);
+    }
+
+    pillEls.forEach((p, idx) => {
       p.addEventListener('click', (e) => {
         e.preventDefault();
-        select(p.dataset.answerPill ?? null);
+        show(idx);
+        stop();
+        start(); // restart the clock from the user's pick
       });
     });
-    // mark the default-visible card's pill active (only when JS is present)
-    if (pills.length) select(pills[0].dataset.answerPill ?? null);
+
+    if (hero) {
+      hero.addEventListener('mouseenter', stop);
+      hero.addEventListener('mouseleave', start);
+      hero.addEventListener('focusin', stop);
+      hero.addEventListener('focusout', start);
+    }
+
+    if (pillEls.length) {
+      show(0);
+      start();
+    }
   </script>
 </Base>
 
@@ -279,26 +323,26 @@ const situations = [
     border: var(--border-hairline);
   }
 
-  /* popular-check pills */
+  /* popular-check pills — one line; horizontally scrollable if they overflow (carousel tab strip) */
   .pills {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     align-items: center;
     gap: var(--sp-2);
+    overflow-x: auto;
+    scrollbar-width: none;
+    scroll-padding-inline: var(--sp-5);
   }
-  .pills-label {
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
-    color: var(--muted);
-    margin-right: var(--sp-2);
+  .pills::-webkit-scrollbar {
+    display: none;
   }
   .pill {
     display: inline-flex;
+    flex: none;
     align-items: center;
     gap: var(--sp-2);
-    min-height: var(--sp-6);
-    padding: 0 var(--sp-4) 0 var(--sp-3);
+    min-height: var(--sp-7);
+    padding: 0 var(--sp-3) 0 var(--sp-2);
     border-radius: var(--r-pill);
     background: var(--surface);
     border: var(--border-hairline);
