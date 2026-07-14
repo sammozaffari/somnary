@@ -1,114 +1,129 @@
-# Somnary identity system — logo brief
+# Somnary identity system — logo brief (round 2)
 
 **Date:** 2026-07-14 · **Status:** concepting brief (drafts only). Adopting any
 non-Instrument-Sans wordmark, or finalizing the wordmark period, is a brand
 `[HUMAN-GATE]` per CLAUDE.md. Stays inside D3: the crescent-moon disc remains the
 brand symbol — this refines it, it is not a rebrand.
 
-> **Use with a concepting model, not for final art.** Image generators mangle
-> real letterforms and won't produce true Instrument Sans. Explore the moon-counter
-> *form and composition* here, then draw the chosen direction as vector and set the
-> wordmark in the real typeface. Append the **Negative** line (§6) to every prompt.
+**Round 1 failed because:** the crescent was crammed *inside the O's counter*
+(muddy below billboard size), the wordmark was rendered small in a 4-up review
+board (no presence), and the neutral UI face gave it no billboard swagger. Round 2
+fixes all three: the moon moves out of the closed counter, the deliverable is a
+hero deck at billboard scale, and a geometric display cut is allowed for the mark.
+
+> **Generate as a PROGRAMMATIC VECTOR PDF, not diffusion images.** The reference
+> deck (PIAZR) is crisp because it was drawn in code (SVG/vector) and laid out as a
+> multi-page PDF. Do the same: exact geometry, real Instrument Sans (or the named
+> display face) for the wordmark, precise favicon scaling. Do NOT use an image model
+> for letterforms.
+
+---
+
+## DELIVERABLE FORMAT (this is what round 1 got wrong)
+
+A single multi-page **PDF**, **one exploration per page**, minimum **24 pages**,
+each page rendered at **hero / billboard scale**. Follow this page anatomy exactly
+(it is the PIAZR reference layout):
+
+- **Hero pages** — the wordmark fills ~80% of the page width. Top third: mark in
+  **black on white**. Middle third: same mark **inverted, white on black**,
+  full-bleed band. Bottom third: a **scale step-down row** — the mark shown large →
+  medium → small → favicon (16px), left to right, proving it holds. Page number in
+  a corner (01, 02, …).
+- **Construction pages** — one per finalist mark: the underlying grid, circle
+  geometry, and unit measurements of the moon element and its integration.
+- **Lockup pages** — symbol alone; symbol + wordmark horizontal; stacked; and the
+  favicon crop.
+- **Production page(s)** — the finalists re-rendered in the ratified palette:
+  oxblood `#7E1F2B` on warm paper `#FCFAF2`, plus oxblood-on-paper and its inverse.
+
+No captions-in-cards review board. No four-up contact sheets. Big, confident,
+one idea per page.
+
+---
+
+## MARK STRATEGY — where the moon lives (round 2)
+
+**Hard rule:** do NOT place a crescent inside the closed counter of the O (this was
+the round-1 failure). The moon must sit in open, isolated space or *be* a clean
+solid form. Explore these placements, several per route:
+
+1. **Solid moon-disc O.** The O is a fully solid filled disc (a full moon), not an
+   outline. Reads as O *and* moon instantly; survives 16px; echoes the existing
+   circular mark. *(Lead candidate.)*
+2. **Detached crescent accent.** The wordmark is set clean; a small crescent moon
+   sits as an isolated accent in open space above or beside the word — the true
+   equivalent of PIAZR's onion-tittle (an isolated spot, never embedded).
+3. **Symbol + logotype lockup.** A standalone crescent-moon disc symbol to the left
+   of (or above) a clean "Somnary" logotype — the most robust, most licensable
+   configuration; the symbol carries the moon so the letters stay pure.
+4. **Geometric display O.** Set the wordmark in a wide geometric display cut whose
+   circular O naturally reads as a moon disc; the typeface carries the presence.
+   *(Logo-only face ≠ Instrument Sans UI face — brand `[HUMAN-GATE]`.)*
 
 ---
 
 ## PROJECT BRIEF: SOMNARY IDENTITY SYSTEM
 
-**TO:** Design Team **FROM:** Creative Director **CLIENT:** SOMNARY
 **SECTOR:** Health Reference & Evidence Publishing **PROJECT:** Core Brand Identity & Logo System
 
 ### 1. The Proposition & Context
 
 Somnary is an independent, evidence-graded reference for natural sleep remedies. The
-brand name is a coinage from the Latin *somnus* ("sleep") joined to the suffix *-ary* —
-the same morpheme that builds *library*, *apothecary*, and *dictionary*: a place where
-knowledge is collected, ordered, and kept. In the context of a health-reference
-platform, this is a precise semiotic device. Somnary is not a supplement seller; it is
-a *repository* that unpeels the layered claims around a remedy to reveal a single graded
-core of truth. The moon — the universal signifier of sleep and night, and the brand's
-ratified symbol — is the concentric, phase-layered form that carries this meaning.
+name is a coinage from Latin *somnus* ("sleep") + the suffix *-ary* — the morpheme
+that builds *library*, *apothecary*, *dictionary*: a place where knowledge is
+collected, ordered, and kept. Somnary is a *repository* that unpeels the layered
+claims around a remedy to reveal a single graded core of truth. The moon — signifier
+of sleep and night, and the brand's ratified symbol — carries this meaning.
 
-The objective is to translate this conceptual richness into a calm, authoritative, and
-uncompromisingly modern visual identity. The resulting system must eschew
-wellness-industry cliché — no crescent-and-stars whimsy, no watercolour botanicals, no
-spa serenity — in favour of timeless typographic rigour and quiet intellectual confidence.
+Translate that into a calm, authoritative, uncompromisingly modern identity. Eschew
+wellness cliché — no crescent-and-stars whimsy, no watercolour botanicals, no spa
+serenity — in favour of timeless typographic rigour and quiet intellectual confidence.
 
 ### 2. Core Conceptual Mandates
 
-*The Layered Metaphor:* The concepts of the moon (phases, the lit crescent against the
-dark disc) and of graded evidence (tiers, strata, unpeeling hype to reach the core) must
-inform the design logic — but executed with extreme reductionism. It cannot look
-astrological or decorative; it must look like a reference instrument: precise, printed,
-trustworthy. **The "layers" idea is expressed only as typographic strata (Routes B, C) —
-never as rings, targets, or a cross-section.**
+*The Layered Metaphor:* the moon (its calm disc, its crescent) and graded evidence
+(tiers, unpeeling hype to the core) inform the logic, executed with extreme
+reductionism — a reference instrument: precise, printed, trustworthy. The "layers"
+idea appears only as typographic strata (Routes B, C), never as rings, targets, or a
+cross-section.
 
-*Monochromatic Discipline → Oxblood Production:* The exploration phase is executed in
-stark black and white so form and structure are judged before colour. The *production*
-identity renders in the ratified brand palette only — oxblood `#7E1F2B` on warm paper
-`#FCFAF2` — with no gradient and no secondary palette. The mark relies on maximum
-contrast, positive/negative-space interplay (gestalt), and stark structural confidence.
-Inversion must be tested in oxblood-on-paper *and* black-on-white.
+*Monochrome discipline → oxblood production:* explore in stark black and white so
+form is judged before colour; render production art in oxblood `#7E1F2B` on paper
+`#FCFAF2`, no gradient, no secondary palette. Inversion holds in both states.
 
 ### 3. Logo Design Explorations
 
-The goal is a bespoke wordmark that can stand alone, anchored by strong typographic principles.
+**Route A — The Moon (mandatory).** Use the four placements above. Lead with the
+solid moon-disc O and the symbol+logotype lockup. Crescent renders large and clean
+in the *symbol*, never crammed in a counter.
 
-**Exploration Route A: The Semiotic Counter (Mandatory)**
-The focal point is the letter **O** in SOMNARY — the natural carrier, since a circular
-counter is already a moon disc.
-- **The Directive:** Render the O as the brand's crescent-moon disc — a solid disc with
-  a slender crescent formed by negative space cut from within.
-- **Execution Rules:** Distil the moon to its absolute minimum viable geometry: a solid
-  disc with a single slender crescent formed by clean negative space. The crescent must
-  feel like a seamless, highly engineered part of the O — not a picture dropped inside a
-  letter — and must resolve to a legible O at small size. **Do not use concentric rings,
-  bullseye targets, cross-sections, or any layered-ring motif** — the "layers" concept
-  lives only in Routes B and C as typographic strata, never as rings inside the moon.
+**Route B — The Graded Peel.** Cuts, masking, overlapping strokes, or forced
+negative space within S-O-M-N-A-R-Y to suggest strata. Legibility intact; a grid-born
+optical illusion, not applied illustration.
 
-**Exploration Route B: The Graded Peel**
-Explore how "layers unpeeled to a core" can be represented purely through typographic
-manipulation.
-- **The Directive:** Use cuts, masking, overlapping strokes, or forced negative space
-  within S-O-M-N-A-R-Y to suggest strata — sleep stages, moon phases, evidence tiers.
-- **Execution Rules:** Legibility stays fully intact. The layering is a subtle optical
-  illusion born of strict grid geometry, not an illustration applied over the text.
-
-**Exploration Route C: The Monolithic Almanac**
-Lean into the stark constraint.
-- **The Directive:** Treat S-O-M-N-A-R-Y as architectural blocks whose positive and
-  negative spaces form the layers.
-- **Execution Rules:** Extremely tight kerning or custom ligatures. The wordmark should
-  feel like a single, impenetrable unit — a printed almanac spine or a block of set type —
-  using heavy weight to emphasise the white space trapped inside the letterforms.
+**Route C — The Monolithic Almanac.** The letters as architectural blocks; tight
+kerning or custom ligatures; heavy weight emphasising trapped white space — a printed
+almanac spine.
 
 ### 4. Typographic Strategy
 
-Present solutions across these classifications:
+- **Neo-grotesque (on-system):** Instrument Sans lineage — ships without a system
+  change; let the moon be the sole expressive act.
+- **Geometric sans / display:** mathematically precise circular cuts (Futura
+  lineage); the round O becomes moon-native. Logo-only face — `[HUMAN-GATE]`.
+- **High-contrast Didone:** editorial almanac authority with surreal wit.
+- **Monospaced / reference:** the vernacular of *data* — "citations are data."
 
-- **The Neo-Grotesque (on-system default):** A rational, grid-based sans in the lineage
-  of the brand's UI face, Instrument Sans. Neutral, letting the moon-counter be the sole
-  expressive act. *This is the route that ships without a system change; the three below
-  are provocations for review.*
-- **The Geometric Sans:** Mathematically precise, circular-based cuts (Futura lineage).
-  The round forms of the S-curves, the O, and the crescent echo one another — the most
-  moon-native option.
-- **The High-Contrast Modernist Serif:** A Didone with extreme thick-and-thin strokes.
-  Editorial, almanac-like authority; the moon-counter adds a note of surreal wit.
-- **The Monospaced / Reference:** A terminal/typewriter cut. Roots the brand in the
-  vernacular of *data* — apt for a platform where "citations are data" and every claim
-  is a graded record.
+### 5. Execution & Deliverables
 
-### 5. Execution & Deliverables for Review
+Form and structure first. Grid construction shown. Scale-tested to 16px favicon.
+Inversion-tested in oxblood-on-paper and black-on-white. Delivered as the multi-page
+hero PDF specified above.
 
-The initial presentation is form and structure only.
-- **Grid Construction:** Show the underlying geometry and mathematical logic, especially
-  the moon-counter's integration into the O.
-- **Scale Testing:** Test at billboard scale and favicon scale (16×16 px) — the crescent
-  must not collapse into a blurred mass when reduced.
-- **Inversion Testing:** Show every mark in oxblood-on-paper and black-on-white (and
-  their inverses); optical weight must hold consistent across states.
+### 6. Negative constraint (append to every render)
 
-### 6. Negative constraint (append to every generation prompt)
-
-> Negative: no onion, no vegetable, no bulb, no concentric rings or bullseye, no
-> botanical cross-section, no planet, no eye, no stars, no watercolour, no gradient.
+> Negative: no crescent inside a closed letter counter, no onion, no vegetable, no
+> bulb, no concentric rings or bullseye, no cross-section, no planet, no eye, no
+> stars, no watercolour, no gradient, no four-up review board, no small-scale
+> contact sheet.
