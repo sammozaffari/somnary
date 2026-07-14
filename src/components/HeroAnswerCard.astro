@@ -66,7 +66,7 @@ const cards = slugs
 
 <style>
   .answer-stack {
-    /* one card visible at a time; the block sizes to whichever is shown */
+    /* no-JS: one card visible at a time; the block sizes to whichever is shown */
     display: block;
   }
   .answer-card {
@@ -81,6 +81,29 @@ const cards = slugs
   }
   .answer-card[hidden] {
     display: none;
+  }
+
+  /* JS-upgraded crossfade: stack every card in one grid cell (container sizes to the
+     tallest, so no height jump) and dissolve between them as the spotlight advances. */
+  .answer-stack.is-live {
+    display: grid;
+  }
+  .answer-stack.is-live .answer-card {
+    grid-area: 1 / 1;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity var(--dur-slow) var(--ease-settle),
+      visibility var(--dur-slow) var(--ease-settle);
+  }
+  .answer-stack.is-live .answer-card.is-active {
+    opacity: 1;
+    visibility: visible;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .answer-stack.is-live .answer-card {
+      transition: none;
+    }
   }
 
   .ac-head {
