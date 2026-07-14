@@ -1,9 +1,40 @@
-# Somnary identity system — logo brief (round 2)
+# Somnary identity system — logo brief (round 3)
 
 **Date:** 2026-07-14 · **Status:** concepting brief (drafts only). Adopting any
 non-Instrument-Sans wordmark, or finalizing the wordmark period, is a brand
 `[HUMAN-GATE]` per CLAUDE.md. Stays inside D3: the crescent-moon disc remains the
 brand symbol — this refines it, it is not a rebrand.
+
+## ROUND 3 — the integrated crescent (current)
+
+Round 2's deck got the *format* right (hero pages, inversion bands, favicon
+proofs) but no mark landed: the solid moon-disc O read as a redaction bullet, the
+detached crescent read as a stray accent, and the symbol+logotype (the deck's
+strongest asset, page 7) kept the moon *beside* the word, not integrated. The
+insight: stop *inserting* the crescent; let it **emerge** from a letter's geometry
+or the space between letters. Round 3 drops the weak approaches and goes deep on
+three, several weights each, in the same hero-deck PDF format:
+
+1. **Moon-as-O (lead).** The O *is* the moon: a full-weight solid disc whose
+   counter is a clean, generous **crescent cut out of it** (promote the page-7
+   symbol into the O's slot). Not a thin sliver, not a solid bullet. The standalone
+   disc-crescent becomes the favicon/app mark — one unified system.
+2. **S–O negative-space ligature.** Nest the O under the tail of the S so the white
+   trapped between them reads as a crescent — the moon emerges *between* letters
+   (FedEx-arrow logic), nothing applied.
+3. **Waning O (variable-weight ring).** Keep the O a legible open ring but taper the
+   stroke — thick on one limb, hairline on the other — so it reads as a moon
+   catching light on one edge.
+
+**Type:** render each in TWO faces — the neo-grotesque (Instrument Sans lineage)
+AND a high-contrast **Didone** (the crescent-cut O inside an editorial serif reads
+as almanac/pharmacopoeia, which fits Somnary). Several weights/apertures each.
+Drop the solid-bullet O, the detached corner crescent, and the geometric/mono
+routes from this round.
+
+---
+
+## (round 2 context retained below)
 
 **Round 1 failed because:** the crescent was crammed *inside the O's counter*
 (muddy below billboard size), the wordmark was rendered small in a 4-up review
