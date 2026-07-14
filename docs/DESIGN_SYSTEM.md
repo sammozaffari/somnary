@@ -307,8 +307,9 @@ scenery, gradients, gray, shadows, or halftones.
 - **Use:** `RemedyIcon.astro` resolves assets by remedy slug and renders each as a CSS
   **mask painted with `currentColor`** (default `--primary`) — so the ink is a token at
   render time, re-inkable in one place and recolorable on dark strips by setting `color`,
-  never a hardcoded value. Icons are decorative: render with empty alternative text and keep
-  the remedy name as the accessible label. Cards use the 48px form; lead blocks the 120px.
+  never a hardcoded value. Icons are decorative: rendered `aria-hidden` (no accessible name),
+  with the adjacent remedy name always carrying the label. Cards use the 48px form; lead
+  blocks the 120px.
 - **Fallback:** an unknown slug receives the Somnary crescent disc, not a broken image.
 - **Review gate:** assess the full family together at both 48px and 240px. Reject any
   candidate whose line weight, detail density, or carved texture drifts from the set,
