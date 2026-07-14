@@ -3,7 +3,9 @@ import Base from '../layouts/Base.astro';
 import Disclaimer from '../components/Disclaimer.astro';
 import TierBadge from '../components/TierBadge.astro';
 import HeroAnswerCard from '../components/HeroAnswerCard.astro';
+import RemedyIcon from '../components/RemedyIcon.astro';
 import { TIERS } from '../lib/tiers';
+import { Search, Compass, ShieldAlert, Pill, Package, Timer, AlarmClock, Baby } from 'lucide-astro';
 
 // Home — CHK-3.1 (strategy 03 "Homepage Above-The-Fold"; DESIGN_SYSTEM §1/§10).
 // Decision-first front door: route by intent, not by molecule. Replaces the v1 "enemy hero".
@@ -28,31 +30,37 @@ const popularChecks = [
 const situations = [
   {
     href: '/r/melatonin',
+    Icon: Pill,
     title: "I'm considering melatonin, or already take it",
     dek: 'The flagship decision hub: clock signal vs sedative, dose reality, the label-accuracy problem.',
   },
   {
     href: '/sleep-blends',
+    Icon: Package,
     title: 'I bought a sleep blend',
     dek: 'Decode the label before you trust it — proprietary blends, missing doses, studied-dose mismatch.',
   },
   {
     href: '/outcome/fall-asleep-faster',
+    Icon: Timer,
     title: 'I want to fall asleep faster',
     dek: 'Remedies with human evidence aimed at sleep-onset latency, ranked by the strength of that evidence.',
   },
   {
     href: '/outcome/stay-asleep',
+    Icon: AlarmClock,
     title: 'I keep waking up at night',
     dek: 'The shorter list of remedies studied for staying asleep — wake after sleep onset, not just falling asleep.',
   },
   {
     href: '/safety',
+    Icon: ShieldAlert,
     title: 'I take medications or have a health condition',
     dek: 'Using medications? Start with the safety boundary — interactions and red flags come before any remedy.',
   },
   {
     href: '/melatonin-children',
+    Icon: Baby,
     title: "I'm considering this for a child",
     dek: 'The most cautious page on the site: what the evidence does and does not support for kids.',
   },
@@ -74,9 +82,15 @@ const situations = [
           Every sleep supplement, graded on real science — not the hype on the label.
         </p>
         <div class="cta-row">
-          <a class="cta cta-action" href="/search">Check a remedy →</a>
-          <a class="cta cta-secondary" href="#situations">Start from your sleep problem</a>
-          <a class="cta cta-ghost" href="/safety">Read safety red flags</a>
+          <a class="cta cta-action" href="/search">
+            <Search size={16} strokeWidth={2} aria-hidden="true" /> Check a remedy
+          </a>
+          <a class="cta cta-secondary" href="#situations">
+            <Compass size={16} strokeWidth={2} aria-hidden="true" /> Start from your sleep problem
+          </a>
+          <a class="cta cta-ghost" href="/safety">
+            <ShieldAlert size={16} strokeWidth={2} aria-hidden="true" /> Read safety red flags
+          </a>
         </div>
         <!-- popular checks double as the answer-card switcher (JS); plain links with no JS -->
         <div class="pills" aria-label="Popular checks">
@@ -84,6 +98,7 @@ const situations = [
           {
             popularChecks.map((p) => (
               <a class="pill" href={`/r/${p.slug}`} data-answer-pill={p.slug}>
+                <RemedyIcon slug={p.slug} size="chip" />
                 {p.name}
               </a>
             ))
@@ -106,6 +121,9 @@ const situations = [
         {
           situations.map((t) => (
             <a class="tile" href={t.href}>
+              <span class="tile-icon">
+                <t.Icon size={22} strokeWidth={1.75} aria-hidden="true" />
+              </span>
               <p class="tile-title">{t.title}</p>
               <p class="tile-dek">{t.dek}</p>
             </a>
@@ -225,6 +243,7 @@ const situations = [
   .cta {
     display: inline-flex;
     align-items: center;
+    gap: var(--sp-2);
     min-height: var(--sp-7);
     padding: 0 var(--sp-5);
     border-radius: var(--r-pill);
@@ -233,6 +252,9 @@ const situations = [
     letter-spacing: var(--tracking-label);
     text-decoration: none;
     transition: transform var(--dur-fast) var(--ease-soft);
+  }
+  .cta :global(svg) {
+    flex: none;
   }
   .cta:hover {
     transform: translateY(-1px);
@@ -274,8 +296,9 @@ const situations = [
   .pill {
     display: inline-flex;
     align-items: center;
+    gap: var(--sp-2);
     min-height: var(--sp-6);
-    padding: 0 var(--sp-4);
+    padding: 0 var(--sp-4) 0 var(--sp-3);
     border-radius: var(--r-pill);
     background: var(--surface);
     border: var(--border-hairline);
@@ -336,6 +359,17 @@ const situations = [
   .tile:focus-visible {
     outline: none;
     box-shadow: var(--ring);
+  }
+  /* Lucide affordance icon in a soft oxblood chip — brand accent, not the --action budget */
+  .tile-icon {
+    display: inline-grid;
+    place-items: center;
+    width: var(--sp-8);
+    height: var(--sp-8);
+    margin-bottom: var(--sp-2);
+    border-radius: var(--r-md);
+    background: var(--primary-soft);
+    color: var(--primary);
   }
   .tile-title {
     font-family: var(--font-display);
