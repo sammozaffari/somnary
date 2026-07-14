@@ -162,6 +162,7 @@ const situations = [
       document.querySelectorAll<HTMLAnchorElement>('[data-answer-pill]'),
     );
     const cards = document.querySelectorAll<HTMLElement>('[data-answer-card]');
+    const stack = document.querySelector<HTMLElement>('.answer-stack');
     const strip = document.querySelector<HTMLElement>('.pills');
     const hero = document.querySelector<HTMLElement>('.hero');
     const slugs = pillEls.map((p) => p.dataset.answerPill ?? '');
@@ -170,8 +171,9 @@ const situations = [
     function show(i: number) {
       current = (i + slugs.length) % slugs.length;
       const slug = slugs[current];
+      // crossfade: toggle .is-active (CSS dissolves opacity); the stack holds all cards
       cards.forEach((c) => {
-        c.hidden = c.dataset.answerCard !== slug;
+        c.classList.toggle('is-active', c.dataset.answerCard === slug);
       });
       pillEls.forEach((p, idx) => {
         if (idx === current) p.setAttribute('aria-current', 'true');
@@ -217,6 +219,11 @@ const situations = [
     }
 
     if (pillEls.length) {
+      // upgrade from the no-JS one-visible-card fallback to the crossfade stack
+      if (stack) stack.classList.add('is-live');
+      cards.forEach((c) => {
+        c.hidden = false;
+      });
       show(0);
       start();
     }
