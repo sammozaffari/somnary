@@ -61,6 +61,7 @@ const jsonLd = remedyJsonLd(d, canonical, site);
     {/* 1b — decision-first lead block: grade + decision translation + best-for / not-for /
         biggest-risk / studied-dose (CHK-2.1, strategy doc 03) */}
     <RemedyLeadBlock
+      slug={entry.id}
       tier={d.tier}
       format={d.format}
       bestFor={d.bestFor}

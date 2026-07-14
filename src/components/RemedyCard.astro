@@ -3,6 +3,7 @@
 // and, next, outcome pages + home. Whole card is one link → /r/{slug}; tier badge + name + key
 // compound + one-line verdict. Hover: lift (§4 motion — translateY(-3px) + shadow-lift, no scale).
 import TierBadge from './TierBadge.astro';
+import RemedyIcon from './RemedyIcon.astro';
 import type { TierId } from '../lib/tiers';
 
 interface Props {
@@ -17,8 +18,11 @@ const { slug, name, tier, oneLiner, keyCompound } = Astro.props;
 
 <a class="card" href={`/r/${slug}`} aria-label={`${name} — grade ${tier}`}>
   <div class="top">
-    <TierBadge tier={tier} size="card" />
-    <span class="name">{name}</span>
+    <RemedyIcon slug={slug} size="card" />
+    <div class="identity">
+      <TierBadge tier={tier} size="card" />
+      <span class="name">{name}</span>
+    </div>
   </div>
   {keyCompound && <p class="meta">{keyCompound}</p>}
   <p class="dek">{oneLiner}</p>
@@ -57,6 +61,12 @@ const { slug, name, tier, oneLiner, keyCompound } = Astro.props;
     font-size: var(--text-lg);
     line-height: 1.1;
     color: var(--ink);
+  }
+  .identity {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    min-width: 0;
   }
   .dot {
     color: var(--primary);
