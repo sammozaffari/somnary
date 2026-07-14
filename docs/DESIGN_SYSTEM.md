@@ -290,3 +290,30 @@ net accessibility gain from the darker brand color.
   design framework: no "UI patterns that make weak evidence feel strong").
 - No wellness clichés: no dream/moon/sparkle imagery, no gradients beyond the
   two specified washes, no supplement-store aesthetics (strategy doc 03).
+
+## 11. Illustration
+
+Remedy illustrations use one coherent, hand-carved linocut system: bold silhouettes,
+slightly irregular edges, sparse gouge marks, and enough negative space to remain clear
+at 48px. Subjects fill 70–75% of a square field with even margins. Molecules use chunky
+ball-and-stick construction, never thin skeletal diagrams. No text, labels, borders,
+scenery, gradients, gray, shadows, or halftones.
+
+- **Masters:** 1024×1024, exactly two tones (solid black ink on pure white), stored in
+  `design/icon-masters/`. Black-on-white is the source of truth so the family can be
+  re-inked without regeneration.
+- **Production assets:** transparent 1024×1024 PNGs in `src/assets/remedies/`. The PNG
+  supplies only the alpha **silhouette**; the ink color is not trusted from the file.
+- **Use:** `RemedyIcon.astro` resolves assets by remedy slug and renders each as a CSS
+  **mask painted with `currentColor`** (default `--primary`) — so the ink is a token at
+  render time, re-inkable in one place and recolorable on dark strips by setting `color`,
+  never a hardcoded value. Icons are decorative: render with empty alternative text and keep
+  the remedy name as the accessible label. Cards use the 48px form; lead blocks the 120px.
+- **Fallback:** an unknown slug receives the Somnary crescent disc, not a broken image.
+- **Review gate:** assess the full family together at both 48px and 240px. Reject any
+  candidate whose line weight, detail density, or carved texture drifts from the set,
+  even if it succeeds as an individual illustration.
+- **Product boundary:** containers stay unbranded and unlabeled. Illustrations must not
+  imply that Somnary manufactures or sells a depicted remedy.
+
+Any change to this illustration grammar or its production color is `[HUMAN-GATE]`.
