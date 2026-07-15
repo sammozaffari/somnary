@@ -239,7 +239,7 @@ const resolved: Resolved[] = slides
     border: var(--border-hairline);
     border-radius: var(--r-xl);
     box-shadow: var(--shadow-sm);
-    padding: var(--sp-8) var(--sp-7);
+    padding: var(--sp-6) var(--sp-7);
     overflow: hidden;
   }
   .hc-stack {
@@ -260,6 +260,11 @@ const resolved: Resolved[] = slides
   .hc-stack.is-live .hc-slide {
     grid-area: 1 / 1;
     min-width: 0;
+    /* center content vertically so the shorter slides sit balanced in the panel (whose height
+       is set by the tallest, remedy, slide) rather than bottom-heavy */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
     opacity: 0;
     visibility: hidden;
     /* incoming slide rests a touch low and lifts as it fades in — a crisp fade-and-lift */
@@ -361,7 +366,7 @@ const resolved: Resolved[] = slides
   .hc-remedy {
     display: flex;
     flex-direction: column;
-    gap: var(--sp-4);
+    gap: var(--sp-3);
   }
   .hc-remedy-head {
     display: flex;
@@ -369,10 +374,16 @@ const resolved: Resolved[] = slides
     gap: var(--sp-5);
     flex-wrap: wrap;
   }
-  /* big bare linocut — the specimen leads the slide; no chip, matching the affordance marks */
+  /* big bare linocut — the specimen leads the slide; no chip, matching the affordance marks.
+     Sized to --sp-9 (96px): a step up from the old 64px spot, but shorter than the 120px lead
+     so the panel — and the empty space on the shorter slides — stays contained. */
   .hc-icon {
     display: inline-flex;
     flex: none;
+  }
+  .hc-icon :global(.remedy-icon) {
+    width: var(--sp-9);
+    height: var(--sp-9);
   }
   .hc-id {
     display: flex;
