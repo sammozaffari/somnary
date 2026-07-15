@@ -24,11 +24,6 @@ const heroSlides: SlideSpec[] = [
   { kind: 'remedy', slug: 'magnesium' },
   { kind: 'remedy', slug: 'valerian' },
   { kind: 'utility', key: 'situations' },
-  { kind: 'remedy', slug: 'melatonin' },
-  { kind: 'utility', key: 'blend' },
-  { kind: 'remedy', slug: 'l-theanine' },
-  { kind: 'utility', key: 'grades' },
-  { kind: 'remedy', slug: 'ashwagandha' },
 ];
 
 // Six situation tiles — labels verbatim from strategy 03, each wired to a route that resolves.
@@ -143,7 +138,7 @@ const situations = [
       // rest. Not an infinite loop — a brief, self-ending morph. Manual controls still reach
       // every slide afterward.
       const AUTOPLAY_SLIDES = Math.min(4, count);
-      const INTERVAL = 6000;
+      const INTERVAL = 4500;
       let current = 0;
 
       function label(i: number): string {

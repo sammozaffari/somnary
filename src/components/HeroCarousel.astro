@@ -262,12 +262,12 @@ const resolved: Resolved[] = slides
     min-width: 0;
     opacity: 0;
     visibility: hidden;
-    /* incoming slide rests a touch low and rises as it dissolves in — a slow, ambient morph */
-    transform: translateY(var(--sp-2));
+    /* incoming slide rests a touch low and lifts as it fades in — a crisp fade-and-lift */
+    transform: translateY(var(--sp-3));
     transition:
-      opacity var(--dur-ambient) var(--ease-soft),
-      transform var(--dur-ambient) var(--ease-settle),
-      visibility var(--dur-ambient) var(--ease-soft);
+      opacity var(--dur-base) var(--ease-soft),
+      transform var(--dur-base) var(--ease-settle),
+      visibility var(--dur-base) var(--ease-soft);
   }
   .hc-stack.is-live .hc-slide.is-active {
     opacity: 1;
