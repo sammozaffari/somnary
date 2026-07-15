@@ -38,7 +38,8 @@ const showDose = format !== 'intervention';
 
 <section class="lead" aria-label="Grade and decision summary">
   <div class="badge-stack">
-    <RemedyEmblem slug={slug} name={name} tier={tier} size="lead" />
+    {/* decorative: the visible "Grade {tier}" + tier-word lines below carry the grade for AT */}
+    <RemedyEmblem slug={slug} name={name} tier={tier} size="lead" decorative />
     <p class="micro">Grade {tier}</p>
     <p class="tier-word">{t.name}</p>
   </div>

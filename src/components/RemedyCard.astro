@@ -150,6 +150,9 @@ const t = getTier(tier);
     .art {
       transition: none;
     }
+    .card:hover {
+      transform: none; /* no lift — disabled, not instant (§11.2) */
+    }
     .card:hover .art {
       transform: none;
     }

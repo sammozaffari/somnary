@@ -340,10 +340,10 @@ the linocuts were carved for. Anatomy, back → front:
 Rules: the disc stays brand-oxblood on **every** remedy — grade color lives only in the orbit
 and seal, and never touches the vermilion safety register. The grade is **never color alone**:
 the letter is in the seal and echoed in adjacent text (the "Grade X" / tier-word lines). The
-seal letter is pinned to the WCAG large-text band (**≥19px bold** at every size), because
-white on `--grade-c` (3.75:1) only clears AA-large; a placement needing a disc smaller than
-`spot` must NOT carry the seal — use the plate card (§11.2) or a plain `RemedyIcon` + text
-grade instead. Sizes: `spot` 80px, `lead` 148px. `TierBadge` remains the grade mark for
+seal letter is pinned to the WCAG large-text band (**≥19px bold** at every size) as a
+conservative floor (worst grade, white on `--grade-c`, computes 5.56:1 — §8 table); a
+placement needing a disc smaller than `spot` must NOT carry the seal — use the plate card
+(§11.2) or a plain `RemedyIcon` + text grade instead. Sizes: `spot` 80px, `lead` 148px. `TierBadge` remains the grade mark for
 **illustration-free** contexts (claims table, metadata, inline).
 
 Any change to the emblem anatomy or the seal-legibility rule is `[HUMAN-GATE]`.

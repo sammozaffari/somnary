@@ -15,10 +15,11 @@
 // Guardrails: disc stays brand-oxblood on every remedy (grade color never contaminates the brand
 // ink; vermilion stays exclusively the safety register). Grade is NEVER color alone — the letter is
 // in the seal, and every placement keeps an adjacent text grade/tier word. The seal letter is held
-// in the WCAG large-text band (≥19px bold) at every size, because white on --grade-c (3.75:1) only
-// clears AA-large. TierBadge survives for standalone (illustration-free) grade contexts. Grades are
-// [HUMAN-GATE]; this is presentation only.
+// in the WCAG large-text band (≥19px bold) at every size as a conservative floor (worst grade,
+// white on --grade-c, computes 5.56:1 — §8 table). TierBadge survives for standalone
+// (illustration-free) grade contexts. Grades are [HUMAN-GATE]; this is presentation only.
 import type { TierId } from '../lib/tiers';
+import { getTier } from '../lib/tiers';
 import RemedyIcon from './RemedyIcon.astro';
 
 interface Props {
@@ -71,7 +72,7 @@ const classes = ['emblem', `is-${size}`, className].filter(Boolean).join(' ');
   style={`width:${disc}px;height:${disc}px`}
   role={decorative ? undefined : 'img'}
   aria-hidden={decorative ? 'true' : undefined}
-  aria-label={decorative ? undefined : `${name} — grade ${tier}`}
+  aria-label={decorative ? undefined : `${name} — grade ${tier}, ${getTier(tier).name}`}
 >
   {/* core: disc + linocut, with a bite mask-cut where the seal nests */}
   <span

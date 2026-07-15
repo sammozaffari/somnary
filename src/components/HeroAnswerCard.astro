@@ -13,6 +13,7 @@
 // the hero primary CTA); the read-more is a plain --primary text link.
 import { getCollection } from 'astro:content';
 import RemedyEmblem from './RemedyEmblem.astro';
+import { getTier } from '../lib/tiers';
 
 interface Props {
   slugs: string[]; // ordered popular-check slugs; slugs[0] is the default-visible card
@@ -30,6 +31,7 @@ const cards = slugs
     slug: e.id,
     name: e.data.name,
     tier: e.data.tier,
+    tierWord: getTier(e.data.tier).name,
     oneLineVerdict: e.data.oneLineVerdict,
     biggestRisk: e.data.biggestRisk,
   }));
@@ -40,8 +42,11 @@ const cards = slugs
     cards.map((c, i) => (
       <article class="answer-card" data-answer-card={c.slug} hidden={i !== 0}>
         <header class="ac-head">
-          <RemedyEmblem slug={c.slug} tier={c.tier} name={c.name} size="spot" />
-          <h3 class="ac-name">{c.name}</h3>
+          <RemedyEmblem slug={c.slug} tier={c.tier} name={c.name} size="spot" decorative />
+          <div class="ac-id">
+            <h3 class="ac-name">{c.name}</h3>
+            <p class="ac-grade">Grade {c.tier} · {c.tierWord}</p>
+          </div>
         </header>
         <p class="ac-verdict">{c.oneLineVerdict}</p>
         {c.biggestRisk && (
@@ -104,6 +109,20 @@ const cards = slugs
     display: flex;
     align-items: center;
     gap: var(--sp-5);
+  }
+  .ac-id {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-1);
+    min-width: 0;
+  }
+  /* adjacent text grade (§11.1: the seal letter is never the only grade) */
+  .ac-grade {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+    margin: 0;
   }
   .ac-name {
     font-family: var(--font-display);
