@@ -1,8 +1,11 @@
 # Typography & UI overhaul — diagnosis and implementation plan (v4 proposal)
 
-**Date:** 2026-07-15 · **Status:** `[HUMAN-GATE]` — owner requested this analysis; the
-token-value changes in Phases A/C/D amend DESIGN_SYSTEM.md and need owner ratification.
-Phase B is bug-fixing (no gate).
+**Date:** 2026-07-15 · **Status:** **RATIFIED by owner 2026-07-15** ("the plan is
+great"). This document is the [HUMAN-GATE] artifact for the Phase A/C token changes;
+execute from it without re-litigating. Phase D options still need individual owner
+sign-off after visual trials. Use Appendix A's pinned values as the starting spec —
+deviate only via the screenshot-checkpoint loop in Appendix B, and record any final
+value that differs from the pin.
 
 **Owner's brief:** type is too thin, hard to read, light where it shouldn't be, kerning
 hurts readability; UI reads AI-generated, unrefined, not responsive/mobile-friendly.
@@ -226,3 +229,95 @@ Presented as options, not defaults — each is reversible and independently deci
 Grades and grading UX semantics, safety register (vermilion), citation apparatus,
 D1–D4 locked decisions, content, and the accent-scarcity rule (§10 one-oxblood-CTA
 budget) — which is already agency-grade discipline and stays.
+
+---
+
+## Appendix A — Pinned v4 starting values (execution spec)
+
+These turn the plan's judgment calls into concrete numbers. They are the **starting
+spec**, chosen against the benchmark data in §1; the checkpoint loop (Appendix B) may
+adjust any of them within the stated bound. Anything outside the bound → stop, screenshot,
+ask the owner.
+
+### A.1 Type scale (replaces the v3 §2 table wholesale)
+
+| Token | Size (px, per breakpoint ≥1024 / 768 / <480) | Weight | Tracking | LH | Color role |
+|---|---|---|---|---|---|
+| display (h1) | 96 / 64 / 42 | 700 | −0.042em / −0.035em / −0.025em | 0.96 | `--ink` |
+| h2 | 56 / 44 / 30 | 660 | −0.028em / −0.022em / −0.015em | 1.06 | `--ink` |
+| h3 (panel/tile titles) | 26 / 24 / 22 | 600 | −0.012em | 1.15 | `--ink` |
+| h4 / small heads | 19 | 600 | −0.005em | 1.25 | `--ink` |
+| lede / dek | 21 / 19 / 18 | 500 | 0 | 1.4 | `--raisin` (NOT muted) |
+| body (long-form) | 17 | 450 | 0 | 1.6 | `--ink` |
+| body (UI/cards) | 15–16 | 450 | 0 | 1.5 | `--ink` / `--raisin` |
+| nav / buttons | 15 | 550 | +0.01em | 1 | `--ink` (nav idle `--raisin`) |
+| support / captions | 14 (floor — nothing below except micro) | 450 | 0 | 1.45 | `--muted` allowed here |
+| micro-label / kicker | 12 | 600 | +0.08em | 1.3 | `--primary` / `--muted` |
+| stat numerals | 40 / 34 | 700 | −0.02em, `tabular-nums` | 1.05 | role color |
+
+Adjustment bound: ±1px sizes, ±0.005em tracking, ±30 weight, ±0.05 LH. The three
+**hard invariants** (never adjust): body-role text ≥14px; tracking at ≤21px never below
+−0.005em; ledes/deks never in `--muted`.
+
+- Weights 430–660 require confirming the loaded `@fontsource-variable/instrument-sans`
+  file is the variable `wght` axis build (it is — `"Instrument Sans Variable"`); if any
+  context falls back to static Instrument Sans, snap to 400/500/600/700.
+- Implement tracking as per-role tokens (`--track-display`, `--track-h2`, …), delete
+  `--tracking-tight`, and have the token linter flag any raw `letter-spacing` value.
+- Add `text-wrap: balance` on h1/h2; `font-kerning: normal` global; keep
+  `letter-spacing: normal` on body (already shipped).
+- Word-gap acid test at every checkpoint: the tile title **"I'm considering melatonin,
+  or already take it"** at h3 spec must show unambiguous word separation at 100% zoom.
+
+### A.2 Breakpoints (new §7)
+
+`--bp-sm: 480px · --bp-md: 768px · --bp-lg: 1024px · --bp-xl: 1440px` — mobile-first
+`min-width` only. New/edited components use these; legacy 980/760/640 queries migrate
+opportunistically (file touched → migrated), not in a big-bang.
+
+### A.3 Radius + ground + motion (Phase C)
+
+- Radii: `--r-sm: 4px` (everything: cards, tables, inputs, buttons, badges) ·
+  `--r-pill: 999px` (chips/pills only) · `50%` (dots/marks). Delete 3/7/11/16/24.
+  Grade badge keeps 6px→4px; big grade badge 4px.
+- Ground: `body { background: var(--paper) }` — the radial+linear wash and
+  `background-attachment: fixed` are deleted. Dark slab register: `--carbon: #171512`
+  ground with `--paper` text, used on the footer (always) and optionally one hero band
+  per page. Contrast: paper-on-carbon ≈ 17:1 (recompute §8 exactly).
+- Motion: one easing `--ease-settle` for everything; link/nav signature = 1px underline
+  drawing left→right via `background-size` transition, 160ms, oxblood; cards hover =
+  border-color `--mineral`→`rgba(23,21,18,0.35)` + `--shadow-sm` (NO translateY);
+  buttons hover = fill deepen only. Delete all other hover transforms.
+
+### A.4 Mobile nav (Phase B pin)
+
+≤767px: wordmark + search trigger + a 44×44px hamburger button; menu is a full-width
+panel under the bar (not a drawer), links at 17px/550, 48px row height, hairline
+dividers. `aria-expanded` on the button, ESC closes, focus returns to the button.
+No-JS fallback: the button is `<summary>` of a `<details>` (pure-CSS open state).
+≥768px: current inline links at the A.1 nav spec.
+
+## Appendix B — Execution protocol (any model/session)
+
+1. **Pre-flight, every session:** `git status` + `git branch --show-current` — the tree
+   is shared with other sessions (see memory: a stash once wiped files). Branch per
+   phase: `design-v4-b-mobile`, `design-v4-a-type`, `design-v4-c-craft`. Land or park
+   `design-hero-carousel` before starting A or C.
+2. **Order:** B → A → C → D trials. B and A may run in parallel ONLY in separate
+   sessions/branches, never one session interleaving both.
+3. **Checkpoint loop (mandatory for A and C):** after each token-table edit, screenshot
+   home + /tiers + /r/melatonin at 390/768/1440 (headless Chrome CLI) and *look at
+   them* before proceeding. Compare against `docs/current-ui-screenshots/` baselines.
+   The A.1 word-gap acid test runs at every checkpoint.
+4. **Overflow probe:** the CI gate (`scripts/check-responsive.mjs`, built first in
+   Phase B) asserts `scrollWidth === innerWidth` at 390px for every sitemap route.
+   Until it exists, probe manually per route.
+5. **DESIGN_SYSTEM.md v4 is rewritten in the same PR as the global.css change** (doc
+   and tokens never drift), including: recomputed §8 contrast table, the D3 wordmark
+   period fix, and updated §2/§4/§6/§7 to match Appendix A.
+6. **Reviewers:** design-guardian on every PR; compliance-reviewer on any copy change.
+   Phase B merges autonomously when green; A and C open PRs with before/after
+   screenshot grids in the description (owner ratified direction, but sees execution).
+7. **Do not** introduce new hues, entrance animations, parallax, or any decorative
+   device — restraint is the spec. When a situation is ambiguous, the answer is the
+   quieter option.
