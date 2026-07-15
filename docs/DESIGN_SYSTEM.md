@@ -321,10 +321,12 @@ Any change to this illustration grammar or its production color is `[HUMAN-GATE]
 
 ### 11.1 Remedy emblem (icon + grade, fused)
 
-Where a remedy is shown *with* its grade — tier-board cards, the home spotlight, the remedy
-lead block — the linocut and the grade are one **struck-coin emblem** (`RemedyEmblem.astro`),
-never two adjacent chips. Design study 2026-07-15, owner-ratified "carve + orbit"
-(`docs/plans/2026-07-15-remedy-emblem-design.md`). Anatomy, back → front:
+Where a remedy is shown *with* its grade at spotlight scale and up — the home spotlight, the
+remedy lead block — the linocut and the grade are one **struck-coin emblem**
+(`RemedyEmblem.astro`), never two adjacent chips. Design study 2026-07-15, owner-ratified
+"carve + orbit" (`docs/plans/2026-07-15-remedy-emblem-design.md`). Tier-board cards use the
+**plate card** instead (§11.2) — the v3 study retired the 56px card emblem as below the scale
+the linocuts were carved for. Anatomy, back → front:
 
 - **Core** — a `--primary-soft` disc (hairline oxblood inner ring) holding the linocut
   (`RemedyIcon size="fill"`) at **72%** of the disc. A concave bite is mask-cut from the core
@@ -332,16 +334,38 @@ never two adjacent chips. Design study 2026-07-15, owner-ratified "carve + orbit
   centred at 82%/82%) so the seal nests *into* the disc, not onto a halo.
 - **Evidence orbit** — a thin grade-colored ring (`max(1.5px, 1.8% of disc)`, inset −7.5%)
   circling the disc and threading *under* the seal. Brand echo of the crescent-moon mark.
-- **Grade seal** — a coin at 42% of the disc (52% at card size), grade-color fill, white
-  Instrument Sans letter; the ratified grade **gradient** (`--grade-x → -anchor`) at lead size.
+- **Grade seal** — a coin at 42% of the disc, grade-color fill, white Instrument Sans letter;
+  the ratified grade **gradient** (`--grade-x → -anchor`) at lead size.
 
 Rules: the disc stays brand-oxblood on **every** remedy — grade color lives only in the orbit
 and seal, and never touches the vermilion safety register. The grade is **never color alone**:
-the letter is in the seal and echoed in adjacent text (card name's aria-label, or the
-"Grade X" / tier-word lines). The seal letter is pinned to the WCAG large-text band
-(**≥19px bold** at every size), because white on `--grade-c` (3.75:1) only clears AA-large;
-a placement needing a disc smaller than the 56px card size must drop the seal and use a plain
-`RemedyIcon` + text grade instead. Sizes: `card` 56px, `spot` 80px, `lead` 148px. `TierBadge`
-remains the grade mark for **illustration-free** contexts (claims table, metadata, inline).
+the letter is in the seal and echoed in adjacent text (the "Grade X" / tier-word lines). The
+seal letter is pinned to the WCAG large-text band (**≥19px bold** at every size), because
+white on `--grade-c` (3.75:1) only clears AA-large; a placement needing a disc smaller than
+`spot` must NOT carry the seal — use the plate card (§11.2) or a plain `RemedyIcon` + text
+grade instead. Sizes: `spot` 80px, `lead` 148px. `TierBadge` remains the grade mark for
+**illustration-free** contexts (claims table, metadata, inline).
 
 Any change to the emblem anatomy or the seal-legibility rule is `[HUMAN-GATE]`.
+
+### 11.2 Plate card (tier board)
+
+At card scale the linocuts must not shrink below legibility — the tier-board card is a
+**specimen plate** (`RemedyCard.astro`; design study 2026-07-15 v3, owner-ratified
+"plate + stamp"). Anatomy:
+
+- **Plate** — a full-bleed `--primary-soft` field (184px tall, hairline mat edge below)
+  holding the linocut at **132px** — the scale the 1024px masters were carved to read at.
+- **Stamp** — the evidence grade pressed onto the plate's lower-right corner like an
+  assessor's mark: grade **letter + tier word** (from `lib/tiers` — never invent grading
+  language), grade-color ink and border on a translucent paper chip, rotated −3°.
+- **Body** — remedy name + ONE clamped verdict line (3 lines max). The key-compound line
+  lives on the remedy page, not the browsing card.
+
+Rules: grade is letter + word + color (stronger than never-color-alone requires) and repeated
+in the card link's aria-label. Hover: card lifts (§4) and the specimen breathes —
+`scale(1.02)`, no more; both disabled under `prefers-reduced-motion`. The plate is the ONLY
+place the linocut may sit smaller than the emblem `spot` size, because the stamp — not a
+seal on the art — carries the grade.
+
+Any change to the plate/stamp anatomy is `[HUMAN-GATE]`.

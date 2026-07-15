@@ -1,5 +1,16 @@
 # Remedy emblem — fusing the linocut icon and the grade (v2, owner-ratified 2026-07-15)
 
+> **v3 addendum (owner, same day):** the 56px card emblem is RETIRED — at that size the
+> linocuts are illegible ("you cannot tell what's even in those icons"). Tier-board cards
+> became the **plate card**: a full-bleed `--primary-soft` specimen plate with the art at
+> 132px as the hero, the grade **stamped** on the plate's corner (letter + tier word from
+> `lib/tiers`, grade color, −3° hand-pressed angle), then name + one clamped verdict line
+> (key-compound line dropped from cards). Hover: lift + art `scale(1.02)` ("ever so
+> slightly" per owner), off under reduced motion. The fused emblem below stands for `spot`
+> (80px, home spotlight) and `lead` (148px, remedy page) only; `RemedyEmblem` no longer
+> offers a `card` size. See DESIGN_SYSTEM §11.2. Sections below describing a card-size
+> emblem are superseded.
+
 ## Problem
 
 The remedy linocut and the tier grade were built in separate PRs (#51, #52) and

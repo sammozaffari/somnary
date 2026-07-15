@@ -1,8 +1,10 @@
 ---
-// Remedy emblem — DESIGN_SYSTEM §11 (design study 2026-07-15, owner-ratified "carve + orbit").
+// Remedy emblem — DESIGN_SYSTEM §11.1 (design study 2026-07-15, owner-ratified "carve + orbit").
 // Fuses the remedy linocut and its evidence grade into ONE struck-coin mark, replacing the
-// adjacent icon-tile + TierBadge pairs that used to sit side by side (RemedyCard, HeroAnswerCard,
-// RemedyLeadBlock). Anatomy, back → front:
+// adjacent icon-tile + TierBadge pairs that used to sit side by side (HeroAnswerCard,
+// RemedyLeadBlock). Tier-board cards use the plate card instead (RemedyCard, §11.2) — the v3
+// study retired the 56px emblem as below the scale the linocuts were carved for.
+// Anatomy, back → front:
 //   · core  — oxblood --primary-soft disc + the linocut (RemedyIcon, size="fill") at 72% of the disc.
 //             A concave bite is mask-cut from the core where the grade seal sits, so the seal nests
 //             INTO the disc rather than floating on a halo.
@@ -23,19 +25,18 @@ interface Props {
   slug: string;
   tier: TierId;
   name: string;
-  size?: 'card' | 'spot' | 'lead';
+  size?: 'spot' | 'lead';
   // When the emblem sits inside an element that already names it (e.g. a card link
   // whose aria-label is "{name} — grade {tier}"), pass decorative to hide the emblem
   // from AT and avoid a duplicate "grade" announcement.
   decorative?: boolean;
   class?: string;
 }
-const { slug, tier, name, size = 'card', decorative = false, class: className } = Astro.props;
+const { slug, tier, name, size = 'spot', decorative = false, class: className } = Astro.props;
 
 // Per-size geometry, resolved to concrete px in the module (no var×var in calc()).
 // letter is pinned ≥19px bold at every size; grad/weight follow DESIGN §3 (gradient at lead only).
 const SIZES = {
-  card: { disc: 56, sealF: 0.52, letter: 19, weight: 800, grad: false },
   spot: { disc: 80, sealF: 0.42, letter: 20, weight: 800, grad: false },
   lead: { disc: 148, sealF: 0.42, letter: 34, weight: 900, grad: true },
 } as const;
