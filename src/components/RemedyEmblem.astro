@@ -1,0 +1,149 @@
+---
+// Remedy emblem — DESIGN_SYSTEM §11 (design study 2026-07-15, owner-ratified "carve + orbit").
+// Fuses the remedy linocut and its evidence grade into ONE struck-coin mark, replacing the
+// adjacent icon-tile + TierBadge pairs that used to sit side by side (RemedyCard, HeroAnswerCard,
+// RemedyLeadBlock). Anatomy, back → front:
+//   · core  — oxblood --primary-soft disc + the linocut (RemedyIcon, size="fill") at 72% of the disc.
+//             A concave bite is mask-cut from the core where the grade seal sits, so the seal nests
+//             INTO the disc rather than floating on a halo.
+//   · orbit — a thin grade-colored ring circling the disc and threading UNDER the seal (brand echo:
+//             the crescent-moon mark — a remedy with its evidence in orbit).
+//   · seal  — the grade coin: grade-color fill, white Instrument Sans letter, gradient at lead size.
+//
+// Guardrails: disc stays brand-oxblood on every remedy (grade color never contaminates the brand
+// ink; vermilion stays exclusively the safety register). Grade is NEVER color alone — the letter is
+// in the seal, and every placement keeps an adjacent text grade/tier word. The seal letter is held
+// in the WCAG large-text band (≥19px bold) at every size, because white on --grade-c (3.75:1) only
+// clears AA-large. TierBadge survives for standalone (illustration-free) grade contexts. Grades are
+// [HUMAN-GATE]; this is presentation only.
+import type { TierId } from '../lib/tiers';
+import RemedyIcon from './RemedyIcon.astro';
+
+interface Props {
+  slug: string;
+  tier: TierId;
+  name: string;
+  size?: 'card' | 'spot' | 'lead';
+  // When the emblem sits inside an element that already names it (e.g. a card link
+  // whose aria-label is "{name} — grade {tier}"), pass decorative to hide the emblem
+  // from AT and avoid a duplicate "grade" announcement.
+  decorative?: boolean;
+  class?: string;
+}
+const { slug, tier, name, size = 'card', decorative = false, class: className } = Astro.props;
+
+// Per-size geometry, resolved to concrete px in the module (no var×var in calc()).
+// letter is pinned ≥19px bold at every size; grad/weight follow DESIGN §3 (gradient at lead only).
+const SIZES = {
+  card: { disc: 56, sealF: 0.52, letter: 19, weight: 800, grad: false },
+  spot: { disc: 80, sealF: 0.42, letter: 20, weight: 800, grad: false },
+  lead: { disc: 148, sealF: 0.42, letter: 34, weight: 900, grad: true },
+} as const;
+
+const s = SIZES[size];
+const lc = tier.toLowerCase();
+
+const disc = s.disc;
+const seal = Math.round(disc * s.sealF); // seal diameter
+const c = disc * 0.82; // seal centre (x = y)
+const sealPos = c - seal / 2; // seal box left/top
+const carveR = seal / 2 + disc * 0.05; // bite radius: hugs the seal + a hair of gap
+const orbitInset = disc * 0.075; // ring sits just outside the disc
+const orbitW = Math.max(1.5, disc * 0.018);
+
+const grade = `var(--grade-${lc})`;
+const sealFill = s.grad
+  ? `linear-gradient(145deg, var(--grade-${lc}), var(--grade-${lc}-anchor))`
+  : grade;
+const sealShadow = s.grad
+  ? '0 8px 22px rgba(23,21,18,.24)'
+  : '0 2px 8px rgba(23,21,18,.22)';
+
+// The linocut art box (72% of the disc), centred; RemedyIcon fills it.
+const artInset = disc * 0.14;
+
+const classes = ['emblem', `is-${size}`, className].filter(Boolean).join(' ');
+---
+
+<span
+  class={classes}
+  style={`width:${disc}px;height:${disc}px`}
+  role={decorative ? undefined : 'img'}
+  aria-hidden={decorative ? 'true' : undefined}
+  aria-label={decorative ? undefined : `${name} — grade ${tier}`}
+>
+  {/* core: disc + linocut, with a bite mask-cut where the seal nests */}
+  <span
+    class="core"
+    style={`-webkit-mask:radial-gradient(circle ${carveR}px at ${c}px ${c}px, transparent 98%, #000 100%);mask:radial-gradient(circle ${carveR}px at ${c}px ${c}px, transparent 98%, #000 100%)`}
+    aria-hidden="true"
+  >
+    <span class="disc"></span>
+    <span class="art" style={`inset:${artInset}px`}>
+      <RemedyIcon slug={slug} size="fill" />
+    </span>
+  </span>
+
+  {/* evidence orbit: grade-colored ring, threaded under the seal */}
+  <span
+    class="orbit"
+    style={`inset:-${orbitInset}px;border:${orbitW}px solid ${grade}`}
+    aria-hidden="true"></span>
+
+  {/* grade seal */}
+  <span
+    class="seal"
+    style={`width:${seal}px;height:${seal}px;left:${sealPos}px;top:${sealPos}px;background:${sealFill};box-shadow:${sealShadow}`}
+    aria-hidden="true"
+  >
+    <span
+      class="letter"
+      style={`font-size:${s.letter}px;font-weight:${s.weight}`}>{tier}</span>
+  </span>
+</span>
+
+<style>
+  .emblem {
+    position: relative;
+    display: inline-block;
+    flex: none;
+    /* orbit + seal extend past the disc box; never let a parent clip them */
+    overflow: visible;
+  }
+  .core {
+    position: absolute;
+    inset: 0;
+  }
+  .disc {
+    position: absolute;
+    inset: 0;
+    border-radius: var(--r-pill);
+    background: var(--primary-soft);
+    box-shadow: inset 0 0 0 1px rgba(126, 31, 43, 0.14);
+  }
+  /* the linocut fills this box; RemedyIcon paints the ink with --primary */
+  .art {
+    position: absolute;
+    display: grid;
+    place-items: center;
+    color: var(--primary);
+  }
+  .orbit {
+    position: absolute;
+    border-radius: var(--r-pill);
+    pointer-events: none;
+  }
+  .seal {
+    position: absolute;
+    display: grid;
+    place-items: center;
+    border-radius: var(--r-pill);
+    color: #ffffff;
+  }
+  .letter {
+    font-family: var(--font-display);
+    line-height: 1;
+    letter-spacing: -0.04em;
+    transform: translateY(0.02em);
+  }
+</style>

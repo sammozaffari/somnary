@@ -12,8 +12,7 @@
 // screen). No dose, no recommendation. No --action here (the oxblood budget is spent once on
 // the hero primary CTA); the read-more is a plain --primary text link.
 import { getCollection } from 'astro:content';
-import TierBadge from './TierBadge.astro';
-import RemedyIcon from './RemedyIcon.astro';
+import RemedyEmblem from './RemedyEmblem.astro';
 
 interface Props {
   slugs: string[]; // ordered popular-check slugs; slugs[0] is the default-visible card
@@ -41,13 +40,8 @@ const cards = slugs
     cards.map((c, i) => (
       <article class="answer-card" data-answer-card={c.slug} hidden={i !== 0}>
         <header class="ac-head">
-          <span class="ac-icon">
-            <RemedyIcon slug={c.slug} size="spot" />
-          </span>
-          <div class="ac-id">
-            <TierBadge tier={c.tier} size="card" />
-            <h3 class="ac-name">{c.name}</h3>
-          </div>
+          <RemedyEmblem slug={c.slug} tier={c.tier} name={c.name} size="spot" />
+          <h3 class="ac-name">{c.name}</h3>
         </header>
         <p class="ac-verdict">{c.oneLineVerdict}</p>
         {c.biggestRisk && (
@@ -110,21 +104,6 @@ const cards = slugs
     display: flex;
     align-items: center;
     gap: var(--sp-5);
-  }
-  /* remedy illustration featured in the spotlight — sits in a soft oxblood tile */
-  .ac-icon {
-    display: inline-grid;
-    place-items: center;
-    flex: none;
-    padding: var(--sp-3);
-    background: var(--primary-soft);
-    border-radius: var(--r-lg);
-  }
-  .ac-id {
-    display: flex;
-    align-items: center;
-    gap: var(--sp-4);
-    min-width: 0;
   }
   .ac-name {
     font-family: var(--font-display);

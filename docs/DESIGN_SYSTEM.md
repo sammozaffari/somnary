@@ -318,3 +318,30 @@ scenery, gradients, gray, shadows, or halftones.
   imply that Somnary manufactures or sells a depicted remedy.
 
 Any change to this illustration grammar or its production color is `[HUMAN-GATE]`.
+
+### 11.1 Remedy emblem (icon + grade, fused)
+
+Where a remedy is shown *with* its grade — tier-board cards, the home spotlight, the remedy
+lead block — the linocut and the grade are one **struck-coin emblem** (`RemedyEmblem.astro`),
+never two adjacent chips. Design study 2026-07-15, owner-ratified "carve + orbit"
+(`docs/plans/2026-07-15-remedy-emblem-design.md`). Anatomy, back → front:
+
+- **Core** — a `--primary-soft` disc (hairline oxblood inner ring) holding the linocut
+  (`RemedyIcon size="fill"`) at **72%** of the disc. A concave bite is mask-cut from the core
+  where the seal sits (radial-gradient mask; bite radius = seal radius + 5% of the disc,
+  centred at 82%/82%) so the seal nests *into* the disc, not onto a halo.
+- **Evidence orbit** — a thin grade-colored ring (`max(1.5px, 1.8% of disc)`, inset −7.5%)
+  circling the disc and threading *under* the seal. Brand echo of the crescent-moon mark.
+- **Grade seal** — a coin at 42% of the disc (52% at card size), grade-color fill, white
+  Instrument Sans letter; the ratified grade **gradient** (`--grade-x → -anchor`) at lead size.
+
+Rules: the disc stays brand-oxblood on **every** remedy — grade color lives only in the orbit
+and seal, and never touches the vermilion safety register. The grade is **never color alone**:
+the letter is in the seal and echoed in adjacent text (card name's aria-label, or the
+"Grade X" / tier-word lines). The seal letter is pinned to the WCAG large-text band
+(**≥19px bold** at every size), because white on `--grade-c` (3.75:1) only clears AA-large;
+a placement needing a disc smaller than the 56px card size must drop the seal and use a plain
+`RemedyIcon` + text grade instead. Sizes: `card` 56px, `spot` 80px, `lead` 148px. `TierBadge`
+remains the grade mark for **illustration-free** contexts (claims table, metadata, inline).
+
+Any change to the emblem anatomy or the seal-legibility rule is `[HUMAN-GATE]`.
