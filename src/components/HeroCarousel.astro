@@ -249,12 +249,17 @@ const resolved: Resolved[] = slides
     display: none;
   }
 
-  /* JS-upgraded crossfade: every slide in one grid cell (panel sizes to the tallest), dissolve */
+  /* JS-upgraded crossfade: every slide in one grid cell (panel sizes to the tallest), dissolve.
+     The explicit minmax(0, 1fr) column is load-bearing: without it the single implicit grid
+     column sizes to the widest slide's max-content and blows past the viewport on mobile
+     (slides were rendering 427px wide inside a ~294px panel and clipping). */
   .hc-stack.is-live {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
   }
   .hc-stack.is-live .hc-slide {
     grid-area: 1 / 1;
+    min-width: 0;
     opacity: 0;
     visibility: hidden;
     /* incoming slide rests a touch low and rises as it dissolves in — a slow, ambient morph */
