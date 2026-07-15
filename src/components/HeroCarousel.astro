@@ -178,7 +178,7 @@ const resolved: Resolved[] = slides
             {s.kind === 'utility' && (
               <div class="hc-utility">
                 <span class="hc-util-icon">
-                  <s.Icon size={26} strokeWidth={1.75} aria-hidden="true" />
+                  <s.Icon size={30} strokeWidth={1.75} aria-hidden="true" />
                 </span>
                 <h2 class="hc-util-title">{s.title}</h2>
                 {s.isGrades && (
@@ -257,17 +257,22 @@ const resolved: Resolved[] = slides
     grid-area: 1 / 1;
     opacity: 0;
     visibility: hidden;
+    /* incoming slide rests a touch low and rises as it dissolves in — a slow, ambient morph */
+    transform: translateY(var(--sp-2));
     transition:
-      opacity var(--dur-slow) var(--ease-settle),
-      visibility var(--dur-slow) var(--ease-settle);
+      opacity var(--dur-ambient) var(--ease-soft),
+      transform var(--dur-ambient) var(--ease-settle),
+      visibility var(--dur-ambient) var(--ease-soft);
   }
   .hc-stack.is-live .hc-slide.is-active {
     opacity: 1;
     visibility: visible;
+    transform: translateY(0);
   }
   @media (prefers-reduced-motion: reduce) {
     .hc-stack.is-live .hc-slide {
       transition: none;
+      transform: none;
     }
   }
 
@@ -418,13 +423,9 @@ const resolved: Resolved[] = slides
     gap: var(--sp-4);
     align-items: flex-start;
   }
+  /* bare oxblood affordance mark — no chip, matching the situation tiles */
   .hc-util-icon {
-    display: inline-grid;
-    place-items: center;
-    width: var(--sp-8);
-    height: var(--sp-8);
-    border-radius: var(--r-md);
-    background: var(--primary-soft);
+    display: inline-flex;
     color: var(--primary);
   }
   .hc-util-title {

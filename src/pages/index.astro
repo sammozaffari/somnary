@@ -93,7 +93,7 @@ const situations = [
           situations.map((t) => (
             <a class="tile" href={t.href}>
               <span class="tile-icon">
-                <t.Icon size={26} strokeWidth={1.75} aria-hidden="true" />
+                <t.Icon size={30} strokeWidth={1.75} aria-hidden="true" />
               </span>
               <p class="tile-title">{t.title}</p>
               <p class="tile-dek">{t.dek}</p>
@@ -139,6 +139,11 @@ const situations = [
       const next = root.querySelector<HTMLButtonElement>('[data-hc-next]');
       const live = root.querySelector<HTMLElement>('[data-hc-live]');
       const count = slidesEls.length;
+      // Intro showcase: reveal this many slides once, then settle back on the start slide and
+      // rest. Not an infinite loop — a brief, self-ending morph. Manual controls still reach
+      // every slide afterward.
+      const AUTOPLAY_SLIDES = Math.min(4, count);
+      const INTERVAL = 6000;
       let current = 0;
 
       function label(i: number): string {
@@ -155,50 +160,47 @@ const situations = [
         if (live) live.textContent = `${label(current)} — slide ${current + 1} of ${count}`;
       }
 
-      // Auto-advance. Pause/Stop (WCAG 2.2.2): pauses on hover/focus; off under reduced motion.
       const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       let timer: ReturnType<typeof setInterval> | null = null;
-      function stop() {
+      function stopAutoplay() {
         if (timer) {
           clearInterval(timer);
           timer = null;
         }
       }
-      function start() {
+      function autoplay() {
         if (reduce || timer || count < 2) return;
-        timer = setInterval(() => show(current + 1), 4500);
-      }
-      function restart() {
-        stop();
-        start();
+        let revealed = 1; // the start slide is already on screen
+        timer = setInterval(() => {
+          if (revealed < AUTOPLAY_SLIDES) {
+            show(current + 1); // reveal the next slide (indices 1 … AUTOPLAY_SLIDES-1)
+            revealed += 1;
+          } else {
+            show(0); // settle back on the start slide …
+            stopAutoplay(); // … and rest there
+          }
+        }, INTERVAL);
       }
 
+      // Manual controls drive freely and cancel the intro (they don't restart it).
       dots.forEach((d, idx) =>
         d.addEventListener('click', () => {
+          stopAutoplay();
           show(idx);
-          restart();
         }),
       );
       prev?.addEventListener('click', () => {
+        stopAutoplay();
         show(current - 1);
-        restart();
       });
       next?.addEventListener('click', () => {
+        stopAutoplay();
         show(current + 1);
-        restart();
       });
 
-      // Pause while a keyboard/AT user is inside the panel (so a focused link isn't yanked
-      // away), and while the tab is hidden; otherwise cycle continuously. Manual controls
-      // (dots/arrows) + reduced-motion remain the explicit pause mechanisms (WCAG 2.2.2).
-      // NB: no hover-pause — the panel spans the full viewport width, so hovering it would
-      // pause the carousel almost permanently.
-      root.addEventListener('focusin', stop);
-      root.addEventListener('focusout', start);
-      document.addEventListener('visibilitychange', () => {
-        if (document.hidden) stop();
-        else start();
-      });
+      // If a keyboard/AT user tabs into the panel mid-intro, stop so a focused link isn't
+      // yanked away. Reduced motion skips the intro entirely (guard in autoplay()).
+      root.addEventListener('focusin', stopAutoplay);
 
       // upgrade from the no-JS single-slide fallback to the crossfade stack
       if (count > 1) {
@@ -208,7 +210,7 @@ const situations = [
         });
         controls?.removeAttribute('hidden');
         show(0);
-        start();
+        autoplay();
       }
     }
   </script>
@@ -265,15 +267,10 @@ const situations = [
     outline: none;
     box-shadow: var(--ring);
   }
-  /* Lucide affordance icon in a soft oxblood chip — brand accent, not the --action budget */
+  /* bare oxblood affordance mark — no chip; the headline leads (brand accent, not --action) */
   .tile-icon {
-    display: inline-grid;
-    place-items: center;
-    width: var(--sp-8);
-    height: var(--sp-8);
-    margin-bottom: var(--sp-2);
-    border-radius: var(--r-md);
-    background: var(--primary-soft);
+    display: inline-flex;
+    margin-bottom: var(--sp-3);
     color: var(--primary);
   }
   .tile-title {
