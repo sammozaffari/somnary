@@ -12,19 +12,24 @@
  * order to teach/refuse it (the system prompt's negative examples) are exempted with the sentinel
  * `FRAMING-LINT-OK` — an explicit, visible allow-list, never a silent skip.
  */
-import { readFile, writeFile, rm } from 'node:fs/promises';
+import { readFile, writeFile, rm, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 const ROOT = process.cwd();
 const SENTINEL = 'FRAMING-LINT-OK';
 
-// Shipped, user-facing assistant copy (NOT the adversarial test fixtures, which contain deliberate
-// bad strings as inputs to prove the runtime downgrade).
+// Shipped, user-facing copy (NOT the adversarial test fixtures, which contain deliberate
+// bad strings as inputs to prove the runtime downgrade). ALL components are scanned — surface
+// redesigns move grade/verdict language into new components (e.g. the 2026-07-15 plate-card
+// stamp), and those must be CI-covered, not manually reviewed.
 const TARGETS = [
   'src/lib/ask/guardrails.ts',
   'src/lib/ask/prompt.ts',
-  'src/components/AskPanel.astro',
+  ...(await readdir(join(ROOT, 'src/components')))
+    .filter((f) => f.endsWith('.astro'))
+    .sort()
+    .map((f) => `src/components/${f}`),
 ];
 
 async function loadPatterns() {
