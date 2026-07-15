@@ -188,10 +188,17 @@ const situations = [
         restart();
       });
 
-      root.addEventListener('mouseenter', stop);
-      root.addEventListener('mouseleave', start);
+      // Pause while a keyboard/AT user is inside the panel (so a focused link isn't yanked
+      // away), and while the tab is hidden; otherwise cycle continuously. Manual controls
+      // (dots/arrows) + reduced-motion remain the explicit pause mechanisms (WCAG 2.2.2).
+      // NB: no hover-pause — the panel spans the full viewport width, so hovering it would
+      // pause the carousel almost permanently.
       root.addEventListener('focusin', stop);
       root.addEventListener('focusout', start);
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) stop();
+        else start();
+      });
 
       // upgrade from the no-JS single-slide fallback to the crossfade stack
       if (count > 1) {

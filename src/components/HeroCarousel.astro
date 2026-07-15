@@ -271,9 +271,10 @@ const resolved: Resolved[] = slides
     }
   }
 
-  /* content column — centered, comfortable measure, so the morph reads as one object */
+  /* content column — comfortable measure, so the morph reads as one object. The remedy slide
+     is uncapped so its biggest-risk register spans the full panel width; only its verdict text
+     keeps a readable measure (below). */
   .hc-brand,
-  .hc-remedy,
   .hc-utility {
     max-width: 62ch;
   }
@@ -384,8 +385,9 @@ const resolved: Resolved[] = slides
     line-height: var(--lh-md);
     color: var(--ink);
     margin: 0;
+    max-width: 68ch; /* keep the one-line verdict readable even though the slide is full-width */
   }
-  /* biggest risk — vermilion safety register, DISTINCT from oxblood */
+  /* biggest risk — vermilion safety register, DISTINCT from oxblood; spans the full panel */
   .hc-risk {
     display: flex;
     flex-direction: column;
