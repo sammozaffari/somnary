@@ -26,7 +26,7 @@ interface Props {
   slug: string;
   tier: TierId;
   name: string;
-  size?: 'spot' | 'lead';
+  size?: 'spot' | 'lead' | 'hero';
   // When the emblem sits inside an element that already names it (e.g. a card link
   // whose aria-label is "{name} — grade {tier}"), pass decorative to hide the emblem
   // from AT and avoid a duplicate "grade" announcement.
@@ -40,6 +40,10 @@ const { slug, tier, name, size = 'spot', decorative = false, class: className } 
 const SIZES = {
   spot: { disc: 80, sealF: 0.42, letter: 20, weight: 800, grad: false },
   lead: { disc: 148, sealF: 0.42, letter: 34, weight: 900, grad: true },
+  // hero: home-carousel scale. Same ratified anatomy as `lead` (sealF 0.42, gradient seal,
+  // letter pinned in the WCAG large-text band) — only the disc grows, so the linocut reads at
+  // ~144px, above the §11.2 plate's 132px. Added per owner direction (2026-07-16 hero brief).
+  hero: { disc: 200, sealF: 0.42, letter: 46, weight: 900, grad: true },
 } as const;
 
 const s = SIZES[size];

@@ -17,8 +17,8 @@
 // enhancement over that base. Auto-advance pauses on hover/focus and is off under reduced motion.
 import { getCollection } from 'astro:content';
 import TierBadge from './TierBadge.astro';
-import RemedyIcon from './RemedyIcon.astro';
-import { TIERS } from '../lib/tiers';
+import RemedyEmblem from './RemedyEmblem.astro';
+import { TIERS, getTier } from '../lib/tiers';
 import type { TierId } from '../lib/tiers';
 import type { SlideSpec } from '../lib/hero-slides';
 import { Search, Compass, ShieldAlert, Package, Scale } from '@lucide/astro';
@@ -51,7 +51,8 @@ const UTILITY = {
   grades: {
     Icon: Scale,
     title: 'How our grades work',
-    copy: 'A grade rates how strong the human evidence is — not whether a remedy is safe for you.',
+    // negative disclaimer: the grade explicitly does NOT assert personal safety
+    copy: 'A grade rates how strong the human evidence is — not whether a remedy is safe for you.', // FRAMING-LINT-OK
     href: '/methodology',
     cta: 'See the full S–F rubric',
   },
@@ -154,15 +155,21 @@ const resolved: Resolved[] = slides
             {s.kind === 'remedy' && (
               <div class="hc-remedy">
                 <header class="hc-remedy-head">
-                  <span class="hc-icon">
-                    <RemedyIcon slug={s.slug} size="lead" />
+                  {/* fused struck-coin emblem (§11.1): linocut + evidence orbit + grade seal.
+                      Decorative here — the grade is named in the adjacent text line below. */}
+                  <span class="hc-emblem">
+                    <RemedyEmblem slug={s.slug} tier={s.tier} name={s.name} size="hero" decorative />
                   </span>
                   <div class="hc-id">
-                    <TierBadge tier={s.tier} size="header" />
                     <h2 class="hc-name">{s.name}</h2>
+                    {/* grade in text — never color alone; tier word verbatim from lib/tiers */}
+                    <p class="hc-grade">
+                      <span class="hc-grade-letter">Grade {s.tier}</span>
+                      <span class="hc-grade-word"> · {getTier(s.tier).name}</span>
+                    </p>
+                    <p class="hc-verdict">{s.oneLineVerdict}</p>
                   </div>
                 </header>
-                <p class="hc-verdict">{s.oneLineVerdict}</p>
                 {s.biggestRisk && (
                   <p class="hc-risk">
                     <span class="hc-risk-label">Biggest risk</span>
@@ -362,33 +369,29 @@ const resolved: Resolved[] = slides
     border: var(--border-hairline);
   }
 
-  /* remedy slide */
+  /* remedy slide — the linocut emblem is the protagonist (§11.1, hero size) */
   .hc-remedy {
     display: flex;
     flex-direction: column;
-    gap: var(--sp-3);
+    gap: var(--sp-5);
   }
   .hc-remedy-head {
     display: flex;
     align-items: center;
-    gap: var(--sp-5);
+    gap: var(--sp-7);
     flex-wrap: wrap;
   }
-  /* big bare linocut — the specimen leads the slide; no chip, matching the affordance marks.
-     Sized to --sp-9 (96px): a step up from the old 64px spot, but shorter than the 120px lead
-     so the panel — and the empty space on the shorter slides — stays contained. */
-  .hc-icon {
+  /* the struck-coin emblem: its orbit + seal extend past the disc box, so never clip it */
+  .hc-emblem {
     display: inline-flex;
     flex: none;
-  }
-  .hc-icon :global(.remedy-icon) {
-    width: var(--sp-9);
-    height: var(--sp-9);
+    overflow: visible;
   }
   .hc-id {
     display: flex;
-    align-items: center;
-    gap: var(--sp-5);
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--sp-3);
     min-width: 0;
   }
   .hc-name {
@@ -399,12 +402,30 @@ const resolved: Resolved[] = slides
     color: var(--ink);
     margin: 0;
   }
+  /* grade in text — pairs with the seal so the grade is never color alone */
+  .hc-grade {
+    display: flex;
+    align-items: baseline;
+    gap: 0;
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+  }
+  .hc-grade-letter {
+    color: var(--ink);
+    font-weight: 700;
+  }
+  .hc-grade-word {
+    color: var(--muted);
+  }
   .hc-verdict {
     font-size: var(--text-md);
     line-height: var(--lh-md);
     color: var(--ink);
     margin: 0;
-    max-width: 68ch; /* keep the one-line verdict readable even though the slide is full-width */
+    max-width: 62ch; /* keep the verdict readable beside the emblem */
   }
   /* biggest risk — vermilion safety register, DISTINCT from oxblood; spans the full panel */
   .hc-risk {
