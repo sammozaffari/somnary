@@ -169,13 +169,9 @@ const resolved: Resolved[] = slides
                   </div>
                   <div class="hc-id">
                     <h2 class="hc-name">{s.name}</h2>
-                    {/* decode the grade for a first-time reader — tier word + its plain-language
-                        decision translation, both verbatim from lib/tiers (never invented) */}
-                    <p class="hc-grade">
-                      <span class="hc-grade-mark">Grade {s.tier} · {getTier(s.tier).name}</span>
-                      <span class="hc-grade-sep" aria-hidden="true"> — </span>
-                      <span class="hc-grade-gloss">{getTier(s.tier).decisionTranslation}</span>
-                    </p>
+                    {/* plain-language decode of the grade (the stamp already shows the letter +
+                        tier word) — verbatim decisionTranslation from lib/tiers, never invented */}
+                    <p class="hc-grade">{getTier(s.tier).decisionTranslation}</p>
                     <p class="hc-verdict">{s.oneLineVerdict}</p>
                   </div>
                 </header>
@@ -450,20 +446,14 @@ const resolved: Resolved[] = slides
     color: var(--ink);
     margin: 0;
   }
-  /* grade decoded: "Grade C · Mixed — interesting but uncertain; do not rely on it." */
+  /* plain-language grade decode — the stamp carries the letter + tier word; this glosses it
+     (e.g. "Interesting but uncertain; do not rely on it.") */
   .hc-grade {
     margin: 0;
     font-size: var(--text-sm);
     line-height: var(--lh-sm);
-    max-width: 60ch;
-  }
-  .hc-grade-mark {
-    font-weight: 650;
-    color: var(--ink);
-  }
-  .hc-grade-sep,
-  .hc-grade-gloss {
     color: var(--muted);
+    max-width: 60ch;
   }
   .hc-verdict {
     font-size: var(--text-md);
