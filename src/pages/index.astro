@@ -2,10 +2,10 @@
 import Base from '../layouts/Base.astro';
 import Disclaimer from '../components/Disclaimer.astro';
 import TierBadge from '../components/TierBadge.astro';
-import HeroAnswerCard from '../components/HeroAnswerCard.astro';
-import RemedyIcon from '../components/RemedyIcon.astro';
+import HeroCarousel from '../components/HeroCarousel.astro';
+import type { SlideSpec } from '../lib/hero-slides';
 import { TIERS } from '../lib/tiers';
-import { Search, Compass, ShieldAlert, Pill, Package, Timer, AlarmClock, Baby } from '@lucide/astro';
+import { Pill, Package, Timer, AlarmClock, ShieldAlert, Baby } from '@lucide/astro';
 
 // Home — CHK-3.1 (strategy 03 "Homepage Above-The-Fold"; DESIGN_SYSTEM §1/§10).
 // Decision-first front door: route by intent, not by molecule. Replaces the v1 "enemy hero".
@@ -16,13 +16,14 @@ import { Search, Compass, ShieldAlert, Pill, Package, Timer, AlarmClock, Baby } 
 // per the §10 budget. No search island is dropped here (SearchPalette has fixed IDs + a single
 // trigger binding); the primary CTA is a plain crawlable anchor to /search plus popular-check
 // pills to real remedy routes. No newsletter/forms (CHK-4.2), no commerce, no stack-builder (D4).
-// Popular-check pills → real remedy routes (verified present in src/content/remedies/).
-const popularChecks = [
-  { slug: 'melatonin', name: 'Melatonin' },
-  { slug: 'magnesium', name: 'Magnesium' },
-  { slug: 'valerian', name: 'Valerian' },
-  { slug: 'l-theanine', name: 'L-theanine' },
-  { slug: 'ashwagandha', name: 'Ashwagandha' },
+// Hero carousel slide order — one array, tweakable. Slide 1 (brand) carries the page H1 and
+// the single oxblood CTA; remedy slides interleave with "useful ways to use the site" so the
+// panel never reads as just a supplement reel. Remedy slugs are real routes in src/content/remedies/.
+const heroSlides: SlideSpec[] = [
+  { kind: 'brand' },
+  { kind: 'remedy', slug: 'magnesium' },
+  { kind: 'remedy', slug: 'valerian' },
+  { kind: 'utility', key: 'situations' },
 ];
 
 // Six situation tiles — labels verbatim from strategy 03, each wired to a route that resolves.
@@ -73,42 +74,8 @@ const situations = [
   canonical="https://somnary.vercel.app/"
 >
   <main class="home">
-    <!-- hero — decision routes (left) + a LIVE answer card (right) -->
-    <section class="hero">
-      <div class="hero-main">
-        <p class="eyebrow">Independent · evidence-graded · reader-funded</p>
-        <h1 class="headline">Check a sleep remedy before you take it</h1>
-        <p class="dek">
-          Every sleep supplement, graded on real science — not the hype on the label.
-        </p>
-        <div class="cta-row">
-          <a class="cta cta-action" href="/search">
-            <Search size={16} strokeWidth={2} aria-hidden="true" /> Check a remedy
-          </a>
-          <a class="cta cta-secondary" href="#situations">
-            <Compass size={16} strokeWidth={2} aria-hidden="true" /> Start from your sleep problem
-          </a>
-          <a class="cta cta-ghost" href="/safety">
-            <ShieldAlert size={16} strokeWidth={2} aria-hidden="true" /> Read safety red flags
-          </a>
-        </div>
-        <!-- popular checks double as the answer-card switcher (JS); plain links with no JS -->
-        <div class="pills" aria-label="Popular checks">
-          {
-            popularChecks.map((p) => (
-              <a class="pill" href={`/r/${p.slug}`} data-answer-pill={p.slug}>
-                <RemedyIcon slug={p.slug} size="pill" />
-                {p.name}
-              </a>
-            ))
-          }
-        </div>
-      </div>
-
-      <aside class="hero-aside" aria-label="Live remedy answer">
-        <HeroAnswerCard slugs={popularChecks.map((p) => p.slug)} />
-      </aside>
-    </section>
+    <!-- hero — one full-width panel that morphs between slides (brand → remedies ⇄ utility) -->
+    <HeroCarousel slides={heroSlides} />
 
     <!-- disclaimer — adjacent to the decision block, not footer-only -->
     <Disclaimer />
@@ -121,7 +88,7 @@ const situations = [
           situations.map((t) => (
             <a class="tile" href={t.href}>
               <span class="tile-icon">
-                <t.Icon size={26} strokeWidth={1.75} aria-hidden="true" />
+                <t.Icon size={30} strokeWidth={1.75} aria-hidden="true" />
               </span>
               <p class="tile-title">{t.title}</p>
               <p class="tile-dek">{t.dek}</p>
@@ -154,78 +121,92 @@ const situations = [
     </section>
   </main>
 
-  {/* Answer-card switcher: pills toggle which card shows. No JS → pills stay plain links. */}
+  {/* Hero carousel controller: crossfade slides, dots + arrows, auto-advance. No JS → slide 1
+      shows and every other slide is real crawlable HTML with its own links. */}
   <script>
-    // Spotlight carousel: pills switch the visible answer card AND auto-advance through them.
-    // No JS → pills stay plain <a> links and every card is real crawlable content.
-    const pillEls = Array.from(
-      document.querySelectorAll<HTMLAnchorElement>('[data-answer-pill]'),
-    );
-    const cards = document.querySelectorAll<HTMLElement>('[data-answer-card]');
-    const stack = document.querySelector<HTMLElement>('.answer-stack');
-    const strip = document.querySelector<HTMLElement>('.pills');
-    const hero = document.querySelector<HTMLElement>('.hero');
-    const slugs = pillEls.map((p) => p.dataset.answerPill ?? '');
-    let current = 0;
+    const root = document.querySelector<HTMLElement>('[data-hero-carousel]');
+    if (root) {
+      const stack = root.querySelector<HTMLElement>('.hc-stack');
+      const slidesEls = Array.from(root.querySelectorAll<HTMLElement>('[data-slide]'));
+      const controls = root.querySelector<HTMLElement>('[data-hc-controls]');
+      const dots = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-hc-dot]'));
+      const prev = root.querySelector<HTMLButtonElement>('[data-hc-prev]');
+      const next = root.querySelector<HTMLButtonElement>('[data-hc-next]');
+      const live = root.querySelector<HTMLElement>('[data-hc-live]');
+      const count = slidesEls.length;
+      // Intro showcase: reveal this many slides once, then settle back on the start slide and
+      // rest. Not an infinite loop — a brief, self-ending morph. Manual controls still reach
+      // every slide afterward.
+      const AUTOPLAY_SLIDES = Math.min(4, count);
+      const INTERVAL = 4500;
+      let current = 0;
 
-    function show(i: number) {
-      current = (i + slugs.length) % slugs.length;
-      const slug = slugs[current];
-      // crossfade: toggle .is-active (CSS dissolves opacity); the stack holds all cards
-      cards.forEach((c) => {
-        c.classList.toggle('is-active', c.dataset.answerCard === slug);
-      });
-      pillEls.forEach((p, idx) => {
-        if (idx === current) p.setAttribute('aria-current', 'true');
-        else p.removeAttribute('aria-current');
-      });
-      // keep the active pill centered within the (scrollable) strip — scoped, no page scroll
-      const active = pillEls[current];
-      if (active && strip) {
-        const a = active.getBoundingClientRect();
-        const s = strip.getBoundingClientRect();
-        strip.scrollBy({ left: a.left - s.left - (s.width - a.width) / 2, behavior: 'smooth' });
+      function label(i: number): string {
+        return dots[i]?.getAttribute('aria-label')?.replace(/^Show\s+/, '') ?? `Slide ${i + 1}`;
       }
-    }
 
-    // Auto-advance. Pause/Stop (WCAG 2.2.2): pauses on hover/focus; off under reduced motion.
-    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    let timer: ReturnType<typeof setInterval> | null = null;
-    function stop() {
-      if (timer) {
-        clearInterval(timer);
-        timer = null;
+      function show(i: number) {
+        current = (i + count) % count;
+        slidesEls.forEach((s, idx) => s.classList.toggle('is-active', idx === current));
+        dots.forEach((d, idx) => {
+          if (idx === current) d.setAttribute('aria-current', 'true');
+          else d.removeAttribute('aria-current');
+        });
+        if (live) live.textContent = `${label(current)} — slide ${current + 1} of ${count}`;
       }
-    }
-    function start() {
-      if (reduce || timer || slugs.length < 2) return;
-      timer = setInterval(() => show(current + 1), 4500);
-    }
 
-    pillEls.forEach((p, idx) => {
-      p.addEventListener('click', (e) => {
-        e.preventDefault();
-        show(idx);
-        stop();
-        start(); // restart the clock from the user's pick
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      let timer: ReturnType<typeof setInterval> | null = null;
+      function stopAutoplay() {
+        if (timer) {
+          clearInterval(timer);
+          timer = null;
+        }
+      }
+      function autoplay() {
+        if (reduce || timer || count < 2) return;
+        let revealed = 1; // the start slide is already on screen
+        timer = setInterval(() => {
+          if (revealed < AUTOPLAY_SLIDES) {
+            show(current + 1); // reveal the next slide (indices 1 … AUTOPLAY_SLIDES-1)
+            revealed += 1;
+          } else {
+            show(0); // settle back on the start slide …
+            stopAutoplay(); // … and rest there
+          }
+        }, INTERVAL);
+      }
+
+      // Manual controls drive freely and cancel the intro (they don't restart it).
+      dots.forEach((d, idx) =>
+        d.addEventListener('click', () => {
+          stopAutoplay();
+          show(idx);
+        }),
+      );
+      prev?.addEventListener('click', () => {
+        stopAutoplay();
+        show(current - 1);
       });
-    });
-
-    if (hero) {
-      hero.addEventListener('mouseenter', stop);
-      hero.addEventListener('mouseleave', start);
-      hero.addEventListener('focusin', stop);
-      hero.addEventListener('focusout', start);
-    }
-
-    if (pillEls.length) {
-      // upgrade from the no-JS one-visible-card fallback to the crossfade stack
-      if (stack) stack.classList.add('is-live');
-      cards.forEach((c) => {
-        c.hidden = false;
+      next?.addEventListener('click', () => {
+        stopAutoplay();
+        show(current + 1);
       });
-      show(0);
-      start();
+
+      // If a keyboard/AT user tabs into the panel mid-intro, stop so a focused link isn't
+      // yanked away. Reduced motion skips the intro entirely (guard in autoplay()).
+      root.addEventListener('focusin', stopAutoplay);
+
+      // upgrade from the no-JS single-slide fallback to the crossfade stack
+      if (count > 1) {
+        stack?.classList.add('is-live');
+        slidesEls.forEach((s) => {
+          s.hidden = false;
+        });
+        controls?.removeAttribute('hidden');
+        show(0);
+        autoplay();
+      }
     }
   </script>
 </Base>
@@ -236,142 +217,12 @@ const situations = [
     margin: 0 auto;
     padding: var(--sp-8) var(--sp-7) var(--sp-8);
   }
-  .dot {
-    color: var(--primary);
-  }
-  .eyebrow,
   .section-eyebrow {
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
     color: var(--muted);
     margin: 0;
-  }
-
-  /* hero — decision routes (left) + live answer card (right); stacks below 900px */
-  .hero {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: var(--sp-7);
-    margin-bottom: var(--sp-7);
-  }
-  .hero-main {
-    min-width: 0;
-  }
-  .hero-aside {
-    min-width: 0;
-  }
-  @media (min-width: 900px) {
-    .hero {
-      grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
-      gap: var(--sp-8);
-      align-items: start;
-    }
-  }
-  .headline {
-    font-family: var(--font-display);
-    font-size: var(--text-3xl);
-    font-weight: 700;
-    line-height: var(--lh-3xl);
-    letter-spacing: var(--tracking-tight);
-    color: var(--ink);
-    margin: var(--sp-4) 0 var(--sp-5);
-    max-width: 18ch;
-  }
-  .dek {
-    font-size: var(--text-md);
-    line-height: var(--lh-md);
-    color: var(--muted);
-    max-width: 60ch;
-    margin: 0 0 var(--sp-6);
-  }
-  .cta-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--sp-3);
-    margin-bottom: var(--sp-6);
-  }
-  .cta {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--sp-2);
-    min-height: var(--sp-7);
-    padding: 0 var(--sp-5);
-    border-radius: var(--r-pill);
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
-    text-decoration: none;
-    transition: transform var(--dur-fast) var(--ease-soft);
-  }
-  .cta :global(svg) {
-    flex: none;
-  }
-  .cta:hover {
-    transform: translateY(-1px);
-  }
-  .cta:focus-visible {
-    outline: none;
-    box-shadow: var(--ring);
-  }
-  /* --action (oxblood): spent ONCE here (the hero primary CTA) — §10 budget */
-  .cta-action {
-    background: var(--action);
-    color: var(--action-ink);
-  }
-  .cta-secondary {
-    background: var(--surface);
-    color: var(--ink);
-    border: var(--border-strong);
-  }
-  .cta-ghost {
-    background: transparent;
-    color: var(--ink);
-    border: var(--border-hairline);
-  }
-
-  /* popular-check pills — one line; horizontally scrollable if they overflow (carousel tab strip) */
-  .pills {
-    display: flex;
-    flex-wrap: nowrap;
-    align-items: center;
-    gap: var(--sp-2);
-    overflow-x: auto;
-    scrollbar-width: none;
-    scroll-padding-inline: var(--sp-5);
-  }
-  .pills::-webkit-scrollbar {
-    display: none;
-  }
-  .pill {
-    display: inline-flex;
-    flex: none;
-    align-items: center;
-    gap: var(--sp-2);
-    min-height: var(--sp-7);
-    padding: 0 var(--sp-3) 0 var(--sp-2);
-    border-radius: var(--r-pill);
-    background: var(--surface);
-    border: var(--border-hairline);
-    color: var(--ink);
-    font-size: var(--text-sm);
-    text-decoration: none;
-    transition:
-      border-color var(--dur-fast) var(--ease-soft),
-      box-shadow var(--dur-fast) var(--ease-soft);
-  }
-  .pill:hover {
-    border: var(--border-strong);
-  }
-  .pill:focus-visible {
-    outline: none;
-    box-shadow: var(--ring);
-  }
-  /* active pill = the answer card currently shown (JS switcher only) */
-  .pill[aria-current='true'] {
-    border: var(--border-strong);
-    background: var(--primary-soft);
-    color: var(--primary-deep);
   }
 
   /* sections */
@@ -411,15 +262,10 @@ const situations = [
     outline: none;
     box-shadow: var(--ring);
   }
-  /* Lucide affordance icon in a soft oxblood chip — brand accent, not the --action budget */
+  /* bare oxblood affordance mark — no chip; the headline leads (brand accent, not --action) */
   .tile-icon {
-    display: inline-grid;
-    place-items: center;
-    width: var(--sp-8);
-    height: var(--sp-8);
-    margin-bottom: var(--sp-2);
-    border-radius: var(--r-md);
-    background: var(--primary-soft);
+    display: inline-flex;
+    margin-bottom: var(--sp-3);
     color: var(--primary);
   }
   .tile-title {
