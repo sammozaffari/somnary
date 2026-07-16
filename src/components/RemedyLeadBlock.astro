@@ -14,11 +14,11 @@
 // "GRADE" label, and the tier word; every decision row is labeled in text.
 import type { TierId } from '../lib/tiers';
 import { getTier } from '../lib/tiers';
-import TierBadge from './TierBadge.astro';
-import RemedyIcon from './RemedyIcon.astro';
+import RemedyEmblem from './RemedyEmblem.astro';
 
 interface Props {
   slug: string;
+  name: string;
   tier: TierId;
   format?: 'supplement' | 'intervention';
   bestFor: string[];
@@ -27,7 +27,7 @@ interface Props {
   studiedDose: string | null;
   reviewDate: string;
 }
-const { slug, tier, format = 'supplement', bestFor, notFor, biggestRisk, studiedDose, reviewDate } =
+const { slug, name, tier, format = 'supplement', bestFor, notFor, biggestRisk, studiedDose, reviewDate } =
   Astro.props;
 const t = getTier(tier);
 
@@ -38,9 +38,9 @@ const showDose = format !== 'intervention';
 
 <section class="lead" aria-label="Grade and decision summary">
   <div class="badge-stack">
-    <RemedyIcon slug={slug} size="lead" />
-    <p class="micro">Grade</p>
-    <TierBadge tier={tier} size="lead" />
+    {/* decorative: the visible "Grade {tier}" + tier-word lines below carry the grade for AT */}
+    <RemedyEmblem slug={slug} name={name} tier={tier} size="lead" decorative />
+    <p class="micro">Grade {tier}</p>
     <p class="tier-word">{t.name}</p>
   </div>
 
