@@ -17,7 +17,7 @@
 // enhancement over that base. Auto-advance pauses on hover/focus and is off under reduced motion.
 import { getCollection } from 'astro:content';
 import TierBadge from './TierBadge.astro';
-import RemedyEmblem from './RemedyEmblem.astro';
+import RemedyIcon from './RemedyIcon.astro';
 import { TIERS, getTier } from '../lib/tiers';
 import type { TierId } from '../lib/tiers';
 import type { SlideSpec } from '../lib/hero-slides';
@@ -154,19 +154,21 @@ const resolved: Resolved[] = slides
 
             {s.kind === 'remedy' && (
               <div class="hc-remedy">
-                <header class="hc-remedy-head">
-                  {/* fused struck-coin emblem (§11.1): linocut + evidence orbit + grade seal.
-                      Decorative here — the grade is named in the adjacent text line below. */}
-                  <span class="hc-emblem">
-                    <RemedyEmblem slug={s.slug} tier={s.tier} name={s.name} size="hero" decorative />
-                  </span>
+                <header class="hc-remedy-head" style={`--g:var(--grade-${s.tier.toLowerCase()})`}>
+                  {/* plate + stamp (§11.2) at hero scale — the big linocut IS the hero; the grade
+                      is pressed on as an assessor's stamp (letter + tier word, grade color, −3°). */}
+                  <div class="hc-plate">
+                    <span class="hc-plate-art"><RemedyIcon slug={s.slug} size="fill" /></span>
+                    <span
+                      class="hc-stamp"
+                      role="img"
+                      aria-label={`grade ${s.tier}, ${getTier(s.tier).name}`}
+                    >
+                      <b>{s.tier}</b> {getTier(s.tier).name}
+                    </span>
+                  </div>
                   <div class="hc-id">
                     <h2 class="hc-name">{s.name}</h2>
-                    {/* grade in text — never color alone; tier word verbatim from lib/tiers */}
-                    <p class="hc-grade">
-                      <span class="hc-grade-letter">Grade {s.tier}</span>
-                      <span class="hc-grade-word"> · {getTier(s.tier).name}</span>
-                    </p>
                     <p class="hc-verdict">{s.oneLineVerdict}</p>
                   </div>
                 </header>
@@ -176,7 +178,7 @@ const resolved: Resolved[] = slides
                     <span class="hc-risk-text">{s.biggestRisk}</span>
                   </p>
                 )}
-                <a class="hc-link" href={`/r/${s.slug}`}>
+                <a class="hc-link" href={`/r/${s.slug}`} aria-label={`Read the full evidence on ${s.name}`}>
                   Read the full evidence <span aria-hidden="true">→</span>
                 </a>
               </div>
@@ -369,7 +371,7 @@ const resolved: Resolved[] = slides
     border: var(--border-hairline);
   }
 
-  /* remedy slide — the linocut emblem is the protagonist (§11.1, hero size) */
+  /* remedy slide — the big linocut is the protagonist (§11.2 plate + stamp, hero scale) */
   .hc-remedy {
     display: flex;
     flex-direction: column;
@@ -381,11 +383,50 @@ const resolved: Resolved[] = slides
     gap: var(--sp-7);
     flex-wrap: wrap;
   }
-  /* the struck-coin emblem: its orbit + seal extend past the disc box, so never clip it */
-  .hc-emblem {
-    display: inline-flex;
+  /* specimen plate: a soft-oxblood field holding the linocut big; the stamp sits in the corner */
+  .hc-plate {
+    position: relative;
     flex: none;
-    overflow: visible;
+    display: grid;
+    place-items: center;
+    width: 320px;
+    height: 288px;
+    background: var(--primary-soft);
+    border: var(--border-hairline);
+    border-radius: var(--r-lg);
+  }
+  .hc-plate-art {
+    width: 216px;
+    height: 216px;
+    display: grid;
+    place-items: center;
+    color: var(--primary);
+  }
+  /* assessor's stamp (§11.2): grade letter + tier word, grade color, hand-pressed −3° */
+  .hc-stamp {
+    position: absolute;
+    right: var(--sp-4);
+    bottom: var(--sp-4);
+    transform: rotate(-3deg);
+    display: inline-flex;
+    align-items: baseline;
+    gap: var(--sp-2);
+    padding: var(--sp-1) var(--sp-3);
+    border: 1.5px solid var(--g);
+    border-radius: var(--r-xs);
+    background: rgba(255, 255, 255, 0.62);
+    color: var(--g);
+    font-size: var(--text-sm);
+    font-weight: 800;
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    line-height: 1;
+    white-space: nowrap;
+  }
+  .hc-stamp b {
+    font-size: var(--text-md);
+    font-weight: 900;
+    letter-spacing: -0.02em;
   }
   .hc-id {
     display: flex;
@@ -401,24 +442,6 @@ const resolved: Resolved[] = slides
     letter-spacing: var(--tracking-tight);
     color: var(--ink);
     margin: 0;
-  }
-  /* grade in text — pairs with the seal so the grade is never color alone */
-  .hc-grade {
-    display: flex;
-    align-items: baseline;
-    gap: 0;
-    margin: 0;
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
-  }
-  .hc-grade-letter {
-    color: var(--ink);
-    font-weight: 700;
-  }
-  .hc-grade-word {
-    color: var(--muted);
   }
   .hc-verdict {
     font-size: var(--text-md);

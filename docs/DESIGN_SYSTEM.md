@@ -343,9 +343,7 @@ the letter is in the seal and echoed in adjacent text (the "Grade X" / tier-word
 seal letter is pinned to the WCAG large-text band (**≥19px bold** at every size) as a
 conservative floor (worst grade, white on `--grade-c`, computes 5.56:1 — §8 table); a
 placement needing a disc smaller than `spot` must NOT carry the seal — use the plate card
-(§11.2) or a plain `RemedyIcon` + text grade instead. Sizes: `spot` 80px, `lead` 148px,
-`hero` 200px (home-carousel protagonist — same ratified proportions as `lead`, disc scaled so
-the linocut reads at ~144px; owner-directed 2026-07-16). `TierBadge` remains the grade mark for
+(§11.2) or a plain `RemedyIcon` + text grade instead. Sizes: `spot` 80px, `lead` 148px. `TierBadge` remains the grade mark for
 **illustration-free** contexts (claims table, metadata, inline).
 
 Any change to the emblem anatomy or the seal-legibility rule is `[HUMAN-GATE]`.
