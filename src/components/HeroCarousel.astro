@@ -169,9 +169,13 @@ const resolved: Resolved[] = slides
                   </div>
                   <div class="hc-id">
                     <h2 class="hc-name">{s.name}</h2>
-                    {/* plain-language decode of the grade (the stamp already shows the letter +
-                        tier word) — verbatim decisionTranslation from lib/tiers, never invented */}
-                    <p class="hc-grade">{getTier(s.tier).decisionTranslation}</p>
+                    {/* frame the stamp as an evidence grade + decode it in plain language
+                        (verbatim decisionTranslation from lib/tiers); link the S–F rubric so a
+                        first-time reader can learn the scale in one click */}
+                    <p class="hc-grade">
+                      <span class="hc-grade-label">Evidence grade</span> — {getTier(s.tier).decisionTranslation}
+                      <a class="hc-grade-link" href="/methodology">How grades work <span aria-hidden="true">→</span></a>
+                    </p>
                     <p class="hc-verdict">{s.oneLineVerdict}</p>
                   </div>
                 </header>
@@ -446,14 +450,34 @@ const resolved: Resolved[] = slides
     color: var(--ink);
     margin: 0;
   }
-  /* plain-language grade decode — the stamp carries the letter + tier word; this glosses it
-     (e.g. "Interesting but uncertain; do not rely on it.") */
+  /* the stamp carries the letter + tier word; this frames it as an evidence grade, glosses
+     it in plain language, and links the rubric for first-time readers */
   .hc-grade {
     margin: 0;
     font-size: var(--text-sm);
     line-height: var(--lh-sm);
     color: var(--muted);
-    max-width: 60ch;
+    max-width: 62ch;
+  }
+  .hc-grade-label {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+  .hc-grade-link {
+    color: var(--primary);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .hc-grade-link:hover {
+    text-decoration: underline;
+  }
+  .hc-grade-link:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+    border-radius: var(--r-xs);
   }
   .hc-verdict {
     font-size: var(--text-md);
