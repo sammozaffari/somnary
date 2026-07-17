@@ -19,5 +19,7 @@ the family's north star before the batch.
   no text, no people, no products; vermilion `#E34234` never dominant (safety
   register); palettes botanical, never evaluative (grades are separate data).
 
-Wiring (RemedyHero component, per-remedy atmosphere tokens, scrim rules) is a
-separate design pass — DESIGN_SYSTEM §12 draft, `[HUMAN-GATE]` for the tokens.
+Wiring shipped 2026-07-17 as the "labeled plate" (DESIGN_SYSTEM §11.3;
+`RemedyHero.astro`; design doc `docs/plans/2026-07-17-remedy-hero-labeled-plate-design.md`).
+The once-planned per-remedy atmosphere tokens were ratified AWAY (v6): no type sits on the
+art, so no per-remedy ink/scrim tokens exist — palettes live in the plates alone.
