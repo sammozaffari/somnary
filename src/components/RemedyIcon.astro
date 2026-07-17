@@ -1,0 +1,87 @@
+---
+// Decorative remedy illustration (DESIGN_SYSTEM §11). Production files are transparent
+// oxblood PNGs derived from the approved black-on-white linocut masters. Rendered as a CSS
+// mask painted with `currentColor` (default --primary), so the ink is a TOKEN at render time
+// — re-inkable in one place, and recolorable on dark strips by setting `color`. The PNG's own
+// pixels only supply the alpha silhouette. Unknown slugs fall back to the brand crescent disc
+// so a missing asset never breaks layout.
+interface Props {
+  slug: string;
+  size?: 'chip' | 'inline' | 'card' | 'spot' | 'lead' | 'fill';
+  class?: string;
+}
+
+const { slug, size = 'card', class: className } = Astro.props;
+const images = import.meta.glob<{ default: ImageMetadata }>('../assets/remedies/*.png', {
+  eager: true,
+});
+const image = images[`../assets/remedies/${slug}.png`]?.default;
+const classes = ['remedy-icon', `is-${size}`, className].filter(Boolean).join(' ');
+---
+
+{
+  image ? (
+    <span class={classes} style={`--icon:url("${image.src}")`} aria-hidden="true" />
+  ) : (
+    <span class={`${classes} is-fallback`} aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" />
+      </svg>
+    </span>
+  )
+}
+
+<style>
+  .remedy-icon {
+    display: inline-grid;
+    place-items: center;
+    flex: none;
+    line-height: 1;
+    color: var(--primary);
+  }
+  /* Masked illustration: the token paints the shape; the PNG supplies only the silhouette. */
+  .remedy-icon:not(.is-fallback) {
+    background-color: currentColor;
+    -webkit-mask: var(--icon) center / contain no-repeat;
+    mask: var(--icon) center / contain no-repeat;
+  }
+  .is-chip {
+    width: 20px;
+    height: 20px;
+  }
+  .is-pill {
+    width: 26px;
+    height: 26px;
+  }
+  .is-inline {
+    width: 32px;
+    height: 32px;
+  }
+  .is-card {
+    width: 48px;
+    height: 48px;
+  }
+  .is-spot {
+    width: 64px;
+    height: 64px;
+  }
+  .is-lead {
+    width: 120px;
+    height: 120px;
+  }
+  /* fill: size to the parent box — used by the plate surfaces (RemedyCard, HeroCarousel),
+     which size the art to their plate. */
+  .is-fill {
+    width: 100%;
+    height: 100%;
+  }
+  .is-fallback {
+    border-radius: var(--r-pill);
+    background: var(--primary);
+    color: var(--surface);
+  }
+  .is-fallback svg {
+    width: 58%;
+    height: 58%;
+  }
+</style>

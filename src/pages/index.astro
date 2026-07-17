@@ -2,7 +2,10 @@
 import Base from '../layouts/Base.astro';
 import Disclaimer from '../components/Disclaimer.astro';
 import TierBadge from '../components/TierBadge.astro';
+import HeroCarousel from '../components/HeroCarousel.astro';
+import type { SlideSpec } from '../lib/hero-slides';
 import { TIERS } from '../lib/tiers';
+import { Pill, Package, Timer, AlarmClock, ShieldAlert, Baby } from '@lucide/astro';
 
 // Home — CHK-3.1 (strategy 03 "Homepage Above-The-Fold"; DESIGN_SYSTEM §1/§10).
 // Decision-first front door: route by intent, not by molecule. Replaces the v1 "enemy hero".
@@ -13,13 +16,14 @@ import { TIERS } from '../lib/tiers';
 // per the §10 budget. No search island is dropped here (SearchPalette has fixed IDs + a single
 // trigger binding); the primary CTA is a plain crawlable anchor to /search plus popular-check
 // pills to real remedy routes. No newsletter/forms (CHK-4.2), no commerce, no stack-builder (D4).
-// Popular-check pills → real remedy routes (verified present in src/content/remedies/).
-const popularChecks = [
-  { slug: 'melatonin', name: 'Melatonin' },
-  { slug: 'magnesium', name: 'Magnesium' },
-  { slug: 'valerian', name: 'Valerian' },
-  { slug: 'l-theanine', name: 'L-theanine' },
-  { slug: 'ashwagandha', name: 'Ashwagandha' },
+// Hero carousel slide order — one array, tweakable. Slide 1 (brand) carries the page H1 and
+// the single oxblood CTA; remedy slides interleave with "useful ways to use the site" so the
+// panel never reads as just a supplement reel. Remedy slugs are real routes in src/content/remedies/.
+const heroSlides: SlideSpec[] = [
+  { kind: 'brand' },
+  { kind: 'remedy', slug: 'magnesium' },
+  { kind: 'remedy', slug: 'valerian' },
+  { kind: 'utility', key: 'situations' },
 ];
 
 // Six situation tiles — labels verbatim from strategy 03, each wired to a route that resolves.
@@ -27,31 +31,37 @@ const popularChecks = [
 const situations = [
   {
     href: '/r/melatonin',
+    Icon: Pill,
     title: "I'm considering melatonin, or already take it",
     dek: 'The flagship decision hub: clock signal vs sedative, dose reality, the label-accuracy problem.',
   },
   {
     href: '/sleep-blends',
+    Icon: Package,
     title: 'I bought a sleep blend',
     dek: 'Decode the label before you trust it — proprietary blends, missing doses, studied-dose mismatch.',
   },
   {
     href: '/outcome/fall-asleep-faster',
+    Icon: Timer,
     title: 'I want to fall asleep faster',
     dek: 'Remedies with human evidence aimed at sleep-onset latency, ranked by the strength of that evidence.',
   },
   {
     href: '/outcome/stay-asleep',
+    Icon: AlarmClock,
     title: 'I keep waking up at night',
     dek: 'The shorter list of remedies studied for staying asleep — wake after sleep onset, not just falling asleep.',
   },
   {
     href: '/safety',
+    Icon: ShieldAlert,
     title: 'I take medications or have a health condition',
     dek: 'Using medications? Start with the safety boundary — interactions and red flags come before any remedy.',
   },
   {
     href: '/melatonin-children',
+    Icon: Baby,
     title: "I'm considering this for a child",
     dek: 'The most cautious page on the site: what the evidence does and does not support for kids.',
   },
@@ -64,29 +74,8 @@ const situations = [
   canonical="https://somnary.vercel.app/"
 >
   <main class="home">
-    <!-- hero — three above-the-fold decision routes -->
-    <section class="hero">
-      <p class="eyebrow">Independent · evidence-graded · reader-funded</p>
-      <h1 class="headline">Check a sleep remedy before you take it</h1>
-      <p class="dek">
-        Every sleep supplement, graded on real science — not the hype on the label.
-      </p>
-      <div class="cta-row">
-        <a class="cta cta-action" href="/search">Check a remedy →</a>
-        <a class="cta cta-secondary" href="#situations">Start from your sleep problem</a>
-        <a class="cta cta-ghost" href="/safety">Read safety red flags</a>
-      </div>
-      <div class="pills" aria-label="Popular checks">
-        <span class="pills-label">Popular checks</span>
-        {
-          popularChecks.map((p) => (
-            <a class="pill" href={`/r/${p.slug}`}>
-              {p.name}
-            </a>
-          ))
-        }
-      </div>
-    </section>
+    <!-- hero — one full-width panel that morphs between slides (brand → remedies ⇄ utility) -->
+    <HeroCarousel slides={heroSlides} />
 
     <!-- disclaimer — adjacent to the decision block, not footer-only -->
     <Disclaimer />
@@ -98,6 +87,9 @@ const situations = [
         {
           situations.map((t) => (
             <a class="tile" href={t.href}>
+              <span class="tile-icon">
+                <t.Icon size={30} strokeWidth={1.75} aria-hidden="true" />
+              </span>
               <p class="tile-title">{t.title}</p>
               <p class="tile-dek">{t.dek}</p>
             </a>
@@ -112,10 +104,11 @@ const situations = [
       <ul class="legend">
         {
           TIERS.map((t) => (
-            <li class="legend-row">
-              <TierBadge tier={t.id} size="inline" />
-              <span class="legend-name">{t.name}</span>
-              <span class="legend-trans">{t.decisionTranslation}</span>
+            <li class="legend-item">
+              <TierBadge tier={t.id} size="card" />
+              <span class="legend-name">
+                <span class="legend-letter">{t.id}</span> {t.name}
+              </span>
             </li>
           ))
         }
@@ -127,127 +120,109 @@ const situations = [
       </p>
     </section>
   </main>
+
+  {/* Hero carousel controller: crossfade slides, dots + arrows, auto-advance. No JS → slide 1
+      shows and every other slide is real crawlable HTML with its own links. */}
+  <script>
+    const root = document.querySelector<HTMLElement>('[data-hero-carousel]');
+    if (root) {
+      const stack = root.querySelector<HTMLElement>('.hc-stack');
+      const slidesEls = Array.from(root.querySelectorAll<HTMLElement>('[data-slide]'));
+      const controls = root.querySelector<HTMLElement>('[data-hc-controls]');
+      const dots = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-hc-dot]'));
+      const prev = root.querySelector<HTMLButtonElement>('[data-hc-prev]');
+      const next = root.querySelector<HTMLButtonElement>('[data-hc-next]');
+      const live = root.querySelector<HTMLElement>('[data-hc-live]');
+      const count = slidesEls.length;
+      // Intro showcase: reveal this many slides once, then settle back on the start slide and
+      // rest. Not an infinite loop — a brief, self-ending morph. Manual controls still reach
+      // every slide afterward.
+      const AUTOPLAY_SLIDES = Math.min(4, count);
+      const INTERVAL = 4500;
+      let current = 0;
+
+      function label(i: number): string {
+        return dots[i]?.getAttribute('aria-label')?.replace(/^Show\s+/, '') ?? `Slide ${i + 1}`;
+      }
+
+      function show(i: number) {
+        current = (i + count) % count;
+        slidesEls.forEach((s, idx) => s.classList.toggle('is-active', idx === current));
+        dots.forEach((d, idx) => {
+          if (idx === current) d.setAttribute('aria-current', 'true');
+          else d.removeAttribute('aria-current');
+        });
+        if (live) live.textContent = `${label(current)} — slide ${current + 1} of ${count}`;
+      }
+
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      let timer: ReturnType<typeof setInterval> | null = null;
+      function stopAutoplay() {
+        if (timer) {
+          clearInterval(timer);
+          timer = null;
+        }
+      }
+      function autoplay() {
+        if (reduce || timer || count < 2) return;
+        let revealed = 1; // the start slide is already on screen
+        timer = setInterval(() => {
+          if (revealed < AUTOPLAY_SLIDES) {
+            show(current + 1); // reveal the next slide (indices 1 … AUTOPLAY_SLIDES-1)
+            revealed += 1;
+          } else {
+            show(0); // settle back on the start slide …
+            stopAutoplay(); // … and rest there
+          }
+        }, INTERVAL);
+      }
+
+      // Manual controls drive freely and cancel the intro (they don't restart it).
+      dots.forEach((d, idx) =>
+        d.addEventListener('click', () => {
+          stopAutoplay();
+          show(idx);
+        }),
+      );
+      prev?.addEventListener('click', () => {
+        stopAutoplay();
+        show(current - 1);
+      });
+      next?.addEventListener('click', () => {
+        stopAutoplay();
+        show(current + 1);
+      });
+
+      // If a keyboard/AT user tabs into the panel mid-intro, stop so a focused link isn't
+      // yanked away. Reduced motion skips the intro entirely (guard in autoplay()).
+      root.addEventListener('focusin', stopAutoplay);
+
+      // upgrade from the no-JS single-slide fallback to the crossfade stack
+      if (count > 1) {
+        stack?.classList.add('is-live');
+        slidesEls.forEach((s) => {
+          s.hidden = false;
+        });
+        controls?.removeAttribute('hidden');
+        show(0);
+        autoplay();
+      }
+    }
+  </script>
 </Base>
 
 <style>
   .home {
     max-width: var(--page);
     margin: 0 auto;
-    padding: var(--sp-9) var(--sp-7) var(--sp-9);
+    padding: var(--sp-8) var(--sp-7) var(--sp-8);
   }
-  .dot {
-    color: var(--primary);
-  }
-  .eyebrow,
   .section-eyebrow {
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
     color: var(--muted);
     margin: 0;
-  }
-
-  /* hero */
-  .hero {
-    margin-bottom: var(--sp-8);
-  }
-  .headline {
-    font-family: var(--font-display);
-    font-size: var(--text-display);
-    font-weight: 700;
-    line-height: var(--lh-display);
-    letter-spacing: var(--tracking-tight);
-    color: var(--ink);
-    margin: var(--sp-4) 0 var(--sp-5);
-    max-width: 18ch;
-  }
-  .dek {
-    font-size: var(--text-md);
-    line-height: var(--lh-md);
-    color: var(--muted);
-    max-width: 60ch;
-    margin: 0 0 var(--sp-6);
-  }
-  .disavow {
-    color: var(--ink);
-    font-weight: 650;
-  }
-  .cta-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--sp-3);
-    margin-bottom: var(--sp-6);
-  }
-  .cta {
-    display: inline-flex;
-    align-items: center;
-    min-height: var(--sp-7);
-    padding: 0 var(--sp-5);
-    border-radius: var(--r-pill);
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
-    text-decoration: none;
-    transition: transform var(--dur-fast) var(--ease-soft);
-  }
-  .cta:hover {
-    transform: translateY(-1px);
-  }
-  .cta:focus-visible {
-    outline: none;
-    box-shadow: var(--ring);
-  }
-  /* --action (oxblood): spent ONCE here (the hero primary CTA) — §10 budget */
-  .cta-action {
-    background: var(--action);
-    color: var(--action-ink);
-  }
-  .cta-secondary {
-    background: var(--surface);
-    color: var(--ink);
-    border: var(--border-strong);
-  }
-  .cta-ghost {
-    background: transparent;
-    color: var(--ink);
-    border: var(--border-hairline);
-  }
-
-  /* popular-check pills */
-  .pills {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--sp-2);
-  }
-  .pills-label {
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
-    color: var(--muted);
-    margin-right: var(--sp-2);
-  }
-  .pill {
-    display: inline-flex;
-    align-items: center;
-    min-height: var(--sp-6);
-    padding: 0 var(--sp-4);
-    border-radius: var(--r-pill);
-    background: var(--surface);
-    border: var(--border-hairline);
-    color: var(--ink);
-    font-size: var(--text-sm);
-    text-decoration: none;
-    transition:
-      border-color var(--dur-fast) var(--ease-soft),
-      box-shadow var(--dur-fast) var(--ease-soft);
-  }
-  .pill:hover {
-    border: var(--border-strong);
-  }
-  .pill:focus-visible {
-    outline: none;
-    box-shadow: var(--ring);
   }
 
   /* sections */
@@ -287,6 +262,12 @@ const situations = [
     outline: none;
     box-shadow: var(--ring);
   }
+  /* bare oxblood affordance mark — no chip; the headline leads (brand accent, not --action) */
+  .tile-icon {
+    display: inline-flex;
+    margin-bottom: var(--sp-3);
+    color: var(--primary);
+  }
   .tile-title {
     font-family: var(--font-display);
     font-size: var(--text-xl);
@@ -302,39 +283,35 @@ const situations = [
     margin: 0;
   }
 
-  /* how to read a grade — S–F legend */
+  /* how to read a grade — one horizontal strip of six badges (was six stacked rows) */
   .legend {
     list-style: none;
     margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
+    padding: var(--sp-5);
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: var(--sp-4);
     background: var(--surface);
     border: var(--border-hairline);
     border-radius: var(--r-lg);
-    overflow: hidden;
   }
-  .legend-row {
-    display: grid;
-    grid-template-columns: auto 8ch 1fr;
+  .legend-item {
+    display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: var(--sp-4);
-    padding: var(--sp-4) var(--sp-5);
+    gap: var(--sp-2);
+    text-align: center;
   }
-  .legend-row + .legend-row {
-    border-top: var(--border-hairline);
-  }
+  /* letter + tier name — legible without color alone (the badge glyph is the letter, echoed here) */
   .legend-name {
     font-family: var(--font-mono);
-    font-weight: 700;
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    color: var(--ink);
-  }
-  .legend-trans {
-    font-size: var(--text-sm);
-    line-height: var(--lh-sm);
     color: var(--muted);
+  }
+  .legend-letter {
+    font-weight: 700;
+    color: var(--ink);
   }
   .legend-note {
     font-size: var(--text-sm);
@@ -351,30 +328,14 @@ const situations = [
     .tiles {
       grid-template-columns: 1fr;
     }
-    .legend-row {
-      grid-template-columns: auto 1fr;
-      grid-template-areas:
-        'badge name'
-        'trans trans';
-      row-gap: var(--sp-2);
-    }
-    .legend-row :global(.tier-badge) {
-      grid-area: badge;
-    }
-    .legend-name {
-      grid-area: name;
-    }
-    .legend-trans {
-      grid-area: trans;
+    /* six badges wrap to two rows of three on narrow viewports */
+    .legend {
+      grid-template-columns: repeat(3, 1fr);
     }
   }
   @media (max-width: 640px) {
     .home {
-      padding: var(--sp-7) var(--sp-5) var(--sp-8);
-    }
-    .headline {
-      font-weight: 700;
-      font-size: 52px;
+      padding: var(--sp-7) var(--sp-5) var(--sp-7);
     }
   }
 </style>

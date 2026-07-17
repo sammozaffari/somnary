@@ -1,20 +1,22 @@
 ---
-// Remedy lead block — CHK-2.1 (DESIGN_SYSTEM §3 big-badge; strategy doc 03 "decision-first lead").
-// The decision-first opener on every remedy page: the big grade badge (with "GRADE" micro-label
-// and the tier word), the decision-translation line, and a compact best-for / not-for /
-// biggest-risk / studied-dose grid. It reuses ONLY already-cited structured fields from the remedy
-// — it introduces NO new factual claims (CLAUDE.md: citations are data).
+// Remedy lead block — CHK-2.1 (strategy doc 03 "decision-first lead"; DESIGN_SYSTEM §11.3).
+// The decision-first opener on every remedy page: the grade-anchored decision-translation line
+// ("Grade A · Strong — <translation>") and a compact best-for / not-for / biggest-risk /
+// studied-dose grid. The grade MARK lives in the hero label row above (GradeStamp, §11.3) —
+// the emblem/badge column retired with the hero plates: the hero IS the remedy, and this block
+// keeps the grade in plain text so never-color-alone holds twice on every page. It reuses ONLY
+// already-cited structured fields from the remedy — it introduces NO new factual claims
+// (CLAUDE.md: citations are data).
 //
 // Graceful empties (CLAUDE.md conservative safety): the not-for and biggest-risk rows are OMITTED
 // entirely when absent. A blank or "no risk" row must never render — absence must never read as
 // "this is safe". best-for and studied-dose render "not established" when unknown (an unknown
 // value, not a hidden risk); the studied-dose row is omitted for interventions, which have no dose.
 //
-// Legible without color alone (DESIGN §3): the badge is always paired with the letter itself, the
-// "GRADE" label, and the tier word; every decision row is labeled in text.
+// Legible without color alone (DESIGN §3): the grade renders as plain text (letter + tier word)
+// in the translation line; every decision row is labeled in text.
 import type { TierId } from '../lib/tiers';
 import { getTier } from '../lib/tiers';
-import TierBadge from './TierBadge.astro';
 
 interface Props {
   tier: TierId;
@@ -35,14 +37,10 @@ const showDose = format !== 'intervention';
 ---
 
 <section class="lead" aria-label="Grade and decision summary">
-  <div class="badge-stack">
-    <p class="micro">Grade</p>
-    <TierBadge tier={tier} size="lead" />
-    <p class="tier-word">{t.name}</p>
-  </div>
-
   <div class="decision">
-    <p class="translation">{t.decisionTranslation}</p>
+    <p class="translation">
+      <strong class="gline">Grade {tier} · {t.name}</strong> — {t.decisionTranslation}
+    </p>
 
     <dl class="grid">
       <div class="drow">
@@ -81,39 +79,12 @@ const showDose = format !== 'intervention';
 
 <style>
   .lead {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: var(--sp-7);
-    align-items: start;
     padding: var(--sp-7);
     background: var(--surface);
     border: var(--border-hairline);
     border-radius: var(--r-xl);
   }
 
-  /* badge column: GRADE label · big badge · tier word */
-  .badge-stack {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--sp-3);
-  }
-  .micro {
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
-    color: var(--muted);
-    margin: 0;
-  }
-  .tier-word {
-    font-family: var(--font-mono);
-    font-size: var(--text-sm);
-    letter-spacing: var(--tracking-label);
-    color: var(--ink);
-    margin: 0;
-  }
-
-  /* decision column */
   .decision {
     min-width: 0;
   }
@@ -123,7 +94,12 @@ const showDose = format !== 'intervention';
     line-height: var(--lh-lg);
     color: var(--ink);
     margin: 0 0 var(--sp-5);
-    max-width: 52ch;
+    max-width: 60ch;
+  }
+  /* grade in plain text, anchoring the translation (never color alone — the stamp above is
+     letter + word too) */
+  .gline {
+    font-weight: 700;
   }
 
   .grid {
@@ -173,15 +149,9 @@ const showDose = format !== 'intervention';
     text-decoration: underline;
   }
 
-  /* stack the badge above the decisions on narrow viewports */
   @media (max-width: 640px) {
     .lead {
-      grid-template-columns: 1fr;
-      gap: var(--sp-6);
       padding: var(--sp-6);
-    }
-    .badge-stack {
-      align-items: flex-start;
     }
   }
 </style>

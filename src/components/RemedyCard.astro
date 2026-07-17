@@ -1,8 +1,18 @@
 ---
-// Remedy card — DESIGN_SYSTEM §2.5/§7.4 (card form). The grid card used by the tier board (CHK-5.1)
-// and, next, outcome pages + home. Whole card is one link → /r/{slug}; tier badge + name + key
-// compound + one-line verdict. Hover: lift (§4 motion — translateY(-3px) + shadow-lift, no scale).
-import TierBadge from './TierBadge.astro';
+// Remedy plate card — DESIGN_SYSTEM §11.2 (design study 2026-07-15 v3, owner-ratified
+// "plate + stamp"). The tier-board card is a specimen plate: a full-bleed --primary-soft
+// field holds the linocut at 132px — the scale the masters were carved to read at — with
+// the evidence grade STAMPED on the plate's corner like an assessor's mark (letter + tier
+// word, grade color, hand-pressed angle). Below: name + one clamped verdict line. The
+// key-compound line moved to the remedy page (catalog noise while browsing).
+//
+// Grade legibility (CLAUDE.md / DESIGN §3): never color alone — the stamp carries the
+// letter AND the tier word, and the card link's aria-label names the grade in text.
+// Hover: lift (§4 motion) + the specimen breathes (art scales 1.02); both are disabled
+// under prefers-reduced-motion. Whole card is one link → /r/{slug}.
+import RemedyIcon from './RemedyIcon.astro';
+import GradeStamp from './GradeStamp.astro';
+import { getTier } from '../lib/tiers';
 import type { TierId } from '../lib/tiers';
 
 interface Props {
@@ -10,29 +20,35 @@ interface Props {
   name: string;
   tier: TierId;
   oneLiner: string;
-  keyCompound?: string | null;
 }
-const { slug, name, tier, oneLiner, keyCompound } = Astro.props;
+const { slug, name, tier, oneLiner } = Astro.props;
+const t = getTier(tier);
 ---
 
-<a class="card" href={`/r/${slug}`} aria-label={`${name} — grade ${tier}`}>
-  <div class="top">
-    <TierBadge tier={tier} size="card" />
-    <span class="name">{name}</span>
+<a
+  class="card"
+  href={`/r/${slug}`}
+  aria-label={`${name} — grade ${tier}, ${t.name}`}
+>
+  <div class="plate">
+    <span class="art"><RemedyIcon slug={slug} size="fill" /></span>
+    <GradeStamp tier={tier} size="card" silent class="corner-stamp" />
   </div>
-  {keyCompound && <p class="meta">{keyCompound}</p>}
-  <p class="dek">{oneLiner}</p>
+  <div class="body">
+    <span class="name">{name}</span>
+    <p class="dek">{oneLiner}</p>
+  </div>
 </a>
 
 <style>
   .card {
     display: flex;
     flex-direction: column;
-    gap: var(--sp-3);
+    width: 100%;
     background: var(--surface);
     border: var(--border-hairline);
     border-radius: var(--r-lg);
-    padding: var(--sp-5);
+    overflow: hidden; /* the plate bleeds to the card edge */
     text-decoration: none;
     color: var(--ink);
     transition:
@@ -47,34 +63,78 @@ const { slug, name, tier, oneLiner, keyCompound } = Astro.props;
     outline: none;
     box-shadow: var(--ring);
   }
-  .top {
+
+  /* specimen plate: full-bleed soft-oxblood field, the linocut big */
+  .plate {
+    position: relative;
+    height: 184px;
+    flex: none;
+    display: grid;
+    place-items: center;
+    background: var(--primary-soft);
+  }
+  /* hairline mat edge between plate and body */
+  .plate::after {
+    content: '';
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 1px;
+    background: var(--hairline);
+  }
+  .art {
+    width: 132px;
+    height: 132px;
+    display: grid;
+    place-items: center;
+    color: var(--primary);
+    transition: transform var(--dur-slow) var(--ease-settle);
+  }
+  .card:hover .art {
+    transform: scale(1.02); /* the specimen breathes — barely */
+  }
+
+  /* assessor's stamp (shared GradeStamp) pinned to the plate corner */
+  .plate :global(.corner-stamp) {
+    position: absolute;
+    right: var(--sp-3);
+    bottom: var(--sp-3);
+  }
+
+  .body {
     display: flex;
-    align-items: center;
-    gap: var(--sp-3);
+    flex-direction: column;
+    gap: var(--sp-2);
+    padding: var(--sp-4) var(--sp-5) var(--sp-5);
   }
   .name {
     font-family: var(--font-display);
     font-size: var(--text-lg);
-    line-height: 1.1;
+    font-weight: 650;
+    letter-spacing: var(--tracking-tight);
+    line-height: 1.15;
     color: var(--ink);
-  }
-  .dot {
-    color: var(--primary);
-  }
-  .meta {
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
-    color: var(--muted);
-    margin: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
   }
   .dek {
     font-size: var(--text-sm);
     line-height: var(--lh-sm);
     color: var(--muted);
     margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .card,
+    .art {
+      transition: none;
+    }
+    .card:hover {
+      transform: none; /* no lift — disabled, not instant (§11.2) */
+    }
+    .card:hover .art {
+      transform: none;
+    }
   }
 </style>

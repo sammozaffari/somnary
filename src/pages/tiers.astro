@@ -19,7 +19,6 @@ interface Card {
   name: string;
   tier: TierId;
   oneLiner: string;
-  keyCompound: string | null;
   category: string;
 }
 
@@ -37,7 +36,6 @@ for (const e of remedies) {
     name: e.data.name,
     tier: e.data.tier,
     oneLiner: e.data.oneLineVerdict,
-    keyCompound: e.data.keyCompound,
     category: categoryOf.get(e.id) ?? '',
   });
 }
@@ -120,13 +118,7 @@ const sortModes = [
             data-name={c.name.toLowerCase()}
             data-category={c.category}
           >
-            <RemedyCard
-              slug={c.slug}
-              name={c.name}
-              tier={c.tier}
-              oneLiner={c.oneLiner}
-              keyCompound={c.keyCompound}
-            />
+            <RemedyCard slug={c.slug} name={c.name} tier={c.tier} oneLiner={c.oneLiner} />
           </li>
         ))
       }

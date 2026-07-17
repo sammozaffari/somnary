@@ -30,6 +30,7 @@
     "@fontsource-variable/instrument-sans": "^5.2.8",
     "@fontsource/ibm-plex-mono": "^5.2.7",
     "@fontsource/instrument-sans": "^5.2.8",
+    "@lucide/astro": "^1.24.0",
     "astro": "^5.2.5",
     "zod": "^3.25.76",
     "@supabase/supabase-js": "^2.110.1",
