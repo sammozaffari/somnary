@@ -29,6 +29,7 @@ import {
 import { PROMPT_VERSION, systemInstruction, buildUserPrompt } from './prompt.ts';
 import { retrieve } from './retrieval.ts';
 import { callGemini, type GeminiResult } from './gemini.ts';
+import { callOpenRouter, OPENROUTER_DEFAULT_MODEL } from './openrouter.ts';
 
 const BOUNDARY = 'This is educational, not medical advice.';
 
@@ -49,18 +50,44 @@ export interface AskResponse {
   answer: string;
   citations: AskCitation[];
   route: Route | null;
-  meta: { promptVersion: string; geminiCalled: boolean };
+  meta: { promptVersion: string; geminiCalled: boolean; provider: string };
 }
 
 export type AskGemini = (args: { system: string; user: string }) => Promise<GeminiResult>;
 
-/** Default server client — reads the key from the environment (never hardcoded, never client-side). */
-const defaultGemini: AskGemini = ({ system, user }) =>
-  callGemini({
-    apiKey: typeof process !== 'undefined' ? (process.env.GEMINI_API_KEY ?? '') : '',
-    system,
-    user,
-  });
+interface ModelClient {
+  fn: AskGemini;
+  provider: string; // shipped in meta.provider — which backend produced (or refused to produce) the text
+}
+
+/**
+ * Default server client chain (CHK-6.7): OPENROUTER_API_KEY → OpenRouter (model overridable via
+ * OPENROUTER_MODEL, default deepseek/deepseek-chat); else GEMINI_API_KEY → Gemini; else a stub that
+ * returns { ok:false } so the engine takes its normal graceful model-error path. Keys are read from
+ * the environment (never hardcoded, never client-side).
+ */
+function defaultClient(): ModelClient {
+  const env = typeof process !== 'undefined' ? process.env : undefined;
+  const orKey = env?.OPENROUTER_API_KEY ?? '';
+  if (orKey) {
+    const model = env?.OPENROUTER_MODEL || OPENROUTER_DEFAULT_MODEL;
+    return {
+      fn: ({ system, user }) => callOpenRouter({ apiKey: orKey, system, user, model }),
+      provider: `openrouter/${model}`,
+    };
+  }
+  const gKey = env?.GEMINI_API_KEY ?? '';
+  if (gKey) {
+    return {
+      fn: ({ system, user }) => callGemini({ apiKey: gKey, system, user }),
+      provider: 'gemini',
+    };
+  }
+  return {
+    fn: async () => ({ ok: false, text: '', error: 'missing-api-key' }),
+    provider: 'none',
+  };
+}
 
 export interface AskParams {
   question: string;
@@ -94,41 +121,38 @@ function toCitations(ns: number[], remedy: AskRemedy): AskCitation[] {
   return out.sort((a, b) => a.n - b.n);
 }
 
-const refusal = (category: string, answer: string, route: Route | null, geminiCalled: boolean): AskResponse => ({
+const refusal = (
+  category: string,
+  answer: string,
+  route: Route | null,
+  geminiCalled: boolean,
+  provider: string,
+): AskResponse => ({
   status: category === 'no-evidence' ? 'no-evidence' : 'refused',
   category,
   answer,
   citations: [],
   route,
-  meta: { promptVersion: PROMPT_VERSION, geminiCalled },
+  meta: { promptVersion: PROMPT_VERSION, geminiCalled, provider },
 });
 
-export async function runAsk(params: AskParams): Promise<AskResponse> {
-  const { question, slug, corpus } = params;
-  const gemini = params.gemini ?? defaultGemini;
+/** Resolve the model client: injected (tests) or the env-driven default chain. */
+function resolveClient(injected?: AskGemini): ModelClient {
+  return injected ? { fn: injected, provider: 'injected' } : defaultClient();
+}
 
-  const remedy = corpus.find((r) => r.slug === slug);
-  if (!remedy) {
-    return {
-      status: 'error',
-      category: 'unknown-remedy',
-      answer: withBoundary("I can't find that page in Somnary's corpus, so I can't answer from it."),
-      citations: [],
-      route: null,
-      meta: { promptVersion: PROMPT_VERSION, geminiCalled: false },
-    };
-  }
-
-  // Layer A — deterministic refusal/routing, no model call.
-  const verdict = classify(question);
-  if (verdict.kind === 'refuse') {
-    return refusal(verdict.category, verdict.message, verdict.route, false);
-  }
+/**
+ * Layers B→D for ONE already-selected remedy — the shared single-remedy pipeline. Both runAsk
+ * (page-scoped) and runAskSitewide (CHK-6.7) end here, so the prompt, the citation post-check, and
+ * the framing lint are byte-for-byte identical for both surfaces.
+ */
+async function answerFromRemedy(question: string, remedy: AskRemedy, client: ModelClient): Promise<AskResponse> {
+  const { provider } = client;
 
   // Layer B — page-scoped retrieval; empty ⇒ hard refuse before the model sees anything.
   const r = retrieve(question, remedy);
   if (!r.matched) {
-    return refusal('no-evidence', noEvidenceMessage(remedy.name), null, false);
+    return refusal('no-evidence', noEvidenceMessage(remedy.name), null, false, provider);
   }
 
   // Layer C — build the versioned prompt from THIS page's chunks + sources[].
@@ -138,7 +162,7 @@ export async function runAsk(params: AskParams): Promise<AskResponse> {
   // Model call (injected for tests).
   let result: GeminiResult;
   try {
-    result = await gemini({ system, user });
+    result = await client.fn({ system, user });
   } catch {
     result = { ok: false, text: '', error: 'engine-exception' };
   }
@@ -149,7 +173,7 @@ export async function runAsk(params: AskParams): Promise<AskResponse> {
       answer: withBoundary(ERROR_MESSAGE),
       citations: [],
       route: null,
-      meta: { promptVersion: PROMPT_VERSION, geminiCalled: true },
+      meta: { promptVersion: PROMPT_VERSION, geminiCalled: true, provider },
     };
   }
 
@@ -157,18 +181,18 @@ export async function runAsk(params: AskParams): Promise<AskResponse> {
 
   // The model correctly declined (out-of-page) → surface as no-evidence.
   if (/i don'?t have that in somnary'?s reviewed evidence/i.test(text)) {
-    return refusal('no-evidence', noEvidenceMessage(remedy.name), null, true);
+    return refusal('no-evidence', noEvidenceMessage(remedy.name), null, true, provider);
   }
 
   // Layer D — forbidden-framing lint on OUTPUT → downgrade to refusal + route.
   if (lintForbiddenFraming(text).length > 0) {
-    return refusal('framing-downgrade', withBoundary(FRAMING_DOWNGRADE_MESSAGE), ROUTES.clinician, true);
+    return refusal('framing-downgrade', withBoundary(FRAMING_DOWNGRADE_MESSAGE), ROUTES.clinician, true, provider);
   }
 
   // Layer D — citation post-check: any [n] not on this page, or any raw identifier → downgrade.
   const cite = checkCitations(text, r.allowedNs);
   if (!cite.ok) {
-    return refusal('citation-downgrade', citationDowngradeMessage(remedy.name), null, true);
+    return refusal('citation-downgrade', citationDowngradeMessage(remedy.name), null, true, provider);
   }
 
   return {
@@ -177,6 +201,31 @@ export async function runAsk(params: AskParams): Promise<AskResponse> {
     answer: withBoundary(text),
     citations: toCitations(cite.cited, remedy),
     route: null,
-    meta: { promptVersion: PROMPT_VERSION, geminiCalled: true },
+    meta: { promptVersion: PROMPT_VERSION, geminiCalled: true, provider },
   };
+}
+
+export async function runAsk(params: AskParams): Promise<AskResponse> {
+  const { question, slug, corpus } = params;
+  const client = resolveClient(params.gemini);
+
+  const remedy = corpus.find((r) => r.slug === slug);
+  if (!remedy) {
+    return {
+      status: 'error',
+      category: 'unknown-remedy',
+      answer: withBoundary("I can't find that page in Somnary's corpus, so I can't answer from it."),
+      citations: [],
+      route: null,
+      meta: { promptVersion: PROMPT_VERSION, geminiCalled: false, provider: client.provider },
+    };
+  }
+
+  // Layer A — deterministic refusal/routing, no model call.
+  const verdict = classify(question);
+  if (verdict.kind === 'refuse') {
+    return refusal(verdict.category, verdict.message, verdict.route, false, client.provider);
+  }
+
+  return answerFromRemedy(question, remedy, client);
 }
