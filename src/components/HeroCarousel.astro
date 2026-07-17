@@ -172,7 +172,11 @@ const resolved: Resolved[] = slides
                         (clear accessible name); its ::after covers .hc-remedy. The nested
                         "How grades work" / "Read the full evidence" links sit above it (z-index). */}
                     <h2 class="hc-name">
-                      <a class="hc-name-link" href={`/r/${s.slug}`}>{s.name}</a>
+                      <a
+                        class="hc-name-link"
+                        href={`/r/${s.slug}`}
+                        aria-label={`${s.name} — grade ${s.tier}, ${getTier(s.tier).name}`}
+                      >{s.name}</a>
                     </h2>
                     {/* frame the stamp as an evidence grade + decode it in plain language
                         (verbatim decisionTranslation from lib/tiers); link the S–F rubric so a
