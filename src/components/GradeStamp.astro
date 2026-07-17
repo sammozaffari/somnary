@@ -1,0 +1,94 @@
+---
+// Assessor's stamp — the grade mark of the plate language (DESIGN_SYSTEM §11.2). The evidence
+// grade pressed on like a curator's mark: grade LETTER + tier word verbatim from lib/tiers
+// (never invented grading language), grade-color ink and border on a paper chip, −3° angle.
+// Extracted from RemedyCard so the plate card and the remedy-page hero share ONE stamp.
+// (HeroCarousel still carries its own inline copy — dedup rides its next touch.)
+//
+// Sizes: `card` (tier-board plate corner — translucent chip; safe there because the linocuts
+// keep >0 alpha clearance in the stamp zone, verified in the #55 review) and `hero` (remedy-page
+// label row — NEAR-OPAQUE paper chip so the grade ink keeps its ≥5:1 contrast over ANY plate).
+//
+// AT: pass `silent` when a parent already announces the grade (e.g. a card link's aria-label).
+// Otherwise the stamp reads naturally with an sr-only "Grade" prefix → "Grade A, Strong".
+import { getTier } from '../lib/tiers';
+import type { TierId } from '../lib/tiers';
+
+interface Props {
+  tier: TierId;
+  size?: 'card' | 'hero';
+  silent?: boolean;
+  class?: string;
+}
+const { tier, size = 'card', silent = false, class: className } = Astro.props;
+const t = getTier(tier);
+const classes = ['stamp', `is-${size}`, className].filter(Boolean).join(' ');
+---
+
+<span
+  class={classes}
+  style={`--g:var(--grade-${tier.toLowerCase()})`}
+  aria-hidden={silent ? 'true' : undefined}
+>
+  {!silent && <span class="sr-only">Grade</span>}
+  <b>{tier}</b>
+  {t.name}
+</span>
+
+<style>
+  .stamp {
+    flex: none;
+    transform: rotate(-3deg);
+    display: inline-flex;
+    align-items: baseline;
+    gap: var(--sp-2);
+    border: 1.5px solid var(--g);
+    border-radius: var(--r-xs);
+    color: var(--g);
+    font-weight: 800;
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    line-height: 1;
+    white-space: nowrap;
+  }
+  .stamp b {
+    font-weight: 900;
+    letter-spacing: -0.02em;
+  }
+
+  /* tier-board plate corner (metrics unchanged from the #55 card) */
+  .is-card {
+    padding: var(--sp-1) var(--sp-2);
+    background: rgba(255, 255, 255, 0.62);
+    font-size: var(--text-xs);
+  }
+  .is-card b {
+    font-size: 15px; /* grade letter, a step above the word (badge dimension system) */
+  }
+
+  /* remedy-page label row — near-opaque paper chip: grade ink keeps tier-board contrast
+     regardless of the plate behind the melt */
+  .is-hero {
+    padding: var(--sp-2) var(--sp-4);
+    border-width: 2px;
+    border-radius: var(--r-sm);
+    background: rgba(251, 247, 244, 0.92);
+    font-size: 15px;
+    box-shadow: 0 4px 14px rgba(23, 21, 18, 0.14);
+  }
+  .is-hero b {
+    font-size: 24px;
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+  }
+</style>

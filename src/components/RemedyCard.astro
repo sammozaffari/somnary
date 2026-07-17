@@ -11,6 +11,7 @@
 // Hover: lift (§4 motion) + the specimen breathes (art scales 1.02); both are disabled
 // under prefers-reduced-motion. Whole card is one link → /r/{slug}.
 import RemedyIcon from './RemedyIcon.astro';
+import GradeStamp from './GradeStamp.astro';
 import { getTier } from '../lib/tiers';
 import type { TierId } from '../lib/tiers';
 
@@ -28,11 +29,10 @@ const t = getTier(tier);
   class="card"
   href={`/r/${slug}`}
   aria-label={`${name} — grade ${tier}, ${t.name}`}
-  style={`--g:var(--grade-${tier.toLowerCase()})`}
 >
   <div class="plate">
     <span class="art"><RemedyIcon slug={slug} size="fill" /></span>
-    <span class="stamp" aria-hidden="true"><b>{tier}</b> {t.name}</span>
+    <GradeStamp tier={tier} size="card" silent class="corner-stamp" />
   </div>
   <div class="body">
     <span class="name">{name}</span>
@@ -93,31 +93,11 @@ const t = getTier(tier);
     transform: scale(1.02); /* the specimen breathes — barely */
   }
 
-  /* assessor's stamp: grade letter + tier word, grade color, hand-pressed angle */
-  .stamp {
+  /* assessor's stamp (shared GradeStamp) pinned to the plate corner */
+  .plate :global(.corner-stamp) {
     position: absolute;
     right: var(--sp-3);
     bottom: var(--sp-3);
-    transform: rotate(-3deg);
-    display: inline-flex;
-    align-items: baseline;
-    gap: var(--sp-2);
-    padding: var(--sp-1) var(--sp-2);
-    border: 1.5px solid var(--g);
-    border-radius: var(--r-xs);
-    background: rgba(255, 255, 255, 0.62);
-    color: var(--g);
-    font-size: var(--text-xs);
-    font-weight: 800;
-    letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
-    line-height: 1;
-    white-space: nowrap;
-  }
-  .stamp b {
-    font-size: 15px; /* grade letter, a step above the word (badge dimension system) */
-    font-weight: 900;
-    letter-spacing: -0.02em;
   }
 
   .body {
