@@ -249,7 +249,8 @@ const jsonLd = remedyJsonLd(d, canonical, site);
     margin-top: var(--sp-8);
   }
 
-  /* breakpoints (§3.2): body 1-col @900 (sidebar static below main); title 46px @640 */
+  /* breakpoints (§3.2): body 1-col @900 (sidebar static below main); title lives in the
+     hero label row (§11.3), which handles its own 46px floor */
   @media (max-width: 900px) {
     .body {
       grid-template-columns: 1fr;
@@ -262,10 +263,6 @@ const jsonLd = remedyJsonLd(d, canonical, site);
   @media (max-width: 640px) {
     .remedy {
       padding: var(--sp-6) var(--sp-5) var(--sp-8);
-    }
-    .title {
-      font-weight: 700;
-      font-size: 46px;
     }
   }
 </style>

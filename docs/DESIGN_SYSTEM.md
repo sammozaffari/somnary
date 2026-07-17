@@ -363,17 +363,23 @@ Every remedy page opens inside its own world: a **full-bleed linocut hero plate*
 dir's README + `docs/plans/2026-07-16-remedy-hero-plates-prompt.md`; design study 2026-07-17
 v4→v6, owner-ratified "labeled plate"). Anatomy:
 
-- **The plate** — pure art, full viewport width, 62vh (44vh under 640px), focal
-  `object-position` per plate (default `center 30%`, subjects sit in the central 60% by
-  family rule). The linocut ICON does not appear on remedy pages — the hero IS the remedy.
+- **The plate** — pure art, full viewport width, 62vh min 380px (44vh min 280px under
+  640px), focal `object-position` per plate (default `center 30%`, subjects sit in the
+  central 60% by family rule). The linocut ICON does not appear on remedy pages — the hero
+  IS the remedy.
 - **The melt** — the plate itself dissolves via an alpha mask over its bottom 34%
   (`mask-image`, opaque → transparent), so the page's real layered background shows through;
   never a painted color fade (the body background is a gradient — a painted fade seams).
 - **The label row** — the plate is **labeled, not painted over**: NO type ever sits on the
-  art (no single ink survives 31 plates — v5 finding). The `h1` title + the assessor's
-  `GradeStamp` (size `hero`: near-opaque paper chip, so grade ink keeps its ≥5:1 contrast
-  over any plate) print on the paper below, tucked `−7vh` into the melt so plate and label
-  read as one composition. Title is always `--ink` on paper — zero per-remedy tuning.
+  art (no single ink survives 31 plates — v5 finding). The `h1` title (hero display size:
+  `clamp(46px, 7vw, 84px)` / 0.95 / weight 700 — a §2 addition ratified with this anatomy)
+  + the assessor's `GradeStamp` (size `hero`: `--paper` chip at 92% opacity + `--shadow-sm`,
+  so grade ink stays **AA ≥4.5:1** over any plate — worst computed 4.97:1, `--grade-c`
+  behind maximum residual melt alpha) print on the paper below, tucked `−7vh` into the melt
+  (`−5vh` under 640px) so plate and label read as one composition. At every ratified
+  height/floor the label's tuck stays inside the melt zone — the title never reaches
+  un-melted art (worst residual image alpha behind the title ≈ 0.334 → ink-on-composite
+  ≥ 8.6:1). Title is always `--ink` on paper — zero per-remedy tuning.
 - **Below** — the one-line verdict as the plate's caption, then the lead block, whose
   translation line anchors the grade in plain text ("Grade A · Strong — …"): never color
   alone, twice per page. Crumbs are retired from remedy pages; navigation stays in the nav.

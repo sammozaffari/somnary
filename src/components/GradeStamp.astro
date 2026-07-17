@@ -7,7 +7,8 @@
 //
 // Sizes: `card` (tier-board plate corner — translucent chip; safe there because the linocuts
 // keep >0 alpha clearance in the stamp zone, verified in the #55 review) and `hero` (remedy-page
-// label row — NEAR-OPAQUE paper chip so the grade ink keeps its ≥5:1 contrast over ANY plate).
+// label row — near-opaque --paper chip so the grade ink stays AA ≥4.5:1 over ANY plate;
+// worst case computed 4.97:1, --grade-c behind maximum residual melt alpha — §11.3).
 //
 // AT: pass `silent` when a parent already announces the grade (e.g. a card link's aria-label).
 // Otherwise the stamp reads naturally with an sr-only "Grade" prefix → "Grade A, Strong".
@@ -66,15 +67,15 @@ const classes = ['stamp', `is-${size}`, className].filter(Boolean).join(' ');
     font-size: 15px; /* grade letter, a step above the word (badge dimension system) */
   }
 
-  /* remedy-page label row — near-opaque paper chip: grade ink keeps tier-board contrast
-     regardless of the plate behind the melt */
+  /* remedy-page label row — near-opaque paper chip (--paper at .92): grade ink stays AA
+     (≥4.5:1) regardless of the plate behind the melt */
   .is-hero {
     padding: var(--sp-2) var(--sp-4);
     border-width: 2px;
     border-radius: var(--r-sm);
-    background: rgba(251, 247, 244, 0.92);
+    background: color-mix(in srgb, var(--paper) 92%, transparent);
     font-size: 15px;
-    box-shadow: 0 4px 14px rgba(23, 21, 18, 0.14);
+    box-shadow: var(--shadow-sm);
   }
   .is-hero b {
     font-size: 24px;
