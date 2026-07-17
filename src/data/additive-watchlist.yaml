@@ -110,8 +110,9 @@ flagged:
       reasonably anticipated to be a human carcinogen, based on forestomach
       tumours in rodents fed high doses. A 2021 review notes the forestomach is
       an organ humans lack and argues the mechanism may not be human-relevant, so
-      the human evidence is weak and contested. BHA and the related antioxidant
-      BHT act only as preservatives; flagged on a precautionary basis.
+      the human evidence is weak and contested. The cited review addresses BHA
+      specifically; the related synthetic phenolic antioxidant BHT is grouped
+      with it here. Both act only as preservatives; flagged on a precautionary basis.
     sources:
       - doi: 10.1016/j.yrtph.2021.104887
         title: "Butylated hydroxyanisole: Carcinogenic food additive to be avoided or harmless antioxidant important to protect food supply?"
