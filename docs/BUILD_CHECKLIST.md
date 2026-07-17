@@ -381,9 +381,38 @@ exists so sessions extend the site instead of rebuilding it.
 - [ ] **CHK-6.5 Supporter tier / label-checker pro.** `HG` scope + pricing.
   *Accept:* free wiki never paywalled.
 
+### Guide-concierge arc (owner-ratified design 2026-07-17 —
+`docs/plans/2026-07-17-guide-concierge-accounts-design.md` is binding for 6.6–6.11)
+- [ ] **CHK-6.6 Sleep-habits content hub.** `/sleep-habits` + per-habit sections
+  (caffeine, alcohol, screens/light, schedule, naps, environment, exercise
+  timing), source-first, 10-part-skeleton honesty incl. hygiene-vs-CBT-I evidence
+  candor. *Accept:* SSG, every claim cited, resolver + auditor green.
+- [ ] **CHK-6.7 Site-wide ask in search.** Generalize the ask engine to
+  corpus-wide scope; "Ask Somnary →" row in the palette on weak/question queries;
+  engine moves to OpenRouter (`deepseek/deepseek-chat`, env-swappable). *Accept:*
+  same guardrail stack passes the refusal/hallucination suite site-wide.
+- [ ] **CHK-6.8 `/guide` concierge.** Anonymous intake (situation → history →
+  habits → reading map): topic-fence, structured extraction, deterministic
+  routing, severity-proportionate output; history beats land in the community
+  store (firewalled per CHK-6.4). *Accept:* red-team fixtures all refuse-or-route;
+  every routed output is a real URL; model prose limited to acknowledgments.
+- [ ] **CHK-6.9 Accounts + saved profiles.** `HG` (privacy page). Supabase Auth
+  OAuth, optional-only, offered at chat end; stores structured answers/map/
+  checklist, never transcripts; experience reports stay pseudonymous + separate.
+  *Accept:* no login wall anywhere; privacy page PR opened for owner.
+- [ ] **CHK-6.10 Product-quality panels.** `HG` (framing sign-off). Per-remedy
+  criteria-verified panels (magnesium + melatonin first), evidence-first framing,
+  no purchase links, new `products` collection separate from corpus. *Accept:*
+  AI never emits a brand name in an imperative sentence shape; disclaimer
+  adjacent; grades untouched.
+- [ ] **CHK-6.11 Community nomination pipeline.** Chat history-beats + form feed
+  a queue; publish only after editorial criteria verification. *Accept:* firewall
+  holds; community input never sets appearance by popularity alone.
+
 ---
 
 ### Session log (agents append one line per session)
+- 2026-07-17 · design · guide-concierge arc ratified (brainstorm with owner, live). Owner proposed an AI intake chat ("problems / remedies tried / specific products / habits" → profile), OAuth accounts, OpenRouter DeepSeek, AI-integrated search, and (future) community-trusted products. Shaped against the constitution and ratified decision-by-decision: concierge/ROUTER not recommender (reading map of corpus URLs, never "take X" — non-negotiables unamended); accounts OPTIONAL via Supabase OAuth, offered at chat end only; dedicated `/guide` page + hero entry (home design kept); products = criteria-verified quality panels (label-checker R1–R5 editorially applied, evidence-first, no purchase links, no affiliate EVER), AI describes criteria but hard-filtered from brand+imperative shapes; experience/supplier reports → CHK-6.4 community store (firewalled); severity-proportionate routing (minor → habits+reading; chronic → CBT-I/clinician, never preachy); habits education hub + deterministic "worth changing" checklist. Design doc: `docs/plans/2026-07-17-guide-concierge-accounts-design.md`. Checklist gains CHK-6.6–6.11 (6.9 privacy-page HG, 6.10 framing HG). No code, no grades, no legal/monetization change — doc-only, autonomous merge.
 - 2026-07-17 · design · remedy hero plates: assets (#57) + labeled-plate wiring (owner-directed, studies v4→v6). Landed the 31 owner-directed full-bleed linocut heroes as WebP q90 production sources (227MB PNG masters stay in owner archive; regeneration prompt at docs/plans/2026-07-16-remedy-hero-plates-prompt.md) then wired the ratified "labeled plate" opener: new `RemedyHero.astro` (62vh plate, alpha-MASK melt — not a painted fade, the body bg is a gradient and would seam — label row h1+stamp tucked −7vh into the melt; LCP eager/high-priority, 828–2880w srcset; alt="" with h1 naming). Title never sits on the art (v5 owner finding: "black and even white can be hard to read" — no single ink survives 31 plates); killed the planned per-remedy `--hero-ink` token entirely. Extracted shared `GradeStamp.astro` (card/hero sizes, sr-only "Grade" prefix; RemedyCard swapped to it; HeroCarousel inline copy = dedup on next touch). RETIRED RemedyEmblem.astro (zero renders after #55/#56/this superseded every surface); lead block loses badge column, translation line now anchors grade in text ("Grade A · Strong — …"); crumb retired from remedy pages; dek promoted to plate caption. DESIGN_SYSTEM §11.1 rewritten historical, §11.2 amended, §11.3 added; design doc 2026-07-17-remedy-hero-labeled-plate-design.md. verify+framing(31 files)+crawl(31 pages)+build green; 31/31 pages render hero+label SSR. Compliance carry-forward: label-row stamp has grade line+translation adjacent; re-check if reused without that context.
 - 2026-07-15 · design · remedy emblem + plate card — icon/grade unification (owner-directed, 3 interactive design studies; PR #55, awaiting owner visual review). Owner: the icon/grade pairing "feels disjointed… an afterthought" → ratified "carve + orbit" fused emblem, then (v3) retired its 56px card form as illegible ("you cannot tell what's even in those linocut icons") → plate card. Shipped: `RemedyEmblem.astro` (oxblood disc + linocut 72%, mask-carved bite seating the grade seal, grade-colored evidence orbit; spot 80/lead 148; decorative-mode for AT) replacing icon-tile+TierBadge pairs in HeroAnswerCard + RemedyLeadBlock; `RemedyCard.astro` → specimen plate (full-bleed `--primary-soft`, art at 132px, grade STAMPED letter+tier-word from lib/tiers at −3°, name + clamped one-liner, keyCompound dropped from cards; hover lift + art scale 1.02, both off under reduced-motion); RemedyIcon gains `fill`. design-guardian FAIL→PASS (fixed: reduced-motion lift; spotlight visible "Grade X · tier-word" line; stale 3.75:1→5.56:1 doc figure; stamp worst-case 5.20:1 AA ✓, stamp/art overlap alpha-scanned 31/31 clean); compliance PASS (0 forbidden framings, disclaimers intact; NOTE: re-review "S · PROVEN" stamp if plate card ever ships outside /tiers). CI hardened: forbidden-framing lint TARGETS 3→all 30 components. DESIGN_SYSTEM §11.1 amended + §11.2 added; design doc + v3 addendum in docs/plans/. verify+build green; 31/31 tier cards SSR plate+stamp. Deferred: `index.astro` pre-existing type errors (Lucide props, RemedyIcon size="pill"); tokenize plate-card font-weight 650 / line-height 1.15 on next touch.
 - 2026-07-13 · design · body reading line-height 1.45 → 1.6 (owner WIP finished). Loosened `--lh-base` 1.45 → 1.60 in `global.css` (drives `--text-base`, so all body/reading text site-wide gets more generous leading — a legibility win for the long-form evidence pages) + added an explicit `letter-spacing: normal` reading-text reset on `body` (no-op restatement; body never set tracking). `DESIGN_SYSTEM.md` type tables synced to `16px / 1.6, no tracking`. design-guardian PASS: doc↔CSS consistent, scale stays monotonic-by-role (lede 1.40 < sm 1.50 < base 1.60), token-only (linter exempts global.css + doesn't scan line-height), no fixed-height container clamps body copy so zero regression. Left untouched: `docs/html-prototype/styles.css:44` (historical v3 prototype artifact, not the live token system). Non-gated, autonomous merge.
