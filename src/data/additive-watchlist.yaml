@@ -1,0 +1,202 @@
+# Additive watchlist — Somnary Source Scorecards (Additives & formulation dimension)
+#
+# PURPOSE: A cited list of ingredients that, when present in a sleep supplement,
+# subtract from that product's Additives & formulation score. This exists to
+# apply the rubric mechanically and defensibly — NOT to endorse clean-label
+# ideology. An additive is listed only when a resolvable regulatory assessment,
+# controlled human trial, or toxicological review supports the concern as
+# written. Weak or precautionary evidence is labeled weak in the rationale.
+#
+# SEVERITY SEMANTICS (must match docs/SOURCE_SCORECARD_RUBRIC.md, Additives &
+# formulation dimension, which starts at 5 and floors at 0):
+#   flag    = minor / precautionary / dose-dependent tolerability evidence  -> -1 point
+#   concern = stronger evidence, or a regulator has withdrawn approval      -> -2 points
+#   structural: true = a labelling-transparency defect, penalised           -> per rubric
+#                      structurally; no external citation applies.
+#
+# EXPLICIT EXCLUSION — ARTIFICIAL SWEETENERS ARE NOT FLAGGED HERE. High-intensity
+# artificial sweeteners (sucralose, acesulfame-K, aspartame, etc.) do not appear
+# on this watchlist. Where a brand markets a product with fear-based or false
+# "no nasty sweeteners" claims, that dishonesty is penalised under the Marketing
+# honesty dimension — not here. The sugar-alcohol entry below is flagged only for
+# dose-dependent gastrointestinal tolerability (osmotic load), a distinct and
+# reversible effect, never for "sweetener toxicity".
+#
+# TONE: regulatory-factual. State what the evidence shows and whether it is a
+# regulatory precaution or demonstrated harm. Never "toxic", "poison", "nasty".
+#
+# REVIEW DATE: 2026-07-17
+
+flagged:
+  - id: titanium-dioxide
+    names: ["titanium dioxide", "E171", "CI 77891"]
+    class: colorant
+    severity: concern
+    rationale: >
+      In 2021 EFSA concluded that titanium dioxide can no longer be considered
+      safe as a food additive because a concern for genotoxicity could not be
+      ruled out, and the EU banned E171 in food from 2022. In a supplement it
+      performs only a cosmetic whitening function and contributes no active
+      ingredient. This is a precautionary regulatory withdrawal of approval
+      rather than a finding of demonstrated harm at supplement exposures.
+    sources:
+      - doi: 10.2903/j.efsa.2021.6585
+        title: "Safety assessment of titanium dioxide (E171) as a food additive"
+        year: 2021
+        type: regulatory-assessment
+
+  - id: artificial-azo-dyes
+    names: ["FD&C Red 40", "Allura Red", "E129", "FD&C Yellow 5", "tartrazine", "E102", "FD&C Yellow 6", "Sunset Yellow", "E110", "azo dye"]
+    class: colorant
+    severity: concern
+    rationale: >
+      A UK Food Standards Agency-funded randomised, double-blind,
+      placebo-controlled trial (McCann 2007) found that mixes of synthetic azo
+      colours increased hyperactive behaviour in children in the general
+      population; the effect sizes were small but statistically significant. On
+      that basis the EU requires a warning label ("may have an adverse effect on
+      activity and attention in children") on foods containing these dyes. In a
+      supplement they add colour only and serve no active function.
+    sources:
+      - pmid: 17825405
+        title: "Food additives and hyperactive behaviour in 3-year-old and 8/9-year-old children in the community: a randomised, double-blinded, placebo-controlled trial"
+        year: 2007
+        type: randomised-controlled-trial
+
+  - id: erythrosine-red-3
+    names: ["FD&C Red 3", "erythrosine", "E127", "CI 45430"]
+    class: colorant
+    severity: flag
+    rationale: >
+      In January 2025 the FDA revoked authorisation for FD&C Red No. 3 in food
+      and ingested drugs under the Delaney Clause, citing rat studies
+      (Borzelleca 1987) in which high dietary doses produced thyroid
+      follicular-cell tumours in male rats. The FDA states the underlying
+      hormonal mechanism is rat-specific and does not occur in humans at relevant
+      exposures, so the human evidence of harm is weak; the flag reflects the
+      mandated regulatory phase-out, not demonstrated human risk. The dye adds
+      colour only.
+    sources:
+      - pmid: 2824305
+        title: "Lifetime toxicity/carcinogenicity study of FD & C Red No. 3 (erythrosine) in rats"
+        year: 1987
+        type: animal-study
+
+  - id: sodium-benzoate
+    names: ["sodium benzoate", "E211"]
+    class: preservative
+    severity: flag
+    rationale: >
+      In the same UK FSA-funded randomised controlled trial (McCann 2007), test
+      mixes that combined a sodium benzoate preservative with artificial colours
+      increased hyperactive behaviour in children; the trial could not isolate
+      the benzoate contribution from the colours, so the evidence specific to
+      benzoate is weak. It functions only as an antimicrobial preservative.
+      Flagged as a minor, precautionary signal, not as evidence of harm at
+      approved use levels.
+    sources:
+      - pmid: 17825405
+        title: "Food additives and hyperactive behaviour in 3-year-old and 8/9-year-old children in the community: a randomised, double-blinded, placebo-controlled trial"
+        year: 2007
+        type: randomised-controlled-trial
+
+  - id: bha-bht
+    names: ["butylated hydroxyanisole", "BHA", "E320", "butylated hydroxytoluene", "BHT", "E321"]
+    class: preservative
+    severity: flag
+    rationale: >
+      IARC classifies butylated hydroxyanisole (BHA) as Group 2B ("possibly
+      carcinogenic to humans") and the US National Toxicology Program lists it as
+      reasonably anticipated to be a human carcinogen, based on forestomach
+      tumours in rodents fed high doses. A 2021 review notes the forestomach is
+      an organ humans lack and argues the mechanism may not be human-relevant, so
+      the human evidence is weak and contested. BHA and the related antioxidant
+      BHT act only as preservatives; flagged on a precautionary basis.
+    sources:
+      - doi: 10.1016/j.yrtph.2021.104887
+        title: "Butylated hydroxyanisole: Carcinogenic food additive to be avoided or harmless antioxidant important to protect food supply?"
+        year: 2021
+        type: review
+
+  - id: partially-hydrogenated-oils
+    names: ["partially hydrogenated oil", "partially hydrogenated vegetable oil", "PHO", "trans fat", "industrial trans fatty acids"]
+    class: filler
+    severity: concern
+    rationale: >
+      Industrial trans fats from partially hydrogenated oils raise LDL
+      cholesterol, lower HDL, and are associated with increased coronary heart
+      disease risk (Mozaffarian 2006); the WHO has called for their global
+      elimination and the FDA removed partially hydrogenated oils from GRAS
+      status in 2018. In a supplement they act as a cheap fat/filler base and
+      confer no benefit. The human evidence of cardiovascular harm from dietary
+      trans fat is strong.
+    sources:
+      - pmid: 16611951
+        title: "Trans fatty acids and cardiovascular disease"
+        year: 2006
+        type: review
+
+  - id: sugar-alcohol-load
+    names: ["sorbitol", "E420", "maltitol", "E965", "xylitol", "E967", "isomalt", "E953", "mannitol", "E421", "lactitol", "E966", "polyol"]
+    class: filler
+    severity: flag
+    rationale: >
+      Sugar alcohols (polyols) used to bulk and sweeten gummies are incompletely
+      absorbed and draw water osmotically into the gut; single doses roughly
+      above 10-30 g of sorbitol or xylitol commonly cause bloating, gas, and
+      diarrhoea, with wide individual variation (Mäkinen 2016). The effect is a
+      dose-dependent, reversible tolerability issue, not toxicity. A multi-gummy
+      daily serving can approach these thresholds, so the flag reflects
+      gastrointestinal tolerability at load — distinct from the artificial-
+      sweetener exclusion noted in the header.
+    sources:
+      - pmid: 27840639
+        title: "Gastrointestinal Disturbances Associated with the Consumption of Sugar Alcohols with Special Consideration of Xylitol: Scientific Review and Instructions for Dentists and Other Health-Care Professionals"
+        year: 2016
+        type: review
+
+  - id: proprietary-blend
+    names: ["proprietary blend", "proprietary formula", "prop blend"]
+    class: structural
+    structural: true
+    severity: concern
+    rationale: >
+      An undisclosed proprietary blend declares a single combined weight for
+      several ingredients without stating each per-ingredient dose, which makes
+      it impossible to compare an active against its studied dose or to detect
+      underdosing of the ingredient that matters. This is a labelling-
+      transparency defect, penalised structurally under the Additives &
+      formulation dimension of the rubric; no external citation applies.
+
+# NOT FLAGGED — benign excipients that pseudoscientific "clean-label" marketing
+# attacks without evidence. Listed here so the watchlist cannot be read as
+# clean-label ideology: at excipient doses, flag-worthy human evidence is absent.
+not_flagged:
+  - id: silicon-dioxide
+    names: ["silicon dioxide", "silica", "synthetic amorphous silica", "E551"]
+    rationale: >
+      Silicon dioxide is a common anti-caking and flow agent. EFSA's 2018
+      re-evaluation found it is poorly absorbed, raises no concern for
+      genotoxicity, and retained a group ADI "not specified" — the category
+      reserved for additives of very low concern. No flag-worthy human evidence
+      exists at excipient doses; treating it as a toxin is the pseudoscience this
+      watchlist rejects.
+    sources:
+      - doi: 10.2903/j.efsa.2018.5088
+        title: "Re-evaluation of silicon dioxide (E 551) as a food additive"
+        year: 2018
+        type: regulatory-assessment
+
+  - id: magnesium-stearate
+    names: ["magnesium stearate", "E572", "magnesium salts of fatty acids", "octadecanoic acid magnesium salt"]
+    rationale: >
+      Magnesium stearate is a widely used tablet and capsule lubricant. A 2017
+      toxicological study found no in vitro or in vivo genotoxic potential at
+      relevant exposures, and JECFA assigns it an ADI "not limited". Claims that
+      it suppresses immunity or blocks nutrient absorption are not supported at
+      excipient doses; no flag-worthy evidence exists.
+    sources:
+      - pmid: 29090120
+        title: "Magnesium stearate, a widely-used food additive, exhibits a lack of in vitro and in vivo genotoxic potential"
+        year: 2017
+        type: toxicology-study
