@@ -20,6 +20,9 @@ import {
   checkCitations,
   lintForbiddenFraming,
   noEvidenceMessage,
+  sitewideNoEvidenceMessage,
+  multiRemedyMessage,
+  detectRemedyMentions,
   citationDowngradeMessage,
   FRAMING_DOWNGRADE_MESSAGE,
   ERROR_MESSAGE,
@@ -27,7 +30,7 @@ import {
   type Route,
 } from './guardrails.ts';
 import { PROMPT_VERSION, systemInstruction, buildUserPrompt } from './prompt.ts';
-import { retrieve } from './retrieval.ts';
+import { retrieve, retrieveSitewide } from './retrieval.ts';
 import { callGemini, type GeminiResult } from './gemini.ts';
 import { callOpenRouter, OPENROUTER_DEFAULT_MODEL } from './openrouter.ts';
 
@@ -51,6 +54,10 @@ export interface AskResponse {
   citations: AskCitation[];
   route: Route | null;
   meta: { promptVersion: string; geminiCalled: boolean; provider: string };
+  /** Site-wide only (CHK-6.7): which single remedy page the answer was drawn from. */
+  answeredFrom?: { name: string; url: string };
+  /** Site-wide only (CHK-6.7): extra deterministic pointers (compare + remedy pages, or search + tiers). */
+  links?: Route[];
 }
 
 export type AskGemini = (args: { system: string; user: string }) => Promise<GeminiResult>;
@@ -228,4 +235,67 @@ export async function runAsk(params: AskParams): Promise<AskResponse> {
   }
 
   return answerFromRemedy(question, remedy, client);
+}
+
+// --- Site-wide ask (CHK-6.7) ---------------------------------------------------------------------
+
+export interface AskSitewideParams {
+  question: string;
+  corpus: AskRemedy[];
+  gemini?: AskGemini;
+}
+
+/**
+ * Corpus-wide question → SINGLE-remedy answer. Guardrail order is fixed:
+ *
+ *   1. classify()          — the same Layer A refusals (dosing/diagnosis/combine/crisis/…) win first.
+ *   2. multi-remedy router — a question naming ≥2 corpus remedies gets a deterministic canned
+ *                            response pointing at /compare + each remedy page, NO model call
+ *                            (cross-page synthesis would break per-page [n] citation integrity,
+ *                            and "which should I take together" is D4 territory).
+ *   3. retrieveSitewide()  — deterministically select the one best remedy (an explicitly named
+ *                            remedy wins; else distinctive-token chunk scoring), then run the
+ *                            UNCHANGED single-remedy pipeline against that page only.
+ *
+ * Answered responses add answeredFrom {name,url} so the caller can say which page answered.
+ */
+export async function runAskSitewide(params: AskSitewideParams): Promise<AskResponse> {
+  const { question, corpus } = params;
+  const client = resolveClient(params.gemini);
+
+  // 1 — Layer A, exactly as page-scoped.
+  const verdict = classify(question);
+  if (verdict.kind === 'refuse') {
+    return refusal(verdict.category, verdict.message, verdict.route, false, client.provider);
+  }
+
+  // 2 — multi-remedy router: deterministic, model never called.
+  const mentions = detectRemedyMentions(question, corpus);
+  if (mentions.length >= 2) {
+    return {
+      status: 'refused',
+      category: 'multi-remedy',
+      answer: withBoundary(multiRemedyMessage(mentions.map((m) => m.name))),
+      citations: [],
+      route: ROUTES.compare,
+      links: mentions.map((m) => ({ href: `/r/${m.slug}`, label: m.name })),
+      meta: { promptVersion: PROMPT_VERSION, geminiCalled: false, provider: client.provider },
+    };
+  }
+
+  // 3 — select ONE remedy (named remedy wins; else distinctive-token scoring), then delegate to the
+  // unchanged single-remedy pipeline.
+  const selected = retrieveSitewide(question, corpus, mentions[0] ?? null);
+  const sitewideNoEvidence = (geminiCalled: boolean): AskResponse => ({
+    ...refusal('no-evidence', sitewideNoEvidenceMessage(), ROUTES.search, geminiCalled, client.provider),
+    links: [ROUTES.tiers],
+  });
+  if (!selected) return sitewideNoEvidence(false);
+
+  const res = await answerFromRemedy(question, selected, client);
+  if (res.status === 'no-evidence') return sitewideNoEvidence(res.meta.geminiCalled);
+  if (res.status === 'answered') {
+    return { ...res, answeredFrom: { name: selected.name, url: `/r/${selected.slug}` } };
+  }
+  return res;
 }
