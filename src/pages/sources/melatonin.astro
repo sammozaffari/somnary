@@ -65,7 +65,7 @@ function pips(score: number): string {
                     {p.productName} · {p.doseMg} mg · {p.form}
                   </p>
                 </div>
-                <p class="cert" data-kind={p.certSummary.toLowerCase().includes('no ') ? 'none' : 'yes'}>
+                <p class="cert" data-kind={p.certVerified ? 'yes' : 'none'}>
                   {p.certSummary}
                 </p>
               </div>
@@ -125,7 +125,8 @@ function pips(score: number): string {
       Somnary · Melatonin source scorecards · Reviewed {reviewDate} · Educational, not medical
       advice · A scorecard is about what’s in a bottle, never about whether you should take it —
       talk to a clinician before changing what you take. Found an error, or a brand with a
-      document to add? <a href="mailto:sammymoz@gmail.com">sammymoz@gmail.com</a>.
+      document to add? We aim to fix verified errors within 7 days —
+      <a href="mailto:sammymoz@gmail.com">sammymoz@gmail.com</a>.
     </p>
   </main>
 </Base>
@@ -277,7 +278,7 @@ function pips(score: number): string {
   }
   .pips {
     font-size: var(--text-sm);
-    letter-spacing: 1px;
+    letter-spacing: 0.15em;
     color: var(--ink);
   }
   .num {

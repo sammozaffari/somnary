@@ -57,6 +57,8 @@ export interface SourceProduct {
   singleOrCombo: 'single' | 'combo';
   manufacturerUrl: string;
   certSummary: string;
+  /** True only for a genuine, directory-confirmed third-party product certification (drives the positive cert-chip color). */
+  certVerified?: boolean;
   additiveSummary: string;
   scores: Record<DimensionKey, Dimension>;
   verdict: string;
@@ -109,6 +111,7 @@ export const MELATONIN_SOURCES: SourceProduct[] = [
     singleOrCombo: 'single',
     manufacturerUrl: 'https://www.naturemade.com/products/nature-made-melatonin-3-mg-tablets',
     certSummary: 'USP Verified',
+    certVerified: true,
     additiveSummary: 'No flagged additives',
     scores: {
       testing_purity: { score: 2, note: 'USP Verified, confirmed in USP’s own directory (+2); no NSF/Informed.' },
