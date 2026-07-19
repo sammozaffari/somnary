@@ -279,34 +279,38 @@
     gap: var(--sp-4);
   }
 
-  .map-section {
+  /* one woven narrative fragment: a sentence + its real corpus links */
+  .map-fragment {
     background: var(--surface);
     border: var(--border-hairline);
     border-radius: var(--r-md);
     padding: var(--sp-5);
   }
-  .map-section-title {
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
-    font-weight: 600;
-    color: var(--primary);
-    margin: 0 0 var(--sp-4);
+  .map-fragment-text {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--ink);
+    margin: 0;
+    max-width: 64ch;
   }
-  /* crisis / boundary sections read as prominent, calm-but-firm — safety register */
-  .map-section.is-crisis {
+  .map-fragment .map-items {
+    margin-top: var(--sp-4);
+  }
+  /* crisis / boundary fragments read as prominent, calm-but-firm — safety register */
+  .map-fragment.is-crisis {
     background: var(--grade-f-tint);
     border-color: var(--grade-f);
   }
-  .map-section.is-crisis .map-section-title {
+  .map-fragment.is-crisis .map-fragment-text {
     color: var(--grade-f);
+    font-weight: 600;
   }
-  .map-section.is-boundary {
+  .map-fragment.is-boundary {
     background: var(--warning-bg);
     border-color: var(--grade-f);
   }
-  .map-section.is-boundary .map-section-title {
-    color: var(--grade-f);
+  .map-fragment.is-boundary .map-fragment-text {
+    color: var(--ink);
   }
 
   .map-items {
@@ -331,13 +335,6 @@
   .is-crisis .map-item-link,
   .is-boundary .map-item-link {
     color: var(--grade-f);
-  }
-  .map-item-note {
-    font-size: var(--text-sm);
-    line-height: var(--lh-sm);
-    color: var(--muted);
-    margin: var(--sp-1) 0 0;
-    max-width: 64ch;
   }
 
   .map-foot {
@@ -405,9 +402,16 @@
     title: string;
     items: RouteItem[];
   }
+  type FragmentTone = 'crisis' | 'boundary' | 'normal';
+  interface SummaryFragment {
+    text: string;
+    links: RouteItem[];
+    tone: FragmentTone;
+  }
   interface RoutePlan {
     stop: boolean;
     sections: RouteSection[];
+    summary: SummaryFragment[];
   }
   // GuideState is opaque to the client — it is only ever POSTed back verbatim as priorState. We never
   // read a field off it (esp. no prose exists on it), so it is typed as an unknown record.
@@ -603,48 +607,47 @@
       ackText.textContent = ack || '';
     };
 
-    // ---- the reading map (persistent results view) -----------------------------------------
-    const SECTION_CLASS: Partial<Record<SectionKind, string>> = {
+    // ---- the reading map (persistent NARRATIVE summary) ------------------------------------
+    // CHK-6.8c revision: instead of a grouped link list, render the SERVER-composed woven summary —
+    // one <p> per fragment (its deterministic text) followed by its real corpus links. The server
+    // already orders fragments safety-first; we preserve that order exactly.
+    const FRAGMENT_CLASS: Record<FragmentTone, string> = {
       crisis: 'is-crisis',
       boundary: 'is-boundary',
+      normal: '',
     };
 
     const renderMap = (plan: RoutePlan, crisis: boolean) => {
-      // The SERVER already orders sections (safety/crisis first). Preserve plan order exactly.
       mapSections.innerHTML = '';
-      plan.sections.forEach((section) => {
-        const secEl = document.createElement('section');
-        secEl.className = 'map-section' + (SECTION_CLASS[section.kind] ? ' ' + SECTION_CLASS[section.kind] : '');
+      plan.summary.forEach((frag) => {
+        const fragEl = document.createElement('div');
+        fragEl.className = 'map-fragment' + (FRAGMENT_CLASS[frag.tone] ? ' ' + FRAGMENT_CLASS[frag.tone] : '');
 
-        const title = document.createElement('p');
-        title.className = 'map-section-title';
-        title.textContent = section.title; // server-authored
-        secEl.appendChild(title);
+        const p = document.createElement('p');
+        p.className = 'map-fragment-text';
+        p.textContent = frag.text; // server-composed, deterministic — never model prose or raw user text
+        fragEl.appendChild(p);
 
-        const list = document.createElement('ul');
-        list.className = 'map-items';
-        section.items.forEach((item) => {
-          const li = document.createElement('li');
-          const a = document.createElement('a');
-          a.className = 'map-item-link';
-          a.href = item.href; // server-authored, real corpus URL
-          a.textContent = item.label; // server-authored
-          li.appendChild(a);
-          if (item.note) {
-            const note = document.createElement('p');
-            note.className = 'map-item-note';
-            note.textContent = item.note; // server-authored deterministic note (never a recommendation)
-            li.appendChild(note);
-          }
-          list.appendChild(li);
-        });
-        secEl.appendChild(list);
-        mapSections.appendChild(secEl);
+        if (frag.links.length) {
+          const list = document.createElement('ul');
+          list.className = 'map-items';
+          frag.links.forEach((item) => {
+            const li = document.createElement('li');
+            const a = document.createElement('a');
+            a.className = 'map-item-link';
+            a.href = item.href; // server-authored, real corpus URL
+            a.textContent = item.label; // server-authored
+            li.appendChild(a);
+            list.appendChild(li);
+          });
+          fragEl.appendChild(list);
+        }
+        mapSections.appendChild(fragEl);
       });
 
       mapLede.textContent = crisis
         ? "Your safety comes first. Please use the help below now — the rest can wait."
-        : "Here's where to read on Somnary for what you described. Safety pages come first where they apply. Nothing here is a recommendation or a dose — it's a map to the evidence.";
+        : "Here's a short read of what you told me and where to go next on Somnary. Safety pages come first where they apply. Nothing here is a recommendation or a dose — it's a map to the evidence.";
 
       beatEl.hidden = true;
       ackWrap.hidden = true;

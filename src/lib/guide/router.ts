@@ -15,7 +15,7 @@
 import { ROUTES, detectRemedyMentions, type Route, type RemedyRef } from '../ask/guardrails.ts';
 import { OUTCOMES } from '../outcomes.ts';
 import { HABIT_SUMMARY_BY_ID } from '../habits.ts';
-import type { GuideExtraction, HabitSignal, Problem, RedFlag } from './schema.ts';
+import type { Chronicity, GuideExtraction, HabitSignal, Problem, RedFlag } from './schema.ts';
 
 // --- route-plan shape ---------------------------------------------------------------------------
 
@@ -40,10 +40,70 @@ export interface RouteSection {
   items: RouteItem[];
 }
 
+/**
+ * A woven narrative reading map (CHK-6.8c revision). Instead of a grouped link list, the plan carries
+ * an ordered array of narrative FRAGMENTS the server composes DETERMINISTICALLY from (a) fixed
+ * enum→phrase templates and (b) verbatim corpus data (remedy name/tier/verdict, HABIT summaries).
+ *
+ * THE INVARIANT HOLDS: a fragment's `text` NEVER contains the user's raw input, the model's `notes`,
+ * or the model's `ack`. Only extracted ENUM signals (mapped to fixed server phrases here) and corpus
+ * fields may appear. Every link is a server-derived real URL — the SAME real-URL set the sections use.
+ */
+export interface SummaryFragment {
+  /** Server-composed narrative sentence(s). Deterministic — no model prose, no raw user text. */
+  text: string;
+  /** Real corpus URLs backing this fragment (a subset of the section hrefs). May be empty (recap). */
+  links: RouteItem[];
+  /** Visual register: crisis/boundary read as the safety tone; normal is the neutral tone. */
+  tone: 'crisis' | 'boundary' | 'normal';
+}
+
 export interface RoutePlan {
   /** True when a crisis screener short-circuited routing (no remedy/outcome/habit sections). */
   stop: boolean;
   sections: RouteSection[];
+  /** The woven narrative reading map — ordered, safety-first, composed from enums + corpus only. */
+  summary: SummaryFragment[];
+}
+
+// --- fixed enum → narrative phrase maps (the ONLY vocabulary the summary recap may use) ----------
+// Every phrase here is server-authored, deterministic, and enum-keyed. The recap is composed ONLY
+// from these — never from the user's raw text, the model's notes, or the model's ack.
+
+/** problem enum → a plain description of what the reader told us (used in the recap sentence). */
+const PROBLEM_PHRASE: Record<Problem, string> = {
+  onset: 'trouble falling asleep',
+  maintenance: 'waking through the night',
+  'early-waking': 'waking too early',
+  'shift-jetlag': 'sleep thrown off by shifts or travel',
+  'anxious-mind': 'a racing mind at night',
+};
+
+/** chronicity enum → a "how often" clause; `unknown` omits the clause entirely. */
+const CHRONICITY_PHRASE: Record<Chronicity, string | null> = {
+  occasional: 'some nights',
+  frequent: 'most weeks',
+  chronic: 'most nights, for months',
+  unknown: null,
+};
+
+/** habit signal → a SHORT recap noun phrase (distinct from the verbatim HABIT summary sentence). */
+const HABIT_RECAP_PHRASE: Record<HabitSignal, string> = {
+  'late-caffeine': 'late caffeine',
+  'alcohol-nightcap': 'a nightcap',
+  'evening-screens': 'evening screens',
+  'irregular-schedule': 'an irregular schedule',
+  'daytime-naps': 'daytime naps',
+  'poor-environment': 'a bright or noisy room',
+  'late-exercise': 'late exercise',
+};
+
+/** Join a list into English prose: "a", "a and b", "a, b, and c". */
+function joinPhrases(parts: string[]): string {
+  if (parts.length === 0) return '';
+  if (parts.length === 1) return parts[0];
+  if (parts.length === 2) return `${parts[0]} and ${parts[1]}`;
+  return `${parts.slice(0, -1).join(', ')}, and ${parts[parts.length - 1]}`;
 }
 
 // --- frozen signal maps -------------------------------------------------------------------------
@@ -101,6 +161,33 @@ const CBT_I: RouteItem = {
   note: "Somnary's highest-graded intervention for ongoing insomnia — a structured programme, not a supplement.",
 };
 
+// --- corpus fields the summary reads (beyond RemedyRef) -----------------------------------------
+// The router is generic over RemedyRef (slug/name/aliases), but at runtime the engine and tests pass
+// full AskRemedy objects that also carry `tier` and `chunks`. The summary reads those two fields
+// DEFENSIVELY (optional), so an object lacking them simply omits the grade/verdict — never crashes.
+interface SummaryChunk {
+  kind: string;
+  text: string;
+}
+interface SummaryCorpusFields {
+  tier?: string;
+  chunks?: SummaryChunk[];
+}
+
+/** The verbatim verdict text for a resolved remedy (the chunk with kind==='verdict'), or null. */
+function verdictText(remedy: SummaryCorpusFields): string | null {
+  const chunk = (remedy.chunks ?? []).find((c) => c.kind === 'verdict');
+  const t = chunk?.text?.trim();
+  return t ? t : null;
+}
+
+/** Look up a remedy's grade letter from the corpus by slug (never hardcoded — the S-tier is G1). */
+function tierForSlug<T extends RemedyRef>(slug: string, corpus: T[]): string | null {
+  const r = corpus.find((x) => x.slug === slug) as (T & SummaryCorpusFields) | undefined;
+  const tier = r?.tier?.trim();
+  return tier ? tier : null;
+}
+
 // --- the router ---------------------------------------------------------------------------------
 
 /** Which screeners suppress or caveat remedy leads and route to a boundary first. */
@@ -130,15 +217,18 @@ export function routePlan<T extends RemedyRef>(extraction: GuideExtraction, corp
   const screeners = activeScreeners(situation.redFlags);
   const sections: RouteSection[] = [];
 
-  // 1 — crisis short-circuits everything.
+  // 1 — crisis short-circuits everything. The narrative summary carries ONLY the crisis fragment,
+  // mirroring the sections' stop behaviour (no recap, no remedy/outcome/habit fragments).
   if (screeners.has('crisis')) {
+    const crisisItem: RouteItem = { href: ROUTES.urgent.href, label: ROUTES.urgent.label };
     return {
       stop: true,
-      sections: [
+      sections: [{ kind: 'crisis', title: 'Please get help now', items: [crisisItem] }],
+      summary: [
         {
-          kind: 'crisis',
-          title: 'Please get help now',
-          items: [{ href: ROUTES.urgent.href, label: ROUTES.urgent.label }],
+          text: 'Your safety comes first. Please use the help below now — the rest can wait.',
+          links: [crisisItem],
+          tone: 'crisis',
         },
       ],
     };
@@ -195,12 +285,14 @@ export function routePlan<T extends RemedyRef>(extraction: GuideExtraction, corp
   // uses; an unresolved name routes NOWHERE (never invented). Suppressed to a caveat when a screener
   // is active (we don't hand remedy pages to a pregnant/child/diagnosed reader as if cleared).
   const triedItems: RouteItem[] = [];
+  const triedResolved: (T & SummaryCorpusFields)[] = []; // resolved corpus objects, for the summary
   const seenSlugs = new Set<string>();
   for (const name of history.triedRemedies) {
     const matches = detectRemedyMentions(name, corpus);
     for (const m of matches) {
       if (seenSlugs.has(m.slug)) continue;
       seenSlugs.add(m.slug);
+      triedResolved.push(m as T & SummaryCorpusFields);
       triedItems.push({
         href: `/r/${m.slug}`,
         label: m.name,
@@ -263,22 +355,128 @@ export function routePlan<T extends RemedyRef>(extraction: GuideExtraction, corp
   }
 
   // 7 — nothing fired → neutral fallback (never empty; always a real place to read).
+  const fallbackItems: RouteItem[] = [
+    { href: '/sleep-habits', label: 'Sleep habits — what the evidence shows' },
+    { href: ROUTES.tiers.href, label: ROUTES.tiers.label },
+    { href: ROUTES.search.href, label: ROUTES.search.label },
+  ];
   if (sections.length === 0) {
-    sections.push({
-      kind: 'fallback',
-      title: 'Where to start',
-      items: [
-        { href: '/sleep-habits', label: 'Sleep habits — what the evidence shows' },
-        { href: ROUTES.tiers.href, label: ROUTES.tiers.label },
-        { href: ROUTES.search.href, label: ROUTES.search.label },
-      ],
+    sections.push({ kind: 'fallback', title: 'Where to start', items: fallbackItems });
+  }
+
+  // --- the woven narrative summary (CHK-6.8c) --------------------------------------------------
+  // Composed DETERMINISTICALLY, in safety-first order, from the SAME data the sections use. Every
+  // fragment is built from fixed enum→phrase templates or verbatim corpus fields — never raw user
+  // text, notes, or ack. Fragments whose data is absent are omitted.
+  const summary: SummaryFragment[] = [];
+
+  // Recap — enum-only ("what you told me"). No links. Omitted if nothing was extracted.
+  const problemPhrases = situation.problems.map((p) => PROBLEM_PHRASE[p]).filter(Boolean);
+  const chronPhrase = CHRONICITY_PHRASE[situation.chronicity];
+  const habitRecap = habits.signals.map((s) => HABIT_RECAP_PHRASE[s]).filter(Boolean).slice(0, 3);
+  if (problemPhrases.length || chronPhrase || habitRecap.length) {
+    const clauses: string[] = [];
+    if (problemPhrases.length) clauses.push(joinPhrases(problemPhrases));
+    if (chronPhrase) clauses.push(chronPhrase);
+    let recap = `What you told me: ${clauses.join(', ')}`;
+    if (habitRecap.length) recap += `, plus ${joinPhrases(habitRecap)}`;
+    recap += '.';
+    summary.push({ text: recap, links: [], tone: 'normal' });
+  }
+
+  // Safety-first — reuse the approved boundary notes; point to the boundary page FIRST.
+  if (screeners.has('prescription-med')) {
+    summary.push({
+      text: 'Because you mentioned a prescription medication, start here — interaction risk is personal and belongs with a pharmacist or doctor.',
+      links: [{ href: ROUTES.meds.href, label: ROUTES.meds.label }],
+      tone: 'boundary',
+    });
+  }
+  if (suppressRemedies) {
+    summary.push({
+      text: 'Read the general cautions here first; whether anything is appropriate in your situation is a conversation for your clinician, not this page.',
+      links: [{ href: ROUTES.safety.href, label: ROUTES.safety.label }],
+      tone: 'boundary',
     });
   }
 
-  return { stop: false, sections };
+  // Severity — chronic OR diagnosed → CBT-I + clinician. Grade pulled from the corpus (never 'S').
+  if (chronicOrDiagnosed) {
+    const cbtTier = tierForSlug('cbt-i', corpus);
+    const grade = cbtTier ? ` (Grade ${cbtTier})` : '';
+    summary.push({
+      text:
+        `Because it's an ongoing or diagnosed sleep problem, the strongest evidence points to ` +
+        `CBT-I — Somnary's highest-graded intervention for ongoing insomnia${grade}, a structured ` +
+        `programme rather than a supplement — and a conversation with a clinician. Habit tweaks alone ` +
+        `are unlikely to be enough.`,
+      links: [
+        { href: CBT_I.href, label: CBT_I.label },
+        { href: ROUTES.clinician.href, label: ROUTES.clinician.label },
+      ],
+      tone: 'normal',
+    });
+  }
+
+  // Tried remedies — one fragment each, corpus name + grade + verbatim verdict. Suppressed under a
+  // screener (same rule as the sections).
+  if (!suppressRemedies) {
+    for (const m of triedResolved) {
+      const tier = m.tier?.trim();
+      const grade = tier ? ` Grade ${tier}.` : '';
+      const verdict = verdictText(m);
+      const tail = verdict ? ` ${verdict}` : '';
+      summary.push({
+        text: `You mentioned ${m.name} — here's Somnary's graded evidence for it:${grade}${tail}`,
+        links: [{ href: `/r/${m.slug}`, label: m.name }],
+        tone: 'normal',
+      });
+    }
+  }
+
+  // Outcomes — reuse the approved outcome note. Shown even under suppression, but AFTER the safety
+  // fragment (guaranteed by ordering). Links to the same outcome/anxiety pages as the section.
+  if (outcomeItems.length) {
+    summary.push({
+      text: 'For what you described, Somnary ranks the options by the strength of their evidence for this goal — not by popularity.',
+      links: outcomeItems.map((i) => ({ href: i.href, label: i.label })),
+      tone: 'normal',
+    });
+  }
+
+  // Habits — one fragment each: the short recap phrase, then the VERBATIM HABIT_SUMMARIES sentence.
+  const seenSummaryAnchors = new Set<string>();
+  for (const s of habits.signals) {
+    const anchor = HABIT_ANCHOR[s];
+    if (!anchor || seenSummaryAnchors.has(anchor)) continue;
+    seenSummaryAnchors.add(anchor);
+    const summaryRow = HABIT_SUMMARY_BY_ID[anchor];
+    if (!summaryRow) continue;
+    summary.push({
+      text: `On ${HABIT_RECAP_PHRASE[s]} — ${summaryRow.summary}`,
+      links: [{ href: `/sleep-habits#${anchor}`, label: `${anchor.charAt(0).toUpperCase()}${anchor.slice(1)} — ${summaryRow.label}` }],
+      tone: 'normal',
+    });
+  }
+
+  // Fallback — nothing else fired. A neutral "where to start" pointing at the same three targets.
+  if (summary.length === 0) {
+    summary.push({
+      text: 'Not much to go on yet — a good place to start is the evidence on sleep habits, the tier board, or a search of Somnary.',
+      links: fallbackItems,
+      tone: 'normal',
+    });
+  }
+
+  return { stop: false, sections, summary };
 }
 
 /** Flatten a plan to the set of hrefs it routes to (used by the engine and the real-URL test). */
 export function planHrefs(plan: RoutePlan): string[] {
   return plan.sections.flatMap((s) => s.items.map((i) => i.href));
+}
+
+/** Flatten the narrative summary to the hrefs it links to (used by the real-URL sweep). */
+export function summaryHrefs(plan: RoutePlan): string[] {
+  return plan.summary.flatMap((f) => f.links.map((l) => l.href));
 }
