@@ -8,6 +8,7 @@ import { getCollection, render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import type { GateVariant } from '../../lib/evidence-gates';
 import RemedyHero from '../../components/RemedyHero.astro';
+import RemedyCoda from '../../components/RemedyCoda.astro';
 import RemedyLeadBlock from '../../components/RemedyLeadBlock.astro';
 import VerdictBand from '../../components/VerdictBand.astro';
 import ClaimsDataTable from '../../components/ClaimsDataTable.astro';
@@ -153,6 +154,9 @@ const jsonLd = remedyJsonLd(d, canonical, site);
       <Disclaimer variant="standard" />
     </div>
   </main>
+
+  {/* coda plate — the hero's world settled toward sleep; the page leaves through it (§11.3) */}
+  <RemedyCoda slug={entry.id} />
 
   {/* 9/12 — single shared citation popover for every .cite-sup on the page */}
   <CitationPopover sources={d.sources} />
