@@ -397,4 +397,16 @@ the stamp here sits outside the tier board's legend, but the grade line + decisi
 translation sit directly under the title — rating context is adjacent. Re-check if the label
 row is ever reused on a surface without that context.
 
+**Coda plates (addendum, owner-ratified 2026-07-19).** Each page *leaves* through the
+hero's world as well: `RemedyCoda.astro` renders a closing band above the site footer —
+the same plate world an hour later, settled toward sleep (family brief:
+`docs/plans/2026-07-19-remedy-coda-plates-prompt.md`; assets
+`src/assets/remedy-codas/{slug}.webp`). Anatomy: **28vh band, min 200px (22vh / 160px under
+640px)** — roughly half the hero, a coda not a second hero; **top-edge alpha-mask melt-in**
+(`transparent 0% → #000 45%`), the hero's melt mirrored; per-plate focal `object-position`
+(default `center 55%` — codas show a low, wide slice); `loading="lazy"` (never competes
+with the hero LCP); decorative `alt=""`; pure art, no type, same family constraints. A
+missing coda renders nothing — the set lights up per-remedy as assets land. Coda anatomy
+changes are `[HUMAN-GATE]` with the rest of this section.
+
 Any change to the hero anatomy (melt spec, label tuck, no-type-on-art rule) is `[HUMAN-GATE]`.
