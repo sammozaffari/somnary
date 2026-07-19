@@ -204,18 +204,11 @@ export function routePlan<T extends RemedyRef>(extraction: GuideExtraction, corp
       });
     }
   }
+  // Under an active screener (pregnancy/breastfeeding/child/diagnosed) we do NOT hand back a specific
+  // remedy page even caveated — the reader is routed to the boundary page instead. Remedy leads are
+  // fully SUPPRESSED here (conservative on pregnancy/children/conditions, per CLAUDE.md).
   if (triedItems.length && !suppressRemedies) {
     sections.push({ kind: 'tried', title: 'The remedies you mentioned', items: triedItems });
-  } else if (triedItems.length && suppressRemedies) {
-    // Caveated: still their own pages, but framed behind the boundary read.
-    sections.push({
-      kind: 'tried',
-      title: 'The remedies you mentioned — read the safety page first',
-      items: triedItems.map((it) => ({
-        ...it,
-        note: `${it.note} Given what you shared, read ${ROUTES.safety.label.toLowerCase()} before anything else.`,
-      })),
-    });
   }
 
   // 5 — problems → outcome / anxiety pages (suppressed to a caveat under an active screener).

@@ -1,0 +1,115 @@
+[
+  {
+    "name": "onset-occasional-habits",
+    "text": "I have trouble falling asleep some nights, usually after too much coffee in the afternoon.",
+    "mock": "onset-caffeine",
+    "expectStatus": "routed",
+    "expectHrefs": ["/outcome/fall-asleep-faster", "/sleep-habits#caffeine"],
+    "expectStop": false
+  },
+  {
+    "name": "maintenance-and-early-waking",
+    "text": "I keep waking up through the night and then far too early, most weeks.",
+    "mock": "maintenance-early",
+    "expectStatus": "routed",
+    "expectHrefs": ["/outcome/stay-asleep"],
+    "expectStop": false
+  },
+  {
+    "name": "anxious-mind-routes-anxiety-hub",
+    "text": "my mind races at night, I feel anxious and just can't switch off.",
+    "mock": "anxious",
+    "expectStatus": "routed",
+    "expectHrefs": ["/outcome/anxiety-driven-insomnia", "/anxiety-and-sleep"],
+    "expectStop": false
+  },
+  {
+    "name": "shift-work-jetlag",
+    "text": "I work night shifts and my sleep schedule is all over the place.",
+    "mock": "shift",
+    "expectStatus": "routed",
+    "expectHrefs": ["/outcome/jet-lag-shift-work", "/sleep-habits#schedule"],
+    "expectStop": false
+  },
+  {
+    "name": "tried-remedy-routes-to-its-page",
+    "text": "I've tried melatonin and it didn't really help me fall asleep.",
+    "mock": "tried-melatonin",
+    "expectStatus": "routed",
+    "expectHrefs": ["/r/melatonin", "/outcome/fall-asleep-faster"],
+    "expectStop": false
+  },
+  {
+    "name": "invented-remedy-name-dropped-not-routed",
+    "text": "someone told me to try dreamzzz gummies for sleep, not sure about them.",
+    "mock": "tried-invented",
+    "expectStatus": "routed",
+    "expectNotHrefs": ["/r/dreamzzz", "/r/dreamzzz-gummies"],
+    "expectStop": false
+  },
+  {
+    "name": "chronic-surfaces-cbti-and-clinician",
+    "text": "I've had trouble sleeping most nights for months now, it never lets up.",
+    "mock": "chronic",
+    "expectStatus": "routed",
+    "expectHrefs": ["/when-to-see-a-doctor", "/r/cbt-i"],
+    "expectStop": false
+  },
+  {
+    "name": "pregnancy-screener-safety-first",
+    "text": "I'm expecting a baby and struggling to fall asleep, what pages should I read?",
+    "mock": "pregnancy-onset-tried",
+    "expectStatus": "routed",
+    "expectHrefs": ["/safety"],
+    "expectNotHrefs": ["/r/valerian"],
+    "expectStop": false
+  },
+  {
+    "name": "child-screener-safety-first",
+    "text": "my kid keeps waking up at night, where should I read about this?",
+    "mock": "child",
+    "expectStatus": "routed",
+    "expectHrefs": ["/safety"],
+    "expectStop": false
+  },
+  {
+    "name": "prescription-med-routes-meds-first",
+    "text": "I take a daily prescription for my blood pressure and I sleep badly.",
+    "mock": "rx-med",
+    "expectStatus": "routed",
+    "expectHrefs": ["/medications-and-sleep-aids"],
+    "expectStop": false
+  },
+  {
+    "name": "diagnosed-condition-safety-and-cbti",
+    "text": "my clinician treats me for an ongoing health condition and my sleep is poor most nights.",
+    "mock": "diagnosed",
+    "expectStatus": "routed",
+    "expectHrefs": ["/safety", "/r/cbt-i", "/when-to-see-a-doctor"],
+    "expectStop": false
+  },
+  {
+    "name": "crisis-via-extraction-shortcircuits",
+    "text": "honestly I don't want to be here anymore and I can't sleep at all",
+    "mock": "crisis-extract",
+    "expectStatus": ["crisis", "refused"],
+    "expectHrefs": ["/when-to-see-a-doctor#urgent"],
+    "expectStop": true,
+    "expectNoRemedyRouting": true
+  },
+  {
+    "name": "empty-extraction-fallback",
+    "text": "I'm just tired all the time and not sure what to do about my sleep.",
+    "mock": "empty",
+    "expectStatus": "routed",
+    "expectHrefs": ["/sleep-habits"],
+    "expectStop": false
+  },
+  {
+    "name": "model-error-degrades",
+    "text": "I can't fall asleep at night and want to read something useful.",
+    "mock": "error",
+    "expectStatus": "model-error",
+    "expectStop": false
+  }
+]

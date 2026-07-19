@@ -146,7 +146,7 @@ export function checkTopic(text: string, remedies: RemedyRef[] = []): TopicFence
   if (!raw.trim()) return { ok: false, reason: 'off-topic', message: OFF_TOPIC_MESSAGE };
 
   for (const re of ABUSE_PATTERNS) {
-    if (re.test(raw)) return { ok: false, reason: 'abusive', message: ABUSE_MESSAGE };
+    if (re.test(raw)) return { ok: false, reason: 'abusive', message: ABUSIVE_MESSAGE };
   }
 
   const n = ` ${norm(raw)} `;
