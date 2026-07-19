@@ -363,13 +363,13 @@ Every remedy page opens inside its own world: a **full-bleed linocut hero plate*
 dir's README + `docs/plans/2026-07-16-remedy-hero-plates-prompt.md`; design study 2026-07-17
 v4→v6, owner-ratified "labeled plate"). Anatomy:
 
-- **The plate** — pure art, full viewport width, 48vh min 340px (38vh min 260px under
-  640px) *(owner-trimmed 2026-07-19 from 62/44vh: the verdict must arrive without a
+- **The plate** — pure art, full viewport width, 40vh min 320px (32vh min 240px under
+  640px) *(owner-trimmed 2026-07-19 twice, from 62/44vh: the verdict must arrive without a
   scroll)*, focal `object-position` per plate (default `center 30%`, subjects sit in the
   central 60% by family rule). The linocut ICON does not appear on remedy pages — the hero
   IS the remedy.
-- **The melt** — the plate itself dissolves via an alpha mask over its bottom 45%
-  *(owner-raised 2026-07-19 from 34%, with the height trim)*
+- **The melt** — the plate itself dissolves via an alpha mask over its bottom 50%
+  *(owner-raised 2026-07-19 in two steps from 34%, with the height trims)*
   (`mask-image`, opaque → transparent), so the page's real layered background shows through;
   never a painted color fade (the body background is a gradient — a painted fade seams).
 - **The label row** — the plate is **labeled, not painted over**: NO type ever sits on the
@@ -380,9 +380,10 @@ v4→v6, owner-ratified "labeled plate"). Anatomy:
   behind maximum residual melt alpha) print on the paper below, tucked `−7vh` into the melt
   (`−5vh` under 640px) so plate and label read as one composition. At every ratified
   height/floor the label's tuck stays inside the melt zone — the title never reaches
-  un-melted art (worst residual image alpha behind the title ≈ 0.324 at 48vh/−7vh —
-  recomputed for the 2026-07-19 geometry; mobile 0.293, floor cases lower → ink-on-composite
-  ≥ 8.6:1 everywhere). Title is always `--ink` on paper — zero per-remedy tuning.
+  un-melted art (worst residual image alpha behind the title ≈ 0.35 at 40vh/−7vh —
+  recomputed for the final 2026-07-19 geometry; mobile 0.3125, floor cases lower →
+  ink-on-composite ≥ 8:1 everywhere). Title is always `--ink` on paper — zero per-remedy
+  tuning.
 - **Below** — the one-line verdict as the plate's caption, then the lead block, whose
   translation line anchors the grade in plain text ("Grade A · Strong — …"): never color
   alone, twice per page. Crumbs are retired from remedy pages; navigation stays in the nav.
@@ -407,8 +408,9 @@ the same plate world an hour later, settled toward sleep (family brief:
 (default `center 55%` — codas show a low, wide slice); `loading="lazy"` (never competes
 with the hero LCP); decorative `alt=""`; pure art, no type, same family constraints. A
 missing coda renders nothing — the set lights up per-remedy as assets land. The band's
-**bottom edge is a hard cut** (no second melt): the plate seats like a framed print against
-the pre-existing footer chrome — `--sp-10` of bare paper, then the hairline, then footer
-text. Coda anatomy changes are `[HUMAN-GATE]` with the rest of this section.
+**bottom edge is a hard cut** (no second melt) seated **flush on the footer hairline**
+*(owner, 2026-07-19: no paper gap — the coda's negative bottom margin collapses the
+Footer's `--sp-10` opening margin to exactly 0)*: art edge → hairline → footer text. Coda
+anatomy changes are `[HUMAN-GATE]` with the rest of this section.
 
 Any change to the hero anatomy (melt spec, label tuck, no-type-on-art rule) is `[HUMAN-GATE]`.
