@@ -33,12 +33,15 @@ primary document before any scoring or publication.
 
 ## Systemic data gaps (apply to the whole set)
 
-- **Community read is thin.** reddit.com is blocked to the research crawler, so
-  most dossiers record the community read as an absence rather than inventing
-  one. Options: a manual human pass, an authenticated Reddit API pull (CHK-6.4
-  Supabase community store could feed this), or ship the pilot with the
-  community strip explicitly marked "gathering". It is display-only and unscored
-  either way.
+- **Community read is DEFERRED (every automated path to Reddit is blocked).**
+  Verified 2026-07-19: the Reddit Data API is approval-gated and likely
+  commercial-classified since the Nov 2025 Responsible Builder Policy; the
+  WebSearch tool filters reddit.com out entirely (both the `site:` operator and
+  organic results return zero Reddit URLs); direct fetch 403s. The one path that
+  works is a **browser pass through the owner's real Chrome session** (Claude-in-
+  Chrome extension) — owner chose this, but it's parked until they can log in to
+  the extension. Until then the community strip ships marked "gathering". It is
+  display-only and unscored, so this blocks nothing on the critical path.
 - **Several regulator pages 404/403 to the fetcher** (FDA warning-letter
   archive URLs, FTC penalty-offense PDFs). Where a datum was corroborated via a
   mirror or trade press, the dossier marks it "search-surfaced, not fetched".
@@ -47,18 +50,30 @@ primary document before any scoring or publication.
 ## MUST resolve to a primary document before scoring/publishing (defamation-sensitive)
 
 Every brand-negative regulatory claim has to rest on the primary regulator
-document, per the rubric's guardrails. These are the ones currently on a mirror
-or unverified source:
+document, per the rubric's guardrails. **Progress 2026-07-19:** the canonical
+primary FDA URLs for all three items below were LOCATED and confirmed to exist
+in FDA's own search index (they are now the cited primary sources). FDA.gov
+bot-blocks the fetch tool (404 to the fetcher), so the remaining step for each is
+verbatim-text confirmation via the browser/human pass — URL existence is verified.
 
-- **Life Extension** — the 2017 FDA warning letter that names melatonin was
-  sourced via a Quackwatch mirror (FDA URL 404'd). Find the primary FDA
-  warning-letter page (FDA warning-letter database) before this becomes a
-  scored "regulatory record" datum.
-- **Kirkland/LNK** — LNK's 2019 FDA CGMP warning letter and 2001 FTC settlement
-  were search-surfaced (FDA 404, FTC 403). Nail to primary before use.
-- **Vitafusion** — the 2021 metallic-mesh recall entry sharing this product's
-  UPC was corroborated via a DoD Commissary notice (FDA page 404'd). Confirm the
-  FDA recall record AND that it covers this exact flavor/lot before it scores.
+- **Life Extension** — 2017 warning letter, primary URL confirmed:
+  `.../warning-letters/life-extension-foundation-buyers-club-inc-500619-02012017`.
+  **Verified via full-text mirror (2026-07-19): melatonin IS named in the letter**,
+  but only as an item in the site's breast-cancer disease-protocol list — the
+  letter's lead cited-violation products are apigenin, astragalus, blueberry,
+  chrysin, cruciferous extract. So this scores against the BRAND's regulatory
+  record as a disease-claim/website matter, and must NOT be presented as the
+  melatonin product being cited for a violation. Dossier updated with this precision.
+- **Kirkland/LNK** — LNK's 2019 CGMP warning letter primary URL confirmed
+  (`.../warning-letters/lnk-international-inc-582253-09262019`) plus its 2021
+  close-out (`...-582253-12012021`). Note: this is CGMP on LNK's OTC DRUG
+  manufacturing (the doxylamine line), not melatonin — and Kirkland melatonin may
+  be dropped from the universe anyway. Verbatim confirmation still pending.
+- **Vitafusion** — 2021 Church & Dwight voluntary recall primary URL confirmed
+  (`.../recalls-market-withdrawals-safety-alerts/church-dwight-initiates-voluntary-recall-select-vitamins-due-isolated-manufacturing-issue`).
+  FDA's summary lists adult "Melatonin" among affected products (lots made
+  2020-10-29 to 11-03, distributed 2020-11-13 to 2021-04-09). Still to confirm:
+  the exact lot/UPC covers this specific sugar-free 3 mg SKU (dossier scope note).
 - **Nature's Bounty / NBTY** — NY AG 2015 C&D + 2016 DNA agreement quoted from
   ag.ny.gov (primary, good). The glucosamine matter is a private class action,
   correctly NOT labeled FTC — keep it out of the regulatory dimension.

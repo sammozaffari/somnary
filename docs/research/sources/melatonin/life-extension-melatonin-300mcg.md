@@ -131,12 +131,14 @@ action against a Life Extension entity was located in these searches (see below)
 - **event_date:** February 1, 2017 (letter reference 500619)
 - **primary-document URL:**
   https://www.fda.gov/inspections-compliance-enforcement-and-criminal-investigations/warning-letters/life-extension-foundation-buyers-club-inc-500619-02012017
-  (fetch of the FDA URL and the older FDA archive URL
-  `.../WarningLetters/2017/ucm540772.htm` both returned HTTP 404 to the fetch tool
-  on 2026-07-19; the letter text below was captured verbatim from Quackwatch's
-  mirror of the same letter,
+  (The canonical FDA URL above was CONFIRMED to exist in FDA's own warning-letter
+  search index on 2026-07-19 — it is the primary citation. Direct fetch of the FDA
+  page and the older archive URL `.../WarningLetters/2017/ucm540772.htm` both
+  returned HTTP 404 to the fetch tool (FDA.gov bot-blocks the fetcher), so the
+  verbatim text below was corroborated from Quackwatch's full-text mirror,
   https://quackwatch.org/cases/fdawarning/prod/fda-warning-letters-about-products-2017/lef/,
-  captured 2026-07-19 — a human should re-open the FDA-hosted copy to confirm.)
+  re-read 2026-07-19. Remaining step: a browser/human with FDA access confirms the
+  verbatim text against the FDA-hosted copy. URL existence = verified; verbatim = mirror-corroborated.)
 - **addressee (quoted verbatim, per the Quackwatch mirror):**
   > "Paul Gilner, President, Life Extension Foundation Buyers Club, Inc." — dated
   > "February 01, 2017"
@@ -145,12 +147,17 @@ action against a Life Extension entity was located in these searches (see below)
   > Section 201(g)(1)(B) of the Federal Food, Drug, and Cosmetic Act (the Act) [21
   > United State Code (USC) 321(g)(1)(B)] because they are intended for use in the
   > cure, mitigation, treatment, or prevention of disease."
-- **melatonin named?:** **Yes.** Per the mirrored letter, "Melatonin" is listed
-  among the products presented on the site's breast-cancer protocol page (the
-  letter cites the site's disease "Health Protocols" pages as the basis for the
-  drug-claim finding). This is a **website-copy / disease-claim** matter about how
+- **melatonin named?:** **Yes, but as a protocol-list item, not a lead cited
+  product.** Verified against the full letter text (2026-07-19): "Melatonin" is
+  listed among the products presented on the site's breast-cancer protocol page.
+  The letter's *lead* violation-example products — the ones it explicitly cites as
+  lacking adequate directions and FDA approval — are **Apigenin, Astragalus,
+  Blueberry, Chrysin, and Cruciferous vegetable extract**; melatonin is not among
+  those lead examples. This is a **website-copy / disease-claim** matter about how
   the brand marketed products (including a melatonin product) against named
   diseases — **not** a content/potency or safety action against the 300 mcg SKU.
+  Scoring note: this attaches to the BRAND's regulatory record, and must not be
+  presented as the melatonin product itself being cited for a violation.
   Diseases named as examples in the letter include breast cancer, Alzheimer's
   Disease, HIV/AIDS, Parkinson's Disease, and Leukemia.
 - **secondary coverage (context, not primary):** NutraIngredients-USA,
