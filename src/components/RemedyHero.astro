@@ -62,13 +62,13 @@ const focal = FOCAL[slug] ?? 'center 30%';
 <style>
   .hero {
     position: relative;
-    height: 48vh;
-    min-height: 340px;
+    height: 40vh;
+    min-height: 320px;
     overflow: hidden;
     /* the melt: the plate itself dissolves (alpha mask), so the page's real layered
        background shows through — seamless by construction, no color to match. */
-    -webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent 100%);
-    mask-image: linear-gradient(to bottom, #000 55%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, #000 50%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 50%, transparent 100%);
   }
   .hero img {
     position: absolute;
@@ -108,8 +108,8 @@ const focal = FOCAL[slug] ?? 'center 30%';
 
   @media (max-width: 640px) {
     .hero {
-      height: 38vh;
-      min-height: 260px;
+      height: 32vh;
+      min-height: 240px;
     }
     .label {
       padding: 0 var(--sp-5);

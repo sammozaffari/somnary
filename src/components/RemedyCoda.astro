@@ -54,6 +54,10 @@ const focal = FOCAL[slug] ?? 'center 55%';
     height: 28vh;
     min-height: 200px;
     overflow: hidden;
+    /* seat flush on the footer hairline (owner, 2026-07-19): the Footer opens with
+       margin-top --sp-10; this negative bottom margin collapses with it to exactly 0,
+       so the plate's hard cut lands directly on the hairline — no paper gap. */
+    margin-bottom: calc(-1 * var(--sp-10));
     /* the melt-in: the page paper dissolves into the plate from above — the hero's mask,
        mirrored. Alpha mask (not a painted fade): the body background is a gradient. */
     -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 45%);
