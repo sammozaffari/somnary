@@ -29,6 +29,19 @@ the public/anon key cannot read or write them — only our server, using the **s
 (which bypasses RLS), can insert. That is the whole security design: writes happen only in our own
 server code, never from the browser.
 
+### 2a. Add the rate-limit table + RPC (for the assistant API routes)
+
+The model-calling routes (`/api/ask`, `/api/search-ask`) are per-IP rate limited to protect the
+LLM budget. In **SQL Editor → New query**, paste the entire contents of
+[`supabase/rate-limit.sql`](../supabase/rate-limit.sql) and click **Run**. This adds:
+
+- a `rate_limits` table (RLS on, no public policies — same security model as above), and
+- an atomic `check_rate_limit()` function the server calls on each request.
+
+**Graceful degradation:** if you skip this step (or run without Supabase configured at all), the
+limiter **fails open** — the assistant keeps working, just unthrottled. So it is safe to defer, but
+run it before opening the assistant to the public.
+
 ## 3. Get the keys
 
 In the project: **Settings → API**.
@@ -85,6 +98,12 @@ Restart `npm run dev` after editing `.env`.
 | --------------------------- | -------------- | ------- | ---------------------------------------------- |
 | `SUPABASE_URL`              | Vercel + `.env`| no      | Supabase project REST URL                      |
 | `SUPABASE_SERVICE_ROLE_KEY` | Vercel + `.env`| **YES** | Server-only insert key; bypasses RLS. Rotate if leaked. |
+| `RATE_LIMIT_MAX`            | Vercel (opt.)  | no      | Max assistant requests per IP per window. **Optional**, default `20`. |
+| `RATE_LIMIT_WINDOW_SECONDS` | Vercel (opt.)  | no      | Rate-limit window length in seconds. **Optional**, default `60`. |
+
+Both `RATE_LIMIT_*` vars are **optional** — leave them unset to use the defaults (20 requests per
+60 s per IP, per endpoint). They only apply once `supabase/rate-limit.sql` has been run and Supabase
+is configured; otherwise the limiter fails open.
 
 ## Data handling notes
 

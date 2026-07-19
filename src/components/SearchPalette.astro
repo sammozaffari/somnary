@@ -534,6 +534,15 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ question }),
         });
+        if (res.status === 429) {
+          renderAnswer({
+            status: 'error',
+            answer: 'You’re sending questions faster than we can answer — give it a moment and try again. You can browse the tier board or a remedy page in the meantime.',
+            citations: [],
+            route: null,
+          });
+          return;
+        }
         if (!res.ok) {
           renderAnswer({
             status: 'error',

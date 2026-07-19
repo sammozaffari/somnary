@@ -325,6 +325,10 @@ const { remedyName, slug } = Astro.props;
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ question, slug }),
         });
+        if (res.status === 429) {
+          showPlain('error', 'You’re sending questions faster than we can answer — give it a moment and try again. You can read this page’s evidence and cited sources above.');
+          return;
+        }
         if (!res.ok) {
           showPlain('error', 'Something went wrong. You can read this page’s evidence and cited sources above. This is educational, not medical advice.');
           return;

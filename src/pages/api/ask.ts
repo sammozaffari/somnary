@@ -7,15 +7,20 @@
 import type { APIRoute } from 'astro';
 import { getAskCorpus } from '../../lib/ask/from-collection.ts';
 import { runAsk } from '../../lib/ask/engine.ts';
+import { checkRateLimit, clientIpFrom, rateLimitConfig } from '../../lib/rate-limit.ts';
 
 export const prerender = false;
 
 const MAX_QUESTION = 500;
 
-const json = (body: unknown, status = 200): Response =>
+const json = (body: unknown, status = 200, extraHeaders?: Record<string, string>): Response =>
   new Response(JSON.stringify(body), {
     status,
-    headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' },
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+      'Cache-Control': 'no-store',
+      ...extraHeaders,
+    },
   });
 
 export const POST: APIRoute = async ({ request }) => {
@@ -32,6 +37,18 @@ export const POST: APIRoute = async ({ request }) => {
   if (!slug || !/^[a-z0-9-]+$/.test(slug)) return json({ error: 'invalid-slug' }, 400);
   if (question.length < 3) return json({ error: 'empty-question' }, 400);
   if (question.length > MAX_QUESTION) return json({ error: 'question-too-long', max: MAX_QUESTION }, 413);
+
+  // Per-IP rate limit BEFORE the model call, so an over-limit caller never spends LLM credit.
+  // Separate bucket per endpoint ('ask:' prefix). Fails open if Supabase is unconfigured or errors.
+  const { max, windowSeconds } = rateLimitConfig();
+  const { allowed, retryAfter } = await checkRateLimit({
+    key: `ask:${clientIpFrom(request)}`,
+    limit: max,
+    windowSeconds,
+  });
+  if (!allowed) {
+    return json({ error: 'rate-limited', retryAfter }, 429, { 'Retry-After': String(retryAfter) });
+  }
 
   const corpus = await getAskCorpus();
   const response = await runAsk({ question, slug, corpus });
