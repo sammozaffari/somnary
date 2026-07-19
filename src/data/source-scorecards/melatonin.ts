@@ -66,6 +66,10 @@ export interface SourceProduct {
   communityStatus: 'gathering' | 'summarized';
   communityNote?: string;
   ratified: boolean;
+  /** Whether an Australian can buy this OTC. Melatonin is Rx in AU, so the only OTC route is
+   * personal import via iHerb. Products not sold to AU (US pharmacy house brands, gummies iHerb
+   * doesn't ship to AU) are set false and withheld from the AU page. Defaults to available. */
+  availableInAU?: boolean;
 }
 
 // Scores from the rubric applied to each dossier. RATIFIED by the owner 2026-07-19 with these
@@ -202,13 +206,14 @@ export const MELATONIN_SOURCES: SourceProduct[] = [
     verdict:
       'No independent testing or product-specific assay for this low-dose capsule; a fully itemized label of benign excipients from an identifiable manufacturer, with no verified regulator action against this product.',
     heldItems: [
-      '2017 FDA warning letter (disease claims across the website; melatonin appears only in a protocol list) — primary FDA URL confirmed but verbatim text pending browser verification',
+      '2017 FDA warning letter — verified verbatim on fda.gov (2026-07-19): it cites the brand’s website for disease claims (melatonin appears in a breast-cancer protocol list, not among the lead cited products). A marketing/labeling matter, not a potency or safety action against this product; not applied to the score.',
     ],
     communityStatus: 'gathering',
     ratified: true,
   },
   {
     slug: 'olly-sleep-gummy-3mg',
+    availableInAU: false, // gummy — not shipped to AU by iHerb, not sold OTC on Amazon AU
     brand: 'OLLY',
     productName: 'Sleep Gummy (Blackberry Zen)',
     form: 'gummy',
@@ -236,6 +241,7 @@ export const MELATONIN_SOURCES: SourceProduct[] = [
   },
   {
     slug: 'natures-truth-melatonin-10mg-gummies',
+    availableInAU: false, // gummy — not shipped to AU by iHerb, not sold OTC on Amazon AU
     brand: "Nature's Truth",
     productName: 'Extra Strength Melatonin Gummies',
     form: 'gummy',
@@ -262,6 +268,7 @@ export const MELATONIN_SOURCES: SourceProduct[] = [
   },
   {
     slug: 'cvs-health-melatonin-5mg',
+    availableInAU: false, // US pharmacy house brand — not sold to Australia
     brand: 'CVS Health',
     productName: 'Melatonin',
     form: 'tablet',
@@ -287,6 +294,7 @@ export const MELATONIN_SOURCES: SourceProduct[] = [
   },
   {
     slug: 'walgreens-melatonin-5mg-liquid',
+    availableInAU: false, // US pharmacy house brand — not sold to Australia
     brand: 'Walgreens',
     productName: 'Melatonin Liquid',
     form: 'liquid',
@@ -315,6 +323,7 @@ export const MELATONIN_SOURCES: SourceProduct[] = [
   },
   {
     slug: 'vitafusion-melatonin-3mg-gummy',
+    availableInAU: false, // gummy — not shipped to AU by iHerb, not sold OTC on Amazon AU
     brand: 'Vitafusion',
     productName: 'Melatonin Sugar-Free Gummy',
     form: 'gummy',
@@ -343,6 +352,7 @@ export const MELATONIN_SOURCES: SourceProduct[] = [
   },
   {
     slug: 'thorne-melaton-5',
+    availableInAU: false, // this Melaton-5 SKU isn't on iHerb AU; the AU-available + NSF-certified Thorne is Melaton-3 (returns on rescore)
     brand: 'Thorne',
     productName: 'Melaton-5',
     form: 'capsule',
