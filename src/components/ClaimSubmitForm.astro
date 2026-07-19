@@ -1,0 +1,259 @@
+---
+// Claim / label submission form (CHK-4.2). Same progressive-enhancement pattern as
+// NewsletterForm: a real <form method="POST" action="/api/submit-claim"> that works with JS off,
+// enhanced by an inline <script> that POSTs via fetch and shows an aria-live status.
+//
+// Framing: readers send a sleep claim or a product label that seems off; we use it to PRIORITIZE
+// research (it feeds the correction process, not a support inbox). Email is OPTIONAL. We ask
+// people NOT to include personal health details — this is not medical advice and not a place for
+// a personal case. No dark patterns: minimal fields, clear purpose, link to /privacy. Honeypot,
+// no CAPTCHA.
+---
+
+<form class="cf" method="POST" action="/api/submit-claim" data-cf-form novalidate>
+  <div class="cf-field">
+    <label class="cf-label" for="cf-submission">The claim or label text</label>
+    <textarea
+      id="cf-submission"
+      name="submission"
+      class="cf-textarea"
+      rows="6"
+      required
+      minlength="20"
+      maxlength="5000"
+      spellcheck="true"
+      placeholder="E.g. “this gummy says 10 mg melatonin is clinically proven for deep sleep” — paste the claim, or the ingredients/amounts from the label, and what seems off."
+      aria-describedby="cf-note"
+      data-cf-submission></textarea>
+  </div>
+
+  <div class="cf-field">
+    <label class="cf-label" for="cf-product">Product or brand <span class="cf-optional">(optional)</span></label>
+    <input
+      type="text"
+      id="cf-product"
+      name="product"
+      class="cf-input"
+      maxlength="200"
+      autocomplete="off"
+      placeholder="What it’s called, if you know"
+      data-cf-product
+    />
+  </div>
+
+  <div class="cf-field">
+    <label class="cf-label" for="cf-email">Your email <span class="cf-optional">(optional — only if you want a reply)</span></label>
+    <input
+      type="email"
+      id="cf-email"
+      name="email"
+      class="cf-input"
+      autocomplete="email"
+      spellcheck="false"
+      placeholder="you@example.com"
+      data-cf-email
+    />
+  </div>
+
+  <!-- honeypot -->
+  <div class="cf-hp" aria-hidden="true">
+    <label for="cf-website">Leave this field empty</label>
+    <input type="text" id="cf-website" name="website" tabindex="-1" autocomplete="off" />
+  </div>
+
+  <p id="cf-note" class="cf-note">
+    This isn’t medical advice and we can’t look at your personal situation — please don’t include
+    personal health details. We read submissions to decide what to research next; we can’t reply to
+    everyone. An email is only used if you want a reply. See the
+    <a href="/privacy">privacy policy</a>.
+  </p>
+
+  <div class="cf-actions">
+    <button type="submit" class="cf-submit" data-cf-submit>Send it</button>
+  </div>
+
+  <p class="cf-status" role="status" aria-live="polite" data-cf-status hidden></p>
+</form>
+
+<style>
+  .cf {
+    background: var(--surface);
+    border: var(--border-hairline);
+    border-radius: var(--r-lg);
+    padding: var(--sp-6);
+  }
+  .cf-field {
+    margin: 0 0 var(--sp-5);
+  }
+  .cf-label {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+    margin-bottom: var(--sp-2);
+  }
+  .cf-optional {
+    color: var(--muted);
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .cf-textarea,
+  .cf-input {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid var(--mineral);
+    background: var(--paper);
+    border-radius: var(--r-md);
+    padding: var(--sp-4);
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--ink);
+  }
+  .cf-input {
+    min-height: 46px;
+    padding: 0 var(--sp-4);
+  }
+  .cf-textarea {
+    resize: vertical;
+    min-height: 140px;
+  }
+  .cf-textarea::placeholder,
+  .cf-input::placeholder {
+    color: var(--muted);
+  }
+  .cf-textarea:focus-visible,
+  .cf-input:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+    border-color: var(--primary);
+  }
+
+  .cf-hp {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  .cf-note {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: 0 0 var(--sp-5);
+    max-width: 60ch;
+  }
+  .cf-note a {
+    color: var(--primary);
+  }
+
+  .cf-actions {
+    display: flex;
+  }
+  .cf-submit {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    min-height: 46px;
+    padding: 0 var(--sp-5);
+    border-radius: var(--r-sm);
+    cursor: pointer;
+    background: var(--primary);
+    color: var(--surface);
+    border: 1px solid var(--primary);
+    transition: background var(--dur-fast) var(--ease-soft), border-color var(--dur-fast) var(--ease-soft);
+  }
+  .cf-submit:hover {
+    background: var(--primary-deep);
+    border-color: var(--primary-deep);
+  }
+  .cf-submit:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+  }
+  .cf-submit[disabled] {
+    opacity: 0.6;
+    cursor: default;
+  }
+
+  .cf-status {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    margin: var(--sp-5) 0 0;
+    padding: var(--sp-3) var(--sp-4);
+    border-radius: var(--r-md);
+    border: var(--border-hairline);
+  }
+  .cf-status[hidden] {
+    display: none;
+  }
+  .cf-status[data-tone='ok'] {
+    color: var(--eucalyptus);
+    background: var(--pistachio);
+    border-color: var(--eucalyptus);
+  }
+  /* neutral, NOT the reserved safety register — a form error is not a health warning */
+  .cf-status[data-tone='err'] {
+    color: var(--ink);
+    background: var(--surface);
+    border-color: var(--ink);
+    font-weight: 600;
+  }
+
+  @media (max-width: 640px) {
+    .cf {
+      padding: var(--sp-5);
+    }
+    .cf-submit {
+      flex: 1;
+    }
+  }
+</style>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>('[data-cf-form]');
+  const submission = document.querySelector<HTMLTextAreaElement>('[data-cf-submission]');
+  const product = document.querySelector<HTMLInputElement>('[data-cf-product]');
+  const email = document.querySelector<HTMLInputElement>('[data-cf-email]');
+  const submit = document.querySelector<HTMLButtonElement>('[data-cf-submit]');
+  const status = document.querySelector<HTMLElement>('[data-cf-status]');
+
+  if (form && submission && submit && status) {
+    const show = (message: string, tone: 'ok' | 'err') => {
+      status.textContent = message;
+      status.dataset.tone = tone;
+      status.hidden = false;
+    };
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      status.hidden = true;
+      submit.disabled = true;
+      try {
+        const res = await fetch(form.action, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json', accept: 'application/json' },
+          body: JSON.stringify({
+            submission: submission.value,
+            product: product?.value ?? '',
+            email: email?.value ?? '',
+            website: (form.elements.namedItem('website') as HTMLInputElement)?.value ?? '',
+          }),
+        });
+        const data = (await res.json().catch(() => ({}))) as { ok?: boolean; message?: string; error?: string };
+        if (data.ok) {
+          show(data.message ?? 'Thanks — we’ll consider it for review.', 'ok');
+          form.reset();
+        } else {
+          show(data.error ?? 'Something went wrong — please try again.', 'err');
+        }
+      } catch {
+        show('Couldn’t reach the server — please try again in a moment.', 'err');
+      } finally {
+        submit.disabled = false;
+      }
+    });
+  }
+</script>

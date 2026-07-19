@@ -28,7 +28,9 @@ const CONTENT_DIR = join(ROOT, 'src/content/remedies');
 
 const imp = (rel) => import(pathToFileURL(join(ROOT, rel)).href);
 const { buildAskCorpus } = await imp('src/lib/ask/corpus.ts');
-const { runAsk } = await imp('src/lib/ask/engine.ts');
+const { runAsk, runAskSitewide } = await imp('src/lib/ask/engine.ts');
+const { lintForbiddenFraming } = await imp('src/lib/ask/guardrails.ts');
+const { shouldOfferAsk } = await imp('src/lib/search-rank.ts');
 
 // --- load corpus from disk (same transform as the site) -----------------------------------------
 async function loadCorpus() {
@@ -143,6 +145,90 @@ async function runHallucinations(corpus) {
   }
 }
 
+// --- site-wide suites (CHK-6.7) — runAskSitewide through the SAME mock, slugless -----------------
+
+const toArray = (v) => (Array.isArray(v) ? v : v === undefined ? [] : [v]);
+
+/** All citations must belong to the answeredFrom page and anchor into it (/r/slug#source-n). */
+function sitewideCitationsOnSelected(res, corpus) {
+  if (!res.answeredFrom) return res.citations.length === 0;
+  const slug = res.answeredFrom.url.replace(/^\/r\//, '');
+  const remedy = corpus.find((r) => r.slug === slug);
+  const allowed = new Set((remedy?.sources ?? []).map((s) => s.n));
+  return res.citations.every((c) => allowed.has(c.n) && c.href.startsWith(`/r/${slug}#source-`));
+}
+
+async function runSitewideRefusals(corpus) {
+  const cases = JSON.parse(await readFile(join(ROOT, 'tests/ask/sitewide-refusal.json'), 'utf8'));
+  console.log(`\nsite-wide refusal set — ${cases.length} case(s):`);
+  for (const c of cases) {
+    const { fn, state } = makeMock('valid'); // if a guardrail case reaches the model, it leaked
+    const res = await runAskSitewide({ question: c.question, corpus, gemini: fn });
+    const routeHref = res.route ? res.route.href : null;
+    let ok = toArray(c.expectStatus).includes(res.status);
+    if (c.expectCategory !== undefined) ok = ok && toArray(c.expectCategory).includes(res.category);
+    if (c.expectRoute !== undefined) ok = ok && routeHref === c.expectRoute;
+    if (c.expectModelCalled !== undefined) ok = ok && state.called === c.expectModelCalled;
+    if (c.expectAnsweredFrom) ok = ok && res.answeredFrom?.url === c.expectAnsweredFrom;
+    if (res.status !== 'answered') ok = ok && res.citations.length === 0;
+    if (c.framingSafeIfAnswered && res.status === 'answered') {
+      ok = ok && lintForbiddenFraming(res.answer).length === 0 && sitewideCitationsOnSelected(res, corpus);
+    }
+    check(ok, `sitewide-refusal/${c.name}`);
+    console.log(
+      `  ${ok ? '✓' : '✗'} ${c.name.padEnd(28)} status=${res.status} category=${res.category} ` +
+        `route=${routeHref ?? '—'} modelCalled=${state.called} answeredFrom=${res.answeredFrom?.url ?? '—'}`,
+    );
+    if (!ok) {
+      console.log(
+        `      expected status=${toArray(c.expectStatus).join('|')} category=${toArray(c.expectCategory).join('|') || '(any)'} ` +
+          `route=${c.expectRoute ?? '(any)'} modelCalled=${c.expectModelCalled ?? '(any)'}`,
+      );
+    }
+  }
+}
+
+async function runSitewideHallucinations(corpus) {
+  const cases = JSON.parse(await readFile(join(ROOT, 'tests/ask/sitewide-hallucination.json'), 'utf8'));
+  console.log(`\nsite-wide hallucination set — ${cases.length} case(s):`);
+  for (const c of cases) {
+    const { fn } = makeMock(c.mock);
+    const res = await runAskSitewide({ question: c.question, corpus, gemini: fn });
+    const onSelected = sitewideCitationsOnSelected(res, corpus);
+    let ok = toArray(c.expectStatus).includes(res.status) && onSelected;
+    if (c.expectCategory) ok = ok && res.category === c.expectCategory;
+    if (c.expectZeroCitations) ok = ok && res.citations.length === 0;
+    if (c.expectAnsweredFrom) ok = ok && res.answeredFrom?.url === c.expectAnsweredFrom;
+    if (c.expectAnsweredFromPresent) ok = ok && Boolean(res.answeredFrom);
+    if (c.expectCitationsSubsetOfSelected) ok = ok && onSelected && res.citations.length > 0;
+    check(ok, `sitewide-hallucination/${c.name}`);
+    const cited = res.citations.map((x) => x.n).join(',') || '—';
+    console.log(
+      `  ${ok ? '✓' : '✗'} ${c.name.padEnd(28)} status=${res.status} category=${res.category} ` +
+        `citations=[${cited}] answeredFrom=${res.answeredFrom?.url ?? '—'} allOnSelected=${onSelected}`,
+    );
+    if (!ok) console.log(`      expected status=${toArray(c.expectStatus).join('|')} category=${c.expectCategory ?? '(any)'}`);
+  }
+}
+
+function runShouldOfferAskUnits() {
+  const cases = [
+    { name: 'strong-hit-not-question', args: ['melatonin', 100, 5], expect: false },
+    { name: 'question-with-results', args: ['is melatonin worth trying?', 100, 5], expect: true },
+    { name: 'question-no-results', args: ['does anything help jet lag?', 0, 0], expect: true },
+    { name: 'gibberish-zero-results', args: ['xqzzt plugh gibberish', 0, 0], expect: true },
+    { name: 'three-chars', args: ['mag', 90, 4], expect: false },
+    { name: 'weak-results-not-question', args: ['calming herbal tea', 30, 2], expect: true },
+  ];
+  console.log(`\nshouldOfferAsk unit set — ${cases.length} case(s):`);
+  for (const c of cases) {
+    const got = shouldOfferAsk(...c.args);
+    const ok = got === c.expect;
+    check(ok, `shouldOfferAsk/${c.name}`);
+    console.log(`  ${ok ? '✓' : '✗'} ${c.name.padEnd(28)} got=${got} expected=${c.expect}`);
+  }
+}
+
 async function onlineSmoke(corpus) {
   console.log('\n--online: attempting ONE live Gemini call (in-corpus melatonin question)…');
   const key = process.env.GEMINI_API_KEY;
@@ -164,6 +250,9 @@ async function main() {
   console.log(`ask suite — corpus loaded: ${corpus.length} remedies`);
   await runRefusals(corpus);
   await runHallucinations(corpus);
+  await runSitewideRefusals(corpus);
+  await runSitewideHallucinations(corpus);
+  runShouldOfferAskUnits();
   if (process.argv.includes('--online')) await onlineSmoke(corpus);
 
   console.log(`\n${results.fail === 0 ? '✓' : '✗'} ask suite: ${results.pass} passed, ${results.fail} failed.`);

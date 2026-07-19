@@ -26,9 +26,17 @@ import LegalPage from '../layouts/LegalPage.astro';
   <h2>1. What we collect</h2>
   <ul>
     <li>
-      <strong>Newsletter (the dispatch):</strong> the dispatch newsletter isn’t live yet. When
-      it launches, subscribing will store your email address, only to send you the newsletter.
-      Nothing else.
+      <strong>Newsletter (the dispatch):</strong> the dispatch newsletter isn’t publishing yet, but
+      you can leave your email to be told when it launches. If you do, we store just that email
+      address (in our database, hosted by Supabase — see “sharing” below), only to send you a note
+      when the dispatch starts. Nothing else, no spam, and you can ask us to remove it any time.
+    </li>
+    <li>
+      <strong>Claim / label submissions:</strong> if you send us a sleep claim or a product label
+      to check, we store what you submit (and your email only if you choose to add one) to help us
+      decide what to research and to run the correction process. These are also stored in our
+      Supabase database. Please don’t include personal health details — we don’t need them and ask
+      you not to send them.
     </li>
     <li>
       <strong>Analytics:</strong> we currently run no analytics: no third-party scripts, no
@@ -83,17 +91,20 @@ import LegalPage from '../layouts/LegalPage.astro';
 
   <h2>5. Sharing</h2>
   <p>
-    We share data with the service providers that run the site for us: our host, Vercel, and —
-    only when you use the optional on-page assistant — Google, which processes your question and
-    the page content through its Gemini API to generate the answer. If we add an email tool (for
-    the dispatch) or analytics, we’ll name them here. Each is bound to handle data for us alone. We
-    may disclose information if required by law.
+    We share data with the service providers that run the site for us: our host, Vercel;
+    Supabase, which stores the email addresses and claim/label submissions described above (its
+    servers are the database behind those two forms); and — only when you use the optional on-page
+    assistant — Google, which processes your question and the page content through its Gemini API to
+    generate the answer. If we add an email-sending tool (for the dispatch) or analytics, we’ll name
+    them here too. Each is bound to handle data for us alone. We may disclose information if required
+    by law.
   </p>
 
   <h2>6. Retention</h2>
   <p>
-    Newsletter data until you unsubscribe; emails for as long as needed to handle your query;
-    analytics in aggregate only.
+    Newsletter emails until you ask us to remove you (before launch, that removal is manual, by
+    email); claim/label submissions for as long as they inform our research and the correction log;
+    emails for as long as needed to handle your query; analytics in aggregate only.
   </p>
 
   <h2>7. Your rights</h2>
@@ -106,10 +117,10 @@ import LegalPage from '../layouts/LegalPage.astro';
 
   <h2>8. Data location</h2>
   <p>
-    Our service providers may store data outside Australia. Our host, Vercel, operates globally
-    and may process data in the United States, and Google (the Gemini API, used only for the
-    on-page assistant) may likewise process your question in the United States. We choose providers
-    with appropriate safeguards.
+    Our service providers may store data outside Australia. Our host, Vercel, and our database
+    provider, Supabase, operate globally and may process data in the United States, and Google (the
+    Gemini API, used only for the on-page assistant) may likewise process your question in the
+    United States. We choose providers with appropriate safeguards.
   </p>
 
   <h2>9. Children</h2>
