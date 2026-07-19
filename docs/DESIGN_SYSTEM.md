@@ -406,7 +406,9 @@ the same plate world an hour later, settled toward sleep (family brief:
 (`transparent 0% → #000 45%`), the hero's melt mirrored; per-plate focal `object-position`
 (default `center 55%` — codas show a low, wide slice); `loading="lazy"` (never competes
 with the hero LCP); decorative `alt=""`; pure art, no type, same family constraints. A
-missing coda renders nothing — the set lights up per-remedy as assets land. Coda anatomy
-changes are `[HUMAN-GATE]` with the rest of this section.
+missing coda renders nothing — the set lights up per-remedy as assets land. The band's
+**bottom edge is a hard cut** (no second melt): the plate seats like a framed print against
+the pre-existing footer chrome — `--sp-10` of bare paper, then the hairline, then footer
+text. Coda anatomy changes are `[HUMAN-GATE]` with the rest of this section.
 
 Any change to the hero anatomy (melt spec, label tuck, no-type-on-art rule) is `[HUMAN-GATE]`.
