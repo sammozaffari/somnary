@@ -1,0 +1,1026 @@
+---
+// sleep-habits — CONTEXT hub (CHK-6.6). NOT a graded remedy and NOT advice about what to do: it is
+// context on what the human evidence for common sleep HABITS ("sleep hygiene") actually shows, habit by
+// habit, and — the owner's key emphasis — the candid framing that standalone sleep hygiene as a package
+// is WEAKER than people assume (it is the control condition CBT-I is repeatedly measured against, and is
+// recommended against as monotherapy for chronic insomnia). The strong, S-tier intervention is the CBT-I
+// package. No tier badge, no evidence-gate chips, no plannedTier. Mirrors jet-lag-shift-work.astro /
+// older-adults.astro structure exactly.
+//
+// STABLE ANCHOR CONTRACT (frozen for CHK-6.8 — do NOT rename these ids):
+//   #caffeine  #alcohol  #light (labeled "Screens & light")  #schedule  #naps  #environment  #exercise
+//   #hygiene-vs-cbti
+// A machine-quotable HABIT_SUMMARIES map (exported below, keyed by those ids) carries a one-line
+// evidence-descriptive summary + strength label for each — pullable deterministically by CHK-6.8.
+//
+// Every source is cited to a record verified FIRSTHAND this session (abstract/record read, not just
+// resolved). PMID is the canonical id; DOI added where confirmed off the PubMed record:
+//   1  Drake 2013 JCSM — RCT, 400 mg caffeine at 0/3/6 h before bed all disrupted sleep vs placebo;
+//      supports the "6 h before bed" caution. PMID 24235903 / DOI 10.5664/jcsm.3170.
+//   2  Ebrahim 2013 — REVIEW (qualitative assessment, not a formal systematic review): alcohol delays
+//      REM onset at all doses, cuts REM at higher doses, and fragments the SECOND half of the night.
+//      Labeled a review, not a systematic review. PMID 23347102 / DOI 10.1111/acer.12006.
+//   3  Chang 2015 PNAS — crossover: evening light-emitting eReader vs print reduced melatonin, delayed
+//      sleep onset (P=0.009), phase-delayed the clock, cut morning alertness. PMID 25535358 /
+//      DOI 10.1073/pnas.1418490112.
+//   4  Gooley 2011 JCEM — room light (<200 lux) before bed suppressed & shortened melatonin vs dim
+//      light (later onset in 99%). Mechanism of the LIGHT half of the screen story. PMID 21193540 /
+//      DOI 10.1210/jc.2010-2098.
+//   5  Singh/Downie 2023 Cochrane — blue-light-FILTERING lenses: sleep-quality effect is very-low
+//      certainty and mixed (3 of 6 trials improved, 3 no difference); little/no effect on visual
+//      outcomes. Anchors the "blue-light glasses fix sleep = WEAK/inconsistent" candor. PMID 37593770 /
+//      DOI 10.1002/14651858.CD013244.pub2.
+//   6  Windred 2024 Sleep — UK Biobank cohort, ~60k accelerometer wearers: sleep REGULARITY (SRI) was a
+//      stronger predictor of all-cause/cardiometabolic/cancer mortality than sleep duration. OBSERVATIONAL
+//      (association, not causation). PMID 37738616 / DOI 10.1093/sleep/zsad253.
+//   7  Maurer 2018 Sleep Med Rev — systematic review of sleep-restriction-therapy mechanisms: reduced
+//      time in bed & shorter latency are consistent with increased sleep pressure, but the review is
+//      explicit these are OUTCOMES, not proven mechanisms ("mechanistic evaluations are needed"). Used
+//      to explain the sleep-drive LOGIC behind discouraging naps in insomnia — carefully, not as proof.
+//      PMID 30177248 / DOI 10.1016/j.smrv.2018.07.005.
+//   8  Smith/Basner 2022 EHP — update to the WHO noise meta-analysis, 36 studies: per 10-dB rise in
+//      night road-traffic noise, odds of being highly sleep-disturbed rose (OR ~2.52), moderate-quality
+//      evidence. The one QUANTIFIED environment finding. PMID 35857401 / DOI 10.1289/EHP10197.
+//   9  Harding 2019 Front Neurosci — REVIEW (mechanism, mostly physiology/animal + human thermophys):
+//      NREM onset coincides with the steepest core-temperature fall; skin warming can shorten latency.
+//      Labeled a mechanism review, which is why "cool room" stays WEAK-MODERATE. PMID 31105512 /
+//      DOI 10.3389/fnins.2019.00336.
+//   10 Kredlow 2015 J Behav Med — meta-analytic review, 66 studies: regular exercise had small benefits
+//      on total sleep time & efficiency and a moderate benefit on sleep QUALITY; acute exercise small
+//      benefits. PMID 25596964 / DOI 10.1007/s10865-015-9617-6.
+//   11 Stutz 2019 Sports Med — systematic review + meta-analysis, 23 studies: evening exercise did NOT
+//      harm sleep onset/duration/quality in healthy adults (overturns the blanket "no evening exercise"
+//      rule); the one exception was VIGOROUS exercise ending <1 h before bed. PMID 30374942 /
+//      DOI 10.1007/s40279-018-1015-0.
+//   12 Qaseem/ACP 2016 Ann Intern Med — GUIDELINE: strong recommendation that ALL adults get CBT-I as
+//      the initial treatment for chronic insomnia, before medication. (Re-verified from cbt-i.mdx.)
+//      PMID 27136449 / DOI 10.7326/M15-2175.
+//   13 Edinger/AASM 2021 JCSM — GUIDELINE: STRONG recommendation for multicomponent CBT-I; and
+//      Recommendation 6 SUGGESTS clinicians NOT use sleep hygiene as a single-component therapy. The
+//      anchor for the hygiene-vs-CBT-I candor. (Re-verified from cbt-i.mdx.) PMID 33164742 /
+//      DOI 10.5664/jcsm.8986.
+//   14 Trauer 2015 Ann Intern Med — meta-analysis, 20 RCTs: CBT-I improved onset latency (~19 min),
+//      WASO (~26 min), efficiency (~9.9%); total sleep time change was small & not significant. Used to
+//      show the STRENGTH of the CBT-I package vs the habits. (Re-verified from cbt-i.mdx.)
+//      PMID 26054060 / DOI 10.7326/M14-2841.
+import Base from '../layouts/Base.astro';
+import ContextBanner from '../components/ContextBanner.astro';
+import ContextSources from '../components/ContextSources.astro';
+import Disclaimer from '../components/Disclaimer.astro';
+import Fn from '../components/Fn.astro';
+
+// Machine-quotable one-liners, keyed by the frozen anchor ids (CHK-6.8 pulls these deterministically).
+// Every summary is evidence-descriptive ("may help" / "the evidence shows"), never imperative.
+export const HABIT_SUMMARIES = [
+  {
+    id: 'caffeine',
+    label: 'Moderate–strong evidence',
+    summary:
+      'A controlled trial found a standard caffeine dose disrupted sleep even when taken six hours before bed, so cutting off caffeine well before evening is one of the better-evidenced habits.',
+  },
+  {
+    id: 'alcohol',
+    label: 'Moderate evidence',
+    summary:
+      'Review evidence shows alcohol delays REM sleep and fragments the second half of the night, so a nightcap tends to lighten and break up later sleep rather than deepen it.',
+  },
+  {
+    id: 'light',
+    label: 'Mixed: light timing moderate, blue-light gadgets weak',
+    summary:
+      'Evening light — especially bright, blue-rich screen light — can suppress melatonin and delay sleep, while the evidence that blue-light glasses or filters fix sleep is weak and inconsistent.',
+  },
+  {
+    id: 'schedule',
+    label: 'Moderate evidence, largely observational',
+    summary:
+      'Large cohort data link a more regular sleep–wake schedule to better health outcomes, though most of this evidence is associational rather than proof that fixing your timing causes better sleep.',
+  },
+  {
+    id: 'naps',
+    label: 'Mixed / depends on your sleep',
+    summary:
+      'For good sleepers a short nap is generally fine, but for people with insomnia daytime sleep can erode the sleep drive that helps them sleep at night, which is why CBT-I often limits it.',
+  },
+  {
+    id: 'environment',
+    label: 'Weak–moderate evidence',
+    summary:
+      'A cool, dark, quiet room is reasonable and night noise is measurably disruptive, but direct human trials that a cooler or darker room causes better sleep are thinner than the confident advice implies.',
+  },
+  {
+    id: 'exercise',
+    label: 'Moderate evidence, myth-correcting',
+    summary:
+      'Regular exercise is associated with better sleep quality, and the blanket rule against evening exercise is largely overturned for most people — with vigorous exercise right before bed the main exception.',
+  },
+  {
+    id: 'hygiene-vs-cbti',
+    label: 'Candor: hygiene weak as a package; CBT-I is the strong intervention',
+    summary:
+      'Standalone sleep hygiene is weaker than assumed — it is the control condition CBT-I is measured against and is not recommended as a solo treatment for chronic insomnia — while multicomponent CBT-I is the strongest-graded intervention.',
+  },
+];
+
+const sources = [
+  {
+    n: 1,
+    cite: 'Drake C, Roehrs T, Shambroom J, Roth T. Caffeine effects on sleep taken 0, 3, or 6 hours before going to bed. J Clin Sleep Med. 2013;9(11):1195–1200.',
+    finding:
+      'Randomised, double-blind study: a 400 mg dose of caffeine (roughly a few cups of coffee) taken at bedtime, 3 hours before, or 6 hours before bed all produced significant disruption of sleep versus placebo; the reduction in total sleep time even at the 6-hour interval was substantial enough that the authors supported avoiding significant caffeine consumption for at least 6 hours before bedtime.',
+    pmid: '24235903',
+    doi: '10.5664/jcsm.3170',
+  },
+  {
+    n: 2,
+    cite: 'Ebrahim IO, Shapiro CM, Williams AJ, Fenwick PB. Alcohol and sleep I: effects on normal sleep. Alcohol Clin Exp Res. 2013;37(4):539–549.',
+    finding:
+      'Review (a qualitative assessment of the known studies, not a formal systematic review) of alcohol and normal sleep: alcohol shortens sleep-onset latency and can consolidate sleep in the first half of the night, but the onset of the first REM period is significantly delayed at all doses, REM is reduced at moderate-to-high doses, and sleep in the second half of the night becomes more disrupted.',
+    pmid: '23347102',
+    doi: '10.1111/acer.12006',
+  },
+  {
+    n: 3,
+    cite: 'Chang AM, Aeschbach D, Duffy JF, Czeisler CA. Evening use of light-emitting eReaders negatively affects sleep, circadian timing, and next-morning alertness. Proc Natl Acad Sci U S A. 2015;112(4):1232–1237.',
+    finding:
+      'Crossover study: reading on a light-emitting eReader in the hours before bed, compared with a printed book, reduced evening melatonin secretion, lengthened the time to fall asleep (P = 0.009), phase-delayed the circadian clock, and reduced next-morning alertness.',
+    pmid: '25535358',
+    doi: '10.1073/pnas.1418490112',
+  },
+  {
+    n: 4,
+    cite: 'Gooley JJ, Chamberlain K, Smith KA, et al. Exposure to room light before bedtime suppresses melatonin onset and shortens melatonin duration in humans. J Clin Endocrinol Metab. 2011;96(3):E463–E472.',
+    finding:
+      'In 116 healthy adults, exposure to room light (<200 lux) before bedtime, compared with dim light (<3 lux), delayed melatonin onset in 99% of participants and shortened the duration of melatonin production by about 90 minutes; room light during usual sleep hours suppressed melatonin by more than 50% in most people.',
+    pmid: '21193540',
+    doi: '10.1210/jc.2010-2098',
+  },
+  {
+    n: 5,
+    cite: 'Singh S, Keller PR, Busija L, et al. Blue-light filtering spectacle lenses for visual performance, sleep, and macular health in adults. Cochrane Database Syst Rev. 2023;8(8):CD013244.',
+    finding:
+      'Cochrane systematic review: the evidence on whether blue-light-FILTERING spectacle lenses improve sleep quality was very-low-certainty and mixed (of six trials, three reported improvement and three found no difference), and the review found probably little or no effect on visual outcomes such as visual acuity — it does not support blue-light-filtering lenses as a reliable sleep intervention.',
+    pmid: '37593770',
+    doi: '10.1002/14651858.CD013244.pub2',
+  },
+  {
+    n: 6,
+    cite: 'Windred DP, Burns AC, Lane JM, et al. Sleep regularity is a stronger predictor of mortality risk than sleep duration: a prospective cohort study. Sleep. 2024;47(1):zsad253.',
+    finding:
+      'Prospective UK Biobank cohort of ~60,000 participants with one week of accelerometry: a Sleep Regularity Index (day-to-day consistency of the sleep–wake pattern) was more strongly predictive of all-cause, cardiometabolic, and cancer mortality than sleep duration. This is an observational association, not evidence that changing one’s schedule causes the outcome.',
+    pmid: '37738616',
+    doi: '10.1093/sleep/zsad253',
+  },
+  {
+    n: 7,
+    cite: 'Maurer LF, Espie CA, Kyle SD. How does sleep restriction therapy for insomnia work? A systematic review of mechanistic evidence and the introduction of the Triple-R model. Sleep Med Rev. 2018;42:127–138.',
+    finding:
+      'Systematic review of the mechanisms of sleep-restriction therapy: reduced time in bed and shorter sleep-onset latency across studies are consistent with increased homeostatic sleep pressure, but the authors emphasise these were most often observed as OUTCOMES rather than proven mechanisms, and that purpose-designed mechanistic studies are still needed. Used here for the sleep-drive rationale behind limiting daytime sleep in insomnia — a well-motivated rationale, not settled proof.',
+    pmid: '30177248',
+    doi: '10.1016/j.smrv.2018.07.005',
+  },
+  {
+    n: 8,
+    cite: 'Smith MG, Cordoza M, Basner M. Environmental Noise and Effects on Sleep: An Update to the WHO Systematic Review and Meta-Analysis. Environ Health Perspect. 2022;130(7):76001.',
+    finding:
+      'Update to the WHO systematic review and meta-analysis (36 studies): for road-traffic noise, each 10-decibel increase in night-time noise level (Lnight) was associated with about 2.52-fold higher odds of being highly sleep-disturbed, at moderate quality of evidence; the exposure–response curves closely matched the earlier WHO estimates.',
+    pmid: '35857401',
+    doi: '10.1289/EHP10197',
+  },
+  {
+    n: 9,
+    cite: 'Harding EC, Franks NP, Wisden W. The Temperature Dependence of Sleep. Front Neurosci. 2019;13:336.',
+    finding:
+      'Review of sleep thermoregulation (largely mechanistic, drawing on physiology and animal work alongside human thermophysiology): sleep onset and NREM sleep coincide with the steepest fall in core body temperature, and skin warming that promotes body-heat loss can shorten the time to fall asleep — the mechanistic basis for why a too-warm room plausibly impairs sleep, short of a body of real-world trials.',
+    pmid: '31105512',
+    doi: '10.3389/fnins.2019.00336',
+  },
+  {
+    n: 10,
+    cite: 'Kredlow MA, Capozzoli MC, Hearon BA, Calkins AW, Otto MW. The effects of physical activity on sleep: a meta-analytic review. J Behav Med. 2015;38(3):427–449.',
+    finding:
+      'Meta-analytic review of 66 studies: regular exercise had small beneficial effects on total sleep time and sleep efficiency and a moderate beneficial effect on sleep quality; acute bouts of exercise had small beneficial effects across several sleep measures.',
+    pmid: '25596964',
+    doi: '10.1007/s10865-015-9617-6',
+  },
+  {
+    n: 11,
+    cite: 'Stutz J, Eiholzer R, Spengler CM. Effects of Evening Exercise on Sleep in Healthy Participants: A Systematic Review and Meta-Analysis. Sports Med. 2019;49(2):269–287.',
+    finding:
+      'Systematic review and meta-analysis of 23 studies: in healthy adults, evening exercise did not negatively affect sleep onset, sleep duration, or sleep quality, and slightly increased slow-wave (deep) sleep; the one exception was that vigorous exercise ending less than one hour before bedtime could delay sleep onset. This largely overturns the blanket rule against evening exercise.',
+    pmid: '30374942',
+    doi: '10.1007/s40279-018-1015-0',
+  },
+  {
+    n: 12,
+    cite: 'Qaseem A, Kansagara D, Forciea MA, Cooke M, Denberg TD. Management of Chronic Insomnia Disorder in Adults: A Clinical Practice Guideline From the American College of Physicians. Ann Intern Med. 2016;165(2):125–133.',
+    finding:
+      'American College of Physicians clinical practice guideline: a STRONG recommendation that all adult patients receive CBT-I as the initial treatment for chronic insomnia disorder, before pharmacotherapy (moderate-quality evidence).',
+    pmid: '27136449',
+    doi: '10.7326/M15-2175',
+  },
+  {
+    n: 13,
+    cite: 'Edinger JD, Arnedt JT, Bertisch SM, et al. Behavioral and psychological treatments for chronic insomnia disorder in adults: an American Academy of Sleep Medicine clinical practice guideline. J Clin Sleep Med. 2021;17(2):255–262.',
+    finding:
+      'American Academy of Sleep Medicine clinical practice guideline: a STRONG recommendation that clinicians use multicomponent CBT-I for chronic insomnia disorder in adults; and, separately, a recommendation that clinicians NOT use sleep hygiene as a single-component therapy for chronic insomnia disorder (conditional recommendation).',
+    pmid: '33164742',
+    doi: '10.5664/jcsm.8986',
+  },
+  {
+    n: 14,
+    cite: 'Trauer JM, Qian MY, Doyle JS, Rajaratnam SMW, Cunnington D. Cognitive Behavioral Therapy for Chronic Insomnia: A Systematic Review and Meta-analysis. Ann Intern Med. 2015;163(3):191–204.',
+    finding:
+      'Meta-analysis of 20 randomised trials (1,162 participants): CBT-I improved sleep-onset latency by about 19 minutes, wake after sleep onset by about 26 minutes, and sleep efficiency by about 9.9%, with clinically meaningful effect sizes; the change in total sleep time was small and not statistically significant.',
+    pmid: '26054060',
+    doi: '10.7326/M14-2841',
+  },
+];
+---
+
+<Base
+  title="Sleep habits: what the evidence for sleep hygiene actually shows | Somnary"
+  description="Caffeine, alcohol, screens, schedule, naps, room, exercise — a habit-by-habit look at what the human evidence for 'sleep hygiene' really shows, and the honest catch: standalone sleep hygiene is weaker than people assume, and for chronic insomnia the strongest-evidenced intervention is CBT-I. Context, not a grade, and not advice about what to do."
+  canonical="https://somnary.vercel.app/sleep-habits"
+>
+  <main class="page">
+    <header class="head">
+      <p class="eyebrow">Context · sleep habits</p>
+      <h1 class="title">Sleep habits</h1>
+      <p class="dek">
+        &ldquo;Sleep hygiene&rdquo; — cut the caffeine, skip the nightcap, dim the screens, keep a
+        schedule — is the advice everyone has heard. Some of it is genuinely well-evidenced; some of
+        it is weaker than the confident tone suggests; and the package as a whole is weaker than most
+        people assume. This page walks through seven common habits one at a time, showing what the
+        human evidence actually documents for each and where it runs thin — and it ends with the honest
+        catch: for chronic insomnia, the strongest-evidenced approach isn't a hygiene checklist, it's
+        <a href="/r/cbt-i">CBT-I</a>. This is context, not a grade, and it does not tell you what to do
+        or what is right for you.
+      </p>
+    </header>
+
+    <ContextBanner
+      note="Which habits matter, and how much, depends on your own sleep, health, and medicines. This page describes what the human evidence documents for each habit — habit by habit — and routes persistent sleep problems to a clinician and to CBT-I."
+    />
+
+    <p class="who">
+      <span class="who-tag">Who this is for</span>
+      Anyone weighing the usual sleep-hygiene advice for ordinary, occasional bad nights — and anyone
+      who has tried &ldquo;good sleep habits&rdquo; and found they weren't enough, which is itself a
+      useful signal about what to do next.
+    </p>
+
+    <!-- how to read this page -->
+    <section class="section">
+      <p class="eyebrow">How to read this page</p>
+      <h2 class="section-title">Seven habits, honestly labelled</h2>
+      <div class="prose">
+        <p>
+          Each habit below carries a plain <strong>evidence-strength label</strong> in words, not just
+          a colour, because the strength varies a lot from one habit to the next. &ldquo;Moderate&rdquo;
+          or &ldquo;strong&rdquo; means human trials or large studies back it; &ldquo;weak&rdquo; or
+          &ldquo;mixed&rdquo; means the evidence is thin, inconsistent, or mostly about mechanism rather
+          than whether the habit changes <em>your</em> sleep. None of these are instructions. They
+          describe what has been studied, and what it does and doesn't show.
+        </p>
+      </div>
+    </section>
+
+    <!-- ============ 1. CAFFEINE ============ -->
+    <section id="caffeine" class="habit">
+      <div class="habit-head">
+        <p class="eyebrow">Habit 01 · Caffeine</p>
+        <p class="strength str-strong">Evidence: moderate–strong</p>
+      </div>
+      <h2 class="section-title">Caffeine, and how late is too late</h2>
+      <div class="prose">
+        <p>
+          <strong>Bottom line.</strong> This is one of the better-evidenced habits. A controlled trial
+          found a standard dose of caffeine disrupted sleep even when it was taken <strong>six hours
+          before bed</strong> — not just right before it.<Fn n={1} />
+        </p>
+        <p>
+          <strong>Who this applies to.</strong> Regular caffeine drinkers, and anyone sensitive to it,
+          who has an afternoon or evening coffee, tea, energy drink, or caffeinated soda. It matters
+          more the closer to bedtime the dose lands, and more for people who metabolise caffeine slowly.
+        </p>
+        <p>
+          <strong>The claim.</strong> That caffeine keeps you awake is uncontroversial; the sharper
+          claim people miss is that an <em>afternoon</em> coffee can still cost you sleep hours later.
+        </p>
+        <p>
+          <strong>What the evidence shows.</strong> In a randomised, double-blind study, a 400 mg dose
+          of caffeine (roughly a few cups of coffee) taken at bedtime, three hours before, or
+          <em>six</em> hours before bed all produced significant sleep disruption versus placebo — the
+          six-hour effect on total sleep time was large enough that the authors supported avoiding
+          significant caffeine for at least six hours before bed.<Fn n={1} />
+        </p>
+        <p>
+          <strong>What it does <em>not</em> show.</strong> That single trial used one fixed dose in a
+          modest sample; it doesn't set a personal cut-off time, and it doesn't capture how much
+          tolerance, genetics, and your usual intake shift the picture. &ldquo;Six hours&rdquo; is a
+          finding about that dose in those participants, not a rule for you.<Fn n={1} />
+        </p>
+        <p>
+          <strong>What changing this actually looks like.</strong> In practice people who want to test
+          this move their last caffeine earlier in the day and notice whether falling asleep gets
+          easier. The evidence describes the direction of the effect; whether it matters for you is
+          something only your own nights can tell you.
+        </p>
+        <p>
+          <strong>Safety boundary.</strong> Cutting caffeine can bring temporary withdrawal headaches,
+          and caffeine interacts with some medicines and conditions — if you rely on it heavily or have
+          a heart or anxiety condition, changes are worth raising with a clinician or pharmacist rather
+          than guessing.
+        </p>
+        <p class="ask-inline">
+          <span class="ask-tag">Ask a clinician</span>
+          Could caffeine be affecting my sleep more than I realise, given my other medicines and
+          conditions?
+        </p>
+      </div>
+    </section>
+
+    <!-- ============ 2. ALCOHOL ============ -->
+    <section id="alcohol" class="habit">
+      <div class="habit-head">
+        <p class="eyebrow">Habit 02 · Alcohol</p>
+        <p class="strength str-mod">Evidence: moderate</p>
+      </div>
+      <h2 class="section-title">Alcohol — the nightcap that backfires</h2>
+      <div class="prose">
+        <p>
+          <strong>Bottom line.</strong> A drink can help you fall asleep and then quietly wreck the
+          back half of the night: alcohol delays REM sleep and fragments sleep in the
+          <strong>second half</strong> as it wears off.<Fn n={2} />
+        </p>
+        <p>
+          <strong>Who this applies to.</strong> Anyone using a nightcap to wind down, and anyone
+          drinking in the few hours before bed.
+        </p>
+        <p>
+          <strong>The claim.</strong> The folk belief is that alcohol is a sleep aid because it makes
+          you drowsy. The evidence complicates that: the sedation is front-loaded and the cost comes
+          later.
+        </p>
+        <p>
+          <strong>What the evidence shows.</strong> A review of the research on alcohol and normal sleep
+          found that alcohol shortens the time to fall asleep and can consolidate sleep early on, but
+          the onset of the first REM period is significantly delayed at all doses, REM is reduced at
+          higher doses, and the second half of the night becomes more disrupted.<Fn n={2} /> The
+          familiar &ldquo;knocked out then wide awake at 3am&rdquo; pattern is exactly this.
+        </p>
+        <p>
+          <strong>What it does <em>not</em> show.</strong> This is a qualitative review rather than a
+          formal systematic review, and it describes averages across studies, not a threshold dose that
+          is safe for sleep or a prediction for one person's night.<Fn n={2} /> It is about sleep
+          architecture, not about alcohol's many other health effects.
+        </p>
+        <p>
+          <strong>What changing this actually looks like.</strong> People testing this usually move
+          drinks earlier and further from bedtime, or reduce them, and watch whether the middle of the
+          night steadies. The evidence points to why the nightcap can betray you; the rest is your own
+          experience.
+        </p>
+        <p>
+          <strong>Safety boundary.</strong> Using alcohol to get to sleep can build into dependence, and
+          alcohol is dangerous combined with sedating sleep medicines and some other drugs. If a drink
+          has become how you fall asleep, that is a conversation for a clinician, not a habit to
+          fine-tune alone.
+        </p>
+        <p class="ask-inline">
+          <span class="ask-tag">Ask a clinician</span>
+          Is my drinking affecting my sleep or interacting with anything I take to sleep?
+        </p>
+      </div>
+    </section>
+
+    <!-- ============ 3. SCREENS & LIGHT ============ -->
+    <section id="light" class="habit">
+      <div class="habit-head">
+        <p class="eyebrow">Habit 03 · Screens &amp; light</p>
+        <p class="strength str-mixed">Evidence: mixed — light timing moderate, blue-light gadgets weak</p>
+      </div>
+      <h2 class="section-title">Screens &amp; light — the timing part is real, the gadget part isn't</h2>
+      <div class="prose">
+        <p>
+          <strong>Bottom line.</strong> Bright, blue-rich light in the evening genuinely delays sleep by
+          suppressing melatonin — that part is moderately well-evidenced. But the popular fix, that
+          blue-light glasses or a phone's night mode will rescue your sleep, is
+          <strong>weak and inconsistent</strong>, and worth separating from the timing point.<Fn n={3} /><Fn n={5} />
+        </p>
+        <p>
+          <strong>Who this applies to.</strong> Anyone using bright screens or bright room lighting in
+          the hour or two before bed — and anyone who has bought blue-light glasses expecting a sleep
+          cure.
+        </p>
+        <p>
+          <strong>The claim(s).</strong> Two very different claims usually get bundled together: (a)
+          evening light can push your body clock later and delay sleep, and (b) a blue-light filter
+          undoes that. The evidence treats them very differently.
+        </p>
+        <p>
+          <strong>What the evidence shows.</strong> For the light itself, the evidence is solid: room
+          light before bed (under 200 lux) suppressed and shortened melatonin release compared with dim
+          light in nearly all participants,<Fn n={4} /> and in a crossover study reading on a
+          light-emitting e-reader before bed, versus a printed book, reduced melatonin, delayed sleep
+          onset, phase-delayed the circadian clock, and cut next-morning alertness.<Fn n={3} /> For the
+          <em>gadget</em> claim, a Cochrane review of blue-light-<em>filtering</em> spectacle lenses
+          found the effect on sleep quality was very-low-certainty and mixed — three of six trials
+          reported improvement, three found no difference — and little or no effect on visual
+          outcomes.<Fn n={5} />
+        </p>
+        <p>
+          <strong>What it does <em>not</em> show.</strong> The melatonin studies are about light exposure
+          and clock timing under lab conditions; they don't prove a given screen habit ruins <em>your</em>
+          sleep, or that any specific number of minutes offline fixes it.<Fn n={3} /><Fn n={4} /> And the
+          lens evidence does not support blue-light glasses as a reliable sleep treatment — the honest
+          read is &ldquo;we don't know, and probably little.&rdquo;<Fn n={5} />
+        </p>
+        <p>
+          <strong>What changing this actually looks like.</strong> The lever the evidence actually points
+          at is <em>less bright light</em> in the evening — dimmer rooms and dimmer, further-away screens
+          — rather than a filter bolted onto the same bright exposure. People test it by dimming things
+          down before bed and seeing whether sleep comes easier.
+        </p>
+        <p>
+          <strong>Safety boundary.</strong> This one is low-risk. The main caution is spending money on
+          blue-light glasses expecting a fix the evidence doesn't support, and letting a screen habit
+          stand in for evaluating a sleep problem that has run on for months.
+        </p>
+        <p class="ask-inline">
+          <span class="ask-tag">Ask a clinician</span>
+          If evening screens seem tied to my sleep trouble, is this a habit issue or a sign of something
+          worth assessing?
+        </p>
+      </div>
+    </section>
+
+    <!-- ============ 4. SCHEDULE ============ -->
+    <section id="schedule" class="habit">
+      <div class="habit-head">
+        <p class="eyebrow">Habit 04 · Regular schedule</p>
+        <p class="strength str-mod">Evidence: moderate, largely observational</p>
+      </div>
+      <h2 class="section-title">A regular schedule — consistent timing, mostly from cohort data</h2>
+      <div class="prose">
+        <p>
+          <strong>Bottom line.</strong> Keeping a regular sleep–wake schedule is one of the more
+          defensible habits, but much of the strongest evidence is <em>observational</em>: large studies
+          link regular timing to better outcomes, which is not the same as proving that fixing your
+          schedule fixes your sleep.<Fn n={6} />
+        </p>
+        <p>
+          <strong>Who this applies to.</strong> Anyone with erratic bed and wake times — big weekday /
+          weekend swings, shifting bedtimes — who is otherwise reasonably healthy.
+        </p>
+        <p>
+          <strong>The claim.</strong> That going to bed and waking at consistent times steadies your body
+          clock and improves sleep.
+        </p>
+        <p>
+          <strong>What the evidence shows.</strong> In a UK Biobank cohort of roughly 60,000 people
+          wearing accelerometers, a Sleep Regularity Index — how consistent the sleep–wake pattern was
+          day to day — was a <em>stronger</em> predictor of all-cause, cardiometabolic, and cancer
+          mortality than sleep duration.<Fn n={6} /> Regularity, in other words, tracks with health at
+          large scale.
+        </p>
+        <p>
+          <strong>What it does <em>not</em> show.</strong> This is a cohort study: it shows association,
+          not causation. It cannot prove that making your schedule more regular <em>causes</em> better
+          sleep or a longer life, and people who keep regular hours may differ in many other ways.<Fn n={6} />
+          It is a strong reason to take regularity seriously, not proof it is a lever for you.
+        </p>
+        <p>
+          <strong>What changing this actually looks like.</strong> In practice this means anchoring wake
+          time in particular — including on weekends — and letting bedtime follow. Regular timing also
+          overlaps heavily with <a href="/r/cbt-i">CBT-I</a>, where a fixed rise time is a core piece of
+          the method rather than a standalone tip.
+        </p>
+        <p>
+          <strong>Safety boundary.</strong> Forcing a rigid schedule while chronically short on sleep can
+          backfire; and if your schedule is dictated by shift work, that is a distinct
+          <a href="/jet-lag-shift-work">circadian problem</a> that belongs with a clinician rather than a
+          hygiene tip.
+        </p>
+        <p class="ask-inline">
+          <span class="ask-tag">Ask a clinician</span>
+          Is an irregular schedule the driver of my sleep problem, or a symptom of something else?
+        </p>
+      </div>
+    </section>
+
+    <!-- ============ 5. NAPS ============ -->
+    <section id="naps" class="habit">
+      <div class="habit-head">
+        <p class="eyebrow">Habit 05 · Naps</p>
+        <p class="strength str-mixed">Evidence: mixed — depends on your sleep</p>
+      </div>
+      <h2 class="section-title">Naps — helpful for some, counter-productive for insomnia</h2>
+      <div class="prose">
+        <p>
+          <strong>Bottom line.</strong> Napping isn't good or bad in the abstract. For a good sleeper a
+          short nap is generally fine or even useful; for someone with insomnia, daytime sleep can work
+          <em>against</em> them by spending the sleep pressure that would otherwise help them sleep at
+          night — which is why CBT-I's sleep-restriction logic tends to limit it.<Fn n={7} />
+        </p>
+        <p>
+          <strong>Who this applies to.</strong> The advice splits by who you are: occasional nappers who
+          sleep well at night are in a different situation from people struggling with chronic insomnia.
+        </p>
+        <p>
+          <strong>The claim.</strong> &ldquo;Never nap&rdquo; is common blanket advice — but it is only
+          well-founded for a specific group.
+        </p>
+        <p>
+          <strong>What the evidence shows.</strong> The rationale comes from how sleep restriction (a
+          core, effective part of CBT-I) is thought to work: consolidating sleep by building up
+          homeostatic sleep pressure. A systematic review of sleep-restriction-therapy mechanisms found
+          reduced time in bed and shorter time to fall asleep consistent with increased sleep pressure —
+          the same pressure a daytime nap discharges.<Fn n={7} /> That is why, for insomnia, cutting naps
+          is often part of the plan.
+        </p>
+        <p>
+          <strong>What it does <em>not</em> show.</strong> That same review is explicit that these
+          changes are largely observed as <em>outcomes</em>, and that rigorous mechanistic proof is still
+          limited — so the sleep-drive story is a well-motivated rationale, not a settled law.<Fn n={7} />
+          And none of it means naps are harmful for people who sleep well; for good sleepers the evidence
+          doesn't support a blanket ban.
+        </p>
+        <p>
+          <strong>What changing this actually looks like.</strong> For a good sleeper, this may mean
+          nothing changes. For someone with insomnia, the CBT-I approach is usually to protect nighttime
+          sleep drive rather than spend it during the day — but that is done as part of a structured
+          programme, tailored, not as a rule improvised alone.
+        </p>
+        <p>
+          <strong>Safety boundary.</strong> A sudden new need to nap, or overwhelming daytime sleepiness,
+          can signal an underlying disorder (such as sleep apnea) and is a reason to seek
+          <a href="/when-to-see-a-doctor">evaluation</a>, not to just cut naps.
+        </p>
+        <p class="ask-inline">
+          <span class="ask-tag">Ask a clinician</span>
+          Is my daytime sleepiness something to manage with my schedule, or a sign of a disorder to
+          assess?
+        </p>
+      </div>
+    </section>
+
+    <!-- ============ 6. ENVIRONMENT ============ -->
+    <section id="environment" class="habit">
+      <div class="habit-head">
+        <p class="eyebrow">Habit 06 · Bedroom environment</p>
+        <p class="strength str-weak">Evidence: weak–moderate</p>
+      </div>
+      <h2 class="section-title">Cool, dark, quiet — reasonable, but thinner than it sounds</h2>
+      <div class="prose">
+        <p>
+          <strong>Bottom line.</strong> &ldquo;Keep the room cool, dark, and quiet&rdquo; is sensible and
+          low-risk, but the direct human evidence that a cooler or darker room <em>causes</em> better
+          sleep is thinner than the confident advice implies. Night <em>noise</em> is the part that is
+          actually well-quantified.<Fn n={8} /><Fn n={9} />
+        </p>
+        <p>
+          <strong>Who this applies to.</strong> Anyone whose bedroom is hot, bright, or noisy — which is
+          worth acting on regardless — while keeping expectations proportionate to the evidence.
+        </p>
+        <p>
+          <strong>The claim.</strong> That a cool, dark, quiet room measurably improves sleep.
+        </p>
+        <p>
+          <strong>What the evidence shows.</strong> For noise, the evidence is real and numeric: an update
+          to the WHO noise meta-analysis (36 studies) found that for every 10-decibel rise in night-time
+          road-traffic noise, the odds of being highly sleep-disturbed rose about 2.5-fold, at moderate
+          quality of evidence.<Fn n={8} /> For temperature, the case is mechanistic: a review of sleep
+          thermoregulation notes that falling asleep coincides with the steepest drop in core body
+          temperature, and that skin warming can shorten the time to fall asleep — which is <em>why</em> a
+          too-warm room plausibly hurts.<Fn n={9} />
+        </p>
+        <p>
+          <strong>What it does <em>not</em> show.</strong> The temperature evidence is largely mechanism
+          and physiology, not a body of trials showing that turning the thermostat down a couple of
+          degrees reliably improves real-world sleep — so &ldquo;cool room&rdquo; earns a
+          <em>weak-to-moderate</em> label, not a strong one.<Fn n={9} /> The noise finding is an
+          association from population studies, not a personal dose-response.<Fn n={8} />
+        </p>
+        <p>
+          <strong>What changing this actually looks like.</strong> The highest-value move the evidence
+          supports is reducing intrusive night noise; a cool, dark room is a reasonable, cheap default to
+          try, held with appropriately modest expectations.
+        </p>
+        <p>
+          <strong>Safety boundary.</strong> Low-risk overall. The main caution is chasing an ever more
+          &ldquo;optimised&rdquo; bedroom as a substitute for addressing a persistent sleep problem that
+          needs a different approach.
+        </p>
+        <p class="ask-inline">
+          <span class="ask-tag">Ask a clinician</span>
+          If my room already seems fine and I still sleep badly, what should I be looking at instead?
+        </p>
+      </div>
+    </section>
+
+    <!-- ============ 7. EXERCISE ============ -->
+    <section id="exercise" class="habit">
+      <div class="habit-head">
+        <p class="eyebrow">Habit 07 · Exercise &amp; timing</p>
+        <p class="strength str-mod">Evidence: moderate, myth-correcting</p>
+      </div>
+      <h2 class="section-title">Exercise — helps sleep, and the &ldquo;not at night&rdquo; rule is mostly a myth</h2>
+      <div class="prose">
+        <p>
+          <strong>Bottom line.</strong> Regular exercise is associated with better sleep, and the common
+          rule that you must never exercise in the evening is <strong>largely overturned</strong> for
+          most people — with one narrow exception, vigorous exercise finishing right before bed.<Fn n={10} /><Fn n={11} />
+        </p>
+        <p>
+          <strong>Who this applies to.</strong> Generally healthy adults deciding whether to exercise,
+          and specifically whether an evening workout will cost them sleep.
+        </p>
+        <p>
+          <strong>The claim(s).</strong> Two claims: that regular exercise improves sleep, and that
+          evening exercise ruins it. The evidence supports the first and mostly refutes the second.
+        </p>
+        <p>
+          <strong>What the evidence shows.</strong> A meta-analytic review of 66 studies found regular
+          exercise had small benefits on total sleep time and sleep efficiency and a <em>moderate</em>
+          benefit on sleep quality.<Fn n={10} /> And a systematic review and meta-analysis of 23 studies
+          on <em>evening</em> exercise in healthy adults found it did not harm sleep onset, duration, or
+          quality — if anything it slightly increased deep (slow-wave) sleep — with the single exception
+          that vigorous exercise ending less than an hour before bed could delay falling asleep.<Fn n={11} />
+        </p>
+        <p>
+          <strong>What it does <em>not</em> show.</strong> The benefits are averages across mostly healthy
+          participants, not a guarantee for everyone, and the exercise-and-sleep link is not proof that
+          starting to exercise will fix a given person's insomnia.<Fn n={10} /> The evening-exercise
+          reassurance is for healthy adults and doesn't erase the vigorous-right-before-bed
+          caveat.<Fn n={11} />
+        </p>
+        <p>
+          <strong>What changing this actually looks like.</strong> For most people the practical upshot is
+          that there is no need to avoid evening workouts on sleep grounds; the only clear caution the
+          evidence flags is intense exercise in the last hour before bed.
+        </p>
+        <p>
+          <strong>Safety boundary.</strong> Starting or intensifying exercise carries its own health
+          considerations unrelated to sleep — if you have a heart condition or other medical issues, that
+          belongs with a clinician first.
+        </p>
+        <p class="ask-inline">
+          <span class="ask-tag">Ask a clinician</span>
+          Given my health, is there any reason evening exercise specifically would be a problem for me?
+        </p>
+      </div>
+    </section>
+
+    <!-- ============ HYGIENE vs CBT-I — the honest catch ============ -->
+    <section id="hygiene-vs-cbti" class="habit candor">
+      <div class="habit-head">
+        <p class="eyebrow">The honest catch</p>
+        <p class="strength str-candor">Hygiene is weak as a package · CBT-I is the strong intervention</p>
+      </div>
+      <h2 class="section-title">Sleep hygiene vs CBT-I — what the habits can and can't do</h2>
+      <div class="prose">
+        <p>
+          Here is the part most &ldquo;sleep hygiene&rdquo; advice leaves out. Taken together as a
+          <em>package</em>, sleep hygiene is <strong>weaker than people assume</strong>. In the insomnia
+          research it is repeatedly used as the <em>control condition</em> — the basic-advice comparison
+          that the real treatment is measured against. And that real treatment is
+          <a href="/r/cbt-i">CBT-I</a> (cognitive behavioural therapy for insomnia), the
+          strongest-evidenced sleep intervention on Somnary. A meta-analysis of 20 randomised trials found
+          CBT-I shortened the time to fall asleep by about 19 minutes, cut time awake at night by about 26
+          minutes, and raised sleep efficiency by nearly 10 percent.<Fn n={14} /> Two professional bodies
+          name it first-line: the American College of Physicians recommends that <em>all</em> adults
+          receive CBT-I as the initial treatment for chronic insomnia, before medication,<Fn n={12} /> and
+          the American Academy of Sleep Medicine gives multicomponent CBT-I a strong recommendation.<Fn n={13} />
+        </p>
+        <p>
+          The same AASM guideline goes further and specifically <strong>suggests clinicians not use sleep
+          hygiene as a single-component therapy</strong> for chronic insomnia.<Fn n={13} /> Standalone
+          hygiene, in other words, is not enough on its own for a chronic problem — a striking thing to
+          learn about the advice given out most freely.
+        </p>
+        <p>
+          None of that discredits the habits above for the many people whose sleep problems are minor.
+          If you sleep badly <em>occasionally</em> and mildly, these low-risk habits are a sensible place
+          to start, and several of them are moderately well-evidenced in their own right. The honest
+          framing is about matching effort to severity — not abandoning good habits.
+        </p>
+
+        <!-- severity-proportionate routing (evidence-descriptive, never a diagnosis or a directive) -->
+        <div class="route">
+          <p class="route-head">Matching the approach to the problem</p>
+          <p class="route-line">
+            <span class="route-tag">Occasional / mild</span>
+            For the odd bad night or mild, short-lived trouble, the habits on this page are a sensible,
+            low-risk starting point, and the best-evidenced of them (caffeine timing, alcohol, evening
+            light) are the ones to weigh first.
+          </p>
+          <p class="route-line">
+            <span class="route-tag">Most nights, 3+ months</span>
+            When poor sleep runs most nights for three months or more, habit tweaks are unlikely to be
+            enough on their own — the strongest evidence points to <a href="/r/cbt-i">CBT-I</a>, and that
+            is a conversation to have with a clinician. Persistent sleep problems, or daytime sleepiness
+            and other warning signs, are a reason to seek
+            <a href="/when-to-see-a-doctor">evaluation</a> rather than keep adjusting habits alone. How
+            Somnary handles interactions and safety boundaries lives on the
+            <a href="/safety">safety page</a>.
+          </p>
+        </div>
+
+        <p class="candor-note">
+          This describes what the evidence documents and where different approaches fit. It does not
+          diagnose your sleep, tell you which category you are in, or tell you what to do — that is a
+          judgement for you and a clinician.
+        </p>
+      </div>
+
+      <!-- Disclaimer placed adjacent to this decision-bearing section, not only in the footer. -->
+      <div class="disclaimer-slot">
+        <Disclaimer variant="standard" />
+      </div>
+    </section>
+
+    <!-- related -->
+    <section class="section">
+      <p class="eyebrow">Related</p>
+      <h2 class="section-title">Read next</h2>
+      <ul class="related">
+        <li><a href="/r/cbt-i">CBT-I</a> — the strongest-evidenced approach to chronic insomnia, and why the habits above are a starting point rather than the treatment.</li>
+        <li><a href="/when-to-see-a-doctor">When to see a doctor</a> — the signs that a sleep problem needs evaluation, not another habit.</li>
+        <li><a href="/safety">Safety &amp; interactions</a> — the primary boundary: how Somnary handles interactions and when to route to a clinician.</li>
+        <li><a href="/jet-lag-shift-work">Jet lag + shift work</a> — why a schedule dictated by travel or shifts is a circadian problem, not a hygiene tip.</li>
+      </ul>
+    </section>
+
+    <ContextSources sources={sources} />
+
+    <p class="review-line">
+      Reviewed 2026-07-19 · Found an error? <a href="/methodology#corrections">Corrections →</a>
+    </p>
+  </main>
+</Base>
+
+<style>
+  .page {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: var(--sp-8) var(--sp-7) var(--sp-9);
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+    margin: 0;
+  }
+  .head {
+    margin-bottom: var(--sp-6);
+  }
+  .title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-3xl);
+    line-height: var(--lh-3xl);
+    letter-spacing: var(--tracking-tight);
+    color: var(--ink);
+    margin: var(--sp-3) 0 var(--sp-5);
+  }
+  .dek {
+    font-size: var(--text-md);
+    line-height: var(--lh-md);
+    color: var(--muted);
+    max-width: 68ch;
+    margin: 0;
+  }
+  .dek a {
+    color: var(--primary);
+  }
+
+  /* who this is for */
+  .who {
+    max-width: 68ch;
+    margin: var(--sp-5) 0 0;
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+  }
+  .who-tag {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--primary);
+    margin-right: var(--sp-2);
+  }
+
+  /* plain section (intro, related) */
+  .section {
+    border-top: var(--border-hairline);
+    padding-top: var(--sp-6);
+    margin-top: var(--sp-8);
+  }
+  .section-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-xl);
+    line-height: var(--lh-xl);
+    color: var(--ink);
+    margin: var(--sp-2) 0 var(--sp-5);
+  }
+
+  /* habit block */
+  .habit {
+    border-top: var(--border-hairline);
+    padding-top: var(--sp-6);
+    margin-top: var(--sp-8);
+    scroll-margin-top: 80px;
+  }
+  .habit-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--sp-3);
+  }
+  /* evidence-strength label — READABLE IN WORDS, never color alone. Weight + a leading marker
+     carry the meaning; the tint is a secondary cue only. */
+  .strength {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    font-weight: 700;
+    letter-spacing: var(--tracking-label);
+    margin: 0;
+    padding-left: var(--sp-4);
+    position: relative;
+  }
+  .strength::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 8px;
+    height: 8px;
+    border-radius: var(--r-pill);
+    background: currentColor;
+  }
+  .str-strong {
+    color: var(--eucalyptus);
+  }
+  .str-mod {
+    color: var(--primary);
+  }
+  .str-mixed {
+    color: var(--muted);
+  }
+  .str-weak {
+    color: var(--muted);
+  }
+  .str-candor {
+    color: var(--ink);
+  }
+
+  .prose {
+    max-width: 68ch;
+  }
+  .prose p {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--muted);
+    margin: 0 0 var(--sp-4);
+  }
+  .prose strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .prose a {
+    color: var(--primary);
+  }
+
+  /* inline clinician question per habit */
+  .ask-inline {
+    padding-left: var(--sp-6);
+    position: relative;
+  }
+  .ask-inline::before {
+    content: '?';
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--primary);
+  }
+  .ask-tag {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--primary);
+    margin-right: var(--sp-2);
+  }
+
+  /* candor section — visually distinct so the honest catch reads as its own beat */
+  .candor {
+    background: var(--pistachio);
+    border: 1px solid var(--eucalyptus);
+    border-radius: var(--r-lg);
+    padding: var(--sp-7);
+    border-top: 1px solid var(--eucalyptus);
+  }
+  .candor .prose p {
+    color: var(--ink);
+  }
+
+  /* severity-proportionate routing block */
+  .route {
+    border: var(--border-hairline);
+    border-radius: var(--r-md);
+    background: var(--surface);
+    padding: var(--sp-5) var(--sp-6);
+    margin: var(--sp-5) 0;
+    max-width: 68ch;
+  }
+  .route-head {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+    margin: 0 0 var(--sp-4);
+  }
+  .route-line {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--muted);
+    margin: 0 0 var(--sp-4);
+  }
+  .route-line:last-child {
+    margin-bottom: 0;
+  }
+  .route-line a {
+    color: var(--primary);
+  }
+  .route-tag {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    font-weight: 700;
+    letter-spacing: var(--tracking-label);
+    color: var(--eucalyptus);
+    margin-right: var(--sp-2);
+  }
+  .candor-note {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    font-style: italic;
+    margin: var(--sp-5) 0 0;
+    max-width: 68ch;
+  }
+
+  /* related / read-next links */
+  .related {
+    max-width: 68ch;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+  }
+  .related li {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--muted);
+  }
+  .related a {
+    color: var(--primary);
+  }
+
+  .disclaimer-slot {
+    margin-top: var(--sp-6);
+  }
+  .review-line {
+    margin-top: var(--sp-8);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+  }
+  .review-line a {
+    color: var(--primary);
+  }
+  @media (max-width: 640px) {
+    .page {
+      padding: var(--sp-6) var(--sp-5) var(--sp-8);
+    }
+    .title {
+      font-weight: 700;
+      font-size: var(--text-2xl);
+    }
+    .candor {
+      padding: var(--sp-6) var(--sp-5);
+    }
+  }
+</style>
