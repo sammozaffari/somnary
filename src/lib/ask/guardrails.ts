@@ -17,6 +17,8 @@
  * Written in erasable TS so Node type-stripping can import it in the CI scripts.
  */
 
+import { norm } from '../search-rank.ts';
+
 const BOUNDARY = 'This is educational, not medical advice.';
 
 export interface Route {
@@ -29,6 +31,9 @@ export const ROUTES = {
   safety: { href: '/safety', label: 'Safety & who should be careful' },
   meds: { href: '/medications-and-sleep-aids', label: 'Medications & sleep aids' },
   urgent: { href: '/when-to-see-a-doctor#urgent', label: "When it's urgent" },
+  compare: { href: '/compare', label: 'Compare remedies side by side' },
+  search: { href: '/search', label: 'Search Somnary' },
+  tiers: { href: '/tiers', label: 'Browse the tier board' },
 } as const;
 
 export interface ClassifyRefusal {
@@ -101,6 +106,11 @@ const SAFE_GENERAL =
 const COMBINE =
   /\b(mix|combine|combining|stack|stacking|take together|together with|alongside|on top of)\b[^.?!]*\b(medication|meds|medicine|prescription|antidepressant|ssri|snri|maoi|warfarin|blood thinner|blood pressure|antihistamine|sedative|benzo\w*|ambien|zolpidem|zoloft|prozac|lexapro|xanax|alcohol|birth control|the pill)\b|\bcombine\b[^.?!]*\band\b|\b(mix|combine|take)\b[^.?!]*\bwith my\b|\bcan i (take|use)\b[^.?!]*\bwith\b[^.?!]*\b(medication|meds|medicine|prescription|antidepressant|warfarin|alcohol)\b|\b(interact|interacts|interaction|interfere|interferes)\b[^.?!]*\b(with )?my\b/i;
 
+// Stack/combo fishing (D4, CHK-6.7): any question framed around stacking or combining supplements
+// refuses even without a named medication — Somnary never advises combinations of any kind, and the
+// assistant is the surface most likely to be fished for one.
+const COMBINE_STACK = /\b(stacks?|stacking|stacked|combos?|combinations?)\b/i;
+
 // Start/stop/replace a prescription.
 const STOP_RX =
   /\b(stop|quit|come off|get off|wean off|taper off|replace|instead of)\b[^.?!]*\b(prescription|my (medication|meds|pills|antidepressant|sleeping pill|sleep meds|ambien|zolpidem|benzo\w*|ssri))\b|\bcan i stop (my|taking)\b/i;
@@ -114,7 +124,7 @@ export function classify(question: string): ClassifyResult {
   const q = ` ${question} `;
   if (CRISIS.test(q)) return { kind: 'refuse', category: 'crisis', message: MSG.crisis, route: ROUTES.urgent };
   if (STOP_RX.test(q)) return { kind: 'refuse', category: 'stop-prescription', message: MSG.stopRx, route: ROUTES.clinician };
-  if (COMBINE.test(q)) return { kind: 'refuse', category: 'combine-meds', message: MSG.combine, route: ROUTES.meds };
+  if (COMBINE.test(q) || COMBINE_STACK.test(q)) return { kind: 'refuse', category: 'combine-meds', message: MSG.combine, route: ROUTES.meds };
   if (DOSING.test(q) || DOSING2.test(q) || DOSING3.test(q) || DOSING4.test(q)) return { kind: 'refuse', category: 'personal-dosing', message: MSG.dosing, route: ROUTES.clinician };
   if (DIAGNOSIS.test(q)) return { kind: 'refuse', category: 'diagnosis', message: MSG.diagnosis, route: ROUTES.clinician };
   if (SAFE_FOR_ME.test(q) || SAFE_GENERAL.test(q)) return { kind: 'refuse', category: 'safe-for-me', message: MSG.safeForMe, route: ROUTES.safety };
@@ -129,6 +139,64 @@ export function noEvidenceMessage(name: string): string {
     `what's cited on this page, so if it isn't covered here I won't guess. You can read the full page ` +
     `above, or search Somnary for another remedy. ` +
     BOUNDARY
+  );
+}
+
+/**
+ * Site-wide no-evidence copy (CHK-6.7) — the corpus-wide analogue of noEvidenceMessage. Points the
+ * reader at search and the tier board (the two honest "what does Somnary actually cover?" surfaces)
+ * instead of "the page above", because there is no page above.
+ */
+export function sitewideNoEvidenceMessage(): string {
+  return (
+    `I don't have that in Somnary's reviewed evidence. This assistant only answers from the reviewed ` +
+    `remedy pages, so if it isn't covered there I won't guess. You can search Somnary or browse the ` +
+    `tier board to see everything that has been reviewed. ` +
+    BOUNDARY
+  );
+}
+
+/**
+ * Multi-remedy router copy (CHK-6.7) — when a question names two or more corpus remedies we never
+ * synthesize across pages (per-page [n] footnotes make a mixed context a citation-integrity bug) and
+ * we never discuss taking things together (D4). Deterministic, no model call: point at the compare
+ * tool and each remedy's own page. Comparing is not combining — the compare tool shows each remedy's
+ * own graded evidence side by side; it never suggests using them together.
+ */
+export function multiRemedyMessage(names: string[]): string {
+  const list =
+    names.length === 2 ? `${names[0]} and ${names[1]}` : `${names.slice(0, -1).join(', ')}, and ${names[names.length - 1]}`;
+  return (
+    `That question spans more than one remedy (${list}), and this assistant answers from one ` +
+    `remedy's cited evidence at a time. Comparing is not combining: the compare tool shows each ` +
+    `remedy's own graded evidence side by side — it never suggests taking remedies together, and ` +
+    `neither will I. You can compare them there, or ask about one remedy at a time. ` +
+    BOUNDARY
+  );
+}
+
+// --- Site-wide remedy-mention detection (CHK-6.7) ------------------------------------------------
+
+/** The minimal remedy shape the detector needs (AskRemedy satisfies it structurally). */
+export interface RemedyRef {
+  slug: string;
+  name: string;
+  aliases: string[];
+}
+
+/**
+ * Which corpus remedies does the question explicitly name? Uses the SAME norm() as search and
+ * retrieval, so "l-theanine" ↔ "l theanine" match identically everywhere. Whole-token matching on
+ * the normalized strings (padded with spaces) — "melatonin vs valerian" hits both; "chamomile tea"
+ * hits chamomile; a 1–2-char alias never matches (too collision-prone).
+ */
+export function detectRemedyMentions<T extends RemedyRef>(question: string, remedies: T[]): T[] {
+  const q = ` ${norm(question)} `;
+  return remedies.filter((r) =>
+    [r.name, ...r.aliases].some((label) => {
+      const l = norm(label);
+      return l.length > 2 && q.includes(` ${l} `);
+    }),
   );
 }
 

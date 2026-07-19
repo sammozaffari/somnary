@@ -51,6 +51,61 @@ function score(qTokens: string[], c: AskChunk): number {
   return hits * 10 + (c.kind === 'source' ? 1 : 0) + (c.sources.length ? 1 : 0);
 }
 
+/**
+ * Site-wide remedy SELECTION (CHK-6.7) — corpus-wide is NOT cross-remedy synthesis. This picks the
+ * single remedy most likely to hold the answer, and the engine then runs the UNCHANGED single-remedy
+ * pipeline (retrieve → prompt → post-checks) against that one page, so the model never sees two
+ * remedies' evidence in one context ([n] footnotes are per-page; mixing would break citation
+ * integrity).
+ *
+ * Selection is deterministic:
+ *   1. A remedy explicitly named in the question (detected by the engine via detectRemedyMentions)
+ *      wins outright — pass it as `named`.
+ *   2. Otherwise every remedy is scored with the SAME per-remedy chunk scorer, using only the
+ *      question's DISTINCTIVE tokens: a token that appears in more than half of the corpus (e.g.
+ *      "sleep", "insomnia" — this is a sleep-remedy reference, so those match everything) carries no
+ *      signal about WHICH remedy and is dropped. No distinctive token, or no remedy scoring > 0,
+ *      returns null → the engine refuses with the site-wide no-evidence copy, model never called.
+ *   3. Ties break on name order (stable, locale-independent-enough for our slugs).
+ */
+export function retrieveSitewide(
+  question: string,
+  corpus: AskRemedy[],
+  named?: AskRemedy | null,
+): AskRemedy | null {
+  if (named) return named;
+  const qTokens = tokenize(question);
+  if (qTokens.length === 0 || corpus.length === 0) return null;
+
+  // Token sets per remedy (union of all chunk tokens), computed once per call.
+  const remedyTokens = corpus.map((r) => {
+    const set = new Set<string>();
+    for (const c of r.chunks) for (const t of tokenize(c.text)) set.add(t);
+    return set;
+  });
+
+  // Document frequency: drop tokens present in more than half the corpus (ubiquitous ⇒ no signal).
+  const distinctive = qTokens.filter((t) => {
+    let df = 0;
+    for (const set of remedyTokens) if (set.has(t)) df++;
+    return df > 0 && df <= corpus.length / 2;
+  });
+  if (distinctive.length === 0) return null;
+
+  let best: AskRemedy | null = null;
+  let bestScore = 0;
+  corpus.forEach((r, i) => {
+    if (!distinctive.some((t) => remedyTokens[i].has(t))) return;
+    let total = 0;
+    for (const c of r.chunks) total += score(distinctive, c);
+    if (total > bestScore || (total === bestScore && best && r.name.localeCompare(best.name) < 0)) {
+      best = r;
+      bestScore = total;
+    }
+  });
+  return bestScore > 0 ? best : null;
+}
+
 export function retrieve(question: string, remedy: AskRemedy, topK = 6): Retrieval {
   const qTokens = tokenize(question);
   const allowedNs = remedy.sources.map((s) => s.n);
