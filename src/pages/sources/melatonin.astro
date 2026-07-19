@@ -9,9 +9,11 @@ import {
 } from '../../data/source-scorecards/melatonin';
 
 // Publish gate mirrors the Supabase view: only owner-ratified rows render.
-const products: SourceProduct[] = MELATONIN_SOURCES.filter((p) => p.ratified).sort((a, b) =>
-  a.brand.localeCompare(b.brand),
-);
+// AU audience: melatonin is prescription-only here, so the only OTC route is personal import
+// via iHerb. Withhold products an Australian can't actually buy OTC (availableInAU === false).
+const products: SourceProduct[] = MELATONIN_SOURCES.filter(
+  (p) => p.ratified && p.availableInAU !== false,
+).sort((a, b) => a.brand.localeCompare(b.brand));
 
 const reviewDate = '2026-07-19';
 
@@ -48,6 +50,19 @@ function pips(score: number): string {
       <p class="banner-sub">
         No affiliate links — Somnary earns nothing if you buy. No brand pays to appear, to improve
         a score, or to remove one. <a href="/sources/methodology">How we rate →</a>
+      </p>
+    </aside>
+
+    <aside class="au-note">
+      <p class="au-note-title">Availability in Australia</p>
+      <p class="au-note-body">
+        Melatonin is <strong>prescription-only in Australia</strong> (Schedule 4; a narrow
+        pharmacist-only exception covers low-dose modified-release for people 55+). Chemist
+        Warehouse and Amazon AU don’t sell it over the counter — searches there return
+        melatonin-<em>free</em> herbal sleep aids or products for pets. The only OTC route is
+        <strong>personal import via iHerb</strong>, so the products below are the melatonin
+        supplements Australians actually import. If you want a pharmacy option,
+        <strong>Circadin</strong> (below) is available on prescription.
       </p>
     </aside>
 
@@ -190,6 +205,31 @@ function pips(score: number): string {
     letter-spacing: var(--tracking-label);
     color: var(--muted);
     margin: 0;
+  }
+
+  .au-note {
+    border: var(--border-hairline);
+    border-radius: var(--r-lg);
+    padding: var(--sp-5) var(--sp-6);
+    margin: 0 0 var(--sp-7);
+    background: var(--surface);
+  }
+  .au-note-title {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--ink);
+    margin: 0 0 var(--sp-2);
+  }
+  .au-note-body {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: 0;
+    max-width: 72ch;
+  }
+  .au-note-body strong {
+    color: var(--ink);
   }
 
   .empty {
