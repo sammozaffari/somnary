@@ -11,4 +11,5 @@ page by page as assets land. Family rules: melatonin coda's line density is the 
 top third strictly calm (it feeds the melt-in); no text / people / products; vermilion and
 oxblood never dominant.
 
-Status: melatonin approved + shipped 2026-07-19; remaining 30 in generation.
+Status: full set of 31 shipped 2026-07-19 (melatonin north star + batch, spot-checked
+against the family rules on delivery).
