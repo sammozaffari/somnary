@@ -14,7 +14,9 @@
 //   RATE_LIMIT_MAX             — max requests per window, per IP, per endpoint. Default 20.
 //   RATE_LIMIT_WINDOW_SECONDS  — window length in seconds.                     Default 60.
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { getSupabaseAdmin } from './supabase.ts';
+// getSupabaseAdmin (and its @supabase/supabase-js import) is loaded LAZILY inside checkRateLimit,
+// only on the non-injected path. This keeps the offline unit test (which always injects a mock
+// client) free of the Supabase SDK, and defers the client construction to real request time.
 
 // import.meta.env is populated at build; process.env is the runtime fallback on Vercel's serverless
 // functions. Read both — same dual pattern as src/lib/supabase.ts.
@@ -69,7 +71,11 @@ export async function checkRateLimit(opts: {
   client?: SupabaseClient | null;
 }): Promise<RateLimitResult> {
   const { key, limit, windowSeconds } = opts;
-  const client = opts.client !== undefined ? opts.client : getSupabaseAdmin();
+  // Use the injected client when provided (tests); otherwise lazily resolve the shared service-role
+  // client. The dynamic import keeps @supabase/supabase-js off the module-eval path for callers that
+  // inject their own client.
+  const client =
+    opts.client !== undefined ? opts.client : (await import('./supabase.ts')).getSupabaseAdmin();
 
   // Not configured → fail open. This is the normal local-dev / no-secrets path, not an error.
   if (!client) {
