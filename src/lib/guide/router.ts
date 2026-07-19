@@ -144,7 +144,11 @@ export function routePlan<T extends RemedyRef>(extraction: GuideExtraction, corp
     };
   }
 
+  // Defense-in-depth: an under-18 age band suppresses remedy leads on its own, not only via the
+  // `child` red flag. A malformed/adversarial extraction could set ageBand='child' while omitting the
+  // flag; conservative-on-children (CLAUDE.md) means either signal is enough to route to safety first.
   const suppressRemedies =
+    situation.ageBand === 'child' ||
     screeners.has('pregnancy') ||
     screeners.has('breastfeeding') ||
     screeners.has('child') ||

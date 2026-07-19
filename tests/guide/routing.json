@@ -73,6 +73,15 @@
     "expectStop": false
   },
   {
+    "name": "child-ageband-alone-suppresses-remedy-leads",
+    "text": "my young son has trouble falling asleep, he has tried melatonin, where should I read?",
+    "mock": "child-ageband-only",
+    "expectStatus": "routed",
+    "expectHrefs": ["/safety"],
+    "expectNotHrefs": ["/r/melatonin"],
+    "expectStop": false
+  },
+  {
     "name": "prescription-med-routes-meds-first",
     "text": "I take a daily prescription for my blood pressure and I sleep badly.",
     "mock": "rx-med",

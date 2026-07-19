@@ -146,6 +146,14 @@ const MOCK = {
     history: { triedRemedies: [], notes: '' },
     habits: { signals: [] },
   }),
+  // Adversarial: model tags age as child but OMITS the `child` red flag. Remedy leads must still be
+  // suppressed on ageBand alone (defense-in-depth for the conservative-on-children non-negotiable).
+  'child-ageband-only': j({
+    ack: 'Noted — a young child having trouble at night.',
+    situation: { problems: ['onset'], chronicity: 'frequent', ageBand: 'child', redFlags: ['none'] },
+    history: { triedRemedies: ['melatonin'], notes: '' },
+    habits: { signals: [] },
+  }),
   'rx-med': j({
     ack: 'Noted — you take a daily prescription and sleep poorly.',
     situation: { problems: ['onset'], chronicity: 'frequent', ageBand: 'adult', redFlags: ['prescription-med'] },
