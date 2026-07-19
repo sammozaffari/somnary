@@ -399,6 +399,7 @@ async function runRealUrlSweep(corpus, routable) {
 
   console.log(`\nreal-URL schema sweep — ${states.length} state(s):`);
   let allOk = true;
+  let containOk = true;
   let checkedUrls = 0;
   let checkedSummaryUrls = 0;
   for (const s of states) {
@@ -418,8 +419,17 @@ async function runRealUrlSweep(corpus, routable) {
         console.log(`  ✗ non-existent SUMMARY route emitted: ${h}`);
       }
     }
+    // Containment across the WHOLE corpus, not just the fixtured remedies: every remedy's verbatim
+    // verdict is woven into a summary fragment, so assert every fragment here passes the
+    // forbidden-framing/identifier lint. Guards against a future editorial verdict smuggling a
+    // forbidden framing or a bare [n] into the concierge's narrative.
+    if (!summaryContained(plan)) {
+      containOk = false;
+      console.log(`  ✗ summary fragment failed containment for state ${JSON.stringify(s.situation)}`);
+    }
   }
   check(allOk, 'real-url-sweep/every-plan-url-exists');
+  check(containOk, 'real-url-sweep/every-summary-fragment-contained');
   console.log(
     `  ${allOk ? '✓' : '✗'} every routed URL exists ` +
       `(${checkedUrls} section urls + ${checkedSummaryUrls} summary urls across ${states.length} states)`,

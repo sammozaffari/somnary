@@ -406,10 +406,10 @@ export function routePlan<T extends RemedyRef>(extraction: GuideExtraction, corp
     const grade = cbtTier ? ` (Grade ${cbtTier})` : '';
     summary.push({
       text:
-        `Because it's an ongoing or diagnosed sleep problem, the strongest evidence points to ` +
-        `CBT-I — Somnary's highest-graded intervention for ongoing insomnia${grade}, a structured ` +
-        `programme rather than a supplement — and a conversation with a clinician. Habit tweaks alone ` +
-        `are unlikely to be enough.`,
+        `For a sleep problem that's ongoing, or one a clinician has diagnosed, the strongest evidence ` +
+        `points to CBT-I — Somnary's highest-graded intervention for ongoing insomnia${grade}, a ` +
+        `structured programme rather than a supplement — alongside a conversation with a clinician. ` +
+        `On its own, adjusting habits is often not enough for a problem at that stage.`,
       links: [
         { href: CBT_I.href, label: CBT_I.label },
         { href: ROUTES.clinician.href, label: ROUTES.clinician.label },
