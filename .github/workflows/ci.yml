@@ -41,6 +41,9 @@ jobs:
       - name: Ask guardrails (refusal + hallucination + site-wide suites, mocked model)
         run: npm run verify:ask
 
+      - name: Guide guardrails (intake refusal + routing + prose-containment + real-URL sweep, mocked model)
+        run: npm run verify:guide
+
       - name: Rate limiter (fail-open + IP extraction, mocked Supabase client)
         run: npm run verify:ratelimit
 

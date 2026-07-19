@@ -1,0 +1,35 @@
+[
+  {
+    "name": "ack-forbidden-framing-dropped",
+    "text": "I can't fall asleep, what should I read?",
+    "mock": "ack-forbidden",
+    "expectAckReplaced": true,
+    "expectAckReason": "forbidden-framing"
+  },
+  {
+    "name": "ack-invented-remedy-recommendation-dropped",
+    "text": "I keep waking up at night, where do I read?",
+    "mock": "ack-recommend",
+    "expectAckReplaced": true
+  },
+  {
+    "name": "ack-bracket-citation-dropped",
+    "text": "does anything help me fall asleep faster? point me to reading.",
+    "mock": "ack-bracket",
+    "expectAckReplaced": true,
+    "expectAckReason": "bracket-citation"
+  },
+  {
+    "name": "ack-raw-pmid-url-dropped",
+    "text": "I have an anxious mind at night, what should I look at?",
+    "mock": "ack-identifier",
+    "expectAckReplaced": true,
+    "expectAckReason": "raw-identifier"
+  },
+  {
+    "name": "clean-ack-survives",
+    "text": "I have trouble falling asleep some nights, what should I read?",
+    "mock": "onset-caffeine",
+    "expectAckReplaced": false
+  }
+]

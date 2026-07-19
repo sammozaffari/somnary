@@ -26,6 +26,13 @@ const SENTINEL = 'FRAMING-LINT-OK';
 const TARGETS = [
   'src/lib/ask/guardrails.ts',
   'src/lib/ask/prompt.ts',
+  // Guide concierge (CHK-6.8a): the router copy, prompt, schema (NEUTRAL_ACK), engine, and topic-fence
+  // all ship model-adjacent prose — every forbidden framing in them must be an intentional, sentinel-
+  // tagged negative example, never live copy.
+  ...(await readdir(join(ROOT, 'src/lib/guide')))
+    .filter((f) => f.endsWith('.ts'))
+    .sort()
+    .map((f) => `src/lib/guide/${f}`),
   ...(await readdir(join(ROOT, 'src/components')))
     .filter((f) => f.endsWith('.astro'))
     .sort()

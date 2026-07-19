@@ -22,6 +22,7 @@
     "verify:framing": "node scripts/check-forbidden-framing.mjs && node scripts/check-forbidden-framing.mjs --selftest",
     "verify:ask": "node scripts/test-ask.mjs",
     "verify:ask:online": "node scripts/test-ask.mjs --online",
+    "verify:guide": "node scripts/test-guide.mjs",
     "verify:ratelimit": "node scripts/test-rate-limit.mjs"
   },
   "dependencies": {

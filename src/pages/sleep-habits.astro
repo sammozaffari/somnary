@@ -70,57 +70,9 @@ import Disclaimer from '../components/Disclaimer.astro';
 import Fn from '../components/Fn.astro';
 
 // Machine-quotable one-liners, keyed by the frozen anchor ids (CHK-6.8 pulls these deterministically).
-// Every summary is evidence-descriptive ("may help" / "the evidence shows"), never imperative.
-export const HABIT_SUMMARIES = [
-  {
-    id: 'caffeine',
-    label: 'Moderate–strong evidence',
-    summary:
-      'A controlled trial found a standard caffeine dose disrupted sleep even when taken six hours before bed, so cutting off caffeine well before evening is one of the better-evidenced habits.',
-  },
-  {
-    id: 'alcohol',
-    label: 'Moderate evidence',
-    summary:
-      'Review evidence shows alcohol delays REM sleep and fragments the second half of the night, so a nightcap tends to lighten and break up later sleep rather than deepen it.',
-  },
-  {
-    id: 'light',
-    label: 'Mixed: light timing moderate, blue-light gadgets weak',
-    summary:
-      'Evening light — especially bright, blue-rich screen light — can suppress melatonin and delay sleep, while the evidence that blue-light glasses or filters fix sleep is weak and inconsistent.',
-  },
-  {
-    id: 'schedule',
-    label: 'Moderate evidence, largely observational',
-    summary:
-      'Large cohort data link a more regular sleep–wake schedule to better health outcomes, though most of this evidence is associational rather than proof that fixing your timing causes better sleep.',
-  },
-  {
-    id: 'naps',
-    label: 'Mixed / depends on your sleep',
-    summary:
-      'For good sleepers a short nap is generally fine, but for people with insomnia daytime sleep can erode the sleep drive that helps them sleep at night, which is why CBT-I often limits it.',
-  },
-  {
-    id: 'environment',
-    label: 'Weak–moderate evidence',
-    summary:
-      'A cool, dark, quiet room is reasonable and night noise is measurably disruptive, but direct human trials that a cooler or darker room causes better sleep are thinner than the confident advice implies.',
-  },
-  {
-    id: 'exercise',
-    label: 'Moderate evidence, myth-correcting',
-    summary:
-      'Regular exercise is associated with better sleep quality, and the blanket rule against evening exercise is largely overturned for most people — with vigorous exercise right before bed the main exception.',
-  },
-  {
-    id: 'hygiene-vs-cbti',
-    label: 'Candor: hygiene weak as a package; CBT-I is the strong intervention',
-    summary:
-      'Standalone sleep hygiene is weaker than assumed — it is the control condition CBT-I is measured against and is not recommended as a solo treatment for chronic insomnia — while multicomponent CBT-I is the strongest-graded intervention.',
-  },
-];
+// The SINGLE source of truth now lives in src/lib/habits.ts so the guide router (CHK-6.8a) and this
+// page read one structure (never duplicated). Re-exported here for anything importing from the page.
+export { HABIT_SUMMARIES } from '../lib/habits';
 
 const sources = [
   {
