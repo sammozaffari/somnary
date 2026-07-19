@@ -16,12 +16,7 @@ const products: SourceProduct[] = MELATONIN_SOURCES.filter(
 ).sort((a, b) => a.brand.localeCompare(b.brand));
 
 const reviewDate = '2026-07-19';
-
-// Render a 0–5 score as filled/empty pips — shape + number, never color alone.
-function pips(score: number): string {
-  const n = Math.max(0, Math.min(5, Math.round(score)));
-  return '●'.repeat(n) + '○'.repeat(5 - n);
-}
+const segs = [1, 2, 3, 4, 5];
 ---
 
 <Base
@@ -34,11 +29,10 @@ function pips(score: number): string {
       <h1 class="title">Where to source melatonin</h1>
       <p class="dek">
         The <a href="/r/melatonin">evidence grade</a> answers whether melatonin works. This page
-        answers a different question: of the products on sale, which actually contain what the
-        label says, made by companies whose claims hold up? Each product is rated on six
-        documented dimensions — every point traces to a primary document. There is no overall
-        score and no #1: <a href="/sources/methodology">a ranking would be a recommendation</a>,
-        and we don’t make those.
+        answers a different question: of the products you can actually buy, which contain what the
+        label says, made by companies whose claims hold up? Each is rated on six documented
+        dimensions — every point traces to a primary document. No overall score, no #1:
+        <a href="/sources/methodology">a ranking would be a recommendation</a>, and we don’t make those.
       </p>
     </header>
 
@@ -61,8 +55,8 @@ function pips(score: number): string {
         Warehouse and Amazon AU don’t sell it over the counter — searches there return
         melatonin-<em>free</em> herbal sleep aids or products for pets. The only OTC route is
         <strong>personal import via iHerb</strong>, so the products below are the melatonin
-        supplements Australians actually import. If you want a pharmacy option,
-        <strong>Circadin</strong> (below) is available on prescription.
+        supplements Australians actually import. For a pharmacy option, <strong>Circadin</strong>
+        (below) is available on prescription.
       </p>
     </aside>
 
@@ -70,59 +64,92 @@ function pips(score: number): string {
       products.length === 0 ? (
         <p class="empty">Scorecards are being finalized. Check back shortly.</p>
       ) : (
-        <section class="grid" aria-label="Melatonin source scorecards">
+        <section class="stack" aria-label="Melatonin source scorecards">
           {products.map((p) => (
             <article class="card">
-              <div class="card-head">
-                <div>
-                  <h2 class="brand">{p.brand}</h2>
-                  <p class="product">
-                    {p.productName} · {p.doseMg} mg · {p.form}
-                  </p>
-                </div>
-                <p class="cert" data-kind={p.certVerified ? 'yes' : 'none'}>
-                  {p.certSummary}
-                </p>
+              <div class="shot">
+                {p.imagePath ? (
+                  <img src={p.imagePath} alt={`${p.brand} ${p.productName}`} loading="lazy" decoding="async" />
+                ) : (
+                  <span class="shot-fallback" aria-hidden="true">
+                    {p.brand.charAt(0)}
+                  </span>
+                )}
               </div>
 
-              <dl class="dims">
-                {DIMENSION_ORDER.map((key) => (
-                  <div class="dim">
-                    <dt>{DIMENSION_LABELS[key]}</dt>
-                    <dd>
-                      <span class="pips" aria-hidden="true">
-                        {pips(p.scores[key].score)}
-                      </span>
-                      <span class="num">{p.scores[key].score}/5</span>
-                      <span class="dimnote">{p.scores[key].note}</span>
-                    </dd>
+              <div class="body">
+                <div class="body-head">
+                  <div class="id">
+                    <h2 class="brand">{p.brand}</h2>
+                    <p class="product">
+                      {p.productName} · {p.doseMg} mg · {p.form}
+                    </p>
                   </div>
-                ))}
-              </dl>
+                  <p class="cert" data-kind={p.certVerified ? 'yes' : 'none'}>
+                    {p.certSummary}
+                  </p>
+                </div>
 
-              <p class="verdict">{p.verdict}</p>
+                <p class="verdict">{p.verdict}</p>
 
-              {p.heldItems.length > 0 && (
-                <p class="held">
-                  <span class="held-label">Under review</span>{' '}
-                  {p.heldItems.join(' ')} — not counted until confirmed against the primary
-                  regulator document.
-                </p>
-              )}
+                <div class="meters">
+                  {DIMENSION_ORDER.map((key) => (
+                    <div class="meter">
+                      <span class="meter-label">{DIMENSION_LABELS[key]}</span>
+                      <span class="meter-row">
+                        <span class="bar" aria-hidden="true">
+                          {segs.map((i) => (
+                            <i class:list={['seg', { on: i <= p.scores[key].score }]} />
+                          ))}
+                        </span>
+                        <span class="meter-num">{p.scores[key].score}<span class="of">/5</span></span>
+                      </span>
+                    </div>
+                  ))}
+                </div>
 
-              <p class="community">
-                <span class="community-label">Community read</span>{' '}
-                {p.communityStatus === 'gathering'
-                  ? 'Gathering — not yet summarized. Community sentiment is shown for context and never affects a score.'
-                  : p.communityNote}
-              </p>
+                <details class="why">
+                  <summary>Why these scores</summary>
+                  <dl class="why-list">
+                    {DIMENSION_ORDER.map((key) => (
+                      <div class="why-row">
+                        <dt>
+                          {DIMENSION_LABELS[key]} · {p.scores[key].score}/5
+                        </dt>
+                        <dd>{p.scores[key].note}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                  {p.heldItems.length > 0 && (
+                    <p class="held">
+                      <span class="tag">Under review</span> {p.heldItems.join(' ')} — not counted
+                      until confirmed against the primary regulator document.
+                    </p>
+                  )}
+                </details>
 
-              <p class="links">
-                <a href={p.manufacturerUrl} rel="nofollow noopener" target="_blank">
-                  Manufacturer page ↗
-                </a>
-                <span class="nolink">No affiliate link · Somnary earns nothing</span>
-              </p>
+                <div class="foot">
+                  <p class="community">
+                    <span class="tag">Community read</span>{' '}
+                    {p.communityThemes && p.communityThemes.length > 0 ? (
+                      p.communityThemes.map((t, i) => (
+                        <>
+                          {i > 0 && ' · '}
+                          {t.url ? <a href={t.url} rel="nofollow noopener" target="_blank">{t.note}</a> : t.note}
+                        </>
+                      ))
+                    ) : (
+                      <>Gathering — shown for context only, never affects a score.</>
+                    )}
+                  </p>
+                  <p class="links">
+                    <a class="buy" href={p.manufacturerUrl} rel="nofollow noopener" target="_blank">
+                      Product page ↗
+                    </a>
+                    <span class="nolink">No affiliate link</span>
+                  </p>
+                </div>
+              </div>
             </article>
           ))}
         </section>
@@ -139,8 +166,8 @@ function pips(score: number): string {
     <p class="footer-strip">
       Somnary · Melatonin source scorecards · Reviewed {reviewDate} · Educational, not medical
       advice · A scorecard is about what’s in a bottle, never about whether you should take it —
-      talk to a clinician before changing what you take. Found an error, or a brand with a
-      document to add? We aim to fix verified errors within 7 days —
+      talk to a clinician before changing what you take. Found an error, or a brand with a document
+      to add? We aim to fix verified errors within 7 days —
       <a href="mailto:sammymoz@gmail.com">sammymoz@gmail.com</a>.
     </p>
   </main>
@@ -148,7 +175,7 @@ function pips(score: number): string {
 
 <style>
   .page {
-    max-width: 1180px;
+    max-width: 1040px;
     margin: 0 auto;
     padding: var(--sp-8) var(--sp-7) var(--sp-9);
   }
@@ -176,12 +203,14 @@ function pips(score: number): string {
     font-size: var(--text-md);
     line-height: var(--lh-md);
     color: var(--muted);
-    max-width: 70ch;
+    max-width: 68ch;
     margin: 0;
   }
   .dek a,
   .banner a,
-  .links a,
+  .au-note a,
+  .buy,
+  .community a,
   .footer-strip a {
     color: var(--primary);
   }
@@ -190,10 +219,9 @@ function pips(score: number): string {
     background: var(--primary-soft);
     border-radius: var(--r-lg);
     padding: var(--sp-5) var(--sp-6);
-    margin: var(--sp-6) 0 var(--sp-7);
+    margin: var(--sp-6) 0 var(--sp-4);
   }
   .banner-line {
-    font-family: var(--font-body);
     font-size: var(--text-base);
     line-height: var(--lh-base);
     color: var(--ink);
@@ -226,7 +254,6 @@ function pips(score: number): string {
     line-height: var(--lh-sm);
     color: var(--muted);
     margin: 0;
-    max-width: 72ch;
   }
   .au-note-body strong {
     color: var(--ink);
@@ -237,32 +264,62 @@ function pips(score: number): string {
     font-size: var(--text-base);
   }
 
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  /* scorecard stack — one wide card per product */
+  .stack {
+    display: flex;
+    flex-direction: column;
     gap: var(--sp-5);
   }
-
   .card {
+    display: grid;
+    grid-template-columns: 168px 1fr;
+    gap: var(--sp-6);
     border: var(--border-hairline);
-    border-radius: var(--r-lg);
+    border-radius: var(--r-xl);
     background: var(--surface);
     padding: var(--sp-6);
+  }
+
+  /* product shot */
+  .shot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 1;
+    background: var(--primary-soft);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+  }
+  .shot img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: var(--sp-3);
+  }
+  .shot-fallback {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-3xl);
+    color: var(--primary);
+  }
+
+  .body {
+    min-width: 0;
     display: flex;
     flex-direction: column;
     gap: var(--sp-4);
   }
-  .card-head {
+  .body-head {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    gap: var(--sp-3);
+    gap: var(--sp-4);
   }
   .brand {
     font-family: var(--font-display);
     font-weight: 700;
-    font-size: var(--text-lg);
-    line-height: var(--lh-lg);
+    font-size: var(--text-xl);
+    line-height: var(--lh-xl);
     color: var(--ink);
     margin: 0;
   }
@@ -276,10 +333,9 @@ function pips(score: number): string {
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
     text-align: right;
-    margin: 0;
-    padding: var(--sp-1) var(--sp-2);
-    border-radius: var(--r-sm);
     white-space: nowrap;
+    margin: 0;
+    flex-shrink: 0;
   }
   .cert[data-kind='yes'] {
     color: var(--eucalyptus, var(--primary));
@@ -288,84 +344,132 @@ function pips(score: number): string {
     color: var(--muted);
   }
 
-  .dims {
+  .verdict {
+    font-family: var(--font-body);
+    font-size: var(--text-md);
+    line-height: var(--lh-md);
+    color: var(--ink);
     margin: 0;
+    max-width: 62ch;
+  }
+
+  /* six-dimension meter grid — 3 across */
+  .meters {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--sp-4) var(--sp-5);
+    padding-top: var(--sp-4);
+    border-top: var(--border-hairline);
+  }
+  .meter {
     display: flex;
     flex-direction: column;
     gap: var(--sp-2);
-    border-top: var(--border-hairline);
-    padding-top: var(--sp-4);
   }
-  .dim {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    grid-template-areas: 'label pips' 'note note';
-    gap: var(--sp-1) var(--sp-3);
-    align-items: baseline;
+  .meter-label {
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+    font-family: var(--font-mono);
   }
-  .dim dt {
-    grid-area: label;
+  .meter-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-2);
+  }
+  .bar {
+    display: inline-flex;
+    gap: var(--sp-1);
+  }
+  .seg {
+    width: var(--sp-4);
+    height: var(--sp-2);
+    border-radius: var(--r-sm);
+    background: var(--primary-soft);
+  }
+  .seg.on {
+    background: var(--ink);
+  }
+  .meter-num {
+    font-family: var(--font-mono);
     font-size: var(--text-sm);
     color: var(--ink);
     font-weight: 600;
   }
-  .dim dd {
-    grid-area: pips;
-    margin: 0;
-    display: flex;
-    align-items: baseline;
-    gap: var(--sp-2);
+  .meter-num .of {
+    color: var(--muted);
+    font-weight: 400;
   }
-  .pips {
-    font-size: var(--text-sm);
-    letter-spacing: 0.15em;
-    color: var(--ink);
+
+  /* expandable rationale */
+  .why {
+    border-top: var(--border-hairline);
+    padding-top: var(--sp-3);
   }
-  .num {
+  .why > summary {
     font-family: var(--font-mono);
     font-size: var(--text-xs);
-    color: var(--muted);
+    letter-spacing: var(--tracking-label);
+    color: var(--primary);
+    cursor: pointer;
   }
-  .dimnote {
-    grid-area: note;
+  .why-list {
+    margin: var(--sp-4) 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+  }
+  .why-row dt {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--ink);
+    margin: 0 0 var(--sp-1);
+  }
+  .why-row dd {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: 0;
+  }
+  .held {
     font-size: var(--text-xs);
     line-height: var(--lh-sm);
     color: var(--muted);
+    margin: var(--sp-4) 0 0;
   }
 
-  .verdict {
-    font-size: var(--text-base);
-    line-height: var(--lh-base);
-    color: var(--ink);
-    margin: 0;
+  .foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: var(--sp-4);
+    flex-wrap: wrap;
     padding-top: var(--sp-3);
     border-top: var(--border-hairline);
   }
-
-  .held,
   .community {
     font-size: var(--text-xs);
     line-height: var(--lh-sm);
     color: var(--muted);
     margin: 0;
+    max-width: 52ch;
   }
-  .held-label,
-  .community-label {
+  .tag {
     font-family: var(--font-mono);
     letter-spacing: var(--tracking-label);
     color: var(--ink);
     margin-right: var(--sp-1);
   }
-
   .links {
     display: flex;
     flex-direction: column;
+    align-items: flex-end;
     gap: var(--sp-1);
-    margin: var(--sp-2) 0 0;
-    padding-top: var(--sp-3);
-    border-top: var(--border-hairline);
+    margin: 0;
+    flex-shrink: 0;
   }
-  .links a {
+  .buy {
     font-size: var(--text-sm);
     font-weight: 600;
   }
@@ -412,8 +516,16 @@ function pips(score: number): string {
     .page {
       padding: var(--sp-7) var(--sp-5) var(--sp-8);
     }
-    .grid {
+    .card {
       grid-template-columns: 1fr;
+      gap: var(--sp-4);
+    }
+    .shot {
+      aspect-ratio: auto;
+      height: 200px;
+    }
+    .meters {
+      grid-template-columns: repeat(2, 1fr);
     }
   }
 </style>
