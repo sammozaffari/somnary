@@ -363,11 +363,13 @@ Every remedy page opens inside its own world: a **full-bleed linocut hero plate*
 dir's README + `docs/plans/2026-07-16-remedy-hero-plates-prompt.md`; design study 2026-07-17
 v4→v6, owner-ratified "labeled plate"). Anatomy:
 
-- **The plate** — pure art, full viewport width, 62vh min 380px (44vh min 280px under
-  640px), focal `object-position` per plate (default `center 30%`, subjects sit in the
+- **The plate** — pure art, full viewport width, 48vh min 340px (38vh min 260px under
+  640px) *(owner-trimmed 2026-07-19 from 62/44vh: the verdict must arrive without a
+  scroll)*, focal `object-position` per plate (default `center 30%`, subjects sit in the
   central 60% by family rule). The linocut ICON does not appear on remedy pages — the hero
   IS the remedy.
-- **The melt** — the plate itself dissolves via an alpha mask over its bottom 34%
+- **The melt** — the plate itself dissolves via an alpha mask over its bottom 45%
+  *(owner-raised 2026-07-19 from 34%, with the height trim)*
   (`mask-image`, opaque → transparent), so the page's real layered background shows through;
   never a painted color fade (the body background is a gradient — a painted fade seams).
 - **The label row** — the plate is **labeled, not painted over**: NO type ever sits on the
@@ -378,8 +380,9 @@ v4→v6, owner-ratified "labeled plate"). Anatomy:
   behind maximum residual melt alpha) print on the paper below, tucked `−7vh` into the melt
   (`−5vh` under 640px) so plate and label read as one composition. At every ratified
   height/floor the label's tuck stays inside the melt zone — the title never reaches
-  un-melted art (worst residual image alpha behind the title ≈ 0.334 → ink-on-composite
-  ≥ 8.6:1). Title is always `--ink` on paper — zero per-remedy tuning.
+  un-melted art (worst residual image alpha behind the title ≈ 0.324 at 48vh/−7vh —
+  recomputed for the 2026-07-19 geometry; mobile 0.293, floor cases lower → ink-on-composite
+  ≥ 8.6:1 everywhere). Title is always `--ink` on paper — zero per-remedy tuning.
 - **Below** — the one-line verdict as the plate's caption, then the lead block, whose
   translation line anchors the grade in plain text ("Grade A · Strong — …"): never color
   alone, twice per page. Crumbs are retired from remedy pages; navigation stays in the nav.
