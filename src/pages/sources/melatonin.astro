@@ -1,0 +1,379 @@
+---
+import Base from '../../layouts/Base.astro';
+import {
+  MELATONIN_SOURCES,
+  DIMENSION_ORDER,
+  DIMENSION_LABELS,
+  PRESCRIPTION_NOTE,
+  type SourceProduct,
+} from '../../data/source-scorecards/melatonin';
+
+// Publish gate mirrors the Supabase view: only owner-ratified rows render.
+const products: SourceProduct[] = MELATONIN_SOURCES.filter((p) => p.ratified).sort((a, b) =>
+  a.brand.localeCompare(b.brand),
+);
+
+const reviewDate = '2026-07-19';
+
+// Render a 0–5 score as filled/empty pips — shape + number, never color alone.
+function pips(score: number): string {
+  const n = Math.max(0, Math.min(5, Math.round(score)));
+  return '●'.repeat(n) + '○'.repeat(5 - n);
+}
+---
+
+<Base
+  title="Where to source melatonin — Somnary source scorecards"
+  description="How melatonin products are sourced and labeled, rated on six documented dimensions: testing, label accuracy, additives, regulatory record, transparency, marketing honesty. No composite score, no #1, no affiliate links."
+>
+  <main class="page">
+    <header class="head">
+      <p class="eyebrow">Source scorecards · Melatonin</p>
+      <h1 class="title">Where to source melatonin</h1>
+      <p class="dek">
+        The <a href="/r/melatonin">evidence grade</a> answers whether melatonin works. This page
+        answers a different question: of the products on sale, which actually contain what the
+        label says, made by companies whose claims hold up? Each product is rated on six
+        documented dimensions — every point traces to a primary document. There is no overall
+        score and no #1: <a href="/sources/methodology">a ranking would be a recommendation</a>,
+        and we don’t make those.
+      </p>
+    </header>
+
+    <aside class="banner">
+      <p class="banner-line">
+        These scorecards rate how a product is <strong>sourced and labeled</strong> — not whether
+        you should take it. Educational, not medical advice.
+      </p>
+      <p class="banner-sub">
+        No affiliate links — Somnary earns nothing if you buy. No brand pays to appear, to improve
+        a score, or to remove one. <a href="/sources/methodology">How we rate →</a>
+      </p>
+    </aside>
+
+    {
+      products.length === 0 ? (
+        <p class="empty">Scorecards are being finalized. Check back shortly.</p>
+      ) : (
+        <section class="grid" aria-label="Melatonin source scorecards">
+          {products.map((p) => (
+            <article class="card">
+              <div class="card-head">
+                <div>
+                  <h2 class="brand">{p.brand}</h2>
+                  <p class="product">
+                    {p.productName} · {p.doseMg} mg · {p.form}
+                  </p>
+                </div>
+                <p class="cert" data-kind={p.certVerified ? 'yes' : 'none'}>
+                  {p.certSummary}
+                </p>
+              </div>
+
+              <dl class="dims">
+                {DIMENSION_ORDER.map((key) => (
+                  <div class="dim">
+                    <dt>{DIMENSION_LABELS[key]}</dt>
+                    <dd>
+                      <span class="pips" aria-hidden="true">
+                        {pips(p.scores[key].score)}
+                      </span>
+                      <span class="num">{p.scores[key].score}/5</span>
+                      <span class="dimnote">{p.scores[key].note}</span>
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+
+              <p class="verdict">{p.verdict}</p>
+
+              {p.heldItems.length > 0 && (
+                <p class="held">
+                  <span class="held-label">Under review</span>{' '}
+                  {p.heldItems.join(' ')} — not counted until confirmed against the primary
+                  regulator document.
+                </p>
+              )}
+
+              <p class="community">
+                <span class="community-label">Community read</span>{' '}
+                {p.communityStatus === 'gathering'
+                  ? 'Gathering — not yet summarized. Community sentiment is shown for context and never affects a score.'
+                  : p.communityNote}
+              </p>
+
+              <p class="links">
+                <a href={p.manufacturerUrl} rel="nofollow noopener" target="_blank">
+                  Manufacturer page ↗
+                </a>
+                <span class="nolink">No affiliate link · Somnary earns nothing</span>
+              </p>
+            </article>
+          ))}
+        </section>
+      )
+    }
+
+    <section class="rx">
+      <h2 class="rx-title">Prescription option (not scored here)</h2>
+      <p class="rx-body">
+        <strong>{PRESCRIPTION_NOTE.brand}</strong> — {PRESCRIPTION_NOTE.productName}. {PRESCRIPTION_NOTE.note}
+      </p>
+    </section>
+
+    <p class="footer-strip">
+      Somnary · Melatonin source scorecards · Reviewed {reviewDate} · Educational, not medical
+      advice · A scorecard is about what’s in a bottle, never about whether you should take it —
+      talk to a clinician before changing what you take. Found an error, or a brand with a
+      document to add? We aim to fix verified errors within 7 days —
+      <a href="mailto:sammymoz@gmail.com">sammymoz@gmail.com</a>.
+    </p>
+  </main>
+</Base>
+
+<style>
+  .page {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: var(--sp-8) var(--sp-7) var(--sp-9);
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+    margin: 0;
+  }
+  .head {
+    margin-bottom: var(--sp-6);
+  }
+  .title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-3xl);
+    line-height: var(--lh-3xl);
+    letter-spacing: var(--tracking-tight);
+    color: var(--ink);
+    margin: var(--sp-3) 0 var(--sp-5);
+  }
+  .dek {
+    font-family: var(--font-body);
+    font-size: var(--text-md);
+    line-height: var(--lh-md);
+    color: var(--muted);
+    max-width: 70ch;
+    margin: 0;
+  }
+  .dek a,
+  .banner a,
+  .links a,
+  .footer-strip a {
+    color: var(--primary);
+  }
+
+  .banner {
+    background: var(--primary-soft);
+    border-radius: var(--r-lg);
+    padding: var(--sp-5) var(--sp-6);
+    margin: var(--sp-6) 0 var(--sp-7);
+  }
+  .banner-line {
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--ink);
+    margin: 0 0 var(--sp-2);
+  }
+  .banner-sub {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+    margin: 0;
+  }
+
+  .empty {
+    color: var(--muted);
+    font-size: var(--text-base);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: var(--sp-5);
+  }
+
+  .card {
+    border: var(--border-hairline);
+    border-radius: var(--r-lg);
+    background: var(--surface);
+    padding: var(--sp-6);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+  }
+  .card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--sp-3);
+  }
+  .brand {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-lg);
+    line-height: var(--lh-lg);
+    color: var(--ink);
+    margin: 0;
+  }
+  .product {
+    font-size: var(--text-sm);
+    color: var(--muted);
+    margin: var(--sp-1) 0 0;
+  }
+  .cert {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-align: right;
+    margin: 0;
+    padding: var(--sp-1) var(--sp-2);
+    border-radius: var(--r-sm);
+    white-space: nowrap;
+  }
+  .cert[data-kind='yes'] {
+    color: var(--eucalyptus, var(--primary));
+  }
+  .cert[data-kind='none'] {
+    color: var(--muted);
+  }
+
+  .dims {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+    border-top: var(--border-hairline);
+    padding-top: var(--sp-4);
+  }
+  .dim {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-areas: 'label pips' 'note note';
+    gap: var(--sp-1) var(--sp-3);
+    align-items: baseline;
+  }
+  .dim dt {
+    grid-area: label;
+    font-size: var(--text-sm);
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .dim dd {
+    grid-area: pips;
+    margin: 0;
+    display: flex;
+    align-items: baseline;
+    gap: var(--sp-2);
+  }
+  .pips {
+    font-size: var(--text-sm);
+    letter-spacing: 0.15em;
+    color: var(--ink);
+  }
+  .num {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--muted);
+  }
+  .dimnote {
+    grid-area: note;
+    font-size: var(--text-xs);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+  }
+
+  .verdict {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--ink);
+    margin: 0;
+    padding-top: var(--sp-3);
+    border-top: var(--border-hairline);
+  }
+
+  .held,
+  .community {
+    font-size: var(--text-xs);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: 0;
+  }
+  .held-label,
+  .community-label {
+    font-family: var(--font-mono);
+    letter-spacing: var(--tracking-label);
+    color: var(--ink);
+    margin-right: var(--sp-1);
+  }
+
+  .links {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-1);
+    margin: var(--sp-2) 0 0;
+    padding-top: var(--sp-3);
+    border-top: var(--border-hairline);
+  }
+  .links a {
+    font-size: var(--text-sm);
+    font-weight: 600;
+  }
+  .nolink {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+  }
+
+  .rx {
+    border: var(--border-hairline);
+    border-radius: var(--r-lg);
+    background: var(--surface);
+    padding: var(--sp-5) var(--sp-6);
+    margin: var(--sp-7) 0 0;
+  }
+  .rx-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-md);
+    color: var(--ink);
+    margin: 0 0 var(--sp-2);
+  }
+  .rx-body {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: 0;
+  }
+
+  .footer-strip {
+    border-top: var(--border-hairline);
+    margin-top: var(--sp-8);
+    padding-top: var(--sp-5);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+  }
+
+  @media (max-width: 720px) {
+    .page {
+      padding: var(--sp-7) var(--sp-5) var(--sp-8);
+    }
+    .grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
