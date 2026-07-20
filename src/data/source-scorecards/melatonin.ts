@@ -65,7 +65,15 @@ export interface SourceProduct {
   heldItems: string[];
   communityStatus: 'gathering' | 'summarized';
   communityNote?: string;
+  /** Recurring themes from public Reddit/forum threads — display-only, never scored. */
+  communityThemes?: { note: string; url?: string }[];
+  /** Product photo in public/images/sources/melatonin/. Omit for a graceful lettered fallback. */
+  imagePath?: string;
   ratified: boolean;
+  /** Whether an Australian can buy this OTC. Melatonin is Rx in AU, so the only OTC route is
+   * personal import via iHerb. Products not sold to AU (US pharmacy house brands, gummies iHerb
+   * doesn't ship to AU) are set false and withheld from the AU page. Defaults to available. */
+  availableInAU?: boolean;
 }
 
 // Scores from the rubric applied to each dossier. RATIFIED by the owner 2026-07-19 with these
@@ -77,6 +85,7 @@ export interface SourceProduct {
 export const MELATONIN_SOURCES: SourceProduct[] = [
   {
     slug: 'natrol-melatonin-5mg-time-release',
+    imagePath: '/images/sources/melatonin/natrol-melatonin-5mg-time-release.png',
     brand: 'Natrol',
     productName: 'Melatonin Time Release',
     form: 'tablet (extended-release)',
@@ -98,11 +107,15 @@ export const MELATONIN_SOURCES: SourceProduct[] = [
     verdict:
       'No independent testing or product-specific assay; a fully itemized label of benign excipients at a dose above the studied extended-release amount, from an identifiable manufacturer with no verified regulator action against this product.',
     heldItems: ['2021 FDA Class II recall of a different Natrol product (ALA lot mislabeled as melatonin)'],
-    communityStatus: 'gathering',
+    communityStatus: 'summarized',
+    communityThemes: [
+      { note: 'Time-release melatonin draws recurring threads about next-morning grogginess, and people seeking doses well below this 5 mg', url: 'https://old.reddit.com/r/melatonin/comments/1hd7wgx/time_release_formulas/' },
+    ],
     ratified: true,
   },
   {
     slug: 'nature-made-melatonin-3mg',
+    imagePath: '/images/sources/melatonin/nature-made-melatonin-3mg.png',
     brand: 'Nature Made',
     productName: 'Melatonin',
     form: 'tablet',
@@ -124,7 +137,10 @@ export const MELATONIN_SOURCES: SourceProduct[] = [
     verdict:
       'A USP Verified tablet from a named manufacturer with a clean additive panel and no verified regulator action, but no independent published assay of this product and no public batch certificate of analysis.',
     heldItems: [],
-    communityStatus: 'gathering',
+    communityStatus: 'summarized',
+    communityThemes: [
+      { note: 'No threads specific to this product surfaced. On Reddit, melatonin discussion is dose-level rather than brand-level — many prefer 1 mg or less and cite next-morning grogginess.' },
+    ],
     ratified: true,
   },
   {
@@ -152,11 +168,15 @@ export const MELATONIN_SOURCES: SourceProduct[] = [
       '2015 NY Attorney General action + 2016 NBTY agreement (a state-AG matter on herbal store brands, not among the rubric’s four event types, and not this product)',
       'Pearson v. NBTY (a private class action, not a regulator action)',
     ],
-    communityStatus: 'gathering',
+    communityStatus: 'summarized',
+    communityThemes: [
+      { note: 'No threads specific to this product surfaced. On Reddit, melatonin discussion is dose-level rather than brand-level — many prefer 1 mg or less and cite next-morning grogginess.' },
+    ],
     ratified: true,
   },
   {
     slug: 'now-foods-melatonin-3mg',
+    imagePath: '/images/sources/melatonin/now-foods-melatonin-3mg.png',
     brand: 'NOW Foods',
     productName: 'Melatonin',
     form: 'capsule',
@@ -177,11 +197,15 @@ export const MELATONIN_SOURCES: SourceProduct[] = [
     verdict:
       'No third-party certification or product assay and no regulator action against it, but a clean two-ingredient label and an identifiable US manufacturer — quality assurance rests on NOW’s own self-published COAs and in-house lab rather than independent verification.',
     heldItems: ['Older non-melatonin recalls and warning letter (other products; primary documents not all confirmed)'],
-    communityStatus: 'gathering',
+    communityStatus: 'summarized',
+    communityThemes: [
+      { note: 'No threads specific to this product surfaced. On Reddit, melatonin discussion is dose-level rather than brand-level — many prefer 1 mg or less and cite next-morning grogginess.' },
+    ],
     ratified: true,
   },
   {
     slug: 'life-extension-melatonin-300mcg',
+    imagePath: '/images/sources/melatonin/life-extension-melatonin-300mcg.png',
     brand: 'Life Extension',
     productName: 'Melatonin',
     form: 'capsule',
@@ -202,13 +226,17 @@ export const MELATONIN_SOURCES: SourceProduct[] = [
     verdict:
       'No independent testing or product-specific assay for this low-dose capsule; a fully itemized label of benign excipients from an identifiable manufacturer, with no verified regulator action against this product.',
     heldItems: [
-      '2017 FDA warning letter (disease claims across the website; melatonin appears only in a protocol list) — primary FDA URL confirmed but verbatim text pending browser verification',
+      '2017 FDA warning letter — verified verbatim on fda.gov (2026-07-19): it cites the brand’s website for disease claims (melatonin appears in a breast-cancer protocol list, not among the lead cited products). A marketing/labeling matter, not a potency or safety action against this product; not applied to the score.',
     ],
-    communityStatus: 'gathering',
+    communityStatus: 'summarized',
+    communityThemes: [
+      { note: 'Low physiologic doses like this 0.3 mg are what r/melatonin regulars tend to favour, though a few report next-day fatigue even on extended-release', url: 'https://old.reddit.com/r/melatonin/comments/1gsdkv4/low_dose_extendedrelease_melatonin_and_fatigue/' },
+    ],
     ratified: true,
   },
   {
     slug: 'olly-sleep-gummy-3mg',
+    availableInAU: false, // gummy — not shipped to AU by iHerb, not sold OTC on Amazon AU
     brand: 'OLLY',
     productName: 'Sleep Gummy (Blackberry Zen)',
     form: 'gummy',
@@ -236,6 +264,7 @@ export const MELATONIN_SOURCES: SourceProduct[] = [
   },
   {
     slug: 'natures-truth-melatonin-10mg-gummies',
+    availableInAU: false, // gummy — not shipped to AU by iHerb, not sold OTC on Amazon AU
     brand: "Nature's Truth",
     productName: 'Extra Strength Melatonin Gummies',
     form: 'gummy',
@@ -262,6 +291,7 @@ export const MELATONIN_SOURCES: SourceProduct[] = [
   },
   {
     slug: 'cvs-health-melatonin-5mg',
+    availableInAU: false, // US pharmacy house brand — not sold to Australia
     brand: 'CVS Health',
     productName: 'Melatonin',
     form: 'tablet',
@@ -287,6 +317,7 @@ export const MELATONIN_SOURCES: SourceProduct[] = [
   },
   {
     slug: 'walgreens-melatonin-5mg-liquid',
+    availableInAU: false, // US pharmacy house brand — not sold to Australia
     brand: 'Walgreens',
     productName: 'Melatonin Liquid',
     form: 'liquid',
@@ -315,6 +346,7 @@ export const MELATONIN_SOURCES: SourceProduct[] = [
   },
   {
     slug: 'vitafusion-melatonin-3mg-gummy',
+    availableInAU: false, // gummy — not shipped to AU by iHerb, not sold OTC on Amazon AU
     brand: 'Vitafusion',
     productName: 'Melatonin Sugar-Free Gummy',
     form: 'gummy',
@@ -343,6 +375,7 @@ export const MELATONIN_SOURCES: SourceProduct[] = [
   },
   {
     slug: 'thorne-melaton-5',
+    availableInAU: false, // this Melaton-5 SKU isn't on iHerb AU; the AU-available + NSF-certified Thorne is Melaton-3 (returns on rescore)
     brand: 'Thorne',
     productName: 'Melaton-5',
     form: 'capsule',
@@ -392,7 +425,10 @@ export const MELATONIN_SOURCES: SourceProduct[] = [
     heldItems: [
       '2017 undeclared-sulfites recall on other Pure Encapsulations products (held: for a per-product scorecard we penalize only events naming this product or its line)',
     ],
-    communityStatus: 'gathering',
+    communityStatus: 'summarized',
+    communityThemes: [
+      { note: 'No threads specific to this product surfaced. On Reddit, melatonin discussion is dose-level rather than brand-level — many prefer 1 mg or less and cite next-morning grogginess.' },
+    ],
     ratified: true,
   },
 ];
