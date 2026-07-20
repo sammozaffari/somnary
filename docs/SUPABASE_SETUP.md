@@ -1,4 +1,9 @@
-# Supabase setup — newsletter + claim submissions (CHK-4.2)
+# Supabase setup — newsletter + claim submissions (CHK-4.2) + accounts (CHK-6.9a)
+
+> Sections 1–5 cover the two capture forms (service-role key). **Section 6** covers accounts /
+> sign-in (the PUBLIC anon key) — a separate, browser-safe key. Both are env-gated: the site builds
+> and deploys with neither configured.
+
 
 Somnary's two capture forms — **the dispatch** (`/dispatch`) and **submit a claim**
 (`/submit-a-claim`) — write to a Supabase Postgres database through two server-only API routes
@@ -98,12 +103,65 @@ Restart `npm run dev` after editing `.env`.
 | --------------------------- | -------------- | ------- | ---------------------------------------------- |
 | `SUPABASE_URL`              | Vercel + `.env`| no      | Supabase project REST URL                      |
 | `SUPABASE_SERVICE_ROLE_KEY` | Vercel + `.env`| **YES** | Server-only insert key; bypasses RLS. Rotate if leaked. |
+| `PUBLIC_SUPABASE_URL`       | Vercel + `.env`| no      | Supabase project URL for accounts/auth (same URL, `PUBLIC_`-prefixed for the browser). |
+| `PUBLIC_SUPABASE_ANON_KEY`  | Vercel + `.env`| no      | Anon/publishable key for sign-in. Browser-safe by design; RLS enforces access. Never the service-role key. |
 | `RATE_LIMIT_MAX`            | Vercel (opt.)  | no      | Max assistant requests per IP per window. **Optional**, default `20`. |
 | `RATE_LIMIT_WINDOW_SECONDS` | Vercel (opt.)  | no      | Rate-limit window length in seconds. **Optional**, default `60`. |
 
 Both `RATE_LIMIT_*` vars are **optional** — leave them unset to use the defaults (20 requests per
 60 s per IP, per endpoint). They only apply once `supabase/rate-limit.sql` has been run and Supabase
 is configured; otherwise the limiter fails open.
+
+## 6. Accounts — auth env vars (CHK-6.9a)
+
+Accounts (sign in with Google, or an email magic-link) use a **second, separate** pair of env vars.
+These are the **PUBLIC anon/publishable** key — the opposite of the service-role key above.
+
+> The **anon / publishable** key is **browser-safe and public by design.** It carries no privilege
+> on its own; **Row-Level Security** decides what a signed-in user may read or write. That is why it
+> is safe to ship in the client bundle. This is the deliberate inverse of the `service_role` key,
+> which is secret and must never reach the client. Auth uses **only** the anon key — never
+> service-role — because a session flow must never run with RLS bypassed.
+
+**Graceful degradation:** if these two vars are absent, the auth clients return `null` and the
+`/auth/*` routes redirect home without error — the site still builds and deploys. So you can ship
+this PR before adding keys, then turn accounts on by adding the vars.
+
+### 6a. Enable the providers (already done by the owner)
+
+In **Authentication → Providers**: **Google** (OAuth) and **Email** (magic-link) are enabled, and
+**Authentication → URL Configuration** has the **Site URL** + **Redirect URLs** set. Apple sign-in is
+deferred. If you add a new deploy domain, add it to the **Redirect URLs** allowlist.
+
+> ⚠️ **Confirm the production domain matches the Supabase redirect allowlist.** The app derives the
+> callback URL from the request origin (so preview and production both work with no code change), but
+> Supabase will only redirect back to a URL on its allowlist. The `site:` value in `astro.config.mjs`
+> is currently `https://somnary.vercel.app`; make sure that domain (and any custom domain) is listed
+> in **Authentication → URL Configuration → Redirect URLs**, including the `/auth/callback` path.
+
+### 6b. Get the anon key
+
+**Settings → API → Project API keys → `anon` / `public`** (labeled *publishable* in newer projects).
+The **Project URL** is the same one from step 3.
+
+### 6c. Set the vars
+
+Add to **Vercel → Settings → Environment Variables** (Production + Preview) **and** to `.env`:
+
+| Name                        | Value                                              |
+| --------------------------- | -------------------------------------------------- |
+| `PUBLIC_SUPABASE_URL`       | your Project URL (same as `SUPABASE_URL`)          |
+| `PUBLIC_SUPABASE_ANON_KEY`  | the `anon` / `public` (publishable) key            |
+
+```bash
+# .env (git-ignored — never commit)
+PUBLIC_SUPABASE_URL=https://YOUR-PROJECT.supabase.co
+PUBLIC_SUPABASE_ANON_KEY=YOUR-ANON-PUBLISHABLE-KEY
+```
+
+The `PUBLIC_` prefix is required — Astro/Vite only exposes `PUBLIC_`-prefixed vars to the browser
+bundle, which the sign-in client needs. Redeploy (Vercel) or restart `npm run dev` (local) after
+adding them.
 
 ## Data handling notes
 
