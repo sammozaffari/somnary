@@ -15,6 +15,16 @@ const products: MagProduct[] = MAGNESIUM_SOURCES.filter((p) => p.ratified).sort(
 
 const reviewDate = '2026-07-20';
 const segs = [1, 2, 3, 4, 5];
+
+// Plain-language legend — so anyone can read a card, not just someone who knows the jargon.
+const ratingLegend = [
+  { label: 'Testing & purity', plain: 'Has an independent lab checked what’s really inside? For most supplements, no one has.' },
+  { label: 'Label accuracy', plain: 'Does the amount inside actually match what the label promises?' },
+  { label: 'Additives', plain: 'Any concerning extra ingredients — or just harmless fillers?' },
+  { label: 'Regulatory record', plain: 'Has it been in trouble with the medicines regulator (the TGA here in Australia)?' },
+  { label: 'Transparency', plain: 'How much does the brand actually tell you — what’s inside, how much of each kind, and who makes it?' },
+  { label: 'Marketing honesty', plain: 'Do the claims on the box hold up, or is it overselling?' },
+];
 ---
 
 <Base
@@ -55,6 +65,23 @@ const segs = [1, 2, 3, 4, 5];
         cancellations. It’s not the magnesium — it’s the added B6. Products below that contain B6
         carry a <strong>⚠ B6</strong> flag; it’s shown for your safety, and is separate from the
         scores. If you take magnesium daily, check your product’s B6 amount and talk to a pharmacist.
+      </p>
+    </aside>
+
+    <aside class="legend">
+      <p class="legend-title">What the six ratings mean — in plain words</p>
+      <dl class="legend-grid">
+        {ratingLegend.map((r) => (
+          <div class="legend-item">
+            <dt>{r.label}</dt>
+            <dd>{r.plain}</dd>
+          </div>
+        ))}
+      </dl>
+      <p class="legend-foot">
+        Each is scored 0–5 (more filled bars = better). There’s no overall score — the six are kept
+        separate on purpose, so you can weigh up what matters to you. Tap “Why these scores” on any
+        card to see the exact reason and the document behind it.
       </p>
     </aside>
 
@@ -263,6 +290,44 @@ const segs = [1, 2, 3, 4, 5];
   .empty {
     color: var(--muted);
     font-size: var(--text-base);
+  }
+
+  /* plain-language legend */
+  .legend {
+    margin: 0 0 var(--sp-7);
+  }
+  .legend-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-md);
+    color: var(--ink);
+    margin: 0 0 var(--sp-4);
+  }
+  .legend-grid {
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--sp-4) var(--sp-6);
+  }
+  .legend-item dt {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--ink);
+    margin: 0 0 var(--sp-1);
+  }
+  .legend-item dd {
+    margin: 0;
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+  }
+  .legend-foot {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: var(--sp-4) 0 0;
+    max-width: 72ch;
   }
 
   .stack {
@@ -501,6 +566,9 @@ const segs = [1, 2, 3, 4, 5];
   }
 
   @media (max-width: 720px) {
+    .legend-grid {
+      grid-template-columns: 1fr;
+    }
     .page {
       padding: var(--sp-7) var(--sp-5) var(--sp-8);
     }
