@@ -140,13 +140,38 @@ function fmtDate(iso: string): string {
             <ul class="map-list" data-map-list>
               {maps.map((m) => (
                 <li class="map-row" data-map-row data-map-id={m.id}>
-                  <div class="map-meta">
-                    <p class="map-title">{m.title}</p>
-                    <p class="map-date">Saved {fmtDate(m.createdAt)}</p>
+                  <div class="map-head-row">
+                    <div class="map-meta">
+                      <p class="map-title">{m.title}</p>
+                      <p class="map-date">Saved {fmtDate(m.createdAt)}</p>
+                    </div>
+                    <div class="map-actions">
+                      <button
+                        type="button"
+                        class="view-btn"
+                        data-map-view
+                        aria-expanded="false"
+                        aria-controls={`map-view-${m.id}`}
+                        aria-label={`View saved map: ${m.title}`}
+                      >
+                        View
+                      </button>
+                      {/* Resume the guide from this saved map (Feature B) — re-derives a fresh map server-side. */}
+                      <a class="resume-link" href={`/guide?resume=${m.id}`}>Continue in the guide →</a>
+                      <button type="button" class="delete-btn" data-map-delete aria-label={`Delete saved map: ${m.title}`}>
+                        Delete
+                      </button>
+                    </div>
                   </div>
-                  <button type="button" class="delete-btn" data-map-delete aria-label={`Delete saved map: ${m.title}`}>
-                    Delete
-                  </button>
+                  {/* Expand-in-place read-only snapshot — filled by the view island via the shared renderer. */}
+                  <div class="map-view" id={`map-view-${m.id}`} data-map-view-region hidden tabindex="-1">
+                    <p class="map-view-status" data-map-view-status hidden aria-live="polite" />
+                    <div class="map-view-body" data-map-view-body />
+                    <p class="map-view-note">
+                      A snapshot of the reading map you saved — a map to Somnary’s evidence, not medical
+                      advice. Whether anything fits you is a conversation for your clinician.
+                    </p>
+                  </div>
                 </li>
               ))}
             </ul>
@@ -334,13 +359,24 @@ function fmtDate(iso: string): string {
   }
   .map-row {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--sp-4);
+    flex-direction: column;
     background: var(--surface);
     border: var(--border-hairline);
     border-radius: var(--r-md);
     padding: var(--sp-4) var(--sp-5);
+  }
+  .map-head-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-4);
+  }
+  .map-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--sp-3);
+    flex: none;
   }
   .map-meta {
     min-width: 0;
@@ -388,6 +424,127 @@ function fmtDate(iso: string): string {
     background: var(--safety-ink);
     border-color: var(--safety-ink);
   }
+  /* View + Continue — same pill register as delete, but the neutral/primary tone (not the safety tone). */
+  .view-btn {
+    flex: none;
+    min-height: 36px;
+    padding: 0 var(--sp-4);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--primary);
+    background: var(--surface);
+    border: var(--border-hairline);
+    border-radius: var(--r-pill);
+    cursor: pointer;
+  }
+  .view-btn:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+  }
+  .view-btn[disabled] {
+    cursor: progress;
+    opacity: 0.7;
+  }
+  .view-btn[aria-expanded='true'] {
+    color: var(--action-ink);
+    background: var(--primary);
+    border-color: var(--primary);
+  }
+  .resume-link {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--primary);
+    text-decoration: none;
+    min-height: 36px;
+    display: inline-flex;
+    align-items: center;
+  }
+  .resume-link:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+    border-radius: var(--r-sm);
+  }
+
+  /* the expand-in-place read-only reading-map snapshot */
+  .map-view {
+    margin-top: var(--sp-5);
+    padding-top: var(--sp-5);
+    border-top: var(--border-hairline);
+  }
+  .map-view-status {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: 0 0 var(--sp-4);
+  }
+  .map-view-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+  }
+  .map-view-note {
+    font-size: var(--text-xs);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: var(--sp-5) 0 0;
+  }
+
+  /* rendered reading-map fragments — the SAME class contract renderReadingMap emits (mirrors the
+     GuidePanel styles so the saved-map snapshot reads identically). Tokens only. */
+  .map-view :global(.map-fragment) {
+    background: var(--primary-soft);
+    border: var(--border-hairline);
+    border-radius: var(--r-md);
+    padding: var(--sp-5);
+  }
+  .map-view :global(.map-fragment-text) {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--ink);
+    margin: 0;
+    max-width: 64ch;
+  }
+  .map-view :global(.map-fragment.is-crisis) {
+    background: var(--grade-f-tint);
+    border-color: var(--grade-f);
+  }
+  .map-view :global(.map-fragment.is-crisis .map-fragment-text) {
+    color: var(--grade-f);
+    font-weight: 600;
+  }
+  .map-view :global(.map-fragment.is-boundary) {
+    background: var(--warning-bg);
+    border-color: var(--grade-f);
+  }
+  .map-view :global(.map-fragment.is-boundary .map-fragment-text) {
+    color: var(--ink);
+  }
+  .map-view :global(.map-items) {
+    list-style: none;
+    margin: var(--sp-4) 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+  }
+  .map-view :global(.map-item-link) {
+    font-size: var(--text-base);
+    font-weight: 600;
+    color: var(--primary);
+    text-decoration: none;
+  }
+  .map-view :global(.map-item-link:focus-visible) {
+    outline: none;
+    box-shadow: var(--ring);
+    border-radius: var(--r-sm);
+  }
+  .map-view :global(.map-fragment.is-crisis .map-item-link),
+  .map-view :global(.map-fragment.is-boundary .map-item-link) {
+    color: var(--grade-f);
+  }
+
   .list-status {
     font-size: var(--text-sm);
     line-height: var(--lh-sm);
@@ -559,6 +716,99 @@ function fmtDate(iso: string): string {
           btn.dataset.confirm = 'false';
           btn.textContent = 'Delete';
           setStatus('Couldn’t reach the server just now — nothing changed. You can try again.');
+        }
+      });
+    });
+  }
+</script>
+
+<!-- signed-in: per-item VIEW island (CHK-6.9e). Expand-in-place, read-only. Fetches the ONE map in
+     full (GET /api/saved-maps?id=) and renders its route_plan via the SHARED renderReadingMap — the
+     SAME textContent-only, internal-href renderer the guide uses. No innerHTML, no raw text: the plan
+     was sanitized when SAVED and re-validated server-side on read (defense-in-depth). A second tap
+     collapses. 404/401/503/error → a calm neutral message, never the safety tone. -->
+<script>
+  import { renderReadingMap } from '../lib/guide/render-map.ts';
+
+  const account = document.querySelector<HTMLElement>('[data-account]');
+  if (account) {
+    account.querySelectorAll<HTMLButtonElement>('[data-map-view]').forEach((btn) => {
+      const row = btn.closest<HTMLElement>('[data-map-row]');
+      const id = row?.dataset.mapId ?? '';
+      const region = row?.querySelector<HTMLElement>('[data-map-view-region]');
+      const body = region?.querySelector<HTMLElement>('[data-map-view-body]');
+      const status = region?.querySelector<HTMLElement>('[data-map-view-status]');
+      if (!region || !body || !status) return;
+
+      let loaded = false; // fetch once; subsequent expands reuse the rendered snapshot
+
+      const setStatus = (text: string) => {
+        status.hidden = false;
+        status.textContent = text;
+      };
+      const clearStatus = () => {
+        status.hidden = true;
+        status.textContent = '';
+      };
+
+      const collapse = () => {
+        region.hidden = true;
+        btn.setAttribute('aria-expanded', 'false');
+        btn.textContent = 'View';
+      };
+
+      const expand = () => {
+        region.hidden = false;
+        btn.setAttribute('aria-expanded', 'true');
+        btn.textContent = 'Hide';
+      };
+
+      btn.addEventListener('click', async () => {
+        const isOpen = btn.getAttribute('aria-expanded') === 'true';
+        if (isOpen) {
+          collapse();
+          return;
+        }
+        // Opening. If already loaded, just re-show the rendered snapshot.
+        if (loaded) {
+          expand();
+          region.focus?.();
+          return;
+        }
+        // First open → fetch this ONE map in full, then render it.
+        btn.disabled = true;
+        expand();
+        setStatus('Loading your saved map…');
+        try {
+          const res = await fetch('/api/saved-maps?id=' + encodeURIComponent(id), {
+            headers: { Accept: 'application/json' },
+          });
+          if (!res.ok) {
+            // Calm, neutral register for every failure — never the safety/vermilion tone.
+            if (res.status === 404) setStatus('We couldn’t find this saved map — it may have been deleted.');
+            else if (res.status === 401) setStatus('Your session has ended. Please sign in again to view this map.');
+            else if (res.status === 503) setStatus('Saved maps aren’t available just now. Please try again later.');
+            else setStatus('We couldn’t load this map just now. You can try again.');
+            btn.disabled = false;
+            return;
+          }
+          const data = (await res.json()) as { route_plan?: unknown };
+          const plan = data?.route_plan;
+          if (!plan || typeof plan !== 'object') {
+            setStatus('This saved map couldn’t be displayed. You can try again.');
+            btn.disabled = false;
+            return;
+          }
+          // Render via the shared, textContent-only renderer. The plan is server-sanitized (internal
+          // hrefs only); no raw string is ever injected as HTML.
+          renderReadingMap(plan as Parameters<typeof renderReadingMap>[0], body);
+          clearStatus();
+          loaded = true;
+          btn.disabled = false;
+          region.focus?.();
+        } catch {
+          setStatus('We couldn’t reach the server just now. You can try again.');
+          btn.disabled = false;
         }
       });
     });

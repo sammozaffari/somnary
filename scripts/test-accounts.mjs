@@ -44,7 +44,7 @@ const {
   deriveMapTitle,
   MAX_CHECKLIST_KEYS,
 } = await imp('src/lib/accounts/save-input.ts');
-const { handleSave, handleList, handleDelete } = await imp('src/lib/accounts/handlers.ts');
+const { handleSave, handleList, handleGetOne, handleDelete } = await imp('src/lib/accounts/handlers.ts');
 const { getServerSupabase } = await imp('src/lib/auth.ts');
 
 const results = { pass: 0, fail: 0, failures: [] };
@@ -93,13 +93,27 @@ function makeClient({ user = { id: 'user-1' }, userError = null, rows = [], fail
           };
         },
         // list: select → eq(user_id) → order
+        // getOne: select → eq(id) → eq(user_id) → maybeSingle  (CHK-6.9e)
         select() {
           return {
-            eq(_col, val) {
+            eq(col1, val1) {
               return {
+                // list path
                 async order() {
                   // RLS is simulated by returning only rows whose user_id matches the injected user.
-                  return { data: store.filter((r) => r.user_id === val), error: null };
+                  return { data: store.filter((r) => r.user_id === val1), error: null };
+                },
+                // getOne path: the first eq is id, the second is user_id — RLS is simulated by
+                // matching BOTH, so another user's row (or a missing id) returns null.
+                eq(col2, val2) {
+                  return {
+                    async maybeSingle() {
+                      const idVal = col1 === 'user_id' ? val2 : val1;
+                      const userVal = col1 === 'user_id' ? val1 : val2;
+                      const row = store.find((r) => r.id === idVal && r.user_id === userVal);
+                      return { data: row ?? null, error: null };
+                    },
+                  };
                 },
               };
             },
@@ -326,6 +340,74 @@ async function run() {
     const client = makeClient({ user: null });
     const r = await handleList(client);
     check(r.status === 401 && r.body.error === 'not-authenticated', 'list: no session → 401 not-authenticated');
+  }
+
+  // getOne (CHK-6.9e): fetch ONE own map in full; RLS-scoped 404 for another user's id; 400 bad uuid;
+  // 401 no session; and the returned route_plan is re-validated to internal hrefs only.
+  const OWN_ID = '11111111-1111-1111-1111-111111111111';
+  const OTHER_ID = '22222222-2222-2222-2222-222222222222';
+  const TAMPERED_ID = '33333333-3333-3333-3333-333333333333';
+  {
+    const rows = [
+      { id: OWN_ID, user_id: 'user-1', route_plan: CLEAN_PLAN, guide_state: { problems: ['onset'] }, created_at: '2026-07-20T00:00:00Z' },
+      { id: OTHER_ID, user_id: 'user-2', route_plan: CLEAN_PLAN, guide_state: { problems: ['maintenance'] }, created_at: 'x' },
+      // A DB row whose stored plan carries an external href (simulating tampering) — the handler must
+      // re-validate and refuse to surface it (treated as not-found), never render an off-site link.
+      { id: TAMPERED_ID, user_id: 'user-1', route_plan: { stop: false, sections: [{ kind: 'outcomes', title: 't', items: [{ href: 'https://evil.com', label: 'x' }] }] }, guide_state: {}, created_at: 'x' },
+    ];
+
+    // own map → full payload (id, title, createdAt, route_plan, guide_state)
+    {
+      const client = makeClient({ user: { id: 'user-1' }, rows });
+      const r = await handleGetOne(client, OWN_ID);
+      check(r.status === 200, 'getOne: own map → 200');
+      check(r.body.id === OWN_ID, 'getOne: returns the requested id');
+      check(r.body.title === 'Fall asleep faster', 'getOne: derived title present');
+      check(r.body.createdAt === '2026-07-20T00:00:00Z', 'getOne: createdAt present');
+      check(r.body.route_plan && Array.isArray(r.body.route_plan.sections), 'getOne: full route_plan returned');
+      check(r.body.guide_state && r.body.guide_state.problems?.[0] === 'onset', 'getOne: guide_state returned in full');
+      // INVARIANT: every href in the returned plan is internal, /-rooted (no external URL ever surfaces).
+      const hrefs = [
+        ...r.body.route_plan.sections.flatMap((s) => s.items.map((i) => i.href)),
+        ...(r.body.route_plan.summary ?? []).flatMap((f) => f.links.map((l) => l.href)),
+      ];
+      check(hrefs.length > 0 && hrefs.every((h) => h.startsWith('/') && !h.startsWith('//') && !h.startsWith('/\\')), 'getOne: returned route_plan passes the internal-href invariant');
+    }
+
+    // another user's id → 404 (RLS scope; NEVER leaks that the row exists)
+    {
+      const client = makeClient({ user: { id: 'user-1' }, rows });
+      const r = await handleGetOne(client, OTHER_ID);
+      check(r.status === 404 && r.body.error === 'not-found', "getOne: another user's id → 404 not-found (no existence leak)");
+    }
+
+    // a truly missing id → the SAME 404 not-found (indistinguishable from "not yours")
+    {
+      const client = makeClient({ user: { id: 'user-1' }, rows });
+      const r = await handleGetOne(client, '44444444-4444-4444-4444-444444444444');
+      check(r.status === 404 && r.body.error === 'not-found', 'getOne: missing id → 404 not-found (same as not-yours)');
+    }
+
+    // tampered stored plan (external href) → re-validation refuses it → 404 (never rendered)
+    {
+      const client = makeClient({ user: { id: 'user-1' }, rows });
+      const r = await handleGetOne(client, TAMPERED_ID);
+      check(r.status === 404 && r.body.error === 'not-found', 'getOne: tampered external-href plan → 404 (re-validation refuses to surface it)');
+    }
+
+    // bad uuid → 400 invalid-id (before any query)
+    {
+      const client = makeClient({ user: { id: 'user-1' }, rows });
+      const r = await handleGetOne(client, 'not-a-uuid');
+      check(r.status === 400 && r.body.error === 'invalid-id', 'getOne: malformed id → 400 invalid-id');
+    }
+
+    // no session → 401 (never a redirect)
+    {
+      const client = makeClient({ user: null, rows });
+      const r = await handleGetOne(client, OWN_ID);
+      check(r.status === 401 && r.body.error === 'not-authenticated', 'getOne: no session → 401 not-authenticated');
+    }
   }
 
   // delete: scoped to id + user; own row removed.

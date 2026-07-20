@@ -11,7 +11,7 @@
 // NO LOGIN WALL: no session → 401 JSON, NEVER a redirect to sign-in.
 import type { APIRoute } from 'astro';
 import { getServerSupabase } from '../../lib/auth.ts';
-import { handleList, handleDelete, type AccountsClient } from '../../lib/accounts/handlers.ts';
+import { handleList, handleGetOne, handleDelete, type AccountsClient } from '../../lib/accounts/handlers.ts';
 
 export const prerender = false;
 
@@ -21,11 +21,20 @@ const json = (body: unknown, status = 200): Response =>
     headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' },
   });
 
-// GET — list the caller's own saved maps. Minimal fields only (id, derived title, createdAt).
-export const GET: APIRoute = async ({ request, cookies }) => {
+// GET — two shapes on ONE route:
+//   • ?id=<uuid> → ONE of the caller's own maps in FULL ({id,title,createdAt,route_plan,guide_state}),
+//     RLS-scoped: a row that isn't theirs → 404 not-found (never leaks existence); non-uuid → 400.
+//     (CHK-6.9e — powers the read-only /account view and the guide resume path.)
+//   • no id      → the minimal list (id, derived title, createdAt) — unchanged.
+// Both: no session → 401 JSON (never a redirect); unconfigured → 503.
+export const GET: APIRoute = async ({ request, cookies, url }) => {
   const supabase = getServerSupabase(request, cookies);
   if (!supabase) return json({ error: 'accounts-unavailable' }, 503);
-  const result = await handleList(supabase as unknown as AccountsClient);
+
+  const id = url.searchParams.get('id');
+  const result = id
+    ? await handleGetOne(supabase as unknown as AccountsClient, id)
+    : await handleList(supabase as unknown as AccountsClient);
   return json(result.body, result.status);
 };
 
