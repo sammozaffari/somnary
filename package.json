@@ -24,7 +24,8 @@
     "verify:ask:online": "node scripts/test-ask.mjs --online",
     "verify:guide": "node scripts/test-guide.mjs",
     "verify:ratelimit": "node scripts/test-rate-limit.mjs",
-    "verify:auth": "node scripts/test-auth-plumbing.mjs"
+    "verify:auth": "node scripts/test-auth-plumbing.mjs",
+    "verify:accounts": "node scripts/test-accounts.mjs"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.0.8",

@@ -47,6 +47,9 @@ jobs:
       - name: Rate limiter (fail-open + IP extraction, mocked Supabase client)
         run: npm run verify:ratelimit
 
+      - name: Accounts (save/list/delete firewall + owner-scoped RLS, mocked Supabase client)
+        run: npm run verify:accounts
+
       - name: Build (schema validation + SSG)
         run: npm run build
 
