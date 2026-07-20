@@ -83,7 +83,13 @@ const segs = [1, 2, 3, 4, 5];
                       {p.productName} · {p.elementalMg} mg elemental · {p.form}
                     </p>
                     <p class="meta">
-                      {p.ausL ? `AUST L ${p.ausL}` : 'Not TGA-listed (import)'} · {p.channel}
+                      {
+                        p.ausL
+                          ? `AUST L ${p.ausL}`
+                          : p.channel.includes('import')
+                            ? 'Not TGA-listed (import)'
+                            : 'AUST L — number unconfirmed'
+                      } · {p.channel}
                     </p>
                   </div>
                   <div class="flags">
@@ -231,7 +237,7 @@ const segs = [1, 2, 3, 4, 5];
   /* B6 safety explainer — safety register, distinct from the primary banner */
   .b6-note {
     border: var(--border-hairline);
-    border-left: 3px solid var(--safety-ink, var(--primary));
+    border-left: 3px solid var(--safety-ink, var(--vermilion));
     border-radius: var(--r-lg);
     padding: var(--sp-5) var(--sp-6);
     margin: 0 0 var(--sp-7);
