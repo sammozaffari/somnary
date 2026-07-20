@@ -518,16 +518,20 @@ function fmtDate(iso: string): string {
     account.querySelectorAll<HTMLButtonElement>('[data-map-delete]').forEach((btn) => {
       const row = btn.closest<HTMLElement>('[data-map-row]');
       const id = row?.dataset.mapId ?? '';
+      const restLabel = btn.getAttribute('aria-label') ?? 'Delete saved map';
+      const armLabel = restLabel.replace(/^Delete /, 'Confirm delete of ');
 
       btn.addEventListener('click', async () => {
         // First tap arms the confirm; second tap within the window commits the delete.
         if (btn.dataset.confirm !== 'true') {
           btn.dataset.confirm = 'true';
           btn.textContent = 'Confirm delete';
+          btn.setAttribute('aria-label', armLabel); // announce the armed state to screen readers
           window.setTimeout(() => {
             if (btn.dataset.confirm === 'true') {
               btn.dataset.confirm = 'false';
               btn.textContent = 'Delete';
+              btn.setAttribute('aria-label', restLabel);
             }
           }, 4000);
           return;
