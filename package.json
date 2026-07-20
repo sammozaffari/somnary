@@ -23,7 +23,8 @@
     "verify:ask": "node scripts/test-ask.mjs",
     "verify:ask:online": "node scripts/test-ask.mjs --online",
     "verify:guide": "node scripts/test-guide.mjs",
-    "verify:ratelimit": "node scripts/test-rate-limit.mjs"
+    "verify:ratelimit": "node scripts/test-rate-limit.mjs",
+    "verify:auth": "node scripts/test-auth-plumbing.mjs"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.0.8",
@@ -33,10 +34,11 @@
     "@fontsource/ibm-plex-mono": "^5.2.7",
     "@fontsource/instrument-sans": "^5.2.8",
     "@lucide/astro": "^1.24.0",
-    "astro": "^5.2.5",
-    "zod": "^3.25.76",
+    "@supabase/ssr": "^0.12.3",
     "@supabase/supabase-js": "^2.110.1",
-    "tslib": "^2.8.1"
+    "astro": "^5.2.5",
+    "tslib": "^2.8.1",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.4",
