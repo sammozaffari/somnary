@@ -219,7 +219,26 @@ async function run() {
   if (rpCheck.ok) {
     const item = rpCheck.plan.sections[0].items[0];
     check(!('injected' in item) && !('onclick' in item), 'route_plan item keys beyond {href,label,note} dropped');
+    check(Array.isArray(rpCheck.plan.summary), 'route_plan always carries a summary array');
   }
+
+  // route_plan summary (CHK-6.8c narrative): sanitized like sections — bad tone → 'normal', keys
+  // beyond {text,links,tone} dropped, external link href rejects the whole payload.
+  const sumClean = validateRoutePlan({
+    stop: false,
+    sections: [{ kind: 'outcomes', title: 't', items: [{ href: '/r/melatonin', label: 'Melatonin' }] }],
+    summary: [{ text: 'A note', links: [{ href: '/r/melatonin', label: 'Melatonin', evil: 'x' }], tone: 'bogus', injected: 'DROP' }],
+  });
+  check(sumClean.ok, 'route_plan with a clean summary validates');
+  if (sumClean.ok) {
+    const f = sumClean.plan.summary[0];
+    check(f.tone === 'normal', 'summary fragment bad tone coerced to normal');
+    check(!('injected' in f) && !('evil' in f.links[0]), 'summary fragment/link keys beyond the allow-list dropped');
+  }
+  check(
+    (() => { const r = validateRoutePlan({ stop: false, sections: [{ kind: 'outcomes', title: 't', items: [{ href: '/r/melatonin', label: 'M' }] }], summary: [{ text: 'x', links: [{ href: 'https://evil.com', label: 'x' }], tone: 'normal' }] }); return !r.ok && r.error === 'external-href'; })(),
+    'summary link with external href → rejected (external-href)',
+  );
 
   // habits_checklist: huge + hostile → flattened, capped, non-booleans dropped.
   const bigChecklist = {};
