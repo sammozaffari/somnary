@@ -48,16 +48,24 @@ const { getBrowserSupabase, getServerSupabase } = await imp('src/lib/auth.ts');
 check(getBrowserSupabase() === null, 'getBrowserSupabase() → null when unconfigured');
 check(getBrowserSupabase() === null, 'getBrowserSupabase() → null on repeat (cached null)');
 
-// Fake AstroCookies — if getServerSupabase touched it before the null check, this would blow up.
-const fakeCookies = {
-  getAll() {
-    throw new Error('cookie jar must not be read when unconfigured');
+// Fake request + AstroCookies — if getServerSupabase touched either before the null check, this
+// would blow up. getServerSupabase(request, cookies) must short-circuit on the missing config.
+const fakeRequest = {
+  headers: {
+    get() {
+      throw new Error('request headers must not be read when unconfigured');
+    },
   },
+};
+const fakeCookies = {
   set() {
     throw new Error('cookie jar must not be written when unconfigured');
   },
 };
-check(getServerSupabase(fakeCookies) === null, 'getServerSupabase() → null when unconfigured');
+check(
+  getServerSupabase(fakeRequest, fakeCookies) === null,
+  'getServerSupabase() → null when unconfigured (touches neither request nor cookies)',
+);
 
 // --- (2) service-role must never appear in auth.ts ----------------------------------------------
 const authSrc = read('src/lib/auth.ts');

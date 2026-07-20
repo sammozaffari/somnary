@@ -18,6 +18,7 @@ import type { AstroCookies } from 'astro';
 import {
   createBrowserClient,
   createServerClient,
+  parseCookieHeader,
   type CookieOptions,
 } from '@supabase/ssr';
 import type { SupabaseClient } from '@supabase/supabase-js';
@@ -66,20 +67,24 @@ export function getBrowserSupabase(): SupabaseClient | null {
  * Uses the anon key + RLS — never the service-role key. Returns null when auth is unconfigured;
  * callers must redirect/degrade gracefully.
  *
+ * Reads incoming cookies from the request's `Cookie` header (AstroCookies exposes no enumerate-all
+ * method) and WRITES via AstroCookies.set(), which appends the Set-Cookie header on the response.
+ *
  * NOT cached: each request has its own cookie jar, so a fresh client is created per call.
  */
-export function getServerSupabase(cookies: AstroCookies): SupabaseClient | null {
+export function getServerSupabase(request: Request, cookies: AstroCookies): SupabaseClient | null {
   const config = readAuthConfig();
   if (!config) return null;
 
   return createServerClient(config.url, config.anonKey, {
-    // Astro cookie adapter — bridges @supabase/ssr's cookie contract to Astro's AstroCookies.
+    // Astro cookie adapter — bridges @supabase/ssr's cookie contract to the request/response.
     // getAll/setAll is the current @supabase/ssr interface (get/set/remove is deprecated).
     cookies: {
       getAll() {
-        return cookies.getAll().map((cookie) => ({
-          name: cookie.name,
-          value: cookie.value,
+        // parseCookieHeader tolerates a null/absent header (returns []).
+        return parseCookieHeader(request.headers.get('cookie') ?? '').map((c) => ({
+          name: c.name,
+          value: c.value ?? '',
         }));
       },
       setAll(cookiesToSet: { name: string; value: string; options: CookieOptions }[]) {

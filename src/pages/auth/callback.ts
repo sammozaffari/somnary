@@ -28,14 +28,14 @@ function safeNext(next: string | null): string {
   return next;
 }
 
-export const GET: APIRoute = async ({ url, cookies, redirect }) => {
+export const GET: APIRoute = async ({ request, url, cookies, redirect }) => {
   const code = url.searchParams.get('code');
   const next = safeNext(url.searchParams.get('next'));
 
   // No code (direct hit, or provider error like ?error=access_denied): go home quietly.
   if (!code) return redirect('/', 302);
 
-  const supabase = getServerSupabase(cookies);
+  const supabase = getServerSupabase(request, cookies);
   // Unconfigured (no anon key): degrade gracefully, no throw.
   if (!supabase) return redirect('/', 302);
 

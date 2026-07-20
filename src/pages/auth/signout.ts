@@ -12,8 +12,8 @@ import { getServerSupabase } from '../../lib/auth';
 
 export const prerender = false;
 
-const signOutAndHome: APIRoute = async ({ cookies, redirect }) => {
-  const supabase = getServerSupabase(cookies);
+const signOutAndHome: APIRoute = async ({ request, cookies, redirect }) => {
+  const supabase = getServerSupabase(request, cookies);
   if (supabase) {
     // Best-effort: clears the auth cookies via the adapter. We ignore any error and redirect home.
     await supabase.auth.signOut();
