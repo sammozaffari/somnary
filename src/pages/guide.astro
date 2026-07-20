@@ -1,0 +1,223 @@
+---
+// The /guide concierge (CHK-6.8c) — the STATIC, crawlable shell around the intake concierge island.
+// This page is a normal SSG page (Base layout, output:'static'): everything a crawler or a no-JS
+// reader needs — what the concierge is, what it will and won't do, the medical boundary, the
+// third-party-AI disclosure, and the privacy note — is server-rendered here. The interactive part
+// (GuidePanel) is a progressive-enhancement island: it POSTs to /api/guide (a serverless route,
+// CHK-6.8b) and renders a deterministic READING MAP of real Somnary pages. The concierge NEVER
+// recommends, diagnoses, or doses — it only routes you to reading. Tokens only (DESIGN_SYSTEM v3).
+import Base from '../layouts/Base.astro';
+import ContextBanner from '../components/ContextBanner.astro';
+import Disclaimer from '../components/Disclaimer.astro';
+import GuidePanel from '../components/GuidePanel.astro';
+---
+
+<Base
+  title="Sleep guide: find where to read on Somnary | Somnary"
+  description="A short, structured intake that points you to the right evidence on Somnary — the graded remedy pages, outcome guides, sleep-habits checklist, and safety boundaries that fit what you describe. It routes you to reading; it does not recommend, diagnose, or dose. Educational, not medical advice."
+  canonical="https://somnary.vercel.app/guide"
+>
+  <main class="page">
+    <header class="head">
+      <p class="eyebrow">Guide · find where to read</p>
+      <h1 class="title">A guide to where to read</h1>
+      <p class="dek">
+        Answer a few short questions about your sleep and Somnary will point you to the pages that
+        fit — the graded remedy evidence, the outcome guides, the sleep-habits checklist, and the
+        safety boundaries. It is a map to the reading that already exists on this site. It does
+        <em>not</em> recommend a remedy, tell you what to take, diagnose you, or give you a dose.
+      </p>
+    </header>
+
+    <ContextBanner
+      note="This is a router, not a grade and not advice. It reads what you describe and links you to the relevant evidence pages on Somnary — nothing here is personalised medical guidance."
+    />
+
+    <!-- Medical boundary, near the top (server-rendered — present with JS off). -->
+    <div class="boundary-slot">
+      <Disclaimer variant="standard" />
+    </div>
+
+    <!-- What it does / doesn't — server-rendered so a crawler and a no-JS reader see the whole contract. -->
+    <section class="contract" aria-label="What this guide does and does not do">
+      <div class="col">
+        <p class="col-tag">What it does</p>
+        <ul class="col-list">
+          <li>Asks a few plain questions about your sleep, one step at a time.</li>
+          <li>Points you to the matching pages: graded remedies, outcome guides, and the sleep-habits checklist.</li>
+          <li>Surfaces the safety pages first when what you describe calls for them — pregnancy, breastfeeding, a child, a diagnosed condition, a prescription medication.</li>
+          <li>Links straight to <a href="/when-to-see-a-doctor">when to see a doctor</a> when a sleep problem is ongoing or diagnosed.</li>
+        </ul>
+      </div>
+      <div class="col">
+        <p class="col-tag">What it doesn't do</p>
+        <ul class="col-list">
+          <li>It never recommends a remedy, brand, or combination, and never tells you what to take.</li>
+          <li>It never gives a dose or a schedule.</li>
+          <li>It never diagnoses a condition or judges what is safe for you — that is a conversation for your clinician.</li>
+          <li>It never invents a page or a source: every link goes to real, cited evidence on Somnary.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- The island. Progressive enhancement: the shell above stands on its own without it. -->
+    <GuidePanel />
+
+    <!-- Third-party-AI disclosure (reuses AskPanel's wording) + privacy note. Server-rendered. -->
+    <section class="notes" aria-label="How this works and your privacy">
+      <p class="note">
+        <span class="note-tag">How it works</span>
+        Your message is sent to a third-party AI service — OpenRouter, which routes it to a DeepSeek
+        model (or Google's Gemini API as a fallback) — only to read the signals in what you wrote: the
+        problems, the timing, and any safety flags. A deterministic system on Somnary, not the AI,
+        decides which pages you are shown; the AI can never name a remedy, a dose, or a link. Don't
+        include personal or identifying details.
+      </p>
+      <p class="note">
+        <span class="note-tag">Your privacy</span>
+        We don't save your answers. Each step is handled and then forgotten — there is no account,
+        no history, and nothing about your sleep is stored on Somnary.
+      </p>
+    </section>
+
+    <p class="review-line">
+      Reviewed 2026-07-19 · found an error? <a href="/methodology#corrections">corrections →</a>
+    </p>
+  </main>
+</Base>
+
+<style>
+  .page {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: var(--sp-8) var(--sp-7) var(--sp-9);
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+    margin: 0;
+  }
+  .head {
+    margin-bottom: var(--sp-6);
+  }
+  .title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-3xl);
+    line-height: var(--lh-3xl);
+    letter-spacing: var(--tracking-tight);
+    color: var(--ink);
+    margin: var(--sp-3) 0 var(--sp-5);
+  }
+  .dek {
+    font-size: var(--text-md);
+    line-height: var(--lh-md);
+    color: var(--muted);
+    max-width: 68ch;
+    margin: 0;
+  }
+
+  .boundary-slot {
+    margin-top: var(--sp-6);
+  }
+
+  /* what it does / doesn't — two calm columns, no grade coloring */
+  .contract {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--sp-6);
+    margin-top: var(--sp-7);
+  }
+  .col {
+    background: var(--surface);
+    border: var(--border-hairline);
+    border-radius: var(--r-lg);
+    padding: var(--sp-6);
+  }
+  .col-tag {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--primary);
+    margin: 0 0 var(--sp-4);
+  }
+  .col-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+  }
+  .col-list li {
+    position: relative;
+    padding-left: var(--sp-5);
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+  }
+  .col-list li::before {
+    content: '·';
+    position: absolute;
+    left: var(--sp-1);
+    top: 0;
+    color: var(--primary);
+    font-weight: 700;
+  }
+  .col-list a {
+    color: var(--primary);
+  }
+
+  /* disclosure + privacy notes */
+  .notes {
+    margin-top: var(--sp-7);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+    max-width: 82ch;
+  }
+  .note {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: 0;
+  }
+  .note-tag {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--primary);
+    margin-right: var(--sp-2);
+  }
+  .note a {
+    color: var(--primary);
+  }
+
+  .review-line {
+    margin-top: var(--sp-8);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+  }
+  .review-line a {
+    color: var(--primary);
+  }
+
+  @media (max-width: 720px) {
+    .contract {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media (max-width: 640px) {
+    .page {
+      padding: var(--sp-6) var(--sp-5) var(--sp-8);
+    }
+    .title {
+      font-size: var(--text-2xl);
+    }
+  }
+</style>

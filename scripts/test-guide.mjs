@@ -34,7 +34,7 @@ const CONTENT_DIR = join(ROOT, 'src/content/remedies');
 const imp = (rel) => import(pathToFileURL(join(ROOT, rel)).href);
 const { buildAskCorpus } = await imp('src/lib/ask/corpus.ts');
 const { runGuideBeat, sanitizeAck } = await imp('src/lib/guide/engine.ts');
-const { planHrefs } = await imp('src/lib/guide/router.ts');
+const { planHrefs, summaryHrefs } = await imp('src/lib/guide/router.ts');
 const { NEUTRAL_ACK } = await imp('src/lib/guide/schema.ts');
 const { OUTCOMES } = await imp('src/lib/outcomes.ts');
 const { HABIT_SUMMARIES } = await imp('src/lib/habits.ts');
@@ -210,6 +210,16 @@ const MOCK = {
     history: { triedRemedies: [], notes: '' },
     habits: { signals: [] },
   }),
+  // CHK-6.8c — a hostile extraction that stuffs the DISTINCTIVE token PURPLEELEPHANT into every
+  // free-text vector (ack + notes) AND names a real remedy the user "raw-typed" as PURPLEELEPHANT-
+  // laced. The summary must be composed ONLY from enums + corpus, so PURPLEELEPHANT must appear in NO
+  // fragment (the recap is enum-only; the tried fragment uses the CORPUS name, not the raw string).
+  'summary-leak-probe': j({
+    ack: 'You should take melatonin PURPLEELEPHANT tonight — it is safe for you.',
+    situation: { problems: ['onset'], chronicity: 'occasional', ageBand: 'adult', redFlags: ['none'] },
+    history: { triedRemedies: ['melatonin PURPLEELEPHANT'], notes: 'PURPLEELEPHANT secret user note' },
+    habits: { signals: ['late-caffeine'] },
+  }),
   error: null, // → model returns { ok:false }
 };
 
@@ -240,9 +250,27 @@ function ackIsContained(ack) {
   return lintForbiddenFraming(ack).length === 0 && extractBracketCitations(ack).length === 0 && !hasRawIdentifier(ack);
 }
 
-// Every href in a plan must be a real routable target.
+// Every href in a plan must be a real routable target — sections AND the woven summary.
 function planUrlsAllReal(plan, routable) {
-  return planHrefs(plan).every((h) => routable.has(h));
+  return planHrefs(plan).every((h) => routable.has(h)) && summaryHrefs(plan).every((h) => routable.has(h));
+}
+
+// The narrative summary is composed DETERMINISTICALLY from enums + verbatim corpus; NO fragment text
+// may ever trip a forbidden framing, carry a bracket [n], or a raw identifier. Asserted on every plan.
+function summaryContained(plan) {
+  return (plan.summary ?? []).every(
+    (f) =>
+      lintForbiddenFraming(f.text).length === 0 &&
+      extractBracketCitations(f.text).length === 0 &&
+      !hasRawIdentifier(f.text),
+  );
+}
+
+// Prove no raw user text leaks: NO summary fragment text may contain the given needle (a distinctive
+// token planted in the input). Case-insensitive.
+function summaryHasNoNeedle(plan, needle) {
+  const n = needle.toLowerCase();
+  return (plan.summary ?? []).every((f) => !f.text.toLowerCase().includes(n));
 }
 
 async function runRefusals(corpus, routable) {
@@ -261,7 +289,7 @@ async function runRefusals(corpus, routable) {
       const kinds = res.plan.sections.map((s) => s.kind);
       ok = ok && !kinds.includes('tried') && !kinds.includes('outcomes');
     }
-    ok = ok && ackIsContained(res.ack) && planUrlsAllReal(res.plan, routable);
+    ok = ok && ackIsContained(res.ack) && planUrlsAllReal(res.plan, routable) && summaryContained(res.plan);
     check(ok, `refusal/${c.name}`);
     console.log(
       `  ${ok ? '✓' : '✗'} ${c.name.padEnd(30)} status=${res.status} category=${res.category} ` +
@@ -292,7 +320,7 @@ async function runRouting(corpus, routable) {
       ok = ok && !kinds.includes('tried') && !kinds.includes('outcomes');
     }
     // Invariants on EVERY routing case.
-    ok = ok && ackIsContained(res.ack) && planUrlsAllReal(res.plan, routable);
+    ok = ok && ackIsContained(res.ack) && planUrlsAllReal(res.plan, routable) && summaryContained(res.plan);
     check(ok, `routing/${c.name}`);
     console.log(
       `  ${ok ? '✓' : '✗'} ${c.name.padEnd(38)} status=${res.status} stop=${res.plan.stop} ` +
@@ -318,7 +346,7 @@ async function runContainment(corpus, routable) {
     if (c.expectAckReason) ok = ok && res.meta.ackReason === c.expectAckReason;
     if (c.expectAckReplaced) ok = ok && res.ack === NEUTRAL_ACK;
     // The hard invariant: no matter what the model wrote, the returned ack is clean and the plan is real.
-    ok = ok && ackIsContained(res.ack) && planUrlsAllReal(res.plan, routable);
+    ok = ok && ackIsContained(res.ack) && planUrlsAllReal(res.plan, routable) && summaryContained(res.plan);
     check(ok, `containment/${c.name}`);
     console.log(
       `  ${ok ? '✓' : '✗'} ${c.name.padEnd(38)} ackReplaced=${res.meta.ackReplaced} reason=${res.meta.ackReason ?? '—'} ` +
@@ -371,19 +399,130 @@ async function runRealUrlSweep(corpus, routable) {
 
   console.log(`\nreal-URL schema sweep — ${states.length} state(s):`);
   let allOk = true;
+  let containOk = true;
   let checkedUrls = 0;
+  let checkedSummaryUrls = 0;
   for (const s of states) {
     const plan = routePlan(validateExtraction(s), corpus);
     for (const h of planHrefs(plan)) {
       checkedUrls++;
       if (!routable.has(h)) {
         allOk = false;
-        console.log(`  ✗ non-existent route emitted: ${h}`);
+        console.log(`  ✗ non-existent SECTION route emitted: ${h}`);
       }
+    }
+    // Every summary link must ALSO be in the real routable set (the woven narrative, CHK-6.8c).
+    for (const h of summaryHrefs(plan)) {
+      checkedSummaryUrls++;
+      if (!routable.has(h)) {
+        allOk = false;
+        console.log(`  ✗ non-existent SUMMARY route emitted: ${h}`);
+      }
+    }
+    // Containment across the WHOLE corpus, not just the fixtured remedies: every remedy's verbatim
+    // verdict is woven into a summary fragment, so assert every fragment here passes the
+    // forbidden-framing/identifier lint. Guards against a future editorial verdict smuggling a
+    // forbidden framing or a bare [n] into the concierge's narrative.
+    if (!summaryContained(plan)) {
+      containOk = false;
+      console.log(`  ✗ summary fragment failed containment for state ${JSON.stringify(s.situation)}`);
     }
   }
   check(allOk, 'real-url-sweep/every-plan-url-exists');
-  console.log(`  ${allOk ? '✓' : '✗'} every routed URL exists (${checkedUrls} urls across ${states.length} states)`);
+  check(containOk, 'real-url-sweep/every-summary-fragment-contained');
+  console.log(
+    `  ${allOk ? '✓' : '✗'} every routed URL exists ` +
+      `(${checkedUrls} section urls + ${checkedSummaryUrls} summary urls across ${states.length} states)`,
+  );
+}
+
+// --- CHK-6.8c: the woven narrative summary invariants -------------------------------------------
+// The summary must be composed DETERMINISTICALLY from (a) fixed enum→phrase templates and (b) verbatim
+// corpus data — NEVER the user's raw text, the model's notes, or the model's ack. These cases prove:
+//   (a) no raw user/model free-text (a planted PURPLEELEPHANT token) leaks into ANY summary fragment;
+//   (b) a tried-remedy fragment uses the CORPUS name + a Grade letter, not the user's raw phrasing;
+//   (c) NO summary fragment text trips lintForbiddenFraming (containment on the composed prose);
+//   (d) crisis → the summary carries ONLY the single crisis fragment.
+async function runSummaryInvariants(corpus, routable) {
+  console.log('\nnarrative-summary invariant set (CHK-6.8c):');
+
+  // (a) + (b) + (c) — the leak probe. Input text, ack, and notes all carry PURPLEELEPHANT; the model
+  // also "recommends" (forbidden framing) and names a remedy via a raw laced string.
+  {
+    const { fn } = makeMock('summary-leak-probe');
+    const res = await runGuideBeat({
+      beat: 'history',
+      text: 'I tried melatonin PURPLEELEPHANT and it did nothing',
+      corpus,
+      model: fn,
+    });
+    const noLeak = summaryHasNoNeedle(res.plan, 'PURPLEELEPHANT');
+    check(noLeak, 'summary/no-raw-user-or-model-text-leaks');
+    console.log(`  ${noLeak ? '✓' : '✗'} no PURPLEELEPHANT (input/ack/notes) leaks into any summary fragment`);
+
+    // (b) the tried fragment names the CORPUS remedy (Melatonin) with a Grade letter, not the raw string.
+    const mel = corpus.find((r) => r.slug === 'melatonin');
+    const triedFrag = (res.plan.summary ?? []).find(
+      (f) => f.links.some((l) => l.href === '/r/melatonin'),
+    );
+    const usesCorpusName =
+      !!triedFrag &&
+      !!mel &&
+      triedFrag.text.includes(mel.name) &&
+      /\bGrade\s+\S+/.test(triedFrag.text) &&
+      !triedFrag.text.includes('PURPLEELEPHANT');
+    check(usesCorpusName, 'summary/tried-remedy-uses-corpus-name-and-grade');
+    console.log(
+      `  ${usesCorpusName ? '✓' : '✗'} tried fragment uses corpus name "${mel?.name}" + a Grade letter, not the raw string`,
+    );
+
+    // (c) containment on the composed summary prose (the forbidden "recommend/safe for you" ack must
+    // NOT reach the summary — the summary never copies the ack).
+    const contained = summaryContained(res.plan);
+    check(contained, 'summary/composed-prose-is-contained');
+    console.log(`  ${contained ? '✓' : '✗'} no summary fragment trips lintForbiddenFraming / bracket / identifier`);
+  }
+
+  // (d) crisis → the summary carries ONLY the single crisis fragment (mirrors plan.stop). Text passes
+  // the topic fence (mentions sleep) so the model runs and its extraction sets the crisis red flag.
+  {
+    const { fn } = makeMock('crisis-extract'); // model extraction sets the crisis red flag
+    const res = await runGuideBeat({
+      beat: 'situation',
+      text: "honestly I don't want to be here anymore and I can't sleep at all",
+      corpus,
+      model: fn,
+    });
+    const onlyCrisis =
+      res.plan.stop === true &&
+      Array.isArray(res.plan.summary) &&
+      res.plan.summary.length === 1 &&
+      res.plan.summary[0].tone === 'crisis' &&
+      res.plan.summary[0].links.length === 1 &&
+      res.plan.summary[0].links[0].href === ROUTES.urgent.href &&
+      summaryContained(res.plan);
+    check(onlyCrisis, 'summary/crisis-only-crisis-fragment');
+    console.log(
+      `  ${onlyCrisis ? '✓' : '✗'} crisis → exactly one crisis-tone fragment linking ${ROUTES.urgent.href} (stop=${res.plan.stop})`,
+    );
+  }
+
+  // (e) the recap is ENUM-ONLY: a normal routed beat produces a "What you told me:" recap built from
+  // the fixed enum phrases (proving the recap path fires and is composed from templates, not input).
+  {
+    const { fn } = makeMock('onset-caffeine');
+    const res = await runGuideBeat({ beat: 'situation', text: 'cannot fall asleep, coffee habit', corpus, model: fn });
+    const recap = (res.plan.summary ?? [])[0];
+    const recapOk =
+      !!recap &&
+      recap.tone === 'normal' &&
+      recap.links.length === 0 &&
+      recap.text.startsWith('What you told me:') &&
+      recap.text.includes('trouble falling asleep') &&
+      recap.text.includes('late caffeine');
+    check(recapOk, 'summary/recap-is-enum-composed');
+    console.log(`  ${recapOk ? '✓' : '✗'} recap is enum-composed ("What you told me: …", no links)`);
+  }
 }
 
 // --- CHK-6.8b: /api/guide route input-validation (the HTTP trust boundary, tested offline) --------
@@ -541,6 +680,7 @@ async function main() {
   await runContainment(corpus, routable);
   runSanitizeUnits();
   await runRealUrlSweep(corpus, routable);
+  await runSummaryInvariants(corpus, routable);
   const runRouteInputEngine = runRouteInputUnits();
   await runRouteInputEngine(corpus, routable);
   runBucketPrefixCheck();
