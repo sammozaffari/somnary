@@ -64,6 +64,8 @@ import SaveMap from './account/SaveMap.astro';
 
   <!-- the PERSISTENT reading map (rendered after reading-map, or immediately on a crisis stop) -->
   <div class="map" data-guide-map hidden aria-live="polite" tabindex="-1">
+    <!-- CHK-6.9e resume: shown only when the map was re-derived from a saved map (?resume=<id>). -->
+    <p class="map-resumed" data-guide-resumed hidden>Picked up from your saved map — freshly re-checked against Somnary’s current evidence.</p>
     <p class="map-head" data-guide-map-head>Your reading map</p>
     <p class="map-lede" data-guide-map-lede></p>
     <div class="map-sections" data-guide-map-sections></div>
@@ -268,6 +270,13 @@ import SaveMap from './account/SaveMap.astro';
   .map {
     margin-top: var(--sp-5);
   }
+  .map-resumed {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--primary);
+    margin: 0 0 var(--sp-3);
+  }
   .map-head {
     font-family: var(--font-display);
     font-weight: 700;
@@ -395,6 +404,9 @@ import SaveMap from './account/SaveMap.astro';
   // read-only /account saved-map view uses. Importing it here keeps the safety-critical render path
   // (textContent-only, internal-href) in one file; the guide's on-screen output is unchanged.
   import { renderReadingMap } from '../lib/guide/render-map.ts';
+  // CHK-6.9e resume: only used to check whether accounts are configured before attempting a resume.
+  // If unconfigured (no keys) getBrowserSupabase() is null and the guide starts fresh as normal.
+  import { getBrowserSupabase } from '../lib/auth.ts';
 
   // ---- server contract (mirrors src/lib/guide/engine.ts GuideBeatResult) ----------------------
   type GuideBeat = 'situation' | 'history' | 'habits' | 'reading-map';
@@ -529,11 +541,12 @@ import SaveMap from './account/SaveMap.astro';
     const mapWrap = root.querySelector<HTMLElement>('[data-guide-map]');
     const mapLede = root.querySelector<HTMLElement>('[data-guide-map-lede]');
     const mapSections = root.querySelector<HTMLElement>('[data-guide-map-sections]');
+    const resumedNote = root.querySelector<HTMLElement>('[data-guide-resumed]');
     const restartBtn = root.querySelector<HTMLButtonElement>('[data-guide-restart]');
     if (
       !stepsEl || !beatEl || !beatTag || !promptEl || !chipsEl || !form || !input ||
       !send || !helpEl || !ackWrap || !statusLine || !ackText || !mapWrap || !mapLede ||
-      !mapSections || !restartBtn
+      !mapSections || !resumedNote || !restartBtn
     ) return;
 
     // Same escaper as AskPanel — no server or model string is ever injected as raw HTML.
@@ -764,12 +777,86 @@ import SaveMap from './account/SaveMap.astro';
       selectedChips = [];
       mapWrap.hidden = true;
       mapSections.innerHTML = '';
+      resumedNote.hidden = true; // CHK-6.9e — a fresh start is no longer "resumed"
+      // CHK-6.9e — drop the ?resume= param so a refresh/back doesn't re-resume the just-cleared map.
+      clearResumeParam();
       // CHK-6.9c — starting over clears any pending save affordance.
       window.dispatchEvent(new CustomEvent('somnary:map-reset'));
       renderBeat();
     });
 
-    // initial render
-    renderBeat();
+    // ---- CHK-6.9e resume: pick up from a saved map -----------------------------------------------
+    // If ?resume=<id> is present AND accounts are configured, fetch the user's OWN saved map, seed its
+    // guide_state as priorState, and ask the server to RE-DERIVE the reading map (beat:'reading-map')
+    // against the CURRENT corpus — so the map is fresh, not the stored snapshot. Any failure (not signed
+    // in, not found, unconfigured, network) falls back SILENTLY to the normal fresh guide start. The
+    // resume NEVER throws and NEVER blocks the guide.
+    const RESUME_ID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+    function clearResumeParam() {
+      try {
+        const url = new URL(window.location.href);
+        if (url.searchParams.has('resume')) {
+          url.searchParams.delete('resume');
+          window.history.replaceState({}, '', url.pathname + url.search + url.hash);
+        }
+      } catch {
+        /* history/URL unavailable — non-fatal */
+      }
+    }
+
+    const tryResume = async (): Promise<boolean> => {
+      let resumeId = '';
+      try {
+        resumeId = new URLSearchParams(window.location.search).get('resume') ?? '';
+      } catch {
+        return false;
+      }
+      // Only a well-formed id is worth a fetch; the API RLS-scopes it to the caller regardless.
+      if (!RESUME_ID_RE.test(resumeId)) return false;
+      // Accounts unconfigured → no session to resume from; start fresh silently.
+      if (!getBrowserSupabase()) return false;
+
+      try {
+        const mapRes = await fetch('/api/saved-maps?id=' + encodeURIComponent(resumeId), {
+          headers: { Accept: 'application/json' },
+        });
+        if (!mapRes.ok) return false; // 401/404/503 → silent fresh start
+        const saved = (await mapRes.json()) as { guide_state?: unknown };
+        // The saved guide_state (opaque fixed-enum signals) becomes priorState. /api/guide re-coerces
+        // it through coercePriorState server-side, so we do not trust it beyond posting it back.
+        const seed = saved?.guide_state ?? {};
+
+        // Re-derive the reading map from the CURRENT corpus. beat:'reading-map' with a neutral text and
+        // the seeded priorState → the server composes a fresh plan (not the stored snapshot).
+        const res = await fetch('/api/guide', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ beat: 'reading-map', text: 'No further detail.', priorState: seed }),
+        });
+        if (!res.ok) return false;
+        const result = (await res.json()) as GuideBeatResult;
+
+        priorState = result.state;
+        beatIndex = BEAT_ORDER.length - 1; // land on the reading-map beat (so "Start over" resets cleanly)
+        renderSteps(); // reflect a completed intake on the (decorative) step rail
+        // A crisis in the re-derived map is still handled safety-first (no save/resumed note).
+        const crisis = result.plan?.stop === true || result.status === 'crisis';
+        if (!crisis) resumedNote.hidden = false;
+        renderMap(result.plan, crisis);
+        return true;
+      } catch {
+        return false; // any error → silent fresh start
+      }
+    };
+
+    // initial render — attempt a resume first; on any miss/failure, start the guide fresh.
+    void (async () => {
+      const resumed = await tryResume();
+      if (!resumed) {
+        clearResumeParam(); // a stale/invalid ?resume= shouldn't linger in the URL
+        renderBeat();
+      }
+    })();
   });
 </script>
