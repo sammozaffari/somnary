@@ -4,6 +4,7 @@
 // to pages that exist today are rendered, to avoid 404s; add more as routes land.
 import Wordmark from './Wordmark.astro';
 import SearchPalette from './SearchPalette.astro';
+import SessionNav from './account/SessionNav.astro';
 
 const links = [
   { href: '/start-here', label: 'Start here' },
@@ -34,6 +35,9 @@ const path = Astro.url.pathname.replace(/\/$/, '') || '/';
       })
     }
     <li><SearchPalette /></li>
+    {/* Signed-in indicator (CHK-6.9c): hidden by default; revealed only for a real session.
+        Adds NO sign-in CTA — no login wall in the global chrome. */}
+    <SessionNav />
   </ul>
 </nav>
 
