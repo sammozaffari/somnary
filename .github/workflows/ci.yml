@@ -50,6 +50,9 @@ jobs:
       - name: Accounts (save/list/delete firewall + owner-scoped RLS, mocked Supabase client)
         run: npm run verify:accounts
 
+      - name: No login wall (no content/search/guide route gates on sign-in; /account never redirects)
+        run: npm run verify:no-auth-wall
+
       - name: Build (schema validation + SSG)
         run: npm run build
 

@@ -15,6 +15,12 @@
 // SERVER-authored plan field (section title, item label/note, item href). The client NEVER renders
 // `history.notes` or any other raw model field. All strings go through the same escaper AskPanel uses,
 // so no server or model text is ever injected as HTML.
+//
+// CHK-6.9c: after a NON-crisis reading map is rendered, GuidePanel dispatches a `somnary:map-ready`
+// event carrying the accumulated guide_state + the rendered route_plan; the optional SaveMap island
+// (below) captures it to offer an OPTIONAL account save. A crisis map dispatches `somnary:map-reset`
+// (no save distraction — safety first). SaveMap self-hides entirely when accounts are unconfigured.
+import SaveMap from './account/SaveMap.astro';
 ---
 
 <section class="guide" aria-label="Sleep guide intake" data-guide>
@@ -61,6 +67,10 @@
     <p class="map-head" data-guide-map-head>Your reading map</p>
     <p class="map-lede" data-guide-map-lede></p>
     <div class="map-sections" data-guide-map-sections></div>
+    <!-- OPTIONAL account save (CHK-6.9c) — self-hides when accounts are unconfigured or before a map
+         exists; never offered on a crisis stop. Nothing here gates reading the map above. -->
+    <SaveMap />
+
     <div class="map-foot">
       <button type="button" class="restart" data-guide-restart>Start over</button>
       <p class="map-note">This is a map to Somnary's evidence, not medical advice. Whether anything fits you is a conversation for your clinician.</p>
@@ -653,6 +663,23 @@
       ackWrap.hidden = true;
       mapWrap.hidden = false;
       mapWrap.focus?.();
+
+      // CHK-6.9c — hand the OPTIONAL SaveMap island the data it needs (or tell it to hide on crisis).
+      // The save API re-validates everything server-side; this event is only the client hand-off.
+      if (crisis) {
+        // Safety first: never offer an account save on a crisis stop.
+        window.dispatchEvent(new CustomEvent('somnary:map-reset'));
+      } else {
+        window.dispatchEvent(
+          new CustomEvent('somnary:map-ready', {
+            detail: {
+              guide_state: priorState ?? {},
+              route_plan: plan,
+              habits_checklist: {},
+            },
+          }),
+        );
+      }
     };
 
     // ---- submit one beat -------------------------------------------------------------------
@@ -759,6 +786,8 @@
       selectedChips = [];
       mapWrap.hidden = true;
       mapSections.innerHTML = '';
+      // CHK-6.9c — starting over clears any pending save affordance.
+      window.dispatchEvent(new CustomEvent('somnary:map-reset'));
       renderBeat();
     });
 
