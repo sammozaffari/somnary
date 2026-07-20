@@ -391,6 +391,11 @@ import SaveMap from './account/SaveMap.astro';
 </style>
 
 <script>
+  // The reading map's DOM-building is the SHARED, framework-free renderer (CHK-6.9e) — the SAME one the
+  // read-only /account saved-map view uses. Importing it here keeps the safety-critical render path
+  // (textContent-only, internal-href) in one file; the guide's on-screen output is unchanged.
+  import { renderReadingMap } from '../lib/guide/render-map.ts';
+
   // ---- server contract (mirrors src/lib/guide/engine.ts GuideBeatResult) ----------------------
   type GuideBeat = 'situation' | 'history' | 'habits' | 'reading-map';
   type GuideStatus = 'routed' | 'refused' | 'crisis' | 'off-topic' | 'model-error';
@@ -620,40 +625,13 @@ import SaveMap from './account/SaveMap.astro';
     // ---- the reading map (persistent NARRATIVE summary) ------------------------------------
     // CHK-6.8c revision: instead of a grouped link list, render the SERVER-composed woven summary —
     // one <p> per fragment (its deterministic text) followed by its real corpus links. The server
-    // already orders fragments safety-first; we preserve that order exactly.
-    const FRAGMENT_CLASS: Record<FragmentTone, string> = {
-      crisis: 'is-crisis',
-      boundary: 'is-boundary',
-      normal: '',
-    };
+    // already orders fragments safety-first; we preserve that order exactly. The DOM-building itself
+    // now lives in the SHARED, framework-free renderReadingMap (CHK-6.9e) — the SAME renderer the
+    // read-only /account saved-map view uses — so the safety-critical (textContent-only, internal-href)
+    // render path exists in exactly one place. This call is byte-identical to the old inlined loop.
 
     const renderMap = (plan: RoutePlan, crisis: boolean) => {
-      mapSections.innerHTML = '';
-      plan.summary.forEach((frag) => {
-        const fragEl = document.createElement('div');
-        fragEl.className = 'map-fragment' + (FRAGMENT_CLASS[frag.tone] ? ' ' + FRAGMENT_CLASS[frag.tone] : '');
-
-        const p = document.createElement('p');
-        p.className = 'map-fragment-text';
-        p.textContent = frag.text; // server-composed, deterministic — never model prose or raw user text
-        fragEl.appendChild(p);
-
-        if (frag.links.length) {
-          const list = document.createElement('ul');
-          list.className = 'map-items';
-          frag.links.forEach((item) => {
-            const li = document.createElement('li');
-            const a = document.createElement('a');
-            a.className = 'map-item-link';
-            a.href = item.href; // server-authored, real corpus URL
-            a.textContent = item.label; // server-authored
-            li.appendChild(a);
-            list.appendChild(li);
-          });
-          fragEl.appendChild(list);
-        }
-        mapSections.appendChild(fragEl);
-      });
+      renderReadingMap(plan, mapSections);
 
       mapLede.textContent = crisis
         ? "Your safety comes first. Please use the help below now — the rest can wait."
