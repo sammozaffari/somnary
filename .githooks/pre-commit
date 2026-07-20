@@ -1,10 +1,11 @@
 #!/bin/sh
 # Somnary pre-commit — fast, offline gates (CHK-0.4/0.5, +CHK-6.7 ask suite). Full build/crawl run in CI.
 # Bypass in a pinch with `git commit --no-verify` (CI still enforces).
-echo "• pre-commit: token linter + citation resolver + ask + guide guardrails + rate limiter + accounts"
+echo "• pre-commit: token linter + citation resolver + ask + guide guardrails + rate limiter + accounts + no-auth-wall"
 node scripts/check-tokens.mjs || { echo "✖ token linter failed"; exit 1; }
 node scripts/check-citations.mjs || { echo "✖ citation resolver failed"; exit 1; }
 node scripts/test-ask.mjs || { echo "✖ ask guardrail suite failed"; exit 1; }
 node scripts/test-guide.mjs || { echo "✖ guide guardrail suite failed"; exit 1; }
 node scripts/test-rate-limit.mjs || { echo "✖ rate-limit suite failed"; exit 1; }
 node scripts/test-accounts.mjs || { echo "✖ accounts suite failed"; exit 1; }
+node scripts/check-no-auth-wall.mjs || { echo "✖ no-auth-wall gate failed"; exit 1; }
