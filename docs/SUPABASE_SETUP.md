@@ -1,4 +1,4 @@
-# Supabase setup — newsletter + claim submissions (CHK-4.2) + accounts (CHK-6.9a)
+# Supabase setup — newsletter + claim submissions (CHK-4.2) + accounts (CHK-6.9a/6.9b)
 
 > Sections 1–5 cover the two capture forms (service-role key). **Section 6** covers accounts /
 > sign-in (the PUBLIC anon key) — a separate, browser-safe key. Both are env-gated: the site builds
@@ -162,6 +162,34 @@ PUBLIC_SUPABASE_ANON_KEY=YOUR-ANON-PUBLISHABLE-KEY
 The `PUBLIC_` prefix is required — Astro/Vite only exposes `PUBLIC_`-prefixed vars to the browser
 bundle, which the sign-in client needs. Redeploy (Vercel) or restart `npm run dev` (local) after
 adding them.
+
+## 7. Accounts — saved reading-maps schema (CHK-6.9b)
+
+Saving a `/guide` result for a signed-in user needs two new tables. Run the migration once:
+
+1. In the project, open **SQL Editor** → **New query**.
+2. Paste the entire contents of
+   [`supabase/migrations/0002_accounts.sql`](../supabase/migrations/0002_accounts.sql) and click **Run**.
+3. Confirm under **Table Editor** that `profiles` and `saved_maps` exist and both show **RLS enabled**.
+
+**Different security model from every other table.** `schema.sql` and `0001` use RLS-on / **no
+policies** (server-only, reached via the *service-role* key). These two tables are **owner-scoped**:
+RLS is on **with** policies keyed to `auth.uid()`, so a signed-in user — using the **anon** key
+through the `/api/save-map` + `/api/saved-maps` routes — can read and write **only their own rows**.
+The service-role key is never used for account data; it always flows through RLS as the user.
+
+**What it stores (the firewall):** the structured `/guide` output only — the validated `GuideState`
+(fixed-enum answers), the deterministic reading map (real corpus URLs), and the habits-checklist
+tick-state. It **never** stores chat transcripts or free prose (the save route strips them through the
+guide schema validator), and it **never** stores experience / supplier / community reports — those
+live in the **separate pseudonymous store** and stay firewalled from account identity.
+
+The migration also adds an `on_auth_user_created` trigger that auto-inserts a `profiles` row on new
+signup (the save route also upserts the profile defensively, so accounts predating the trigger work).
+
+**Graceful degradation:** if the `PUBLIC_SUPABASE_*` vars from §6 are absent, `/api/save-map` and
+`/api/saved-maps` return **503** and store nothing — the site still builds and works signed-out. So
+you can defer this migration until you turn accounts on.
 
 ## Data handling notes
 
