@@ -1,0 +1,768 @@
+---
+// GuidePanel — the intake concierge island (CHK-6.8c). A DETERMINISTIC four-beat interview
+// (situation → history → habits → reading-map) that POSTs each turn to /api/guide (CHK-6.8b) and
+// renders the returned deterministic READING MAP as a persistent results view. Mirrors AskPanel:
+// SSG-safe shell + a progressive-enhancement <script> island, token-only styling, the SAME HTML
+// escaping + [n]-style safety, aria-live status, loading / 429 / error handling.
+//
+// THE FLOW IS CLIENT-DETERMINISTIC: this island decides the next beat; the model never drives
+// navigation. Between beats the island carries the response's `state` forward as `priorState` (the
+// server accumulator) — so the final reading map reflects the whole conversation, not just the last
+// answer. A `plan.stop` (crisis) short-circuits to the crisis map immediately, whatever beat we are on.
+//
+// SAFETY INVARIANT (adversarial-review P3): the ONLY model prose surfaced is `ack` (already
+// forbidden-framing-filtered + identifier-stripped server-side). Every other rendered string is a
+// SERVER-authored plan field (section title, item label/note, item href). The client NEVER renders
+// `history.notes` or any other raw model field. All strings go through the same escaper AskPanel uses,
+// so no server or model text is ever injected as HTML.
+---
+
+<section class="guide" aria-label="Sleep guide intake" data-guide>
+  <!-- progress: which of the four beats we're on (deterministic, client-owned) -->
+  <ol class="steps" data-guide-steps aria-hidden="true">
+    <li class="step is-current" data-step="situation"><span class="s-dot"></span>Your situation</li>
+    <li class="step" data-step="history"><span class="s-dot"></span>What you've tried</li>
+    <li class="step" data-step="habits"><span class="s-dot"></span>Evening habits</li>
+    <li class="step" data-step="reading-map"><span class="s-dot"></span>Your reading map</li>
+  </ol>
+
+  <!-- the current beat's prompt + input; hidden once the reading map is shown -->
+  <div class="beat" data-guide-beat>
+    <p class="beat-label"><span class="dot" aria-hidden="true"></span> <span data-guide-beat-tag>Your situation</span></p>
+    <p class="prompt" data-guide-prompt></p>
+
+    <!-- deterministic quick-select chips (belt-and-suspenders screeners) — appended to the message -->
+    <div class="chips" data-guide-chips hidden></div>
+
+    <form class="field" data-guide-form>
+      <label class="sr-only" data-guide-input-label for="guide-input">Your answer</label>
+      <textarea
+        id="guide-input"
+        class="guide-input"
+        name="text"
+        rows="2"
+        maxlength="500"
+        autocomplete="off"
+        data-guide-input
+      ></textarea>
+      <button type="submit" class="send" data-guide-send aria-label="Continue">→</button>
+    </form>
+    <p class="beat-help" data-guide-help></p>
+  </div>
+
+  <!-- the running acknowledgment for the CURRENT beat (the only model prose we ever show) -->
+  <div class="ack" data-guide-ack hidden aria-live="polite">
+    <p class="a-status" data-guide-statusline hidden></p>
+    <p class="a-ack" data-guide-ack-text></p>
+  </div>
+
+  <!-- the PERSISTENT reading map (rendered after reading-map, or immediately on a crisis stop) -->
+  <div class="map" data-guide-map hidden aria-live="polite" tabindex="-1">
+    <p class="map-head" data-guide-map-head>Your reading map</p>
+    <p class="map-lede" data-guide-map-lede></p>
+    <div class="map-sections" data-guide-map-sections></div>
+    <div class="map-foot">
+      <button type="button" class="restart" data-guide-restart>Start over</button>
+      <p class="map-note">This is a map to Somnary's evidence, not medical advice. Whether anything fits you is a conversation for your clinician.</p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .guide {
+    background: var(--primary-soft);
+    border-radius: var(--r-lg);
+    padding: var(--sp-6);
+    margin-top: var(--sp-7);
+  }
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  /* step rail */
+  .steps {
+    list-style: none;
+    margin: 0 0 var(--sp-5);
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-4);
+  }
+  .step {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+  }
+  .s-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: var(--r-pill);
+    background: var(--mineral);
+    flex: none;
+  }
+  .step.is-current {
+    color: var(--primary);
+  }
+  .step.is-current .s-dot {
+    background: var(--primary);
+  }
+  .step.is-done {
+    color: var(--eucalyptus);
+  }
+  .step.is-done .s-dot {
+    background: var(--eucalyptus);
+  }
+
+  /* beat prompt + input */
+  .beat-label {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--primary);
+    margin: 0 0 var(--sp-3);
+  }
+  .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: var(--r-pill);
+    background: var(--primary);
+    flex: none;
+  }
+  .prompt {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--ink);
+    margin: 0 0 var(--sp-4);
+    max-width: 60ch;
+  }
+
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2);
+    margin: 0 0 var(--sp-4);
+  }
+  .chip {
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    color: var(--muted);
+    background: var(--surface);
+    border: var(--border-hairline);
+    border-radius: var(--r-pill);
+    padding: var(--sp-2) var(--sp-4);
+    cursor: pointer;
+    min-height: 34px;
+  }
+  .chip[aria-pressed='true'] {
+    color: var(--surface);
+    background: var(--primary);
+    border-color: var(--primary);
+  }
+  .chip:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+  }
+
+  .field {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--sp-2);
+  }
+  .guide-input {
+    flex: 1;
+    min-width: 0;
+    min-height: 44px;
+    padding: var(--sp-3) var(--sp-4);
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--ink);
+    background: var(--surface);
+    border: var(--border-hairline);
+    border-radius: var(--r-md);
+    resize: vertical;
+  }
+  .guide-input:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+  }
+  .send {
+    width: 44px;
+    height: 44px;
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: var(--r-pill);
+    background: var(--primary);
+    color: var(--surface);
+    font-family: var(--font-mono);
+    font-size: var(--text-md);
+    cursor: pointer;
+  }
+  .send:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+  }
+  .send[disabled] {
+    background: var(--mineral);
+    cursor: progress;
+  }
+  .beat-help {
+    font-size: var(--text-xs);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: var(--sp-3) 0 0;
+  }
+
+  /* acknowledgment card (per-beat) */
+  .ack {
+    margin-top: var(--sp-4);
+    background: var(--surface);
+    border: var(--border-hairline);
+    border-radius: var(--r-md);
+    padding: var(--sp-4) var(--sp-5);
+  }
+  .a-status {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    font-weight: 600;
+    color: var(--ink);
+    margin: 0 0 var(--sp-2);
+  }
+  .a-ack {
+    font-size: var(--text-sm);
+    line-height: var(--lh-base);
+    color: var(--ink);
+    margin: 0;
+  }
+
+  /* the persistent reading map */
+  .map {
+    margin-top: var(--sp-5);
+  }
+  .map-head {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-xl);
+    line-height: var(--lh-xl);
+    color: var(--ink);
+    margin: 0 0 var(--sp-2);
+  }
+  .map-lede {
+    font-size: var(--text-sm);
+    line-height: var(--lh-base);
+    color: var(--muted);
+    margin: 0 0 var(--sp-5);
+    max-width: 64ch;
+  }
+  .map-sections {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+  }
+
+  /* one woven narrative fragment: a sentence + its real corpus links */
+  .map-fragment {
+    background: var(--surface);
+    border: var(--border-hairline);
+    border-radius: var(--r-md);
+    padding: var(--sp-5);
+  }
+  .map-fragment-text {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--ink);
+    margin: 0;
+    max-width: 64ch;
+  }
+  .map-fragment .map-items {
+    margin-top: var(--sp-4);
+  }
+  /* crisis / boundary fragments read as prominent, calm-but-firm — safety register */
+  .map-fragment.is-crisis {
+    background: var(--grade-f-tint);
+    border-color: var(--grade-f);
+  }
+  .map-fragment.is-crisis .map-fragment-text {
+    color: var(--grade-f);
+    font-weight: 600;
+  }
+  .map-fragment.is-boundary {
+    background: var(--warning-bg);
+    border-color: var(--grade-f);
+  }
+  .map-fragment.is-boundary .map-fragment-text {
+    color: var(--ink);
+  }
+
+  .map-items {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+  }
+  .map-item-link {
+    font-size: var(--text-base);
+    font-weight: 600;
+    color: var(--primary);
+    text-decoration: none;
+  }
+  .map-item-link:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+    border-radius: var(--r-sm);
+  }
+  .is-crisis .map-item-link,
+  .is-boundary .map-item-link {
+    color: var(--grade-f);
+  }
+
+  .map-foot {
+    margin-top: var(--sp-6);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+  }
+  .restart {
+    align-self: flex-start;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--primary);
+    background: var(--surface);
+    border: var(--border-hairline);
+    border-radius: var(--r-pill);
+    padding: var(--sp-2) var(--sp-4);
+    cursor: pointer;
+    min-height: 34px;
+  }
+  .restart:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+  }
+  .map-note {
+    font-size: var(--text-xs);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .guide * {
+      transition: none !important;
+      animation: none !important;
+    }
+  }
+  @media (max-width: 640px) {
+    .guide {
+      padding: var(--sp-5);
+    }
+  }
+</style>
+
+<script>
+  // ---- server contract (mirrors src/lib/guide/engine.ts GuideBeatResult) ----------------------
+  type GuideBeat = 'situation' | 'history' | 'habits' | 'reading-map';
+  type GuideStatus = 'routed' | 'refused' | 'crisis' | 'off-topic' | 'model-error';
+  interface RouteItem {
+    href: string;
+    label: string;
+    note?: string;
+  }
+  type SectionKind =
+    | 'crisis'
+    | 'boundary'
+    | 'clinician-first'
+    | 'tried'
+    | 'outcomes'
+    | 'habits'
+    | 'fallback';
+  interface RouteSection {
+    kind: SectionKind;
+    title: string;
+    items: RouteItem[];
+  }
+  type FragmentTone = 'crisis' | 'boundary' | 'normal';
+  interface SummaryFragment {
+    text: string;
+    links: RouteItem[];
+    tone: FragmentTone;
+  }
+  interface RoutePlan {
+    stop: boolean;
+    sections: RouteSection[];
+    summary: SummaryFragment[];
+  }
+  // GuideState is opaque to the client — it is only ever POSTed back verbatim as priorState. We never
+  // read a field off it (esp. no prose exists on it), so it is typed as an unknown record.
+  type GuideState = Record<string, unknown>;
+  interface GuideBeatResult {
+    status: GuideStatus;
+    category: string;
+    ack: string;
+    plan: RoutePlan;
+    route: { href: string; label: string } | null;
+    state: GuideState;
+    meta: unknown;
+  }
+
+  // ---- beat script (client-deterministic; the model NEVER drives navigation) -------------------
+  const BEAT_ORDER: GuideBeat[] = ['situation', 'history', 'habits', 'reading-map'];
+
+  interface BeatCopy {
+    tag: string;
+    prompt: string;
+    placeholder: string;
+    help: string;
+    chips?: { label: string; append: string }[];
+    optionalOk?: boolean; // may be submitted with no free text (chips-only / "skip")
+  }
+  const BEAT_COPY: Record<GuideBeat, BeatCopy> = {
+    situation: {
+      tag: 'Your situation',
+      prompt:
+        "In a sentence or two, what's happening with your sleep? For example: how long it's been going on, and whether it's trouble falling asleep, waking in the night, or a racing mind.",
+      placeholder: "e.g. I've had trouble falling asleep for a few weeks, mind won't switch off…",
+      help: 'Please don’t include personal or identifying details. This step is required.',
+      // Belt-and-suspenders screeners — deterministic, appended verbatim to the message so the
+      // server extractor sees the flag even if the free text is vague. Not medical advice, just tags.
+      chips: [
+        { label: 'Pregnant', append: 'I am pregnant.' },
+        { label: 'Breastfeeding', append: 'I am breastfeeding.' },
+        { label: "It's for a child", append: 'This is about a child under 18.' },
+        { label: 'On a prescription med', append: 'I take a prescription medication.' },
+        { label: 'A diagnosed condition', append: 'I have a diagnosed medical or mental-health condition.' },
+      ],
+    },
+    history: {
+      tag: "What you've tried",
+      prompt:
+        "Have you tried anything for it so far? Name anything you've used — for example melatonin, magnesium, valerian, or nothing yet.",
+      placeholder: 'e.g. I tried melatonin and magnesium, no real change…',
+      help: 'Optional — you can leave this blank and continue.',
+      optionalOk: true,
+    },
+    habits: {
+      tag: 'Evening habits',
+      prompt:
+        'Anything about your evenings that might be in play? For example late coffee, a nightcap, screens in bed, an irregular schedule, or a noisy/bright room.',
+      placeholder: 'e.g. coffee after lunch, and I scroll in bed…',
+      help: 'Optional — leave blank if none apply.',
+      optionalOk: true,
+      chips: [
+        { label: 'Late caffeine', append: 'I drink caffeine later in the day.' },
+        { label: 'Nightcap', append: 'I have alcohol before bed.' },
+        { label: 'Screens in bed', append: 'I use screens in the evening / in bed.' },
+        { label: 'Irregular schedule', append: 'My sleep schedule is irregular.' },
+        { label: 'Daytime naps', append: 'I nap during the day.' },
+        { label: 'Noisy/bright room', append: 'My bedroom is hot, bright, or noisy.' },
+        { label: 'Late exercise', append: 'I exercise late in the evening.' },
+      ],
+    },
+    'reading-map': {
+      tag: 'Your reading map',
+      prompt:
+        "Anything else you want to add before we build your reading map? You can leave this blank and continue.",
+      placeholder: 'e.g. it started after a stressful few months…',
+      help: 'Optional — continue to see your reading map.',
+      optionalOk: true,
+    },
+  };
+
+  const STATUS_LABEL: Record<GuideStatus, string> = {
+    routed: 'Noted',
+    refused: 'This needs a person, not a page',
+    crisis: 'Please get help now',
+    'off-topic': "Let's keep to sleep",
+    'model-error': 'Noted',
+  };
+
+  const roots = document.querySelectorAll<HTMLElement>('[data-guide]');
+  roots.forEach((root) => {
+    const stepsEl = root.querySelector<HTMLElement>('[data-guide-steps]');
+    const beatEl = root.querySelector<HTMLElement>('[data-guide-beat]');
+    const beatTag = root.querySelector<HTMLElement>('[data-guide-beat-tag]');
+    const promptEl = root.querySelector<HTMLElement>('[data-guide-prompt]');
+    const chipsEl = root.querySelector<HTMLElement>('[data-guide-chips]');
+    const form = root.querySelector<HTMLFormElement>('[data-guide-form]');
+    const input = root.querySelector<HTMLTextAreaElement>('[data-guide-input]');
+    const send = root.querySelector<HTMLButtonElement>('[data-guide-send]');
+    const helpEl = root.querySelector<HTMLElement>('[data-guide-help]');
+    const ackWrap = root.querySelector<HTMLElement>('[data-guide-ack]');
+    const statusLine = root.querySelector<HTMLElement>('[data-guide-statusline]');
+    const ackText = root.querySelector<HTMLElement>('[data-guide-ack-text]');
+    const mapWrap = root.querySelector<HTMLElement>('[data-guide-map]');
+    const mapLede = root.querySelector<HTMLElement>('[data-guide-map-lede]');
+    const mapSections = root.querySelector<HTMLElement>('[data-guide-map-sections]');
+    const restartBtn = root.querySelector<HTMLButtonElement>('[data-guide-restart]');
+    if (
+      !stepsEl || !beatEl || !beatTag || !promptEl || !chipsEl || !form || !input ||
+      !send || !helpEl || !ackWrap || !statusLine || !ackText || !mapWrap || !mapLede ||
+      !mapSections || !restartBtn
+    ) return;
+
+    // Same escaper as AskPanel — no server or model string is ever injected as raw HTML.
+    const esc = (s: string) =>
+      s.replace(/[&<>"']/g, (c) =>
+        ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c] as string,
+      );
+
+    // ---- state (client-owned) --------------------------------------------------------------
+    let beatIndex = 0; // index into BEAT_ORDER — the FLOW is client-deterministic
+    let priorState: GuideState | undefined; // the server accumulator, carried between beats
+    let selectedChips: string[] = [];
+    let busy = false;
+
+    const currentBeat = (): GuideBeat => BEAT_ORDER[beatIndex];
+
+    const setBusy = (b: boolean) => {
+      busy = b;
+      send.disabled = b;
+      input.disabled = b;
+      chipsEl.querySelectorAll<HTMLButtonElement>('.chip').forEach((c) => (c.disabled = b));
+    };
+
+    const renderSteps = () => {
+      stepsEl.querySelectorAll<HTMLElement>('.step').forEach((el, i) => {
+        el.classList.toggle('is-current', i === beatIndex);
+        el.classList.toggle('is-done', i < beatIndex);
+      });
+    };
+
+    const renderChips = (copy: BeatCopy) => {
+      selectedChips = [];
+      if (!copy.chips || copy.chips.length === 0) {
+        chipsEl.hidden = true;
+        chipsEl.innerHTML = '';
+        return;
+      }
+      chipsEl.hidden = false;
+      chipsEl.innerHTML = '';
+      copy.chips.forEach((c) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'chip';
+        btn.textContent = c.label; // deterministic, client-authored copy
+        btn.setAttribute('aria-pressed', 'false');
+        btn.addEventListener('click', () => {
+          const on = btn.getAttribute('aria-pressed') === 'true';
+          btn.setAttribute('aria-pressed', on ? 'false' : 'true');
+          if (on) selectedChips = selectedChips.filter((x) => x !== c.append);
+          else selectedChips.push(c.append);
+        });
+        chipsEl.appendChild(btn);
+      });
+    };
+
+    const renderBeat = () => {
+      const beat = currentBeat();
+      const copy = BEAT_COPY[beat];
+      beatTag.textContent = copy.tag;
+      promptEl.textContent = copy.prompt;
+      input.value = '';
+      input.placeholder = copy.placeholder;
+      input.maxLength = 500;
+      helpEl.textContent = copy.help;
+      renderChips(copy);
+      renderSteps();
+      // hide the previous beat's ack until a new response arrives
+      ackWrap.hidden = true;
+      beatEl.hidden = false;
+      input.focus();
+    };
+
+    const showStatus = (text: string) => {
+      ackWrap.hidden = false;
+      statusLine.hidden = false;
+      statusLine.textContent = text;
+      ackText.textContent = '';
+    };
+
+    const showAck = (status: GuideStatus, ack: string) => {
+      ackWrap.hidden = false;
+      statusLine.hidden = false;
+      statusLine.textContent = STATUS_LABEL[status] ?? 'Noted';
+      // `ack` is the ONLY model prose; it is server-sanitized. Escape it anyway (belt-and-suspenders)
+      // and render as plain text — never as HTML.
+      ackText.textContent = ack || '';
+    };
+
+    // ---- the reading map (persistent NARRATIVE summary) ------------------------------------
+    // CHK-6.8c revision: instead of a grouped link list, render the SERVER-composed woven summary —
+    // one <p> per fragment (its deterministic text) followed by its real corpus links. The server
+    // already orders fragments safety-first; we preserve that order exactly.
+    const FRAGMENT_CLASS: Record<FragmentTone, string> = {
+      crisis: 'is-crisis',
+      boundary: 'is-boundary',
+      normal: '',
+    };
+
+    const renderMap = (plan: RoutePlan, crisis: boolean) => {
+      mapSections.innerHTML = '';
+      plan.summary.forEach((frag) => {
+        const fragEl = document.createElement('div');
+        fragEl.className = 'map-fragment' + (FRAGMENT_CLASS[frag.tone] ? ' ' + FRAGMENT_CLASS[frag.tone] : '');
+
+        const p = document.createElement('p');
+        p.className = 'map-fragment-text';
+        p.textContent = frag.text; // server-composed, deterministic — never model prose or raw user text
+        fragEl.appendChild(p);
+
+        if (frag.links.length) {
+          const list = document.createElement('ul');
+          list.className = 'map-items';
+          frag.links.forEach((item) => {
+            const li = document.createElement('li');
+            const a = document.createElement('a');
+            a.className = 'map-item-link';
+            a.href = item.href; // server-authored, real corpus URL
+            a.textContent = item.label; // server-authored
+            li.appendChild(a);
+            list.appendChild(li);
+          });
+          fragEl.appendChild(list);
+        }
+        mapSections.appendChild(fragEl);
+      });
+
+      mapLede.textContent = crisis
+        ? "Your safety comes first. Please use the help below now — the rest can wait."
+        : "Here's a short read of what you told me and where to go next on Somnary. Safety pages come first where they apply. Nothing here is a recommendation or a dose — it's a map to the evidence.";
+
+      beatEl.hidden = true;
+      ackWrap.hidden = true;
+      mapWrap.hidden = false;
+      mapWrap.focus?.();
+    };
+
+    // ---- submit one beat -------------------------------------------------------------------
+    const submitBeat = async () => {
+      if (busy) return;
+      const beat = currentBeat();
+      const copy = BEAT_COPY[beat];
+      const typed = input.value.trim();
+      // Deterministic client message: free text + any selected screener chips.
+      const parts: string[] = [];
+      if (typed) parts.push(typed);
+      parts.push(...selectedChips);
+      let text = parts.join(' ').trim();
+
+      // Required beats need SOMETHING; optional beats may proceed with a neutral placeholder so the
+      // route (which requires non-empty text) still advances the deterministic flow.
+      if (!text) {
+        if (copy.optionalOk) text = 'No further detail.';
+        else {
+          helpEl.textContent = 'Please add a short description to continue.';
+          input.focus();
+          return;
+        }
+      }
+      // Never exceed the server cap (defense-in-depth; textarea maxlength already enforces it).
+      text = text.slice(0, 500);
+
+      setBusy(true);
+      showStatus('Thinking…');
+      try {
+        const res = await fetch('/api/guide', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ beat, text, priorState }),
+        });
+        if (res.status === 429) {
+          // Reuse AskPanel's calm, neutral rate-limit register (never the vermilion/safety tone).
+          showAck(
+            'model-error',
+            "You’re going a little faster than we can keep up with — give it a moment and try again. Nothing you’ve entered is lost.",
+          );
+          setBusy(false);
+          return;
+        }
+        if (!res.ok) {
+          showAck(
+            'model-error',
+            'Something went wrong on our side. You can try again, or browse Somnary’s evidence directly. This is educational, not medical advice.',
+          );
+          setBusy(false);
+          return;
+        }
+        const result = (await res.json()) as GuideBeatResult;
+
+        // Carry the server accumulator forward for the next beat.
+        priorState = result.state;
+
+        // A crisis STOP short-circuits everything, whatever beat we're on: render ONLY the crisis map.
+        if (result.plan?.stop || result.status === 'crisis') {
+          showAck(result.status, result.ack);
+          renderMap(result.plan, true);
+          setBusy(false);
+          return;
+        }
+
+        // Show the beat acknowledgment (the only model prose), then advance the deterministic flow.
+        showAck(result.status, result.ack);
+
+        if (beat === 'reading-map') {
+          // Final beat → render the persistent reading map from the accumulated plan.
+          renderMap(result.plan, false);
+        } else {
+          beatIndex += 1;
+          renderBeat();
+        }
+      } catch {
+        showAck(
+          'model-error',
+          'Something went wrong reaching the guide. You can try again, or browse Somnary’s evidence directly. This is educational, not medical advice.',
+        );
+      } finally {
+        setBusy(false);
+      }
+    };
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      void submitBeat();
+    });
+
+    // Enter submits; Shift+Enter inserts a newline (textarea affordance).
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        void submitBeat();
+      }
+      if (e.key === 'Escape') input.blur();
+    });
+
+    // Start over — reset to the first beat and clear the carried state.
+    restartBtn.addEventListener('click', () => {
+      beatIndex = 0;
+      priorState = undefined;
+      selectedChips = [];
+      mapWrap.hidden = true;
+      mapSections.innerHTML = '';
+      renderBeat();
+    });
+
+    // initial render
+    renderBeat();
+  });
+</script>

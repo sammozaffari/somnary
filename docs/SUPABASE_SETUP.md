@@ -165,6 +165,7 @@ adding them.
 
 ## 7. Accounts — saved reading-maps schema (CHK-6.9b)
 
+
 Saving a `/guide` result for a signed-in user needs two new tables. Run the migration once:
 
 1. In the project, open **SQL Editor** → **New query**.
