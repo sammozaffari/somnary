@@ -1,0 +1,312 @@
+---
+import { DIMENSION_ORDER, DIMENSION_LABELS, type ScorecardCardData } from '../../data/source-scorecards/card';
+
+interface Props {
+  card: ScorecardCardData;
+}
+const { card: p } = Astro.props;
+const segs = [1, 2, 3, 4, 5];
+---
+
+<article class="card">
+  <div class="shot">
+    {p.imagePath ? (
+      <img src={p.imagePath} alt={`${p.brand} ${p.productName}`} loading="lazy" decoding="async" />
+    ) : (
+      <span class="shot-fallback" aria-hidden="true">{p.brand.charAt(0)}</span>
+    )}
+  </div>
+
+  <div class="body">
+    <div class="id">
+      <h3 class="brand">{p.brand}</h3>
+      <p class="product">{p.productName}</p>
+      {p.specLines.map((s) => <p class="spec">{s}</p>)}
+      <p class="meta">{p.metaLine}</p>
+      <p class="cert" data-kind={p.certVerified ? 'yes' : 'none'}>{p.certSummary}</p>
+    </div>
+
+    <p class="bottomline">{p.bottomLine}</p>
+
+    {p.chips.length > 0 && (
+      <div class="chips">
+        {p.chips.map((c) => (
+          <span class="chip" data-kind={c.kind} title={c.note}>{c.label}</span>
+        ))}
+      </div>
+    )}
+
+    <details class="why">
+      <summary>Why these scores</summary>
+      <div class="why-body">
+        <p class="verdict">{p.verdict}</p>
+
+        {p.detailLines.map((d) => (
+          <p class:list={['detailline', d.kind]}><span class="tag">{d.tag}</span> {d.note}</p>
+        ))}
+
+        <div class="meters">
+          {DIMENSION_ORDER.map((key) => (
+            <div class="meter">
+              <span class="meter-label">{DIMENSION_LABELS[key]}</span>
+              <span class="meter-row">
+                <span class="bar" aria-hidden="true">
+                  {segs.map((i) => <i class:list={['seg', { on: i <= p.scores[key].score }]} />)}
+                </span>
+                <span class="meter-num">{p.scores[key].score}<span class="of">/5</span></span>
+              </span>
+            </div>
+          ))}
+        </div>
+
+        <dl class="why-list">
+          {DIMENSION_ORDER.map((key) => (
+            <div class="why-row">
+              <dt>{DIMENSION_LABELS[key]} · {p.scores[key].score}/5</dt>
+              <dd>{p.scores[key].note}</dd>
+            </div>
+          ))}
+        </dl>
+
+        {p.heldItems.length > 0 && (
+          <p class="held"><span class="tag">Under review</span> {p.heldItems.join(' ')}</p>
+        )}
+      </div>
+    </details>
+  </div>
+</article>
+
+<style>
+  .card {
+    display: flex;
+    flex-direction: column;
+    border: var(--border-hairline);
+    border-radius: var(--r-xl);
+    background: var(--surface);
+    overflow: hidden;
+  }
+  .shot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 4 / 3;
+    background: var(--primary-soft);
+    border-bottom: var(--border-hairline);
+  }
+  .shot img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: var(--sp-5);
+  }
+  .shot-fallback {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-3xl);
+    color: var(--primary);
+  }
+
+  .body {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+    padding: var(--sp-5);
+    flex: 1 1 auto;
+  }
+  .id {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-1);
+  }
+  .brand {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-lg);
+    line-height: var(--lh-lg);
+    letter-spacing: var(--tracking-tight);
+    color: var(--ink);
+    margin: 0;
+  }
+  .product {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--ink);
+    margin: 0;
+  }
+  .spec {
+    font-size: var(--text-xs);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: 0;
+  }
+  .meta {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+    margin: 0;
+  }
+  .cert {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    margin: var(--sp-1) 0 0;
+  }
+  .cert[data-kind='yes'] {
+    color: var(--eucalyptus, var(--primary));
+  }
+  .cert[data-kind='none'] {
+    color: var(--muted);
+  }
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2);
+  }
+  .chip {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    border-radius: var(--r-sm);
+    padding: var(--sp-1) var(--sp-2);
+    margin: 0;
+    white-space: nowrap;
+  }
+  .chip[data-kind='good'] {
+    color: var(--eucalyptus, var(--primary));
+    border: 1px solid var(--eucalyptus, var(--primary));
+  }
+  .chip[data-kind='warn'] {
+    color: var(--safety-ink, var(--ink));
+    border: 1px solid var(--safety-ink, var(--muted));
+  }
+
+  /* the 2-second read — bold lead line */
+  .bottomline {
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    font-weight: 600;
+    color: var(--ink);
+    margin: var(--sp-1) 0 0;
+  }
+
+  .why {
+    border-top: var(--border-hairline);
+    padding-top: var(--sp-3);
+    margin-top: var(--sp-1);
+  }
+  .why > summary {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--primary);
+    cursor: pointer;
+  }
+  .why-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+    margin-top: var(--sp-4);
+  }
+  .verdict {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: 0;
+  }
+  .detailline {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: 0;
+    padding: var(--sp-3) var(--sp-4);
+    border-radius: var(--r-sm);
+    background: var(--primary-soft);
+  }
+  .detailline.safety .tag {
+    color: var(--safety-ink, var(--ink));
+  }
+  .detailline.trial .tag {
+    color: var(--eucalyptus, var(--ink));
+  }
+
+  .meters {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--sp-4) var(--sp-5);
+  }
+  .meter {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+  }
+  .meter-label {
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+    font-family: var(--font-mono);
+  }
+  .meter-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-2);
+  }
+  .bar {
+    display: inline-flex;
+    gap: var(--sp-1);
+  }
+  .seg {
+    width: var(--sp-4);
+    height: var(--sp-2);
+    border-radius: var(--r-sm);
+    background: var(--primary-soft);
+  }
+  .seg.on {
+    background: var(--ink);
+  }
+  .meter-num {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .meter-num .of {
+    color: var(--muted);
+    font-weight: 400;
+  }
+
+  .why-list {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+  }
+  .why-row dt {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--ink);
+    margin: 0 0 var(--sp-1);
+  }
+  .why-row dd {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: 0;
+  }
+  .held {
+    font-size: var(--text-xs);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: 0;
+  }
+  .tag {
+    font-family: var(--font-mono);
+    letter-spacing: var(--tracking-label);
+    color: var(--ink);
+    margin-right: var(--sp-1);
+  }
+</style>

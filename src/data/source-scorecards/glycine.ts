@@ -61,6 +61,8 @@ export interface GlyProduct {
   slug: string;
   brand: string;
   productName: string;
+  /** One-line, plain-language bottom line — the 2-second scan (leads the card, above the fuller verdict). */
+  bottomLine: string;
   form: string; // single-ingredient powder / capsules / combo (+ other actives)
   dose: string; // glycine per serving — the label figure
   /** Dose-honesty context — displayed, never scored. `reaches` styles it as a positive/neutral note. */
@@ -101,6 +103,8 @@ export const GLYCINE_SOURCES: GlyProduct[] = [
     imagePath: undefined,
     brand: 'HealthWise',
     productName: 'Glycine Pure Powder',
+    bottomLine:
+      'Pure single-ingredient glycine, and one teaspoon hits the studied ~3 g — but it’s a food with no testing and an unbacked "pharmaceutical grade" claim.',
     form: 'single-ingredient powder',
     dose: '~3.5 g per teaspoon',
     doseReach: { note: 'Reaches the studied ~3 g in one teaspoon', reaches: true },
@@ -129,6 +133,8 @@ export const GLYCINE_SOURCES: GlyProduct[] = [
     imagePath: '/images/sources/glycine/bulk-nutrients-glycine.jpg',
     brand: 'Bulk Nutrients',
     productName: 'Glycine',
+    bottomLine:
+      'Its "removes lactic acid" line is an unbacked claim — but this is a named Australian maker running a real public lab-report program, the strongest here.',
     form: 'single-ingredient powder',
     dose: 'user-measured (label serving to confirm)',
     doseReach: { note: 'Bulk powder — reaching the studied ~3 g is trivial', reaches: true },
@@ -161,6 +167,8 @@ export const GLYCINE_SOURCES: GlyProduct[] = [
     imagePath: '/images/sources/glycine/vpa-glycine.jpg',
     brand: 'VPA',
     productName: 'Glycine Powder',
+    bottomLine:
+      'A clean single-ingredient food powder from a named Australian maker — but no testing, and the 1 g serving is a third of the studied ~3 g.',
     form: 'single-ingredient powder',
     dose: '1 g per serving',
     doseReach: { note: 'Label serving is 1 g — treble it to reach the studied ~3 g', reaches: false },
@@ -189,6 +197,8 @@ export const GLYCINE_SOURCES: GlyProduct[] = [
     imagePath: '/images/sources/glycine/now-foods-glycine-pure-powder.jpg',
     brand: 'NOW Foods',
     productName: 'Glycine Pure Powder',
+    bottomLine:
+      'Its "Pharmaceutical Grade (USP)" label implies a USP certification it doesn’t hold — though the powder is pure and reaches the studied ~3 g in one serving.',
     form: 'single-ingredient powder',
     dose: '3 g per ¾ teaspoon',
     doseReach: { note: 'Reaches the studied ~3 g in one serving', reaches: true },
@@ -217,6 +227,8 @@ export const GLYCINE_SOURCES: GlyProduct[] = [
     imagePath: '/images/sources/glycine/bulksupplements-glycine-powder.jpg',
     brand: 'BulkSupplements.com',
     productName: 'Glycine Powder',
+    bottomLine:
+      'The one with a real verification route — an NSF-registered facility and lab reports on request — and one serving reaches the studied ~3 g.',
     form: 'single-ingredient powder',
     dose: '3 g per serving',
     doseReach: { note: 'Reaches the studied ~3 g in one serving', reaches: true },
@@ -246,6 +258,8 @@ export const GLYCINE_SOURCES: GlyProduct[] = [
     imagePath: '/images/sources/glycine/swanson-ajipure-glycine-powder.jpg',
     brand: 'Swanson',
     productName: 'AjiPure Glycine Powder',
+    bottomLine:
+      'Its grade rests on a real, named raw material (Ajinomoto AjiPure), not a bare self-claim — but there’s no lab report for the tub, and 1 g a scoop needs about three.',
     form: 'single-ingredient powder',
     dose: '1 g per scoop',
     doseReach: { note: 'About 3 scoops to reach the studied ~3 g', reaches: false },
@@ -275,6 +289,8 @@ export const GLYCINE_SOURCES: GlyProduct[] = [
     imagePath: '/images/sources/glycine/now-foods-glycine-1000-caps.jpg',
     brand: 'NOW Foods',
     productName: 'Glycine 1,000 mg Veg Capsules',
+    bottomLine:
+      'Pure glycine in a disclosed, benign capsule; three reach the studied ~3 g — but no testing, no lab report, and a food import outside TGA oversight.',
     form: 'single-ingredient capsules',
     dose: '1 g per capsule',
     doseReach: { note: '3 capsules to reach the studied ~3 g (a mild load)', reaches: true },
@@ -303,6 +319,8 @@ export const GLYCINE_SOURCES: GlyProduct[] = [
     imagePath: '/images/sources/glycine/thorne-glycine.jpg',
     brand: 'Thorne',
     productName: 'Glycine',
+    bottomLine:
+      'Its "third-party certified" line doesn’t hold for this SKU — the glycine isn’t in the NSF directory — and reaching the studied ~3 g takes six capsules, the heaviest load here.',
     form: 'single-ingredient capsules',
     dose: '500 mg per capsule',
     doseReach: { note: '6 capsules to reach the studied ~3 g (the heaviest load here)', reaches: false },
@@ -331,6 +349,8 @@ export const GLYCINE_SOURCES: GlyProduct[] = [
     imagePath: '/images/sources/glycine/solgar-glycine-500.jpg',
     brand: 'Solgar',
     productName: 'Glycine 500 mg Vegetable Capsules',
+    bottomLine:
+      'A clean, fully disclosed capsule that makes no grade or testing claims at all — but no independent testing, and six capsules to reach the studied ~3 g.',
     form: 'single-ingredient capsules',
     dose: '500 mg per capsule',
     doseReach: { note: '6 capsules to reach the studied ~3 g (tied heaviest)', reaches: false },
@@ -359,6 +379,8 @@ export const GLYCINE_SOURCES: GlyProduct[] = [
     imagePath: undefined,
     brand: 'Orthoplex White',
     productName: 'Glycine',
+    bottomLine:
+      'A restrained practitioner-brand pure glycine ("excipients nil") — but sold as a food with no testing, and a 1.5 g serving, half the studied ~3 g.',
     form: 'single-ingredient powder',
     dose: '1.5 g per serving',
     doseReach: { note: 'Label serving is 1.5 g — half the studied ~3 g', reaches: false },
@@ -387,6 +409,8 @@ export const GLYCINE_SOURCES: GlyProduct[] = [
     imagePath: '/images/sources/glycine/blackmores-sleep-sound-magnesium.jpg',
     brand: 'Blackmores',
     productName: 'Sleep Sound Magnesium Powder',
+    bottomLine:
+      'A TGA-listed magnesium sleep powder where glycine is one of five actives; a scoop delivers 3.1 g — but no lab report, and the full ingredients list isn’t published.',
     form: 'combo (+ magnesium, hops, calcium)',
     dose: '3.1 g glycine per scoop',
     doseReach: { note: 'Glycine reaches ~3 g, but it’s one of five actives in a magnesium combo', reaches: true },
@@ -415,6 +439,8 @@ export const GLYCINE_SOURCES: GlyProduct[] = [
     imagePath: '/images/sources/glycine/ethical-nutrients-mega-magnesium-night.jpg',
     brand: 'Ethical Nutrients',
     productName: 'Mega Magnesium Night Powder',
+    bottomLine:
+      'A TGA-listed magnesium sleep combo where glycine is a minor ingredient — just 0.74 g a scoop, a quarter of the studied ~3 g.',
     form: 'combo (+ magnesium glycinate, passionflower)',
     dose: '0.74 g free glycine per scoop',
     doseReach: { note: 'Only 0.74 g free glycine — a quarter of the studied ~3 g', reaches: false },

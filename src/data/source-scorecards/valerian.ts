@@ -56,6 +56,8 @@ export interface ValProduct {
   slug: string;
   brand: string;
   productName: string;
+  /** One-line, plain-language bottom line — the 2-second scan (leads the card, above the fuller verdict). */
+  bottomLine: string;
   form: string; // single-herb / combo (+ other herbs)
   strength: string; // dry-root equivalent + active-marker disclosure (the valerian quality axis)
   ausL: string | null; // TGA AUST L number, or null for imports (not TGA-listed)
@@ -96,6 +98,8 @@ export const VALERIAN_SOURCES: ValProduct[] = [
     slug: 'blackmores-valerian-forte',
     brand: 'Blackmores',
     productName: 'Valerian Forte',
+    bottomLine:
+      'A TGA-listed single-herb valerian that prints its active strength on the pack (valerenic acids 3.2 mg) — no red flags, but no independent test either.',
     form: 'single-herb',
     strength: '2000 mg dry-root eq · valerenic acids 3.2 mg',
     ausL: '351518',
@@ -121,6 +125,8 @@ export const VALERIAN_SOURCES: ValProduct[] = [
     slug: 'carusos-valerian',
     brand: "Caruso's",
     productName: 'Valerian',
+    bottomLine:
+      'Discloses the highest active strength in the set (valerenic acid 4.5 mg) as a TGA-listed medicine — no independent test of the product itself.',
     form: 'single-herb',
     strength: '2250 mg dry-root eq · valerenic acid 4.5 mg',
     ausL: '292332',
@@ -146,6 +152,8 @@ export const VALERIAN_SOURCES: ValProduct[] = [
     slug: 'thompsons-one-a-day-valerian-2000',
     brand: "Thompson's",
     productName: 'One-A-Day Valerian 2000',
+    bottomLine:
+      'A single-herb TGA medicine that names its maker and states its active strength (valerenic acids 3.56 mg) — but no independent test or batch report.',
     form: 'single-herb',
     strength: '2000 mg dry-root eq · valerenic acids 3.56 mg',
     ausL: '400382',
@@ -171,6 +179,8 @@ export const VALERIAN_SOURCES: ValProduct[] = [
     slug: 'natures-own-valerian-forte-2000',
     brand: "Nature's Own",
     productName: 'Valerian Forte 2000',
+    bottomLine:
+      'A TGA medicine at the same 2000 mg dose as its rivals — but, unlike them, it never prints a valerenic-acid figure, so you can’t see its active strength.',
     form: 'single-herb',
     strength: '2000 mg dry-root eq · active strength not stated',
     ausL: '375755',
@@ -196,6 +206,8 @@ export const VALERIAN_SOURCES: ValProduct[] = [
     slug: 'blackmores-deep-sleep',
     brand: 'Blackmores',
     productName: 'Deep Sleep',
+    bottomLine:
+      'A four-herb combo that lists each herb’s dose and is TGA-listed — but valerian’s active strength isn’t stated, and no independent test is public.',
     form: 'combo (+ ziziphus, hops, magnesium)',
     strength: '1200 mg valerian dry-root eq · active strength not stated',
     ausL: '394694',
@@ -221,6 +233,8 @@ export const VALERIAN_SOURCES: ValProduct[] = [
     slug: 'swisse-ultiboost-sleep',
     brand: 'Swisse',
     productName: 'Ultiboost Sleep',
+    bottomLine:
+      'A TGA-listed combo from a named maker that doses every active and states valerian’s strength — though that figure only appears on some retail channels.',
     form: 'combo (+ hops, magnesium)',
     strength: '1300 mg valerian dry-root eq · valerenic acids 2.6 mg',
     ausL: '327845',
@@ -246,6 +260,8 @@ export const VALERIAN_SOURCES: ValProduct[] = [
     slug: 'natures-own-sleep-ezy',
     brand: "Nature's Own",
     productName: 'Sleep Ezy',
+    bottomLine:
+      'A low-dose four-herb combo from a named maker, TGA-listed with a clean record — but valerian’s active strength isn’t disclosed and no independent test is public.',
     form: 'combo (+ hops, chamomile, passionflower)',
     strength: '556 mg valerian dry-root eq · active strength not stated',
     ausL: '248434',
@@ -271,6 +287,8 @@ export const VALERIAN_SOURCES: ValProduct[] = [
     slug: 'mediherb-valerian-complex',
     brand: 'MediHerb',
     productName: 'Valerian Complex',
+    bottomLine:
+      'The rare AU product that publishes its full ingredients panel and doses each herb separately — but its testing is in-house, not independently confirmed.',
     form: 'combo (+ passionflower, ziziphus)',
     strength: '700 mg valerian dry-herb eq (5:1) · extract ratios + dry-herb equivalents disclosed',
     ausL: '226203',
@@ -296,6 +314,8 @@ export const VALERIAN_SOURCES: ValProduct[] = [
     slug: 'bioceuticals-sleep-complex',
     brand: 'BioCeuticals',
     productName: 'Sleep Complex',
+    bottomLine:
+      'Its "clinically trialled" claim borrows a trial of a different, equivalent extract — not this product. It does, unusually for a combo, print its valerian potency.',
     form: 'combo (+ ziziphus, lavender)',
     strength: '1500 mg valerian dry-root eq · valerenic acid 1.13 mg',
     ausL: '366873',
@@ -321,6 +341,8 @@ export const VALERIAN_SOURCES: ValProduct[] = [
     slug: 'flordis-redormin-forte',
     brand: 'Flordis',
     productName: 'ReDormin Forte',
+    bottomLine:
+      'Built on the named Ze 91019 extract with published trials — one names this exact product — so its "clinically researched" claim is genuinely backed.',
     form: 'combo (valerian + hops, Ze 91019 extract)',
     strength: '≈2500 mg eq · named clinical extract (Ze 91019)',
     ausL: '283649',
@@ -350,6 +372,8 @@ export const VALERIAN_SOURCES: ValProduct[] = [
     slug: 'now-foods-valerian-root-500',
     brand: 'NOW Foods',
     productName: 'Valerian Root 500 mg',
+    bottomLine:
+      'An import that skips Australia’s mandated valerian liver warning — and it’s whole root with no active-strength figure, so you can’t know the dose from the bottle.',
     form: 'single-herb (whole root)',
     strength: '1000 mg root / serving · whole root, no active figure',
     ausL: null,
@@ -378,6 +402,8 @@ export const VALERIAN_SOURCES: ValProduct[] = [
     slug: 'gaia-herbs-valerian-root',
     brand: 'Gaia Herbs',
     productName: 'Valerian Root',
+    bottomLine:
+      'The one product here that publishes per-batch lab reports you can check from your bottle’s code — but it’s an import that skips Australia’s mandated liver warning.',
     form: 'single-herb (standardised extract)',
     strength: '450 mg extract / serving · valerenic acids 1.8 mg',
     ausL: null,
