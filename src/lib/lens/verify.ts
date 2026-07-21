@@ -39,8 +39,11 @@ import { LENS_REFUTE_PROMPT, buildRefuteUserPrompt } from './prompts.ts';
 export const REFUTE_N = 3;
 /** Survivors need at least this many grounded 'yes' verdicts (of REFUTE_N). */
 export const REFUTE_QUORUM = 2;
-/** Ceiling on total model calls for one verify run — a hard cap on cost + latency. */
-export const LENS_MAX_MODEL_CALLS = 16;
+/** Ceiling on total model calls for ONE Lens run — a hard cap on cost + latency, shared across the
+ * resolve (1, CHK-7.4) + extract (1) + verify (up to LENS_MAX_CLAIMS × REFUTE_N) stages. Sized so a
+ * full 5-claim run still gets all three verifiers each (1 + 1 + 5×3 = 17) after the added resolve call,
+ * so query understanding did NOT come at the cost of verification depth. Owner-tunable cost ceiling. */
+export const LENS_MAX_MODEL_CALLS = 18;
 /** Temperature for refute calls — a little diversity so the 3 verifiers aren't identical. */
 const REFUTE_TEMPERATURE = 0.3;
 /** Floor on the per-call timeout; below this we don't bother calling (deadline effectively hit). */

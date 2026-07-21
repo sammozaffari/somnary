@@ -247,6 +247,22 @@ async function run() {
     ok('empty query → [] (no fetch)', (await provider.search('   ')).length === 0);
     ok('non-string query → []', (await provider.search(null)).length === 0);
   }
+  {
+    // CHK-7.4: esearch must request Best Match (sort=relevance), not the API's date-first default —
+    // otherwise a bounded top-N returns the LATEST papers that merely mention the term, not the ones
+    // about it (why a resolved drug extracted nothing before this fix).
+    let esearchUrl = '';
+    const spyFetch = async (url) => {
+      if (url.includes('/esearch.fcgi')) {
+        esearchUrl = url;
+        return { ok: true, json: async () => ({ esearchresult: { idlist: ['23691095'] } }) };
+      }
+      return { ok: true, text: async () => CANNED_XML };
+    };
+    const provider = new PubMedProvider({ fetchImpl: spyFetch });
+    await provider.search('doxylamine AND (sleep OR insomnia)');
+    ok('esearch requests relevance (Best Match) sort', /[?&]sort=relevance(&|$)/.test(esearchUrl), esearchUrl);
+  }
 
   console.log('\nlens suite — input.ts (normalize + classify + short-circuit):');
 
