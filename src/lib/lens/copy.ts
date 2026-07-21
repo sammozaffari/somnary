@@ -86,8 +86,8 @@ const PRODUCT_CLASS_LABEL: Record<string, string> = {
   herb: 'a herbal remedy',
   'amino-acid': 'an amino acid',
   hormone: 'a hormone',
-  'otc-drug': 'an over-the-counter sleep medicine',
-  'prescription-drug': 'a prescription sleep medicine',
+  'otc-drug': 'an over-the-counter medicine',
+  'prescription-drug': 'a prescription medicine',
   food: 'a food or food-derived compound',
   other: '',
   unknown: '',
@@ -124,9 +124,9 @@ export function interpretedAsLine(subject: string, resolvedName: string, product
 export function safetyNoteFor(productClass: string): string {
   if (productClass === 'otc-drug' || productClass === 'prescription-drug') {
     return (
-      'This is a medicine, not a supplement — its risks, interactions, and who should avoid it are ' +
-      'personal and can be serious. The Lens makes no safety call; talk with a pharmacist or doctor ' +
-      'before using it, and see the pages below.'
+      'This is a medicine — its risks, interactions, and how it affects sleep are personal and can be ' +
+      'serious, especially if it was prescribed for something else or taken with other medicines. The ' +
+      'Lens makes no safety call; talk with a pharmacist or doctor about it, and see the pages below.'
     );
   }
   return SAFETY_NOTE;

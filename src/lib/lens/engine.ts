@@ -165,9 +165,24 @@ function safetyRoutesFor(productClass?: LensProductClass): Route[] {
 
 // --- extraction parsing (never throws) -----------------------------------------------------------
 
+/** A candidate evidence claim must mention a SLEEP concept to survive (CHK-7.4). The Lens is a SLEEP
+ * reference: for a subject with a large unrelated literature (e.g. propranolol → migraine / portal
+ * hypertension), PubMed's Best Match returns broadly-cited reviews that mention sleep only incidentally,
+ * and the extractor can surface their off-topic main finding. This DETERMINISTIC gate drops any claim
+ * with no sleep concept — a reliable backstop over the extractor's instruction (which an LLM may not
+ * obey). Broad on purpose (help AND harm to sleep); a genuine sleep claim almost always names one. */
+const SLEEP_CLAIM_RE =
+  /\b(?:sleep|asleep|insomnia|sedat|somnolen|somnif|drows|hypnotic|circadian|nightmare|parasomnia|apn(?:o?ea|eic)|polysomn|nocturn|bedtime|sleepiness|wakeful)\w*|\b(?:naps?|napping|napped|psqi|waso|rem\ssleep|restless\sleg|night\sterror)\b/i;
+
+/** True iff a claim text names a sleep concept (help or harm). Exported for the red-team suite. */
+export function isSleepConcept(text: string): boolean {
+  return typeof text === 'string' && SLEEP_CLAIM_RE.test(text);
+}
+
 /** Parse ONE extraction reply into candidate claims. Tolerant of code-fence/prose wrapping (extract
- * the first {...}); ANY failure → []. Caps at LENS_MAX_CLAIMS and drops any claim whose sourcePmid is
- * not one of the fetched docs' PMIDs (an invented citation can never enter the pipeline). */
+ * the first {...}); ANY failure → []. Caps at LENS_MAX_CLAIMS, drops any claim whose sourcePmid is not
+ * one of the fetched docs' PMIDs (no invented citation), and drops any claim that names NO sleep concept
+ * (the Lens only reports a subject's sleep effect, never its unrelated findings). */
 export function parseExtraction(raw: string, docPmids: Set<string>): CandidateClaim[] {
   const text = typeof raw === 'string' ? raw : '';
   const start = text.indexOf('{');
@@ -187,9 +202,10 @@ export function parseExtraction(raw: string, docPmids: Set<string>): CandidateCl
     const rec = c as Record<string, unknown>;
     const claimText = typeof rec.text === 'string' ? rec.text.trim() : '';
     const pmid = typeof rec.sourcePmid === 'string' ? rec.sourcePmid.trim() : '';
-    // Drop empty claims and any claim tied to a PMID that was NOT in the fetched docs (no ungrounded,
-    // no invented citation). verify.ts re-checks this too — belt and suspenders at the data boundary.
-    if (!claimText || !pmid || !docPmids.has(pmid)) continue;
+    // Drop empty claims, any claim tied to a PMID that was NOT in the fetched docs (no ungrounded, no
+    // invented citation — verify.ts re-checks too), and any claim that names NO sleep concept (a sleep
+    // reference never reports a subject's unrelated findings).
+    if (!claimText || !pmid || !docPmids.has(pmid) || !isSleepConcept(claimText)) continue;
     out.push({ text: claimText, sourcePmid: pmid });
     if (out.length >= LENS_MAX_CLAIMS) break;
   }

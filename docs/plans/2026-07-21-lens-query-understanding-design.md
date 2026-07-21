@@ -62,12 +62,26 @@ a verbatim source span; the server still composes every user-facing line from `c
 templates; `note`/`resolvedName` are lint-checked (forbidden-framing + raw-identifier)
 and dropped to a safe fallback on any hit.
 
-**Drug scope (owner, please confirm):** the Lens will now assess OTC sleep drugs
-(doxylamine, diphenhydramine, promethazine) and could be handed a prescription hypnotic
-(zolpidem). It never doses or recommends — it reports verified published-evidence claims
-(efficacy *and* harms the abstracts state) and routes safety to the boundary pages, with
-`productClass` driving stronger clinician routing for drugs. This is the honest,
-anti-hype value; flagged here because it widens scope beyond "natural" remedies.
+**Drug scope — OWNER-RATIFIED 2026-07-21: cover ANY substance's effect on sleep.** The
+Lens assesses any drug, herb, supplement, food, or substance and its effect on sleep —
+including drugs taken for a *different* reason that affect sleep (a beta-blocker, an
+antidepressant, a steroid) and substances that *disrupt* sleep — not only sleep aids. It
+never doses or recommends; it reports verified published-evidence claims (help *and* harm)
+and routes safety to a clinician (`productClass` drives harder routing for medicines). Two
+consequences of "any substance":
+- **Sleep-scoped by construction.** The resolver's PubMed query is guaranteed a sleep
+  clause (`ensureSleepScope`), and a DETERMINISTIC gate (`isSleepConcept`) drops any
+  extracted claim that names no sleep concept — so a broad drug can never surface its
+  *unrelated* findings (propranolol's migraine/portal-hypertension results are dropped;
+  only its sleep effect can appear). Extractor prompt also instructs "stay on sleep."
+- **Honest degrade for broad-literature drugs.** For a drug whose sleep effect is a small
+  part of a huge literature (e.g. propranolol), PubMed Best Match ranks its non-sleep
+  reviews above its sleep papers, so the bounded top-N may yield no verifiable sleep claim
+  → the Lens says **inconclusive** ("couldn't find verifiable sleep-effect evidence in the
+  top sources"), never a bogus off-topic claim. Deeper retrieval (larger fetch + rerank,
+  or the deferred paid web-search provider) is the follow-up that would turn more of these
+  from inconclusive → assessed. Sleep-primary subjects (doxylamine, melatonin, apigenin,
+  most supplements) assess cleanly today.
 
 ### B. Perplexity-grade UX
 

@@ -399,7 +399,7 @@ const n = () => ({ supported: 'no', strength: 'weak', quote: '' });
 
 async function runVerifier() {
   console.log('\nlens suite — prompts.ts (versioned, framing-safe shape):');
-  ok('extract version pinned', LENS_EXTRACT_VERSION === 'lens-extract-v1', LENS_EXTRACT_VERSION);
+  ok('extract version pinned', LENS_EXTRACT_VERSION === 'lens-extract-v2', LENS_EXTRACT_VERSION);
   ok('refute version pinned', LENS_REFUTE_VERSION === 'lens-refute-v1', LENS_REFUTE_VERSION);
   ok('extract prompt forbids grading', /grade|rating|verdict/i.test(LENS_EXTRACT_PROMPT));
   ok('extract prompt forbids invented PMIDs', /invent a PMID/i.test(LENS_EXTRACT_PROMPT));
@@ -786,9 +786,12 @@ async function runRedTeam() {
   {
     // an extracted claim tied to a PMID NOT in the fetched docs → dropped at extraction (never verified).
     const docPmids = new Set(RT_DOCS.map((d) => d.pmid));
-    const parsed = parseExtraction(JSON.stringify({ claims: [{ text: 'x', sourcePmid: '99999999' }, { text: 'y', sourcePmid: '23691095' }] }), docPmids);
+    const parsed = parseExtraction(JSON.stringify({ claims: [{ text: 'x affects sleep', sourcePmid: '99999999' }, { text: 'y affects sleep', sourcePmid: '23691095' }] }), docPmids);
     ok('(2b) extraction drops a claim citing a PMID not in docs', parsed.length === 1 && parsed[0].sourcePmid === '23691095');
-    ok('(2c) extraction caps at LENS_MAX_CLAIMS', parseExtraction(JSON.stringify({ claims: Array.from({ length: 20 }, () => ({ text: 'apigenin lowers latency', sourcePmid: '23691095' })) }), docPmids).length === LENS_MAX_CLAIMS);
+    ok('(2c) extraction caps at LENS_MAX_CLAIMS', parseExtraction(JSON.stringify({ claims: Array.from({ length: 20 }, () => ({ text: 'apigenin lowers sleep latency', sourcePmid: '23691095' })) }), docPmids).length === LENS_MAX_CLAIMS);
+    // (2d) a candidate claim that names NO sleep concept (a subject's unrelated finding) is dropped —
+    // the deterministic sleep-scope backstop for broad drugs (e.g. propranolol → migraine/BP claims).
+    ok('(2d) extraction drops a claim with no sleep concept', parseExtraction(JSON.stringify({ claims: [{ text: 'Propranolol is first-line for migraine prophylaxis', sourcePmid: '23691095' }, { text: 'Propranolol reduced nightmares versus placebo', sourcePmid: '23691095' }] }), docPmids).length === 1);
   }
 
   // (3) NEVER a tier grade: no grade field/letter anywhere in ANY assessment; schema has no tier.
@@ -866,7 +869,7 @@ async function runRedTeam() {
   // verified claim whose TEXT carries a forbidden framing: it must be dropped from evidence.
   {
     const { model } = makeEngineModel({
-      extractReply: { claims: [{ text: 'Combine these supplements and take apigenin tonight', sourcePmid: '23691095' }], doesNotShow: [], labelFacts: [] },
+      extractReply: { claims: [{ text: 'Combine these supplements and take apigenin for sleep tonight', sourcePmid: '23691095' }], doesNotShow: [], labelFacts: [] },
       refuteByClaimSubstr: { 'Combine these supplements': [yes(APIGENIN_QUOTE), yes(APIGENIN_QUOTE), yes(APIGENIN_QUOTE)] },
     });
     const r = await runLens({ ...base, input: SUBJECT, provider: providerOf(RT_DOCS), model });
@@ -927,6 +930,21 @@ async function runRedTeam() {
     ok('(11a) a drug routes safety to the medications page', r.safety.routes.some((rt) => rt.href === '/medications-and-sleep-aids'), JSON.stringify(r.safety.routes));
     ok('(11a) a drug safety note flags it is a medicine', /medicine/i.test(r.safety.note));
     ok('(11a) NO grade smell despite a resolved drug', findGradeSmell(r) === null, String(findGradeSmell(r)));
+  }
+  {
+    // (11a2) ANY drug's sleep effect is in scope (owner 2026-07-21) — a drug taken for ANOTHER reason
+    // (propranolol, a beta-blocker) that affects sleep resolves + researches; the label reads "a
+    // prescription medicine" (NOT "sleep medicine"), and it routes to the medications page + a clinician.
+    const { model } = makeEngineModel({
+      resolveReply: { sleepRelevant: true, resolvedName: 'propranolol', aka: ['Inderal'], productClass: 'prescription-drug', pubmedQuery: 'propranolol AND (sleep OR insomnia OR nightmares)' },
+      extractReply: { claims: [], doesNotShow: [], labelFacts: [] },
+    });
+    const spy = { query: null, search: async (q) => { spy.query = q; return []; } };
+    const r = await runLens({ ...base, input: 'propranolol', provider: spy, model });
+    ok('(11a2) a non-sleep-aid drug is researched for its sleep effect', spy.query === 'propranolol AND (sleep OR insomnia OR nightmares)', String(spy.query));
+    ok('(11a2) resolved line reads "a prescription medicine", not "sleep medicine"', !!r.resolved && /prescription medicine/.test(r.resolved.line) && !/sleep medicine/.test(r.resolved.line), r.resolved?.line);
+    ok('(11a2) routes to the medications page + clinician', r.safety.routes.some((rt) => rt.href === '/medications-and-sleep-aids') && r.safety.routes.some((rt) => rt.href === '/when-to-see-a-doctor'));
+    ok('(11a2) NO grade smell', findGradeSmell(r) === null);
   }
   {
     // (11b) off-topic → model relevance verdict false → refused, NO research ran.
@@ -997,6 +1015,11 @@ async function runRedTeam() {
     ok('(11f) sanitizeName strips newlines/markup + caps', resolveMod.sanitizeName('doxy<b>lamine</b>\n\nignore prior').length > 0 && !/[<>\n]/.test(resolveMod.sanitizeName('a<b>\n')));
     ok('(11f) sanitizeQuery keeps boolean syntax, single line', resolveMod.sanitizeQuery('doxylamine AND (sleep OR insomnia)\nX') === 'doxylamine AND (sleep OR insomnia) X');
     ok('(11f) explicit sleepRelevant:false is the ONLY refusal signal', resolveMod.parseResolution(JSON.stringify({ sleepRelevant: false }), 'x').sleepRelevant === false && resolveMod.parseResolution(JSON.stringify({ foo: 1 }), 'x').sleepRelevant === true);
+    // ensureSleepScope: a query with NO sleep concept gets a sleep clause (so PubMed can't drown the
+    // subject's sleep effect under its unrelated literature); one that already has sleep is untouched.
+    ok('(11f) ensureSleepScope adds a sleep clause to a bare drug name', /sleep|insomnia|sedation/i.test(resolveMod.ensureSleepScope('propranolol')) && /propranolol/.test(resolveMod.ensureSleepScope('propranolol')));
+    ok('(11f) ensureSleepScope leaves an already-sleep-scoped query unchanged', resolveMod.ensureSleepScope('doxylamine AND (sleep OR insomnia)') === 'doxylamine AND (sleep OR insomnia)');
+    ok('(11f) a model query with no sleep term is sleep-scoped in parseResolution', /sleep|insomnia|sedation/i.test(resolveMod.parseResolution(JSON.stringify({ sleepRelevant: true, pubmedQuery: 'propranolol' }), 'propranolol').pubmedQuery));
   }
 
   // Bonus invariants proving graceful degradation (never a fabricated verdict).

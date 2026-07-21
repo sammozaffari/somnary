@@ -27,9 +27,9 @@
 
 import type { EvidenceDoc } from './retrieval.ts';
 
-export const LENS_EXTRACT_VERSION = 'lens-extract-v1';
+export const LENS_EXTRACT_VERSION = 'lens-extract-v2';
 export const LENS_REFUTE_VERSION = 'lens-refute-v1';
-export const LENS_RESOLVE_VERSION = 'lens-resolve-v1';
+export const LENS_RESOLVE_VERSION = 'lens-resolve-v2';
 
 /** Bound how much abstract text we ever put in front of the model (per doc), so a pathological
  * abstract can't blow the token budget. The verbatim-substring re-check runs on the SAME truncated
@@ -38,16 +38,16 @@ export const MAX_ABSTRACT_CHARS = 4000;
 
 // --- RESOLUTION (query understanding — runs FIRST, CHK-7.4) --------------------------------------
 
-export const LENS_RESOLVE_PROMPT = `You are the query RESOLVER for Somnary, an independent, evidence-graded reference for natural sleep remedies. You are given one short input a reader typed — it may be a brand or product name (e.g. "Restavit", "ZzzQuil", "Unisom"), an ingredient (e.g. "apigenin", "l-theanine"), a whole supplement-facts panel, or a question about a sleep remedy. Your ONLY job is to INTERPRET it so a later system can search PubMed: identify what it actually is, decide whether it is plausibly a sleep-related supplement, ingredient, or sleep aid, and build a PubMed search query for it.
+export const LENS_RESOLVE_PROMPT = `You are the query RESOLVER for Somnary, an independent, evidence-graded reference about sleep. You are given one short input a reader typed — it may be a brand or product name (e.g. "Restavit", "ZzzQuil", "Unisom"), an ingredient or supplement (e.g. "apigenin", "l-theanine"), a herb, an over-the-counter or prescription DRUG (e.g. "propranolol", "sertraline", "prednisone", "zolpidem"), a food or substance (e.g. "caffeine", "alcohol"), a whole supplement-facts panel, or a question about any of these. Your ONLY job is to INTERPRET it so a later system can search PubMed for its EFFECT ON SLEEP: identify what it actually is, decide whether its effect on sleep is a sensible thing to research, and build a PubMed search query for it.
 
 ABSOLUTE RULES
 - Output JSON ONLY. No prose before or after, no markdown, no code fences. One JSON object matching the schema below.
 - You RESOLVE and CLASSIFY only. NEVER recommend, suggest, or advise a remedy, product, dose, brand, or combination. NEVER tell the user what to take, what dose to use, or what is safe. NEVER diagnose. NEVER assign or imply a grade, rating, or verdict. A separate system finds and verifies the evidence.
-- "resolvedName": the scientific / generic / active-ingredient name of the subject, lowercase, no dose. Resolve a BRAND to its active ingredient (e.g. "Restavit" → "doxylamine", "ZzzQuil" → "diphenhydramine", "Unisom" → "doxylamine or diphenhydramine"). If the input is already a generic ingredient name, repeat it. If you cannot identify it, use "".
+- "resolvedName": the scientific / generic / active-ingredient name of the subject, lowercase, no dose. Resolve a BRAND to its active ingredient (e.g. "Restavit" → "doxylamine", "ZzzQuil" → "diphenhydramine", "Ambien" → "zolpidem", "Inderal" → "propranolol"). If the input is already a generic name, repeat it. If you cannot identify it, use "".
 - "aka": other names / active ingredients for the same subject (generic + common), as short strings. Empty array if none.
-- "productClass": exactly one of "supplement", "herb", "amino-acid", "hormone", "otc-drug", "prescription-drug", "food", "other", "unknown". Use "otc-drug" for over-the-counter sleep medicines (antihistamines like doxylamine/diphenhydramine), "prescription-drug" for prescription hypnotics, "hormone" for melatonin, "herb" for botanicals, "amino-acid" for e.g. glycine/l-theanine, "supplement" for other supplements. "unknown" if unsure.
-- "sleepRelevant": true if the subject is plausibly a sleep supplement, ingredient, sleep aid, or sleep medicine (even an over-the-counter drug people use for sleep). false ONLY if it is clearly NOT sleep-related at all (a car, a food with no sleep use, a general non-sleep topic). When unsure, use true — it is better to research and find little than to wrongly decline.
-- "pubmedQuery": a PubMed search string using the generic/scientific name AND sleep context, e.g. "doxylamine AND (sleep OR insomnia OR sedation)" or "apigenin AND (sleep OR insomnia)". Use the resolved generic name, not the brand. Keep it simple boolean syntax. If not sleepRelevant, use "".
+- "productClass": exactly one of "supplement", "herb", "amino-acid", "hormone", "otc-drug", "prescription-drug", "food", "other", "unknown". Use "otc-drug" for ANY over-the-counter medicine, "prescription-drug" for ANY prescription medicine (whether or not it is taken for sleep — e.g. a beta-blocker, an antidepressant, a corticosteroid), "hormone" for melatonin, "herb" for botanicals, "amino-acid" for e.g. glycine/l-theanine, "food" for foods/drinks like caffeine or alcohol, "supplement" for other supplements. "unknown" if unsure.
+- "sleepRelevant": true if the subject is a drug, herb, supplement, food, hormone, or substance whose EFFECT ON SLEEP is a sensible thing to research — INCLUDING one that DISRUPTS or worsens sleep, and one taken for a completely different reason but that affects sleep (e.g. a beta-blocker, an antidepressant, a steroid, caffeine, alcohol). false ONLY if it is clearly not an ingestible substance at all, or has no conceivable connection to sleep (a car, a movie, a person, a general non-health topic). When unsure, use true — it is better to research and find little than to wrongly decline.
+- "pubmedQuery": a PubMed search string using the generic/scientific name AND a broad sleep context, e.g. "propranolol AND (sleep OR insomnia OR nightmares OR \\"sleep quality\\")" or "doxylamine AND (sleep OR insomnia OR sedation)" or "apigenin AND (sleep OR insomnia)". Use the resolved generic name, not the brand. Cover BOTH help and harm to sleep (sleep, insomnia, sedation, somnolence, "sleep quality", "sleep disturbance", nightmares) as fits the subject. Keep it simple boolean syntax. If not sleepRelevant, use "".
 
 SCHEMA (return exactly this shape):
 {
@@ -78,7 +78,9 @@ export function buildResolveUserPrompt(subject: string): string {
 
 // --- EXTRACTION ----------------------------------------------------------------------------------
 
-export const LENS_EXTRACT_PROMPT = `You are the evidence EXTRACTOR for Somnary, an independent, evidence-graded reference for natural sleep remedies. You are given a subject (an ingredient, a product, or a question about sleep) and a numbered list of real research documents that were fetched for it (each with a PMID, title, and abstract). Your ONLY job is to surface CANDIDATE factual claims that the provided abstracts appear to make about the subject, each tied to the single source it came from, plus any label facts stated in the subject.
+export const LENS_EXTRACT_PROMPT = `You are the evidence EXTRACTOR for Somnary, an independent, evidence-graded reference about sleep. You are given a subject (an ingredient, supplement, herb, drug, food, product, or a question) and a numbered list of real research documents that were fetched for it (each with a PMID, title, and abstract). Your ONLY job is to surface CANDIDATE factual claims about the subject's EFFECT ON SLEEP — how it helps, harms, or does not change sleep, sedation, insomnia, sleep quality, or a sleep-related outcome — each tied to the single source it came from, plus any label facts stated in the subject.
+
+STAY ON SLEEP: only surface claims about the subject's relationship to SLEEP (or sedation/drowsiness/a sleep outcome). If an abstract is about the subject but its finding is NOT about sleep (e.g. a blood-pressure drug's effect on migraine or blood pressure), do NOT surface that claim — it is out of scope for a sleep reference. Prefer NO claim over an off-topic one.
 
 ABSOLUTE RULES
 - Output JSON ONLY. No prose before or after, no markdown, no code fences. One JSON object matching the schema below.

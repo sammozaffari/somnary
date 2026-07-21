@@ -100,6 +100,32 @@ export function sanitizeQuery(raw: unknown): string {
     .trim();
 }
 
+/** Sleep-scope tokens: if a query already contains one, it is sleep-bounded; otherwise we append a
+ * clause so PubMed can't return the subject's UNRELATED literature (e.g. propranolol's huge migraine /
+ * portal-hypertension corpus drowning its sleep effect). Covers help AND harm to sleep. */
+const SLEEP_SCOPE_TOKENS = [
+  'sleep',
+  'insomnia',
+  'sedation',
+  'sedative',
+  'somnolence',
+  'hypnotic',
+  'drowsi',
+  'circadian',
+  'nightmare',
+  'wakefulness',
+];
+
+/** Guarantee a query is scoped to SLEEP. If the model's query already names a sleep concept, return it
+ * unchanged; otherwise AND-in a broad sleep clause. Never throws; result stays within sanitize bounds. */
+export function ensureSleepScope(query: string): string {
+  const q = sanitizeQuery(query);
+  if (!q) return q;
+  const low = q.toLowerCase();
+  if (SLEEP_SCOPE_TOKENS.some((t) => low.includes(t))) return q;
+  return sanitizeQuery(`${q} AND (sleep OR insomnia OR sedation OR somnolence)`);
+}
+
 function coerceProductClass(raw: unknown): LensProductClass {
   const s = typeof raw === 'string' ? raw.trim().toLowerCase() : '';
   return (PRODUCT_CLASSES.has(s) ? s : 'unknown') as LensProductClass;
@@ -117,7 +143,7 @@ export function parseResolution(raw: string, subject: string): ResolvedSubject {
     resolvedName: '',
     aka: [],
     productClass: 'unknown',
-    pubmedQuery: sanitizeQuery(boundedSubject) || boundedSubject,
+    pubmedQuery: ensureSleepScope(boundedSubject) || boundedSubject,
   };
 
   const text = typeof raw === 'string' ? raw : '';
@@ -148,9 +174,10 @@ export function parseResolution(raw: string, subject: string): ResolvedSubject {
   const productClass = coerceProductClass(rec.productClass);
 
   // The query: prefer the model's, sanitised; fall back to the resolved name, then the subject. Never
-  // empty (an empty term would make esearch return everything).
-  const modelQuery = sanitizeQuery(rec.pubmedQuery);
-  const pubmedQuery = modelQuery || sanitizeQuery(resolvedName) || sanitizeQuery(boundedSubject) || boundedSubject;
+  // empty (an empty term would make esearch return everything). Then GUARANTEE a sleep scope so PubMed
+  // can't drown the subject's sleep effect under its unrelated literature.
+  const rawQuery = sanitizeQuery(rec.pubmedQuery) || sanitizeQuery(resolvedName) || sanitizeQuery(boundedSubject) || boundedSubject;
+  const pubmedQuery = ensureSleepScope(rawQuery) || rawQuery;
 
   return { sleepRelevant, subject: boundedSubject, resolvedName, aka, productClass, pubmedQuery };
 }
