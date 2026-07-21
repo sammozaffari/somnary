@@ -419,18 +419,18 @@ The AI's differentiated job: apply Somnary's rubric (evidence grade + label R1�
 + source-scorecard dims + anti-hype + real cited/verified sources) to products the
 corpus doesn't cover — a Perplexity-style prompt → cited verdict card, "AI-assisted,
 NOT a Somnary grade". Concierge (CHK-6.8) demotes to a secondary mode.
-- [ ] **CHK-7.1 Lens engine (headless).** `HG` (output-framing sign-off before any
+- [x] **CHK-7.1 Lens engine (headless).** `HG` (output-framing sign-off before any
   UI). Research → apply rubric in code → **adversarial refute-first verification
   (unproven claims CUT)** → server-composed draft assessment. Reuse guide guardrails
   + label engine + deep-research harness + citation resolver. *Accept:* offline
   red-team suite passes — zero unverified claims survive, NEVER emits a tier grade,
   no dose/diagnosis, corpus remedies short-circuit to graded pages, safety routes.
-- [ ] **CHK-7.2 Perplexity-style Lens UI.** Prompt box + live "researching" step
+- [x] **CHK-7.2 Perplexity-style Lens UI.** Prompt box + live "researching" step
   reveal + structured cited answer card (verdict · evidence+chips · what-it-does-NOT-
   show · label reality · safety · source chips · "not a grade" stamp · follow-ups).
   Caching per normalized product; rate-limited. *Accept:* tokens-only; card renders
   server-authored/verified fields only; the stamp + educational-not-advice prominent.
-- [ ] **CHK-7.3 Human-grade loop.** "Request a full review" queue + Lens-demand
+- [x] **CHK-7.3 Human-grade loop.** "Request a full review" queue + Lens-demand
   analytics feeding the grading backlog; concierge repositioned as secondary mode.
   *Accept:* grading stays human-gated; firewall to community store intact.
 
