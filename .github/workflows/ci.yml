@@ -47,6 +47,9 @@ jobs:
       - name: Lens engine (red-team: no unverified claim survives, never a grade, refuse/short-circuit/inconclusive, mocked model)
         run: npm run verify:lens
 
+      - name: Lens card renderer (textContent-only per status, no innerHTML markup, no grade rendered, fake-DOM)
+        run: npm run verify:lens:card
+
       - name: Rate limiter (fail-open + IP extraction, mocked Supabase client)
         run: npm run verify:ratelimit
 

@@ -44,6 +44,11 @@ const TARGETS = [
     .filter((f) => f.endsWith('.astro'))
     .sort()
     .map((f) => `src/components/${f}`),
+  // Somnary Lens UI pages (CHK-7.2): the flagship /lens shell and the /request-a-review page ship
+  // product-boundary prose next to a live AI surface — every forbidden framing in them must be an
+  // intentional, sentinel-tagged negative example, never live copy (same bar as the /guide shell copy).
+  'src/pages/lens.astro',
+  'src/pages/request-a-review.astro',
 ];
 
 async function loadPatterns() {
