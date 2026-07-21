@@ -44,6 +44,9 @@ jobs:
       - name: Guide guardrails (intake refusal + routing + prose-containment + real-URL sweep, mocked model)
         run: npm run verify:guide
 
+      - name: Lens engine (red-team: no unverified claim survives, never a grade, refuse/short-circuit/inconclusive, mocked model)
+        run: npm run verify:lens
+
       - name: Rate limiter (fail-open + IP extraction, mocked Supabase client)
         run: npm run verify:ratelimit
 

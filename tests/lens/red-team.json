@@ -1,0 +1,30 @@
+{
+  "_comment": "Fixtures for the Lens red-team suite (CHK-7.1c). Offline: mock evidence docs + pasted-panel fixtures. NO network. The mock model + mock provider in scripts/test-lens.mjs drive the REAL engine over these.",
+
+  "docs": [
+    {
+      "pmid": "23691095",
+      "title": "Apigenin for insomnia: a randomized placebo-controlled trial",
+      "abstractText": "In a randomized placebo-controlled trial, apigenin reduced sleep onset latency by 7 minutes compared with placebo. No effect on total sleep time was observed. Adverse events were mild and transient.",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/23691095/",
+      "year": "2013"
+    },
+    {
+      "pmid": "30060537",
+      "title": "A systematic review of botanical sleep aids",
+      "abstractText": "Across the included trials the evidence for most botanical sleep aids was of low quality and results were inconsistent, with small samples and short follow-up.",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/30060537/",
+      "year": "2020"
+    }
+  ],
+
+  "labelEntries": [
+    { "slug": "melatonin", "url": "/r/melatonin", "name": "Melatonin", "aliases": [], "keyCompound": null, "category": "hormone", "isBotanical": false, "studiedDoseText": "0.5–5 mg", "studiedDoseFloorMg": 0.5, "interactions": ["may add to the effect of sedatives"], "tier": "A" },
+    { "slug": "valerian", "url": "/r/valerian", "name": "Valerian", "aliases": ["valeriana"], "keyCompound": "valerenic acid", "category": "botanical", "isBotanical": true, "studiedDoseText": "300–600 mg", "studiedDoseFloorMg": 300, "interactions": ["additive sedation with CNS depressants"], "tier": "C" }
+  ],
+
+  "panels": {
+    "highDoseMelatoninBotanicalBlend": "Supplement Facts\nMelatonin 10 mg\nValerian root 100 mg\nProprietary Calm Blend 250 mg\nColor: FD&C Red 40",
+    "cleanSingleIngredient": "Supplement Facts\nMagnesium glycinate 200 mg"
+  }
+}
