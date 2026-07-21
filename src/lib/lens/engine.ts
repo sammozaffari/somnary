@@ -370,6 +370,14 @@ function inconclusive(
   };
 }
 
+/** Letter-grade-shaped prose an evidence claim must never carry (the Lens output is NEVER a Somnary
+ * grade). Targets S/A–F tier/grade phrasings — "grade A", "tier S", "A grade", "earns a solid B",
+ * "rated C" — while deliberately NOT matching numeric clinical scores (PSQI/ISI "score of 8") or
+ * plain counts ("10 of 12 patients"), which are legitimate evidence. Defense-in-depth over the
+ * framing lint, which has no grade pattern. */
+const GRADE_SMELL =
+  /\b(?:grade[sd]?|tier)\s+(?:of\s+)?[a-fs]\b|\b[a-fs][-+]?[-\s]+(?:grade|tier)\b|\b(?:rated|scored|graded|earns?)\s+(?:an?\s+)?(?:\w+\s+)?[a-fs][-+]?\b/i;
+
 /**
  * Compose an ASSESSED (or, if nothing survived, INCONCLUSIVE) card from verified claims + flags.
  *
@@ -399,8 +407,15 @@ function compose(
     if (sources.length === 0) continue; // an evidence line with NO resolvable source is not shown
     // The claim text came from the model (extraction) but was adversarially verified against a
     // verbatim source span; still, we defensively lint it and drop it if it trips a framing/identifier
-    // gate (it must never carry a raw PMID/DOI or a forbidden framing).
-    if (lintForbiddenFraming(v.text).length > 0 || hasRawIdentifier(v.text)) continue;
+    // gate (it must never carry a raw PMID/DOI or a forbidden framing) OR reads like a letter grade
+    // (defense-in-depth: the Lens output is NEVER a Somnary grade — an evidence line must not smuggle
+    // grade-shaped prose past the composer even if it happened to be a verbatim span of an abstract).
+    if (
+      lintForbiddenFraming(v.text).length > 0 ||
+      hasRawIdentifier(v.text) ||
+      GRADE_SMELL.test(v.text)
+    )
+      continue;
     evidence.push({ text: v.text, strength: v.strength === 'strong' ? 'strong' : 'weak', sources });
   }
 

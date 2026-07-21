@@ -401,12 +401,17 @@ async function runVerifier() {
   console.log('\nlens suite — verify.ts helpers:');
   ok('N=3, quorum=2 (anti-hype bar)', REFUTE_N === 3 && REFUTE_QUORUM === 2);
   ok('call ceiling sane', LENS_MAX_MODEL_CALLS >= 3);
-  // quoteIsGrounded: verbatim (ws-normalized) yes; paraphrase no; empty no.
-  ok('grounded: exact substring', quoteIsGrounded('sleep onset latency', MEL_ABSTRACT));
-  ok('grounded: whitespace-normalized still matches', quoteIsGrounded('melatonin   reduced\n sleep onset latency', MEL_ABSTRACT));
-  ok('NOT grounded: paraphrase (not a substring)', !quoteIsGrounded('melatonin helped people fall asleep faster', MEL_ABSTRACT));
-  ok('NOT grounded: empty quote', !quoteIsGrounded('', MEL_ABSTRACT));
-  ok('NOT grounded: non-string', !quoteIsGrounded(null, MEL_ABSTRACT));
+  // quoteIsGrounded(quote, source, claim): a substantive, topically-tied verbatim span → yes;
+  // paraphrase / empty / trivial / irrelevant-but-real span → no.
+  const MEL_CLAIM = 'Melatonin reduced sleep onset latency in adults.';
+  ok('grounded: substantive span tied to the claim', quoteIsGrounded('melatonin reduced sleep onset latency', MEL_ABSTRACT, MEL_CLAIM));
+  ok('grounded: whitespace-normalized still matches', quoteIsGrounded('melatonin   reduced\n sleep onset latency', MEL_ABSTRACT, MEL_CLAIM));
+  ok('NOT grounded: paraphrase (not a substring)', !quoteIsGrounded('melatonin helped people fall asleep faster', MEL_ABSTRACT, MEL_CLAIM));
+  ok('NOT grounded: empty quote', !quoteIsGrounded('', MEL_ABSTRACT, MEL_CLAIM));
+  ok('NOT grounded: non-string', !quoteIsGrounded(null, MEL_ABSTRACT, MEL_CLAIM));
+  // F1 hardening: a trivial or topically-irrelevant real substring can't anchor a claim.
+  ok('NOT grounded: trivial short substring below min length', !quoteIsGrounded('sleep', MEL_ABSTRACT, MEL_CLAIM));
+  ok('NOT grounded: real span with NO content-token overlap with the (unrelated) claim', !quoteIsGrounded('melatonin reduced sleep onset latency', MEL_ABSTRACT, 'Apigenin cures cancer in humans.'));
   // parseVerdict / coerceVerdict: malformed → skeptical default.
   ok('parseVerdict malformed JSON → supported:no', parseVerdict('not json at all').supported === 'no');
   ok('parseVerdict empty → supported:no', parseVerdict('').supported === 'no');
@@ -687,15 +692,23 @@ const providerOf = (docs) => ({ search: async () => docs });
 const yes = (quote, strength = 'strong') => ({ supported: 'yes', strength, quote });
 const no = () => ({ supported: 'no', strength: 'weak', quote: '' });
 
-/** Deep-scan an assessment object for any tier-grade smell: a `tier`/`grade`/`score` KEY, or a value
- * that is a bare S/A/B/C/D/F grade letter. Returns the offending path or null. The label-flag rule
- * IDs (R1–R5) and citation ids are allowed — we only reject grade LETTERS as standalone values. */
+/** Grade-shaped prose (mirrors engine GRADE_SMELL): "grade A", "tier S", "A grade", "earns a solid
+ * B", "rated C" — but NOT numeric clinical scores or the copy's "not a Somnary grade" (no trailing
+ * letter). Strengthened per adversarial-review F4 so the detector catches grade-in-prose, not only a
+ * bare grade-letter value. */
+const GRADE_SMELL_PROSE =
+  /\b(?:grade[sd]?|tier)\s+(?:of\s+)?[a-fs]\b|\b[a-fs][-+]?[-\s]+(?:grade|tier)\b|\b(?:rated|scored|graded|earns?)\s+(?:an?\s+)?(?:\w+\s+)?[a-fs][-+]?\b/i;
+
+/** Deep-scan an assessment object for any tier-grade smell: a `tier`/`grade`/`score` KEY, a value
+ * that is a bare S/A/B/C/D/F grade letter, OR grade-shaped prose in any string. Returns the offending
+ * path or null. Label-flag rule IDs (R1–R5) and citation ids are allowed. */
 function findGradeSmell(obj, path = '$') {
   if (obj == null) return null;
   if (typeof obj === 'string') {
-    // A standalone grade letter used as a value (e.g. "A", "S", "Grade B"). Rule ids like "R2" and
-    // free prose that happens to contain a capital letter are NOT this.
+    // A standalone grade letter used as a value (e.g. "A", "S", "Grade B").
     if (/^(grade\s+)?[SABCDF]$/.test(obj.trim())) return `${path}="${obj}"`;
+    // Grade-shaped prose embedded in a sentence (e.g. an evidence line "earns a solid A").
+    if (GRADE_SMELL_PROSE.test(obj)) return `${path} grade-prose="${obj.slice(0, 60)}"`;
     return null;
   }
   if (Array.isArray(obj)) {

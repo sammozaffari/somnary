@@ -166,14 +166,43 @@ function normalizeWs(s: string): string {
   return s.replace(/\s+/g, ' ').trim();
 }
 
-/** TRUE iff `quote` is a non-empty verbatim substring of `sourceText` after whitespace-normalizing
- * both. This is the server-side re-check the model cannot fake: a fabricated/paraphrased quote is
- * not a substring and fails here, deterministically. */
-export function quoteIsGrounded(quote: string, sourceText: string): boolean {
+/** A verbatim substring alone is not enough: a trivial span the model picks BECAUSE it is common
+ * ("trial", "sleep") could anchor an arbitrary false claim. So a grounding quote must ALSO be
+ * non-trivial in length AND topically tied to the claim it supposedly supports. */
+const MIN_QUOTE_CHARS = 20; // a one/two-word span can't anchor a claim
+const MIN_SHARED_TOKENS = 2; // the quote must share content words with the claim
+const QUOTE_STOPWORDS = new Set([
+  'that', 'this', 'with', 'from', 'were', 'have', 'been', 'their', 'which', 'these', 'those',
+  'study', 'trial', 'group', 'groups', 'result', 'results', 'effect', 'effects', 'compared',
+  'placebo', 'patients', 'participants', 'significant', 'significantly', 'associated', 'evidence',
+]);
+
+/** Content tokens: lowercased words ≥4 chars, minus generic study-boilerplate stopwords, so overlap
+ * reflects the SUBJECT of the claim (e.g. "apigenin", "latency") not filler both texts share. */
+function contentTokens(s: string): Set<string> {
+  const out = new Set<string>();
+  for (const w of normalizeWs(s).toLowerCase().replace(/[^a-z0-9 ]+/g, ' ').split(' ')) {
+    if (w.length >= 4 && !QUOTE_STOPWORDS.has(w)) out.add(w);
+  }
+  return out;
+}
+
+/** TRUE iff `quote` is a verbatim substring of `sourceText` (whitespace-normalized) AND non-trivial
+ * (≥ MIN_QUOTE_CHARS) AND shares ≥ MIN_SHARED_TOKENS content words with `claim`. This is the
+ * server-side re-check the model cannot fake: a fabricated/paraphrased quote isn't a substring, and a
+ * real-but-irrelevant span (e.g. a lone "trial") can't anchor an unrelated claim. Conservative by
+ * design — it prefers cutting a genuine claim to admitting an unsupported one. */
+export function quoteIsGrounded(quote: string, sourceText: string, claim: string): boolean {
   if (typeof quote !== 'string' || typeof sourceText !== 'string') return false;
   const q = normalizeWs(quote);
-  if (!q) return false;
-  return normalizeWs(sourceText).includes(q);
+  if (q.length < MIN_QUOTE_CHARS) return false;
+  if (!normalizeWs(sourceText).includes(q)) return false;
+  const claimTokens = contentTokens(typeof claim === 'string' ? claim : '');
+  let shared = 0;
+  for (const t of contentTokens(q)) {
+    if (claimTokens.has(t) && ++shared >= MIN_SHARED_TOKENS) return true;
+  }
+  return false;
 }
 
 // --- the verifier --------------------------------------------------------------------------------
@@ -261,7 +290,7 @@ export async function verifyClaims(args: VerifyArgs): Promise<VerifyResult> {
       const v = outcome.verdict;
       // A verdict only counts toward quorum if it says 'yes' AND its quote is a server-confirmed
       // verbatim substring of THIS source's abstract. Fabricated/paraphrased quotes fail here.
-      if (v.supported === 'yes' && quoteIsGrounded(v.quote, source)) {
+      if (v.supported === 'yes' && quoteIsGrounded(v.quote, source, text)) {
         groundedYes += 1;
         if (v.strength === 'weak') anyWeak = true;
       }
