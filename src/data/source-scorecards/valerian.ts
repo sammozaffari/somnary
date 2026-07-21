@@ -96,6 +96,7 @@ const VALERIAN_COMMUNITY = [
 export const VALERIAN_SOURCES: ValProduct[] = [
   {
     slug: 'blackmores-valerian-forte',
+    imagePath: '/images/sources/valerian/blackmores-valerian-forte.jpg',
     brand: 'Blackmores',
     productName: 'Valerian Forte',
     bottomLine:
@@ -123,6 +124,7 @@ export const VALERIAN_SOURCES: ValProduct[] = [
   },
   {
     slug: 'carusos-valerian',
+    imagePath: '/images/sources/valerian/carusos-valerian.jpg',
     brand: "Caruso's",
     productName: 'Valerian',
     bottomLine:
@@ -150,6 +152,7 @@ export const VALERIAN_SOURCES: ValProduct[] = [
   },
   {
     slug: 'thompsons-one-a-day-valerian-2000',
+    imagePath: '/images/sources/valerian/thompsons-one-a-day-valerian-2000.jpg',
     brand: "Thompson's",
     productName: 'One-A-Day Valerian 2000',
     bottomLine:
@@ -177,6 +180,7 @@ export const VALERIAN_SOURCES: ValProduct[] = [
   },
   {
     slug: 'natures-own-valerian-forte-2000',
+    imagePath: '/images/sources/valerian/natures-own-valerian-forte-2000.jpg',
     brand: "Nature's Own",
     productName: 'Valerian Forte 2000',
     bottomLine:
@@ -204,6 +208,7 @@ export const VALERIAN_SOURCES: ValProduct[] = [
   },
   {
     slug: 'blackmores-deep-sleep',
+    imagePath: '/images/sources/valerian/blackmores-deep-sleep.jpg',
     brand: 'Blackmores',
     productName: 'Deep Sleep',
     bottomLine:
@@ -231,6 +236,7 @@ export const VALERIAN_SOURCES: ValProduct[] = [
   },
   {
     slug: 'swisse-ultiboost-sleep',
+    imagePath: '/images/sources/valerian/swisse-ultiboost-sleep.jpg',
     brand: 'Swisse',
     productName: 'Ultiboost Sleep',
     bottomLine:
@@ -258,6 +264,7 @@ export const VALERIAN_SOURCES: ValProduct[] = [
   },
   {
     slug: 'natures-own-sleep-ezy',
+    imagePath: '/images/sources/valerian/natures-own-sleep-ezy.jpg',
     brand: "Nature's Own",
     productName: 'Sleep Ezy',
     bottomLine:
@@ -312,6 +319,7 @@ export const VALERIAN_SOURCES: ValProduct[] = [
   },
   {
     slug: 'bioceuticals-sleep-complex',
+    imagePath: '/images/sources/valerian/bioceuticals-sleep-complex.jpg',
     brand: 'BioCeuticals',
     productName: 'Sleep Complex',
     bottomLine:
@@ -370,6 +378,7 @@ export const VALERIAN_SOURCES: ValProduct[] = [
   },
   {
     slug: 'now-foods-valerian-root-500',
+    imagePath: '/images/sources/valerian/now-foods-valerian-root-500.jpg',
     brand: 'NOW Foods',
     productName: 'Valerian Root 500 mg',
     bottomLine:
