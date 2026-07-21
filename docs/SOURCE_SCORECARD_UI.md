@@ -11,8 +11,9 @@ change that breaks one of these.
 - The card is a flex column; the image sits on top, the content below, and the **"Why these scores"
   toggle is pinned to the bottom of every card** (`.why { margin-top: auto }`) so the toggles line up
   across a row regardless of how long a product's bottom line is.
-- The image area is a **fixed `aspect-ratio: 4 / 3`** box with `object-fit: contain` — identical for a
-  real photo or a lettered fallback tile, so the container never changes size.
+- The image area is a **fixed `aspect-ratio: 1 / 1`** box with `object-fit: contain` — identical for a
+  real photo or a lettered fallback tile, so the container never changes size. (Square keeps a portrait
+  supplement bottle and a squat tub the same footprint, and matches the lettered fallback tile.)
 - No per-card min/max-width, no one-off padding. Spacing comes only from the shared component + tokens.
 
 ## Product images (never pixelated)
@@ -23,9 +24,11 @@ change that breaks one of these.
   - Chemist Warehouse: try `…/pi/<sku>/2DF_1000.jpg` (and larger) before `2DF_800.jpg`.
   - Shopify brand sites: append `&width=1200` to the `cdn/shop/...` URL.
   - Amazon: use the `._SL1500_.` (or `._SL1200_.`) size token, not `._AC_.`.
-- **Never upscale.** `sips -Z` enlarges anything smaller than the target — forbidden. Resize **down only**:
-  `sips --resampleWidthMax 800 <file>` shrinks only if wider, leaves smaller images untouched. If a source
-  can't reach ~700 px, DON'T ship a blurry version — use the lettered fallback tile instead and note it.
+- **Never upscale.** `sips -Z <n>` enlarges anything smaller than `<n>` — forbidden (it's what produced the
+  mushy first pass). It resizes **down only** when you guard it: read the width first and skip the resize if
+  the source is already at/under target — `w=$(sips -g pixelWidth f | grep -o '[0-9]*$'); [ "$w" -gt 1000 ] && sips -Z 1000 f`.
+  (`--resampleWidthMax` is a no-op on this macOS build — don't rely on it.) If a source can't reach ~700 px,
+  DON'T ship a blurry version — use the lettered fallback tile instead and note it.
 - **Standard output: 1000 px on the long edge, JPEG.** 1000 px covers 2× retina for the largest render
   (single-column mobile, ~500 px CSS). A real 1000 px product photo is ~100–200 KB; anything much smaller
   is a red flag that the source was low-res (re-source it).
@@ -39,9 +42,10 @@ change that breaks one of these.
 ```
 # fetch the HIGH-RES source (example patterns)
 curl -sL -A 'Mozilla/5.0' -o <slug>.jpg '<high-res source url>'
-# downscale-only to 800px long edge, convert to jpeg
-sips -s format jpeg --resampleWidthMax 800 <slug>.jpg >/dev/null
-# verify: must be >= ~600px wide and > ~40KB, else re-source
+# convert to jpeg, then downscale-only to 1000px long edge — guard so sips never UPSCALES
+sips -s format jpeg <slug>.jpg >/dev/null
+w=$(sips -g pixelWidth <slug>.jpg | grep -o '[0-9]*$'); [ "$w" -gt 1000 ] && sips -Z 1000 <slug>.jpg >/dev/null
+# verify: must be >= ~700px wide and > ~80KB, else re-source (or use the fallback tile)
 sips -g pixelWidth -g pixelHeight <slug>.jpg
 ```
 
