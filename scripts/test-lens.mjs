@@ -29,6 +29,10 @@ const { isValidId, isResolvableId, parseCitation, canonicalUrl, canonicalUrlByKi
 );
 const { PubMedProvider } = await imp('src/lib/lens/retrieval.ts');
 const { normalizeLensInput, MAX_LENS_INPUT_LEN } = await imp('src/lib/lens/input.ts');
+const { verifyClaims, quoteIsGrounded, parseVerdict, coerceVerdict, REFUTE_N, REFUTE_QUORUM, LENS_MAX_MODEL_CALLS } =
+  await imp('src/lib/lens/verify.ts');
+const { LENS_EXTRACT_PROMPT, LENS_REFUTE_PROMPT, LENS_EXTRACT_VERSION, LENS_REFUTE_VERSION, buildRefuteUserPrompt, buildExtractUserPrompt } =
+  await imp('src/lib/lens/prompts.ts');
 
 let pass = 0;
 let fail = 0;
@@ -308,8 +312,279 @@ async function run() {
     ok('no corpus arg → no shortCircuit, no throw', !res.shortCircuit && !res.empty);
   }
 
+  await runVerifier();
+
   console.log(`\n${fail === 0 ? '✓' : '✗'} lens suite: ${pass} passed, ${fail} failed.`);
   if (fail) process.exit(1);
+}
+
+// ==================================================================================================
+// CHK-7.1b — adversarial verifier + prompts. All offline: a MOCK model returns canned verdicts; NO
+// network. These prove the load-bearing D5 guarantee — a claim that can't be defended against its
+// FETCHED source text is CUT, never hedged.
+// ==================================================================================================
+
+// A source doc with a real, quotable abstract span. The verbatim substring re-check runs against
+// exactly this abstractText.
+const MEL_ABSTRACT =
+  'In a randomized placebo-controlled trial, melatonin reduced sleep onset latency by 7 minutes ' +
+  'compared with placebo. No effect on total sleep time was observed. Adverse events were mild.';
+const VAL_ABSTRACT = 'Evidence for valerian was of low quality and results were inconsistent across small trials.';
+
+const DOCS = [
+  { pmid: '23691095', title: 'Melatonin RCT', abstractText: MEL_ABSTRACT, url: 'https://pubmed.ncbi.nlm.nih.gov/23691095/', year: '2013' },
+  { pmid: '30060537', title: 'Valerian review', abstractText: VAL_ABSTRACT, url: 'https://pubmed.ncbi.nlm.nih.gov/30060537/', year: '2020' },
+];
+
+// A far-future deadline so budget/deadline don't interfere unless a test sets them.
+const farDeadline = () => Date.now() + 60_000;
+
+/**
+ * A mock model: it inspects the refute user prompt to find WHICH claim it's judging, then returns a
+ * canned JSON verdict for that claim. `verdictsByClaimSubstr` maps a distinctive substring of a
+ * claim's text → a fixed array of REFUTE_N verdict objects (one per call, cycled). Records calls.
+ */
+function makeMockModel(verdictsByClaimSubstr, { onCall } = {}) {
+  const perClaimIndex = new Map();
+  const calls = { count: 0, prompts: [] };
+  const model = async ({ user, system }) => {
+    calls.count += 1;
+    calls.prompts.push({ user, system });
+    if (onCall) onCall(calls.count);
+    // Which claim? match by the distinctive substring appearing in the user prompt.
+    let key = null;
+    for (const k of Object.keys(verdictsByClaimSubstr)) {
+      if (user.includes(k)) { key = k; break; }
+    }
+    if (key == null) return { ok: true, text: JSON.stringify({ supported: 'no', strength: 'weak', quote: '' }) };
+    const seq = verdictsByClaimSubstr[key];
+    const i = perClaimIndex.get(key) ?? 0;
+    perClaimIndex.set(key, i + 1);
+    const verdict = seq[Math.min(i, seq.length - 1)];
+    // Support a raw-string verdict (to test malformed/non-JSON model output).
+    const text = typeof verdict === 'string' ? verdict : JSON.stringify(verdict);
+    return { ok: true, text };
+  };
+  return { model, calls };
+}
+
+// A verbatim span present in MEL_ABSTRACT (used by supporting verdicts).
+const MEL_QUOTE = 'melatonin reduced sleep onset latency by 7 minutes';
+const y = (quote, strength = 'strong') => ({ supported: 'yes', strength, quote });
+const n = () => ({ supported: 'no', strength: 'weak', quote: '' });
+
+async function runVerifier() {
+  console.log('\nlens suite — prompts.ts (versioned, framing-safe shape):');
+  ok('extract version pinned', LENS_EXTRACT_VERSION === 'lens-extract-v1', LENS_EXTRACT_VERSION);
+  ok('refute version pinned', LENS_REFUTE_VERSION === 'lens-refute-v1', LENS_REFUTE_VERSION);
+  ok('extract prompt forbids grading', /grade|rating|verdict/i.test(LENS_EXTRACT_PROMPT));
+  ok('extract prompt forbids invented PMIDs', /invent a PMID/i.test(LENS_EXTRACT_PROMPT));
+  ok('refute prompt demands verbatim quote', /VERBATIM/i.test(LENS_REFUTE_PROMPT));
+  ok('refute prompt defaults to skepticism', /skepticism|skeptical/i.test(LENS_REFUTE_PROMPT));
+  {
+    const up = buildRefuteUserPrompt('claim X', 'source Y');
+    ok('refute user prompt carries claim + source', up.includes('claim X') && up.includes('source Y'));
+  }
+  {
+    const up = buildExtractUserPrompt('melatonin', DOCS);
+    ok('extract user prompt lists both PMIDs', up.includes('23691095') && up.includes('30060537'));
+  }
+
+  console.log('\nlens suite — verify.ts helpers:');
+  ok('N=3, quorum=2 (anti-hype bar)', REFUTE_N === 3 && REFUTE_QUORUM === 2);
+  ok('call ceiling sane', LENS_MAX_MODEL_CALLS >= 3);
+  // quoteIsGrounded: verbatim (ws-normalized) yes; paraphrase no; empty no.
+  ok('grounded: exact substring', quoteIsGrounded('sleep onset latency', MEL_ABSTRACT));
+  ok('grounded: whitespace-normalized still matches', quoteIsGrounded('melatonin   reduced\n sleep onset latency', MEL_ABSTRACT));
+  ok('NOT grounded: paraphrase (not a substring)', !quoteIsGrounded('melatonin helped people fall asleep faster', MEL_ABSTRACT));
+  ok('NOT grounded: empty quote', !quoteIsGrounded('', MEL_ABSTRACT));
+  ok('NOT grounded: non-string', !quoteIsGrounded(null, MEL_ABSTRACT));
+  // parseVerdict / coerceVerdict: malformed → skeptical default.
+  ok('parseVerdict malformed JSON → supported:no', parseVerdict('not json at all').supported === 'no');
+  ok('parseVerdict empty → supported:no', parseVerdict('').supported === 'no');
+  ok('coerceVerdict unknown supported → no', coerceVerdict({ supported: 'maybe', quote: 'x' }).supported === 'no');
+  ok('coerceVerdict tolerates code-fence wrap', parseVerdict('```json\n{"supported":"yes","strength":"strong","quote":"x"}\n```').supported === 'yes');
+  ok('coerceVerdict default strength weak', coerceVerdict({ supported: 'yes' }).strength === 'weak');
+
+  console.log('\nlens suite — verify.ts (verifyClaims, injected MOCK model — NO network):');
+
+  // (1) SUPPORTED claim survives: 3/3 grounded 'yes' with a verbatim quote → 1 verified, strength strong.
+  {
+    const { model, calls } = makeMockModel({ 'onset latency by 7 minutes': [y(MEL_QUOTE), y(MEL_QUOTE), y(MEL_QUOTE)] });
+    const res = await verifyClaims({
+      claims: [{ text: 'Melatonin reduced sleep onset latency by 7 minutes', sourcePmid: '23691095' }],
+      docs: DOCS, model, deadline: farDeadline(),
+    });
+    ok('supported claim survives', res.verified.length === 1, JSON.stringify(res.meta));
+    ok('survivor strength = strong (all strong)', res.verified[0]?.strength === 'strong');
+    ok('survivor carries resolvable source {pmid,url}', res.verified[0]?.sources?.[0]?.pmid === '23691095' && res.verified[0]?.sources?.[0]?.url.includes('23691095'));
+    ok('meta: 1 extracted, 0 cut', res.meta.claimsExtracted === 1 && res.meta.claimsCut === 0);
+    ok('meta: exactly 3 model calls (N per claim)', res.meta.modelCalls === 3, `got ${res.meta.modelCalls}`);
+    ok('meta: no deadline hit', res.meta.deadlineHit === false);
+    ok('ran REFUTE_N calls', calls.count === 3);
+  }
+
+  // (2) UNSUPPORTED claim is CUT: 3/3 say 'no' → dropped, never hedged.
+  {
+    const { model } = makeMockModel({ 'cures insomnia': [n(), n(), n()] });
+    const res = await verifyClaims({
+      claims: [{ text: 'Melatonin cures insomnia', sourcePmid: '23691095' }],
+      docs: DOCS, model, deadline: farDeadline(),
+    });
+    ok('unsupported claim CUT (0 verified)', res.verified.length === 0);
+    ok('unsupported: meta claimsCut=1', res.meta.claimsCut === 1);
+  }
+
+  // (3) FABRICATED / PARAPHRASED quote is CUT: model says 'yes' 3× but the quote is NOT a substring
+  // of the abstract → the server re-check fails deterministically → cut.
+  {
+    const fabricated = y('melatonin is a proven cure for all insomnia'); // not in MEL_ABSTRACT
+    const { model } = makeMockModel({ 'proven cure': [fabricated, fabricated, fabricated] });
+    const res = await verifyClaims({
+      claims: [{ text: 'Melatonin is a proven cure', sourcePmid: '23691095' }],
+      docs: DOCS, model, deadline: farDeadline(),
+    });
+    ok('fabricated quote (yes×3 but not a substring) → CUT', res.verified.length === 0, JSON.stringify(res.verified));
+  }
+  {
+    // paraphrase that is close but NOT verbatim.
+    const para = y('melatonin reduced sleep latency by seven minutes'); // "seven"/"latency" — not verbatim
+    const { model } = makeMockModel({ 'seven minutes claim': [para, para, para] });
+    const res = await verifyClaims({
+      claims: [{ text: 'seven minutes claim: melatonin cut latency', sourcePmid: '23691095' }],
+      docs: DOCS, model, deadline: farDeadline(),
+    });
+    ok('paraphrased quote → CUT (not a verbatim substring)', res.verified.length === 0);
+  }
+
+  // (4) MAJORITY-REFUTE is CUT: only 1 of 3 grounded 'yes' (quorum is 2) → cut.
+  {
+    const { model } = makeMockModel({ 'onset latency by 7 minutes': [y(MEL_QUOTE), n(), n()] });
+    const res = await verifyClaims({
+      claims: [{ text: 'Melatonin reduced sleep onset latency by 7 minutes', sourcePmid: '23691095' }],
+      docs: DOCS, model, deadline: farDeadline(),
+    });
+    ok('1-of-3 yes (below quorum) → CUT', res.verified.length === 0);
+  }
+  {
+    // exactly at quorum: 2 of 3 grounded yes → SURVIVES.
+    const { model } = makeMockModel({ 'onset latency by 7 minutes': [y(MEL_QUOTE), y(MEL_QUOTE), n()] });
+    const res = await verifyClaims({
+      claims: [{ text: 'Melatonin reduced sleep onset latency by 7 minutes', sourcePmid: '23691095' }],
+      docs: DOCS, model, deadline: farDeadline(),
+    });
+    ok('2-of-3 yes (at quorum) → SURVIVES', res.verified.length === 1);
+  }
+
+  // (5) MIN-STRENGTH downgrade: 2 supporters, one says weak → survivor is weak.
+  {
+    const { model } = makeMockModel({ 'onset latency by 7 minutes': [y(MEL_QUOTE, 'strong'), y(MEL_QUOTE, 'weak'), n()] });
+    const res = await verifyClaims({
+      claims: [{ text: 'Melatonin reduced sleep onset latency by 7 minutes', sourcePmid: '23691095' }],
+      docs: DOCS, model, deadline: farDeadline(),
+    });
+    ok('min-strength: any weak supporter → survivor weak', res.verified[0]?.strength === 'weak', JSON.stringify(res.verified[0]));
+  }
+
+  // (6) claim tied to a PMID NOT in docs → CUT (can't ground it), and NO model call made for it.
+  {
+    const { model, calls } = makeMockModel({ anything: [y(MEL_QUOTE), y(MEL_QUOTE), y(MEL_QUOTE)] });
+    const res = await verifyClaims({
+      claims: [{ text: 'Some claim', sourcePmid: '99999999' }],
+      docs: DOCS, model, deadline: farDeadline(),
+    });
+    ok('claim with unknown sourcePmid → CUT', res.verified.length === 0);
+    ok('ungroundable claim → 0 model calls', calls.count === 0);
+  }
+
+  // (7) BUDGET exhaustion drops partials: a tiny budget can't finish N calls for a would-be survivor
+  // → it is CUT (never a partial survivor), and deadlineHit is recorded.
+  {
+    const { model } = makeMockModel({ 'onset latency by 7 minutes': [y(MEL_QUOTE), y(MEL_QUOTE), y(MEL_QUOTE)] });
+    const budget = { used: 0, max: 2 }; // < REFUTE_N (3): can't complete verification.
+    const res = await verifyClaims({
+      claims: [{ text: 'Melatonin reduced sleep onset latency by 7 minutes', sourcePmid: '23691095' }],
+      docs: DOCS, model, deadline: farDeadline(), budget,
+    });
+    ok('budget < N → would-be survivor CUT (no partial)', res.verified.length === 0, JSON.stringify(res.verified));
+    ok('budget exhaustion → deadlineHit recorded', res.meta.deadlineHit === true);
+    ok('budget respected: never exceeded max', budget.used <= budget.max, `used ${budget.used}`);
+  }
+
+  // (8) DEADLINE exhaustion mid-run drops the second claim entirely (first survives, second CUT).
+  // The verifier gates a call when (deadline - now) < MIN_CALL_MS (250). We use a fake clock that
+  // consumes 1000ms per call, so after the first claim's 3 calls (3000ms consumed) the remaining
+  // time drops below MIN_CALL_MS and the second claim can't start → CUT, never unverified.
+  {
+    const start = 100_000;
+    let clock = start;
+    // Room for exactly the first claim's 3 calls, then < MIN_CALL_MS remains for the second claim.
+    const deadline = start + 3 * 1000 + 100; // 3 calls @1000ms leaves 100ms (< 250) → gate trips.
+    const { model } = makeMockModel(
+      {
+        'first claim': [y(MEL_QUOTE), y(MEL_QUOTE), y(MEL_QUOTE)],
+        'second claim': [y(MEL_QUOTE), y(MEL_QUOTE), y(MEL_QUOTE)],
+      },
+      { onCall: () => { clock += 1000; } }, // each call consumes 1000ms of the shared clock
+    );
+    const res = await verifyClaims({
+      claims: [
+        { text: 'first claim: melatonin reduced sleep onset latency by 7 minutes', sourcePmid: '23691095' },
+        { text: 'second claim: melatonin reduced sleep onset latency by 7 minutes', sourcePmid: '23691095' },
+      ],
+      docs: DOCS, model, deadline, now: () => clock,
+    });
+    ok('deadline mid-run: first claim survives', res.verified.length === 1, JSON.stringify(res.meta));
+    ok('deadline mid-run: second claim CUT (never unverified)', res.meta.claimsCut === 1);
+    ok('deadline mid-run: deadlineHit recorded', res.meta.deadlineHit === true);
+  }
+
+  // (9) MALFORMED model JSON → treated as supported:'no' → claim CUT (a broken reply can't smuggle a
+  // claim through).
+  {
+    const { model } = makeMockModel({ 'garbage reply claim': ['<<<not json>>>', '{oops', 'null'] });
+    const res = await verifyClaims({
+      claims: [{ text: 'garbage reply claim about melatonin', sourcePmid: '23691095' }],
+      docs: DOCS, model, deadline: farDeadline(),
+    });
+    ok('malformed model JSON → CUT (treated as no)', res.verified.length === 0);
+  }
+
+  // (10) NEVER THROWS on hostile input (non-array claims/docs, missing fields).
+  {
+    let threw = false;
+    let res;
+    try {
+      res = await verifyClaims({ claims: null, docs: null, model: async () => ({ ok: false, text: '' }), deadline: farDeadline() });
+    } catch { threw = true; }
+    ok('hostile null claims/docs → no throw, 0 verified', !threw && res.verified.length === 0);
+  }
+  {
+    // default model (no key present in CI env) → never-throws error result → all claims CUT.
+    const res = await verifyClaims({
+      claims: [{ text: 'Melatonin reduced sleep onset latency by 7 minutes', sourcePmid: '23691095' }],
+      docs: DOCS, deadline: farDeadline(),
+    });
+    ok('default env-gated model (no key) → 0 verified (degrades, never guesses)', res.verified.length === 0);
+  }
+
+  // (11) MIXED batch: one survivor, one cut → verified has exactly the survivor; sources correct.
+  {
+    const { model } = makeMockModel({
+      'good claim': [y(MEL_QUOTE), y(MEL_QUOTE), y(MEL_QUOTE)],
+      'bogus claim': [n(), n(), n()],
+    });
+    const res = await verifyClaims({
+      claims: [
+        { text: 'good claim: melatonin reduced sleep onset latency by 7 minutes', sourcePmid: '23691095' },
+        { text: 'bogus claim: melatonin cures everything', sourcePmid: '30060537' },
+      ],
+      docs: DOCS, model, deadline: farDeadline(),
+    });
+    ok('mixed batch: exactly 1 survives', res.verified.length === 1);
+    ok('mixed batch: the survivor is the grounded one', res.verified[0]?.text?.startsWith('good claim'));
+    ok('mixed batch: claimsExtracted=2, claimsCut=1', res.meta.claimsExtracted === 2 && res.meta.claimsCut === 1);
+  }
 }
 
 run().catch((err) => {

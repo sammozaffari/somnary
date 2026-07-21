@@ -33,6 +33,13 @@ const TARGETS = [
     .filter((f) => f.endsWith('.ts'))
     .sort()
     .map((f) => `src/lib/guide/${f}`),
+  // Somnary Lens engine (CHK-7.1): the extraction + refute prompts ship model-adjacent prose. Every
+  // forbidden framing in them must be an intentional, sentinel-tagged negative example, never live
+  // copy — the same bar as the guide's prompt.
+  ...(await readdir(join(ROOT, 'src/lib/lens')))
+    .filter((f) => f.endsWith('.ts'))
+    .sort()
+    .map((f) => `src/lib/lens/${f}`),
   ...(await readdir(join(ROOT, 'src/components')))
     .filter((f) => f.endsWith('.astro'))
     .sort()
