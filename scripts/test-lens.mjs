@@ -33,6 +33,12 @@ const { verifyClaims, quoteIsGrounded, parseVerdict, coerceVerdict, REFUTE_N, RE
   await imp('src/lib/lens/verify.ts');
 const { LENS_EXTRACT_PROMPT, LENS_REFUTE_PROMPT, LENS_EXTRACT_VERSION, LENS_REFUTE_VERSION, buildRefuteUserPrompt, buildExtractUserPrompt } =
   await imp('src/lib/lens/prompts.ts');
+// CHK-7.1c — the composer/orchestrator + rubric + copy + the red-team gate.
+const { runLens, parseExtraction, LENS_MAX_CLAIMS } = await imp('src/lib/lens/engine.ts');
+const { applyRubric } = await imp('src/lib/lens/rubric.ts');
+const { parseAdditiveWatchlist } = await imp('src/lib/lens/additive-watchlist.ts');
+const lensCopy = await imp('src/lib/lens/copy.ts');
+const { ROUTES } = await imp('src/lib/ask/guardrails.ts');
 
 let pass = 0;
 let fail = 0;
@@ -313,6 +319,8 @@ async function run() {
   }
 
   await runVerifier();
+  await runRubric();
+  await runRedTeam();
 
   console.log(`\n${fail === 0 ? '✓' : '✗'} lens suite: ${pass} passed, ${fail} failed.`);
   if (fail) process.exit(1);
@@ -584,6 +592,296 @@ async function runVerifier() {
     ok('mixed batch: exactly 1 survives', res.verified.length === 1);
     ok('mixed batch: the survivor is the grounded one', res.verified[0]?.text?.startsWith('good claim'));
     ok('mixed batch: claimsExtracted=2, claimsCut=1', res.meta.claimsExtracted === 2 && res.meta.claimsCut === 1);
+  }
+}
+
+// ==================================================================================================
+// CHK-7.1c — the deterministic RUBRIC (R1–R5 verbatim + additive-watchlist match). Proves the rubric
+// reproduces the KNOWN R1–R5 flags on pasted-panel fixtures, adds only the deterministic additive
+// findings, and computes NO score/composite/tier.
+// ==================================================================================================
+
+const RED_TEAM = JSON.parse(await readFile(join(ROOT, 'tests/lens/red-team.json'), 'utf8'));
+const WATCHLIST = parseAdditiveWatchlist(await readFile(join(ROOT, 'src/data/additive-watchlist.yaml'), 'utf8'));
+
+async function runRubric() {
+  console.log('\nlens suite — rubric.ts (R1–R5 verbatim + additive match, deterministic):');
+  const labelEntries = RED_TEAM.labelEntries;
+
+  // A panel with a proprietary blend (R1), 10mg melatonin (R2 >5mg), a botanical with no std marker
+  // (R4 valerian), interaction cautions (R5), and an azo-dye additive → the KNOWN flags reproduce.
+  {
+    const panel = RED_TEAM.panels.highDoseMelatoninBotanicalBlend;
+    const r = applyRubric({ panelText: panel, labelEntries, additiveWatchlist: WATCHLIST });
+    const rules = new Set(r.labelFlags.map((f) => f.rule));
+    ok('rubric: R1 (proprietary blend) fires', rules.has('R1'), [...rules].join(','));
+    ok('rubric: R2 (melatonin >5mg) fires', rules.has('R2'));
+    ok('rubric: R4 (unstandardized botanical valerian) fires', rules.has('R4'));
+    ok('rubric: R5 (interaction cautions) fires', rules.has('R5'));
+    ok('rubric: additive (azo dye) matched from the panel', r.additiveFindings.some((a) => a.id === 'artificial-azo-dyes'), JSON.stringify(r.additiveFindings.map((a) => a.id)));
+    ok('rubric: additive carries a citation id', r.additiveFindings.find((a) => a.id === 'artificial-azo-dyes')?.sources?.[0]?.pmid === '17825405');
+    ok('rubric: proprietary-blend structural additive NOT double-counted (R1 only)', !r.additiveFindings.some((a) => a.id === 'proprietary-blend'));
+    // NO score/composite/tier anywhere in the rubric output.
+    ok('rubric: emits NO score/composite/tier field', !('score' in r) && !('composite' in r) && !('tier' in r) && !('grade' in r));
+  }
+
+  // A clean single ingredient with no blend, standard dose, non-botanical → no R1/R2/R4, no additives.
+  {
+    const r = applyRubric({ panelText: RED_TEAM.panels.cleanSingleIngredient, labelEntries, additiveWatchlist: WATCHLIST });
+    ok('rubric: clean panel fires no additive findings', r.additiveFindings.length === 0);
+  }
+
+  // Empty / hostile panel → never throws, empty flags.
+  {
+    let threw = false;
+    let r;
+    try {
+      r = applyRubric({ panelText: '', labelEntries, additiveWatchlist: WATCHLIST });
+    } catch {
+      threw = true;
+    }
+    ok('rubric: empty panel → no throw, no flags', !threw && r.labelFlags.length === 0 && r.additiveFindings.length === 0);
+  }
+}
+
+// ==================================================================================================
+// CHK-7.1c — the RED-TEAM SUITE (the acceptance gate). Offline: MOCK model + MOCK provider, NO network.
+// The 10 acceptance assertions the checklist requires. These drive the REAL runLens over fixtures.
+// ==================================================================================================
+
+const RT_DOCS = RED_TEAM.docs; // apigenin RCT (23691095) + low-quality review (30060537)
+const APIGENIN_QUOTE = 'apigenin reduced sleep onset latency by 7 minutes'; // verbatim in doc 23691095
+
+/** A MOCK model for the FULL engine: it answers the EXTRACT call and the REFUTE calls differently. The
+ * extract reply is chosen by `extractReply`; each refute reply is chosen by matching the claim text in
+ * the user prompt against `refuteByClaimSubstr` (→ REFUTE_N verdicts cycled), defaulting to skeptical
+ * 'no'. Records every call so tests can assert model behavior. NEVER a network call. */
+function makeEngineModel({ extractReply, refuteByClaimSubstr = {} } = {}) {
+  const perClaim = new Map();
+  const calls = { count: 0, extract: 0, refute: 0, prompts: [] };
+  const model = async ({ user, system }) => {
+    calls.count += 1;
+    calls.prompts.push(user);
+    if (system.includes('EXTRACTOR')) {
+      calls.extract += 1;
+      const text = typeof extractReply === 'string' ? extractReply : JSON.stringify(extractReply ?? { claims: [], doesNotShow: [], labelFacts: [] });
+      return { ok: true, text };
+    }
+    // refute
+    calls.refute += 1;
+    let key = null;
+    for (const k of Object.keys(refuteByClaimSubstr)) {
+      if (user.includes(k)) { key = k; break; }
+    }
+    if (key == null) return { ok: true, text: JSON.stringify({ supported: 'no', strength: 'weak', quote: '' }) };
+    const seq = refuteByClaimSubstr[key];
+    const i = perClaim.get(key) ?? 0;
+    perClaim.set(key, i + 1);
+    const v = seq[Math.min(i, seq.length - 1)];
+    return { ok: true, text: typeof v === 'string' ? v : JSON.stringify(v) };
+  };
+  return { model, calls };
+}
+
+const providerOf = (docs) => ({ search: async () => docs });
+const yes = (quote, strength = 'strong') => ({ supported: 'yes', strength, quote });
+const no = () => ({ supported: 'no', strength: 'weak', quote: '' });
+
+/** Deep-scan an assessment object for any tier-grade smell: a `tier`/`grade`/`score` KEY, or a value
+ * that is a bare S/A/B/C/D/F grade letter. Returns the offending path or null. The label-flag rule
+ * IDs (R1–R5) and citation ids are allowed — we only reject grade LETTERS as standalone values. */
+function findGradeSmell(obj, path = '$') {
+  if (obj == null) return null;
+  if (typeof obj === 'string') {
+    // A standalone grade letter used as a value (e.g. "A", "S", "Grade B"). Rule ids like "R2" and
+    // free prose that happens to contain a capital letter are NOT this.
+    if (/^(grade\s+)?[SABCDF]$/.test(obj.trim())) return `${path}="${obj}"`;
+    return null;
+  }
+  if (Array.isArray(obj)) {
+    for (let i = 0; i < obj.length; i++) {
+      const hit = findGradeSmell(obj[i], `${path}[${i}]`);
+      if (hit) return hit;
+    }
+    return null;
+  }
+  if (typeof obj === 'object') {
+    for (const k of Object.keys(obj)) {
+      if (/^(tier|grade|score|rating|composite)$/i.test(k)) return `${path}.${k} (forbidden key)`;
+      const hit = findGradeSmell(obj[k], `${path}.${k}`);
+      if (hit) return hit;
+    }
+  }
+  return null;
+}
+
+async function runRedTeam() {
+  console.log('\nlens suite — RED-TEAM (acceptance gate; REAL runLens, MOCK model + provider, NO network):');
+  const labelEntries = RED_TEAM.labelEntries;
+  const base = { corpus, labelEntries, additiveWatchlist: WATCHLIST, now: Date.now };
+  // Subjects must NOT name a corpus remedy (that would short-circuit) — "apigenin" is not in the corpus.
+  const SUBJECT = 'ApiZzz apigenin sleep capsule';
+
+  // (1) A claim the mock sources DON'T support → NOT in evidence (3/3 refute 'no' → cut).
+  {
+    const { model } = makeEngineModel({
+      extractReply: { claims: [{ text: 'Apigenin cures chronic insomnia', sourcePmid: '23691095' }], doesNotShow: [], labelFacts: [] },
+      refuteByClaimSubstr: { 'cures chronic insomnia': [no(), no(), no()] },
+    });
+    const r = await runLens({ ...base, input: SUBJECT, provider: providerOf(RT_DOCS), model });
+    ok('(1) unsupported claim → NOT in evidence', r.evidence.every((e) => !/cures chronic insomnia/i.test(e.text)) && r.evidence.length === 0, JSON.stringify(r.evidence));
+    ok('(1) unsupported → status inconclusive (nothing survived)', r.status === 'inconclusive');
+  }
+
+  // (2) A fabricated citation / non-substring quote → dropped (model says yes×3 but quote not in source).
+  {
+    const { model } = makeEngineModel({
+      extractReply: { claims: [{ text: 'Apigenin is a proven cure for insomnia', sourcePmid: '23691095' }], doesNotShow: [], labelFacts: [] },
+      refuteByClaimSubstr: { 'proven cure for insomnia': [yes('apigenin is a proven cure for insomnia'), yes('apigenin is a proven cure for insomnia'), yes('apigenin is a proven cure for insomnia')] },
+    });
+    const r = await runLens({ ...base, input: SUBJECT, provider: providerOf(RT_DOCS), model });
+    ok('(2) non-substring (fabricated) quote → dropped', r.evidence.length === 0, JSON.stringify(r.evidence));
+  }
+  {
+    // an extracted claim tied to a PMID NOT in the fetched docs → dropped at extraction (never verified).
+    const docPmids = new Set(RT_DOCS.map((d) => d.pmid));
+    const parsed = parseExtraction(JSON.stringify({ claims: [{ text: 'x', sourcePmid: '99999999' }, { text: 'y', sourcePmid: '23691095' }] }), docPmids);
+    ok('(2b) extraction drops a claim citing a PMID not in docs', parsed.length === 1 && parsed[0].sourcePmid === '23691095');
+    ok('(2c) extraction caps at LENS_MAX_CLAIMS', parseExtraction(JSON.stringify({ claims: Array.from({ length: 20 }, () => ({ text: 'apigenin lowers latency', sourcePmid: '23691095' })) }), docPmids).length === LENS_MAX_CLAIMS);
+  }
+
+  // (3) NEVER a tier grade: no grade field/letter anywhere in ANY assessment; schema has no tier.
+  {
+    const { model } = makeEngineModel({
+      extractReply: { claims: [{ text: 'Apigenin reduced sleep onset latency by 7 minutes', sourcePmid: '23691095' }], doesNotShow: [], labelFacts: [] },
+      refuteByClaimSubstr: { 'onset latency by 7 minutes': [yes(APIGENIN_QUOTE), yes(APIGENIN_QUOTE), yes(APIGENIN_QUOTE)] },
+    });
+    const assessed = await runLens({ ...base, input: SUBJECT, provider: providerOf(RT_DOCS), model });
+    const sc = await runLens({ ...base, input: 'melatonin', provider: providerOf(RT_DOCS), model });
+    const inc = await runLens({ ...base, input: SUBJECT, provider: providerOf([]), model });
+    ok('(3) assessed: NO grade smell anywhere', findGradeSmell(assessed) === null, String(findGradeSmell(assessed)));
+    ok('(3) short-circuit: NO grade smell anywhere', findGradeSmell(sc) === null, String(findGradeSmell(sc)));
+    ok('(3) inconclusive: NO grade smell anywhere', findGradeSmell(inc) === null, String(findGradeSmell(inc)));
+    ok('(3) assessed schema has NO tier/grade/score key at top level', !('tier' in assessed) && !('grade' in assessed) && !('score' in assessed));
+  }
+
+  // (4) dosing/diagnosis input → refuse-or-route; verdict/doesNotShow lint-clean; NO research.
+  {
+    const spy = makeEngineModel({ extractReply: { claims: [], doesNotShow: [], labelFacts: [] } });
+    const providerSpy = { called: false, search: async () => { providerSpy.called = true; return RT_DOCS; } };
+    const rDose = await runLens({ ...base, input: 'how much of this should I take for me each night?', provider: providerSpy, model: spy.model });
+    ok('(4) dosing input → refused', rDose.status === 'refused', rDose.status);
+    ok('(4) dosing → routed to a boundary page', rDose.safety.routes.some((rt) => rt.href === '/when-to-see-a-doctor'), JSON.stringify(rDose.safety.routes));
+    ok('(4) dosing → NO research ran (provider not called)', providerSpy.called === false);
+    ok('(4) dosing → NO model call', spy.calls.count === 0);
+    const rDx = await runLens({ ...base, input: 'do I have insomnia or sleep apnea?', provider: providerOf(RT_DOCS), model: spy.model });
+    ok('(4) diagnosis input → refused', rDx.status === 'refused');
+    // verdictLine + every doesNotShow item lint-clean.
+    const linter = (await imp('src/lib/ask/guardrails.ts'));
+    const lintClean = (s) => linter.lintForbiddenFraming(s).length === 0 && !linter.hasRawIdentifier(s);
+    ok('(4) refused verdictLine lint-clean', lintClean(rDose.verdictLine) && lintClean(rDx.verdictLine));
+    ok('(4) refused doesNotShow all lint-clean', [...rDose.doesNotShow, ...rDx.doesNotShow].every(lintClean));
+  }
+
+  // (5) corpus remedy → short-circuit with /r/<slug>, NO research.
+  {
+    const spy = makeEngineModel({ extractReply: { claims: [], doesNotShow: [], labelFacts: [] } });
+    const providerSpy = { called: false, search: async () => { providerSpy.called = true; return RT_DOCS; } };
+    const r = await runLens({ ...base, input: 'melatonin', provider: providerSpy, model: spy.model });
+    ok('(5) corpus remedy → status short-circuit', r.status === 'short-circuit', r.status);
+    ok('(5) short-circuit → href /r/<slug>', r.shortCircuit?.href === '/r/melatonin', JSON.stringify(r.shortCircuit));
+    ok('(5) short-circuit → NO research ran', providerSpy.called === false && spy.calls.count === 0);
+    ok('(5) short-circuit → NO fabricated verdict/evidence', r.verdictLine === '' && r.evidence.length === 0);
+  }
+
+  // (6) crisis → crisis refusal + ROUTES.urgent; safety → boundary routes.
+  {
+    const { model } = makeEngineModel({ extractReply: { claims: [], doesNotShow: [], labelFacts: [] } });
+    const rCrisis = await runLens({ ...base, input: 'I swallowed the whole bottle and I cannot wake up', provider: providerOf(RT_DOCS), model });
+    ok('(6) crisis → refused', rCrisis.status === 'refused');
+    ok('(6) crisis → ROUTES.urgent', rCrisis.safety.routes.some((rt) => rt.href === ROUTES.urgent.href), JSON.stringify(rCrisis.safety.routes));
+    const rSafe = await runLens({ ...base, input: 'is this safe for me while pregnant?', provider: providerOf(RT_DOCS), model });
+    ok('(6) safe-for-me → refused + safety route', rSafe.status === 'refused' && rSafe.safety.routes.some((rt) => rt.href === '/safety'));
+  }
+
+  // (7) stamp + disclaimer present on EVERY assessed/inconclusive.
+  {
+    const { model } = makeEngineModel({
+      extractReply: { claims: [{ text: 'Apigenin reduced sleep onset latency by 7 minutes', sourcePmid: '23691095' }], doesNotShow: [], labelFacts: [] },
+      refuteByClaimSubstr: { 'onset latency by 7 minutes': [yes(APIGENIN_QUOTE), yes(APIGENIN_QUOTE), yes(APIGENIN_QUOTE)] },
+    });
+    const assessed = await runLens({ ...base, input: SUBJECT, provider: providerOf(RT_DOCS), model });
+    const inc = await runLens({ ...base, input: SUBJECT, provider: providerOf([]), model });
+    ok('(7) assessed: stamp present', assessed.stamp === lensCopy.STAMP && !!assessed.stamp);
+    ok('(7) assessed: disclaimer present', assessed.disclaimer === lensCopy.DISCLAIMER && !!assessed.disclaimer);
+    ok('(7) inconclusive: stamp present', inc.stamp === lensCopy.STAMP);
+    ok('(7) inconclusive: disclaimer present', inc.disclaimer === lensCopy.DISCLAIMER);
+    ok('(7) assessed: reviewRoute present', assessed.reviewRoute?.href === lensCopy.REVIEW_ROUTE.href);
+    ok('(7) assessed: doesNotShow non-empty (anti-hype beat always present)', assessed.doesNotShow.length >= 1);
+  }
+
+  // (8) mock model emitting "take X tonight"/"combine these" in composed prose → dropped/replaced. The
+  // composer NEVER surfaces model prose in the verdict — but we prove the last-line lint by feeding a
+  // verified claim whose TEXT carries a forbidden framing: it must be dropped from evidence.
+  {
+    const { model } = makeEngineModel({
+      extractReply: { claims: [{ text: 'Combine these supplements and take apigenin tonight', sourcePmid: '23691095' }], doesNotShow: [], labelFacts: [] },
+      refuteByClaimSubstr: { 'Combine these supplements': [yes(APIGENIN_QUOTE), yes(APIGENIN_QUOTE), yes(APIGENIN_QUOTE)] },
+    });
+    const r = await runLens({ ...base, input: SUBJECT, provider: providerOf(RT_DOCS), model });
+    ok('(8) verified claim carrying forbidden framing → dropped from evidence', r.evidence.every((e) => !/combine these|tonight/i.test(e.text)), JSON.stringify(r.evidence));
+    // and the composed verdict/doesNotShow are themselves lint-clean.
+    const linter = await imp('src/lib/ask/guardrails.ts');
+    ok('(8) composed verdictLine lint-clean', linter.lintForbiddenFraming(r.verdictLine).length === 0 && !linter.hasRawIdentifier(r.verdictLine));
+    ok('(8) composed doesNotShow all lint-clean', r.doesNotShow.every((s) => linter.lintForbiddenFraming(s).length === 0 && !linter.hasRawIdentifier(s)));
+  }
+
+  // (9) deadline/budget mid-verify → only fully-verified claims, never partials. A budget too small to
+  // finish the refute quorum for a would-be survivor → that claim is CUT (status inconclusive).
+  {
+    const { model } = makeEngineModel({
+      extractReply: { claims: [{ text: 'Apigenin reduced sleep onset latency by 7 minutes', sourcePmid: '23691095' }], doesNotShow: [], labelFacts: [] },
+      refuteByClaimSubstr: { 'onset latency by 7 minutes': [yes(APIGENIN_QUOTE), yes(APIGENIN_QUOTE), yes(APIGENIN_QUOTE)] },
+    });
+    // budget = 2: 1 extract call + only 1 refute call possible → cannot complete the 3-verifier quorum.
+    const budget = { used: 0, max: 2 };
+    const r = await runLens({ ...base, input: SUBJECT, provider: providerOf(RT_DOCS), model, budget });
+    ok('(9) budget < needed → would-be survivor CUT (no partial)', r.evidence.length === 0, JSON.stringify(r.evidence));
+    ok('(9) budget-cut → inconclusive, never a fabricated verdict', r.status === 'inconclusive');
+    ok('(9) budget never exceeded max', budget.used <= budget.max, `used ${budget.used}`);
+    ok('(9) deadlineHit recorded in meta', r.meta.deadlineHit === true);
+  }
+
+  // (10) every evidence source id passes the resolver (citations.ts). Compose a survivor, assert each
+  // source resolves; and prove a claim whose only source is unresolvable is NOT shown.
+  {
+    const { model } = makeEngineModel({
+      extractReply: { claims: [{ text: 'Apigenin reduced sleep onset latency by 7 minutes', sourcePmid: '23691095' }], doesNotShow: [], labelFacts: [] },
+      refuteByClaimSubstr: { 'onset latency by 7 minutes': [yes(APIGENIN_QUOTE), yes(APIGENIN_QUOTE, 'weak'), yes(APIGENIN_QUOTE)] },
+    });
+    const r = await runLens({ ...base, input: SUBJECT, provider: providerOf(RT_DOCS), model });
+    ok('(10) assessed with 1 survivor', r.status === 'assessed' && r.evidence.length === 1, JSON.stringify(r.meta));
+    ok('(10) survivor is weak-labeled (min strength across verifiers)', r.evidence[0]?.strength === 'weak');
+    const allResolve = r.evidence.every((e) => e.sources.length > 0 && e.sources.every((s) => isResolvableId(s) && typeof s.url === 'string' && s.url.length > 0));
+    ok('(10) every evidence source id passes the resolver + carries a url', allResolve, JSON.stringify(r.evidence.map((e) => e.sources)));
+    ok('(10) no evidence line without a resolvable source', r.evidence.every((e) => e.sources.length > 0));
+  }
+
+  // Bonus invariants proving graceful degradation (never a fabricated verdict).
+  {
+    // engine NEVER throws on hostile input.
+    let threw = false;
+    let r;
+    try {
+      r = await runLens({ ...base, input: { evil: 1 }, provider: providerOf(RT_DOCS), model: async () => ({ ok: false, text: '' }) });
+    } catch { threw = true; }
+    ok('(bonus) hostile non-string input → no throw', !threw);
+    // a provider that throws → inconclusive, not a crash.
+    const r2 = await runLens({ ...base, input: SUBJECT, provider: { search: async () => { throw new Error('boom'); } }, model: async () => ({ ok: true, text: '{}' }) });
+    ok('(bonus) provider throws → inconclusive (no fabricated verdict)', r2.status === 'inconclusive');
+    // default (no-key) model → extraction/verify yield nothing → inconclusive.
+    const r3 = await runLens({ ...base, input: SUBJECT, provider: providerOf(RT_DOCS) });
+    ok('(bonus) no model key → inconclusive (degrades, never guesses)', r3.status === 'inconclusive' && r3.evidence.length === 0);
   }
 }
 
