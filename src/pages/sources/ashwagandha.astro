@@ -56,25 +56,40 @@ const ratingLegend = [
       </p>
     </aside>
 
-    <aside class="safety-note">
-      <p class="safety-note-title">⚠ The ashwagandha safety notes worth knowing</p>
-      <p class="safety-note-body">
-        <strong>Liver:</strong> Australia’s medicines regulator (the TGA) has a standing advisory that
-        ashwagandha carries a <strong>very rare risk of liver injury</strong>, and it’s weighing the
-        <strong>root vs leaf</strong> question (some countries restrict leaf use). Products made from
-        <strong>root and leaf</strong> — flagged on their cards — sit on the higher-scrutiny side; the
-        <strong>imported</strong> products don’t carry Australia’s liver-caution wording at all.<br />
-        <strong>Vitamin B6:</strong> one product here (Blackmores Ashwagandha+) also adds a notable
-        amount of B6 and carries the mandated nerve-damage warning — shown as a <strong>⚠ B6</strong>
-        flag.<br />
-        <strong>Pregnancy:</strong> the standard advice is to avoid ashwagandha in pregnancy and
-        breastfeeding. These flags are shown for your safety and are separate from the scores — talk to
-        a pharmacist before taking ashwagandha regularly.
+    <aside class="safety-note" aria-labelledby="safety-title">
+      <h2 class="safety-note-title" id="safety-title"><span class="safety-note-mark" aria-hidden="true">⚠</span> Ashwagandha safety notes worth knowing</h2>
+      <dl class="safety-list">
+        <div class="safety-item">
+          <dt>Liver</dt>
+          <dd>
+            Australia’s medicines regulator (the TGA) has a standing advisory that ashwagandha carries a
+            <strong>very rare risk of liver injury</strong>, and it’s weighing the <strong>root vs leaf</strong>
+            question (some countries restrict leaf use). Products made from <strong>root and leaf</strong> —
+            flagged on their cards — sit on the higher-scrutiny side; the <strong>imported</strong> ones don’t
+            carry Australia’s liver-caution wording at all.
+          </dd>
+        </div>
+        <div class="safety-item">
+          <dt>Vitamin B6</dt>
+          <dd>
+            One product here (Blackmores Ashwagandha+) also adds a notable amount of B6 and carries the
+            mandated nerve-damage warning — shown as a <strong>⚠ B6</strong> flag.
+          </dd>
+        </div>
+        <div class="safety-item">
+          <dt>Pregnancy</dt>
+          <dd>The standard advice is to avoid ashwagandha in pregnancy and breastfeeding.</dd>
+        </div>
+      </dl>
+      <p class="safety-note-foot">
+        These flags are shown for your safety and sit apart from the scores — talk to a pharmacist before
+        taking ashwagandha regularly.
       </p>
     </aside>
 
-    <aside class="legend">
-      <p class="legend-title">What the six ratings mean — in plain words</p>
+    <section class="legend" aria-labelledby="legend-title">
+      <h2 class="legend-title" id="legend-title">What the six ratings mean</h2>
+      <p class="legend-sub">In plain words. Every product is scored 0–5 on each — more filled bars is better.</p>
       <dl class="legend-grid">
         {ratingLegend.map((r) => (
           <div class="legend-item">
@@ -84,14 +99,13 @@ const ratingLegend = [
         ))}
       </dl>
       <p class="legend-foot">
-        Each is scored 0–5 (more filled bars = better). To make the page quick to read, we group the
-        products into four <strong>trust tiers</strong> below — a shorthand for how well-sourced and
-        transparent each is, drawn straight from these six scores.
-        <strong>The tier is about how much you can trust what’s on the label — not whether you should
-        buy it or whether it works for you</strong> (that’s the <a href="/r/ashwagandha">evidence
-        grade</a>). Tap “Why these scores” on any card for the exact reasons.
+        To make the page quick to read, we group the products into four <strong>trust tiers</strong> below —
+        a shorthand for how well-sourced and transparent each is, drawn straight from these six scores.
+        <strong>A tier is about how much you can trust what’s on the label — not whether you should buy it or
+        whether it works for you</strong> (that’s the <a href="/r/ashwagandha">evidence grade</a>). Tap
+        “Why these scores” on any card for the specifics.
       </p>
-    </aside>
+    </section>
 
     {
       total === 0 ? (
@@ -122,98 +136,85 @@ const ratingLegend = [
                   </div>
 
                   <div class="body">
-                    <div class="body-head">
-                      <div class="id">
-                        <h3 class="brand">{p.brand}</h3>
-                        <p class="product">
-                          {p.productName} · {p.strength} · {p.form}
-                        </p>
-                        <p class="meta">
-                          {p.regulated === 'medicine' && p.ausL ? `AUST L ${p.ausL}` : 'Food · not TGA-listed (import)'} · {p.channel}
-                        </p>
-                      </div>
-                      <div class="flags">
-                        <p class="cert" data-kind={p.certVerified ? 'yes' : 'none'}>{p.certSummary}</p>
-                        {p.trialFlag && <p class="trialflag" title={p.trialFlag.note}>🔬 Used in trials</p>}
-                        {p.rootPart === 'root+leaf' && <p class="leafflag" title="Made from root and leaf — the plant part under extra liver scrutiny (see the safety note).">🍃 Root + leaf</p>}
-                        {p.b6 && <p class="importflag" title={p.b6.note}>⚠ Contains B6</p>}
-                        {p.importSafety && <p class="importflag" title={p.importSafety.note}>⚠ Import — no AU liver warning</p>}
-                      </div>
+                    <div class="id">
+                      <h3 class="brand">{p.brand}</h3>
+                      <p class="product">{p.productName}</p>
+                      <p class="spec">{p.strength}</p>
+                      <p class="cert" data-kind={p.certVerified ? 'yes' : 'none'}>{p.certSummary}</p>
                     </div>
 
                     <p class="bottomline">{p.bottomLine}</p>
-                    <p class="verdict">{p.verdict}</p>
 
-                    {p.trialFlag && (
-                  <p class="trialline">
-                    <span class="tag">Used in trials</span> {p.trialFlag.note}
-                  </p>
-                )}
-
-                {p.b6 && (
-                  <p class="safetyline">
-                    <span class="tag">Safety</span> {p.b6.note}
-                  </p>
-                )}
-
-                {p.importSafety && (
-                  <p class="safetyline">
-                    <span class="tag">Safety</span> {p.importSafety.note}
-                  </p>
-                )}
-
-                <div class="meters">
-                  {DIMENSION_ORDER.map((key) => (
-                    <div class="meter">
-                      <span class="meter-label">{DIMENSION_LABELS[key]}</span>
-                      <span class="meter-row">
-                        <span class="bar" aria-hidden="true">
-                          {segs.map((i) => (
-                            <i class:list={['seg', { on: i <= p.scores[key].score }]} />
-                          ))}
-                        </span>
-                        <span class="meter-num">{p.scores[key].score}<span class="of">/5</span></span>
-                      </span>
-                    </div>
-                  ))}
-                </div>
-
-                <details class="why">
-                  <summary>Why these scores</summary>
-                  <dl class="why-list">
-                    {DIMENSION_ORDER.map((key) => (
-                      <div class="why-row">
-                        <dt>
-                          {DIMENSION_LABELS[key]} · {p.scores[key].score}/5
-                        </dt>
-                        <dd>{p.scores[key].note}</dd>
+                    {(p.trialFlag || p.rootPart === 'root+leaf' || p.b6 || p.importSafety) && (
+                      <div class="chips">
+                        {p.trialFlag && <span class="chip" data-kind="good" title={p.trialFlag.note}>🔬 Used in trials</span>}
+                        {p.rootPart === 'root+leaf' && <span class="chip" data-kind="good" title="Made from root and leaf — the plant part under extra liver scrutiny (see the safety notes above).">🍃 Root + leaf</span>}
+                        {p.b6 && <span class="chip" data-kind="warn" title={p.b6.note}>⚠ Contains B6</span>}
+                        {p.importSafety && <span class="chip" data-kind="warn" title={p.importSafety.note}>⚠ Import — no AU warning</span>}
                       </div>
-                    ))}
-                  </dl>
-                  {p.heldItems.length > 0 && (
-                    <p class="held">
-                      <span class="tag">Under review</span> {p.heldItems.join(' ')}
-                    </p>
-                  )}
-                </details>
-
-                <div class="foot">
-                  <p class="community">
-                    <span class="tag">Community read · never scored</span>{' '}
-                    {p.communityThemes && p.communityThemes.length > 0 ? (
-                      p.communityThemes.map((t, i) => (
-                        <>
-                          {i > 0 && ' · '}
-                          {t.url ? <a href={t.url} rel="nofollow noopener" target="_blank">{t.note}</a> : t.note}
-                        </>
-                      ))
-                    ) : (
-                      <>Gathering — forum context only.</>
                     )}
-                  </p>
-                </div>
-              </div>
-            </article>
+
+                    <details class="why">
+                      <summary>Why these scores</summary>
+                      <div class="why-body">
+                        <p class="verdict">{p.verdict}</p>
+
+                        {p.b6 && (
+                          <p class="safetyline"><span class="tag">Safety</span> {p.b6.note}</p>
+                        )}
+                        {p.importSafety && (
+                          <p class="safetyline"><span class="tag">Safety</span> {p.importSafety.note}</p>
+                        )}
+                        {p.trialFlag && (
+                          <p class="trialline"><span class="tag">Used in trials</span> {p.trialFlag.note}</p>
+                        )}
+
+                        <div class="meters">
+                          {DIMENSION_ORDER.map((key) => (
+                            <div class="meter">
+                              <span class="meter-label">{DIMENSION_LABELS[key]}</span>
+                              <span class="meter-row">
+                                <span class="bar" aria-hidden="true">
+                                  {segs.map((i) => (
+                                    <i class:list={['seg', { on: i <= p.scores[key].score }]} />
+                                  ))}
+                                </span>
+                                <span class="meter-num">{p.scores[key].score}<span class="of">/5</span></span>
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+
+                        <dl class="why-list">
+                          {DIMENSION_ORDER.map((key) => (
+                            <div class="why-row">
+                              <dt>{DIMENSION_LABELS[key]} · {p.scores[key].score}/5</dt>
+                              <dd>{p.scores[key].note}</dd>
+                            </div>
+                          ))}
+                        </dl>
+
+                        {p.heldItems.length > 0 && (
+                          <p class="held"><span class="tag">Under review</span> {p.heldItems.join(' ')}</p>
+                        )}
+                      </div>
+                    </details>
+
+                    <p class="community">
+                      <span class="tag">Community read · never scored</span>{' '}
+                      {p.communityThemes && p.communityThemes.length > 0 ? (
+                        p.communityThemes.map((t, i) => (
+                          <>
+                            {i > 0 && ' · '}
+                            {t.url ? <a href={t.url} rel="nofollow noopener" target="_blank">{t.note}</a> : t.note}
+                          </>
+                        ))
+                      ) : (
+                        <>Gathering — forum context only.</>
+                      )}
+                    </p>
+                  </div>
+                </article>
               ))}
             </div>
           </section>
@@ -297,25 +298,60 @@ const ratingLegend = [
     border: var(--border-hairline);
     border-left: 3px solid var(--safety-ink, var(--vermilion));
     border-radius: var(--r-lg);
-    padding: var(--sp-5) var(--sp-6);
-    margin: 0 0 var(--sp-7);
+    padding: var(--sp-6) var(--sp-7);
+    margin: 0 0 var(--sp-8);
     background: var(--surface);
   }
   .safety-note-title {
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-lg);
+    line-height: var(--lh-lg);
+    letter-spacing: var(--tracking-tight);
     color: var(--safety-ink, var(--ink));
-    margin: 0 0 var(--sp-2);
+    margin: 0 0 var(--sp-5);
   }
-  .safety-note-body {
+  .safety-note-mark {
+    font-size: var(--text-md);
+  }
+  .safety-list {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-5);
+  }
+  .safety-item {
+    display: grid;
+    grid-template-columns: minmax(88px, 120px) 1fr;
+    gap: var(--sp-2) var(--sp-6);
+    align-items: baseline;
+  }
+  .safety-item dt {
+    font-family: var(--font-body);
     font-size: var(--text-sm);
-    line-height: var(--lh-sm);
-    color: var(--muted);
+    font-weight: 700;
+    color: var(--ink);
     margin: 0;
   }
-  .safety-note-body strong {
+  .safety-item dd {
+    margin: 0;
+    font-size: var(--text-sm);
+    line-height: var(--lh-md);
     color: var(--ink);
+  }
+  .safety-item dd strong {
+    font-weight: 700;
+  }
+  .safety-note-foot {
+    font-size: var(--text-xs);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: var(--sp-5) 0 0;
+    padding-top: var(--sp-4);
+    border-top: var(--border-hairline);
   }
 
   .empty {
@@ -325,50 +361,57 @@ const ratingLegend = [
 
   /* plain-language legend */
   .legend {
-    margin: 0 0 var(--sp-7);
+    margin: 0 0 var(--sp-8);
   }
   .legend-title {
     font-family: var(--font-display);
     font-weight: 700;
-    font-size: var(--text-md);
+    font-size: var(--text-2xl);
+    line-height: var(--lh-2xl);
+    letter-spacing: var(--tracking-tight);
     color: var(--ink);
-    margin: 0 0 var(--sp-4);
+    margin: 0 0 var(--sp-2);
+  }
+  .legend-sub {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: 0 0 var(--sp-6);
   }
   .legend-grid {
     margin: 0;
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: var(--sp-4) var(--sp-6);
+    gap: var(--sp-6) var(--sp-8);
+  }
+  .legend-item {
+    padding-top: var(--sp-4);
+    border-top: var(--border-hairline);
   }
   .legend-item dt {
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    font-weight: 700;
     color: var(--ink);
-    margin: 0 0 var(--sp-1);
+    margin: 0 0 var(--sp-2);
   }
   .legend-item dd {
     margin: 0;
     font-size: var(--text-sm);
-    line-height: var(--lh-sm);
+    line-height: var(--lh-md);
     color: var(--muted);
   }
   .legend-foot {
     font-size: var(--text-sm);
-    line-height: var(--lh-sm);
+    line-height: var(--lh-md);
     color: var(--muted);
-    margin: var(--sp-4) 0 0;
-    max-width: 72ch;
+    margin: var(--sp-6) 0 0;
+    padding-top: var(--sp-5);
+    border-top: var(--border-hairline);
+    max-width: 74ch;
   }
   .legend-foot strong {
     color: var(--ink);
-  }
-  .inline-trial {
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
-    color: var(--eucalyptus, var(--primary));
-    white-space: nowrap;
   }
 
   /* sourcing-trust tier groups */
@@ -410,6 +453,10 @@ const ratingLegend = [
     letter-spacing: var(--tracking-label);
     color: var(--muted);
     font-weight: 400;
+    background: var(--primary-soft);
+    border-radius: var(--r-sm);
+    padding: var(--sp-1) var(--sp-2);
+    align-self: center;
   }
   .tierhead-blurb {
     font-size: var(--text-sm);
@@ -419,34 +466,34 @@ const ratingLegend = [
     max-width: 72ch;
   }
 
+  /* responsive grid of compact, decision-first cards — 3 across on desktop */
   .stack {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
     gap: var(--sp-5);
+    align-items: start;
   }
   .card {
-    display: grid;
-    grid-template-columns: 168px 1fr;
-    gap: var(--sp-6);
+    display: flex;
+    flex-direction: column;
     border: var(--border-hairline);
     border-radius: var(--r-xl);
     background: var(--surface);
-    padding: var(--sp-6);
+    overflow: hidden;
   }
   .shot {
     display: flex;
     align-items: center;
     justify-content: center;
-    aspect-ratio: 1;
+    aspect-ratio: 4 / 3;
     background: var(--primary-soft);
-    border-radius: var(--r-lg);
-    overflow: hidden;
+    border-bottom: var(--border-hairline);
   }
   .shot img {
     width: 100%;
     height: 100%;
     object-fit: contain;
-    padding: var(--sp-3);
+    padding: var(--sp-5);
   }
   .shot-fallback {
     font-family: var(--font-display);
@@ -459,48 +506,41 @@ const ratingLegend = [
     min-width: 0;
     display: flex;
     flex-direction: column;
-    gap: var(--sp-4);
+    gap: var(--sp-3);
+    padding: var(--sp-5);
+    flex: 1 1 auto;
   }
-  .body-head {
+  .id {
     display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: var(--sp-4);
+    flex-direction: column;
+    gap: var(--sp-1);
   }
   .brand {
     font-family: var(--font-display);
     font-weight: 700;
-    font-size: var(--text-xl);
-    line-height: var(--lh-xl);
+    font-size: var(--text-lg);
+    line-height: var(--lh-lg);
+    letter-spacing: var(--tracking-tight);
     color: var(--ink);
     margin: 0;
   }
   .product {
     font-size: var(--text-sm);
-    color: var(--muted);
-    margin: var(--sp-1) 0 0;
+    line-height: var(--lh-sm);
+    color: var(--ink);
+    margin: 0;
   }
-  .meta {
-    font-family: var(--font-mono);
+  .spec {
     font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
+    line-height: var(--lh-sm);
     color: var(--muted);
-    margin: var(--sp-1) 0 0;
-  }
-  .flags {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: var(--sp-2);
-    flex-shrink: 0;
-    max-width: 40%;
+    margin: 0;
   }
   .cert {
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    text-align: right;
-    margin: 0;
+    margin: var(--sp-1) 0 0;
   }
   .cert[data-kind='yes'] {
     color: var(--eucalyptus, var(--primary));
@@ -508,40 +548,37 @@ const ratingLegend = [
   .cert[data-kind='none'] {
     color: var(--muted);
   }
-  .trialflag,
-  .leafflag {
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2);
+  }
+  .chip {
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    color: var(--eucalyptus, var(--primary));
-    border: 1px solid var(--eucalyptus, var(--primary));
     border-radius: var(--r-sm);
     padding: var(--sp-1) var(--sp-2);
     margin: 0;
     white-space: nowrap;
   }
-  .importflag {
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
+  .chip[data-kind='good'] {
+    color: var(--eucalyptus, var(--primary));
+    border: 1px solid var(--eucalyptus, var(--primary));
+  }
+  .chip[data-kind='warn'] {
     color: var(--safety-ink, var(--ink));
     border: 1px solid var(--safety-ink, var(--muted));
-    border-radius: var(--r-sm);
-    padding: var(--sp-1) var(--sp-2);
-    margin: 0;
-    white-space: nowrap;
-    text-align: right;
   }
 
   /* the 2-second read — bold lead line */
   .bottomline {
     font-family: var(--font-body);
-    font-size: var(--text-md);
-    line-height: var(--lh-md);
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
     font-weight: 600;
     color: var(--ink);
-    margin: 0;
-    max-width: 62ch;
+    margin: var(--sp-1) 0 0;
   }
   /* the fuller story — supporting, de-emphasised under the bottom line */
   .verdict {
@@ -572,10 +609,8 @@ const ratingLegend = [
 
   .meters {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: var(--sp-4) var(--sp-5);
-    padding-top: var(--sp-4);
-    border-top: var(--border-hairline);
   }
   .meter {
     display: flex;
@@ -621,6 +656,7 @@ const ratingLegend = [
   .why {
     border-top: var(--border-hairline);
     padding-top: var(--sp-3);
+    margin-top: var(--sp-1);
   }
   .why > summary {
     font-family: var(--font-mono);
@@ -629,8 +665,14 @@ const ratingLegend = [
     color: var(--primary);
     cursor: pointer;
   }
+  .why-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+    margin-top: var(--sp-4);
+  }
   .why-list {
-    margin: var(--sp-4) 0 0;
+    margin: 0;
     display: flex;
     flex-direction: column;
     gap: var(--sp-3);
@@ -651,18 +693,16 @@ const ratingLegend = [
     font-size: var(--text-xs);
     line-height: var(--lh-sm);
     color: var(--muted);
-    margin: var(--sp-4) 0 0;
+    margin: 0;
   }
 
-  .foot {
-    padding-top: var(--sp-3);
-    border-top: var(--border-hairline);
-  }
   .community {
     font-size: var(--text-xs);
     line-height: var(--lh-sm);
     color: var(--muted);
-    margin: 0;
+    margin: auto 0 0;
+    padding-top: var(--sp-4);
+    border-top: var(--border-hairline);
   }
   .tag {
     font-family: var(--font-mono);
@@ -682,26 +722,26 @@ const ratingLegend = [
     color: var(--muted);
   }
 
-  @media (max-width: 720px) {
-    .legend-grid {
-      grid-template-columns: 1fr;
+  @media (max-width: 900px) {
+    .stack {
+      grid-template-columns: repeat(2, 1fr);
     }
+  }
+  @media (max-width: 720px) {
     .page {
       padding: var(--sp-7) var(--sp-5) var(--sp-8);
     }
-    .card {
+    .legend-grid {
       grid-template-columns: 1fr;
-      gap: var(--sp-4);
     }
-    .shot {
-      aspect-ratio: auto;
-      height: 200px;
+    .safety-item {
+      grid-template-columns: 1fr;
+      gap: var(--sp-1);
     }
-    .flags {
-      max-width: none;
-    }
-    .meters {
-      grid-template-columns: repeat(2, 1fr);
+  }
+  @media (max-width: 560px) {
+    .stack {
+      grid-template-columns: 1fr;
     }
   }
 </style>
