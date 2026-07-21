@@ -433,7 +433,7 @@ NOT a Somnary grade". Concierge (CHK-6.8) demotes to a secondary mode.
 - [x] **CHK-7.3 Human-grade loop.** "Request a full review" queue + Lens-demand
   analytics feeding the grading backlog; concierge repositioned as secondary mode.
   *Accept:* grading stays human-gated; firewall to community store intact.
-- [ ] **CHK-7.4 Query understanding + Perplexity-grade UX.** `HG` (medical-boundary
+- [x] **CHK-7.4 Query understanding + Perplexity-grade UX.** `HG` (medical-boundary
   AI core). Owner-reported: "Restavit" (an OTC doxylamine sleep aid) returned nothing —
   the concierge topic-fence refused any bare product name the corpus doesn't know,
   the opposite of the Lens's job. Adds a model query-understanding step (resolve.ts):
