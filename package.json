@@ -25,6 +25,7 @@
     "verify:guide": "node scripts/test-guide.mjs",
     "verify:lens": "node scripts/test-lens.mjs",
     "verify:lens:card": "node scripts/test-lens-card.mjs",
+    "verify:lens:loop": "node scripts/test-lens-loop.mjs",
     "verify:ratelimit": "node scripts/test-rate-limit.mjs",
     "verify:auth": "node scripts/test-auth-plumbing.mjs",
     "verify:accounts": "node scripts/test-accounts.mjs",

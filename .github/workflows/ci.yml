@@ -50,6 +50,9 @@ jobs:
       - name: Lens card renderer (textContent-only per status, no innerHTML markup, no grade rendered, fake-DOM)
         run: npm run verify:lens:card
 
+      - name: Lens loop firewall (backlog can't touch a grade — no FK/import; demand logs names-only, fail-open)
+        run: npm run verify:lens:loop
+
       - name: Rate limiter (fail-open + IP extraction, mocked Supabase client)
         run: npm run verify:ratelimit
 
