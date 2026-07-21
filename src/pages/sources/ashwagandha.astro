@@ -4,14 +4,14 @@ import {
   ASHWAGANDHA_SOURCES,
   DIMENSION_ORDER,
   DIMENSION_LABELS,
-  type AshProduct,
 } from '../../data/source-scorecards/ashwagandha';
+import { groupByTier } from '../../data/source-scorecards/tiers';
 
-// Only ratified rows render (mirrors the Supabase publish gate). Ordered alphabetically —
-// never by score — so no ranking is implied.
-const products: AshProduct[] = ASHWAGANDHA_SOURCES.filter((p) => p.ratified).sort((a, b) =>
-  a.brand.localeCompare(b.brand),
-);
+// Only ratified rows render (mirrors the Supabase publish gate). Grouped into sourcing-trust tiers
+// (best-documented first); within a tier, alphabetical — so no hard 1-2-3 ranking is implied.
+const ratified = ASHWAGANDHA_SOURCES.filter((p) => p.ratified);
+const grouped = groupByTier(ratified, (p) => !!p.b6, (a, b) => a.brand.localeCompare(b.brand));
+const total = ratified.length;
 
 const reviewDate = '2026-07-21';
 const segs = [1, 2, 3, 4, 5];
@@ -84,55 +84,67 @@ const ratingLegend = [
         ))}
       </dl>
       <p class="legend-foot">
-        Each is scored 0–5 (more filled bars = better). There’s no overall score — the six are kept
-        separate on purpose. Ashwagandha is the most <strong>transparent</strong> of the remedies we’ve
-        rated: many products name a real studied extract (<strong>KSM-66</strong> or <strong>Shoden</strong>,
-        marked <span class="inline-trial">🔬 used in trials</span>) and print their withanolide strength.
-        But almost none is independently tested, so testing and label accuracy are near-zero across the
-        board. Tap “Why these scores” on any card for the exact reason and the document behind it.
+        Each is scored 0–5 (more filled bars = better). To make the page quick to read, we group the
+        products into four <strong>trust tiers</strong> below — a shorthand for how well-sourced and
+        transparent each is, drawn straight from these six scores.
+        <strong>The tier is about how much you can trust what’s on the label — not whether you should
+        buy it or whether it works for you</strong> (that’s the <a href="/r/ashwagandha">evidence
+        grade</a>). Tap “Why these scores” on any card for the exact reasons.
       </p>
     </aside>
 
     {
-      products.length === 0 ? (
+      total === 0 ? (
         <p class="empty">Scorecards are being finalized. Check back shortly.</p>
       ) : (
-        <section class="stack" aria-label="Ashwagandha source scorecards">
-          {products.map((p) => (
-            <article class="card">
-              <div class="shot">
-                {p.imagePath ? (
-                  <img src={p.imagePath} alt={`${p.brand} ${p.productName}`} loading="lazy" decoding="async" />
-                ) : (
-                  <span class="shot-fallback" aria-hidden="true">
-                    {p.brand.charAt(0)}
-                  </span>
-                )}
-              </div>
+        grouped.map((g) => (
+          <section class="tiergroup" aria-label={`${g.tier.label} — ${g.items.length} product${g.items.length === 1 ? '' : 's'}`}>
+            <div class="tierhead" data-tier={g.tier.key}>
+              <h2 class="tierhead-title">
+                <span class="tierhead-icon" aria-hidden="true">{g.tier.icon}</span>
+                {g.tier.label}
+                <span class="tierhead-count">{g.items.length}</span>
+              </h2>
+              <p class="tierhead-blurb">{g.tier.blurb}</p>
+            </div>
 
-              <div class="body">
-                <div class="body-head">
-                  <div class="id">
-                    <h2 class="brand">{p.brand}</h2>
-                    <p class="product">
-                      {p.productName} · {p.strength} · {p.form}
-                    </p>
-                    <p class="meta">
-                      {p.regulated === 'medicine' && p.ausL ? `AUST L ${p.ausL}` : 'Food · not TGA-listed (import)'} · {p.channel}
-                    </p>
+            <div class="stack">
+              {g.items.map((p) => (
+                <article class="card">
+                  <div class="shot">
+                    {p.imagePath ? (
+                      <img src={p.imagePath} alt={`${p.brand} ${p.productName}`} loading="lazy" decoding="async" />
+                    ) : (
+                      <span class="shot-fallback" aria-hidden="true">
+                        {p.brand.charAt(0)}
+                      </span>
+                    )}
                   </div>
-                  <div class="flags">
-                    <p class="cert" data-kind={p.certVerified ? 'yes' : 'none'}>{p.certSummary}</p>
-                    {p.trialFlag && <p class="trialflag" title={p.trialFlag.note}>🔬 Used in trials</p>}
-                    {p.rootPart === 'root+leaf' && <p class="leafflag" title="Made from root and leaf — the plant part under extra liver scrutiny (see the safety note).">🍃 Root + leaf</p>}
-                    {p.b6 && <p class="importflag" title={p.b6.note}>⚠ Contains B6</p>}
-                    {p.importSafety && <p class="importflag" title={p.importSafety.note}>⚠ Import — no AU liver warning</p>}
-                  </div>
-                </div>
 
-                <p class="verdict">{p.verdict}</p>
+                  <div class="body">
+                    <div class="body-head">
+                      <div class="id">
+                        <h3 class="brand">{p.brand}</h3>
+                        <p class="product">
+                          {p.productName} · {p.strength} · {p.form}
+                        </p>
+                        <p class="meta">
+                          {p.regulated === 'medicine' && p.ausL ? `AUST L ${p.ausL}` : 'Food · not TGA-listed (import)'} · {p.channel}
+                        </p>
+                      </div>
+                      <div class="flags">
+                        <p class="cert" data-kind={p.certVerified ? 'yes' : 'none'}>{p.certSummary}</p>
+                        {p.trialFlag && <p class="trialflag" title={p.trialFlag.note}>🔬 Used in trials</p>}
+                        {p.rootPart === 'root+leaf' && <p class="leafflag" title="Made from root and leaf — the plant part under extra liver scrutiny (see the safety note).">🍃 Root + leaf</p>}
+                        {p.b6 && <p class="importflag" title={p.b6.note}>⚠ Contains B6</p>}
+                        {p.importSafety && <p class="importflag" title={p.importSafety.note}>⚠ Import — no AU liver warning</p>}
+                      </div>
+                    </div>
 
-                {p.trialFlag && (
+                    <p class="bottomline">{p.bottomLine}</p>
+                    <p class="verdict">{p.verdict}</p>
+
+                    {p.trialFlag && (
                   <p class="trialline">
                     <span class="tag">Used in trials</span> {p.trialFlag.note}
                   </p>
@@ -202,8 +214,10 @@ const ratingLegend = [
                 </div>
               </div>
             </article>
-          ))}
-        </section>
+              ))}
+            </div>
+          </section>
+        ))
       )
     }
 
@@ -357,6 +371,54 @@ const ratingLegend = [
     white-space: nowrap;
   }
 
+  /* sourcing-trust tier groups */
+  .tiergroup {
+    margin: 0 0 var(--sp-8);
+  }
+  .tierhead {
+    margin: 0 0 var(--sp-5);
+    padding-left: var(--sp-4);
+    border-left: 3px solid var(--muted);
+  }
+  .tierhead[data-tier='well-documented'],
+  .tierhead[data-tier='reasonable'] {
+    border-left-color: var(--eucalyptus, var(--primary));
+  }
+  .tierhead[data-tier='bare-bones'] {
+    border-left-color: var(--muted);
+  }
+  .tierhead[data-tier='heads-up'] {
+    border-left-color: var(--safety-ink, var(--vermilion));
+  }
+  .tierhead-title {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-xl);
+    line-height: var(--lh-xl);
+    color: var(--ink);
+    margin: 0;
+  }
+  .tierhead-icon {
+    font-size: var(--text-lg);
+  }
+  .tierhead-count {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+    font-weight: 400;
+  }
+  .tierhead-blurb {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: var(--sp-2) 0 0;
+    max-width: 72ch;
+  }
+
   .stack {
     display: flex;
     flex-direction: column;
@@ -471,13 +533,24 @@ const ratingLegend = [
     text-align: right;
   }
 
-  .verdict {
+  /* the 2-second read — bold lead line */
+  .bottomline {
     font-family: var(--font-body);
     font-size: var(--text-md);
     line-height: var(--lh-md);
+    font-weight: 600;
     color: var(--ink);
     margin: 0;
     max-width: 62ch;
+  }
+  /* the fuller story — supporting, de-emphasised under the bottom line */
+  .verdict {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: 0;
+    max-width: 64ch;
   }
 
   .trialline,
