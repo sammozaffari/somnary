@@ -62,6 +62,8 @@ export interface AshProduct {
   slug: string;
   brand: string;
   productName: string;
+  /** One-line, plain-language bottom line — the 2-second scan (leads the card, above the fuller verdict). */
+  bottomLine: string;
   form: string; // single-herb / combo (+ other actives)
   strength: string; // withanolide figure + extract, the quality axis
   rootPart: 'root' | 'root+leaf';
@@ -105,6 +107,8 @@ export const ASHWAGANDHA_SOURCES: AshProduct[] = [
     imagePath: '/images/sources/ashwagandha/carusos-ashwagandha-7500.jpg',
     brand: "Caruso's",
     productName: 'Ashwagandha 7500',
+    bottomLine:
+      'The highest-strength KSM-66 here (30 mg) — but a batch was recalled in Dec 2024 over suspected tampering (not a Caruso’s quality defect).',
     form: 'single-herb (KSM-66)',
     strength: 'withanolides 30 mg · 600 mg extract (7.5 g dry-root eq)',
     rootPart: 'root',
@@ -134,6 +138,8 @@ export const ASHWAGANDHA_SOURCES: AshProduct[] = [
     imagePath: undefined, // Nature's Way site uses query-string image URLs (redacted); lettered fallback
     brand: "Nature's Way",
     productName: 'Ashwagandha 6000 mg',
+    bottomLine:
+      'Names KSM-66 and tells you its strength (15 mg) — a TGA-listed medicine, no red flags. Discloses more than its own sibling, Sound Sleep.',
     form: 'single-herb (KSM-66)',
     strength: 'withanolides 15 mg · 300 mg extract (3.75 g dry-root eq)',
     rootPart: 'root',
@@ -163,6 +169,8 @@ export const ASHWAGANDHA_SOURCES: AshProduct[] = [
     imagePath: '/images/sources/ashwagandha/switch-nutrition-ksm66-ashwagandha.jpg',
     brand: 'Switch Nutrition',
     productName: 'KSM-66 Ashwagandha',
+    bottomLine:
+      'A single-herb KSM-66 that discloses its strength (15 mg) and is a TGA-listed medicine — no red flags on the product itself.',
     form: 'single-herb (KSM-66)',
     strength: 'withanolides 15 mg (~5%) · 300 mg extract (3.75 g dry-root eq)',
     rootPart: 'root',
@@ -192,6 +200,8 @@ export const ASHWAGANDHA_SOURCES: AshProduct[] = [
     imagePath: '/images/sources/ashwagandha/herbs-of-gold-mind-ease.jpg',
     brand: 'Herbs of Gold',
     productName: 'Mind Ease',
+    bottomLine:
+      'A KSM-66 + lavender combo that discloses its strength — and, taken as directed, actually delivers the studied dose its "clinically trialled" claim cites.',
     form: 'combo (+ lavender)',
     strength: 'withanolides 15 mg · 300 mg extract (per tablet, twice daily)',
     rootPart: 'root',
@@ -221,6 +231,8 @@ export const ASHWAGANDHA_SOURCES: AshProduct[] = [
     imagePath: '/images/sources/ashwagandha/natures-way-sound-sleep.jpg',
     brand: "Nature's Way",
     productName: 'Sound Sleep',
+    bottomLine:
+      'Built on KSM-66 and a TGA medicine — but, unlike its own sibling Ashwagandha 6000, it never tells you its withanolide strength.',
     form: 'single-herb (KSM-66)',
     strength: 'active strength not stated · 600 mg extract (7.5 g dry-root eq)',
     rootPart: 'root',
@@ -250,6 +262,8 @@ export const ASHWAGANDHA_SOURCES: AshProduct[] = [
     imagePath: undefined,
     brand: 'Fusion Health',
     productName: 'Stress & Anxiety',
+    bottomLine:
+      'A six-herb combo with KSM-66; it doses each herb but doesn’t disclose the ashwagandha’s strength, and its clinical claim rests on the holy basil.',
     form: 'combo (6-herb: + holy basil, poria, magnolia, polygala, citrus)',
     strength: 'active strength not stated · KSM-66 187.5 mg/tablet',
     rootPart: 'root',
@@ -279,6 +293,8 @@ export const ASHWAGANDHA_SOURCES: AshProduct[] = [
     imagePath: '/images/sources/ashwagandha/green-nutritionals-shoden-ashwagandha.jpg',
     brand: 'Green Nutritionals',
     productName: 'Shoden Ashwagandha',
+    bottomLine:
+      'The highest-standardisation extract here (Shoden), a TGA medicine, and its clinical claim is met at the dose delivered — note it’s root + leaf.',
     form: 'single-herb (Shoden)',
     strength: '35% withanolide glycosides · 84 mg per capsule (240 mg Shoden)',
     rootPart: 'root+leaf',
@@ -308,6 +324,8 @@ export const ASHWAGANDHA_SOURCES: AshProduct[] = [
     imagePath: '/images/sources/ashwagandha/blackmores-ashwagandha-plus.jpg',
     brand: 'Blackmores',
     productName: 'Ashwagandha+',
+    bottomLine:
+      'A generic, low-dose ashwagandha in a vitamin/mineral combo — and it adds a notable amount of vitamin B6 (carries the nerve-damage warning).',
     form: 'combo (+ B vitamins, vitamin C, magnesium, zinc)',
     strength: 'withanolides ~4.5 mg · 150 mg extract (generic, ~0.3%)',
     rootPart: 'root',
@@ -337,6 +355,8 @@ export const ASHWAGANDHA_SOURCES: AshProduct[] = [
     imagePath: '/images/sources/ashwagandha/swisse-ultiboost-ashwagandha-calm.jpg',
     brand: 'Swisse',
     productName: 'Ultiboost Ashwagandha Calm+',
+    bottomLine:
+      'The lowest ashwagandha dose here (1.5 mg) — a generic extract in a calm combo; a TGA medicine, no red flags but very little herb.',
     form: 'combo (+ magnesium, passionflower, reishi)',
     strength: 'withanolides 1.5 mg · 30 mg extract (generic, the lowest dose here)',
     rootPart: 'root',
@@ -365,6 +385,8 @@ export const ASHWAGANDHA_SOURCES: AshProduct[] = [
     imagePath: '/images/sources/ashwagandha/thompsons-ashwagandha-complex-stress-sleep.jpg',
     brand: "Thompson's",
     productName: 'Ashwagandha Complex Stress + Sleep',
+    bottomLine:
+      'A generic ashwagandha (no named extract) in a passionflower/lavender sleep combo; discloses its strength, a TGA medicine.',
     form: 'combo (+ passionflower, lavender oil)',
     strength: 'withanolides 3.75 mg/tablet · 150 mg extract (generic)',
     rootPart: 'root',
@@ -393,6 +415,8 @@ export const ASHWAGANDHA_SOURCES: AshProduct[] = [
     imagePath: '/images/sources/ashwagandha/gaia-herbs-ashwagandha-root.jpg',
     brand: 'Gaia Herbs',
     productName: 'Ashwagandha Root',
+    bottomLine:
+      'The one you can actually verify — it publishes per-batch lab reports — though it’s a generic low-dose blend (not KSM-66) and a no-AU-warning import.',
     form: 'single-herb (proprietary blend — not KSM-66)',
     strength: 'withanolides 2.5 mg · 350 mg per capsule (generic, ~0.7%)',
     rootPart: 'root',
@@ -423,6 +447,8 @@ export const ASHWAGANDHA_SOURCES: AshProduct[] = [
     imagePath: '/images/sources/ashwagandha/now-foods-ashwagandha-450.jpg',
     brand: 'NOW Foods',
     productName: 'Ashwagandha Standardized Extract 450 mg',
+    bottomLine:
+      'A generic standardised extract that discloses its strength — but no named studied extract, an import with no AU liver warning, and root + leaf.',
     form: 'single-herb (generic standardised)',
     strength: 'min 2.5% withanolides · ~11 mg · 450 mg extract',
     rootPart: 'root+leaf',
