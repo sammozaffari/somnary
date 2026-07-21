@@ -319,34 +319,18 @@ scenery, gradients, gray, shadows, or halftones.
 
 Any change to this illustration grammar or its production color is `[HUMAN-GATE]`.
 
-### 11.1 Remedy emblem (icon + grade, fused)
+### 11.1 Remedy emblem (RETIRED 2026-07-17)
 
-Where a remedy is shown *with* its grade at spotlight scale and up — the home spotlight, the
-remedy lead block — the linocut and the grade are one **struck-coin emblem**
-(`RemedyEmblem.astro`), never two adjacent chips. Design study 2026-07-15, owner-ratified
-"carve + orbit" (`docs/plans/2026-07-15-remedy-emblem-design.md`). Tier-board cards use the
-**plate card** instead (§11.2) — the v3 study retired the 56px card emblem as below the scale
-the linocuts were carved for. Anatomy, back → front:
-
-- **Core** — a `--primary-soft` disc (hairline oxblood inner ring) holding the linocut
-  (`RemedyIcon size="fill"`) at **72%** of the disc. A concave bite is mask-cut from the core
-  where the seal sits (radial-gradient mask; bite radius = seal radius + 5% of the disc,
-  centred at 82%/82%) so the seal nests *into* the disc, not onto a halo.
-- **Evidence orbit** — a thin grade-colored ring (`max(1.5px, 1.8% of disc)`, inset −7.5%)
-  circling the disc and threading *under* the seal. Brand echo of the crescent-moon mark.
-- **Grade seal** — a coin at 42% of the disc, grade-color fill, white Instrument Sans letter;
-  the ratified grade **gradient** (`--grade-x → -anchor`) at lead size.
-
-Rules: the disc stays brand-oxblood on **every** remedy — grade color lives only in the orbit
-and seal, and never touches the vermilion safety register. The grade is **never color alone**:
-the letter is in the seal and echoed in adjacent text (the "Grade X" / tier-word lines). The
-seal letter is pinned to the WCAG large-text band (**≥19px bold** at every size) as a
-conservative floor (worst grade, white on `--grade-c`, computes 5.56:1 — §8 table); a
-placement needing a disc smaller than `spot` must NOT carry the seal — use the plate card
-(§11.2) or a plain `RemedyIcon` + text grade instead. Sizes: `spot` 80px, `lead` 148px. `TierBadge` remains the grade mark for
+The struck-coin emblem (carve + orbit; design study 2026-07-15,
+`docs/plans/2026-07-15-remedy-emblem-design.md`) fused the linocut and grade into one mark.
+It was superseded surface by surface within two days: the tier board by the plate card
+(§11.2), the home spotlight by the hero carousel's plate-and-stamp protagonist (PR #56), and
+the remedy lead block by the hero plates (§11.3) — each time because the linocut deserved to
+be bigger than a disc allows, and the **stamp** proved the stronger grade mark. The component
+is deleted; the owner-ratified ideas that survive it: the grade never contaminates the brand
+ink or the vermilion safety register, the grade is never color alone, and identity + verdict
+must read as ONE designed thing, not adjacent chips. `TierBadge` remains the grade mark for
 **illustration-free** contexts (claims table, metadata, inline).
-
-Any change to the emblem anatomy or the seal-legibility rule is `[HUMAN-GATE]`.
 
 ### 11.2 Plate card (tier board)
 
@@ -358,14 +342,75 @@ At card scale the linocuts must not shrink below legibility — the tier-board c
   holding the linocut at **132px** — the scale the 1024px masters were carved to read at.
 - **Stamp** — the evidence grade pressed onto the plate's lower-right corner like an
   assessor's mark: grade **letter + tier word** (from `lib/tiers` — never invent grading
-  language), grade-color ink and border on a translucent paper chip, rotated −3°.
+  language), grade-color ink and border on a translucent paper chip, rotated −3°. The stamp
+  is a shared component (`GradeStamp.astro`, sizes `card`/`hero`) used here and in the
+  remedy-page label row (§11.3); HeroCarousel's inline copy dedups on its next touch.
 - **Body** — remedy name + ONE clamped verdict line (3 lines max). The key-compound line
   lives on the remedy page, not the browsing card.
 
 Rules: grade is letter + word + color (stronger than never-color-alone requires) and repeated
 in the card link's aria-label. Hover: card lifts (§4) and the specimen breathes —
 `scale(1.02)`, no more; both disabled under `prefers-reduced-motion`. The plate is the ONLY
-place the linocut may sit smaller than the emblem `spot` size, because the stamp — not a
-seal on the art — carries the grade.
+place the linocut may sit smaller than 80px, because the stamp — not a mark on the art —
+carries the grade.
 
 Any change to the plate/stamp anatomy is `[HUMAN-GATE]`.
+
+### 11.3 Hero plates (remedy pages) — the labeled plate
+
+Every remedy page opens inside its own world: a **full-bleed linocut hero plate**
+(`RemedyHero.astro`; assets `src/assets/remedy-heroes/{slug}.webp`, family grammar in that
+dir's README + `docs/plans/2026-07-16-remedy-hero-plates-prompt.md`; design study 2026-07-17
+v4→v6, owner-ratified "labeled plate"). Anatomy:
+
+- **The plate** — pure art, full viewport width, 40vh min 320px (32vh min 240px under
+  640px) *(owner-trimmed 2026-07-19 twice, from 62/44vh: the verdict must arrive without a
+  scroll)*, focal `object-position` per plate (default `center 30%`, subjects sit in the
+  central 60% by family rule). The linocut ICON does not appear on remedy pages — the hero
+  IS the remedy.
+- **The melt** — the plate itself dissolves via an alpha mask over its bottom 50%
+  *(owner-raised 2026-07-19 in two steps from 34%, with the height trims)*
+  (`mask-image`, opaque → transparent), so the page's real layered background shows through;
+  never a painted color fade (the body background is a gradient — a painted fade seams).
+- **The label row** — the plate is **labeled, not painted over**: NO type ever sits on the
+  art (no single ink survives 31 plates — v5 finding). The `h1` title (hero display size:
+  `clamp(46px, 7vw, 84px)` / 0.95 / weight 700 — a §2 addition ratified with this anatomy)
+  + the assessor's `GradeStamp` (size `hero`: `--paper` chip at 92% opacity + `--shadow-sm`,
+  so grade ink stays **AA ≥4.5:1** over any plate — worst computed 4.97:1, `--grade-c`
+  behind maximum residual melt alpha) print on the paper below, tucked `−7vh` into the melt
+  (`−5vh` under 640px) so plate and label read as one composition. At every ratified
+  height/floor the label's tuck stays inside the melt zone — the title never reaches
+  un-melted art (worst residual image alpha behind the title ≈ 0.35 at 40vh/−7vh —
+  recomputed for the final 2026-07-19 geometry; mobile 0.3125, floor cases lower →
+  ink-on-composite ≥ 8:1 everywhere). Title is always `--ink` on paper — zero per-remedy
+  tuning.
+- **Below** — the one-line verdict as the plate's caption, then the lead block, whose
+  translation line anchors the grade in plain text ("Grade A · Strong — …"): never color
+  alone, twice per page. Crumbs are retired from remedy pages; navigation stays in the nav.
+- **Performance** — the hero is the LCP: `loading="eager"`, `fetchpriority="high"`,
+  responsive widths (828/1400/2048/2880) via the Astro image service. The plate is
+  decorative (`alt=""`) — the adjacent `h1` names it (same pattern as §11 icons). A missing
+  plate never breaks the page: the label row renders alone.
+
+Palettes are per-remedy and live in the ART, not in tokens — no page-level color tokens vary
+by remedy, so the token system stays global. Compliance note (carried from the #55 review):
+the stamp here sits outside the tier board's legend, but the grade line + decision
+translation sit directly under the title — rating context is adjacent. Re-check if the label
+row is ever reused on a surface without that context.
+
+**Coda plates (addendum, owner-ratified 2026-07-19).** Each page *leaves* through the
+hero's world as well: `RemedyCoda.astro` renders a closing band above the site footer —
+the same plate world an hour later, settled toward sleep (family brief:
+`docs/plans/2026-07-19-remedy-coda-plates-prompt.md`; assets
+`src/assets/remedy-codas/{slug}.webp`). Anatomy: **28vh band, min 200px (22vh / 160px under
+640px)** — roughly half the hero, a coda not a second hero; **top-edge alpha-mask melt-in**
+(`transparent 0% → #000 45%`), the hero's melt mirrored; per-plate focal `object-position`
+(default `center 55%` — codas show a low, wide slice); `loading="lazy"` (never competes
+with the hero LCP); decorative `alt=""`; pure art, no type, same family constraints. A
+missing coda renders nothing — the set lights up per-remedy as assets land. The band's
+**bottom edge is a hard cut** (no second melt) seated **flush on the footer hairline**
+*(owner, 2026-07-19: no paper gap — the coda's negative bottom margin collapses the
+Footer's `--sp-10` opening margin to exactly 0)*: art edge → hairline → footer text. Coda
+anatomy changes are `[HUMAN-GATE]` with the rest of this section.
+
+Any change to the hero anatomy (melt spec, label tuck, no-type-on-art rule) is `[HUMAN-GATE]`.

@@ -59,13 +59,39 @@ function score(q: string, doc: SearchDoc): number {
   return 0;
 }
 
-/** Rank docs for a query. Empty query → no results (surfaces show recent/suggested instead). */
-export function searchDocs(query: string, docs: SearchDoc[]): SearchDoc[] {
+export interface ScoredDoc {
+  doc: SearchDoc;
+  score: number;
+}
+
+/** Rank docs for a query, keeping each doc's score (CHK-6.7 — the palette's ask heuristic needs the
+ * top score). Same ranking as searchDocs; empty query → no results. */
+export function searchDocsScored(query: string, docs: SearchDoc[]): ScoredDoc[] {
   const q = norm(query);
   if (!q) return [];
   return docs
-    .map((doc) => ({ doc, s: score(q, doc) }))
-    .filter((r) => r.s > 0)
-    .sort((a, b) => b.s - a.s || a.doc.name.localeCompare(b.doc.name))
-    .map((r) => r.doc);
+    .map((doc) => ({ doc, score: score(q, doc) }))
+    .filter((r) => r.score > 0)
+    .sort((a, b) => b.score - a.score || a.doc.name.localeCompare(b.doc.name));
+}
+
+/** Rank docs for a query. Empty query → no results (surfaces show recent/suggested instead). */
+export function searchDocs(query: string, docs: SearchDoc[]): SearchDoc[] {
+  return searchDocsScored(query, docs).map((r) => r.doc);
+}
+
+/**
+ * Should the palette offer its "ask the assistant" row? (CHK-6.7) Pure and deterministic:
+ * offer when the query reads like a QUESTION, or when lexical search came back WEAK — and only for
+ * queries long enough to mean something (≥ 8 chars). A strong lexical hit on a plain term (e.g.
+ * "melatonin") stays a plain search; the crawlable /search page is untouched by this.
+ */
+export function shouldOfferAsk(query: string, topScore: number, resultCount: number): boolean {
+  const q = query.trim();
+  if (q.length < 8) return false;
+  const questionShaped =
+    /\?\s*$/.test(q) ||
+    (/^(how|why|does|do|is|are|can|could|should|will|what|when|which|who)\b/i.test(q) && q.split(/\s+/).length >= 3);
+  const weak = resultCount === 0 || topScore < 50;
+  return questionShaped || weak;
 }

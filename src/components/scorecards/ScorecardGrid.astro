@@ -1,0 +1,117 @@
+---
+import ScorecardCard from './ScorecardCard.astro';
+import { groupByTier } from '../../data/source-scorecards/tiers';
+import type { ScorecardCardData } from '../../data/source-scorecards/card';
+
+interface Props {
+  cards: ScorecardCardData[];
+}
+const { cards } = Astro.props;
+
+const grouped = groupByTier(
+  cards,
+  (c) => c.hasB6,
+  (a, b) => a.brand.localeCompare(b.brand),
+);
+const total = cards.length;
+---
+
+{
+  total === 0 ? (
+    <p class="empty">Scorecards are being finalized. Check back shortly.</p>
+  ) : (
+    grouped.map((g) => (
+      <section class="tiergroup" aria-label={`${g.tier.label} — ${g.items.length} product${g.items.length === 1 ? '' : 's'}`}>
+        <div class="tierhead" data-tier={g.tier.key}>
+          <h2 class="tierhead-title">
+            <span class="tierhead-icon" aria-hidden="true">{g.tier.icon}</span>
+            {g.tier.label}
+            <span class="tierhead-count">{g.items.length}</span>
+          </h2>
+          <p class="tierhead-blurb">{g.tier.blurb}</p>
+        </div>
+
+        <div class="stack">
+          {g.items.map((c) => <ScorecardCard card={c} />)}
+        </div>
+      </section>
+    ))
+  )
+}
+
+<style>
+  .empty {
+    color: var(--muted);
+    font-size: var(--text-base);
+  }
+
+  /* sourcing-trust tier groups */
+  .tiergroup {
+    margin: 0 0 var(--sp-8);
+  }
+  .tierhead {
+    margin: 0 0 var(--sp-5);
+    padding-left: var(--sp-4);
+    border-left: 3px solid var(--muted);
+  }
+  .tierhead[data-tier='well-documented'],
+  .tierhead[data-tier='reasonable'] {
+    border-left-color: var(--eucalyptus, var(--primary));
+  }
+  .tierhead[data-tier='bare-bones'] {
+    border-left-color: var(--muted);
+  }
+  .tierhead[data-tier='heads-up'] {
+    border-left-color: var(--safety-ink, var(--vermilion));
+  }
+  .tierhead-title {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-xl);
+    line-height: var(--lh-xl);
+    color: var(--ink);
+    margin: 0;
+  }
+  .tierhead-icon {
+    font-size: var(--text-lg);
+  }
+  .tierhead-count {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+    font-weight: 400;
+    background: var(--primary-soft);
+    border-radius: var(--r-sm);
+    padding: var(--sp-1) var(--sp-2);
+    align-self: center;
+  }
+  .tierhead-blurb {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: var(--sp-2) 0 0;
+    max-width: 72ch;
+  }
+
+  /* responsive grid of compact, decision-first cards — 3 across on desktop */
+  .stack {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--sp-5);
+    align-items: stretch; /* every card in a row is the same height */
+  }
+  @media (max-width: 900px) {
+    .stack {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (max-width: 560px) {
+    .stack {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

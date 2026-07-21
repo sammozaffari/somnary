@@ -4,12 +4,18 @@
 // to pages that exist today are rendered, to avoid 404s; add more as routes land.
 import Wordmark from './Wordmark.astro';
 import SearchPalette from './SearchPalette.astro';
+import SessionNav from './account/SessionNav.astro';
 
+// CHK-7.3c — /lens is the primary AI nav entry (the Lens is the AI front door). /guide is DROPPED from
+// the top nav (the homepage carries the demoted "Talk it through" secondary line); /guide stays
+// reachable by URL and internal links — this only demotes it from the global chrome.
 const links = [
   { href: '/start-here', label: 'Start here' },
   { href: '/tiers', label: 'Remedies' },
+  { href: '/lens', label: 'Lens' },
   { href: '/label-checker', label: 'Label checker' },
   { href: '/compare', label: 'Compare' },
+  { href: '/sleep-habits', label: 'Sleep habits' },
   { href: '/safety', label: 'Safety' },
   { href: '/methodology', label: 'Methodology' },
 ];
@@ -32,6 +38,9 @@ const path = Astro.url.pathname.replace(/\/$/, '') || '/';
       })
     }
     <li><SearchPalette /></li>
+    {/* Signed-in indicator (CHK-6.9c): hidden by default; revealed only for a real session.
+        Adds NO sign-in CTA — no login wall in the global chrome. */}
+    <SessionNav />
   </ul>
 </nav>
 

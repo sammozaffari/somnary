@@ -1,0 +1,776 @@
+---
+// LensPanel — the Somnary Lens island (CHK-7.2 + CHK-7.4). The user-facing surface for the Lens engine:
+// one free-text prompt (a product name, an ingredient, or a pasted supplement-facts panel) → POST
+// /api/lens → the SERVER-composed LensAssessment, rendered by the shared, framework-free renderLensCard
+// (the SAFETY-CRITICAL textContent-only renderer). Mirrors GuidePanel / AskPanel: an SSG-safe shell + a
+// progressive-enhancement <script> island, token-only styling, aria-live status, reduced-motion.
+//
+// THE INVARIANT CONTINUES INTO THE UI: this island renders ONLY server-authored fields (via the card
+// renderer's textContent-only path). It authors no medical prose — the verdict, evidence, doesNotShow,
+// the resolved "read X as Y" line, label flags, safety note, stamp, and disclaimer all come from the
+// server. The only strings this file introduces are STRUCTURAL: the input affordances, the example
+// seeds, the REAL streamed pipeline-stage labels, and the neutral error registers. No grade is rendered.
+//
+// LIVE SSE PROGRESS (CHK-7.4): the request asks for text/event-stream; the engine streams REAL pipeline
+// milestones (resolving → the interpreted entity, N sources read, verifying, composing) which the island
+// shows as they happen — counts shown are the engine's real ones, never fabricated. On the final `done`
+// frame the same renderLensCard takes over. A non-streaming fallback (plain JSON) is handled too.
+---
+
+<section class="lens" aria-label="Somnary Lens" data-lens>
+  <p class="lens-label"><span class="dot" aria-hidden="true"></span> Somnary Lens</p>
+  <p class="prompt">
+    Name any sleep product or ingredient — a brand the tier board doesn’t cover, an unfamiliar
+    supplement, or paste a supplement-facts panel. The Lens researches the published evidence and shows
+    what it does — and doesn’t — establish. It is not a Somnary grade.
+  </p>
+
+  <form class="field" data-lens-form>
+    <label class="sr-only" for="lens-input">A product, an ingredient, or a pasted label</label>
+    <textarea
+      id="lens-input"
+      class="lens-input"
+      name="input"
+      rows="3"
+      maxlength="4000"
+      autocomplete="off"
+      placeholder="e.g. Restavit, apigenin, or paste a sleep-gummy supplement-facts panel…"
+      data-lens-input></textarea>
+    <button type="submit" class="send" data-lens-send>Research this →</button>
+  </form>
+
+  <!-- example seeds (STRUCTURAL — click to research; never a recommendation, just starting points) -->
+  <div class="examples" data-lens-examples>
+    <span class="ex-label">Try:</span>
+    <button type="button" class="chip" data-example="Restavit">Restavit</button>
+    <button type="button" class="chip" data-example="apigenin">apigenin</button>
+    <button type="button" class="chip" data-example="ZzzQuil">ZzzQuil</button>
+    <button type="button" class="chip" data-example="magnesium glycinate">magnesium glycinate</button>
+    <button type="button" class="chip" data-example="tart cherry">tart cherry</button>
+  </div>
+
+  <!-- live SSE progress (REAL pipeline milestones; counts are the engine's real ones) -->
+  <div class="progress" data-lens-progress hidden aria-live="polite">
+    <p class="p-resolved" data-lens-resolved hidden></p>
+    <p class="p-stage" data-lens-stage></p>
+    <div class="p-track" aria-hidden="true"><span class="p-bar" data-lens-bar></span></div>
+  </div>
+
+  <!-- the server-composed card renders here (textContent-only, via renderLensCard) -->
+  <div class="card-region" data-lens-card aria-live="polite" tabindex="-1"></div>
+
+  <!-- Minimal privacy disclosure (server-rendered, static, visible JS-off) — the two verbose blocks
+       were retired per owner, but the third-party-AI + "don't share personal details" disclosure is a
+       CLAUDE.md non-negotiable, so it stays as one quiet line. -->
+  <p class="privacy-line">
+    Sent to a third-party AI service (OpenRouter → DeepSeek, Gemini fallback) and to PubMed for sources.
+    Don’t include personal or identifying details. <a href="/privacy">Privacy</a>.
+  </p>
+</section>
+
+<style>
+  .lens {
+    background: var(--primary-soft);
+    border-radius: var(--r-lg);
+    padding: var(--sp-6);
+    margin-top: var(--sp-7);
+  }
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  .lens-label {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--primary);
+    margin: 0 0 var(--sp-3);
+  }
+  .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: var(--r-pill);
+    background: var(--primary);
+    flex: none;
+  }
+  .prompt {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--ink);
+    margin: 0 0 var(--sp-4);
+    max-width: 64ch;
+  }
+
+  .field {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--sp-3);
+  }
+  .lens-input {
+    flex: 1;
+    min-width: 0;
+    min-height: 44px;
+    padding: var(--sp-3) var(--sp-4);
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    line-height: var(--lh-base);
+    color: var(--ink);
+    background: var(--surface);
+    border: var(--border-hairline);
+    border-radius: var(--r-md);
+    resize: vertical;
+  }
+  .lens-input:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+  }
+  .send {
+    flex: none;
+    min-height: 44px;
+    padding: 0 var(--sp-5);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: var(--r-pill);
+    background: var(--primary);
+    color: var(--surface);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    cursor: pointer;
+  }
+  .send:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+  }
+  .send[disabled] {
+    background: var(--mineral);
+    cursor: progress;
+  }
+
+  /* example seed chips */
+  .examples {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--sp-2);
+    margin-top: var(--sp-4);
+  }
+  .ex-label {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+  }
+  .chip {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--primary);
+    background: var(--surface);
+    border: var(--border-hairline);
+    border-radius: var(--r-pill);
+    padding: var(--sp-1) var(--sp-3);
+    cursor: pointer;
+  }
+  .chip:hover {
+    border-color: var(--primary);
+  }
+  .chip:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+  }
+
+  /* live SSE progress */
+  .progress {
+    margin-top: var(--sp-5);
+    background: var(--surface);
+    border: var(--border-hairline);
+    border-radius: var(--r-md);
+    padding: var(--sp-4) var(--sp-5);
+  }
+  .p-resolved {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--ink);
+    margin: 0 0 var(--sp-2);
+  }
+  .p-stage {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+    margin: 0 0 var(--sp-3);
+  }
+  .p-track {
+    height: 4px;
+    border-radius: var(--r-pill);
+    background: var(--stone);
+    overflow: hidden;
+  }
+  .p-bar {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: var(--eucalyptus);
+    border-radius: var(--r-pill);
+    transition: width var(--dur-slow) var(--ease-soft);
+  }
+
+  /* one quiet, server-rendered privacy line (retained non-negotiable disclosure) */
+  .privacy-line {
+    margin: var(--sp-5) 0 0;
+    font-size: var(--text-xs);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    max-width: 64ch;
+  }
+  .privacy-line a {
+    color: var(--primary);
+  }
+
+  /* the card region — the shared renderer builds into it. Styles below match render-card.ts classes. */
+  .card-region {
+    margin-top: var(--sp-5);
+  }
+  .card-region:empty {
+    margin-top: 0;
+  }
+
+  :global(.lc-card) {
+    background: var(--surface);
+    border: var(--border-hairline);
+    border-radius: var(--r-md);
+    padding: var(--sp-6);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-5);
+  }
+  /* the "read X as Y" interpreted-query line — quiet, sits above the verdict */
+  :global(.lc-resolved) {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: 0;
+    max-width: 64ch;
+  }
+  :global(.lc-verdict) {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--ink);
+    margin: 0;
+    max-width: 64ch;
+  }
+  :global(.lc-stamp) {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--eucalyptus);
+    margin: 0;
+  }
+  :global(.lc-disclaimer) {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: 0;
+    max-width: 64ch;
+  }
+
+  :global(.lc-block) {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+  }
+  :global(.lc-head) {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--primary);
+    margin: 0;
+  }
+
+  :global(.lc-ev-list),
+  :global(.lc-dn-list),
+  :global(.lc-flag-list),
+  :global(.lc-fu-list),
+  :global(.lc-route-list) {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+  }
+  :global(.lc-ev-row) {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+    padding-left: var(--sp-4);
+    border-left: 2px solid var(--mineral);
+  }
+  :global(.lc-ev-text),
+  :global(.lc-dn-row),
+  :global(.lc-flag-text) {
+    font-size: var(--text-sm);
+    line-height: var(--lh-base);
+    color: var(--ink);
+    margin: 0;
+    max-width: 64ch;
+  }
+  :global(.lc-dn-row) {
+    color: var(--muted);
+  }
+
+  /* strength: a TEXT-labelled chip — legible WITHOUT color (the word says it), color only reinforces */
+  :global(.lc-strength) {
+    align-self: flex-start;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    border-radius: var(--r-pill);
+    padding: var(--sp-1) var(--sp-3);
+    border: var(--border-hairline);
+  }
+  :global(.lc-strength.is-strong) {
+    color: var(--eucalyptus);
+    background: var(--pistachio);
+    border-color: var(--eucalyptus);
+  }
+  :global(.lc-strength.is-weak) {
+    color: var(--muted);
+    background: var(--stone);
+    border-color: var(--mineral);
+  }
+
+  :global(.lc-ev-sources) {
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--sp-2);
+  }
+  :global(.lc-sources-label) {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+  }
+  :global(.lc-source-chip) {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--primary);
+    text-decoration: none;
+    border: var(--border-hairline);
+    border-radius: var(--r-pill);
+    padding: var(--sp-1) var(--sp-3);
+  }
+  :global(.lc-source-chip:focus-visible) {
+    outline: none;
+    box-shadow: var(--ring);
+  }
+
+  :global(.lc-flag-row) {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+  }
+  :global(.lc-flag-link),
+  :global(.lc-fu-link),
+  :global(.lc-review-link) {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--primary);
+    text-decoration: none;
+  }
+  :global(.lc-flag-link:focus-visible),
+  :global(.lc-fu-link:focus-visible),
+  :global(.lc-review-link:focus-visible),
+  :global(.lc-route-link:focus-visible),
+  :global(.lc-sc-link:focus-visible) {
+    outline: none;
+    box-shadow: var(--ring);
+    border-radius: var(--r-sm);
+  }
+
+  /* safety register — vermilion, DISTINCT from the oxblood --action (which is spent elsewhere) */
+  :global(.lc-safety .lc-head) {
+    color: var(--safety-ink);
+  }
+  :global(.lc-safety-register) {
+    background: var(--warning-bg);
+    border: 1px solid var(--safety-ink);
+    border-radius: var(--r-md);
+    padding: var(--sp-4) var(--sp-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+  }
+  :global(.lc-safety-note) {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--ink);
+    margin: 0;
+    max-width: 64ch;
+  }
+  :global(.lc-safety-register .lc-route-link) {
+    color: var(--safety-ink);
+    font-weight: 600;
+    text-decoration: none;
+  }
+  :global(.lc-fu-link),
+  :global(.lc-route-link) {
+    color: var(--primary);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  /* short-circuit — a calm pointer to the graded page */
+  :global(.lc-shortcircuit) {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+  }
+  :global(.lc-sc-line) {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--ink);
+    margin: 0;
+  }
+  :global(.lc-sc-link) {
+    font-size: var(--text-base);
+    font-weight: 600;
+    color: var(--primary);
+    text-decoration: none;
+  }
+
+  /* refused — the boundary line reads in the safety register */
+  :global(.lc-refused) {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+  }
+  :global(.lc-refused-line) {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--ink);
+    margin: 0;
+    max-width: 64ch;
+  }
+
+  :global(.lc-review) {
+    margin: 0;
+    padding-top: var(--sp-4);
+    border-top: var(--border-hairline);
+  }
+
+  /* the island's own neutral message card (503 / errors / empty) — never the safety tone */
+  .notice {
+    margin-top: var(--sp-5);
+    background: var(--surface);
+    border: var(--border-hairline);
+    border-radius: var(--r-md);
+    padding: var(--sp-4) var(--sp-5);
+    font-size: var(--text-sm);
+    line-height: var(--lh-base);
+    color: var(--ink);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lens *,
+    .p-bar {
+      transition: none !important;
+      animation: none !important;
+    }
+  }
+  @media (max-width: 640px) {
+    .lens {
+      padding: var(--sp-5);
+    }
+    .field {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+</style>
+
+<script>
+  // The card DOM-building is the SHARED, framework-free renderer (CHK-7.2) — the textContent-only path
+  // that authors no medical prose. Importing it here keeps the safety-critical render in one file.
+  import { renderLensCard, type LensCardAssessment } from '../lib/lens/render-card.ts';
+
+  // REAL pipeline milestones (CHK-7.4): the engine streams these as SSE events. Each maps to an honest
+  // stage label; counts (sources, claims) come from the event, never fabricated. The FALLBACK sequence
+  // is used only when the stream is unavailable (a JSON-only response) so the bar still moves.
+  const STAGE_ORDER = ['resolving', 'searching', 'sources', 'extracting', 'verifying', 'composing'];
+  const FALLBACK_STAGES = [
+    'Understanding your query…',
+    'Searching published sources…',
+    'Reading what the studies say…',
+    'Verifying each claim against its source…',
+    'Composing the assessment…',
+  ];
+  const STAGE_MS = 1600;
+
+  const roots = document.querySelectorAll<HTMLElement>('[data-lens]');
+  roots.forEach((root) => {
+    const form = root.querySelector<HTMLFormElement>('[data-lens-form]');
+    const input = root.querySelector<HTMLTextAreaElement>('[data-lens-input]');
+    const send = root.querySelector<HTMLButtonElement>('[data-lens-send]');
+    const progress = root.querySelector<HTMLElement>('[data-lens-progress]');
+    const resolvedEl = root.querySelector<HTMLElement>('[data-lens-resolved]');
+    const stageEl = root.querySelector<HTMLElement>('[data-lens-stage]');
+    const barEl = root.querySelector<HTMLElement>('[data-lens-bar]');
+    const cardRegion = root.querySelector<HTMLElement>('[data-lens-card]');
+    const examples = root.querySelector<HTMLElement>('[data-lens-examples]');
+    if (!form || !input || !send || !progress || !resolvedEl || !stageEl || !barEl || !cardRegion) return;
+
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let busy = false;
+    let fallbackTimer: ReturnType<typeof setInterval> | null = null;
+
+    const setBusy = (b: boolean) => {
+      busy = b;
+      send.disabled = b;
+      input.disabled = b;
+    };
+
+    const showNotice = (text: string) => {
+      cardRegion.innerHTML = ''; // clear only
+      const p = document.createElement('div');
+      p.className = 'notice';
+      p.setAttribute('role', 'status');
+      p.textContent = text; // island copy, plain text
+      cardRegion.appendChild(p);
+      cardRegion.focus?.();
+    };
+
+    // Move the bar to a fraction of the way through the known milestone order (real progress).
+    const setBar = (fraction: number) => {
+      barEl.style.width = Math.max(0, Math.min(100, Math.round(fraction * 100))) + '%';
+    };
+
+    const startProgress = () => {
+      cardRegion.innerHTML = '';
+      resolvedEl.hidden = true;
+      resolvedEl.textContent = '';
+      progress.hidden = false;
+      stageEl.textContent = 'Understanding your query…';
+      setBar(reduce ? 1 : 0.05);
+    };
+
+    const stopProgress = () => {
+      if (fallbackTimer) {
+        clearInterval(fallbackTimer);
+        fallbackTimer = null;
+      }
+      progress.hidden = true;
+      barEl.style.width = '0';
+    };
+
+    // Apply ONE real streamed event to the progress UI. Counts shown are the engine's real ones.
+    const applyEvent = (event: any) => {
+      if (!event || typeof event.type !== 'string') return;
+      const idx = STAGE_ORDER.indexOf(event.type === 'resolved' ? 'resolving' : event.type);
+      if (idx >= 0 && !reduce) setBar((idx + 1) / (STAGE_ORDER.length + 1));
+      switch (event.type) {
+        case 'resolved': {
+          const r = event.resolved;
+          // Structural "X → Y" (sanitised names only) — persists while the rest of the pipeline runs.
+          if (r && (r.resolvedName || r.subject)) {
+            const arrow = r.resolvedName && r.resolvedName !== r.subject ? `${r.subject} → ${r.resolvedName}` : r.subject;
+            resolvedEl.textContent = arrow;
+            resolvedEl.hidden = false;
+          }
+          stageEl.textContent = 'Searching published sources…';
+          break;
+        }
+        case 'searching':
+          stageEl.textContent = 'Searching published sources…';
+          break;
+        case 'sources':
+          stageEl.textContent =
+            typeof event.count === 'number'
+              ? `Read ${event.count} source${event.count === 1 ? '' : 's'}…`
+              : 'Reading sources…';
+          break;
+        case 'extracting':
+          stageEl.textContent = 'Reading what the studies say…';
+          break;
+        case 'verifying':
+          stageEl.textContent =
+            typeof event.total === 'number' && event.total > 0
+              ? `Verifying ${event.total} claim${event.total === 1 ? '' : 's'} against ${event.total === 1 ? 'its source' : 'their sources'}…`
+              : 'Verifying each claim against its source…';
+          break;
+        case 'composing':
+          stageEl.textContent = 'Composing the assessment…';
+          if (!reduce) setBar(0.95);
+          break;
+      }
+    };
+
+    // Fallback timed stepper for a non-streaming (JSON) response — the bar still advances honestly.
+    const startFallbackStepper = () => {
+      if (reduce) return;
+      let i = 0;
+      stageEl.textContent = FALLBACK_STAGES[0];
+      fallbackTimer = setInterval(() => {
+        i = Math.min(i + 1, FALLBACK_STAGES.length - 1);
+        stageEl.textContent = FALLBACK_STAGES[i];
+        setBar((i + 1) / (FALLBACK_STAGES.length + 1));
+        if (i >= FALLBACK_STAGES.length - 1 && fallbackTimer) {
+          clearInterval(fallbackTimer);
+          fallbackTimer = null;
+        }
+      }, STAGE_MS);
+    };
+
+    // Parse an SSE byte stream frame-by-frame, applying events and resolving with the final assessment.
+    const consumeStream = async (res: Response): Promise<LensCardAssessment | null> => {
+      const reader = res.body?.getReader();
+      if (!reader) return null;
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let done: LensCardAssessment | null = null;
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        const { value, done: streamDone } = await reader.read();
+        if (streamDone) break;
+        buffer += decoder.decode(value, { stream: true });
+        const frames = buffer.split('\n\n');
+        buffer = frames.pop() ?? ''; // keep the trailing partial frame
+        for (const frame of frames) {
+          const dataLines = frame
+            .split('\n')
+            .filter((l) => l.startsWith('data:'))
+            .map((l) => l.slice(5).trim());
+          if (!dataLines.length) continue;
+          let msg: any;
+          try {
+            msg = JSON.parse(dataLines.join(''));
+          } catch {
+            continue;
+          }
+          if (msg.kind === 'event') applyEvent(msg.event);
+          else if (msg.kind === 'done') done = msg.assessment as LensCardAssessment;
+          else if (msg.kind === 'error') throw new Error('stream-error');
+        }
+      }
+      return done;
+    };
+
+    const submit = async () => {
+      if (busy) return;
+      const value = input.value.trim();
+      if (!value) {
+        showNotice('Type a product name, an ingredient, or paste a supplement-facts panel to research.');
+        input.focus();
+        return;
+      }
+      if (value.length > 4000) {
+        showNotice('That’s longer than the Lens can take in one go. Trim it to the ingredients you want checked and try again.');
+        return;
+      }
+      setBusy(true);
+      startProgress();
+      try {
+        const res = await fetch('/api/lens', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'text/event-stream' },
+          body: JSON.stringify({ input: value }),
+        });
+        if (res.status === 503) {
+          stopProgress();
+          showNotice('The Lens isn’t available right now. You can still browse the graded tier board and each remedy’s cited evidence in the meantime.');
+          return;
+        }
+        if (res.status === 429) {
+          stopProgress();
+          showNotice('You’re going a little faster than the Lens can keep up with — give it a moment and try again. Nothing you entered is lost.');
+          return;
+        }
+        if (res.status === 413) {
+          stopProgress();
+          showNotice('That’s longer than the Lens can take in one go. Trim it to the ingredients you want checked and try again.');
+          return;
+        }
+        if (res.status === 400) {
+          stopProgress();
+          showNotice('Type a product name, an ingredient, or paste a supplement-facts panel to research.');
+          return;
+        }
+        if (!res.ok) {
+          stopProgress();
+          showNotice('Something went wrong researching that. You can try again, or browse Somnary’s graded evidence directly. This is educational, not medical advice.');
+          return;
+        }
+
+        let assessment: LensCardAssessment | null = null;
+        const contentType = res.headers.get('content-type') || '';
+        if (contentType.includes('text/event-stream') && res.body) {
+          assessment = await consumeStream(res);
+        } else {
+          // Non-streaming fallback (JSON): step the fallback bar while we await, then render.
+          startFallbackStepper();
+          assessment = (await res.json()) as LensCardAssessment;
+        }
+        stopProgress();
+        if (!assessment) {
+          showNotice('Something went wrong researching that. You can try again, or browse Somnary’s graded evidence directly. This is educational, not medical advice.');
+          return;
+        }
+        renderLensCard(assessment, cardRegion);
+        cardRegion.focus?.();
+      } catch {
+        stopProgress();
+        showNotice('Something went wrong reaching the Lens. You can try again, or browse Somnary’s graded evidence directly. This is educational, not medical advice.');
+      } finally {
+        setBusy(false);
+      }
+    };
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      void submit();
+    });
+    // Cmd/Ctrl+Enter submits from the textarea; plain Enter inserts a newline (labels can be multi-line).
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        void submit();
+      }
+      if (e.key === 'Escape') input.blur();
+    });
+
+    // Example seed chips — fill the box and research (the research loop stays one click away).
+    examples?.querySelectorAll<HTMLButtonElement>('[data-example]').forEach((chip) => {
+      chip.addEventListener('click', () => {
+        const q = chip.getAttribute('data-example') || '';
+        if (!q || busy) return;
+        input.value = q;
+        void submit();
+      });
+    });
+
+    // Deep-link: ?q=<query> (from the homepage on-ramp / ⌘K palette handoff) → prefill + auto-submit.
+    try {
+      const q = new URLSearchParams(window.location.search).get('q');
+      if (q && q.trim()) {
+        input.value = q.trim().slice(0, 4000);
+        void submit();
+      }
+    } catch {
+      /* URL unavailable — non-fatal; the empty prompt still works */
+    }
+  });
+</script>

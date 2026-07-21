@@ -35,6 +35,33 @@ jobs:
       - name: Botanical completeness (every botanical has standardization + a studied dose)
         run: npm run verify:botanical
 
+      - name: Forbidden-framing lint (assistant copy never ships a forbidden framing)
+        run: npm run verify:framing
+
+      - name: Ask guardrails (refusal + hallucination + site-wide suites, mocked model)
+        run: npm run verify:ask
+
+      - name: Guide guardrails (intake refusal + routing + prose-containment + real-URL sweep, mocked model)
+        run: npm run verify:guide
+
+      - name: Lens engine (red-team: no unverified claim survives, never a grade, refuse/short-circuit/inconclusive, mocked model)
+        run: npm run verify:lens
+
+      - name: Lens card renderer (textContent-only per status, no innerHTML markup, no grade rendered, fake-DOM)
+        run: npm run verify:lens:card
+
+      - name: Lens loop firewall (backlog can't touch a grade — no FK/import; demand logs names-only, fail-open)
+        run: npm run verify:lens:loop
+
+      - name: Rate limiter (fail-open + IP extraction, mocked Supabase client)
+        run: npm run verify:ratelimit
+
+      - name: Accounts (save/list/delete firewall + owner-scoped RLS, mocked Supabase client)
+        run: npm run verify:accounts
+
+      - name: No login wall (no content/search/guide route gates on sign-in; /account never redirects)
+        run: npm run verify:no-auth-wall
+
       - name: Build (schema validation + SSG)
         run: npm run build
 

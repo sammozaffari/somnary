@@ -7,6 +7,8 @@
 import { getCollection, render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import type { GateVariant } from '../../lib/evidence-gates';
+import RemedyHero from '../../components/RemedyHero.astro';
+import RemedyCoda from '../../components/RemedyCoda.astro';
 import RemedyLeadBlock from '../../components/RemedyLeadBlock.astro';
 import VerdictBand from '../../components/VerdictBand.astro';
 import ClaimsDataTable from '../../components/ClaimsDataTable.astro';
@@ -50,19 +52,17 @@ const jsonLd = remedyJsonLd(d, canonical, site);
   ogImage={`${site}/r/${entry.id}/og.png`}
 >
   <script type="application/ld+json" is:inline set:html={JSON.stringify(jsonLd)} />
+  {/* 1 — hero plate + label row (h1 + grade stamp), full-bleed above the content column
+      (DESIGN_SYSTEM §11.3 "labeled plate"; crumb retired — navigation stays in the nav) */}
+  <RemedyHero slug={entry.id} name={d.name} tier={d.tier} />
   <main class="remedy">
-    {/* 1 — header (grade badge moves to the decision-first lead block below; CHK-2.1) */}
     <header class="head">
-      <p class="crumb"><a href="/">Somnary</a> <span aria-hidden="true">›</span> <a href="/tiers">{isIntervention ? 'Interventions' : 'Remedies'}</a></p>
-      <h1 class="title">{d.name}</h1>
       <p class="dek">{d.oneLineVerdict}</p>
     </header>
 
     {/* 1b — decision-first lead block: grade + decision translation + best-for / not-for /
         biggest-risk / studied-dose (CHK-2.1, strategy doc 03) */}
     <RemedyLeadBlock
-      slug={entry.id}
-      name={d.name}
       tier={d.tier}
       format={d.format}
       bestFor={d.bestFor}
@@ -162,15 +162,19 @@ const jsonLd = remedyJsonLd(d, canonical, site);
     </nav>
   </main>
 
+  {/* coda plate — the hero's world settled toward sleep; the page leaves through it (§11.3) */}
+  <RemedyCoda slug={entry.id} />
+
   {/* 9/12 — single shared citation popover for every .cite-sup on the page */}
   <CitationPopover sources={d.sources} />
 </Base>
 
 <style>
+  /* content column starts right under the hero label row (§11.3) — the label owns the top */
   .remedy {
     max-width: 1180px;
     margin: 0 auto;
-    padding: var(--sp-8) var(--sp-7) var(--sp-9);
+    padding: var(--sp-5) var(--sp-7) var(--sp-9);
   }
 
   .eyebrow {
@@ -184,40 +188,17 @@ const jsonLd = remedyJsonLd(d, canonical, site);
     color: var(--primary);
   }
 
-  /* header */
+  /* header: the one-line verdict, promoted — it reads as the plate's caption */
   .head {
     margin-bottom: var(--sp-6);
   }
-  .crumb {
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
-    color: var(--muted);
-    margin: 0 0 var(--sp-5);
-  }
-  .crumb a {
-    color: var(--muted);
-    text-decoration: none;
-  }
-  .crumb a:hover {
-    color: var(--ink);
-  }
-  .title {
-    font-family: var(--font-display);
-    font-weight: 700;
-    font-size: var(--text-3xl);
-    line-height: var(--lh-3xl);
-    letter-spacing: var(--tracking-tight);
-    color: var(--ink);
-    margin: 0 0 var(--sp-3);
-  }
   .dek {
     font-family: var(--font-body);
-    font-size: var(--text-md);
-    line-height: var(--lh-md);
-    color: var(--muted);
-    max-width: 60ch;
-    margin: 0 0 var(--sp-3);
+    font-size: var(--text-lg);
+    line-height: var(--lh-lg);
+    color: var(--ink);
+    max-width: 56ch;
+    margin: 0;
   }
 
   /* body grid */
@@ -279,7 +260,7 @@ const jsonLd = remedyJsonLd(d, canonical, site);
     margin-top: var(--sp-8);
   }
 
-  /* foot back-nav to the remedies board (mirrors the breadcrumb, for long pages) */
+  /* foot back-nav to the remedies board — the primary return path now the crumb is retired */
   .back-nav {
     margin-top: var(--sp-7);
     padding-top: var(--sp-5);
@@ -296,7 +277,8 @@ const jsonLd = remedyJsonLd(d, canonical, site);
     color: var(--ink);
   }
 
-  /* breakpoints (§3.2): body 1-col @900 (sidebar static below main); title 46px @640 */
+  /* breakpoints (§3.2): body 1-col @900 (sidebar static below main); title lives in the
+     hero label row (§11.3), which handles its own 46px floor */
   @media (max-width: 900px) {
     .body {
       grid-template-columns: 1fr;
@@ -309,10 +291,6 @@ const jsonLd = remedyJsonLd(d, canonical, site);
   @media (max-width: 640px) {
     .remedy {
       padding: var(--sp-6) var(--sp-5) var(--sp-8);
-    }
-    .title {
-      font-weight: 700;
-      font-size: 46px;
     }
   }
 </style>

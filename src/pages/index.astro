@@ -5,7 +5,7 @@ import TierBadge from '../components/TierBadge.astro';
 import HeroCarousel from '../components/HeroCarousel.astro';
 import type { SlideSpec } from '../lib/hero-slides';
 import { TIERS } from '../lib/tiers';
-import { Pill, Package, Timer, AlarmClock, ShieldAlert, Baby } from '@lucide/astro';
+import { Pill, Package, Timer, AlarmClock, ShieldAlert, Baby, MessagesSquare, ScanSearch } from '@lucide/astro';
 
 // Home — CHK-3.1 (strategy 03 "Homepage Above-The-Fold"; DESIGN_SYSTEM §1/§10).
 // Decision-first front door: route by intent, not by molecule. Replaces the v1 "enemy hero".
@@ -83,6 +83,27 @@ const situations = [
     <!-- situation route tiles — route by intent -->
     <section class="section" id="situations">
       <p class="section-eyebrow">What are you trying to decide?</p>
+      <!-- Primary AI front door: the Somnary Lens. A distinct --primary-soft affordance (NOT the
+           oxblood --action CTA — that is spent once on the hero). The guide is demoted to a secondary
+           text link below it. -->
+      <a class="guide-entry" href="/lens">
+        <span class="guide-entry-icon">
+          <ScanSearch size={26} strokeWidth={1.75} aria-hidden="true" />
+        </span>
+        <span class="guide-entry-text">
+          <span class="guide-entry-title">Researching a supplement we haven’t graded? Use the Lens →</span>
+          <span class="guide-entry-dek">
+            Name a product or ingredient — or paste a label — and the Lens researches the published
+            evidence and shows what it does and doesn’t establish. AI-assisted research, never a grade,
+            a recommendation, or a dose.
+          </span>
+        </span>
+      </a>
+      <p class="guide-secondary">
+        <MessagesSquare size={16} strokeWidth={1.75} aria-hidden="true" />
+        Not sure where to start? <a href="/guide">Talk it through</a> — answer a few questions and get
+        a map of what to read on Somnary for your situation.
+      </p>
       <div class="tiles">
         {
           situations.map((t) => (
@@ -235,6 +256,73 @@ const situations = [
   }
 
   /* situation tiles — 2×3 route cards */
+  /* concierge on-ramp — a distinct --primary-soft affordance above the intent tiles; NOT the
+     oxblood --action CTA (that is spent once on the hero). */
+  .guide-entry {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-4);
+    background: var(--primary-soft);
+    border: var(--border-hairline);
+    border-radius: var(--r-lg);
+    padding: var(--sp-5) var(--sp-6);
+    margin-bottom: var(--sp-4);
+    text-decoration: none;
+    color: var(--ink);
+    transition:
+      box-shadow var(--dur-base) var(--ease-settle),
+      transform var(--dur-base) var(--ease-settle);
+  }
+  .guide-entry:hover {
+    box-shadow: var(--shadow-lift);
+    transform: translateY(-2px);
+  }
+  .guide-entry:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+  }
+  .guide-entry-icon {
+    display: inline-flex;
+    flex-shrink: 0;
+    color: var(--primary);
+  }
+  .guide-entry-text {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-1);
+  }
+  .guide-entry-title {
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    line-height: var(--lh-lg);
+    letter-spacing: var(--tracking-tight);
+    color: var(--ink);
+  }
+  .guide-entry-dek {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+  }
+  /* secondary AI on-ramp — the guide concierge, demoted to a plain text line (no card, no accent
+     fill) so the Lens reads as the primary front door. */
+  .guide-secondary {
+    display: flex;
+    align-items: baseline;
+    gap: var(--sp-2);
+    margin: 0 0 var(--sp-5);
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+  }
+  .guide-secondary :global(svg) {
+    flex-shrink: 0;
+    align-self: center;
+    color: var(--primary);
+  }
+  .guide-secondary a {
+    color: var(--primary);
+    font-weight: 600;
+  }
   .tiles {
     display: grid;
     grid-template-columns: repeat(2, 1fr);

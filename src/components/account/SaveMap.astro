@@ -1,0 +1,369 @@
+---
+// SaveMap — the OPTIONAL "keep this map" affordance at the END of the /guide reading map (CHK-6.9c).
+//
+// NO LOGIN WALL: this is the ONLY place accounts are offered, and it is entirely optional. The whole
+// /guide flow — every beat, the reading map, all its links — works signed-out and with accounts
+// unconfigured. This component adds a save option AFTER the map is built; it never gates anything.
+//
+// ENV-GATED: the client script calls getBrowserSupabase() (src/lib/auth.ts). When accounts are
+// unconfigured (no PUBLIC_SUPABASE_* keys — the default build), that returns null and this component
+// renders NOTHING at all (it stays hidden). So with no keys the guide degrades to exactly what it was.
+//
+// The data it saves comes from GuidePanel, which owns the accumulated guide_state and the rendered
+// route_plan. GuidePanel dispatches a `somnary:map-ready` CustomEvent carrying { guide_state,
+// route_plan, habits_checklist }; this island captures it and POSTs it to /api/save-map (CHK-6.9b)
+// only when the user is signed in and clicks "Save this map".
+//
+// SAFETY / COPY: the copy never implies the map is medical advice or a recommendation — it is a
+// bookmark of reading links. Errors reuse AskPanel's CALM neutral register (muted text, never the
+// safety/vermilion tone). aria-live, keyboard-operable, tokens only, reduced-motion respected.
+---
+
+<section class="savemap" data-savemap hidden aria-label="Save this reading map (optional)">
+  <!-- signed-OUT: offer to keep the map (optional) via Google or an email magic-link -->
+  <div class="sm-panel" data-savemap-signedout hidden>
+    <p class="sm-head">Want to keep this? <span class="sm-optional">(optional)</span></p>
+    <p class="sm-lede">
+      You can save this reading map to a free account and come back to it later. It only stores the
+      links and the answers you selected — never a transcript. It’s a bookmark, not medical advice.
+    </p>
+    <div class="sm-actions">
+      <button type="button" class="sm-btn sm-btn-google" data-savemap-google>
+        Continue with Google
+      </button>
+      <span class="sm-or" aria-hidden="true">or</span>
+      <form class="sm-magic" data-savemap-magic>
+        <label class="sr-only" for="savemap-email">Email address for a sign-in link</label>
+        <input
+          id="savemap-email"
+          class="sm-email"
+          type="email"
+          name="email"
+          inputmode="email"
+          autocomplete="email"
+          placeholder="you@example.com"
+          data-savemap-email
+        />
+        <button type="submit" class="sm-btn sm-btn-magic" data-savemap-magic-send>
+          Email me a link
+        </button>
+      </form>
+    </div>
+    <p class="sm-status" data-savemap-signedout-status hidden aria-live="polite"></p>
+  </div>
+
+  <!-- signed-IN: a single save button -->
+  <div class="sm-panel" data-savemap-signedin hidden>
+    <p class="sm-head">Save this reading map</p>
+    <p class="sm-lede">
+      Keep these links on your account so you can return to them. Nothing here is a recommendation or
+      a dose — it’s a saved map to the evidence.
+    </p>
+    <div class="sm-actions">
+      <button type="button" class="sm-btn sm-btn-save" data-savemap-save>Save this map</button>
+      <a class="sm-account-link" href="/account">Your saved maps →</a>
+    </div>
+    <p class="sm-status" data-savemap-signedin-status hidden aria-live="polite"></p>
+  </div>
+</section>
+
+<style>
+  .savemap {
+    margin-top: var(--sp-6);
+    padding-top: var(--sp-5);
+    border-top: var(--border-hairline);
+  }
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  .sm-head {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--primary);
+    margin: 0 0 var(--sp-2);
+  }
+  .sm-optional {
+    color: var(--muted);
+  }
+  .sm-lede {
+    font-size: var(--text-sm);
+    line-height: var(--lh-base);
+    color: var(--muted);
+    margin: 0 0 var(--sp-4);
+    max-width: 62ch;
+  }
+  .sm-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--sp-3);
+  }
+  .sm-or {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+  }
+  .sm-magic {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    flex-wrap: wrap;
+  }
+  .sm-email {
+    min-width: 0;
+    min-height: 40px;
+    padding: 0 var(--sp-4);
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: var(--ink);
+    background: var(--surface);
+    border: var(--border-hairline);
+    border-radius: var(--r-pill);
+  }
+  .sm-email:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+  }
+  .sm-btn {
+    min-height: 40px;
+    padding: 0 var(--sp-5);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    border-radius: var(--r-pill);
+    cursor: pointer;
+  }
+  .sm-btn:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+  }
+  .sm-btn[disabled] {
+    cursor: progress;
+    opacity: 0.7;
+  }
+  .sm-btn-google,
+  .sm-btn-save {
+    color: var(--action-ink);
+    background: var(--primary);
+    border: 1px solid var(--primary);
+  }
+  .sm-btn-magic {
+    color: var(--primary);
+    background: var(--surface);
+    border: var(--border-hairline);
+  }
+  .sm-account-link {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--primary);
+    text-decoration: none;
+  }
+  .sm-account-link:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+    border-radius: var(--r-sm);
+  }
+  .sm-status {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: var(--sp-4) 0 0;
+  }
+  .sm-status.is-ok {
+    color: var(--eucalyptus);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .savemap * {
+      transition: none !important;
+      animation: none !important;
+    }
+  }
+</style>
+
+<script>
+  // Client island for the optional save affordance. This is the FIRST browser consumer of the auth
+  // client — importing it here lets Vite bundle it and inline the PUBLIC_* env at build. When those
+  // vars are absent (the default build), getBrowserSupabase() returns null → the whole section stays
+  // hidden and the guide is unchanged. NOTHING here is ever required to read the map.
+  import { getBrowserSupabase } from '../../lib/auth.ts';
+
+  interface MapReadyDetail {
+    guide_state: Record<string, unknown>;
+    route_plan: Record<string, unknown>;
+    habits_checklist: Record<string, boolean>;
+  }
+
+  const root = document.querySelector<HTMLElement>('[data-savemap]');
+  if (root) {
+    const supabase = getBrowserSupabase();
+    // Unconfigured → accounts are off. Render nothing; the guide degrades to exactly what it was.
+    if (!supabase) {
+      root.remove();
+    } else {
+      const signedOut = root.querySelector<HTMLElement>('[data-savemap-signedout]');
+      const signedIn = root.querySelector<HTMLElement>('[data-savemap-signedin]');
+      const googleBtn = root.querySelector<HTMLButtonElement>('[data-savemap-google]');
+      const magicForm = root.querySelector<HTMLFormElement>('[data-savemap-magic]');
+      const emailInput = root.querySelector<HTMLInputElement>('[data-savemap-email]');
+      const magicSend = root.querySelector<HTMLButtonElement>('[data-savemap-magic-send]');
+      const outStatus = root.querySelector<HTMLElement>('[data-savemap-signedout-status]');
+      const saveBtn = root.querySelector<HTMLButtonElement>('[data-savemap-save]');
+      const inStatus = root.querySelector<HTMLElement>('[data-savemap-signedin-status]');
+
+      // The data GuidePanel hands us when the reading map is ready. Held until the user saves.
+      let payload: MapReadyDetail | null = null;
+
+      const setStatus = (el: HTMLElement | null, text: string, ok = false) => {
+        if (!el) return;
+        el.hidden = false;
+        el.textContent = text;
+        el.classList.toggle('is-ok', ok);
+      };
+
+      // Decide which panel to show based on the current session.
+      const applySession = (signedInNow: boolean) => {
+        if (signedOut) signedOut.hidden = signedInNow;
+        if (signedIn) signedIn.hidden = !signedInNow;
+        // Only reveal the section once GuidePanel has handed us a map to save.
+        root.hidden = payload === null;
+      };
+
+      // Reveal + set the correct panel once we know the session. We check the session lazily (only
+      // after a map exists) so a signed-out reader who never finishes the guide sees nothing extra.
+      let sessionKnown = false;
+      const ensureSession = async () => {
+        if (sessionKnown) return;
+        sessionKnown = true;
+        const { data } = await supabase.auth.getUser();
+        applySession(Boolean(data?.user));
+      };
+
+      // GuidePanel dispatches this when the reading map is rendered. Capture the (already server-
+      // sanitized-on-save) state + plan; the API re-validates everything server-side regardless.
+      window.addEventListener('somnary:map-ready', (e) => {
+        const detail = (e as CustomEvent<MapReadyDetail>).detail;
+        if (!detail || !detail.route_plan) return;
+        payload = detail;
+        void ensureSession().then(() => {
+          root.hidden = false;
+        });
+      });
+
+      // A crisis map should NOT offer an account save — safety first, no distraction. GuidePanel
+      // signals this by dispatching a reset.
+      window.addEventListener('somnary:map-reset', () => {
+        payload = null;
+        root.hidden = true;
+        setStatus(outStatus, '');
+        if (outStatus) outStatus.hidden = true;
+        setStatus(inStatus, '');
+        if (inStatus) inStatus.hidden = true;
+      });
+
+      // ---- signed-out: Google OAuth ----------------------------------------------------------
+      googleBtn?.addEventListener('click', async () => {
+        googleBtn.disabled = true;
+        setStatus(outStatus, 'Opening Google sign-in…');
+        try {
+          const redirectTo = window.location.origin + '/auth/callback?next=/account';
+          const { error } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: { redirectTo },
+          });
+          if (error) {
+            googleBtn.disabled = false;
+            setStatus(outStatus, 'Couldn’t start Google sign-in just now. You can still read your map above.');
+          }
+          // On success the browser navigates away to Google — nothing more to do here.
+        } catch {
+          googleBtn.disabled = false;
+          setStatus(outStatus, 'Couldn’t start Google sign-in just now. You can still read your map above.');
+        }
+      });
+
+      // ---- signed-out: email magic-link ------------------------------------------------------
+      magicForm?.addEventListener('submit', async (ev) => {
+        ev.preventDefault();
+        const email = (emailInput?.value ?? '').trim();
+        if (!email || !email.includes('@')) {
+          setStatus(outStatus, 'Please enter a valid email address.');
+          emailInput?.focus();
+          return;
+        }
+        if (magicSend) magicSend.disabled = true;
+        setStatus(outStatus, 'Sending you a sign-in link…');
+        try {
+          const emailRedirectTo = window.location.origin + '/auth/callback?next=/account';
+          const { error } = await supabase.auth.signInWithOtp({
+            email,
+            options: { emailRedirectTo },
+          });
+          if (magicSend) magicSend.disabled = false;
+          if (error) {
+            setStatus(outStatus, 'Couldn’t send the link just now. You can still read your map above.');
+          } else {
+            setStatus(
+              outStatus,
+              'Check your email for a sign-in link. Once you’re signed in, come back here to save this map.',
+              true,
+            );
+          }
+        } catch {
+          if (magicSend) magicSend.disabled = false;
+          setStatus(outStatus, 'Couldn’t send the link just now. You can still read your map above.');
+        }
+      });
+
+      // ---- signed-in: save the map -----------------------------------------------------------
+      saveBtn?.addEventListener('click', async () => {
+        if (!payload) return;
+        saveBtn.disabled = true;
+        setStatus(inStatus, 'Saving…');
+        try {
+          const res = await fetch('/api/save-map', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              guide_state: payload.guide_state,
+              route_plan: payload.route_plan,
+              habits_checklist: payload.habits_checklist ?? {},
+            }),
+          });
+          if (res.status === 201) {
+            // Keep it saved; leave the button disabled so a double-click can’t duplicate it.
+            setStatus(inStatus, 'Saved — view it on your account page.', true);
+          } else if (res.status === 401) {
+            // Session lapsed between load and click — offer sign-in again, calmly.
+            saveBtn.disabled = false;
+            applySession(false);
+            setStatus(outStatus, 'Please sign in again to save this map. Your map above is unchanged.');
+          } else {
+            saveBtn.disabled = false;
+            setStatus(
+              inStatus,
+              'Couldn’t save just now — nothing was lost, and your map above still works. You can try again.',
+            );
+          }
+        } catch {
+          saveBtn.disabled = false;
+          setStatus(
+            inStatus,
+            'Couldn’t reach the server just now — nothing was lost, and your map above still works. You can try again.',
+          );
+        }
+      });
+    }
+  }
+</script>

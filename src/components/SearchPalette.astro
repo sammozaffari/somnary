@@ -38,6 +38,15 @@
       />
     </div>
     <ul id="p-listbox" class="p-list" role="listbox" aria-label="Search results" data-search-list></ul>
+    <div class="p-answer" data-pask-answer hidden aria-live="polite">
+      <p class="pa-status" data-pask-status></p>
+      <div class="pa-body" data-pask-body></div>
+      <p class="pa-routes" data-pask-routes hidden></p>
+      <p class="pa-privacy">
+        Your question is sent to a third-party AI service — OpenRouter, which routes it to a DeepSeek
+        model (or Google’s Gemini API as a fallback). Don’t include personal or identifying details.
+      </p>
+    </div>
     <p class="p-hint" data-search-hint>Type to search · ↑↓ to move · enter to open · esc to close</p>
   </div>
 </div>
@@ -235,6 +244,82 @@
     color: var(--muted);
   }
 
+  /* ask row (CHK-6.7) — one more option at the end of the listbox; primary-tinted so it reads as
+     "hand this to the assistant", never as another search result */
+  .p-list :global(.p-askrow .p-badge) {
+    background: var(--primary-soft);
+    border: 1px solid var(--primary);
+    color: var(--primary);
+  }
+  .p-list :global(.p-askrow .p-name) {
+    white-space: normal;
+  }
+
+  /* inline answer panel (CHK-6.7) — same register as the remedy-page AskPanel answer card */
+  .p-answer {
+    border-top: var(--border-hairline);
+    padding: var(--sp-4) var(--sp-5);
+    overflow-y: auto;
+    max-height: 40vh;
+  }
+  .p-answer[hidden] {
+    display: none;
+  }
+  .pa-status {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    font-weight: 600;
+    color: var(--ink);
+    margin: 0 0 var(--sp-3);
+  }
+  .pa-body :global(p) {
+    font-size: var(--text-sm);
+    line-height: var(--lh-base);
+    color: var(--ink);
+    margin: 0 0 var(--sp-3);
+  }
+  .pa-body :global(p.pa-head) {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+    margin: 0 0 var(--sp-1);
+  }
+  .pa-body :global(a.ask-cref) {
+    color: var(--primary);
+    text-decoration: none;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+  }
+  .pa-routes {
+    margin: 0 0 var(--sp-3);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2) var(--sp-4);
+  }
+  .pa-routes[hidden] {
+    display: none;
+  }
+  .pa-routes :global(a) {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--primary);
+    text-decoration: none;
+  }
+  .pa-routes :global(a:focus-visible) {
+    outline: none;
+    box-shadow: var(--ring);
+    border-radius: var(--r-sm);
+  }
+  .pa-privacy {
+    font-size: var(--text-xs);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: 0;
+  }
+
   .p-hint,
   .p-empty {
     font-family: var(--font-mono);
@@ -274,7 +359,20 @@
 </style>
 
 <script>
-  import { searchDocs, type SearchDoc } from '../lib/search-rank';
+  import { searchDocsScored, shouldOfferAsk, type SearchDoc } from '../lib/search-rank';
+
+  interface AskCitation {
+    n: number;
+    href: string;
+  }
+  interface AskResponse {
+    status: 'answered' | 'refused' | 'no-evidence' | 'error';
+    answer: string;
+    citations: AskCitation[];
+    route: { href: string; label: string } | null;
+    answeredFrom?: { name: string; url: string };
+    links?: Array<{ href: string; label: string }>;
+  }
 
   const trigger = document.querySelector<HTMLButtonElement>('[data-search-open]');
   const overlay = document.querySelector<HTMLElement>('[data-search-overlay]');
@@ -282,11 +380,18 @@
   const input = document.querySelector<HTMLInputElement>('[data-search-input]');
   const list = document.querySelector<HTMLUListElement>('[data-search-list]');
   const hint = document.querySelector<HTMLElement>('[data-search-hint]');
-  if (trigger && overlay && scrim && input && list && hint) {
+  const askAnswer = document.querySelector<HTMLElement>('[data-pask-answer]');
+  const askStatus = document.querySelector<HTMLElement>('[data-pask-status]');
+  const askBody = document.querySelector<HTMLElement>('[data-pask-body]');
+  const askRoutes = document.querySelector<HTMLElement>('[data-pask-routes]');
+  if (trigger && overlay && scrim && input && list && hint && askAnswer && askStatus && askBody && askRoutes) {
     let docs: SearchDoc[] | null = null;
     let loading = false;
     let options: SearchDoc[] = []; // flat, in rendered order
+    let askOffered = false; // CHK-6.7: one extra "ask the assistant" option at the end
+    let asking = false;
     let active = -1;
+    const total = () => options.length + (askOffered ? 1 : 0);
 
     const KIND_LABEL: Record<string, string> = {
       remedy: 'Remedies',
@@ -338,10 +443,20 @@
           i++;
         }
       }
+      if (askOffered) {
+        const q = input.value.trim();
+        html += `<li class="p-group" role="presentation">Assistant</li>`;
+        html +=
+          `<li id="p-opt-${i}" class="p-row p-askrow" role="option" aria-selected="${i === active}" data-i="${i}" data-ask-row aria-label="Ask Somnary's assistant: ${esc(q)}">` +
+          `<span class="p-badge" aria-hidden="true"><span class="p-glyph">?</span></span>` +
+          `<span class="p-main"><span class="p-name">${asking ? 'Thinking…' : `Ask: “${esc(q)}”`}</span>` +
+          `<span class="p-cat">answers only from Somnary’s cited pages</span></span>` +
+          `<span class="p-grade">ask ↵</span></li>`;
+      }
       list.innerHTML = html;
-      input.setAttribute('aria-expanded', options.length ? 'true' : 'false');
+      input.setAttribute('aria-expanded', total() ? 'true' : 'false');
       const q = input.value.trim();
-      if (q && options.length === 0) {
+      if (q && total() === 0) {
         hint.textContent = 'No matches — try a compound, an outcome, or a symptom';
       } else {
         hint.textContent = 'Type to search · ↑↓ to move · enter to open · esc to close';
@@ -360,14 +475,113 @@
       }
     };
 
+    const resetAnswer = () => {
+      askAnswer.hidden = true;
+      askStatus.textContent = '';
+      askBody.innerHTML = '';
+      askRoutes.hidden = true;
+      askRoutes.innerHTML = '';
+    };
+
+    const STATUS_LABEL: Record<AskResponse['status'], string> = {
+      answered: 'From Somnary’s cited evidence',
+      refused: 'This needs a person, not a page',
+      'no-evidence': 'Not in Somnary’s reviewed evidence',
+      error: 'Could not answer',
+    };
+
+    // Same escaping + [n] → footnote-href pattern as AskPanel.astro (the remedy-page assistant).
+    const renderAnswer = (res: AskResponse) => {
+      askAnswer.hidden = false;
+      askStatus.textContent = STATUS_LABEL[res.status] ?? '';
+      const byN = new Map(res.citations.map((c) => [String(c.n), c]));
+      const paragraphs = res.answer.split(/\n{2,}/).filter((p) => p.trim());
+      askBody.innerHTML = paragraphs
+        .map((p) => {
+          const linked = esc(p).replace(/\[(\d{1,3})\]/g, (m, d) => {
+            const c = byN.get(d);
+            return c ? `<a class="ask-cref" href="${esc(c.href)}">[${esc(d)}]</a>` : m;
+          });
+          const head = linked.match(/^([A-Z][^:]{2,40}):\s*/);
+          if (head) return `<p class="pa-head">${head[1]}</p><p>${linked.slice(head[0].length)}</p>`;
+          return `<p>${linked}</p>`;
+        })
+        .join('');
+      const routeLinks: Array<{ href: string; label: string }> = [];
+      if (res.answeredFrom) routeLinks.push({ href: res.answeredFrom.url, label: `From the ${res.answeredFrom.name} page` });
+      if (res.route) routeLinks.push(res.route);
+      for (const l of res.links ?? []) routeLinks.push(l);
+      // Handoff to the Somnary Lens: the in-palette corpus answer above is scoped to reviewed evidence;
+      // the Lens researches products/ingredients the corpus doesn't cover. Deep-link the typed query so
+      // /lens?q= prefills + auto-submits. Encoded href only — never rendered as content.
+      const q = input.value.trim();
+      if (q) routeLinks.push({ href: `/lens?q=${encodeURIComponent(q)}`, label: 'Research this in the Lens' });
+      if (routeLinks.length) {
+        askRoutes.hidden = false;
+        askRoutes.innerHTML = routeLinks.map((l) => `<a href="${esc(l.href)}">→ ${esc(l.label)}</a>`).join('');
+      } else {
+        askRoutes.hidden = true;
+        askRoutes.innerHTML = '';
+      }
+    };
+
+    const doAsk = async () => {
+      const question = input.value.trim();
+      if (asking || question.length < 3) return;
+      asking = true;
+      render();
+      resetAnswer();
+      askAnswer.hidden = false;
+      askStatus.textContent = 'Thinking…';
+      try {
+        const res = await fetch('/api/search-ask', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question }),
+        });
+        if (res.status === 429) {
+          renderAnswer({
+            status: 'error',
+            answer: 'You’re sending questions faster than we can answer — give it a moment and try again. You can browse the tier board or a remedy page in the meantime.',
+            citations: [],
+            route: null,
+          });
+          return;
+        }
+        if (!res.ok) {
+          renderAnswer({
+            status: 'error',
+            answer: 'Something went wrong reaching the assistant. You can browse the tier board or a remedy page instead. This is educational, not medical advice.',
+            citations: [],
+            route: null,
+          });
+          return;
+        }
+        renderAnswer((await res.json()) as AskResponse);
+      } catch {
+        renderAnswer({
+          status: 'error',
+          answer: 'Something went wrong reaching the assistant. You can browse the tier board or a remedy page instead. This is educational, not medical advice.',
+          citations: [],
+          route: null,
+        });
+      } finally {
+        asking = false;
+        render();
+      }
+    };
+
     let timer: number | undefined;
     const run = (q: string) => {
       if (!docs) {
         loadDocs();
         return;
       }
-      options = searchDocs(q, docs);
-      active = options.length ? 0 : -1;
+      const scored = searchDocsScored(q, docs);
+      options = scored.map((r) => r.doc);
+      askOffered = shouldOfferAsk(q, scored[0]?.score ?? 0, scored.length);
+      resetAnswer();
+      active = total() ? 0 : -1;
       render();
     };
 
@@ -377,7 +591,9 @@
       loadDocs();
       input.value = '';
       options = [];
+      askOffered = false;
       active = -1;
+      resetAnswer();
       render();
       input.focus();
     };
@@ -386,22 +602,34 @@
       overlay.hidden = true;
       input.value = '';
       options = [];
+      askOffered = false;
       active = -1;
+      resetAnswer();
       trigger.focus();
     };
 
     const move = (delta: number) => {
-      if (!options.length) return;
-      active = (active + delta + options.length) % options.length;
+      const n = total();
+      if (!n) return;
+      active = (active + delta + n) % n;
       syncActive();
     };
     const choose = () => {
+      if (askOffered && active === options.length) {
+        doAsk();
+        return;
+      }
       const d = options[active];
       if (d) window.location.href = d.url;
     };
 
     trigger.addEventListener('click', open);
     scrim.addEventListener('click', close);
+
+    // Click on the ask row submits the question (result rows stay keyboard-driven, as before).
+    list.addEventListener('click', (e) => {
+      if ((e.target as HTMLElement)?.closest('[data-ask-row]')) doAsk();
+    });
 
     input.addEventListener('input', () => {
       window.clearTimeout(timer);
@@ -420,11 +648,23 @@
         e.preventDefault();
         move(-1);
       } else if (e.key === 'Enter') {
+        if (askAnswer.contains(document.activeElement)) return; // activate the focused answer link
         e.preventDefault();
         choose();
       } else if (e.key === 'Tab') {
-        e.preventDefault(); // trap: keep focus on the input (options are arrow-navigated)
-        input.focus();
+        // With an answer showing, Tab cycles input ↔ its citation/route links (they must be
+        // keyboard-reachable); otherwise trap to the input (result rows are arrow-navigated).
+        e.preventDefault();
+        const links = askAnswer.hidden
+          ? []
+          : (Array.from(askAnswer.querySelectorAll('a[href]')) as HTMLElement[]);
+        if (!links.length) {
+          input.focus();
+          return;
+        }
+        const ring = [input as HTMLElement, ...links];
+        const i = ring.indexOf(document.activeElement as HTMLElement);
+        ring[(i + (e.shiftKey ? -1 : 1) + ring.length) % ring.length].focus();
       }
     });
 

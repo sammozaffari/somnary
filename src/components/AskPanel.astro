@@ -39,7 +39,8 @@ const { remedyName, slug } = Astro.props;
   </div>
 
   <p class="privacy-note">
-    Your question is sent to Google’s Gemini API to generate the answer. Don’t include personal or
+    Your question is sent to a third-party AI service — OpenRouter, which routes it to a DeepSeek
+    model (or Google’s Gemini API as a fallback) — to generate the answer. Don’t include personal or
     identifying details.
   </p>
   <p class="stub-note">Scoped to this page’s evidence — it will never invent a source. Educational, not medical advice.</p>
@@ -325,6 +326,10 @@ const { remedyName, slug } = Astro.props;
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ question, slug }),
         });
+        if (res.status === 429) {
+          showPlain('error', 'You’re sending questions faster than we can answer — give it a moment and try again. You can read this page’s evidence and cited sources above.');
+          return;
+        }
         if (!res.ok) {
           showPlain('error', 'Something went wrong. You can read this page’s evidence and cited sources above. This is educational, not medical advice.');
           return;

@@ -1,0 +1,816 @@
+---
+// /account — the OPTIONAL account management page (CHK-6.9c). Server-rendered (prerender=false, emits
+// as a Vercel function) so it can read the session cookie and list the caller's saved maps under RLS.
+//
+// NO LOGIN WALL — CRITICAL: this page NEVER redirects an unauthenticated visitor. Signed-out, it shows
+// a plain, informational "you're not signed in" state WITH an optional sign-in affordance. Unconfigured
+// (no PUBLIC_SUPABASE_* keys — the default build), it shows a plain "accounts aren't enabled yet"
+// state. It is account MANAGEMENT, not health content, so no medical Disclaimer — but copy stays plain
+// and honest. Tokens only (DESIGN_SYSTEM v3).
+//
+// The saved-maps list is SERVER-RENDERED (handleList via the same user-scoped ANON client the GET route
+// uses) so a signed-in reader sees their maps with JS off. The per-item delete is a small client island
+// that calls DELETE /api/saved-maps?id= and removes the row on success.
+import Base from '../layouts/Base.astro';
+import { getServerSupabase } from '../lib/auth.ts';
+import { handleList, type AccountsClient } from '../lib/accounts/handlers.ts';
+
+export const prerender = false;
+
+// Three states: unconfigured (accounts off), signed-out (informational + optional sign-in), signed-in.
+type AccountState = 'unconfigured' | 'signed-out' | 'signed-in';
+interface SavedMap {
+  id: string;
+  title: string;
+  createdAt: string;
+}
+
+let state: AccountState = 'unconfigured';
+let maps: SavedMap[] = [];
+let listError = false;
+
+const supabase = getServerSupabase(Astro.request, Astro.cookies);
+if (supabase) {
+  const { data } = await supabase.auth.getUser();
+  if (data?.user) {
+    state = 'signed-in';
+    const result = await handleList(supabase as unknown as AccountsClient);
+    if (result.status === 200 && result.body && typeof result.body === 'object') {
+      maps = ((result.body as { maps?: SavedMap[] }).maps ?? []) as SavedMap[];
+    } else {
+      listError = true;
+    }
+  } else {
+    state = 'signed-out';
+  }
+}
+
+// Format an ISO timestamp to a short, locale-stable date. Falls back to the raw value if unparseable.
+function fmtDate(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleDateString('en-AU', { year: 'numeric', month: 'short', day: 'numeric' });
+}
+---
+
+<Base
+  title="Your account | Somnary"
+  description="Your optional Somnary account: view and delete the reading maps you've saved from the guide. Accounts are optional — everything on Somnary works without one."
+>
+  <main class="page">
+    <header class="head">
+      <p class="eyebrow">Account</p>
+      <h1 class="title">Your saved maps</h1>
+    </header>
+
+    {
+      state === 'unconfigured' && (
+        <section class="card" aria-label="Accounts not enabled">
+          <p class="card-head">Accounts aren’t enabled yet</p>
+          <p class="card-body">
+            Optional accounts aren’t turned on in this environment, so there’s nothing to sign in to
+            right now. Everything on Somnary — the guide, the remedy evidence, search, and every
+            page — works without an account.
+          </p>
+          <p class="card-body">
+            <a class="inline-link" href="/guide">Go to the guide →</a>
+          </p>
+        </section>
+      )
+    }
+
+    {
+      state === 'signed-out' && (
+        <section class="card" aria-label="You are not signed in" data-signin>
+          <p class="card-head">You’re not signed in</p>
+          <p class="card-body">
+            You don’t need an account to use Somnary — the guide, the evidence, and every page work
+            without one. An account only does one thing: it lets you save a reading map from the
+            <a class="inline-link" href="/guide"> guide</a> and come back to it later. It’s optional.
+          </p>
+          <div class="signin-actions">
+            <button type="button" class="btn btn-primary" data-signin-google>Continue with Google</button>
+            <span class="or" aria-hidden="true">or</span>
+            <form class="magic" data-signin-magic>
+              <label class="sr-only" for="account-email">Email address for a sign-in link</label>
+              <input
+                id="account-email"
+                class="email"
+                type="email"
+                name="email"
+                inputmode="email"
+                autocomplete="email"
+                placeholder="you@example.com"
+                data-signin-email
+              />
+              <button type="submit" class="btn btn-secondary" data-signin-send>Email me a link</button>
+            </form>
+          </div>
+          <p class="signin-status" data-signin-status hidden aria-live="polite" />
+          <p class="card-foot">
+            What we’d store, and how to delete it, is set out in our{' '}
+            <a class="inline-link" href="/privacy">privacy policy</a>.
+          </p>
+        </section>
+      )
+    }
+
+    {
+      state === 'signed-in' && (
+        <section class="signedin" aria-label="Your saved reading maps" data-account>
+          <p class="store-note">
+            An account stores only the reading maps you choose to save from the guide: the links, the
+            structured answers you selected, and the remedy names you mentioned — never a transcript of
+            the conversation. You can delete any map here; deleting removes it from our database.{' '}
+            <a class="inline-link" href="/privacy">What we store →</a>
+          </p>
+
+          {listError && (
+            <p class="empty">We couldn’t load your saved maps just now. Please refresh to try again.</p>
+          )}
+
+          {!listError && maps.length === 0 && (
+            <p class="empty">
+              You haven’t saved any maps yet. Finish the{' '}
+              <a class="inline-link" href="/guide">guide</a> and choose “Save this map” at the end.
+            </p>
+          )}
+
+          {!listError && maps.length > 0 && (
+            <ul class="map-list" data-map-list>
+              {maps.map((m) => (
+                <li class="map-row" data-map-row data-map-id={m.id}>
+                  <div class="map-head-row">
+                    <div class="map-meta">
+                      <p class="map-title">{m.title}</p>
+                      <p class="map-date">Saved {fmtDate(m.createdAt)}</p>
+                    </div>
+                    <div class="map-actions">
+                      <button
+                        type="button"
+                        class="view-btn"
+                        data-map-view
+                        aria-expanded="false"
+                        aria-controls={`map-view-${m.id}`}
+                        aria-label={`View saved map: ${m.title}`}
+                      >
+                        View
+                      </button>
+                      {/* Resume the guide from this saved map (Feature B) — re-derives a fresh map server-side. */}
+                      <a class="resume-link" href={`/guide?resume=${m.id}`}>Continue in the guide →</a>
+                      <button type="button" class="delete-btn" data-map-delete aria-label={`Delete saved map: ${m.title}`}>
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                  {/* Expand-in-place read-only snapshot — filled by the view island via the shared renderer. */}
+                  <div class="map-view" id={`map-view-${m.id}`} data-map-view-region hidden tabindex="-1">
+                    <p class="map-view-status" data-map-view-status hidden aria-live="polite" />
+                    <div class="map-view-body" data-map-view-body />
+                    <p class="map-view-note">
+                      A snapshot of the reading map you saved — a map to Somnary’s evidence, not medical
+                      advice. Whether anything fits you is a conversation for your clinician.
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          <p class="list-status" data-list-status hidden aria-live="polite" />
+
+          <div class="signedin-foot">
+            <a class="signout-link" href="/auth/signout">Sign out</a>
+            <a class="inline-link" href="/guide">Back to the guide →</a>
+          </div>
+        </section>
+      )
+    }
+  </main>
+</Base>
+
+<style>
+  .page {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: var(--sp-8) var(--sp-7) var(--sp-9);
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+    margin: 0;
+  }
+  .head {
+    margin-bottom: var(--sp-6);
+  }
+  .title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-3xl);
+    line-height: var(--lh-3xl);
+    letter-spacing: var(--tracking-tight);
+    color: var(--ink);
+    margin: var(--sp-3) 0 0;
+  }
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  /* informational cards (unconfigured / signed-out) */
+  .card {
+    background: var(--surface);
+    border: var(--border-hairline);
+    border-radius: var(--r-lg);
+    padding: var(--sp-6);
+  }
+  .card-head {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--primary);
+    margin: 0 0 var(--sp-4);
+  }
+  .card-body {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--muted);
+    margin: 0 0 var(--sp-4);
+    max-width: 64ch;
+  }
+  .card-foot {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: var(--sp-5) 0 0;
+  }
+  .inline-link {
+    color: var(--primary);
+    text-decoration: none;
+  }
+  .inline-link:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+    border-radius: var(--r-sm);
+  }
+
+  /* sign-in affordance (signed-out state) */
+  .signin-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--sp-3);
+    margin-top: var(--sp-4);
+  }
+  .or {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+  }
+  .magic {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    flex-wrap: wrap;
+  }
+  .email {
+    min-width: 0;
+    min-height: 40px;
+    padding: 0 var(--sp-4);
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: var(--ink);
+    background: var(--surface);
+    border: var(--border-hairline);
+    border-radius: var(--r-pill);
+  }
+  .email:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+  }
+  .btn {
+    min-height: 40px;
+    padding: 0 var(--sp-5);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    border-radius: var(--r-pill);
+    cursor: pointer;
+  }
+  .btn:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+  }
+  .btn[disabled] {
+    cursor: progress;
+    opacity: 0.7;
+  }
+  .btn-primary {
+    color: var(--action-ink);
+    background: var(--primary);
+    border: 1px solid var(--primary);
+  }
+  .btn-secondary {
+    color: var(--primary);
+    background: var(--surface);
+    border: var(--border-hairline);
+  }
+  .signin-status {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: var(--sp-4) 0 0;
+  }
+  .signin-status.is-ok {
+    color: var(--eucalyptus);
+  }
+
+  /* signed-in: saved-maps list */
+  .store-note {
+    font-size: var(--text-sm);
+    line-height: var(--lh-base);
+    color: var(--muted);
+    margin: 0 0 var(--sp-6);
+    max-width: 68ch;
+  }
+  .empty {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--muted);
+    margin: 0 0 var(--sp-6);
+  }
+  .map-list {
+    list-style: none;
+    margin: 0 0 var(--sp-5);
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+  }
+  .map-row {
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    border: var(--border-hairline);
+    border-radius: var(--r-md);
+    padding: var(--sp-4) var(--sp-5);
+  }
+  .map-head-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-4);
+  }
+  .map-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--sp-3);
+    flex: none;
+  }
+  .map-meta {
+    min-width: 0;
+  }
+  .map-title {
+    font-size: var(--text-base);
+    font-weight: 600;
+    color: var(--ink);
+    margin: 0 0 var(--sp-1);
+  }
+  .map-date {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+    margin: 0;
+  }
+  .delete-btn {
+    flex: none;
+    min-height: 36px;
+    padding: 0 var(--sp-4);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--primary);
+    background: var(--surface);
+    border: var(--border-hairline);
+    border-radius: var(--r-pill);
+    cursor: pointer;
+  }
+  .delete-btn:hover {
+    color: var(--safety-ink);
+    border-color: var(--safety-ink);
+  }
+  .delete-btn:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+  }
+  .delete-btn[disabled] {
+    cursor: progress;
+    opacity: 0.7;
+  }
+  .delete-btn[data-confirm='true'] {
+    color: var(--action-ink);
+    background: var(--safety-ink);
+    border-color: var(--safety-ink);
+  }
+  /* View + Continue — same pill register as delete, but the neutral/primary tone (not the safety tone). */
+  .view-btn {
+    flex: none;
+    min-height: 36px;
+    padding: 0 var(--sp-4);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--primary);
+    background: var(--surface);
+    border: var(--border-hairline);
+    border-radius: var(--r-pill);
+    cursor: pointer;
+  }
+  .view-btn:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+  }
+  .view-btn[disabled] {
+    cursor: progress;
+    opacity: 0.7;
+  }
+  .view-btn[aria-expanded='true'] {
+    color: var(--action-ink);
+    background: var(--primary);
+    border-color: var(--primary);
+  }
+  .resume-link {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--primary);
+    text-decoration: none;
+    min-height: 36px;
+    display: inline-flex;
+    align-items: center;
+  }
+  .resume-link:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+    border-radius: var(--r-sm);
+  }
+
+  /* the expand-in-place read-only reading-map snapshot */
+  .map-view {
+    margin-top: var(--sp-5);
+    padding-top: var(--sp-5);
+    border-top: var(--border-hairline);
+  }
+  .map-view-status {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: 0 0 var(--sp-4);
+  }
+  .map-view-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+  }
+  .map-view-note {
+    font-size: var(--text-xs);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: var(--sp-5) 0 0;
+  }
+
+  /* rendered reading-map fragments — the SAME class contract renderReadingMap emits (mirrors the
+     GuidePanel styles so the saved-map snapshot reads identically). Tokens only. */
+  .map-view :global(.map-fragment) {
+    background: var(--primary-soft);
+    border: var(--border-hairline);
+    border-radius: var(--r-md);
+    padding: var(--sp-5);
+  }
+  .map-view :global(.map-fragment-text) {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--ink);
+    margin: 0;
+    max-width: 64ch;
+  }
+  .map-view :global(.map-fragment.is-crisis) {
+    background: var(--grade-f-tint);
+    border-color: var(--grade-f);
+  }
+  .map-view :global(.map-fragment.is-crisis .map-fragment-text) {
+    color: var(--grade-f);
+    font-weight: 600;
+  }
+  .map-view :global(.map-fragment.is-boundary) {
+    background: var(--warning-bg);
+    border-color: var(--grade-f);
+  }
+  .map-view :global(.map-fragment.is-boundary .map-fragment-text) {
+    color: var(--ink);
+  }
+  .map-view :global(.map-items) {
+    list-style: none;
+    margin: var(--sp-4) 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+  }
+  .map-view :global(.map-item-link) {
+    font-size: var(--text-base);
+    font-weight: 600;
+    color: var(--primary);
+    text-decoration: none;
+  }
+  .map-view :global(.map-item-link:focus-visible) {
+    outline: none;
+    box-shadow: var(--ring);
+    border-radius: var(--r-sm);
+  }
+  .map-view :global(.map-fragment.is-crisis .map-item-link),
+  .map-view :global(.map-fragment.is-boundary .map-item-link) {
+    color: var(--grade-f);
+  }
+
+  .list-status {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: 0 0 var(--sp-5);
+  }
+  .signedin-foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--sp-5);
+    margin-top: var(--sp-6);
+    padding-top: var(--sp-5);
+    border-top: var(--border-hairline);
+  }
+  .signout-link {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--primary);
+    text-decoration: none;
+  }
+  .signout-link:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+    border-radius: var(--r-sm);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .page * {
+      transition: none !important;
+      animation: none !important;
+    }
+  }
+  @media (max-width: 640px) {
+    .page {
+      padding: var(--sp-6) var(--sp-5) var(--sp-8);
+    }
+    .title {
+      font-size: var(--text-2xl);
+    }
+  }
+</style>
+
+<!-- signed-out: optional sign-in island (Google + magic-link). Reuses the SaveMap sign-in pattern. -->
+<script>
+  import { getBrowserSupabase } from '../lib/auth.ts';
+
+  const wrap = document.querySelector<HTMLElement>('[data-signin]');
+  if (wrap) {
+    const supabase = getBrowserSupabase();
+    const status = wrap.querySelector<HTMLElement>('[data-signin-status]');
+    const googleBtn = wrap.querySelector<HTMLButtonElement>('[data-signin-google]');
+    const magicForm = wrap.querySelector<HTMLFormElement>('[data-signin-magic]');
+    const emailInput = wrap.querySelector<HTMLInputElement>('[data-signin-email]');
+    const sendBtn = wrap.querySelector<HTMLButtonElement>('[data-signin-send]');
+
+    const setStatus = (text: string, ok = false) => {
+      if (!status) return;
+      status.hidden = false;
+      status.textContent = text;
+      status.classList.toggle('is-ok', ok);
+    };
+
+    // If somehow rendered without config (shouldn't happen — server would show 'unconfigured'), keep
+    // the buttons inert rather than throwing.
+    if (supabase) {
+      const redirectTo = window.location.origin + '/auth/callback?next=/account';
+
+      googleBtn?.addEventListener('click', async () => {
+        googleBtn.disabled = true;
+        setStatus('Opening Google sign-in…');
+        try {
+          const { error } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: { redirectTo },
+          });
+          if (error) {
+            googleBtn.disabled = false;
+            setStatus('Couldn’t start Google sign-in just now. Please try again.');
+          }
+        } catch {
+          googleBtn.disabled = false;
+          setStatus('Couldn’t start Google sign-in just now. Please try again.');
+        }
+      });
+
+      magicForm?.addEventListener('submit', async (ev) => {
+        ev.preventDefault();
+        const email = (emailInput?.value ?? '').trim();
+        if (!email || !email.includes('@')) {
+          setStatus('Please enter a valid email address.');
+          emailInput?.focus();
+          return;
+        }
+        if (sendBtn) sendBtn.disabled = true;
+        setStatus('Sending you a sign-in link…');
+        try {
+          const { error } = await supabase.auth.signInWithOtp({
+            email,
+            options: { emailRedirectTo: redirectTo },
+          });
+          if (sendBtn) sendBtn.disabled = false;
+          if (error) setStatus('Couldn’t send the link just now. Please try again.');
+          else setStatus('Check your email for a sign-in link, then come back here.', true);
+        } catch {
+          if (sendBtn) sendBtn.disabled = false;
+          setStatus('Couldn’t send the link just now. Please try again.');
+        }
+      });
+    }
+  }
+</script>
+
+<!-- signed-in: per-item delete island. Two-tap confirm, then DELETE /api/saved-maps?id= and remove. -->
+<script>
+  const account = document.querySelector<HTMLElement>('[data-account]');
+  if (account) {
+    const listStatus = account.querySelector<HTMLElement>('[data-list-status]');
+    const list = account.querySelector<HTMLElement>('[data-map-list]');
+
+    const setStatus = (text: string) => {
+      if (!listStatus) return;
+      listStatus.hidden = false;
+      listStatus.textContent = text;
+    };
+
+    account.querySelectorAll<HTMLButtonElement>('[data-map-delete]').forEach((btn) => {
+      const row = btn.closest<HTMLElement>('[data-map-row]');
+      const id = row?.dataset.mapId ?? '';
+      const restLabel = btn.getAttribute('aria-label') ?? 'Delete saved map';
+      const armLabel = restLabel.replace(/^Delete /, 'Confirm delete of ');
+
+      btn.addEventListener('click', async () => {
+        // First tap arms the confirm; second tap within the window commits the delete.
+        if (btn.dataset.confirm !== 'true') {
+          btn.dataset.confirm = 'true';
+          btn.textContent = 'Confirm delete';
+          btn.setAttribute('aria-label', armLabel); // announce the armed state to screen readers
+          window.setTimeout(() => {
+            if (btn.dataset.confirm === 'true') {
+              btn.dataset.confirm = 'false';
+              btn.textContent = 'Delete';
+              btn.setAttribute('aria-label', restLabel);
+            }
+          }, 4000);
+          return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = 'Deleting…';
+        try {
+          const res = await fetch('/api/saved-maps?id=' + encodeURIComponent(id), { method: 'DELETE' });
+          if (res.ok) {
+            row?.remove();
+            setStatus('Deleted.');
+            // If that was the last one, note the empty state.
+            if (list && list.querySelectorAll('[data-map-row]').length === 0) {
+              setStatus('Deleted. You have no saved maps.');
+            }
+          } else {
+            btn.disabled = false;
+            btn.dataset.confirm = 'false';
+            btn.textContent = 'Delete';
+            setStatus('Couldn’t delete just now — nothing changed. You can try again.');
+          }
+        } catch {
+          btn.disabled = false;
+          btn.dataset.confirm = 'false';
+          btn.textContent = 'Delete';
+          setStatus('Couldn’t reach the server just now — nothing changed. You can try again.');
+        }
+      });
+    });
+  }
+</script>
+
+<!-- signed-in: per-item VIEW island (CHK-6.9e). Expand-in-place, read-only. Fetches the ONE map in
+     full (GET /api/saved-maps?id=) and renders its route_plan via the SHARED renderReadingMap — the
+     SAME textContent-only, internal-href renderer the guide uses. No innerHTML, no raw text: the plan
+     was sanitized when SAVED and re-validated server-side on read (defense-in-depth). A second tap
+     collapses. 404/401/503/error → a calm neutral message, never the safety tone. -->
+<script>
+  import { renderReadingMap } from '../lib/guide/render-map.ts';
+
+  const account = document.querySelector<HTMLElement>('[data-account]');
+  if (account) {
+    account.querySelectorAll<HTMLButtonElement>('[data-map-view]').forEach((btn) => {
+      const row = btn.closest<HTMLElement>('[data-map-row]');
+      const id = row?.dataset.mapId ?? '';
+      const region = row?.querySelector<HTMLElement>('[data-map-view-region]');
+      const body = region?.querySelector<HTMLElement>('[data-map-view-body]');
+      const status = region?.querySelector<HTMLElement>('[data-map-view-status]');
+      if (!region || !body || !status) return;
+
+      let loaded = false; // fetch once; subsequent expands reuse the rendered snapshot
+
+      const setStatus = (text: string) => {
+        status.hidden = false;
+        status.textContent = text;
+      };
+      const clearStatus = () => {
+        status.hidden = true;
+        status.textContent = '';
+      };
+
+      const collapse = () => {
+        region.hidden = true;
+        btn.setAttribute('aria-expanded', 'false');
+        btn.textContent = 'View';
+      };
+
+      const expand = () => {
+        region.hidden = false;
+        btn.setAttribute('aria-expanded', 'true');
+        btn.textContent = 'Hide';
+      };
+
+      btn.addEventListener('click', async () => {
+        const isOpen = btn.getAttribute('aria-expanded') === 'true';
+        if (isOpen) {
+          collapse();
+          return;
+        }
+        // Opening. If already loaded, just re-show the rendered snapshot.
+        if (loaded) {
+          expand();
+          region.focus?.();
+          return;
+        }
+        // First open → fetch this ONE map in full, then render it.
+        btn.disabled = true;
+        expand();
+        setStatus('Loading your saved map…');
+        try {
+          const res = await fetch('/api/saved-maps?id=' + encodeURIComponent(id), {
+            headers: { Accept: 'application/json' },
+          });
+          if (!res.ok) {
+            // Calm, neutral register for every failure — never the safety/vermilion tone.
+            if (res.status === 404) setStatus('We couldn’t find this saved map — it may have been deleted.');
+            else if (res.status === 401) setStatus('Your session has ended. Please sign in again to view this map.');
+            else if (res.status === 503) setStatus('Saved maps aren’t available just now. Please try again later.');
+            else setStatus('We couldn’t load this map just now. You can try again.');
+            btn.disabled = false;
+            return;
+          }
+          const data = (await res.json()) as { route_plan?: unknown };
+          const plan = data?.route_plan;
+          if (!plan || typeof plan !== 'object') {
+            setStatus('This saved map couldn’t be displayed. You can try again.');
+            btn.disabled = false;
+            return;
+          }
+          // Render via the shared, textContent-only renderer. The plan is server-sanitized (internal
+          // hrefs only); no raw string is ever injected as HTML.
+          renderReadingMap(plan as Parameters<typeof renderReadingMap>[0], body);
+          clearStatus();
+          loaded = true;
+          btn.disabled = false;
+          region.focus?.();
+        } catch {
+          setStatus('We couldn’t reach the server just now. You can try again.');
+          btn.disabled = false;
+        }
+      });
+    });
+  }
+</script>

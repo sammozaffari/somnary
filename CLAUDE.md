@@ -45,10 +45,31 @@ rulebook for every content, design, AI, ad, and product decision.
   decision page; "educational, not medical advice" appears near decisions, not
   only in the footer. Be conservative on pregnancy, children, drug interactions.
 - All content pages are SSR/SSG. Never ship core content client-only.
-- AI features answer only from the reviewed corpus, cite back, refuse
-  personalized dosing/diagnosis, and route safety concerns to boundary pages.
-  Forbidden framings (from the rulebook): "take X tonight", "your ideal dose",
-  "this is safe for you", "combine these", any diagnosis.
+- AI features cite back, refuse personalized dosing/diagnosis, and route safety
+  concerns to boundary pages. Forbidden framings (from the rulebook): "take X
+  tonight", "your ideal dose", "this is safe for you", "combine these", any
+  diagnosis. *(Corpus scope amended by owner 2026-07-21 — see D5.)*
+- **D5 AI corpus scope: bounded external research allowed (owner-ratified
+  2026-07-21).** The earlier "AI answers ONLY from the reviewed corpus" rule is
+  amended: the **Somnary Lens** (see `/docs/plans/2026-07-21-somnary-lens-ai-
+  design.md`) MAY research products/ingredients/questions the corpus does not
+  cover — BUT ONLY under all of these, no exceptions:
+  1. Every factual claim resolves to a real, cited source (PMID/DOI/registry),
+     same bar as the corpus.
+  2. Every evidence claim is **adversarially verified** (refute-first; a claim
+     that survivors cannot defend is CUT, never hedged). Anti-hallucination is
+     the load-bearing guarantee, not a nicety.
+  3. Weak evidence is labeled weak; the anti-hype "what the evidence does NOT
+     show" beat is mandatory.
+  4. Output is a **draft assessment, NEVER a tier grade** — stamped "AI-assisted
+     research · not a Somnary grade", with a route to request a human review.
+     No agent assigns or changes a tier grade (below) is UNCHANGED.
+  5. No brand money, no paid placement, no personalized dosing/diagnosis; safety
+     routing intact. What stays sacred: published grades, the corpus quality
+     bar, citation discipline, safety conservatism — the AI may only *apply*
+     that discipline to new inputs, clearly fenced as draft/unvetted.
+  Corpus remedies still short-circuit to their human-graded pages (a vetted
+  grade always beats fresh AI research).
 - No agent assigns or changes a tier grade. Grading is `[HUMAN-GATE]`, always.
 
 ## Agent roles (definitions in `.claude/agents/`)

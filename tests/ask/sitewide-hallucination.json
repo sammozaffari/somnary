@@ -1,0 +1,53 @@
+[
+  {
+    "name": "grounded-named-kava",
+    "question": "does kava have liver risks?",
+    "mock": "valid",
+    "expectStatus": "answered",
+    "expectAnsweredFrom": "/r/kava",
+    "expectCitationsSubsetOfSelected": true,
+    "note": "named remedy wins selection; every citation must be a kava source with href /r/kava#source-n"
+  },
+  {
+    "name": "grounded-unnamed-jet-lag",
+    "question": "does anything help jet lag?",
+    "mock": "valid",
+    "expectStatus": "answered",
+    "expectAnsweredFromPresent": true,
+    "expectCitationsSubsetOfSelected": true,
+    "note": "no remedy named → distinctive-token scoring selects one page; answeredFrom present, citations ⊆ that page"
+  },
+  {
+    "name": "invented-bracket-citation",
+    "question": "does melatonin cure insomnia?",
+    "mock": "invented-bracket",
+    "expectStatus": "refused",
+    "expectCategory": "citation-downgrade",
+    "expectZeroCitations": true,
+    "note": "model emits [99], not on the selected page -> downgrade (site-wide regression proof)"
+  },
+  {
+    "name": "invented-raw-pmid",
+    "question": "is melatonin proven for jet lag?",
+    "mock": "invented-pmid",
+    "expectStatus": "refused",
+    "expectCategory": "citation-downgrade",
+    "expectZeroCitations": true
+  },
+  {
+    "name": "invented-link",
+    "question": "what dose was studied for jet lag?",
+    "mock": "invented-link",
+    "expectStatus": "refused",
+    "expectCategory": "citation-downgrade",
+    "expectZeroCitations": true
+  },
+  {
+    "name": "forbidden-framing-output",
+    "question": "does melatonin work for sleep onset?",
+    "mock": "forbidden",
+    "expectStatus": "refused",
+    "expectCategory": "framing-downgrade",
+    "expectZeroCitations": true
+  }
+]

@@ -1,0 +1,447 @@
+---
+import Base from '../../layouts/Base.astro';
+
+// The six scorecard dimensions, rendered from data so the page and the rubric
+// doc (docs/SOURCE_SCORECARD_RUBRIC.md) can be diffed against each other.
+const dimensions: { name: string; measures: string; rules: string[] }[] = [
+  {
+    name: 'Testing & purity',
+    measures:
+      'Whether anyone independent of the brand has verified what is in the bottle. Not whether the remedy works — that is the evidence grade’s job.',
+    rules: [
+      'Current USP Verified certification: +2',
+      'Current NSF certification: +2',
+      'Current Informed Choice / Informed Sport: +2',
+      'TGA AUST L listing (Australian market): +1',
+      'Published independent assay meeting label claim, if no certification held: +2',
+      'Capped at 5. Brand-commissioned COAs don’t count here (they count under Transparency). A score of 0 reads “no independent testing found” — a fact, not an accusation.',
+    ],
+  },
+  {
+    name: 'Label accuracy',
+    measures:
+      'Measured content versus label claim, from published assays that name the exact product.',
+    rules: [
+      'Most recent product-naming assay within ±10% of claim: 5 · within ±20%: 3 · within ±50%: 1 · beyond: 0',
+      'Publicly posted batch-level COA: +1 (capped at 5)',
+      'No product-naming assay exists → the card says “no assay data” and the score is capped at 2, from COA transparency alone. Absence of data never reads as passing.',
+    ],
+  },
+  {
+    name: 'Additives & formulation',
+    measures:
+      'What is in the product besides the active ingredient, and whether the dose is honest.',
+    rules: [
+      'Starts at 5. Each additive on our published, cited watchlist deducts −1 or −2 by evidence strength.',
+      'Proprietary blend hiding the per-ingredient dose: −2',
+      'Dose more than twice the studied-dose ceiling for the remedy: −1',
+      'Benign excipients (silicon dioxide, magnesium stearate) never deduct — the watchlist says so explicitly, with sources. Clean-label theater is not evidence.',
+    ],
+  },
+  {
+    name: 'Regulatory record',
+    measures: 'The manufacturer’s documented history with FDA, FTC, and TGA.',
+    rules: [
+      'Starts at 5. FDA warning letter: −3 · recall: −3 · FTC action: −2 · TGA alert: −2',
+      'Penalties decay: halved after 3 years, quartered after 6. A decade-old letter is context, not a verdict.',
+      'Every deduction links the primary regulator document, dated. We quote regulators; we don’t editorialize them.',
+    ],
+  },
+  {
+    name: 'Transparency',
+    measures: 'Whether you can find out who actually makes the product and verify a batch.',
+    rules: [
+      'Actual manufacturer identifiable (not anonymous white-label): +2',
+      'Batch COA publicly posted: +2 · available on request: +1 (we test this by actually asking)',
+      'Ingredient origin disclosed: +1. Capped at 5.',
+    ],
+  },
+  {
+    name: 'Marketing honesty',
+    measures: 'What the brand’s own copy claims, quoted verbatim with URL and capture date.',
+    rules: [
+      'Starts at 5. Disease claims (“treats insomnia”): −2 each',
+      '“Clinically proven” / “doctor recommended” with no citable trial of that product: −1 each',
+      'Fear-based ingredient claims contradicted by evidence: −1 each — including fear-marketing benign excipients. Lying about additives costs points exactly like lying about benefits.',
+    ],
+  },
+];
+---
+
+<Base
+  title="How we rate sources — Somnary methodology"
+  description="How Somnary's source scorecards rate supplement products and suppliers: six documented dimensions, no composite score, no #1 pick, no affiliate links. Every point traces to a document you can open."
+>
+  <main class="page">
+    <header class="head">
+      <p class="eyebrow">Methodology · How Somnary rates sources</p>
+      <h1 class="title">How we rate sources</h1>
+      <p class="dek">
+        The evidence grade answers whether a remedy works. Source scorecards answer a different
+        question: if the evidence justifies trying one, which bottles actually contain what the
+        label says, made by companies whose own claims hold up? Six dimensions, each scored 0–5, each point
+        traceable to a document you can open yourself. This page is the whole method. The full
+        point-by-point rubric is versioned in public, and
+        <a href="/methodology">the evidence-grading methodology</a> is its sibling. The first
+        scorecards are live: <a href="/sources/melatonin">where to source melatonin</a>,
+        <a href="/sources/magnesium">where to source magnesium</a>,
+        <a href="/sources/valerian">where to source valerian</a>,
+        <a href="/sources/glycine">where to source glycine</a>, and
+        <a href="/sources/ashwagandha">where to source ashwagandha</a>.
+      </p>
+    </header>
+
+    <aside class="principle">
+      <p class="principle-line">No composite score. No #1 pick. A ranking is a recommendation, and we don’t make those.</p>
+      <p class="principle-sub">— The source-scorecard principle</p>
+    </aside>
+
+    <!-- Section 1 — why sourcing matters -->
+    <section class="section">
+      <p class="eyebrow">Section 01</p>
+      <h2 class="section-title">Why sourcing matters</h2>
+      <div class="prose">
+        <p>
+          Supplements are not manufactured like medicines, and melatonin is the proof. When
+          researchers assayed 30 commercial melatonin products, measured content ranged from
+          <strong>83% below to 478% above</strong> the label claim, and more than 71% missed the
+          label by over 10% — with lot-to-lot swings within a single product of up to 465%
+          (<a href="https://pubmed.ncbi.nlm.nih.gov/27855744/">Erland &amp; Saxena 2017, PMID 27855744</a>).
+          Six years later, JAMA repeated the exercise for melatonin gummies: of 25 products, 22
+          were inaccurately labeled, actual melatonin ran <strong>74% to 347%</strong> of the
+          stated dose, and one contained no melatonin at all
+          (<a href="https://doi.org/10.1001/jama.2023.2296">Cohen et&nbsp;al. 2023, JAMA, doi 10.1001/jama.2023.2296</a>).
+        </p>
+        <p>
+          Two identical-looking bottles can be different products in everything but the label. An
+          evidence grade can’t see that; a source scorecard exists to make it visible.
+        </p>
+      </div>
+    </section>
+
+    <!-- Section 2 — the six dimensions -->
+    <section class="section">
+      <p class="eyebrow">Section 02</p>
+      <h2 class="section-title">The six dimensions</h2>
+      <div class="prose">
+        <p>
+          Every product on a scorecard page gets the same six scores. There is deliberately no
+          overall number: a weighting would be an editorial opinion dressed as arithmetic, and a
+          #1 slot would be a purchase instruction. You can sort by whichever dimension matters to
+          you; the scores stay separate, like the evidence gates behind a remedy grade.
+        </p>
+      </div>
+      <dl class="dims">
+        {
+          dimensions.map((d, i) => (
+            <div class="dim-row">
+              <dt>
+                <span class="dim-index">{String(i + 1).padStart(2, '0')}</span>
+                <span class="dim-name">{d.name}</span>
+              </dt>
+              <dd>
+                <p class="dim-measures">{d.measures}</p>
+                <ul class="dim-rules">
+                  {d.rules.map((r) => (
+                    <li>{r}</li>
+                  ))}
+                </ul>
+              </dd>
+            </div>
+          ))
+        }
+      </dl>
+    </section>
+
+    <!-- Section 3 — whose test is it -->
+    <section class="section">
+      <p class="eyebrow">Section 03</p>
+      <h2 class="section-title">Whose test is it?</h2>
+      <div class="prose">
+        <p>
+          Today, every testing data point on a scorecard is someone else’s test, and the card
+          says whose: a certifier’s public directory (USP, NSF, Informed Choice, the TGA’s
+          register), a peer-reviewed assay with a PubMed ID or DOI, or a regulator’s lab finding.
+          We aggregate and link; we don’t launder. Where a result comes from a subscription
+          service’s proprietary testing, we cite and link it — we never republish their tables as
+          our own.
+        </p>
+        <p>
+          <strong>We do not yet run our own lab tests.</strong> Commissioning independent assays
+          through an accredited lab is a planned future step, and when it happens those
+          results will be labeled as ours, with the full protocol published. Until then, nothing
+          on a scorecard implies testing we didn’t do.
+        </p>
+      </div>
+    </section>
+
+    <!-- Section 4 — what we never score -->
+    <section class="section">
+      <p class="eyebrow">Section 04</p>
+      <h2 class="section-title">What we never score</h2>
+      <div class="prose">
+        <p>
+          <strong>Community sentiment.</strong> Anecdotes — Reddit and forum threads — are never a
+          score input, because anecdotes aren’t assays. The same firewall that keeps community reports
+          out of evidence grades keeps them out of source scores: no scoring path reads them,
+          structurally.
+        </p>
+        <p>
+          <strong>Trial usage.</strong> When a published trial used an exact branded product, we
+          flag it, with the citation. It’s context, not credit — a product being handed out in a
+          study says nothing about the bottle you’d buy today.
+        </p>
+      </div>
+    </section>
+
+    <!-- Section 5 — where the data comes from -->
+    <section class="section">
+      <p class="eyebrow">Section 05</p>
+      <h2 class="section-title">Where the data comes from</h2>
+      <div class="prose">
+        <ul>
+          <li>Certifier directories: USP Verified, NSF, Informed Choice, the TGA’s ARTG.</li>
+          <li>Regulator databases: FDA warning letters and recalls, FTC enforcement actions, TGA alerts.</li>
+          <li>Peer-reviewed assays and trials via PubMed, DOI, and ClinicalTrials.gov.</li>
+          <li>The products’ own labels and websites, captured and dated.</li>
+          <li>Public community threads (Reddit, open forums) — for background context during research only; never scored or displayed.</li>
+        </ul>
+        <p>
+          We don’t scrape Facebook or Amazon reviews: their terms prohibit it, and star ratings
+          aren’t data we’d trust anyway — review sections are exactly where manipulated sentiment
+          lives. If a data source would require breaking someone’s rules to access, we don’t use
+          it, and we’d rather show you less data than laundered data.
+        </p>
+      </div>
+    </section>
+
+    <!-- Section 6 — money -->
+    <section class="section">
+      <p class="eyebrow">Section 06</p>
+      <h2 class="section-title">Money</h2>
+      <div class="prose">
+        <p>
+          Scorecard pages link directly to products because a source page that won’t name sources
+          is useless. So, loudly: <strong>no affiliate links — Somnary earns nothing if you
+          buy.</strong> The links carry no tracking or commission parameters. No brand pays to
+          appear, to improve a score, to remove one, or to see one before you do. The
+          <a href="/disclosure">full disclosure page</a> covers the whole model: reader-funded,
+          zero brand money, no commerce.
+        </p>
+      </div>
+    </section>
+
+    <!-- Section 7 — mistakes -->
+    <section class="section corrections" id="corrections">
+      <p class="eyebrow">Section 07</p>
+      <h2 class="section-title">Mistakes, corrections, and right of reply</h2>
+      <div class="prose">
+        <p>
+          Scores are ratified by a human before publication, re-reviewed on any new regulator
+          event, new assay, certification change, or label change — and at most 12 months after
+          the review date shown on every card. When a score changes, the changelog says what
+          moved and why.
+        </p>
+        <p>
+          If we got a fact wrong, tell us and we aim to fix verified errors
+          <strong>within 7 days</strong>. That includes brands: a company that sends a document —
+          a certification, a batch COA, a corrected label — gets a re-review under the same
+          public rubric as everyone else. Documents move scores; complaints don’t.
+        </p>
+        <p class="inbox">
+          Corrections inbox: <a href="mailto:sammymoz@gmail.com">sammymoz@gmail.com</a>
+        </p>
+      </div>
+    </section>
+
+    <p class="footer-strip">
+      Somnary · Source methodology v1 · Reviewed 2026-07-17 · Educational, not medical advice ·
+      A source scorecard is about what’s in a bottle, never about whether you should take it —
+      talk to a clinician before changing what you take.
+    </p>
+  </main>
+</Base>
+
+<style>
+  .page {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: var(--sp-8) var(--sp-7) var(--sp-9);
+  }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+    margin: 0;
+  }
+
+  .head {
+    margin-bottom: var(--sp-7);
+  }
+  .title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-3xl);
+    line-height: var(--lh-3xl);
+    letter-spacing: var(--tracking-tight);
+    color: var(--ink);
+    margin: var(--sp-3) 0 var(--sp-5);
+  }
+  .dek {
+    font-family: var(--font-body);
+    font-size: var(--text-md);
+    line-height: var(--lh-md);
+    color: var(--muted);
+    max-width: 68ch;
+    margin: 0;
+  }
+  .dek a {
+    color: var(--primary);
+  }
+
+  .principle {
+    background: var(--primary-soft);
+    border-radius: var(--r-xl);
+    padding: var(--sp-7);
+    margin: var(--sp-7) 0;
+  }
+  .principle-line {
+    font-family: var(--font-display);
+    font-size: var(--text-2xl);
+    line-height: var(--lh-2xl);
+    color: var(--ink);
+    margin: 0;
+    max-width: 28ch;
+  }
+  .principle-sub {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--primary);
+    margin: var(--sp-4) 0 0;
+  }
+
+  .section {
+    border-top: var(--border-hairline);
+    padding-top: var(--sp-6);
+    margin-top: var(--sp-8);
+  }
+  .section-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-xl);
+    line-height: var(--lh-xl);
+    color: var(--ink);
+    margin: var(--sp-2) 0 var(--sp-5);
+  }
+
+  .prose {
+    max-width: 68ch;
+  }
+  .prose p {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--muted);
+    margin: 0 0 var(--sp-4);
+  }
+  .prose strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .prose ul {
+    margin: 0 0 var(--sp-4);
+    padding-left: var(--sp-5);
+  }
+  .prose li {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--muted);
+    margin-bottom: var(--sp-2);
+  }
+  .prose a {
+    color: var(--primary);
+  }
+
+  /* dimension list */
+  .dims {
+    margin: var(--sp-6) 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+  }
+  .dim-row {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: var(--sp-5);
+    align-items: start;
+    padding: var(--sp-5);
+    border: var(--border-hairline);
+    border-radius: var(--r-lg);
+    background: var(--surface);
+  }
+  .dim-row dt {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+    margin: 0;
+  }
+  .dim-index {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--primary);
+  }
+  .dim-name {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-md);
+    line-height: var(--lh-md);
+    color: var(--ink);
+  }
+  .dim-row dd {
+    margin: 0;
+  }
+  .dim-measures {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--ink);
+    margin: 0 0 var(--sp-3);
+  }
+  .dim-rules {
+    margin: 0;
+    padding-left: var(--sp-5);
+  }
+  .dim-rules li {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin-bottom: var(--sp-2);
+  }
+
+  .inbox {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+  }
+
+  .footer-strip {
+    border-top: var(--border-hairline);
+    margin-top: var(--sp-8);
+    padding-top: var(--sp-5);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+  }
+
+  @media (max-width: 720px) {
+    .page {
+      padding: var(--sp-7) var(--sp-5) var(--sp-8);
+    }
+    .dim-row {
+      grid-template-columns: 1fr;
+      gap: var(--sp-3);
+    }
+  }
+</style>

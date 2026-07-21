@@ -9,9 +9,9 @@ import LegalPage from '../layouts/LegalPage.astro';
 
 <LegalPage
   title="Privacy"
-  eyebrow="Privacy · Last updated 10 July 2026"
+  eyebrow="Privacy · Last updated 21 July 2026"
   description="Somnary's privacy policy. We collect as little as possible: no data selling, no ad-tracking, and most of the site works without collecting anything that identifies you."
-  lastUpdated="10 July 2026"
+  lastUpdated="21 July 2026"
 >
   <p class="lead">
     Somnary is built to need as little of your data as possible. This policy explains what we
@@ -26,9 +26,17 @@ import LegalPage from '../layouts/LegalPage.astro';
   <h2>1. What we collect</h2>
   <ul>
     <li>
-      <strong>Newsletter (the dispatch):</strong> the dispatch newsletter isn’t live yet. When
-      it launches, subscribing will store your email address, only to send you the newsletter.
-      Nothing else.
+      <strong>Newsletter (the dispatch):</strong> the dispatch newsletter isn’t publishing yet, but
+      you can leave your email to be told when it launches. If you do, we store just that email
+      address (in our database, hosted by Supabase — see “sharing” below), only to send you a note
+      when the dispatch starts. Nothing else, no spam, and you can ask us to remove it any time.
+    </li>
+    <li>
+      <strong>Claim / label submissions:</strong> if you send us a sleep claim or a product label
+      to check, we store what you submit (and your email only if you choose to add one) to help us
+      decide what to research and to run the correction process. These are also stored in our
+      Supabase database. Please don’t include personal health details — we don’t need them and ask
+      you not to send them.
     </li>
     <li>
       <strong>Analytics:</strong> we currently run no analytics: no third-party scripts, no
@@ -43,22 +51,52 @@ import LegalPage from '../layouts/LegalPage.astro';
     </li>
     <li>
       <strong>Community reports (when launched):</strong> these are anonymous by design: no
-      name, no email, no account. Don’t include anything in a report that could identify you; we
-      don’t want it and don’t store it.
+      name, no email, no account — and they stay separate and pseudonymous even if you are signed in
+      (a report is never linked to your account). Don’t include anything in a report that could
+      identify you; we don’t want it and don’t store it.
     </li>
     <li>
       <strong>Corrections / emails:</strong> if you email us, we keep your message and address to
       reply and to track the correction.
     </li>
     <li>
-      <strong>The on-page assistant (“ask this page”):</strong> when you send a question to the
-      optional assistant, the text of your question and the reviewed content of the page you’re on
-      are sent to Google (the Gemini API) to generate the answer. We don’t attach your name, email,
-      or an account (we don’t have one for you), and we don’t log your questions to build a profile
-      of you. Google processes the request as our AI provider under its API terms. Because your
-      question leaves our servers to reach Google, please don’t type anything into the assistant
-      that identifies you or that you consider sensitive. The feature is optional: every page and
-      its sources work fully without it.
+      <strong>Accounts (optional):</strong> you don’t need an account to use Somnary — every page, its
+      sources, search, and the whole guide work signed-out. An account does one thing: it lets you
+      save a reading map from the guide so you can return to it. If you create one (through Google
+      sign-in or an email “magic link”, handled by Supabase Auth), we store your account identifier and
+      the email address you sign in with. For each map you choose to save, we store the structured
+      answers you selected in the guide (the sleep problems, how often, the age band, and the evening
+      habits you picked) <em>and</em> the remedy names you typed when we asked what you’d tried, plus
+      the reading map itself (the links) and any habits-checklist ticks. We do <strong>not</strong>
+      store a free-text transcript of your conversation — the free-text notes you type are dropped
+      before anything is saved; only the fixed answers you selected and the remedy names you mentioned
+      are kept. You can view and delete your saved maps yourself, any time, at{' '}
+      <a href="/account">your account page</a>; deleting a map removes it from our database. There is
+      no login wall.
+    </li>
+    <li>
+      <strong>AI features (“ask this page”, the “Ask Somnary” search answer, and the guide):</strong>
+      when you use one of the optional AI features, the text you send (your question, or the answers
+      you type into the guide) is sent to a third-party AI service — OpenRouter, which routes it to a
+      DeepSeek model, or Google’s Gemini API as a fallback — to generate the answer. We don’t attach
+      your name or email, and we don’t log what you type to build a profile of you. The provider
+      processes the request as our AI provider under its API terms. Because your text leaves our
+      servers to reach the provider, please don’t type anything that identifies you or that you
+      consider sensitive. These features are optional: every page, its sources, and the reading the
+      guide points to all work without them, and the guide keeps nothing after it answers — unless you
+      are signed in and choose “save this map”, which stores only the structured result described under
+      “Accounts (optional)” above (never the AI text you sent).
+    </li>
+    <li>
+      <strong>Somnary Lens research counts:</strong> when the Lens researches a supplement or
+      ingredient, we keep an <strong>aggregate count</strong> of which <em>named</em> products and
+      ingredients people look up, so we can decide what to grade next. We store <strong>only the
+      normalised name and a running count</strong> — for example, “ashwagandha: 42”. We do
+      <strong>not</strong> store the free-text questions you type into the Lens; we don’t log a run when
+      the Lens declines to research (an off-topic, safety, or dosing question) or when it just points you
+      to a page we’ve already graded; we don’t store the pasted text of a supplement-facts label (only a
+      recognised ingredient name from it); and we don’t tie a Lens run to your identity, your IP, or keep
+      any per-search record. It is a tally of subjects, nothing more.
     </li>
   </ul>
 
@@ -83,33 +121,43 @@ import LegalPage from '../layouts/LegalPage.astro';
 
   <h2>5. Sharing</h2>
   <p>
-    We share data with the service providers that run the site for us: our host, Vercel, and —
-    only when you use the optional on-page assistant — Google, which processes your question and
-    the page content through its Gemini API to generate the answer. If we add an email tool (for
-    the dispatch) or analytics, we’ll name them here. Each is bound to handle data for us alone. We
-    may disclose information if required by law.
+    We share data with the service providers that run the site for us: our host, Vercel; Supabase,
+    which stores the email addresses and claim/label submissions described above, and — if you create
+    one — your optional account (Supabase Auth handles Google/email-link sign-in) and the reading maps
+    you save (its servers are the database behind those forms and accounts); and — only when you use
+    one of the optional AI features — our
+    AI provider OpenRouter (which routes your text to a DeepSeek model), or Google’s Gemini API as a
+    fallback, which processes the text you sent to generate the answer. If we add an email-sending
+    tool (for the dispatch) or analytics, we’ll name them here too. Each is bound to handle data for
+    us alone. We may disclose information if required by law.
   </p>
 
   <h2>6. Retention</h2>
   <p>
-    Newsletter data until you unsubscribe; emails for as long as needed to handle your query;
-    analytics in aggregate only.
+    Newsletter emails until you ask us to remove you (before launch, that removal is manual, by
+    email); claim/label submissions for as long as they inform our research and the correction log;
+    account and saved maps until you delete them (each map is deletable by you at any time on{' '}
+    <a href="/account">your account page</a>, and you can ask us to remove the whole account); emails
+    for as long as needed to handle your query; analytics in aggregate only.
   </p>
 
   <h2>7. Your rights</h2>
   <p>
     You can ask us to access, correct, or delete the personal data we hold about you (essentially
-    just your email, if you’ve subscribed or written to us), and you can unsubscribe at any time.
+    just your email, if you’ve subscribed or written to us, plus your account and saved maps if you’ve
+    created an account), and you can unsubscribe at any time. If you have an account, you can view and
+    delete your saved maps yourself at <a href="/account">your account page</a> without contacting us.
     EU/UK readers also have GDPR rights including objection and portability. To exercise any of
     these, email <a href="mailto:sammymoz@gmail.com">sammymoz@gmail.com</a>.
   </p>
 
   <h2>8. Data location</h2>
   <p>
-    Our service providers may store data outside Australia. Our host, Vercel, operates globally
-    and may process data in the United States, and Google (the Gemini API, used only for the
-    on-page assistant) may likewise process your question in the United States. We choose providers
-    with appropriate safeguards.
+    Our service providers may store data outside Australia. Our host, Vercel, and our database
+    provider, Supabase, operate globally and may process data in the United States, and our AI
+    provider — OpenRouter/DeepSeek, or Google’s Gemini API as a fallback, used only for the optional
+    AI features — may likewise process the text you sent in the United States or elsewhere. We choose
+    providers with appropriate safeguards.
   </p>
 
   <h2>9. Children</h2>

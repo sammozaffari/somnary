@@ -17,24 +17,24 @@
 import { readdir, readFile } from 'node:fs/promises';
 import { join, relative } from 'node:path';
 import matter from 'gray-matter';
+import yaml from 'js-yaml';
+// SINGLE SOURCE OF TRUTH for identifier format + canonical URL (CHK-7.1a). The Lens engine
+// (src/lib/lens/retrieval.ts) imports the SAME RE + canonical-URL map, so the CI build gate and the
+// model-facing evidence pipeline agree byte-for-byte on what a real citation id is. Node type-strips
+// the erasable-TS module on import.
+import { RE, canonicalUrlByKind as canonicalUrl } from '../src/lib/lens/citations.ts';
 
 // Default corpus; overridable via env so the fake-PMID regression test (test-resolver.mjs)
 // can point the resolver at a throwaway fixture without touching the real content.
 const CONTENT_DIR = process.env.SOMNARY_CONTENT_DIR || 'src/content/remedies';
+// Cited data files outside the remedy corpus that carry sources[] under the same "cite or
+// don't claim" rule (Source Scorecards additive watchlist). Skipped silently if absent so the
+// regression fixture (which overrides CONTENT_DIR) and older checkouts still pass.
+const WATCHLIST_FILE = process.env.SOMNARY_WATCHLIST_FILE || 'src/data/additive-watchlist.yaml';
 const ONLINE = process.argv.includes('--online');
 
-// Identifier formats — must match the regexes in src/content.config.ts.
-const RE = {
-  pmid: /^\d+$/,
-  doi: /^10\.\d{4,9}\/\S+$/,
-  registry: /^NCT\d{8}$/,
-};
-
-const canonicalUrl = {
-  pmid: (v) => `https://pubmed.ncbi.nlm.nih.gov/${v}/`,
-  doi: (v) => `https://doi.org/${v}`,
-  registry: (v) => `https://clinicaltrials.gov/study/${v}`,
-};
+// RE (identifier formats — must match src/content.config.ts) and canonicalUrl are imported from
+// src/lib/lens/citations.ts (CHK-7.1a single source of truth). See the import at the top of the file.
 
 async function mdxFiles(dir) {
   const out = [];
@@ -93,6 +93,29 @@ async function resolve(url) {
   }
 }
 
+/**
+ * Walk any parsed YAML/JSON value and validate every `sources` array found on an object,
+ * so the watchlist's structure (grouped sections, nested entries) doesn't have to be known
+ * here. Entries marked `structural: true` are policy rules with no external claim, so they
+ * carry no citation and are skipped.
+ */
+function collectSources(node, where, sink) {
+  if (Array.isArray(node)) {
+    node.forEach((child, i) => collectSources(child, `${where}[${i}]`, sink));
+    return;
+  }
+  if (!node || typeof node !== 'object') return;
+  if (node.structural === true) return;
+  const label = node.id ? `${where}(${node.id})` : where;
+  if (Array.isArray(node.sources)) {
+    node.sources.forEach((src, i) => sink(src, `${label} · source[${i}]`));
+  }
+  for (const [key, child] of Object.entries(node)) {
+    if (key === 'sources') continue;
+    if (child && typeof child === 'object') collectSources(child, `${label}.${key}`, sink);
+  }
+}
+
 async function main() {
   const files = await mdxFiles(CONTENT_DIR);
   const errors = [];
@@ -111,6 +134,24 @@ async function main() {
     });
   }
 
+  // Additive watchlist — same citation rule, different shape. Optional: skip if not present.
+  let watchlistRaw = null;
+  try {
+    watchlistRaw = await readFile(WATCHLIST_FILE, 'utf8');
+  } catch {
+    /* file absent (e.g. regression fixture run) — nothing to check */
+  }
+  if (watchlistRaw != null) {
+    const rel = relative(process.cwd(), WATCHLIST_FILE);
+    const parsed = yaml.load(watchlistRaw);
+    collectSources(parsed, rel, (src, where) => {
+      sourceCount++;
+      const { urls, errors: e } = validateSource(src, where);
+      errors.push(...e);
+      urls.forEach((u) => allUrls.push({ ...u, rel, n: where }));
+    });
+  }
+
   if (errors.length) {
     console.error(`\n✗ citation check FAILED — ${errors.length} problem(s):\n`);
     errors.forEach((e) => console.error(`  • ${e}`));
@@ -118,7 +159,8 @@ async function main() {
     process.exit(1);
   }
 
-  console.log(`✓ format OK — ${sourceCount} citation(s) across ${files.length} remedy file(s), all carry a valid identifier.`);
+  const watchlistNote = watchlistRaw != null ? ` (+ additive watchlist)` : '';
+  console.log(`✓ format OK — ${sourceCount} citation(s) across ${files.length} remedy file(s)${watchlistNote}, all carry a valid identifier.`);
 
   if (!ONLINE) {
     console.log('  (run with --online to verify each link actually resolves)');

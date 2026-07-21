@@ -1,0 +1,119 @@
+---
+// Remedy hero plate — DESIGN_SYSTEM §11.3 ("labeled plate", owner-ratified design study
+// 2026-07-17, v4→v6 in docs/plans/2026-07-17-remedy-hero-labeled-plate-design.md).
+// Each remedy page opens inside its own world: the full-bleed linocut hero plate
+// (src/assets/remedy-heroes/{slug}.webp, family grammar in that dir's README) melts into the
+// page paper, and the LABEL ROW — the h1 title + the assessor's GradeStamp — prints on the
+// paper below, tucked into the melt so plate and label read as one composition.
+//
+// The plate is labeled, NOT painted over: no type ever sits on the art (v5 finding: no single
+// ink survives 31 different plates), so title contrast is --ink on --page on every page, with
+// no per-remedy ink tuning. The plate itself is decorative (alt="") — the adjacent h1 names it,
+// same pattern as the icon system (§11). The old linocut icon does NOT appear on remedy pages:
+// the hero IS the remedy (the emblem's two-moons problem, retired with it).
+//
+// LCP: this is the page's largest paint — eager + high fetchpriority, responsive widths.
+// A missing plate never breaks the page: the label row renders alone on paper.
+import { Image } from 'astro:assets';
+import GradeStamp from './GradeStamp.astro';
+import type { TierId } from '../lib/tiers';
+
+interface Props {
+  slug: string;
+  name: string;
+  tier: TierId;
+}
+const { slug, name, tier } = Astro.props;
+
+const heroes = import.meta.glob<{ default: ImageMetadata }>('../assets/remedy-heroes/*.webp', {
+  eager: true,
+});
+const plate = heroes[`../assets/remedy-heroes/${slug}.webp`]?.default;
+
+// Per-plate focal point (object-position) — override when a plate's subject sits off the
+// default crop line. Family rule keeps subjects in the central 60%, so most need nothing.
+const FOCAL: Record<string, string> = {};
+const focal = FOCAL[slug] ?? 'center 30%';
+---
+
+{
+  plate && (
+    <div class="hero">
+      <Image
+        src={plate}
+        alt=""
+        widths={[828, 1400, 2048, 2880]}
+        sizes="100vw"
+        loading="eager"
+        fetchpriority="high"
+        style={`object-position:${focal}`}
+      />
+    </div>
+  )
+}
+
+<header class:list={['label', { 'no-plate': !plate }]}>
+  <div class="label-row">
+    <h1 class="title">{name}</h1>
+    <GradeStamp tier={tier} size="hero" />
+  </div>
+</header>
+
+<style>
+  .hero {
+    position: relative;
+    height: 40vh;
+    min-height: 320px;
+    overflow: hidden;
+    /* the melt: the plate itself dissolves (alpha mask), so the page's real layered
+       background shows through — seamless by construction, no color to match. */
+    -webkit-mask-image: linear-gradient(to bottom, #000 50%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 50%, transparent 100%);
+  }
+  .hero img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* label row on paper, tucked into the melt (§11.3: by the tuck point the gradient is
+     effectively paper, so the title stays AA on every plate) */
+  .label {
+    position: relative;
+    max-width: 1180px;
+    margin: -7vh auto 0;
+    padding: 0 var(--sp-7);
+  }
+  .label.no-plate {
+    margin-top: var(--sp-8);
+  }
+  .label-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--sp-6);
+    flex-wrap: wrap;
+  }
+  .title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(46px, 7vw, 84px);
+    letter-spacing: var(--tracking-tight);
+    line-height: 0.95;
+    color: var(--ink);
+    margin: 0;
+  }
+
+  @media (max-width: 640px) {
+    .hero {
+      height: 32vh;
+      min-height: 240px;
+    }
+    .label {
+      padding: 0 var(--sp-5);
+      margin-top: -5vh;
+    }
+  }
+</style>
