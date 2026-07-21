@@ -49,6 +49,12 @@ const TARGETS = [
   // intentional, sentinel-tagged negative example, never live copy (same bar as the /guide shell copy).
   'src/pages/lens.astro',
   'src/pages/request-a-review.astro',
+  // Somnary Lens human-grade loop (CHK-7.3): the Lens route (one demand-log call added) and the
+  // nominate route carry reader-facing / model-adjacent prose — every forbidden framing must be an
+  // intentional, sentinel-tagged negative example, never live copy. (src/lib/lens/demand-log.ts is
+  // already covered by the src/lib/lens/*.ts sweep above.)
+  'src/pages/api/lens.ts',
+  'src/pages/api/nominate.ts',
 ];
 
 async function loadPatterns() {

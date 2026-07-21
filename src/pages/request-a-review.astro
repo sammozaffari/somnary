@@ -10,8 +10,14 @@
 // needs the owner's project + keys, and wiring/self-hiding it is more than trivial — so per the plan
 // this ships as the honest static page and the optional form is noted as a 7.3 follow-up. Nothing on
 // this page makes a promise the site can't keep today.
+//
+// CHK-7.3a adds the capture FORM (the 7.2 follow-up noted below): a progressive-enhancement nomination
+// form posting to /api/nominate (env-gated Supabase capture, mirrors CHK-4.2). It writes to the SEPARATE,
+// firewalled backlog store (review_nominations) — never a grade. The honest real-promises copy is
+// UNCHANGED; the form sits under the "what it honestly can't promise" section so the limits are read first.
 import Base from '../layouts/Base.astro';
 import ContextBanner from '../components/ContextBanner.astro';
+import ReviewNominateForm from '../components/ReviewNominateForm.astro';
 ---
 
 <Base
@@ -58,7 +64,18 @@ import ContextBanner from '../components/ContextBanner.astro';
         What we can say honestly: every nomination is read, and the backlog is what the grading work
         draws from.
       </p>
+    </section>
 
+    <section class="nominate" aria-label="Nominate a remedy for review">
+      <h2 class="h2">Nominate a remedy</h2>
+      <p class="nominate-lead">
+        Name the product or ingredient. It joins the grading backlog for a human to weigh — nothing
+        here returns a grade, a verdict, or a reply.
+      </p>
+      <ReviewNominateForm />
+    </section>
+
+    <section class="prose" aria-label="What to read now">
       <h2 class="h2">In the meantime</h2>
       <p>
         The evidence that already exists is here now, graded and cited:
@@ -154,6 +171,17 @@ import ContextBanner from '../components/ContextBanner.astro';
   }
   .prose a {
     color: var(--primary);
+  }
+
+  .nominate {
+    margin-top: var(--sp-7);
+  }
+  .nominate-lead {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--ink);
+    max-width: 64ch;
+    margin: 0 0 var(--sp-5);
   }
 
   .review-line {
