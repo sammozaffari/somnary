@@ -51,7 +51,10 @@ export interface PubMedProviderOptions {
 const ESEARCH = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi';
 const EFETCH = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi';
 
-const DEFAULT_MAX_RESULTS = 6;
+// Per-search fetch breadth. The engine runs TWO searches (resolver query + sleep-focused, CHK-7.5) and
+// reranks the merged set by sleep relevance, so a slightly wider fetch gives the reranker more real
+// sleep papers to surface for broad-literature subjects without a large prompt (it caps before extract).
+const DEFAULT_MAX_RESULTS = 8;
 const DEFAULT_TIMEOUT_MS = 12000;
 // NCBI polite-use: identify the tool. `email` is added when provided. Keyless — no API key needed.
 const TOOL = 'somnary';
