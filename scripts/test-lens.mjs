@@ -869,13 +869,14 @@ async function runRedTeam() {
 
   // Bonus invariants proving graceful degradation (never a fabricated verdict).
   {
-    // engine NEVER throws on hostile input.
+    // engine NEVER throws on hostile input; a non-string coerces to empty → refused (off-topic), a
+    // safe terminal state with the stamp/disclaimer and NO fabricated verdict.
     let threw = false;
-    let r;
+    let r = null;
     try {
       r = await runLens({ ...base, input: { evil: 1 }, provider: providerOf(RT_DOCS), model: async () => ({ ok: false, text: '' }) });
     } catch { threw = true; }
-    ok('(bonus) hostile non-string input → no throw', !threw);
+    ok('(bonus) hostile non-string input → no throw + safe terminal state + no verdict', !threw && (r?.status === 'refused' || r?.status === 'inconclusive') && r.evidence.length === 0);
     // a provider that throws → inconclusive, not a crash.
     const r2 = await runLens({ ...base, input: SUBJECT, provider: { search: async () => { throw new Error('boom'); } }, model: async () => ({ ok: true, text: '{}' }) });
     ok('(bonus) provider throws → inconclusive (no fabricated verdict)', r2.status === 'inconclusive');

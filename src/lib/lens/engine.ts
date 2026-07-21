@@ -36,7 +36,7 @@ import {
 } from '../ask/guardrails.ts';
 import type { Flag, LabelEntry } from '../label-rules.ts';
 import { normalizeLensInput, type LensInputKind, type LensShortCircuit } from './input.ts';
-import type { EvidenceProvider } from './retrieval.ts';
+import type { EvidenceProvider, EvidenceDoc } from './retrieval.ts';
 import { parseCitation, type CitationId } from './citations.ts';
 import {
   verifyClaims,
@@ -58,8 +58,6 @@ import * as copy from './copy.ts';
 export const LENS_MAX_CLAIMS = 5;
 /** Default wall-clock budget for a whole Lens run (ms). Research + N×claims refute calls must fit. */
 const DEFAULT_DEADLINE_MS = 60_000;
-/** Tokens for the single extraction reply (the JSON claim list is small but larger than a verdict). */
-const EXTRACT_MAX_TOKENS = 900;
 
 // --- the assessment schema — NO tier/grade/score FIELD ANYWHERE ----------------------------------
 
@@ -280,13 +278,13 @@ export async function runLens(args: RunLensArgs): Promise<LensAssessment> {
     }
 
     // (4) RESEARCH — bounded external search. No docs ⇒ inconclusive (never a fabricated verdict).
-    let docs;
+    let docs: EvidenceDoc[] = [];
     try {
-      docs = await args.provider.search(normalized.normalized);
+      const searched = await args.provider.search(normalized.normalized);
+      docs = Array.isArray(searched) ? searched : [];
     } catch {
       docs = [];
     }
-    docs = Array.isArray(docs) ? docs : [];
     if (docs.length === 0) {
       return inconclusive(base, rubric.labelFlags, rubric.additiveFindings, normalized.normalized, emptyMeta(providerName));
     }
