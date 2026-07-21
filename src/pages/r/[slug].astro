@@ -53,7 +53,7 @@ const jsonLd = remedyJsonLd(d, canonical, site);
   <main class="remedy">
     {/* 1 — header (grade badge moves to the decision-first lead block below; CHK-2.1) */}
     <header class="head">
-      <p class="crumb"><a href="/">Somnary</a> <span aria-hidden="true">›</span> {isIntervention ? 'Interventions' : 'Remedies'}</p>
+      <p class="crumb"><a href="/">Somnary</a> <span aria-hidden="true">›</span> <a href="/tiers">{isIntervention ? 'Interventions' : 'Remedies'}</a></p>
       <h1 class="title">{d.name}</h1>
       <p class="dek">{d.oneLineVerdict}</p>
     </header>
@@ -153,6 +153,13 @@ const jsonLd = remedyJsonLd(d, canonical, site);
     <div class="disclaimer-slot">
       <Disclaimer variant="standard" />
     </div>
+
+    {/* foot: return to the remedies board without scrolling back to the breadcrumb */}
+    <nav class="back-nav" aria-label="Back to the remedies board">
+      <a class="back-link" href="/tiers">
+        <span aria-hidden="true">←</span> Back to all {isIntervention ? 'interventions' : 'remedies'}
+      </a>
+    </nav>
   </main>
 
   {/* 9/12 — single shared citation popover for every .cite-sup on the page */}
@@ -270,6 +277,23 @@ const jsonLd = remedyJsonLd(d, canonical, site);
 
   .disclaimer-slot {
     margin-top: var(--sp-8);
+  }
+
+  /* foot back-nav to the remedies board (mirrors the breadcrumb, for long pages) */
+  .back-nav {
+    margin-top: var(--sp-7);
+    padding-top: var(--sp-5);
+    border-top: var(--hairline);
+  }
+  .back-link {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+    text-decoration: none;
+  }
+  .back-link:hover {
+    color: var(--ink);
   }
 
   /* breakpoints (§3.2): body 1-col @900 (sidebar static below main); title 46px @640 */
