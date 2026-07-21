@@ -36,6 +36,7 @@ import {
 } from '../ask/guardrails.ts';
 import type { Flag, LabelEntry } from '../label-rules.ts';
 import { normalizeLensInput, type LensInputKind, type LensShortCircuit } from './input.ts';
+import { resolveSubject, type ResolvedSubject, type LensProductClass } from './resolve.ts';
 import type { EvidenceProvider, EvidenceDoc } from './retrieval.ts';
 import { parseCitation, type CitationId } from './citations.ts';
 import {
@@ -79,6 +80,26 @@ export interface LensEvidence {
   sources: LensSource[];
 }
 
+/** What the Lens took the query to mean (CHK-7.4) — set on any researched card. `line` is the
+ * SERVER-composed "read X as Y" sentence (copy.ts); `subject`/`resolvedName` are the sanitised parts a
+ * live-progress UI shows as "X → Y". No evidence, no grade — just the interpreted query. */
+export interface LensResolvedDisplay {
+  subject: string;
+  resolvedName: string;
+  productClass: LensProductClass;
+  line: string;
+}
+
+/** A real pipeline milestone, streamed to the UI (CHK-7.4). Every field is server-authored/structural
+ * — a count the engine actually reached, or the sanitised resolved names. NEVER model prose. */
+export type LensEvent =
+  | { type: 'resolved'; resolved: LensResolvedDisplay | null }
+  | { type: 'searching' }
+  | { type: 'sources'; count: number }
+  | { type: 'extracting' }
+  | { type: 'verifying'; total: number }
+  | { type: 'composing' };
+
 /**
  * The Lens assessment — the server-composed card. There is DELIBERATELY no tier/grade/score field:
  * the Lens applies Somnary's method to a new input but NEVER emits a grade (D5). The card is a draft
@@ -89,6 +110,8 @@ export interface LensAssessment {
   status: LensStatus;
   /** Set only on status:'short-circuit' — the graded page to read instead of fresh AI research. */
   shortCircuit?: LensShortCircuit;
+  /** What the query was resolved to (CHK-7.4). Present on assessed/inconclusive researched cards. */
+  resolved?: LensResolvedDisplay;
   verdictLine: string;
   evidence: LensEvidence[];
   /** The signature anti-hype block — always populated on assessed/inconclusive. */
@@ -120,6 +143,9 @@ export interface RunLensArgs {
   deadlineMs?: number;
   /** Provider label for meta (e.g. 'pubmed'); purely informational. */
   providerName?: string;
+  /** Optional streaming hook (CHK-7.4). Fired at each REAL pipeline milestone so the route can emit SSE
+   * frames. Non-streaming callers omit it — the run is identical. Never expected to throw (wrapped). */
+  onEvent?: (event: LensEvent) => void;
 }
 
 // --- safety routing (deterministic; boundary pages, never a dose/diagnosis) ----------------------
@@ -128,6 +154,14 @@ export interface RunLensArgs {
 // two standing boundary routes so safety is prominent on every remedy/decision surface (CLAUDE.md).
 import { ROUTES } from '../ask/guardrails.ts';
 const STANDING_SAFETY_ROUTES: Route[] = [ROUTES.safety, ROUTES.clinician];
+/** A resolved OTC/prescription sleep DRUG routes harder — to the medications page + a clinician —
+ * because its risks are personal and can be serious (CHK-7.4). All other classes get the standing set. */
+const DRUG_SAFETY_ROUTES: Route[] = [ROUTES.meds, ROUTES.clinician];
+function safetyRoutesFor(productClass?: LensProductClass): Route[] {
+  return productClass === 'otc-drug' || productClass === 'prescription-drug'
+    ? DRUG_SAFETY_ROUTES
+    : STANDING_SAFETY_ROUTES;
+}
 
 // --- extraction parsing (never throws) -----------------------------------------------------------
 
@@ -197,6 +231,27 @@ function emptyMeta(provider: string): LensAssessment['meta'] {
   return { modelCalls: 0, claimsExtracted: 0, claimsCut: 0, provider, deadlineHit: false, cached: false };
 }
 
+/** Build the server-composed resolved display from a ResolvedSubject (CHK-7.4). The interpreted-as LINE
+ * is composed by copy.ts and lint-checked (safeLine → '' on any gate hit); the resolvedName is shown
+ * only if it trips no framing/identifier gate. productClass is ALWAYS carried — it drives safety routing
+ * even when there is nothing to display. */
+function buildResolvedDisplay(resolved: ResolvedSubject): LensResolvedDisplay {
+  const line = safeLine(copy.interpretedAsLine(resolved.subject, resolved.resolvedName, resolved.productClass), '');
+  const name =
+    resolved.resolvedName &&
+    lintForbiddenFraming(resolved.resolvedName).length === 0 &&
+    !hasRawIdentifier(resolved.resolvedName)
+      ? resolved.resolvedName
+      : '';
+  return { subject: resolved.subject, resolvedName: name, productClass: resolved.productClass, line };
+}
+
+/** True when the resolved display carries something worth SHOWING (a composed line or a resolved name);
+ * an empty display still travels internally (for productClass-based safety routing) but isn't rendered. */
+function hasResolvedDisplay(d: LensResolvedDisplay): boolean {
+  return !!(d.line || d.resolvedName);
+}
+
 // --- the orchestrator ----------------------------------------------------------------------------
 
 /**
@@ -211,13 +266,27 @@ export async function runLens(args: RunLensArgs): Promise<LensAssessment> {
   const labelEntries = Array.isArray(args.labelEntries) ? args.labelEntries : [];
   const additiveWatchlist = Array.isArray(args.additiveWatchlist) ? args.additiveWatchlist : [];
 
+  // A safe streaming sink: a broken onEvent must never break the run.
+  const emit = (event: LensEvent) => {
+    if (typeof args.onEvent === 'function') {
+      try {
+        args.onEvent(event);
+      } catch {
+        /* a broken sink is swallowed — streaming is best-effort, the returned assessment is truth */
+      }
+    }
+  };
+
   // A defensive outer try: nothing below may throw out of the engine.
   try {
     const rawInput = typeof args.input === 'string' ? args.input : '';
 
-    // (1) TOPIC FENCE — off-topic/abusive is refused before any model call, unjailbreakably.
+    // (1) ABUSE FENCE — prompt-injection / abusive input is refused before any model call,
+    // deterministically and unjailbreakably. CHK-7.4: we NO LONGER honour the fence's *off-topic*
+    // keyword verdict here — the Lens's whole job is to research the long tail it doesn't recognise
+    // (a brand like "Restavit"), so relevance is decided later by the resolver. Only ABUSE refuses now.
     const topic = checkTopic(rawInput, corpus);
-    if (!topic.ok) {
+    if (!topic.ok && topic.reason === 'abusive') {
       return {
         ...baseFields('question', typeof rawInput === 'string' ? rawInput.slice(0, 4000).trim() : ''),
         status: 'refused',
@@ -231,7 +300,7 @@ export async function runLens(args: RunLensArgs): Promise<LensAssessment> {
     }
 
     // (2) DETERMINISTIC CLASSIFY — crisis/dosing/diagnosis/combine/safe-for-me refuse-or-route; NO
-    // research runs. The canned message + boundary route come from the shared guardrails.
+    // research runs, NO model call. This safety-critical gate stays deterministic and pre-model.
     const cls = classify(rawInput);
     if (cls.kind === 'refuse') {
       const normalized = rawInput.slice(0, 4000).trim();
@@ -273,34 +342,69 @@ export async function runLens(args: RunLensArgs): Promise<LensAssessment> {
       additiveWatchlist,
     });
 
+    // Shared model-call budget + wall-clock deadline across resolve + extract + verify.
+    const budget: CallBudget = args.budget ?? { used: 0, max: LENS_MAX_MODEL_CALLS };
+    const deadline = now() + (typeof args.deadlineMs === 'number' ? args.deadlineMs : DEFAULT_DEADLINE_MS);
+    const model = args.model ?? defaultLensModel();
+
     if (normalized.empty) {
       return inconclusive(base, rubric.labelFlags, rubric.additiveFindings, normalized.normalized, emptyMeta(providerName));
     }
 
-    // (4) RESEARCH — bounded external search. No docs ⇒ inconclusive (never a fabricated verdict).
+    // (3.5) RESOLVE (CHK-7.4) — interpret the input BEFORE research: brand→ingredient, sleep relevance,
+    // and a real PubMed query. ONE model call (shares budget/deadline). Degrades to a passthrough on any
+    // model failure. The relevance verdict is the ONLY new refusal, and it refuses strictly LESS than the
+    // old keyword fence — the safety-critical refusals above stayed deterministic and already ran.
+    const resolved = await resolveSubject({ subject: normalized.normalized, model, budget, deadline, now });
+    const resolvedDisplay = buildResolvedDisplay(resolved);
+    emit({ type: 'resolved', resolved: hasResolvedDisplay(resolvedDisplay) ? resolvedDisplay : null });
+
+    if (!resolved.sleepRelevant) {
+      return {
+        ...base,
+        status: 'refused',
+        verdictLine: copy.OFF_TOPIC_MESSAGE,
+        evidence: [],
+        doesNotShow: [],
+        labelFlags: [],
+        safety: { routes: [ROUTES.search], note: copy.SAFETY_NOTE },
+        meta: { ...emptyMeta(providerName), modelCalls: budget.used },
+      };
+    }
+
+    // (4) RESEARCH — bounded external search on the RESOLVED query (a real ingredient + sleep scope),
+    // not the raw brand string. No docs ⇒ inconclusive (never a fabricated verdict).
+    emit({ type: 'searching' });
     let docs: EvidenceDoc[] = [];
     try {
-      const searched = await args.provider.search(normalized.normalized);
+      const searched = await args.provider.search(resolved.pubmedQuery);
       docs = Array.isArray(searched) ? searched : [];
     } catch {
       docs = [];
     }
+    emit({ type: 'sources', count: docs.length });
     if (docs.length === 0) {
-      return inconclusive(base, rubric.labelFlags, rubric.additiveFindings, normalized.normalized, emptyMeta(providerName));
+      return inconclusive(
+        base,
+        rubric.labelFlags,
+        rubric.additiveFindings,
+        normalized.normalized,
+        { ...emptyMeta(providerName), modelCalls: budget.used },
+        resolvedDisplay,
+      );
     }
 
-    // (5) EXTRACT — ONE model call. Shared budget/deadline across extract + verify.
-    const budget: CallBudget = args.budget ?? { used: 0, max: LENS_MAX_MODEL_CALLS };
-    const deadline = now() + (typeof args.deadlineMs === 'number' ? args.deadlineMs : DEFAULT_DEADLINE_MS);
-    const model = args.model ?? defaultLensModel();
+    // (5) EXTRACT — ONE model call over the docs fetched for the resolved subject.
+    const extractSubject = resolved.resolvedName || normalized.normalized;
     const docPmids = new Set(docs.map((d) => d.pmid).filter((p): p is string => typeof p === 'string' && !!p));
 
     let candidates: CandidateClaim[] = [];
     if (budget.used < budget.max && deadline - now() > 0) {
       budget.used += 1;
+      emit({ type: 'extracting' });
       const extractRes = await model({
         system: LENS_EXTRACT_PROMPT,
-        user: buildExtractUserPrompt(normalized.normalized, docs),
+        user: buildExtractUserPrompt(extractSubject, docs),
         temperature: 0.1,
         timeoutMs: Math.max(1, deadline - now()),
       });
@@ -308,6 +412,7 @@ export async function runLens(args: RunLensArgs): Promise<LensAssessment> {
     }
 
     // (6) VERIFY — refute-first; only survivors reach composition. Shares the budget + deadline.
+    emit({ type: 'verifying', total: candidates.length });
     const { verified, meta: vmeta } = await verifyClaims({
       claims: candidates,
       docs,
@@ -327,7 +432,8 @@ export async function runLens(args: RunLensArgs): Promise<LensAssessment> {
     };
 
     // (7)+(8) COMPOSE — server-side, from verified claims + rubric flags + copy.ts templates.
-    return compose(base, verified, rubric.labelFlags, rubric.additiveFindings, normalized.normalized, candidates.length, meta);
+    emit({ type: 'composing' });
+    return compose(base, verified, rubric.labelFlags, rubric.additiveFindings, normalized.normalized, candidates.length, meta, resolvedDisplay);
   } catch {
     // Any unexpected error ⇒ honest inconclusive with empty rubric (never a fabricated verdict).
     const normalized = typeof args.input === 'string' ? args.input.slice(0, 4000).trim() : '';
@@ -353,19 +459,22 @@ function inconclusive(
   additiveFindings: AdditiveFinding[],
   subject: string,
   meta: LensAssessment['meta'],
+  resolved?: LensResolvedDisplay,
 ): LensAssessment {
   const doesNotShow = [
     safeLine(copy.doesNotShowNoHumanEvidence(subject), copy.DOES_NOT_SHOW_STANDING),
     copy.DOES_NOT_SHOW_STANDING,
   ];
+  const productClass = resolved?.productClass ?? 'unknown';
   return {
     ...base,
+    ...(resolved && hasResolvedDisplay(resolved) ? { resolved } : {}),
     status: 'inconclusive',
     verdictLine: safeLine(copy.INCONCLUSIVE_MESSAGE, copy.INCONCLUSIVE_MESSAGE),
     evidence: [],
     doesNotShow,
     labelFlags: mergeAdditiveIntoFlags(labelFlags, additiveFindings),
-    safety: { routes: STANDING_SAFETY_ROUTES, note: copy.SAFETY_NOTE },
+    safety: { routes: safetyRoutesFor(resolved?.productClass), note: copy.safetyNoteFor(productClass) },
     meta,
   };
 }
@@ -395,6 +504,7 @@ function compose(
   subject: string,
   extractedCount: number,
   meta: LensAssessment['meta'],
+  resolved?: LensResolvedDisplay,
 ): LensAssessment {
   // Map verified claims → evidence, re-validating every source id. Drop a claim if NONE resolves.
   const evidence: LensEvidence[] = [];
@@ -423,7 +533,7 @@ function compose(
 
   // Nothing survived verification+resolution ⇒ honest inconclusive, not a fabricated verdict.
   if (evidence.length === 0) {
-    const inc = inconclusive(base, labelFlags, additiveFindings, subject, meta);
+    const inc = inconclusive(base, labelFlags, additiveFindings, subject, meta, resolved);
     // Keep the true meta (claimsExtracted/cut) from this run rather than emptyMeta.
     return { ...inc, meta };
   }
@@ -445,12 +555,13 @@ function compose(
 
   return {
     ...base,
+    ...(resolved && hasResolvedDisplay(resolved) ? { resolved } : {}),
     status: 'assessed',
     verdictLine,
     evidence,
     doesNotShow,
     labelFlags: mergedFlags,
-    safety: { routes: STANDING_SAFETY_ROUTES, note: copy.SAFETY_NOTE },
+    safety: { routes: safetyRoutesFor(resolved?.productClass), note: copy.safetyNoteFor(resolved?.productClass ?? 'unknown') },
     meta,
   };
 }
