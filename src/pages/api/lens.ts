@@ -21,6 +21,7 @@ import { getAskCorpus } from '../../lib/ask/from-collection.ts';
 import { getLabelEntries } from '../../lib/label-data.ts';
 import { getAdditiveWatchlist } from '../../lib/lens/additive-watchlist-loader.ts';
 import { runLens } from '../../lib/lens/engine.ts';
+import { logLensDemand } from '../../lib/lens/demand-log.ts';
 import { PubMedProvider } from '../../lib/lens/retrieval.ts';
 import { validateLensInput, lensRateLimitMax, lensConfigured, MAX_LENS_INPUT } from '../../lib/lens/route-input.ts';
 import { checkRateLimit, clientIpFrom, rateLimitConfig } from '../../lib/rate-limit.ts';
@@ -88,6 +89,18 @@ export const POST: APIRoute = async ({ request }) => {
     provider,
     providerName: 'pubmed',
   });
+
+  // Fire-and-await the ONE aggregate demand log (CHK-7.3b) — feeds the human grading backlog with which
+  // NAMED products/ingredients get researched. It logs a normalized NAME + a count and NOTHING else
+  // (never the free-text question, never refused/short-circuit runs, never raw text/IP). It is env-gated
+  // and fail-open by construction; the extra try/catch here guarantees a logging fault can never change
+  // the Lens response or its status. The engine is untouched.
+  try {
+    await logLensDemand(assessment);
+  } catch {
+    /* fail-open: backlog signal is best-effort and must never affect the answer */
+  }
+
   return json(assessment);
 };
 

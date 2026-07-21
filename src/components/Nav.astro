@@ -6,13 +6,16 @@ import Wordmark from './Wordmark.astro';
 import SearchPalette from './SearchPalette.astro';
 import SessionNav from './account/SessionNav.astro';
 
+// CHK-7.3c — /lens is the primary AI nav entry (the Lens is the AI front door). /guide is DROPPED from
+// the top nav (the homepage carries the demoted "Talk it through" secondary line); /guide stays
+// reachable by URL and internal links — this only demotes it from the global chrome.
 const links = [
   { href: '/start-here', label: 'Start here' },
   { href: '/tiers', label: 'Remedies' },
+  { href: '/lens', label: 'Lens' },
   { href: '/label-checker', label: 'Label checker' },
   { href: '/compare', label: 'Compare' },
   { href: '/sleep-habits', label: 'Sleep habits' },
-  { href: '/guide', label: 'Guide' },
   { href: '/safety', label: 'Safety' },
   { href: '/methodology', label: 'Methodology' },
 ];

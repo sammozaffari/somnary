@@ -27,6 +27,11 @@ import GuidePanel from '../components/GuidePanel.astro';
         safety boundaries. It is a map to the reading that already exists on this site. It does
         <em>not</em> recommend a remedy, tell you what to take, diagnose you, or give you a dose.
       </p>
+      <p class="secondary-note">
+        This is a secondary way in. To research a specific supplement or ingredient, the
+        <a href="/lens">Somnary Lens</a> is the main tool — it shows what the published evidence does and
+        doesn’t establish.
+      </p>
     </header>
 
     <ContextBanner
@@ -100,6 +105,16 @@ import GuidePanel from '../components/GuidePanel.astro';
     color: var(--muted);
     max-width: 68ch;
     margin: 0;
+  }
+  .secondary-note {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    max-width: 68ch;
+    margin: var(--sp-4) 0 0;
+  }
+  .secondary-note a {
+    color: var(--primary);
   }
 
   .boundary-slot {
