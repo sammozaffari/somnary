@@ -128,7 +128,10 @@ console.log('\n(b) FIREWALL — no grading/corpus/tier/scorecard module imports 
   for (const f of gradingFiles) {
     const text = await readFile(f, 'utf8');
     for (const m of LOOP_MODULES) {
-      if (new RegExp(`import[^\\n]*['"\`][^'"\`]*${m}['"\`]`).test(text) || new RegExp(`from\\s+['"\`][^'"\`]*${m}['"\`]`).test(text)) {
+      // Match the module token ANYWHERE inside a quoted import/from path — so a real leak written the
+      // codebase's own way (`from '../lens/demand-log.ts'`, `.js`, or trailing path) is caught, not just
+      // a bare `'demand-log'` right against the quote. (Fix per adversarial-review finding.)
+      if (new RegExp(`(?:import[^\\n]*|from\\s+)['"\`][^'"\`]*${m}[^'"\`]*['"\`]`).test(text)) {
         leaks.push(`${relative(ROOT, f)} imports ${m}`);
       }
     }

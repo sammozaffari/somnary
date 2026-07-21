@@ -56,6 +56,11 @@ export function deriveDemandSubject(assessment: LensAssessment): string | null {
 
   const kind = assessment.input?.kind;
 
+  // A 'question' is free text — NEVER log anything from it, not even a matched ingredient name. Gate it
+  // out BEFORE any panel-name extraction so the "we don't log question runs" promise is unconditional
+  // (the privacy clause's ingredient-name carve-out is for pasted product labels only, not questions).
+  if (kind === 'question') return null;
+
   // A matched panel ingredient name is a clean corpus NAME — safe to log, and preferred over the raw
   // normalized text. (panelLines live on the engine input in some builds; guard defensively.)
   const panelName = firstPanelName(assessment);
