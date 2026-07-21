@@ -34,7 +34,7 @@ const { verifyClaims, quoteIsGrounded, parseVerdict, coerceVerdict, REFUTE_N, RE
 const { LENS_EXTRACT_PROMPT, LENS_REFUTE_PROMPT, LENS_EXTRACT_VERSION, LENS_REFUTE_VERSION, buildRefuteUserPrompt, buildExtractUserPrompt } =
   await imp('src/lib/lens/prompts.ts');
 // CHK-7.1c — the composer/orchestrator + rubric + copy + the red-team gate.
-const { runLens, parseExtraction, LENS_MAX_CLAIMS } = await imp('src/lib/lens/engine.ts');
+const { runLens, parseExtraction, LENS_MAX_CLAIMS, mergeDocs, sleepScore, rerankBySleep, sleepFocusedQuery } = await imp('src/lib/lens/engine.ts');
 const { applyRubric } = await imp('src/lib/lens/rubric.ts');
 const { parseAdditiveWatchlist } = await imp('src/lib/lens/additive-watchlist.ts');
 const lensCopy = await imp('src/lib/lens/copy.ts');
@@ -921,9 +921,10 @@ async function runRedTeam() {
       resolveReply: { sleepRelevant: true, resolvedName: 'doxylamine', aka: ['Restavit'], productClass: 'otc-drug', pubmedQuery: 'doxylamine AND (sleep OR insomnia OR sedation)' },
       extractReply: { claims: [], doesNotShow: [], labelFacts: [] },
     });
-    const spy = { query: null, search: async (q) => { spy.query = q; return []; } };
+    const spy = { queries: [], search: async (q) => { spy.queries.push(q); return []; } };
     const r = await runLens({ ...base, input: 'Restavit', provider: spy, model });
-    ok('(11a) resolved query (ingredient + sleep) reaches the provider, not the raw brand', spy.query === 'doxylamine AND (sleep OR insomnia OR sedation)', String(spy.query));
+    ok('(11a) resolved query (ingredient + sleep) reaches the provider, not the raw brand', spy.queries[0] === 'doxylamine AND (sleep OR insomnia OR sedation)', JSON.stringify(spy.queries));
+    ok('(11a) a second sleep-focused search also runs (CHK-7.5)', spy.queries.length === 2 && /insomnia OR nightmares/.test(spy.queries[1]), JSON.stringify(spy.queries));
     ok('(11a) resolution consumed one model call', calls.resolve === 1);
     ok('(11a) meta.modelCalls counts the resolve call', r.meta.modelCalls >= 1);
     ok('(11a) card shows the resolved entity', !!r.resolved && r.resolved.resolvedName === 'doxylamine' && /doxylamine/.test(r.resolved.line));
@@ -939,9 +940,9 @@ async function runRedTeam() {
       resolveReply: { sleepRelevant: true, resolvedName: 'propranolol', aka: ['Inderal'], productClass: 'prescription-drug', pubmedQuery: 'propranolol AND (sleep OR insomnia OR nightmares)' },
       extractReply: { claims: [], doesNotShow: [], labelFacts: [] },
     });
-    const spy = { query: null, search: async (q) => { spy.query = q; return []; } };
+    const spy = { queries: [], search: async (q) => { spy.queries.push(q); return []; } };
     const r = await runLens({ ...base, input: 'propranolol', provider: spy, model });
-    ok('(11a2) a non-sleep-aid drug is researched for its sleep effect', spy.query === 'propranolol AND (sleep OR insomnia OR nightmares)', String(spy.query));
+    ok('(11a2) a non-sleep-aid drug is researched for its sleep effect', spy.queries[0] === 'propranolol AND (sleep OR insomnia OR nightmares)', JSON.stringify(spy.queries));
     ok('(11a2) resolved line reads "a prescription medicine", not "sleep medicine"', !!r.resolved && /prescription medicine/.test(r.resolved.line) && !/sleep medicine/.test(r.resolved.line), r.resolved?.line);
     ok('(11a2) routes to the medications page + clinician', r.safety.routes.some((rt) => rt.href === '/medications-and-sleep-aids') && r.safety.routes.some((rt) => rt.href === '/when-to-see-a-doctor'));
     ok('(11a2) NO grade smell', findGradeSmell(r) === null);
@@ -958,10 +959,10 @@ async function runRedTeam() {
   }
   {
     // (11c) resolution model FAILS → passthrough: research runs on the (sanitised) subject, no crash.
-    const spy = { query: null, search: async (q) => { spy.query = q; return []; } };
+    const spy = { queries: [], search: async (q) => { spy.queries.push(q); return []; } };
     const failResolveModel = async ({ system }) => (system.includes('RESOLVER') ? { ok: false, text: '' } : { ok: true, text: '{}' });
     const r = await runLens({ ...base, input: 'someunlistedcompound', provider: spy, model: failResolveModel });
-    ok('(11c) model failure → passthrough searches the subject', typeof spy.query === 'string' && /someunlistedcompound/.test(spy.query), String(spy.query));
+    ok('(11c) model failure → passthrough searches the subject', spy.queries.some((q) => /someunlistedcompound/.test(q)), JSON.stringify(spy.queries));
     ok('(11c) model failure → inconclusive, never a crash/verdict', r.status === 'inconclusive');
   }
   {
@@ -989,6 +990,33 @@ async function runRedTeam() {
       ok(`(11d2) grade-shaped resolved name "${badName}" → no grade smell anywhere`, findGradeSmell(r) === null, String(findGradeSmell(r)));
       const shown = r.resolved ? `${r.resolved.line} ${r.resolved.resolvedName}` : '';
       ok(`(11d2) grade-shaped resolved name "${badName}" → dropped from display`, !/grade|tier|rated/i.test(shown), shown);
+    }
+  }
+  {
+    // (11r) RETRIEVAL RECALL (CHK-7.5): two searches merge + dedupe; rerank floats sleep papers to the
+    // top so a broad drug's sleep evidence reaches extraction; a title sleep-match outranks abstract-only.
+    ok('(11r) sleepFocusedQuery builds a specific sleep query from a name', /propranolol AND \(insomnia OR nightmares/.test(sleepFocusedQuery('propranolol')) && sleepFocusedQuery('') === '');
+    const dTitleSleep = { pmid: '1', title: 'Zopiclone and insomnia: a trial', abstractText: 'unrelated body' };
+    const dAbsSleep = { pmid: '2', title: 'A cardiology review', abstractText: 'the drug affected sleep quality and insomnia in some patients' };
+    const dNoSleep = { pmid: '3', title: 'Portal hypertension outcomes', abstractText: 'decompensation and death' };
+    ok('(11r) sleepScore weights a title sleep-match above an abstract-only one', sleepScore(dTitleSleep) > sleepScore(dAbsSleep) && sleepScore(dAbsSleep) > sleepScore(dNoSleep));
+    const merged = mergeDocs([dNoSleep, dAbsSleep], [dTitleSleep, dNoSleep]);
+    ok('(11r) mergeDocs dedupes by PMID, preserves first-seen', merged.length === 3 && merged[0].pmid === '3' && merged.map((d) => d.pmid).join() === '3,2,1');
+    const ranked = rerankBySleep([dNoSleep, dAbsSleep, dTitleSleep]);
+    ok('(11r) rerankBySleep floats the most sleep-relevant doc first, no-sleep last', ranked[0].pmid === '1' && ranked[ranked.length - 1].pmid === '3');
+    // The engine runs BOTH searches and reranks: give it a non-sleep top result + a sleep-focused second
+    // result; the reranked docs put the sleep paper first so extraction sees it.
+    {
+      const nonSleep = [{ pmid: '30060537', title: 'Migraine prophylaxis', abstractText: 'propranolol first-line for migraine', url: 'https://pubmed.ncbi.nlm.nih.gov/30060537/' }];
+      const sleepDoc = [{ pmid: '23691095', title: 'Drug and insomnia: a sleep trial', abstractText: 'reduced insomnia and improved sleep quality', url: 'https://pubmed.ncbi.nlm.nih.gov/23691095/' }];
+      const twoQ = { queries: [], search: async (q) => { twoQ.queries.push(q); return twoQ.queries.length === 1 ? nonSleep : sleepDoc; } };
+      const { model } = makeEngineModel({
+        resolveReply: { sleepRelevant: true, resolvedName: 'somedrug', aka: [], productClass: 'prescription-drug', pubmedQuery: 'somedrug AND sleep' },
+        extractReply: { claims: [{ text: 'Somedrug reduced insomnia and improved sleep quality', sourcePmid: '23691095' }], doesNotShow: [], labelFacts: [] },
+        refuteByClaimSubstr: { 'reduced insomnia': [yes('reduced insomnia and improved sleep quality'), yes('reduced insomnia and improved sleep quality'), yes('reduced insomnia and improved sleep quality')] },
+      });
+      const r = await runLens({ ...base, input: 'somedrug', provider: twoQ, model });
+      ok('(11r) engine ran two searches + surfaced the sleep paper → assessed', r.status === 'assessed' && r.evidence.length === 1 && r.evidence[0].sources[0].pmid === '23691095', JSON.stringify({ q: twoQ.queries.length, st: r.status }));
     }
   }
   {

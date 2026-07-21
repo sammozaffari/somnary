@@ -445,7 +445,19 @@ NOT a Somnary grade". Concierge (CHK-6.8) demotes to a secondary mode.
   dose, verified-only); off-topic still declined; drugs route harder to a clinician.
   Design `docs/plans/2026-07-21-lens-query-understanding-design.md`. PR for owner (never
   self-merged — medical boundary). Lens red-team 183/39/40 green; live: Restavit →
-  doxylamine → assessed, 2 verified claims (weak+strong).
+  doxylamine → assessed, 2 verified claims (weak+strong). *(Merged #99; scope broadened
+  to ANY substance's sleep effect per owner.)*
+- [ ] **CHK-7.5 Retrieval recall.** `HG` (medical-boundary AI core). Owner: "put in any
+  drug and get a response" without loosening the no-uncited-claims firewall. PubMed Best
+  Match ranks a broad drug's non-sleep literature above its sleep papers, so a bounded
+  top-N missed them → wrongly inconclusive. Fix: run the resolver's query AND a
+  deterministic sleep-FOCUSED query, merge/dedupe, and rerank by sleep-term density so the
+  most sleep-relevant abstracts reach extraction. Firewall UNCHANGED — every surviving
+  claim still verbatim-verified; this only widens WHICH real papers are read.
+  *Accept:* no new model calls (both searches are PubMed); invariant holds; more drugs
+  return cited evidence, the rest stay honestly inconclusive. Live: prednisone → insomnia
+  (strong), propranolol now assessed (was inconclusive); deeper recall (paid web-search
+  provider) remains the follow-up for drugs PubMed doesn't surface (e.g. sertraline).
 
 ---
 

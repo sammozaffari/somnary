@@ -179,6 +179,67 @@ export function isSleepConcept(text: string): boolean {
   return typeof text === 'string' && SLEEP_CLAIM_RE.test(text);
 }
 
+// --- retrieval recall: two searches, merge, rerank by sleep relevance (CHK-7.5) ------------------
+//
+// PubMed's Best Match ranks by overall relevance, so for a subject with a large NON-sleep literature
+// (e.g. propranolol → cirrhosis/migraine reviews) a bounded top-N misses its sleep papers entirely,
+// and the Lens wrongly degrades to inconclusive. To find MORE citable evidence WITHOUT loosening the
+// verification firewall (every surviving claim is still verbatim-verified), we: (1) run the resolver's
+// query AND a deterministic sleep-FOCUSED query; (2) merge + dedupe; (3) rerank so the most
+// sleep-relevant abstracts are the ones fed to extraction. No model prose is ever trusted — this only
+// changes WHICH real papers we read.
+
+/** Global counter form of the sleep-concept regex (for scoring term density in a doc). */
+const SLEEP_TERM_G = new RegExp(SLEEP_CLAIM_RE.source, 'gi');
+
+/** Specific sleep-PROBLEM terms — deliberately NOT the bare word "sleep" (which nearly every clinical
+ * review mentions and so cannot discriminate). Used to build a second, sleep-focused query. */
+const SLEEP_FOCUS_TERMS =
+  '(insomnia OR nightmares OR "sleep quality" OR "sleep disturbance" OR somnolence OR "daytime sleepiness" OR sedation OR "sleep architecture" OR "sleep onset")';
+
+/** How many of the most-sleep-relevant merged docs to feed extraction (bounds prompt size + cost). */
+const EXTRACT_DOC_CAP = 8;
+
+/** A deterministic sleep-focused PubMed query from a resolved name — surfaces papers ABOUT the
+ * subject's sleep effect that Best Match buried. '' when there's no usable name. */
+export function sleepFocusedQuery(name: string): string {
+  const n = (typeof name === 'string' ? name : '').replace(/["\\]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 120);
+  return n ? `${n} AND ${SLEEP_FOCUS_TERMS}` : '';
+}
+
+/** A doc's sleep relevance: sleep-term hits in the title count triple (a title match means the paper is
+ * ABOUT sleep), abstract hits count once. Used to rerank so sleep papers reach extraction first. */
+export function sleepScore(doc: { title?: string; abstractText?: string }): number {
+  const title = typeof doc?.title === 'string' ? doc.title : '';
+  const abs = typeof doc?.abstractText === 'string' ? doc.abstractText : '';
+  const titleHits = (title.match(SLEEP_TERM_G) || []).length;
+  const absHits = (abs.match(SLEEP_TERM_G) || []).length;
+  return titleHits * 3 + absHits;
+}
+
+/** Merge doc lists, deduped by PMID, preserving first-seen order. */
+export function mergeDocs(...lists: EvidenceDoc[][]): EvidenceDoc[] {
+  const seen = new Set<string>();
+  const out: EvidenceDoc[] = [];
+  for (const list of lists) {
+    if (!Array.isArray(list)) continue;
+    for (const d of list) {
+      if (!d || typeof d.pmid !== 'string' || !d.pmid || seen.has(d.pmid)) continue;
+      seen.add(d.pmid);
+      out.push(d);
+    }
+  }
+  return out;
+}
+
+/** Rerank merged docs by sleep relevance (desc), stable on ties (V8 sort is stable, so Best-Match order
+ * survives as the tiebreak), then cap to EXTRACT_DOC_CAP. */
+export function rerankBySleep(docs: EvidenceDoc[]): EvidenceDoc[] {
+  return (Array.isArray(docs) ? docs.slice() : [])
+    .sort((a, b) => sleepScore(b) - sleepScore(a))
+    .slice(0, EXTRACT_DOC_CAP);
+}
+
 /** Parse ONE extraction reply into candidate claims. Tolerant of code-fence/prose wrapping (extract
  * the first {...}); ANY failure → []. Caps at LENS_MAX_CLAIMS, drops any claim whose sourcePmid is not
  * one of the fetched docs' PMIDs (no invented citation), and drops any claim that names NO sleep concept
@@ -398,16 +459,25 @@ export async function runLens(args: RunLensArgs): Promise<LensAssessment> {
       };
     }
 
-    // (4) RESEARCH — bounded external search on the RESOLVED query (a real ingredient + sleep scope),
-    // not the raw brand string. No docs ⇒ inconclusive (never a fabricated verdict).
+    // (4) RESEARCH — bounded external search. Runs the resolver's query AND a deterministic
+    // sleep-FOCUSED query (CHK-7.5), so a subject with a large non-sleep literature still surfaces its
+    // sleep papers; results are merged, deduped, and reranked so the most sleep-relevant abstracts reach
+    // extraction. Sequential (not parallel) to respect NCBI's ~3 req/s polite-use limit. No docs ⇒
+    // inconclusive (never a fabricated verdict). The verification firewall downstream is UNCHANGED —
+    // this only widens WHICH real papers we read, never what we trust.
     emit({ type: 'searching' });
-    let docs: EvidenceDoc[] = [];
-    try {
-      const searched = await args.provider.search(resolved.pubmedQuery);
-      docs = Array.isArray(searched) ? searched : [];
-    } catch {
-      docs = [];
-    }
+    const safeSearch = async (q: string): Promise<EvidenceDoc[]> => {
+      if (!q) return [];
+      try {
+        const searched = await args.provider.search(q);
+        return Array.isArray(searched) ? searched : [];
+      } catch {
+        return [];
+      }
+    };
+    const primaryDocs = await safeSearch(resolved.pubmedQuery);
+    const focusedDocs = await safeSearch(sleepFocusedQuery(resolved.resolvedName || normalized.normalized));
+    const docs = rerankBySleep(mergeDocs(primaryDocs, focusedDocs));
     emit({ type: 'sources', count: docs.length });
     if (docs.length === 0) {
       return inconclusive(
