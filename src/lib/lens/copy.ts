@@ -72,6 +72,66 @@ export const SAFETY_NOTE =
   'make a safety call on any product or dose — these pages cover the general cautions, and a pharmacist ' +
   'or doctor can weigh them with your own health and medicines.';
 
+// --- resolved-subject line (SERVER-composed; CHK-7.4) --------------------------------------------
+//
+// The Lens now interprets the input before researching (resolve.ts): a brand → its active ingredient,
+// plus a product class. This line SHOWS the reader what the Lens understood ("read 'Restavit' as
+// doxylamine…") — the honest "it got my intent" beat. It is SERVER-composed here: the only interpolated
+// values are the reader's own bounded subject and a model-derived NAME + a FIXED class label from the
+// map below. It states no evidence, no advice, no grade — just what the query was taken to mean.
+
+/** Fixed, human-readable label per resolved product class. '' ⇒ no class phrase is shown. */
+const PRODUCT_CLASS_LABEL: Record<string, string> = {
+  supplement: 'a supplement',
+  herb: 'a herbal remedy',
+  'amino-acid': 'an amino acid',
+  hormone: 'a hormone',
+  'otc-drug': 'an over-the-counter medicine',
+  'prescription-drug': 'a prescription medicine',
+  food: 'a food or food-derived compound',
+  other: '',
+  unknown: '',
+};
+
+function sameName(a: string, b: string): boolean {
+  return a.trim().toLowerCase().replace(/\s+/g, ' ') === b.trim().toLowerCase().replace(/\s+/g, ' ');
+}
+
+/**
+ * The "what the Lens took your query to mean" line. `subject` is the reader's input; `resolvedName` +
+ * `productClass` come from resolve.ts (already sanitised). Returns '' when there is nothing useful to
+ * say (no resolved name and no class). Never advice, never a grade.
+ */
+export function interpretedAsLine(subject: string, resolvedName: string, productClass: string): string {
+  const s = (typeof subject === 'string' ? subject : '').trim();
+  const r = (typeof resolvedName === 'string' ? resolvedName : '').trim();
+  const label = PRODUCT_CLASS_LABEL[productClass] || '';
+  if (!s) return '';
+  if (r && !sameName(r, s)) {
+    return `The Lens read “${s}” as ${r}${label ? `, ${label}` : ''}, and researched the published evidence for it below.`;
+  }
+  if (label) {
+    return `The Lens researched the published evidence for ${s}, ${label}, below.`;
+  }
+  return '';
+}
+
+/**
+ * The safety note, augmented for medicines. An OTC or prescription sleep drug carries real, personal
+ * risk that a supplement note under-states, so we prepend a "this is a medicine" reminder — still a
+ * ROUTING note, never a safety call on a dose. All other classes get the standing SAFETY_NOTE.
+ */
+export function safetyNoteFor(productClass: string): string {
+  if (productClass === 'otc-drug' || productClass === 'prescription-drug') {
+    return (
+      'This is a medicine — its risks, interactions, and how it affects sleep are personal and can be ' +
+      'serious, especially if it was prescribed for something else or taken with other medicines. The ' +
+      'Lens makes no safety call; talk with a pharmacist or doctor about it, and see the pages below.'
+    );
+  }
+  return SAFETY_NOTE;
+}
+
 // --- verdict-line templates (SERVER-composed; NOT model prose) -----------------------------------
 //
 // The engine composes the single verdict line by picking exactly ONE of these builders from the

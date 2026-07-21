@@ -53,10 +53,19 @@ export interface LensCardShortCircuit {
   name: string;
   href: string;
 }
+/** What the Lens took the query to mean (CHK-7.4). `line` is the server-composed "read X as Y" sentence
+ * — rendered verbatim via textContent, exactly like every other server field. */
+export interface LensCardResolved {
+  subject: string;
+  resolvedName: string;
+  productClass: string;
+  line: string;
+}
 export interface LensCardAssessment {
   input: { kind: 'ingredient' | 'product' | 'question'; normalized: string };
   status: LensCardStatus;
   shortCircuit?: LensCardShortCircuit;
+  resolved?: LensCardResolved;
   verdictLine: string;
   evidence: LensCardEvidence[];
   doesNotShow: string[];
@@ -184,6 +193,13 @@ export function renderLensCard(assessment: LensCardAssessment, container: HTMLEl
   }
 
   // --- ASSESSED / INCONCLUSIVE — the full card. ------------------------------------------------------
+  // "What the Lens read your query as" (CHK-7.4) — the server-composed interpreted-as line, at the very
+  // top so the reader sees the entity was understood (the Perplexity "it got my intent" beat). Verbatim
+  // server field via textContent; it states no evidence, no advice, no grade.
+  if (assessment.resolved && typeof assessment.resolved.line === 'string' && assessment.resolved.line) {
+    card.appendChild(el(doc, 'p', 'lc-resolved', assessment.resolved.line));
+  }
+
   // verdict + disclaimer sit together near the top (disclaimer prominent, near the decision).
   if (assessment.verdictLine) {
     card.appendChild(el(doc, 'p', 'lc-verdict', assessment.verdictLine));

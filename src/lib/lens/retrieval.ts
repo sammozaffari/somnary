@@ -100,6 +100,11 @@ async function esearchPmids(
     db: 'pubmed',
     retmode: 'json',
     retmax: String(max),
+    // sort=relevance = PubMed's "Best Match". Without it the API defaults to most-recent-first, which
+    // for a bounded top-N returns whatever was published latest that merely MENTIONS the term (tangential
+    // reviews, unrelated trials) instead of the studies actually ABOUT the subject — the exact reason a
+    // resolved drug like doxylamine returned only recent nausea/dispensing papers and extracted nothing.
+    sort: 'relevance',
     term: query,
   });
   const res = await guardedFetch(url, doFetch, timeoutMs);

@@ -1,32 +1,28 @@
 ---
-// LensPanel — the Somnary Lens island (CHK-7.2). The user-facing surface for the 7.1 Lens engine: one
-// free-text prompt (a product name, an ingredient, or a pasted supplement-facts panel) → POST /api/lens
-// → the SERVER-composed LensAssessment, rendered by the shared, framework-free renderLensCard (CHK-7.2,
-// the SAFETY-CRITICAL textContent-only renderer). Mirrors GuidePanel / AskPanel: an SSG-safe shell + a
-// progressive-enhancement <script> island, token-only styling, aria-live status, esc(), reduced-motion.
+// LensPanel — the Somnary Lens island (CHK-7.2 + CHK-7.4). The user-facing surface for the Lens engine:
+// one free-text prompt (a product name, an ingredient, or a pasted supplement-facts panel) → POST
+// /api/lens → the SERVER-composed LensAssessment, rendered by the shared, framework-free renderLensCard
+// (the SAFETY-CRITICAL textContent-only renderer). Mirrors GuidePanel / AskPanel: an SSG-safe shell + a
+// progressive-enhancement <script> island, token-only styling, aria-live status, reduced-motion.
 //
 // THE INVARIANT CONTINUES INTO THE UI: this island renders ONLY server-authored fields (via the card
 // renderer's textContent-only path). It authors no medical prose — the verdict, evidence, doesNotShow,
-// label flags, safety note, stamp, and disclaimer all come from the server. The only strings this file
-// introduces are STRUCTURAL: the input affordances, the HONEST staged progress labels (real pipeline
-// stages, never a fabricated count), and the neutral error registers. No grade is ever rendered.
+// the resolved "read X as Y" line, label flags, safety note, stamp, and disclaimer all come from the
+// server. The only strings this file introduces are STRUCTURAL: the input affordances, the example
+// seeds, the REAL streamed pipeline-stage labels, and the neutral error registers. No grade is rendered.
 //
-// HONEST PROGRESS REVEAL: while a request is in flight the island advances a FIXED sequence of REAL
-// pipeline-stage labels on a timer. It NEVER asserts a specific count ("read 6 sources") — counts only
-// ever appear in the final card, from the real assessment. If the response arrives before the sequence
-// finishes, the reveal is dropped and the card takes over.
-//
-// PRIVACY: the prompt is sent to a third-party AI service (same wording as AskPanel), disclosed
-// server-rendered + static below the input. Env-gated: with no OPENROUTER key the route returns 503 and
-// the island shows the honest "not available right now" state — the page still explains itself with JS off.
+// LIVE SSE PROGRESS (CHK-7.4): the request asks for text/event-stream; the engine streams REAL pipeline
+// milestones (resolving → the interpreted entity, N sources read, verifying, composing) which the island
+// shows as they happen — counts shown are the engine's real ones, never fabricated. On the final `done`
+// frame the same renderLensCard takes over. A non-streaming fallback (plain JSON) is handled too.
 ---
 
 <section class="lens" aria-label="Somnary Lens" data-lens>
   <p class="lens-label"><span class="dot" aria-hidden="true"></span> Somnary Lens</p>
   <p class="prompt">
-    Name a product or ingredient the tier board doesn’t cover, or paste a supplement-facts panel. The
-    Lens researches the published evidence and shows what it does — and doesn’t — establish. It is not
-    a Somnary grade.
+    Name any sleep product or ingredient — a brand the tier board doesn’t cover, an unfamiliar
+    supplement, or paste a supplement-facts panel. The Lens researches the published evidence and shows
+    what it does — and doesn’t — establish. It is not a Somnary grade.
   </p>
 
   <form class="field" data-lens-form>
@@ -38,13 +34,24 @@
       rows="3"
       maxlength="4000"
       autocomplete="off"
-      placeholder="e.g. apigenin, or paste a sleep-gummy supplement-facts panel…"
+      placeholder="e.g. Restavit, apigenin, or paste a sleep-gummy supplement-facts panel…"
       data-lens-input></textarea>
     <button type="submit" class="send" data-lens-send>Research this →</button>
   </form>
 
-  <!-- honest staged progress (real pipeline stages; NEVER a fabricated count) -->
+  <!-- example seeds (STRUCTURAL — click to research; never a recommendation, just starting points) -->
+  <div class="examples" data-lens-examples>
+    <span class="ex-label">Try:</span>
+    <button type="button" class="chip" data-example="Restavit">Restavit</button>
+    <button type="button" class="chip" data-example="apigenin">apigenin</button>
+    <button type="button" class="chip" data-example="ZzzQuil">ZzzQuil</button>
+    <button type="button" class="chip" data-example="magnesium glycinate">magnesium glycinate</button>
+    <button type="button" class="chip" data-example="tart cherry">tart cherry</button>
+  </div>
+
+  <!-- live SSE progress (REAL pipeline milestones; counts are the engine's real ones) -->
   <div class="progress" data-lens-progress hidden aria-live="polite">
+    <p class="p-resolved" data-lens-resolved hidden></p>
     <p class="p-stage" data-lens-stage></p>
     <div class="p-track" aria-hidden="true"><span class="p-bar" data-lens-bar></span></div>
   </div>
@@ -52,14 +59,12 @@
   <!-- the server-composed card renders here (textContent-only, via renderLensCard) -->
   <div class="card-region" data-lens-card aria-live="polite" tabindex="-1"></div>
 
-  <p class="privacy-note">
-    Your prompt is sent to a third-party AI service — OpenRouter, which routes it to a DeepSeek model
-    (or Google’s Gemini API as a fallback) — and to the public PubMed database to find sources. Don’t
-    include personal or identifying details.
-  </p>
-  <p class="stub-note">
-    The Lens researches published evidence and verifies each claim against its source. It never invents
-    a source, never assigns a grade, and never tells you what to take. Educational, not medical advice.
+  <!-- Minimal privacy disclosure (server-rendered, static, visible JS-off) — the two verbose blocks
+       were retired per owner, but the third-party-AI + "don't share personal details" disclosure is a
+       CLAUDE.md non-negotiable, so it stays as one quiet line. -->
+  <p class="privacy-line">
+    Sent to a third-party AI service (OpenRouter → DeepSeek, Gemini fallback) and to PubMed for sources.
+    Don’t include personal or identifying details. <a href="/privacy">Privacy</a>.
   </p>
 </section>
 
@@ -154,7 +159,39 @@
     cursor: progress;
   }
 
-  /* honest staged progress */
+  /* example seed chips */
+  .examples {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--sp-2);
+    margin-top: var(--sp-4);
+  }
+  .ex-label {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+  }
+  .chip {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--primary);
+    background: var(--surface);
+    border: var(--border-hairline);
+    border-radius: var(--r-pill);
+    padding: var(--sp-1) var(--sp-3);
+    cursor: pointer;
+  }
+  .chip:hover {
+    border-color: var(--primary);
+  }
+  .chip:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+  }
+
+  /* live SSE progress */
   .progress {
     margin-top: var(--sp-5);
     background: var(--surface);
@@ -162,11 +199,17 @@
     border-radius: var(--r-md);
     padding: var(--sp-4) var(--sp-5);
   }
+  .p-resolved {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--ink);
+    margin: 0 0 var(--sp-2);
+  }
   .p-stage {
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    color: var(--ink);
+    color: var(--muted);
     margin: 0 0 var(--sp-3);
   }
   .p-track {
@@ -182,6 +225,18 @@
     background: var(--eucalyptus);
     border-radius: var(--r-pill);
     transition: width var(--dur-slow) var(--ease-soft);
+  }
+
+  /* one quiet, server-rendered privacy line (retained non-negotiable disclosure) */
+  .privacy-line {
+    margin: var(--sp-5) 0 0;
+    font-size: var(--text-xs);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    max-width: 64ch;
+  }
+  .privacy-line a {
+    color: var(--primary);
   }
 
   /* the card region — the shared renderer builds into it. Styles below match render-card.ts classes. */
@@ -200,6 +255,14 @@
     display: flex;
     flex-direction: column;
     gap: var(--sp-5);
+  }
+  /* the "read X as Y" interpreted-query line — quiet, sits above the verdict */
+  :global(.lc-resolved) {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: 0;
+    max-width: 64ch;
   }
   :global(.lc-verdict) {
     font-size: var(--text-base);
@@ -445,12 +508,12 @@
   // that authors no medical prose. Importing it here keeps the safety-critical render in one file.
   import { renderLensCard, type LensCardAssessment } from '../lib/lens/render-card.ts';
 
-  // The HONEST staged progress: a FIXED sequence of REAL pipeline stages (topic-fence + classify →
-  // corpus short-circuit → PubMed research → model extract → adversarial verify → server compose). Each
-  // is true to what the engine actually does. NONE asserts a count — counts appear only in the final
-  // card, from the real assessment. Purely a truthful "we're working" reveal, never a fabricated result.
-  const STAGES = [
-    'Checking Somnary’s graded corpus…',
+  // REAL pipeline milestones (CHK-7.4): the engine streams these as SSE events. Each maps to an honest
+  // stage label; counts (sources, claims) come from the event, never fabricated. The FALLBACK sequence
+  // is used only when the stream is unavailable (a JSON-only response) so the bar still moves.
+  const STAGE_ORDER = ['resolving', 'searching', 'sources', 'extracting', 'verifying', 'composing'];
+  const FALLBACK_STAGES = [
+    'Understanding your query…',
     'Searching published sources…',
     'Reading what the studies say…',
     'Verifying each claim against its source…',
@@ -464,14 +527,16 @@
     const input = root.querySelector<HTMLTextAreaElement>('[data-lens-input]');
     const send = root.querySelector<HTMLButtonElement>('[data-lens-send]');
     const progress = root.querySelector<HTMLElement>('[data-lens-progress]');
+    const resolvedEl = root.querySelector<HTMLElement>('[data-lens-resolved]');
     const stageEl = root.querySelector<HTMLElement>('[data-lens-stage]');
     const barEl = root.querySelector<HTMLElement>('[data-lens-bar]');
     const cardRegion = root.querySelector<HTMLElement>('[data-lens-card]');
-    if (!form || !input || !send || !progress || !stageEl || !barEl || !cardRegion) return;
+    const examples = root.querySelector<HTMLElement>('[data-lens-examples]');
+    if (!form || !input || !send || !progress || !resolvedEl || !stageEl || !barEl || !cardRegion) return;
 
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     let busy = false;
-    let stageTimer: ReturnType<typeof setInterval> | null = null;
+    let fallbackTimer: ReturnType<typeof setInterval> | null = null;
 
     const setBusy = (b: boolean) => {
       busy = b;
@@ -479,7 +544,6 @@
       input.disabled = b;
     };
 
-    // Show a neutral, island-authored notice (503 / error / input problems). NEVER the safety register.
     const showNotice = (text: string) => {
       cardRegion.innerHTML = ''; // clear only
       const p = document.createElement('div');
@@ -490,40 +554,119 @@
       cardRegion.focus?.();
     };
 
+    // Move the bar to a fraction of the way through the known milestone order (real progress).
+    const setBar = (fraction: number) => {
+      barEl.style.width = Math.max(0, Math.min(100, Math.round(fraction * 100))) + '%';
+    };
+
     const startProgress = () => {
-      cardRegion.innerHTML = ''; // clear any prior card
+      cardRegion.innerHTML = '';
+      resolvedEl.hidden = true;
+      resolvedEl.textContent = '';
       progress.hidden = false;
-      let i = 0;
-      const render = () => {
-        stageEl.textContent = STAGES[i];
-        const pct = reduce ? 100 : Math.round(((i + 1) / STAGES.length) * 100);
-        barEl.style.width = pct + '%';
-      };
-      render();
-      if (reduce) return; // no stepping animation when reduced-motion — the first stage + full bar suffice
-      stageTimer = setInterval(() => {
-        i += 1;
-        if (i >= STAGES.length) {
-          // Hold on the final stage until the response returns; never loop past "Composing…".
-          i = STAGES.length - 1;
-          if (stageTimer) {
-            clearInterval(stageTimer);
-            stageTimer = null;
-          }
-          render();
-          return;
-        }
-        render();
-      }, STAGE_MS);
+      stageEl.textContent = 'Understanding your query…';
+      setBar(reduce ? 1 : 0.05);
     };
 
     const stopProgress = () => {
-      if (stageTimer) {
-        clearInterval(stageTimer);
-        stageTimer = null;
+      if (fallbackTimer) {
+        clearInterval(fallbackTimer);
+        fallbackTimer = null;
       }
       progress.hidden = true;
       barEl.style.width = '0';
+    };
+
+    // Apply ONE real streamed event to the progress UI. Counts shown are the engine's real ones.
+    const applyEvent = (event: any) => {
+      if (!event || typeof event.type !== 'string') return;
+      const idx = STAGE_ORDER.indexOf(event.type === 'resolved' ? 'resolving' : event.type);
+      if (idx >= 0 && !reduce) setBar((idx + 1) / (STAGE_ORDER.length + 1));
+      switch (event.type) {
+        case 'resolved': {
+          const r = event.resolved;
+          // Structural "X → Y" (sanitised names only) — persists while the rest of the pipeline runs.
+          if (r && (r.resolvedName || r.subject)) {
+            const arrow = r.resolvedName && r.resolvedName !== r.subject ? `${r.subject} → ${r.resolvedName}` : r.subject;
+            resolvedEl.textContent = arrow;
+            resolvedEl.hidden = false;
+          }
+          stageEl.textContent = 'Searching published sources…';
+          break;
+        }
+        case 'searching':
+          stageEl.textContent = 'Searching published sources…';
+          break;
+        case 'sources':
+          stageEl.textContent =
+            typeof event.count === 'number'
+              ? `Read ${event.count} source${event.count === 1 ? '' : 's'}…`
+              : 'Reading sources…';
+          break;
+        case 'extracting':
+          stageEl.textContent = 'Reading what the studies say…';
+          break;
+        case 'verifying':
+          stageEl.textContent =
+            typeof event.total === 'number' && event.total > 0
+              ? `Verifying ${event.total} claim${event.total === 1 ? '' : 's'} against ${event.total === 1 ? 'its source' : 'their sources'}…`
+              : 'Verifying each claim against its source…';
+          break;
+        case 'composing':
+          stageEl.textContent = 'Composing the assessment…';
+          if (!reduce) setBar(0.95);
+          break;
+      }
+    };
+
+    // Fallback timed stepper for a non-streaming (JSON) response — the bar still advances honestly.
+    const startFallbackStepper = () => {
+      if (reduce) return;
+      let i = 0;
+      stageEl.textContent = FALLBACK_STAGES[0];
+      fallbackTimer = setInterval(() => {
+        i = Math.min(i + 1, FALLBACK_STAGES.length - 1);
+        stageEl.textContent = FALLBACK_STAGES[i];
+        setBar((i + 1) / (FALLBACK_STAGES.length + 1));
+        if (i >= FALLBACK_STAGES.length - 1 && fallbackTimer) {
+          clearInterval(fallbackTimer);
+          fallbackTimer = null;
+        }
+      }, STAGE_MS);
+    };
+
+    // Parse an SSE byte stream frame-by-frame, applying events and resolving with the final assessment.
+    const consumeStream = async (res: Response): Promise<LensCardAssessment | null> => {
+      const reader = res.body?.getReader();
+      if (!reader) return null;
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let done: LensCardAssessment | null = null;
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        const { value, done: streamDone } = await reader.read();
+        if (streamDone) break;
+        buffer += decoder.decode(value, { stream: true });
+        const frames = buffer.split('\n\n');
+        buffer = frames.pop() ?? ''; // keep the trailing partial frame
+        for (const frame of frames) {
+          const dataLines = frame
+            .split('\n')
+            .filter((l) => l.startsWith('data:'))
+            .map((l) => l.slice(5).trim());
+          if (!dataLines.length) continue;
+          let msg: any;
+          try {
+            msg = JSON.parse(dataLines.join(''));
+          } catch {
+            continue;
+          }
+          if (msg.kind === 'event') applyEvent(msg.event);
+          else if (msg.kind === 'done') done = msg.assessment as LensCardAssessment;
+          else if (msg.kind === 'error') throw new Error('stream-error');
+        }
+      }
+      return done;
     };
 
     const submit = async () => {
@@ -543,32 +686,49 @@
       try {
         const res = await fetch('/api/lens', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', Accept: 'text/event-stream' },
           body: JSON.stringify({ input: value }),
         });
-        stopProgress();
         if (res.status === 503) {
+          stopProgress();
           showNotice('The Lens isn’t available right now. You can still browse the graded tier board and each remedy’s cited evidence in the meantime.');
           return;
         }
         if (res.status === 429) {
-          // Calm, neutral — the SAME register as AskPanel's rate-limit copy. Never the vermilion/safety tone.
+          stopProgress();
           showNotice('You’re going a little faster than the Lens can keep up with — give it a moment and try again. Nothing you entered is lost.');
           return;
         }
         if (res.status === 413) {
+          stopProgress();
           showNotice('That’s longer than the Lens can take in one go. Trim it to the ingredients you want checked and try again.');
           return;
         }
         if (res.status === 400) {
+          stopProgress();
           showNotice('Type a product name, an ingredient, or paste a supplement-facts panel to research.');
           return;
         }
         if (!res.ok) {
+          stopProgress();
           showNotice('Something went wrong researching that. You can try again, or browse Somnary’s graded evidence directly. This is educational, not medical advice.');
           return;
         }
-        const assessment = (await res.json()) as LensCardAssessment;
+
+        let assessment: LensCardAssessment | null = null;
+        const contentType = res.headers.get('content-type') || '';
+        if (contentType.includes('text/event-stream') && res.body) {
+          assessment = await consumeStream(res);
+        } else {
+          // Non-streaming fallback (JSON): step the fallback bar while we await, then render.
+          startFallbackStepper();
+          assessment = (await res.json()) as LensCardAssessment;
+        }
+        stopProgress();
+        if (!assessment) {
+          showNotice('Something went wrong researching that. You can try again, or browse Somnary’s graded evidence directly. This is educational, not medical advice.');
+          return;
+        }
         renderLensCard(assessment, cardRegion);
         cardRegion.focus?.();
       } catch {
@@ -590,6 +750,16 @@
         void submit();
       }
       if (e.key === 'Escape') input.blur();
+    });
+
+    // Example seed chips — fill the box and research (the research loop stays one click away).
+    examples?.querySelectorAll<HTMLButtonElement>('[data-example]').forEach((chip) => {
+      chip.addEventListener('click', () => {
+        const q = chip.getAttribute('data-example') || '';
+        if (!q || busy) return;
+        input.value = q;
+        void submit();
+      });
     });
 
     // Deep-link: ?q=<query> (from the homepage on-ramp / ⌘K palette handoff) → prefill + auto-submit.

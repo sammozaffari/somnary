@@ -81,26 +81,65 @@ export const POST: APIRoute = async ({ request }) => {
   const email = (typeof process !== 'undefined' ? process.env?.NCBI_EUTILS_EMAIL : undefined) || undefined;
   const provider = new PubMedProvider({ email });
 
-  const assessment = await runLens({
-    input: check.input,
-    corpus,
-    labelEntries,
-    additiveWatchlist,
-    provider,
-    providerName: 'pubmed',
-  });
+  const runArgs = { input: check.input, corpus, labelEntries, additiveWatchlist, provider, providerName: 'pubmed' as const };
 
   // Fire-and-await the ONE aggregate demand log (CHK-7.3b) — feeds the human grading backlog with which
-  // NAMED products/ingredients get researched. It logs a normalized NAME + a count and NOTHING else
-  // (never the free-text question, never refused/short-circuit runs, never raw text/IP). It is env-gated
-  // and fail-open by construction; the extra try/catch here guarantees a logging fault can never change
-  // the Lens response or its status. The engine is untouched.
-  try {
-    await logLensDemand(assessment);
-  } catch {
-    /* fail-open: backlog signal is best-effort and must never affect the answer */
+  // NAMED products/ingredients get researched. Logs a normalized NAME + a count and NOTHING else (never
+  // the free-text question, never refused/short-circuit runs, never raw text/IP). Env-gated + fail-open;
+  // the try/catch guarantees a logging fault can never change the Lens response. The engine is untouched.
+  const logDemand = async (assessment: Awaited<ReturnType<typeof runLens>>) => {
+    try {
+      await logLensDemand(assessment);
+    } catch {
+      /* fail-open: backlog signal is best-effort and must never affect the answer */
+    }
+  };
+
+  // (CHK-7.4) SSE streaming: a client that asks for text/event-stream gets REAL pipeline milestones as
+  // they happen (onEvent), then a final `done` frame carrying the same LensAssessment the JSON path
+  // returns. Every frame is server-authored/structural — the events carry counts + sanitised resolved
+  // names, never model prose. A client that does NOT ask for the stream gets the JSON exactly as before.
+  const wantsStream = (request.headers.get('accept') || '').includes('text/event-stream');
+  if (wantsStream) {
+    const encoder = new TextEncoder();
+    const stream = new ReadableStream<Uint8Array>({
+      async start(controller) {
+        const send = (obj: unknown) => {
+          try {
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify(obj)}\n\n`));
+          } catch {
+            /* controller closed (client hung up) — best-effort, ignore */
+          }
+        };
+        try {
+          const assessment = await runLens({ ...runArgs, onEvent: (event) => send({ kind: 'event', event }) });
+          await logDemand(assessment);
+          send({ kind: 'done', assessment });
+        } catch {
+          // runLens never throws, but a stream fault must still close cleanly with an honest signal.
+          send({ kind: 'error' });
+        } finally {
+          try {
+            controller.close();
+          } catch {
+            /* already closed */
+          }
+        }
+      },
+    });
+    return new Response(stream, {
+      status: 200,
+      headers: {
+        'Content-Type': 'text/event-stream; charset=utf-8',
+        'Cache-Control': 'no-store, no-transform',
+        Connection: 'keep-alive',
+        'X-Accel-Buffering': 'no',
+      },
+    });
   }
 
+  const assessment = await runLens(runArgs);
+  await logDemand(assessment);
   return json(assessment);
 };
 

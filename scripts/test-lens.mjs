@@ -247,6 +247,22 @@ async function run() {
     ok('empty query → [] (no fetch)', (await provider.search('   ')).length === 0);
     ok('non-string query → []', (await provider.search(null)).length === 0);
   }
+  {
+    // CHK-7.4: esearch must request Best Match (sort=relevance), not the API's date-first default —
+    // otherwise a bounded top-N returns the LATEST papers that merely mention the term, not the ones
+    // about it (why a resolved drug extracted nothing before this fix).
+    let esearchUrl = '';
+    const spyFetch = async (url) => {
+      if (url.includes('/esearch.fcgi')) {
+        esearchUrl = url;
+        return { ok: true, json: async () => ({ esearchresult: { idlist: ['23691095'] } }) };
+      }
+      return { ok: true, text: async () => CANNED_XML };
+    };
+    const provider = new PubMedProvider({ fetchImpl: spyFetch });
+    await provider.search('doxylamine AND (sleep OR insomnia)');
+    ok('esearch requests relevance (Best Match) sort', /[?&]sort=relevance(&|$)/.test(esearchUrl), esearchUrl);
+  }
 
   console.log('\nlens suite — input.ts (normalize + classify + short-circuit):');
 
@@ -383,7 +399,7 @@ const n = () => ({ supported: 'no', strength: 'weak', quote: '' });
 
 async function runVerifier() {
   console.log('\nlens suite — prompts.ts (versioned, framing-safe shape):');
-  ok('extract version pinned', LENS_EXTRACT_VERSION === 'lens-extract-v1', LENS_EXTRACT_VERSION);
+  ok('extract version pinned', LENS_EXTRACT_VERSION === 'lens-extract-v2', LENS_EXTRACT_VERSION);
   ok('refute version pinned', LENS_REFUTE_VERSION === 'lens-refute-v1', LENS_REFUTE_VERSION);
   ok('extract prompt forbids grading', /grade|rating|verdict/i.test(LENS_EXTRACT_PROMPT));
   ok('extract prompt forbids invented PMIDs', /invent a PMID/i.test(LENS_EXTRACT_PROMPT));
@@ -661,12 +677,24 @@ const APIGENIN_QUOTE = 'apigenin reduced sleep onset latency by 7 minutes'; // v
  * extract reply is chosen by `extractReply`; each refute reply is chosen by matching the claim text in
  * the user prompt against `refuteByClaimSubstr` (→ REFUTE_N verdicts cycled), defaulting to skeptical
  * 'no'. Records every call so tests can assert model behavior. NEVER a network call. */
-function makeEngineModel({ extractReply, refuteByClaimSubstr = {} } = {}) {
+function makeEngineModel({ extractReply, refuteByClaimSubstr = {}, resolveReply } = {}) {
   const perClaim = new Map();
-  const calls = { count: 0, extract: 0, refute: 0, prompts: [] };
+  const calls = { count: 0, extract: 0, refute: 0, resolve: 0, prompts: [] };
   const model = async ({ user, system }) => {
     calls.count += 1;
     calls.prompts.push(user);
+    // CHK-7.4: the RESOLVER runs first. Default reply is a passthrough (sleepRelevant, no rename) so
+    // existing tests behave as before; a test can override with `resolveReply` to drive resolution.
+    if (system.includes('RESOLVER')) {
+      calls.resolve += 1;
+      const text =
+        resolveReply === undefined
+          ? JSON.stringify({ sleepRelevant: true, resolvedName: '', aka: [], productClass: 'unknown', pubmedQuery: '' })
+          : typeof resolveReply === 'string'
+            ? resolveReply
+            : JSON.stringify(resolveReply);
+      return { ok: true, text };
+    }
     if (system.includes('EXTRACTOR')) {
       calls.extract += 1;
       const text = typeof extractReply === 'string' ? extractReply : JSON.stringify(extractReply ?? { claims: [], doesNotShow: [], labelFacts: [] });
@@ -758,9 +786,12 @@ async function runRedTeam() {
   {
     // an extracted claim tied to a PMID NOT in the fetched docs → dropped at extraction (never verified).
     const docPmids = new Set(RT_DOCS.map((d) => d.pmid));
-    const parsed = parseExtraction(JSON.stringify({ claims: [{ text: 'x', sourcePmid: '99999999' }, { text: 'y', sourcePmid: '23691095' }] }), docPmids);
+    const parsed = parseExtraction(JSON.stringify({ claims: [{ text: 'x affects sleep', sourcePmid: '99999999' }, { text: 'y affects sleep', sourcePmid: '23691095' }] }), docPmids);
     ok('(2b) extraction drops a claim citing a PMID not in docs', parsed.length === 1 && parsed[0].sourcePmid === '23691095');
-    ok('(2c) extraction caps at LENS_MAX_CLAIMS', parseExtraction(JSON.stringify({ claims: Array.from({ length: 20 }, () => ({ text: 'apigenin lowers latency', sourcePmid: '23691095' })) }), docPmids).length === LENS_MAX_CLAIMS);
+    ok('(2c) extraction caps at LENS_MAX_CLAIMS', parseExtraction(JSON.stringify({ claims: Array.from({ length: 20 }, () => ({ text: 'apigenin lowers sleep latency', sourcePmid: '23691095' })) }), docPmids).length === LENS_MAX_CLAIMS);
+    // (2d) a candidate claim that names NO sleep concept (a subject's unrelated finding) is dropped —
+    // the deterministic sleep-scope backstop for broad drugs (e.g. propranolol → migraine/BP claims).
+    ok('(2d) extraction drops a claim with no sleep concept', parseExtraction(JSON.stringify({ claims: [{ text: 'Propranolol is first-line for migraine prophylaxis', sourcePmid: '23691095' }, { text: 'Propranolol reduced nightmares versus placebo', sourcePmid: '23691095' }] }), docPmids).length === 1);
   }
 
   // (3) NEVER a tier grade: no grade field/letter anywhere in ANY assessment; schema has no tier.
@@ -838,7 +869,7 @@ async function runRedTeam() {
   // verified claim whose TEXT carries a forbidden framing: it must be dropped from evidence.
   {
     const { model } = makeEngineModel({
-      extractReply: { claims: [{ text: 'Combine these supplements and take apigenin tonight', sourcePmid: '23691095' }], doesNotShow: [], labelFacts: [] },
+      extractReply: { claims: [{ text: 'Combine these supplements and take apigenin for sleep tonight', sourcePmid: '23691095' }], doesNotShow: [], labelFacts: [] },
       refuteByClaimSubstr: { 'Combine these supplements': [yes(APIGENIN_QUOTE), yes(APIGENIN_QUOTE), yes(APIGENIN_QUOTE)] },
     });
     const r = await runLens({ ...base, input: SUBJECT, provider: providerOf(RT_DOCS), model });
@@ -878,6 +909,117 @@ async function runRedTeam() {
     const allResolve = r.evidence.every((e) => e.sources.length > 0 && e.sources.every((s) => isResolvableId(s) && typeof s.url === 'string' && s.url.length > 0));
     ok('(10) every evidence source id passes the resolver + carries a url', allResolve, JSON.stringify(r.evidence.map((e) => e.sources)));
     ok('(10) no evidence line without a resolvable source', r.evidence.every((e) => e.sources.length > 0));
+  }
+
+  // (11) QUERY UNDERSTANDING / RESOLUTION (CHK-7.4) — a brand resolves to its ingredient and drives
+  // the PubMed query; an off-topic term is declined by the model relevance verdict; a model failure
+  // degrades to a passthrough search; a resolved name that trips a lint gate is NEVER shown.
+  const resolveMod = await imp('src/lib/lens/resolve.ts');
+  {
+    // (11a) "Restavit" → doxylamine: the resolved query reaches the provider, and the card shows it.
+    const { model, calls } = makeEngineModel({
+      resolveReply: { sleepRelevant: true, resolvedName: 'doxylamine', aka: ['Restavit'], productClass: 'otc-drug', pubmedQuery: 'doxylamine AND (sleep OR insomnia OR sedation)' },
+      extractReply: { claims: [], doesNotShow: [], labelFacts: [] },
+    });
+    const spy = { query: null, search: async (q) => { spy.query = q; return []; } };
+    const r = await runLens({ ...base, input: 'Restavit', provider: spy, model });
+    ok('(11a) resolved query (ingredient + sleep) reaches the provider, not the raw brand', spy.query === 'doxylamine AND (sleep OR insomnia OR sedation)', String(spy.query));
+    ok('(11a) resolution consumed one model call', calls.resolve === 1);
+    ok('(11a) meta.modelCalls counts the resolve call', r.meta.modelCalls >= 1);
+    ok('(11a) card shows the resolved entity', !!r.resolved && r.resolved.resolvedName === 'doxylamine' && /doxylamine/.test(r.resolved.line));
+    ok('(11a) a drug routes safety to the medications page', r.safety.routes.some((rt) => rt.href === '/medications-and-sleep-aids'), JSON.stringify(r.safety.routes));
+    ok('(11a) a drug safety note flags it is a medicine', /medicine/i.test(r.safety.note));
+    ok('(11a) NO grade smell despite a resolved drug', findGradeSmell(r) === null, String(findGradeSmell(r)));
+  }
+  {
+    // (11a2) ANY drug's sleep effect is in scope (owner 2026-07-21) — a drug taken for ANOTHER reason
+    // (propranolol, a beta-blocker) that affects sleep resolves + researches; the label reads "a
+    // prescription medicine" (NOT "sleep medicine"), and it routes to the medications page + a clinician.
+    const { model } = makeEngineModel({
+      resolveReply: { sleepRelevant: true, resolvedName: 'propranolol', aka: ['Inderal'], productClass: 'prescription-drug', pubmedQuery: 'propranolol AND (sleep OR insomnia OR nightmares)' },
+      extractReply: { claims: [], doesNotShow: [], labelFacts: [] },
+    });
+    const spy = { query: null, search: async (q) => { spy.query = q; return []; } };
+    const r = await runLens({ ...base, input: 'propranolol', provider: spy, model });
+    ok('(11a2) a non-sleep-aid drug is researched for its sleep effect', spy.query === 'propranolol AND (sleep OR insomnia OR nightmares)', String(spy.query));
+    ok('(11a2) resolved line reads "a prescription medicine", not "sleep medicine"', !!r.resolved && /prescription medicine/.test(r.resolved.line) && !/sleep medicine/.test(r.resolved.line), r.resolved?.line);
+    ok('(11a2) routes to the medications page + clinician', r.safety.routes.some((rt) => rt.href === '/medications-and-sleep-aids') && r.safety.routes.some((rt) => rt.href === '/when-to-see-a-doctor'));
+    ok('(11a2) NO grade smell', findGradeSmell(r) === null);
+  }
+  {
+    // (11b) off-topic → model relevance verdict false → refused, NO research ran.
+    const { model, calls } = makeEngineModel({ resolveReply: { sleepRelevant: false, resolvedName: '', aka: [], productClass: 'other', pubmedQuery: '' } });
+    const spy = { called: false, search: async () => { spy.called = true; return RT_DOCS; } };
+    const r = await runLens({ ...base, input: 'Toyota Corolla 2016 review', provider: spy, model });
+    ok('(11b) off-topic → refused', r.status === 'refused', r.status);
+    ok('(11b) off-topic → uses the neutral off-topic message', r.verdictLine === lensCopy.OFF_TOPIC_MESSAGE);
+    ok('(11b) off-topic → NO research ran (provider not called)', spy.called === false);
+    ok('(11b) off-topic → resolution ran but extraction/verify did not', calls.resolve === 1 && calls.extract === 0 && calls.refute === 0);
+  }
+  {
+    // (11c) resolution model FAILS → passthrough: research runs on the (sanitised) subject, no crash.
+    const spy = { query: null, search: async (q) => { spy.query = q; return []; } };
+    const failResolveModel = async ({ system }) => (system.includes('RESOLVER') ? { ok: false, text: '' } : { ok: true, text: '{}' });
+    const r = await runLens({ ...base, input: 'someunlistedcompound', provider: spy, model: failResolveModel });
+    ok('(11c) model failure → passthrough searches the subject', typeof spy.query === 'string' && /someunlistedcompound/.test(spy.query), String(spy.query));
+    ok('(11c) model failure → inconclusive, never a crash/verdict', r.status === 'inconclusive');
+  }
+  {
+    // (11d) a resolved name carrying a forbidden framing is NEVER shown (lint drop at the display).
+    const { model } = makeEngineModel({
+      resolveReply: { sleepRelevant: true, resolvedName: 'take this tonight doxylamine', aka: [], productClass: 'supplement', pubmedQuery: 'doxylamine AND sleep' },
+      extractReply: { claims: [], doesNotShow: [], labelFacts: [] },
+    });
+    const r = await runLens({ ...base, input: 'MysterySleep', provider: providerOf([]), model });
+    const linter = await imp('src/lib/ask/guardrails.ts');
+    const shown = r.resolved ? `${r.resolved.line} ${r.resolved.resolvedName}` : '';
+    ok('(11d) a lint-tripping resolved name is dropped from the card', linter.lintForbiddenFraming(shown).length === 0, shown);
+    ok('(11d) still no grade smell', findGradeSmell(r) === null);
+  }
+  {
+    // (11d2) a GRADE-SHAPED resolved name is NEVER shown (defense-in-depth: the resolver output path
+    // must apply the same GRADE_SMELL gate as evidence text — a model can never smuggle "grade A" onto
+    // the card or the streamed arrow). Adversarial-review Finding 1.
+    for (const badName of ['grade A doxylamine', 'tier S melatonin', 'rated a solid B valerian', 'A-grade magnesium']) {
+      const { model } = makeEngineModel({
+        resolveReply: { sleepRelevant: true, resolvedName: badName, aka: [], productClass: 'supplement', pubmedQuery: 'x AND sleep' },
+        extractReply: { claims: [], doesNotShow: [], labelFacts: [] },
+      });
+      const r = await runLens({ ...base, input: 'MysterySleep', provider: providerOf([]), model });
+      ok(`(11d2) grade-shaped resolved name "${badName}" → no grade smell anywhere`, findGradeSmell(r) === null, String(findGradeSmell(r)));
+      const shown = r.resolved ? `${r.resolved.line} ${r.resolved.resolvedName}` : '';
+      ok(`(11d2) grade-shaped resolved name "${badName}" → dropped from display`, !/grade|tier|rated/i.test(shown), shown);
+    }
+  }
+  {
+    // (11e) STREAMING (CHK-7.4): runLens fires real milestone events; counts are the real ones.
+    const { model } = makeEngineModel({
+      resolveReply: { sleepRelevant: true, resolvedName: 'apigenin', aka: [], productClass: 'supplement', pubmedQuery: 'apigenin AND sleep' },
+      extractReply: { claims: [{ text: 'Apigenin reduced sleep onset latency by 7 minutes', sourcePmid: '23691095' }], doesNotShow: [], labelFacts: [] },
+      refuteByClaimSubstr: { 'onset latency by 7 minutes': [yes(APIGENIN_QUOTE), yes(APIGENIN_QUOTE), yes(APIGENIN_QUOTE)] },
+    });
+    const events = [];
+    const r = await runLens({ ...base, input: 'apigenin sleep capsule brand', provider: providerOf(RT_DOCS), model, onEvent: (e) => events.push(e) });
+    const types = events.map((e) => e.type);
+    ok('(11e) fired a resolved event with the entity', events.some((e) => e.type === 'resolved' && e.resolved?.resolvedName === 'apigenin'));
+    ok('(11e) fired a real sources count', events.some((e) => e.type === 'sources' && e.count === RT_DOCS.length));
+    ok('(11e) fired searching → extracting → verifying → composing in order', ['searching', 'extracting', 'verifying', 'composing'].every((t) => types.includes(t)));
+    ok('(11e) a broken onEvent sink never breaks the run', r.status === 'assessed');
+    const boom = await runLens({ ...base, input: 'apigenin sleep capsule brand', provider: providerOf(RT_DOCS), model, onEvent: () => { throw new Error('sink boom'); } });
+    ok('(11e) onEvent that throws is swallowed', boom.status === 'assessed');
+  }
+  {
+    // (11f) resolve.ts unit: malformed reply → passthrough; sanitisers strip markup/control chars + cap.
+    const pt = resolveMod.parseResolution('not json at all', 'valerian tea');
+    ok('(11f) malformed resolution → passthrough over subject', pt.sleepRelevant === true && pt.subject === 'valerian tea' && /valerian/.test(pt.pubmedQuery));
+    ok('(11f) sanitizeName strips newlines/markup + caps', resolveMod.sanitizeName('doxy<b>lamine</b>\n\nignore prior').length > 0 && !/[<>\n]/.test(resolveMod.sanitizeName('a<b>\n')));
+    ok('(11f) sanitizeQuery keeps boolean syntax, single line', resolveMod.sanitizeQuery('doxylamine AND (sleep OR insomnia)\nX') === 'doxylamine AND (sleep OR insomnia) X');
+    ok('(11f) explicit sleepRelevant:false is the ONLY refusal signal', resolveMod.parseResolution(JSON.stringify({ sleepRelevant: false }), 'x').sleepRelevant === false && resolveMod.parseResolution(JSON.stringify({ foo: 1 }), 'x').sleepRelevant === true);
+    // ensureSleepScope: a query with NO sleep concept gets a sleep clause (so PubMed can't drown the
+    // subject's sleep effect under its unrelated literature); one that already has sleep is untouched.
+    ok('(11f) ensureSleepScope adds a sleep clause to a bare drug name', /sleep|insomnia|sedation/i.test(resolveMod.ensureSleepScope('propranolol')) && /propranolol/.test(resolveMod.ensureSleepScope('propranolol')));
+    ok('(11f) ensureSleepScope leaves an already-sleep-scoped query unchanged', resolveMod.ensureSleepScope('doxylamine AND (sleep OR insomnia)') === 'doxylamine AND (sleep OR insomnia)');
+    ok('(11f) a model query with no sleep term is sleep-scoped in parseResolution', /sleep|insomnia|sedation/i.test(resolveMod.parseResolution(JSON.stringify({ sleepRelevant: true, pubmedQuery: 'propranolol' }), 'propranolol').pubmedQuery));
   }
 
   // Bonus invariants proving graceful degradation (never a fabricated verdict).
