@@ -1,35 +1,74 @@
 ---
 import Base from '../../layouts/Base.astro';
-import {
-  VALERIAN_SOURCES,
-  DIMENSION_ORDER,
-  DIMENSION_LABELS,
-  type ValProduct,
-} from '../../data/source-scorecards/valerian';
-
-// Only ratified rows render (mirrors the Supabase publish gate). Ordered alphabetically —
-// never by score — so no ranking is implied.
-const products: ValProduct[] = VALERIAN_SOURCES.filter((p) => p.ratified).sort((a, b) =>
-  a.brand.localeCompare(b.brand),
-);
+import SafetyCallout from '../../components/scorecards/SafetyCallout.astro';
+import RatingLegend from '../../components/scorecards/RatingLegend.astro';
+import ScorecardGrid from '../../components/scorecards/ScorecardGrid.astro';
+import { VALERIAN_SOURCES, type ValProduct } from '../../data/source-scorecards/valerian';
+import type { ScorecardCardData, Chip, DetailLine } from '../../data/source-scorecards/card';
 
 const reviewDate = '2026-07-20';
-const segs = [1, 2, 3, 4, 5];
 
-// Plain-language legend — so anyone can read a card, not just someone who knows the jargon.
+// Map a valerian product into the shared card shape.
+function toCard(p: ValProduct): ScorecardCardData {
+  const chips: Chip[] = [];
+  if (p.trialFlag) chips.push({ label: '🔬 Used in trials', kind: 'good', note: p.trialFlag.note });
+  if (p.importSafety) chips.push({ label: '⚠ Import — no AU warning', kind: 'warn', note: p.importSafety.note });
+
+  const detailLines: DetailLine[] = [];
+  if (p.importSafety) detailLines.push({ tag: 'Safety', note: p.importSafety.note, kind: 'safety' });
+  if (p.trialFlag) detailLines.push({ tag: 'Used in trials', note: p.trialFlag.note, kind: 'trial' });
+
+  return {
+    slug: p.slug,
+    brand: p.brand,
+    productName: p.productName,
+    specLines: [p.strength, p.form],
+    metaLine: `${p.ausL ? `AUST L ${p.ausL}` : 'Not TGA-listed (import)'} · ${p.channel}`,
+    certSummary: p.certSummary,
+    certVerified: p.certVerified,
+    imagePath: p.imagePath,
+    bottomLine: p.bottomLine,
+    chips,
+    scores: p.scores,
+    verdict: p.verdict,
+    detailLines,
+    heldItems: p.heldItems,
+    hasB6: false,
+  };
+}
+
+const cards = VALERIAN_SOURCES.filter((p) => p.ratified).map(toCard);
+
 const ratingLegend = [
   { label: 'Testing & purity', plain: 'Has an independent lab checked what’s really inside? For valerian, almost no one has.' },
   { label: 'Label accuracy', plain: 'Does the amount inside actually match what the label promises?' },
-  { label: 'Additives', plain: 'Any concerning extra ingredients — or just harmless fillers?' },
+  { label: 'Additives', plain: 'Any concerning extra ingredients — or just the herb?' },
   { label: 'Regulatory record', plain: 'Has it been in trouble with the medicines regulator (the TGA here in Australia)?' },
-  { label: 'Transparency', plain: 'Does the brand tell you its active strength — how much valerenic acid — and who makes it?' },
+  { label: 'Transparency', plain: 'Does the label tell you its active strength (valerenic acid), name its extract, and who makes it?' },
   { label: 'Marketing honesty', plain: 'Do the claims on the box hold up, or is it overselling?' },
+];
+
+const safetyItems = [
+  {
+    label: 'Liver',
+    body:
+      'Australia’s medicines regulator (the TGA) has a standing <strong>liver-caution advisory</strong> for valerian and mandates a liver warning on the pack. It’s rare but real — worth knowing if you take valerian regularly or have a liver condition.',
+  },
+  {
+    label: 'Imports',
+    body:
+      'The two <strong>imported</strong> products (bought via iHerb) don’t carry Australia’s mandated valerian liver warning at all, so an Australian buyer misses it.',
+  },
+  {
+    label: 'Pregnancy',
+    body: 'The standard advice is to avoid valerian in pregnancy and breastfeeding.',
+  },
 ];
 ---
 
 <Base
   title="Where to source valerian — Somnary source scorecards"
-  description="Australian valerian supplements for sleep, rated on six documented dimensions: testing, label accuracy, additives, regulatory record, transparency, marketing honesty. No composite score, no #1, no affiliate links. Plus the valerian liver-warning worth knowing."
+  description="Valerian supplements for sleep you can buy in Australia, grouped into plain-English trust tiers and rated on six documented dimensions. No composite score, no #1, no affiliate links. Plus the liver-caution warning worth knowing."
 >
   <main class="page">
     <header class="head">
@@ -40,8 +79,7 @@ const ratingLegend = [
         page answers a different question: of the valerian you can buy in an Australian chemist,
         which brands actually tell you their active strength and don’t overstate it? Each is rated on
         six documented dimensions — every point traces to a primary document. No overall score, no #1:
-        <a href="/sources/methodology">a ranking would be a recommendation</a>, and we don’t make
-        those.
+        <a href="/sources/methodology">a ranking would be a recommendation</a>, and we don’t make those.
       </p>
     </header>
 
@@ -56,156 +94,23 @@ const ratingLegend = [
       </p>
     </aside>
 
-    <aside class="safety-note">
-      <p class="safety-note-title">⚠ The valerian liver warning worth knowing</p>
-      <p class="safety-note-body">
-        Australia’s medicines regulator (the TGA) has a standing <strong>liver-injury advisory</strong>
-        for valerian and mandates an on-pack <strong>liver-caution warning</strong> on Australian
-        valerian products. It’s a rare but real signal — worth knowing if you take valerian regularly
-        or have a liver condition. One thing to watch: the two <strong>imported</strong> products
-        below (bought via iHerb) do <strong>not</strong> carry Australia’s mandated warning, so an
-        Australian buyer misses it. Those products show an <strong>⚠ import</strong> flag; it’s shown
-        for your safety, separate from the scores. Talk to a pharmacist before taking valerian daily.
-      </p>
-    </aside>
+    <SafetyCallout
+      title="Valerian safety notes worth knowing"
+      tone="safety"
+      items={safetyItems}
+      foot="These flags are shown for your safety and sit apart from the scores — talk to a pharmacist before taking valerian regularly."
+    />
 
-    <aside class="legend">
-      <p class="legend-title">What the six ratings mean — in plain words</p>
-      <dl class="legend-grid">
-        {ratingLegend.map((r) => (
-          <div class="legend-item">
-            <dt>{r.label}</dt>
-            <dd>{r.plain}</dd>
-          </div>
-        ))}
-      </dl>
-      <p class="legend-foot">
-        Each is scored 0–5 (more filled bars = better). There’s no overall score — the six are kept
-        separate on purpose, so you can weigh up what matters to you. The one thing that separates
-        most valerian products is <strong>transparency</strong>: does the label print a valerenic-acid
-        figure (its active strength), or not? Tap “Why these scores” on any card to see the exact
-        reason and the document behind it.
-      </p>
-    </aside>
+    <RatingLegend items={ratingLegend} remedyHref="/r/valerian" />
 
-    {
-      products.length === 0 ? (
-        <p class="empty">Scorecards are being finalized. Check back shortly.</p>
-      ) : (
-        <section class="stack" aria-label="Valerian source scorecards">
-          {products.map((p) => (
-            <article class="card">
-              <div class="shot">
-                {p.imagePath ? (
-                  <img src={p.imagePath} alt={`${p.brand} ${p.productName}`} loading="lazy" decoding="async" />
-                ) : (
-                  <span class="shot-fallback" aria-hidden="true">
-                    {p.brand.charAt(0)}
-                  </span>
-                )}
-              </div>
-
-              <div class="body">
-                <div class="body-head">
-                  <div class="id">
-                    <h2 class="brand">{p.brand}</h2>
-                    <p class="product">
-                      {p.productName} · {p.strength} · {p.form}
-                    </p>
-                    <p class="meta">
-                      {
-                        p.ausL
-                          ? `AUST L ${p.ausL}`
-                          : p.channel.includes('import')
-                            ? 'Not TGA-listed (import)'
-                            : 'AUST L — number unconfirmed'
-                      } · {p.channel}
-                    </p>
-                  </div>
-                  <div class="flags">
-                    <p class="cert" data-kind={p.certVerified ? 'yes' : 'none'}>{p.certSummary}</p>
-                    {p.trialFlag && <p class="trialflag" title={p.trialFlag.note}>🔬 Used in trials</p>}
-                    {p.importSafety && <p class="importflag" title={p.importSafety.note}>⚠ Import — no AU liver warning</p>}
-                  </div>
-                </div>
-
-                <p class="verdict">{p.verdict}</p>
-
-                {p.trialFlag && (
-                  <p class="trialline">
-                    <span class="tag">Used in trials</span> {p.trialFlag.note}
-                  </p>
-                )}
-
-                {p.importSafety && (
-                  <p class="safetyline">
-                    <span class="tag">Safety</span> {p.importSafety.note}
-                  </p>
-                )}
-
-                <div class="meters">
-                  {DIMENSION_ORDER.map((key) => (
-                    <div class="meter">
-                      <span class="meter-label">{DIMENSION_LABELS[key]}</span>
-                      <span class="meter-row">
-                        <span class="bar" aria-hidden="true">
-                          {segs.map((i) => (
-                            <i class:list={['seg', { on: i <= p.scores[key].score }]} />
-                          ))}
-                        </span>
-                        <span class="meter-num">{p.scores[key].score}<span class="of">/5</span></span>
-                      </span>
-                    </div>
-                  ))}
-                </div>
-
-                <details class="why">
-                  <summary>Why these scores</summary>
-                  <dl class="why-list">
-                    {DIMENSION_ORDER.map((key) => (
-                      <div class="why-row">
-                        <dt>
-                          {DIMENSION_LABELS[key]} · {p.scores[key].score}/5
-                        </dt>
-                        <dd>{p.scores[key].note}</dd>
-                      </div>
-                    ))}
-                  </dl>
-                  {p.heldItems.length > 0 && (
-                    <p class="held">
-                      <span class="tag">Under review</span> {p.heldItems.join(' ')}
-                    </p>
-                  )}
-                </details>
-
-                <div class="foot">
-                  <p class="community">
-                    <span class="tag">Community read · never scored</span>{' '}
-                    {p.communityThemes && p.communityThemes.length > 0 ? (
-                      p.communityThemes.map((t, i) => (
-                        <>
-                          {i > 0 && ' · '}
-                          {t.url ? <a href={t.url} rel="nofollow noopener" target="_blank">{t.note}</a> : t.note}
-                        </>
-                      ))
-                    ) : (
-                      <>Gathering — forum context only.</>
-                    )}
-                  </p>
-                </div>
-              </div>
-            </article>
-          ))}
-        </section>
-      )
-    }
+    <ScorecardGrid cards={cards} />
 
     <p class="footer-strip">
       Somnary · Valerian source scorecards · Reviewed {reviewDate} · Educational, not medical
       advice · A scorecard is about what’s in a bottle, never about whether you should take it —
-      talk to a clinician before changing what you take, especially about your liver. Found an
-      error, or a brand with a document to add? We aim to fix verified errors within 7 days —
-      <a href="mailto:sammymoz@gmail.com">sammymoz@gmail.com</a>.
+      talk to a clinician before changing what you take, especially about your liver, or if you’re
+      pregnant. Found an error, or a brand with a document to add? We aim to fix verified errors
+      within 7 days — <a href="mailto:sammymoz@gmail.com">sammymoz@gmail.com</a>.
     </p>
   </main>
 </Base>
@@ -245,8 +150,6 @@ const ratingLegend = [
   }
   .dek a,
   .banner a,
-  .safety-note a,
-  .community a,
   .footer-strip a {
     color: var(--primary);
   }
@@ -255,7 +158,7 @@ const ratingLegend = [
     background: var(--primary-soft);
     border-radius: var(--r-lg);
     padding: var(--sp-5) var(--sp-6);
-    margin: var(--sp-6) 0 var(--sp-4);
+    margin: var(--sp-6) 0 var(--sp-7);
   }
   .banner-line {
     font-size: var(--text-base);
@@ -271,317 +174,6 @@ const ratingLegend = [
     margin: 0;
   }
 
-  /* valerian liver-warning explainer — safety register, distinct from the primary banner */
-  .safety-note {
-    border: var(--border-hairline);
-    border-left: 3px solid var(--safety-ink, var(--vermilion));
-    border-radius: var(--r-lg);
-    padding: var(--sp-5) var(--sp-6);
-    margin: 0 0 var(--sp-7);
-    background: var(--surface);
-  }
-  .safety-note-title {
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
-    color: var(--safety-ink, var(--ink));
-    margin: 0 0 var(--sp-2);
-  }
-  .safety-note-body {
-    font-size: var(--text-sm);
-    line-height: var(--lh-sm);
-    color: var(--muted);
-    margin: 0;
-  }
-  .safety-note-body strong {
-    color: var(--ink);
-  }
-
-  .empty {
-    color: var(--muted);
-    font-size: var(--text-base);
-  }
-
-  /* plain-language legend */
-  .legend {
-    margin: 0 0 var(--sp-7);
-  }
-  .legend-title {
-    font-family: var(--font-display);
-    font-weight: 700;
-    font-size: var(--text-md);
-    color: var(--ink);
-    margin: 0 0 var(--sp-4);
-  }
-  .legend-grid {
-    margin: 0;
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--sp-4) var(--sp-6);
-  }
-  .legend-item dt {
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
-    color: var(--ink);
-    margin: 0 0 var(--sp-1);
-  }
-  .legend-item dd {
-    margin: 0;
-    font-size: var(--text-sm);
-    line-height: var(--lh-sm);
-    color: var(--muted);
-  }
-  .legend-foot {
-    font-size: var(--text-sm);
-    line-height: var(--lh-sm);
-    color: var(--muted);
-    margin: var(--sp-4) 0 0;
-    max-width: 72ch;
-  }
-  .legend-foot strong {
-    color: var(--ink);
-  }
-
-  .stack {
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-5);
-  }
-  .card {
-    display: grid;
-    grid-template-columns: 168px 1fr;
-    gap: var(--sp-6);
-    border: var(--border-hairline);
-    border-radius: var(--r-xl);
-    background: var(--surface);
-    padding: var(--sp-6);
-  }
-  .shot {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    aspect-ratio: 1;
-    background: var(--primary-soft);
-    border-radius: var(--r-lg);
-    overflow: hidden;
-  }
-  .shot img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    padding: var(--sp-3);
-  }
-  .shot-fallback {
-    font-family: var(--font-display);
-    font-weight: 700;
-    font-size: var(--text-3xl);
-    color: var(--primary);
-  }
-
-  .body {
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-4);
-  }
-  .body-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: var(--sp-4);
-  }
-  .brand {
-    font-family: var(--font-display);
-    font-weight: 700;
-    font-size: var(--text-xl);
-    line-height: var(--lh-xl);
-    color: var(--ink);
-    margin: 0;
-  }
-  .product {
-    font-size: var(--text-sm);
-    color: var(--muted);
-    margin: var(--sp-1) 0 0;
-  }
-  .meta {
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
-    color: var(--muted);
-    margin: var(--sp-1) 0 0;
-  }
-  .flags {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: var(--sp-2);
-    flex-shrink: 0;
-  }
-  .cert {
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
-    text-align: right;
-    white-space: nowrap;
-    margin: 0;
-  }
-  .cert[data-kind='yes'] {
-    color: var(--eucalyptus, var(--primary));
-  }
-  .cert[data-kind='none'] {
-    color: var(--muted);
-  }
-  .trialflag {
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
-    color: var(--eucalyptus, var(--primary));
-    border: 1px solid var(--eucalyptus, var(--primary));
-    border-radius: var(--r-sm);
-    padding: var(--sp-1) var(--sp-2);
-    margin: 0;
-    white-space: nowrap;
-  }
-  .importflag {
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
-    color: var(--safety-ink, var(--ink));
-    border: 1px solid var(--safety-ink, var(--muted));
-    border-radius: var(--r-sm);
-    padding: var(--sp-1) var(--sp-2);
-    margin: 0;
-    white-space: nowrap;
-  }
-
-  .verdict {
-    font-family: var(--font-body);
-    font-size: var(--text-md);
-    line-height: var(--lh-md);
-    color: var(--ink);
-    margin: 0;
-    max-width: 62ch;
-  }
-
-  .trialline,
-  .safetyline {
-    font-size: var(--text-sm);
-    line-height: var(--lh-sm);
-    color: var(--muted);
-    margin: 0;
-    padding: var(--sp-3) var(--sp-4);
-    border-radius: var(--r-sm);
-    background: var(--primary-soft);
-  }
-  .safetyline .tag {
-    color: var(--safety-ink, var(--ink));
-  }
-  .trialline .tag {
-    color: var(--eucalyptus, var(--ink));
-  }
-
-  .meters {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--sp-4) var(--sp-5);
-    padding-top: var(--sp-4);
-    border-top: var(--border-hairline);
-  }
-  .meter {
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-2);
-  }
-  .meter-label {
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
-    color: var(--muted);
-    font-family: var(--font-mono);
-  }
-  .meter-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--sp-2);
-  }
-  .bar {
-    display: inline-flex;
-    gap: var(--sp-1);
-  }
-  .seg {
-    width: var(--sp-4);
-    height: var(--sp-2);
-    border-radius: var(--r-sm);
-    background: var(--primary-soft);
-  }
-  .seg.on {
-    background: var(--ink);
-  }
-  .meter-num {
-    font-family: var(--font-mono);
-    font-size: var(--text-sm);
-    color: var(--ink);
-    font-weight: 600;
-  }
-  .meter-num .of {
-    color: var(--muted);
-    font-weight: 400;
-  }
-
-  .why {
-    border-top: var(--border-hairline);
-    padding-top: var(--sp-3);
-  }
-  .why > summary {
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
-    color: var(--primary);
-    cursor: pointer;
-  }
-  .why-list {
-    margin: var(--sp-4) 0 0;
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-3);
-  }
-  .why-row dt {
-    font-size: var(--text-sm);
-    font-weight: 600;
-    color: var(--ink);
-    margin: 0 0 var(--sp-1);
-  }
-  .why-row dd {
-    font-size: var(--text-sm);
-    line-height: var(--lh-sm);
-    color: var(--muted);
-    margin: 0;
-  }
-  .held {
-    font-size: var(--text-xs);
-    line-height: var(--lh-sm);
-    color: var(--muted);
-    margin: var(--sp-4) 0 0;
-  }
-
-  .foot {
-    padding-top: var(--sp-3);
-    border-top: var(--border-hairline);
-  }
-  .community {
-    font-size: var(--text-xs);
-    line-height: var(--lh-sm);
-    color: var(--muted);
-    margin: 0;
-  }
-  .tag {
-    font-family: var(--font-mono);
-    letter-spacing: var(--tracking-label);
-    color: var(--ink);
-    margin-right: var(--sp-1);
-  }
-
   .footer-strip {
     border-top: var(--border-hairline);
     margin-top: var(--sp-8);
@@ -594,22 +186,8 @@ const ratingLegend = [
   }
 
   @media (max-width: 720px) {
-    .legend-grid {
-      grid-template-columns: 1fr;
-    }
     .page {
       padding: var(--sp-7) var(--sp-5) var(--sp-8);
-    }
-    .card {
-      grid-template-columns: 1fr;
-      gap: var(--sp-4);
-    }
-    .shot {
-      aspect-ratio: auto;
-      height: 200px;
-    }
-    .meters {
-      grid-template-columns: repeat(2, 1fr);
     }
   }
 </style>

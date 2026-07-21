@@ -51,6 +51,8 @@ export interface SourceProduct {
   slug: string;
   brand: string;
   productName: string;
+  /** One-line, plain-language bottom line — the 2-second scan (leads the card, above the fuller verdict). */
+  bottomLine: string;
   form: string;
   doseMg: number;
   market: string;
@@ -88,6 +90,8 @@ export const MELATONIN_SOURCES: SourceProduct[] = [
     imagePath: '/images/sources/melatonin/natrol-melatonin-5mg-time-release.png',
     brand: 'Natrol',
     productName: 'Melatonin Time Release',
+    bottomLine:
+      'A named-maker extended-release tablet with a benign label, but no independent lab test — and 5 mg is above the studied extended-release dose.',
     form: 'tablet (extended-release)',
     doseMg: 5,
     market: 'US',
@@ -118,6 +122,8 @@ export const MELATONIN_SOURCES: SourceProduct[] = [
     imagePath: '/images/sources/melatonin/nature-made-melatonin-3mg.png',
     brand: 'Nature Made',
     productName: 'Melatonin',
+    bottomLine:
+      'USP Verified in USP’s own directory and a clean label from a named maker — no independent product lab test, but the strongest verification in this AU-available set.',
     form: 'tablet',
     doseMg: 3,
     market: 'US',
@@ -147,6 +153,8 @@ export const MELATONIN_SOURCES: SourceProduct[] = [
     slug: 'natures-bounty-melatonin-5mg-dual-spectrum',
     brand: "Nature's Bounty",
     productName: 'Melatonin Dual Spectrum',
+    bottomLine:
+      'A single-ingredient tablet with a clean label from a named maker, but no third-party certification and no independent lab test of the product.',
     form: 'tablet (bi-layer)',
     doseMg: 5,
     market: 'US',
@@ -179,6 +187,8 @@ export const MELATONIN_SOURCES: SourceProduct[] = [
     imagePath: '/images/sources/melatonin/now-foods-melatonin-3mg.png',
     brand: 'NOW Foods',
     productName: 'Melatonin',
+    bottomLine:
+      'A clean two-ingredient capsule from a named maker whose quality rests on its own self-published COAs, not any independent third-party test.',
     form: 'capsule',
     doseMg: 3,
     market: 'US',
@@ -208,6 +218,8 @@ export const MELATONIN_SOURCES: SourceProduct[] = [
     imagePath: '/images/sources/melatonin/life-extension-melatonin-300mcg.png',
     brand: 'Life Extension',
     productName: 'Melatonin',
+    bottomLine:
+      'A low physiologic 0.3 mg dose with a benign label from a named maker, with a COA available on request but no independent lab test of the product.',
     form: 'capsule',
     doseMg: 0.3,
     market: 'US',
@@ -239,6 +251,8 @@ export const MELATONIN_SOURCES: SourceProduct[] = [
     availableInAU: false, // gummy — not shipped to AU by iHerb, not sold OTC on Amazon AU
     brand: 'OLLY',
     productName: 'Sleep Gummy (Blackberry Zen)',
+    bottomLine:
+      'Shows an NSF badge that Somnary could not match to this SKU in NSF’s directory — a clean panel otherwise, but no confirmed test.',
     form: 'gummy',
     doseMg: 3,
     market: 'US',
@@ -267,6 +281,8 @@ export const MELATONIN_SOURCES: SourceProduct[] = [
     availableInAU: false, // gummy — not shipped to AU by iHerb, not sold OTC on Amazon AU
     brand: "Nature's Truth",
     productName: 'Extra Strength Melatonin Gummies',
+    bottomLine:
+      'A high-dose 10 mg gummy with a clean panel from a named maker, but no independent test and no public batch report.',
     form: 'gummy',
     doseMg: 10,
     market: 'US',
@@ -294,6 +310,8 @@ export const MELATONIN_SOURCES: SourceProduct[] = [
     availableInAU: false, // US pharmacy house brand — not sold to Australia
     brand: 'CVS Health',
     productName: 'Melatonin',
+    bottomLine:
+      'A house-brand tablet with no maker named on the label and no independent test, though its panel carries no flagged additives.',
     form: 'tablet',
     doseMg: 5,
     market: 'US',
@@ -320,6 +338,8 @@ export const MELATONIN_SOURCES: SourceProduct[] = [
     availableInAU: false, // US pharmacy house brand — not sold to Australia
     brand: 'Walgreens',
     productName: 'Melatonin Liquid',
+    bottomLine:
+      'A house-brand liquid whose contract maker is identifiable, but whose ingredient panel and marketing copy could not be captured from a primary source.',
     form: 'liquid',
     doseMg: 5,
     market: 'US',
@@ -349,6 +369,8 @@ export const MELATONIN_SOURCES: SourceProduct[] = [
     availableInAU: false, // gummy — not shipped to AU by iHerb, not sold OTC on Amazon AU
     brand: 'Vitafusion',
     productName: 'Melatonin Sugar-Free Gummy',
+    bottomLine:
+      'A named-maker gummy with no independent test or public COA that contains the sugar alcohol maltitol.',
     form: 'gummy',
     doseMg: 3,
     market: 'US',
@@ -378,6 +400,8 @@ export const MELATONIN_SOURCES: SourceProduct[] = [
     availableInAU: false, // this Melaton-5 SKU isn't on iHerb AU; the AU-available + NSF-certified Thorne is Melaton-3 (returns on rescore)
     brand: 'Thorne',
     productName: 'Melaton-5',
+    bottomLine:
+      'Carries a "third-party certified" badge that couldn’t be tied to any certifier directory — the located NSF cert is for the different 3 mg Melaton-3.',
     form: 'capsule',
     doseMg: 5,
     market: 'US',
@@ -405,6 +429,8 @@ export const MELATONIN_SOURCES: SourceProduct[] = [
     slug: 'pure-encapsulations-melatonin-0-5mg',
     brand: 'Pure Encapsulations',
     productName: 'Melatonin 0.5 mg',
+    bottomLine:
+      'A low-dose two-ingredient capsule from a named maker that posts public per-batch COAs — strong label transparency, though no independent product test.',
     form: 'capsule',
     doseMg: 0.5,
     market: 'US',

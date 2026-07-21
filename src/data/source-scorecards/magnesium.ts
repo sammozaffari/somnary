@@ -53,6 +53,8 @@ export interface MagProduct {
   slug: string;
   brand: string;
   productName: string;
+  /** One-line, plain-language bottom line — the 2-second scan (leads the card, above the fuller verdict). */
+  bottomLine: string;
   form: string; // magnesium salt(s)
   elementalMg: number; // elemental magnesium per serving
   ausL: string | null; // TGA AUST L number, or null for imports (not TGA-listed)
@@ -78,6 +80,8 @@ export const MAGNESIUM_SOURCES: MagProduct[] = [
     slug: 'blackmores-sleep-sound-magnesium',
     brand: 'Blackmores',
     productName: 'Sleep Sound Magnesium',
+    bottomLine:
+      'A TGA-listed citrate + glycinate sleep combo that discloses how much of each type is inside, and adds no B6 — but no independent lab test.',
     form: 'citrate + glycinate (+ glycine, hops)',
     elementalMg: 320,
     ausL: '312974',
@@ -106,6 +110,8 @@ export const MAGNESIUM_SOURCES: MagProduct[] = [
     imagePath: '/images/sources/magnesium/cabot-health-magnesium-ultra-potent.png',
     brand: 'Cabot Health',
     productName: 'Magnesium Ultra Potent Powder',
+    bottomLine:
+      'A four-salt powder that fully discloses how much of each type is inside, with a "no oxide" claim verified accurate — but no independent lab test.',
     form: '4-salt chelate/ascorbate/glycinate/phosphate — no oxide (+ taurine, zinc)',
     elementalMg: 400,
     ausL: '221456',
@@ -134,6 +140,8 @@ export const MAGNESIUM_SOURCES: MagProduct[] = [
     imagePath: '/images/sources/magnesium/herbs-of-gold-magnesium-forte.png',
     brand: 'Herbs of Gold',
     productName: 'Magnesium Forte',
+    bottomLine:
+      'A magnesium-only four-salt tablet that discloses how much of each type is inside, with no added B6 — but no independent lab test.',
     form: '4-salt chelate/citrate/glycinate/orotate',
     elementalMg: 220,
     ausL: '465031',
@@ -161,6 +169,8 @@ export const MAGNESIUM_SOURCES: MagProduct[] = [
     slug: 'swisse-ultiboost-magnesium',
     brand: 'Swisse',
     productName: 'Ultiboost Magnesium',
+    bottomLine:
+      'A single-salt magnesium citrate tablet from a named Australian maker with hedged marketing and no B6 — but no independent lab test.',
     form: 'citrate (single salt)',
     elementalMg: 150,
     ausL: '355159',
@@ -188,6 +198,8 @@ export const MAGNESIUM_SOURCES: MagProduct[] = [
     slug: 'bioglan-active-magnesium-pm',
     brand: 'Bioglan',
     productName: 'Active Magnesium PM',
+    bottomLine:
+      'Markets "3 bioavailable forms", but about 44% of the magnesium is poorly-absorbed oxide — a fully-disclosed blend with no independent lab test.',
     form: 'oxide + phosphate + glycinate (+ poppy, hops)',
     elementalMg: 225,
     ausL: '353356',
@@ -215,6 +227,8 @@ export const MAGNESIUM_SOURCES: MagProduct[] = [
     slug: 'carusos-super-magnesium',
     brand: "Caruso's",
     productName: 'Super Magnesium',
+    bottomLine:
+      'Its maker received 2024 TGA infringement notices after this product’s performance claims were found unsubstantiated — a fully-disclosed 6-salt blend, no independent lab test.',
     form: '6-salt blend (time-release)',
     elementalMg: 300,
     ausL: '298635',
@@ -242,6 +256,8 @@ export const MAGNESIUM_SOURCES: MagProduct[] = [
     slug: 'swisse-magnesium-glycinate',
     brand: 'Swisse',
     productName: 'Ultiboost Magnesium Glycinate',
+    bottomLine:
+      'A single-salt glycinate tablet with oxide-qualified absorption claims and no B6 — but it discloses only the elemental amount, and has no independent lab test.',
     form: 'glycinate (single salt)',
     elementalMg: 150,
     ausL: '460629',
@@ -269,6 +285,8 @@ export const MAGNESIUM_SOURCES: MagProduct[] = [
     slug: 'natures-own-magnesium-sleep-effervescent',
     brand: "Nature's Own",
     productName: 'Magnesium + Sleep Effervescent',
+    bottomLine:
+      'A single-salt carbonate effervescent from an identifiable maker with no regulator action against it — but an unconfirmed AUST L and no independent lab test.',
     form: 'carbonate (+ passionflower)',
     elementalMg: 320,
     ausL: null,
@@ -296,6 +314,8 @@ export const MAGNESIUM_SOURCES: MagProduct[] = [
     slug: 'bioceuticals-ultra-muscleze-night',
     brand: 'BioCeuticals',
     productName: 'Ultra Muscleze Night',
+    bottomLine:
+      'A practitioner-brand sleep powder with no B6 and no regulator events — but it hides the split between magnesium types in a "proprietary blend", with no independent lab test.',
     form: 'amino-acid chelate/glycinate "UltraMag" (+ glycine, inositol, choline)',
     elementalMg: 244,
     ausL: '366872',
@@ -324,6 +344,8 @@ export const MAGNESIUM_SOURCES: MagProduct[] = [
     imagePath: '/images/sources/magnesium/doctors-best-high-absorption-magnesium.jpg',
     brand: "Doctor's Best",
     productName: 'High Absorption Magnesium',
+    bottomLine:
+      'Its "up to 6× better absorbed" claim uses an unnamed comparator and an unpinned source — a clean, well-disclosed US import (not TGA-listed) with no independent lab test.',
     form: 'lysinate glycinate chelate (Albion TRAACS)',
     elementalMg: 200,
     ausL: null,
@@ -352,6 +374,8 @@ export const MAGNESIUM_SOURCES: MagProduct[] = [
     imagePath: '/images/sources/magnesium/ethical-nutrients-mega-magnesium-powder.jpg',
     brand: 'Ethical Nutrients',
     productName: 'Mega Magnesium Powder',
+    bottomLine:
+      'Carries the mandated B6 neuropathy warning at the adult maximum, and belongs to a powder line recalled for double the labelled B6 — no independent lab test.',
     form: 'glycinate ("Meta Mag"/"MagActive")',
     elementalMg: 300,
     ausL: '489275',
@@ -381,6 +405,8 @@ export const MAGNESIUM_SOURCES: MagProduct[] = [
     imagePath: '/images/sources/magnesium/thorne-magnesium-bisglycinate.jpg',
     brand: 'Thorne',
     productName: 'Magnesium Bisglycinate',
+    bottomLine:
+      'The only product here with a genuine, directory-confirmed NSF Certified for Sport — a real per-batch content check — with a clean disclosed panel; a US import, not TGA-listed.',
     form: 'bisglycinate (single chelate)',
     elementalMg: 200,
     ausL: null,
