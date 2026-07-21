@@ -1,0 +1,606 @@
+---
+// LensPanel — the Somnary Lens island (CHK-7.2). The user-facing surface for the 7.1 Lens engine: one
+// free-text prompt (a product name, an ingredient, or a pasted supplement-facts panel) → POST /api/lens
+// → the SERVER-composed LensAssessment, rendered by the shared, framework-free renderLensCard (CHK-7.2,
+// the SAFETY-CRITICAL textContent-only renderer). Mirrors GuidePanel / AskPanel: an SSG-safe shell + a
+// progressive-enhancement <script> island, token-only styling, aria-live status, esc(), reduced-motion.
+//
+// THE INVARIANT CONTINUES INTO THE UI: this island renders ONLY server-authored fields (via the card
+// renderer's textContent-only path). It authors no medical prose — the verdict, evidence, doesNotShow,
+// label flags, safety note, stamp, and disclaimer all come from the server. The only strings this file
+// introduces are STRUCTURAL: the input affordances, the HONEST staged progress labels (real pipeline
+// stages, never a fabricated count), and the neutral error registers. No grade is ever rendered.
+//
+// HONEST PROGRESS REVEAL: while a request is in flight the island advances a FIXED sequence of REAL
+// pipeline-stage labels on a timer. It NEVER asserts a specific count ("read 6 sources") — counts only
+// ever appear in the final card, from the real assessment. If the response arrives before the sequence
+// finishes, the reveal is dropped and the card takes over.
+//
+// PRIVACY: the prompt is sent to a third-party AI service (same wording as AskPanel), disclosed
+// server-rendered + static below the input. Env-gated: with no OPENROUTER key the route returns 503 and
+// the island shows the honest "not available right now" state — the page still explains itself with JS off.
+---
+
+<section class="lens" aria-label="Somnary Lens" data-lens>
+  <p class="lens-label"><span class="dot" aria-hidden="true"></span> Somnary Lens</p>
+  <p class="prompt">
+    Name a product or ingredient the tier board doesn’t cover, or paste a supplement-facts panel. The
+    Lens researches the published evidence and shows what it does — and doesn’t — establish. It is not
+    a Somnary grade.
+  </p>
+
+  <form class="field" data-lens-form>
+    <label class="sr-only" for="lens-input">A product, an ingredient, or a pasted label</label>
+    <textarea
+      id="lens-input"
+      class="lens-input"
+      name="input"
+      rows="3"
+      maxlength="4000"
+      autocomplete="off"
+      placeholder="e.g. apigenin, or paste a sleep-gummy supplement-facts panel…"
+      data-lens-input></textarea>
+    <button type="submit" class="send" data-lens-send>Research this →</button>
+  </form>
+
+  <!-- honest staged progress (real pipeline stages; NEVER a fabricated count) -->
+  <div class="progress" data-lens-progress hidden aria-live="polite">
+    <p class="p-stage" data-lens-stage></p>
+    <div class="p-track" aria-hidden="true"><span class="p-bar" data-lens-bar></span></div>
+  </div>
+
+  <!-- the server-composed card renders here (textContent-only, via renderLensCard) -->
+  <div class="card-region" data-lens-card aria-live="polite" tabindex="-1"></div>
+
+  <p class="privacy-note">
+    Your prompt is sent to a third-party AI service — OpenRouter, which routes it to a DeepSeek model
+    (or Google’s Gemini API as a fallback) — and to the public PubMed database to find sources. Don’t
+    include personal or identifying details.
+  </p>
+  <p class="stub-note">
+    The Lens researches published evidence and verifies each claim against its source. It never invents
+    a source, never assigns a grade, and never tells you what to take. Educational, not medical advice.
+  </p>
+</section>
+
+<style>
+  .lens {
+    background: var(--primary-soft);
+    border-radius: var(--r-lg);
+    padding: var(--sp-6);
+    margin-top: var(--sp-7);
+  }
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  .lens-label {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--primary);
+    margin: 0 0 var(--sp-3);
+  }
+  .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: var(--r-pill);
+    background: var(--primary);
+    flex: none;
+  }
+  .prompt {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--ink);
+    margin: 0 0 var(--sp-4);
+    max-width: 64ch;
+  }
+
+  .field {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--sp-3);
+  }
+  .lens-input {
+    flex: 1;
+    min-width: 0;
+    min-height: 44px;
+    padding: var(--sp-3) var(--sp-4);
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    line-height: var(--lh-base);
+    color: var(--ink);
+    background: var(--surface);
+    border: var(--border-hairline);
+    border-radius: var(--r-md);
+    resize: vertical;
+  }
+  .lens-input:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+  }
+  .send {
+    flex: none;
+    min-height: 44px;
+    padding: 0 var(--sp-5);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: var(--r-pill);
+    background: var(--primary);
+    color: var(--surface);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    cursor: pointer;
+  }
+  .send:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+  }
+  .send[disabled] {
+    background: var(--mineral);
+    cursor: progress;
+  }
+
+  /* honest staged progress */
+  .progress {
+    margin-top: var(--sp-5);
+    background: var(--surface);
+    border: var(--border-hairline);
+    border-radius: var(--r-md);
+    padding: var(--sp-4) var(--sp-5);
+  }
+  .p-stage {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--ink);
+    margin: 0 0 var(--sp-3);
+  }
+  .p-track {
+    height: 4px;
+    border-radius: var(--r-pill);
+    background: var(--stone);
+    overflow: hidden;
+  }
+  .p-bar {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: var(--eucalyptus);
+    border-radius: var(--r-pill);
+    transition: width var(--dur-slow) var(--ease-soft);
+  }
+
+  /* the card region — the shared renderer builds into it. Styles below match render-card.ts classes. */
+  .card-region {
+    margin-top: var(--sp-5);
+  }
+  .card-region:empty {
+    margin-top: 0;
+  }
+
+  :global(.lc-card) {
+    background: var(--surface);
+    border: var(--border-hairline);
+    border-radius: var(--r-md);
+    padding: var(--sp-6);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-5);
+  }
+  :global(.lc-verdict) {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--ink);
+    margin: 0;
+    max-width: 64ch;
+  }
+  :global(.lc-stamp) {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--eucalyptus);
+    margin: 0;
+  }
+  :global(.lc-disclaimer) {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: 0;
+    max-width: 64ch;
+  }
+
+  :global(.lc-block) {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+  }
+  :global(.lc-head) {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--primary);
+    margin: 0;
+  }
+
+  :global(.lc-ev-list),
+  :global(.lc-dn-list),
+  :global(.lc-flag-list),
+  :global(.lc-fu-list),
+  :global(.lc-route-list) {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+  }
+  :global(.lc-ev-row) {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+    padding-left: var(--sp-4);
+    border-left: 2px solid var(--mineral);
+  }
+  :global(.lc-ev-text),
+  :global(.lc-dn-row),
+  :global(.lc-flag-text) {
+    font-size: var(--text-sm);
+    line-height: var(--lh-base);
+    color: var(--ink);
+    margin: 0;
+    max-width: 64ch;
+  }
+  :global(.lc-dn-row) {
+    color: var(--muted);
+  }
+
+  /* strength: a TEXT-labelled chip — legible WITHOUT color (the word says it), color only reinforces */
+  :global(.lc-strength) {
+    align-self: flex-start;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    border-radius: var(--r-pill);
+    padding: var(--sp-1) var(--sp-3);
+    border: var(--border-hairline);
+  }
+  :global(.lc-strength.is-strong) {
+    color: var(--eucalyptus);
+    background: var(--pistachio);
+    border-color: var(--eucalyptus);
+  }
+  :global(.lc-strength.is-weak) {
+    color: var(--muted);
+    background: var(--stone);
+    border-color: var(--mineral);
+  }
+
+  :global(.lc-ev-sources) {
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--sp-2);
+  }
+  :global(.lc-sources-label) {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+  }
+  :global(.lc-source-chip) {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--primary);
+    text-decoration: none;
+    border: var(--border-hairline);
+    border-radius: var(--r-pill);
+    padding: var(--sp-1) var(--sp-3);
+  }
+  :global(.lc-source-chip:focus-visible) {
+    outline: none;
+    box-shadow: var(--ring);
+  }
+
+  :global(.lc-flag-row) {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+  }
+  :global(.lc-flag-link),
+  :global(.lc-fu-link),
+  :global(.lc-review-link) {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--primary);
+    text-decoration: none;
+  }
+  :global(.lc-flag-link:focus-visible),
+  :global(.lc-fu-link:focus-visible),
+  :global(.lc-review-link:focus-visible),
+  :global(.lc-route-link:focus-visible),
+  :global(.lc-sc-link:focus-visible) {
+    outline: none;
+    box-shadow: var(--ring);
+    border-radius: var(--r-sm);
+  }
+
+  /* safety register — vermilion, DISTINCT from the oxblood --action (which is spent elsewhere) */
+  :global(.lc-safety .lc-head) {
+    color: var(--safety-ink);
+  }
+  :global(.lc-safety-register) {
+    background: var(--warning-bg);
+    border: 1px solid var(--safety-ink);
+    border-radius: var(--r-md);
+    padding: var(--sp-4) var(--sp-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+  }
+  :global(.lc-safety-note) {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--ink);
+    margin: 0;
+    max-width: 64ch;
+  }
+  :global(.lc-safety-register .lc-route-link) {
+    color: var(--safety-ink);
+    font-weight: 600;
+    text-decoration: none;
+  }
+  :global(.lc-fu-link),
+  :global(.lc-route-link) {
+    color: var(--primary);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  /* short-circuit — a calm pointer to the graded page */
+  :global(.lc-shortcircuit) {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+  }
+  :global(.lc-sc-line) {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--ink);
+    margin: 0;
+  }
+  :global(.lc-sc-link) {
+    font-size: var(--text-base);
+    font-weight: 600;
+    color: var(--primary);
+    text-decoration: none;
+  }
+
+  /* refused — the boundary line reads in the safety register */
+  :global(.lc-refused) {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+  }
+  :global(.lc-refused-line) {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--ink);
+    margin: 0;
+    max-width: 64ch;
+  }
+
+  :global(.lc-review) {
+    margin: 0;
+    padding-top: var(--sp-4);
+    border-top: var(--border-hairline);
+  }
+
+  /* the island's own neutral message card (503 / errors / empty) — never the safety tone */
+  .notice {
+    margin-top: var(--sp-5);
+    background: var(--surface);
+    border: var(--border-hairline);
+    border-radius: var(--r-md);
+    padding: var(--sp-4) var(--sp-5);
+    font-size: var(--text-sm);
+    line-height: var(--lh-base);
+    color: var(--ink);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lens *,
+    .p-bar {
+      transition: none !important;
+      animation: none !important;
+    }
+  }
+  @media (max-width: 640px) {
+    .lens {
+      padding: var(--sp-5);
+    }
+    .field {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+</style>
+
+<script>
+  // The card DOM-building is the SHARED, framework-free renderer (CHK-7.2) — the textContent-only path
+  // that authors no medical prose. Importing it here keeps the safety-critical render in one file.
+  import { renderLensCard, type LensCardAssessment } from '../lib/lens/render-card.ts';
+
+  // The HONEST staged progress: a FIXED sequence of REAL pipeline stages (topic-fence + classify →
+  // corpus short-circuit → PubMed research → model extract → adversarial verify → server compose). Each
+  // is true to what the engine actually does. NONE asserts a count — counts appear only in the final
+  // card, from the real assessment. Purely a truthful "we're working" reveal, never a fabricated result.
+  const STAGES = [
+    'Checking Somnary’s graded corpus…',
+    'Searching published sources…',
+    'Reading what the studies say…',
+    'Verifying each claim against its source…',
+    'Composing the assessment…',
+  ];
+  const STAGE_MS = 1600;
+
+  const roots = document.querySelectorAll<HTMLElement>('[data-lens]');
+  roots.forEach((root) => {
+    const form = root.querySelector<HTMLFormElement>('[data-lens-form]');
+    const input = root.querySelector<HTMLTextAreaElement>('[data-lens-input]');
+    const send = root.querySelector<HTMLButtonElement>('[data-lens-send]');
+    const progress = root.querySelector<HTMLElement>('[data-lens-progress]');
+    const stageEl = root.querySelector<HTMLElement>('[data-lens-stage]');
+    const barEl = root.querySelector<HTMLElement>('[data-lens-bar]');
+    const cardRegion = root.querySelector<HTMLElement>('[data-lens-card]');
+    if (!form || !input || !send || !progress || !stageEl || !barEl || !cardRegion) return;
+
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let busy = false;
+    let stageTimer: ReturnType<typeof setInterval> | null = null;
+
+    const setBusy = (b: boolean) => {
+      busy = b;
+      send.disabled = b;
+      input.disabled = b;
+    };
+
+    // Show a neutral, island-authored notice (503 / error / input problems). NEVER the safety register.
+    const showNotice = (text: string) => {
+      cardRegion.innerHTML = ''; // clear only
+      const p = document.createElement('div');
+      p.className = 'notice';
+      p.setAttribute('role', 'status');
+      p.textContent = text; // island copy, plain text
+      cardRegion.appendChild(p);
+      cardRegion.focus?.();
+    };
+
+    const startProgress = () => {
+      cardRegion.innerHTML = ''; // clear any prior card
+      progress.hidden = false;
+      let i = 0;
+      const render = () => {
+        stageEl.textContent = STAGES[i];
+        const pct = reduce ? 100 : Math.round(((i + 1) / STAGES.length) * 100);
+        barEl.style.width = pct + '%';
+      };
+      render();
+      if (reduce) return; // no stepping animation when reduced-motion — the first stage + full bar suffice
+      stageTimer = setInterval(() => {
+        i += 1;
+        if (i >= STAGES.length) {
+          // Hold on the final stage until the response returns; never loop past "Composing…".
+          i = STAGES.length - 1;
+          if (stageTimer) {
+            clearInterval(stageTimer);
+            stageTimer = null;
+          }
+          render();
+          return;
+        }
+        render();
+      }, STAGE_MS);
+    };
+
+    const stopProgress = () => {
+      if (stageTimer) {
+        clearInterval(stageTimer);
+        stageTimer = null;
+      }
+      progress.hidden = true;
+      barEl.style.width = '0';
+    };
+
+    const submit = async () => {
+      if (busy) return;
+      const value = input.value.trim();
+      if (!value) {
+        showNotice('Type a product name, an ingredient, or paste a supplement-facts panel to research.');
+        input.focus();
+        return;
+      }
+      if (value.length > 4000) {
+        showNotice('That’s longer than the Lens can take in one go. Trim it to the ingredients you want checked and try again.');
+        return;
+      }
+      setBusy(true);
+      startProgress();
+      try {
+        const res = await fetch('/api/lens', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ input: value }),
+        });
+        stopProgress();
+        if (res.status === 503) {
+          showNotice('The Lens isn’t available right now. You can still browse the graded tier board and each remedy’s cited evidence in the meantime.');
+          return;
+        }
+        if (res.status === 429) {
+          // Calm, neutral — the SAME register as AskPanel's rate-limit copy. Never the vermilion/safety tone.
+          showNotice('You’re going a little faster than the Lens can keep up with — give it a moment and try again. Nothing you entered is lost.');
+          return;
+        }
+        if (res.status === 413) {
+          showNotice('That’s longer than the Lens can take in one go. Trim it to the ingredients you want checked and try again.');
+          return;
+        }
+        if (res.status === 400) {
+          showNotice('Type a product name, an ingredient, or paste a supplement-facts panel to research.');
+          return;
+        }
+        if (!res.ok) {
+          showNotice('Something went wrong researching that. You can try again, or browse Somnary’s graded evidence directly. This is educational, not medical advice.');
+          return;
+        }
+        const assessment = (await res.json()) as LensCardAssessment;
+        renderLensCard(assessment, cardRegion);
+        cardRegion.focus?.();
+      } catch {
+        stopProgress();
+        showNotice('Something went wrong reaching the Lens. You can try again, or browse Somnary’s graded evidence directly. This is educational, not medical advice.');
+      } finally {
+        setBusy(false);
+      }
+    };
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      void submit();
+    });
+    // Cmd/Ctrl+Enter submits from the textarea; plain Enter inserts a newline (labels can be multi-line).
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        void submit();
+      }
+      if (e.key === 'Escape') input.blur();
+    });
+
+    // Deep-link: ?q=<query> (from the homepage on-ramp / ⌘K palette handoff) → prefill + auto-submit.
+    try {
+      const q = new URLSearchParams(window.location.search).get('q');
+      if (q && q.trim()) {
+        input.value = q.trim().slice(0, 4000);
+        void submit();
+      }
+    } catch {
+      /* URL unavailable — non-fatal; the empty prompt still works */
+    }
+  });
+</script>

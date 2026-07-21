@@ -1,0 +1,185 @@
+---
+// The /lens flagship page (CHK-7.2) — the STATIC, crawlable shell around the Somnary Lens island. A
+// normal SSG page (Base layout, output:'static'): everything a crawler or a no-JS reader needs — what
+// the Lens is, what it will and won't do, the medical boundary, the not-a-grade framing, and the
+// third-party-AI disclosure — is server-rendered here. The interactive part (LensPanel) is a
+// progressive-enhancement island: it POSTs to /api/lens (a serverless route, CHK-7.1c) and renders the
+// SERVER-composed assessment. The Lens applies Somnary's method to a product the corpus doesn't cover —
+// but it NEVER assigns a grade, recommends, diagnoses, or doses. Tokens only (DESIGN_SYSTEM v2).
+//
+// All prose on this page is PRODUCT-BOUNDARY framing (what the Lens is / isn't) — compliance reviews it.
+import Base from '../layouts/Base.astro';
+import ContextBanner from '../components/ContextBanner.astro';
+import Disclaimer from '../components/Disclaimer.astro';
+import LensPanel from '../components/LensPanel.astro';
+---
+
+<Base
+  title="Somnary Lens: research a sleep supplement the tier board doesn’t cover | Somnary"
+  description="AI-assisted research that applies Somnary’s method to a product or ingredient the graded corpus doesn’t cover. It searches published sources, verifies each claim against its source, and shows what the evidence does and does not establish — never a Somnary grade, a recommendation, or a dose. Educational, not medical advice."
+  canonical="https://somnary.vercel.app/lens"
+>
+  <main class="page">
+    <header class="head">
+      <p class="eyebrow">Somnary Lens · AI-assisted research</p>
+      <h1 class="title">Research a remedy the tier board doesn’t cover yet</h1>
+      <p class="dek">
+        Name a product or ingredient — or paste a supplement-facts panel — and the Lens applies
+        Somnary’s method to it: it searches the published literature, verifies each claim against its
+        own source, and shows what the evidence does <em>and doesn’t</em> establish. It is
+        AI-assisted research, <em>not</em> a Somnary grade. It never recommends, never diagnoses, and
+        never tells you what to take or what dose.
+      </p>
+    </header>
+
+    <ContextBanner
+      note="This is AI-assisted research, not a Somnary grade. It applies Somnary’s method to products the graded corpus doesn’t cover — a human grade always beats fresh AI, so anything already on the tier board links you straight there instead."
+    />
+
+    <!-- Medical boundary, near the top (server-rendered — present with JS off). -->
+    <div class="boundary-slot">
+      <Disclaimer variant="standard" />
+    </div>
+
+    <!-- What it does / doesn't — server-rendered so a crawler and a no-JS reader see the whole contract. -->
+    <section class="contract" aria-label="What the Lens does and does not do">
+      <div class="col">
+        <p class="col-tag">What it does</p>
+        <ul class="col-list">
+          <li>Researches a product or ingredient the graded corpus doesn’t cover yet, or reads a pasted supplement-facts panel.</li>
+          <li>Searches the published literature and verifies each claim against its own cited source — dropping any it can’t stand up.</li>
+          <li>Shows what the evidence does <em>not</em> establish, and labels weak evidence weak.</li>
+          <li>Points you to the <a href="/tiers">graded tier board</a> when a subject is already covered — a human grade beats fresh AI.</li>
+          <li>Surfaces the safety and interaction pages, and offers to <a href="/request-a-review">request a full human review</a>.</li>
+        </ul>
+      </div>
+      <div class="col">
+        <p class="col-tag">What it doesn't do</p>
+        <ul class="col-list">
+          <li>It never assigns a grade, tier, or score — that is a human judgement, and the Lens output is a draft assessment, not a grade.</li>
+          <li>It never recommends a product, brand, or combination, and never tells you what to take.</li>
+          <li>It never gives a dose or says a product is “safe for you” — that is a conversation for your clinician.</li>
+          <li>It never diagnoses a condition.</li>
+          <li>It never invents a source: every claim shown is verified against a real, resolvable citation.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- The island. Progressive enhancement: the shell above stands on its own without it. -->
+    <LensPanel />
+
+    <p class="review-line">
+      Reviewed 2026-07-21 · found an error? <a href="/methodology#corrections">corrections →</a>
+    </p>
+  </main>
+</Base>
+
+<style>
+  .page {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: var(--sp-8) var(--sp-7) var(--sp-9);
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+    margin: 0;
+  }
+  .head {
+    margin-bottom: var(--sp-6);
+  }
+  .title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-3xl);
+    line-height: var(--lh-3xl);
+    letter-spacing: var(--tracking-tight);
+    color: var(--ink);
+    margin: var(--sp-3) 0 var(--sp-5);
+  }
+  .dek {
+    font-size: var(--text-md);
+    line-height: var(--lh-md);
+    color: var(--muted);
+    max-width: 68ch;
+    margin: 0;
+  }
+
+  .boundary-slot {
+    margin-top: var(--sp-6);
+  }
+
+  /* what it does / doesn't — two calm columns, no grade coloring */
+  .contract {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--sp-6);
+    margin-top: var(--sp-7);
+  }
+  .col {
+    background: var(--surface);
+    border: var(--border-hairline);
+    border-radius: var(--r-lg);
+    padding: var(--sp-6);
+  }
+  .col-tag {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--primary);
+    margin: 0 0 var(--sp-4);
+  }
+  .col-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+  }
+  .col-list li {
+    position: relative;
+    padding-left: var(--sp-5);
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+  }
+  .col-list li::before {
+    content: '·';
+    position: absolute;
+    left: var(--sp-1);
+    top: 0;
+    color: var(--primary);
+    font-weight: 700;
+  }
+  .col-list a {
+    color: var(--primary);
+  }
+
+  .review-line {
+    margin-top: var(--sp-8);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+  }
+  .review-line a {
+    color: var(--primary);
+  }
+
+  @media (max-width: 720px) {
+    .contract {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media (max-width: 640px) {
+    .page {
+      padding: var(--sp-6) var(--sp-5) var(--sp-8);
+    }
+    .title {
+      font-size: var(--text-2xl);
+    }
+  }
+</style>
