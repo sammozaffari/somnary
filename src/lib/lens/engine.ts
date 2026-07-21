@@ -208,12 +208,21 @@ function toResolvableSource(id: CitationId): LensSource | null {
   return src;
 }
 
-/** Run a composed line through the forbidden-framing lint + raw-identifier check. Returns the line if
- * clean, or a safe replacement if it trips either gate — a composed line can NEVER ship a forbidden
- * framing or a smuggled raw identifier even if a template were ever mis-fed model-derived text. */
+/** Letter-grade-shaped prose the Lens output must NEVER carry (it is never a Somnary grade). Targets
+ * S/A–F tier/grade phrasings — "grade A", "tier S", "A grade", "earns a solid B", "rated C" — while
+ * deliberately NOT matching numeric clinical scores (PSQI/ISI "score of 8") or plain counts ("10 of 12
+ * patients"), which are legitimate evidence. Defense-in-depth over the framing lint (which has no grade
+ * pattern). Applied to composed evidence text AND (CHK-7.4) to the model-derived resolved name/line. */
+const GRADE_SMELL =
+  /\b(?:grade[sd]?|tier)\s+(?:of\s+)?[a-fs]\b|\b[a-fs][-+]?[-\s]+(?:grade|tier)\b|\b(?:rated|scored|graded|earns?)\s+(?:an?\s+)?(?:\w+\s+)?[a-fs][-+]?\b/i;
+
+/** Run a composed line through the forbidden-framing lint + raw-identifier + grade-smell checks. Returns
+ * the line if clean, or a safe replacement if it trips any gate — a composed line can NEVER ship a
+ * forbidden framing, a smuggled raw identifier, or grade-shaped prose even if a template were ever
+ * mis-fed model-derived text (e.g. a resolved name like "grade A doxylamine"). */
 function safeLine(line: string, replacement: string): string {
   if (typeof line !== 'string' || !line) return replacement;
-  if (lintForbiddenFraming(line).length > 0 || hasRawIdentifier(line)) return replacement;
+  if (lintForbiddenFraming(line).length > 0 || hasRawIdentifier(line) || GRADE_SMELL.test(line)) return replacement;
   return line;
 }
 
@@ -240,7 +249,8 @@ function buildResolvedDisplay(resolved: ResolvedSubject): LensResolvedDisplay {
   const name =
     resolved.resolvedName &&
     lintForbiddenFraming(resolved.resolvedName).length === 0 &&
-    !hasRawIdentifier(resolved.resolvedName)
+    !hasRawIdentifier(resolved.resolvedName) &&
+    !GRADE_SMELL.test(resolved.resolvedName)
       ? resolved.resolvedName
       : '';
   return { subject: resolved.subject, resolvedName: name, productClass: resolved.productClass, line };
@@ -479,13 +489,6 @@ function inconclusive(
   };
 }
 
-/** Letter-grade-shaped prose an evidence claim must never carry (the Lens output is NEVER a Somnary
- * grade). Targets S/A–F tier/grade phrasings — "grade A", "tier S", "A grade", "earns a solid B",
- * "rated C" — while deliberately NOT matching numeric clinical scores (PSQI/ISI "score of 8") or
- * plain counts ("10 of 12 patients"), which are legitimate evidence. Defense-in-depth over the
- * framing lint, which has no grade pattern. */
-const GRADE_SMELL =
-  /\b(?:grade[sd]?|tier)\s+(?:of\s+)?[a-fs]\b|\b[a-fs][-+]?[-\s]+(?:grade|tier)\b|\b(?:rated|scored|graded|earns?)\s+(?:an?\s+)?(?:\w+\s+)?[a-fs][-+]?\b/i;
 
 /**
  * Compose an ASSESSED (or, if nothing survived, INCONCLUSIVE) card from verified claims + flags.

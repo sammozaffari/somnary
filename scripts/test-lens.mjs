@@ -959,6 +959,21 @@ async function runRedTeam() {
     ok('(11d) still no grade smell', findGradeSmell(r) === null);
   }
   {
+    // (11d2) a GRADE-SHAPED resolved name is NEVER shown (defense-in-depth: the resolver output path
+    // must apply the same GRADE_SMELL gate as evidence text — a model can never smuggle "grade A" onto
+    // the card or the streamed arrow). Adversarial-review Finding 1.
+    for (const badName of ['grade A doxylamine', 'tier S melatonin', 'rated a solid B valerian', 'A-grade magnesium']) {
+      const { model } = makeEngineModel({
+        resolveReply: { sleepRelevant: true, resolvedName: badName, aka: [], productClass: 'supplement', pubmedQuery: 'x AND sleep' },
+        extractReply: { claims: [], doesNotShow: [], labelFacts: [] },
+      });
+      const r = await runLens({ ...base, input: 'MysterySleep', provider: providerOf([]), model });
+      ok(`(11d2) grade-shaped resolved name "${badName}" → no grade smell anywhere`, findGradeSmell(r) === null, String(findGradeSmell(r)));
+      const shown = r.resolved ? `${r.resolved.line} ${r.resolved.resolvedName}` : '';
+      ok(`(11d2) grade-shaped resolved name "${badName}" → dropped from display`, !/grade|tier|rated/i.test(shown), shown);
+    }
+  }
+  {
     // (11e) STREAMING (CHK-7.4): runLens fires real milestone events; counts are the real ones.
     const { model } = makeEngineModel({
       resolveReply: { sleepRelevant: true, resolvedName: 'apigenin', aka: [], productClass: 'supplement', pubmedQuery: 'apigenin AND sleep' },

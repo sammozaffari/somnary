@@ -58,6 +58,14 @@
 
   <!-- the server-composed card renders here (textContent-only, via renderLensCard) -->
   <div class="card-region" data-lens-card aria-live="polite" tabindex="-1"></div>
+
+  <!-- Minimal privacy disclosure (server-rendered, static, visible JS-off) — the two verbose blocks
+       were retired per owner, but the third-party-AI + "don't share personal details" disclosure is a
+       CLAUDE.md non-negotiable, so it stays as one quiet line. -->
+  <p class="privacy-line">
+    Sent to a third-party AI service (OpenRouter → DeepSeek, Gemini fallback) and to PubMed for sources.
+    Don’t include personal or identifying details. <a href="/privacy">Privacy</a>.
+  </p>
 </section>
 
 <style>
@@ -217,6 +225,18 @@
     background: var(--eucalyptus);
     border-radius: var(--r-pill);
     transition: width var(--dur-slow) var(--ease-soft);
+  }
+
+  /* one quiet, server-rendered privacy line (retained non-negotiable disclosure) */
+  .privacy-line {
+    margin: var(--sp-5) 0 0;
+    font-size: var(--text-xs);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    max-width: 64ch;
+  }
+  .privacy-line a {
+    color: var(--primary);
   }
 
   /* the card region — the shared renderer builds into it. Styles below match render-card.ts classes. */
