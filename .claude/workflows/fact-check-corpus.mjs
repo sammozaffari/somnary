@@ -201,7 +201,11 @@ phase('Synthesize')
 const dropped = perRemedy.flatMap((r) => r.checked.filter((c) => c.status === 'dropped'))
 log(`Verification done: ${perRemedy.length} remedies, ${dropped.length} finding(s) killed by refuters`)
 
-const report = await agent(
+// {report:false} skips synthesis and returns raw JSON — for batch runs whose
+// results a caller consolidates into one report (avoids per-batch report files
+// colliding on the same dated path, and saves the synthesis tokens).
+const wantReport = !(a && !Array.isArray(a) && a.report === false)
+const report = !wantReport ? (log('report:false — skipping synthesis; returning raw results for external consolidation'), null) : await agent(
   `You are the synthesis writer for Somnary's fact-check audit. ${NO_GIT}
 Get today's date with Bash (date +%F), then write the report to ${ROOT}/docs/audits/<date>-fact-check.md (create the directory if needed). That file is the ONLY file you may write.
 Full results JSON (statuses: confirmed/contested findings are reportable; "dropped" were killed by refuters and appear only in Method counts; verdict "inaccessible" is its own info bucket, never a guessed finding):
