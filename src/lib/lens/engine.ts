@@ -37,6 +37,7 @@ import {
 import type { Flag, LabelEntry } from '../label-rules.ts';
 import { normalizeLensInput, type LensInputKind, type LensShortCircuit } from './input.ts';
 import { resolveSubject, type ResolvedSubject, type LensProductClass } from './resolve.ts';
+import { defaultWebResearch, isReputableUrl, domainOf, type WebFinding, type WebResearchFn } from './websearch.ts';
 import type { EvidenceProvider, EvidenceDoc } from './retrieval.ts';
 import { parseCitation, type CitationId } from './citations.ts';
 import {
@@ -59,6 +60,14 @@ import * as copy from './copy.ts';
 export const LENS_MAX_CLAIMS = 5;
 /** Default wall-clock budget for a whole Lens run (ms). Research + N×claims refute calls must fit. */
 const DEFAULT_DEADLINE_MS = 60_000;
+/** The reputable web tier (CHK-7.7) runs AFTER the study result is composed, so it is bounded by a
+ * separate WALL-clock ceiling (just under the Vercel maxDuration of 90s) rather than the study deadline —
+ * this guarantees a slow study run + the web call can never blow the platform cap and lose the answer. */
+const WEB_WALL_BUDGET_MS = 85_000;
+/** Don't start the web tier without at least this much wall-clock left — else the study result ships now. */
+const WEB_MIN_BUDGET_MS = 8_000;
+/** Upper bound on a single web call regardless of how much budget remains. */
+const WEB_MAX_TIMEOUT_MS = 25_000;
 
 // --- the assessment schema — NO tier/grade/score FIELD ANYWHERE ----------------------------------
 
@@ -98,7 +107,8 @@ export type LensEvent =
   | { type: 'sources'; count: number }
   | { type: 'extracting' }
   | { type: 'verifying'; total: number }
-  | { type: 'composing' };
+  | { type: 'composing' }
+  | { type: 'web-search' };
 
 /**
  * The Lens assessment — the server-composed card. There is DELIBERATELY no tier/grade/score field:
@@ -116,6 +126,9 @@ export interface LensAssessment {
   evidence: LensEvidence[];
   /** The signature anti-hype block — always populated on assessed/inconclusive. */
   doesNotShow: string[];
+  /** Reputable-only web references (CHK-7.7) — a SEPARATE, weaker tier shown below the study evidence;
+   * present only when the env-gated web tier ran and grounded ≥1 note. Never peer-reviewed. */
+  webFindings?: WebFinding[];
   labelFlags: Flag[];
   safety: { routes: Route[]; note: string };
   stamp: string;
@@ -146,6 +159,10 @@ export interface RunLensArgs {
   /** Optional streaming hook (CHK-7.4). Fired at each REAL pipeline milestone so the route can emit SSE
    * frames. Non-streaming callers omit it — the run is identical. Never expected to throw (wrapped). */
   onEvent?: (event: LensEvent) => void;
+  /** Injectable reputable-only web-references fn (CHK-7.7). Defaults to the ENV-GATED real one
+   * (LENS_WEB_SEARCH). Tests inject a mock; when it returns [] (or is disabled) there is simply no web
+   * tier. NEVER expected to throw. */
+  webResearch?: WebResearchFn;
 }
 
 // --- safety routing (deterministic; boundary pages, never a dose/diagnosis) ----------------------
@@ -360,6 +377,7 @@ function hasResolvedDisplay(d: LensResolvedDisplay): boolean {
 export async function runLens(args: RunLensArgs): Promise<LensAssessment> {
   const providerName = args.providerName ?? 'pubmed';
   const now = args.now ?? Date.now;
+  const runStart = now(); // wall-clock start, for the web tier's platform-cap budget (CHK-7.7)
   const corpus = Array.isArray(args.corpus) ? args.corpus : [];
   const labelEntries = Array.isArray(args.labelEntries) ? args.labelEntries : [];
   const additiveWatchlist = Array.isArray(args.additiveWatchlist) ? args.additiveWatchlist : [];
@@ -444,6 +462,7 @@ export async function runLens(args: RunLensArgs): Promise<LensAssessment> {
     const budget: CallBudget = args.budget ?? { used: 0, max: LENS_MAX_MODEL_CALLS };
     const deadline = now() + (typeof args.deadlineMs === 'number' ? args.deadlineMs : DEFAULT_DEADLINE_MS);
     const model = args.model ?? defaultLensModel();
+    const webResearch = args.webResearch ?? defaultWebResearch();
 
     if (normalized.empty) {
       return inconclusive(base, rubric.labelFlags, rubric.additiveFindings, normalized.normalized, emptyMeta(providerName));
@@ -491,7 +510,7 @@ export async function runLens(args: RunLensArgs): Promise<LensAssessment> {
     const docs = rerankBySleep(mergeDocs(primaryDocs, focusedDocs));
     emit({ type: 'sources', count: docs.length });
     if (docs.length === 0) {
-      return inconclusive(
+      const studyResult = inconclusive(
         base,
         rubric.labelFlags,
         rubric.additiveFindings,
@@ -499,6 +518,9 @@ export async function runLens(args: RunLensArgs): Promise<LensAssessment> {
         { ...emptyMeta(providerName), modelCalls: budget.used },
         resolvedDisplay,
       );
+      // Even with NO study evidence, reputable web references (if enabled) can still help — this is
+      // exactly when a reader most wants them. Enrich before returning.
+      return await enrichWithWeb(studyResult, resolved.resolvedName || normalized.normalized, webResearch, runStart, now, emit);
     }
 
     // (5) EXTRACT — ONE model call over the docs fetched for the resolved subject.
@@ -540,7 +562,8 @@ export async function runLens(args: RunLensArgs): Promise<LensAssessment> {
 
     // (7)+(8) COMPOSE — server-side, from verified claims + rubric flags + copy.ts templates.
     emit({ type: 'composing' });
-    return compose(base, verified, rubric.labelFlags, rubric.additiveFindings, normalized.normalized, candidates.length, meta, resolvedDisplay);
+    const studyResult = compose(base, verified, rubric.labelFlags, rubric.additiveFindings, normalized.normalized, candidates.length, meta, resolvedDisplay);
+    return await enrichWithWeb(studyResult, extractSubject, webResearch, runStart, now, emit);
   } catch {
     // Any unexpected error ⇒ honest inconclusive with empty rubric (never a fabricated verdict).
     const normalized = typeof args.input === 'string' ? args.input.slice(0, 4000).trim() : '';
@@ -666,6 +689,54 @@ function compose(
     safety: { routes: safetyRoutesFor(resolved?.productClass), note: copy.safetyNoteFor(resolved?.productClass ?? 'unknown') },
     meta,
   };
+}
+
+/**
+ * Enrich a researched study result with the reputable-only web tier (CHK-7.7). Runs ONLY on assessed/
+ * inconclusive cards, ONLY with deadline headroom, and ONLY when the injected webResearch fn is live
+ * (env-gated). Every note is re-filtered server-side: it must name a sleep concept AND pass the SAME
+ * forbidden-framing + raw-identifier + grade-smell gates as study evidence. Never throws; on any failure
+ * the study result is returned unchanged (the study tiers never depend on the web tier).
+ */
+async function enrichWithWeb(
+  result: LensAssessment,
+  subject: string,
+  webResearch: WebResearchFn,
+  runStart: number,
+  now: () => number,
+  emit: (event: LensEvent) => void,
+): Promise<LensAssessment> {
+  if (result.status !== 'assessed' && result.status !== 'inconclusive') return result;
+  if (typeof webResearch !== 'function') return result;
+  // WALL-clock budget (not the study deadline): only run with real headroom under the platform cap, and
+  // clamp the call so a slow study run + the web call can never exceed it and lose the composed answer.
+  const webBudget = Math.min(WEB_MAX_TIMEOUT_MS, WEB_WALL_BUDGET_MS - (now() - runStart));
+  if (webBudget < WEB_MIN_BUDGET_MS) return result;
+  emit({ type: 'web-search' });
+  let findings: WebFinding[] = [];
+  try {
+    findings = await webResearch(subject, webBudget);
+  } catch {
+    findings = [];
+  }
+  if (!Array.isArray(findings) || findings.length === 0) return result;
+  const clean: WebFinding[] = [];
+  const seen = new Set<string>();
+  for (const f of findings) {
+    if (!f || typeof f.text !== 'string' || typeof f.url !== 'string' || !f.url) continue;
+    // Defense-in-depth: the engine INDEPENDENTLY enforces reputability (webResearch is injectable) and
+    // recomputes the shown domain from the URL — never trusts a passed-in domain.
+    if (!isReputableUrl(f.url)) continue;
+    if (!isSleepConcept(f.text)) continue; // only the subject's SLEEP effect, same as study evidence
+    if (lintForbiddenFraming(f.text).length > 0 || hasRawIdentifier(f.text) || GRADE_SMELL.test(f.text)) continue;
+    const key = f.text.toLowerCase().replace(/\s+/g, ' ').trim();
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    clean.push({ text: f.text, url: f.url, domain: domainOf(f.url) });
+    if (clean.length >= 4) break;
+  }
+  if (clean.length === 0) return result;
+  return { ...result, webFindings: clean };
 }
 
 /**
