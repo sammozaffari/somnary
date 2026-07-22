@@ -468,7 +468,20 @@ NOT a Somnary grade". Concierge (CHK-6.8) demotes to a secondary mode.
   (`isPreclinical`) since broader indexes surface more preclinical studies — never "strong"
   human evidence. *Accept:* firewall unchanged (every claim still verbatim-verified + cited);
   no new keys/deps. Live: sertraline inconclusive → assessed (REM-in-mice shown WEAK);
-  propranolol/prednisone improved. The paid web-search provider stays the next lever.
+  propranolol/prednisone improved. The paid web-search provider stays the next lever. *(Merged #104.)*
+- [ ] **CHK-7.7 Reputable web-references tier.** `HG` (medical-boundary AI core + cost).
+  Owner: "search the web with the openrouter api." OpenRouter's `web` plugin (Exa) returns
+  real results w/ URL + content. Owner chose "reputable health sites only, separate tier."
+  New `websearch.ts`: one `web`-plugin call → grounds each model note against a REPUTABLE
+  source (host allowlist: MedlinePlus/NIH/PMC/DailyMed/Drugs.com/NHS/Cochrane/Mayo/Sleep
+  Foundation…) via the SAME verbatim quoteIsGrounded firewall; the model's synthesised prose
+  is discarded. Engine adds a SEPARATE `webFindings` tier (sleep-filtered + framing/grade
+  linted) shown BELOW the study evidence with a "not primary studies, weaker" caveat +
+  each source's domain. ENV-GATED `LENS_WEB_SEARCH` (paid ~$0.006/query → opt-in, never
+  bills otherwise). *Accept:* only reputable hosts cited (host-based, not substring); every
+  note verbatim-grounded; study tiers untouched if web fails; no marketing/blogs. Live:
+  doxylamine → study evidence + drugs.com/ncbi web notes. Owner sets LENS_WEB_SEARCH=on in
+  Vercel to enable. Lens red-team 235 / card 39 / loop 40.
 
 ---
 

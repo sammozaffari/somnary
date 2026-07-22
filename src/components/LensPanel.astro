@@ -303,6 +303,7 @@
   :global(.lc-dn-list),
   :global(.lc-flag-list),
   :global(.lc-fu-list),
+  :global(.lc-web-list),
   :global(.lc-route-list) {
     list-style: none;
     margin: 0;
@@ -329,6 +330,47 @@
   }
   :global(.lc-dn-row) {
     color: var(--muted);
+  }
+
+  /* reputable web-references tier — visually SET APART + quieter than the study evidence */
+  :global(.lc-web) {
+    background: var(--stone);
+    border-radius: var(--r-md);
+    padding: var(--sp-4) var(--sp-5);
+  }
+  :global(.lc-web .lc-head) {
+    color: var(--muted);
+  }
+  :global(.lc-web-note) {
+    font-size: var(--text-xs);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: 0;
+    max-width: 64ch;
+  }
+  :global(.lc-web-row) {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-1);
+  }
+  :global(.lc-web-text) {
+    font-size: var(--text-sm);
+    line-height: var(--lh-base);
+    color: var(--ink);
+    margin: 0;
+    max-width: 64ch;
+  }
+  :global(.lc-web-src) {
+    align-self: flex-start;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--primary);
+    text-decoration: none;
+  }
+  :global(.lc-web-src:focus-visible) {
+    outline: none;
+    box-shadow: var(--ring);
+    border-radius: var(--r-sm);
   }
 
   /* strength: a TEXT-labelled chip — legible WITHOUT color (the word says it), color only reinforces */
@@ -511,7 +553,7 @@
   // REAL pipeline milestones (CHK-7.4): the engine streams these as SSE events. Each maps to an honest
   // stage label; counts (sources, claims) come from the event, never fabricated. The FALLBACK sequence
   // is used only when the stream is unavailable (a JSON-only response) so the bar still moves.
-  const STAGE_ORDER = ['resolving', 'searching', 'sources', 'extracting', 'verifying', 'composing'];
+  const STAGE_ORDER = ['resolving', 'searching', 'sources', 'extracting', 'verifying', 'composing', 'web-search'];
   const FALLBACK_STAGES = [
     'Understanding your query…',
     'Searching published sources…',
@@ -614,7 +656,11 @@
           break;
         case 'composing':
           stageEl.textContent = 'Composing the assessment…';
-          if (!reduce) setBar(0.95);
+          if (!reduce) setBar(0.9);
+          break;
+        case 'web-search':
+          stageEl.textContent = 'Checking reputable health references…';
+          if (!reduce) setBar(0.96);
           break;
       }
     };

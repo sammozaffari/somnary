@@ -24,6 +24,10 @@
 // Re-declared here (not imported from engine.ts) so the renderer stays a leaf module the offline harness
 // and the island can both import without pulling the whole engine graph. Kept in sync by the T1 harness.
 
+// The reputable-web-references caveat lives in copy.ts (the [HUMAN-GATE] framing surface); import it so
+// the renderer never authors that medical framing itself. copy.ts is a light leaf (no engine graph).
+import { WEB_TIER_HEAD, WEB_TIER_NOTE } from './copy.ts';
+
 export type LensCardStatus = 'assessed' | 'short-circuit' | 'refused' | 'inconclusive';
 
 export interface LensCardSource {
@@ -61,6 +65,12 @@ export interface LensCardResolved {
   productClass: string;
   line: string;
 }
+/** One reputable-web-reference note (CHK-7.7) — a short sleep note + its source domain/url. */
+export interface LensCardWebFinding {
+  text: string;
+  url: string;
+  domain: string;
+}
 export interface LensCardAssessment {
   input: { kind: 'ingredient' | 'product' | 'question'; normalized: string };
   status: LensCardStatus;
@@ -69,6 +79,7 @@ export interface LensCardAssessment {
   verdictLine: string;
   evidence: LensCardEvidence[];
   doesNotShow: string[];
+  webFindings?: LensCardWebFinding[];
   labelFlags: LensCardFlag[];
   safety: { routes: LensCardRoute[]; note: string };
   stamp: string;
@@ -252,6 +263,31 @@ export function renderLensCard(assessment: LensCardAssessment, container: HTMLEl
     assessment.doesNotShow.forEach((line) => {
       if (typeof line !== 'string' || !line) return;
       list.appendChild(el(doc, 'li', 'lc-dn-row', line));
+    });
+    section.appendChild(list);
+    card.appendChild(section);
+  }
+
+  // "From health references" (CHK-7.7) — the reputable-only web tier, DISTINCT + weaker, shown below the
+  // study evidence with an explicit caveat + each note's source domain. Never peer-reviewed; grounded
+  // server-side (verbatim quote in a reputable source) before it can appear here.
+  if (Array.isArray(assessment.webFindings) && assessment.webFindings.length) {
+    const { section } = block(doc, WEB_TIER_HEAD, 'lc-web');
+    section.appendChild(el(doc, 'p', 'lc-web-note', WEB_TIER_NOTE)); // server caveat (copy.ts), textContent
+    const list = el(doc, 'ul', 'lc-web-list');
+    assessment.webFindings.forEach((w) => {
+      if (!w || typeof w.text !== 'string' || !w.text) return;
+      const li = el(doc, 'li', 'lc-web-row');
+      li.appendChild(el(doc, 'p', 'lc-web-text', w.text));
+      if (w.url && w.domain) {
+        const a = el(doc, 'a', 'lc-web-src');
+        a.href = w.url; // reputable source url (server-vetted host)
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.textContent = w.domain; // show the source domain so the reader judges it
+        li.appendChild(a);
+      }
+      list.appendChild(li);
     });
     section.appendChild(list);
     card.appendChild(section);

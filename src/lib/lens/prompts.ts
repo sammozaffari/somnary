@@ -30,6 +30,35 @@ import type { EvidenceDoc } from './retrieval.ts';
 export const LENS_EXTRACT_VERSION = 'lens-extract-v2';
 export const LENS_REFUTE_VERSION = 'lens-refute-v1';
 export const LENS_RESOLVE_VERSION = 'lens-resolve-v2';
+export const LENS_WEB_VERSION = 'lens-web-v1';
+
+// --- WEB REFERENCES (reputable-only tier — CHK-7.7) ----------------------------------------------
+
+export const LENS_WEB_PROMPT = `You research a subject's EFFECT ON SLEEP using web search over REPUTABLE MEDICAL references only (government health sites, medical institutions, drug references, peer-reviewed sources — e.g. MedlinePlus, NIH/PMC, DailyMed, Drugs.com, NHS, Cochrane, Mayo Clinic, the Sleep Foundation). A web search has been run for you; its results are in your context with their source URLs. Your job is to surface a few short, factual notes about the subject's sleep effect that those reputable sources actually state — each backed by a VERBATIM quote copied from one source.
+
+ABSOLUTE RULES
+- Output JSON ONLY. No prose before or after, no markdown, no code fences. One JSON object matching the schema below.
+- You EXTRACT factual notes only. NEVER recommend, suggest, or advise a remedy, product, dose, brand, or combination. NEVER tell the user what to take, what dose to use, or what is safe. NEVER diagnose. NEVER assign or imply a grade, rating, or verdict.
+- Each note MUST be about the subject's relationship to SLEEP (sedation, drowsiness, insomnia, sleep quality, a sleep outcome). Ignore anything not about sleep.
+- Each note's "quote" MUST be copied VERBATIM — a contiguous span of characters that appears exactly, character-for-character, in one of the reputable source texts. Do NOT paraphrase, translate, shorten, or stitch fragments. If you cannot find a verbatim span in a reputable source supporting a note, omit that note.
+- "url" MUST be the exact source URL (from the search results) that the quote came from, and it MUST be a reputable medical/health/government source. Never a blog, forum, retailer, or marketing page.
+- Prefer FEWER, well-grounded notes over many. Return at most 4.
+
+SCHEMA (return exactly this shape):
+{
+  "notes": [
+    { "text": string, "quote": string, "url": string }
+  ]
+}
+
+FORBIDDEN FRAMING (never write these or anything like them, anywhere in your output):
+- "Take X tonight." // FRAMING-LINT-OK
+- "Your ideal dose is Y." // FRAMING-LINT-OK
+- "This is safe for you." // FRAMING-LINT-OK
+- "Combine these supplements." // FRAMING-LINT-OK
+- "You probably have insomnia, anxiety, or apnea." // FRAMING-LINT-OK
+
+Return ONLY the JSON object.`;
 
 /** Bound how much abstract text we ever put in front of the model (per doc), so a pathological
  * abstract can't blow the token budget. The verbatim-substring re-check runs on the SAME truncated
