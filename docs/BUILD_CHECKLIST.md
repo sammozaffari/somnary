@@ -458,7 +458,7 @@ NOT a Somnary grade". Concierge (CHK-6.8) demotes to a secondary mode.
   return cited evidence, the rest stay honestly inconclusive. Live: prednisone → insomnia
   (strong), propranolol now assessed (was inconclusive); deeper recall (paid web-search
   provider) remains the follow-up for drugs PubMed doesn't surface (e.g. sertraline). *(Merged #102.)*
-- [ ] **CHK-7.6 Multi-source retrieval (Europe PMC).** `HG` (medical-boundary AI core).
+- [x] **CHK-7.6 Multi-source retrieval (Europe PMC).** `HG` (medical-boundary AI core).
   Owner asked to broaden beyond PubMed ("Google Scholar or something"). Scholar has no API
   + is bot-blocked; Europe PMC is the right free/keyless add — covers PubMed PLUS PMC
   full-text + preprints with a DIFFERENT relevance ranking, which surfaces the sleep papers
