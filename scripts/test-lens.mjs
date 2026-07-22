@@ -28,6 +28,7 @@ const { isValidId, isResolvableId, parseCitation, canonicalUrl, canonicalUrlByKi
   'src/lib/lens/citations.ts',
 );
 const { PubMedProvider, EuropePmcProvider, MultiProvider } = await imp('src/lib/lens/retrieval.ts');
+const { isReputableUrl, domainOf, parseWebNotes, openRouterWebResearch, REPUTABLE_DOMAINS } = await imp('src/lib/lens/websearch.ts');
 const { normalizeLensInput, MAX_LENS_INPUT_LEN } = await imp('src/lib/lens/input.ts');
 const { verifyClaims, quoteIsGrounded, parseVerdict, coerceVerdict, REFUTE_N, REFUTE_QUORUM, LENS_MAX_MODEL_CALLS } =
   await imp('src/lib/lens/verify.ts');
@@ -301,6 +302,50 @@ async function run() {
     ok('MultiProvider keeps the FIRST source copy of a shared PMID', merged.find((d) => d.pmid === '999').title === 'shared-from-A');
     ok('MultiProvider tolerates a throwing source (contributes [])', merged.length === 3);
     ok('MultiProvider with no providers → []', (await new MultiProvider([]).search('q')).length === 0);
+  }
+
+  console.log('\nlens suite — reputable web tier (CHK-7.7):');
+  {
+    // Domain allowlist: reputable hosts + subdomains pass; blogs/retailers/path-embedded do NOT.
+    ok('isReputableUrl allows a reputable host', isReputableUrl('https://medlineplus.gov/druginfo/x.html') && isReputableUrl('https://pmc.ncbi.nlm.nih.gov/articles/PMC1/'));
+    ok('isReputableUrl allows a subdomain of an allowed host', isReputableUrl('https://sub.drugs.com/monograph/x'));
+    ok('isReputableUrl rejects a blog/retailer', !isReputableUrl('https://sleepblog.com/x') && !isReputableUrl('https://amazon.com/x') && !isReputableUrl('https://reddit.com/r/sleep'));
+    ok('isReputableUrl rejects a domain merely EMBEDDED in a junk path (host-based, not substring)', !isReputableUrl('https://evil.com/nih.gov/fake') && !isReputableUrl('https://medlineplus.gov.evil.com/x'));
+    ok('domainOf strips www + lowercases', domainOf('https://WWW.Drugs.com/x') === 'drugs.com');
+    ok('parseWebNotes tolerates prose-wrapped JSON + skips malformed', parseWebNotes('here: {"notes":[{"text":"a","quote":"q","url":"u"},{"text":"","quote":"q"}]} end').length === 1);
+    // openRouterWebResearch: grounds each note against a REPUTABLE annotation's verbatim text; a note
+    // whose quote isn't a real substring, or whose source isn't reputable, is DROPPED.
+    const REP = 'https://medlineplus.gov/druginfo/meds/a682537.html';
+    const grounded = 'you will probably become very sleepy soon after you take the medication';
+    const webBody = {
+      choices: [
+        {
+          message: {
+            content: JSON.stringify({
+              notes: [
+                { text: 'Doxylamine makes you very sleepy soon after taking it', quote: grounded, url: REP },
+                { text: 'Fabricated sleep claim never in any source', quote: 'this exact text appears in no source at all', url: REP },
+                { text: 'Doxylamine helps you sleep', quote: 'helps you sleep according to a blog', url: 'https://sleepblog.com/x' },
+              ],
+            }),
+            annotations: [
+              { type: 'url_citation', url_citation: { url: REP, title: 'MedlinePlus', content: `If you are taking doxylamine to treat insomnia, ${grounded} and will remain sleepy the next day.` } },
+              { type: 'url_citation', url_citation: { url: 'https://sleepblog.com/x', title: 'Blog', content: 'helps you sleep according to a blog says the author' } },
+            ],
+          },
+        },
+      ],
+    };
+    const webFetch = async (url, init) => {
+      ok('web research POSTs to OpenRouter with the web plugin', url.includes('openrouter.ai') && /"id":"web"/.test(init.body) && /"plugins"/.test(init.body));
+      return { ok: true, json: async () => webBody };
+    };
+    const findings = await openRouterWebResearch({ subject: 'doxylamine', apiKey: 'k', fetchImpl: webFetch });
+    ok('web tier keeps the grounded reputable note only', findings.length === 1 && findings[0].domain === 'medlineplus.gov' && /very sleepy/.test(findings[0].text));
+    ok('web tier drops a fabricated (non-substring) quote', findings.every((f) => !/Fabricated/.test(f.text)));
+    ok('web tier drops a non-reputable (blog) source', findings.every((f) => f.domain !== 'sleepblog.com'));
+    ok('web tier: missing key or subject → [] (never bills)', (await openRouterWebResearch({ subject: 'x', apiKey: '' })).length === 0 && (await openRouterWebResearch({ subject: '', apiKey: 'k' })).length === 0);
+    ok('web tier: non-ok response → [] (never throws)', (await openRouterWebResearch({ subject: 'x', apiKey: 'k', fetchImpl: async () => ({ ok: false }) })).length === 0);
   }
 
   console.log('\nlens suite — input.ts (normalize + classify + short-circuit):');
@@ -1071,6 +1116,31 @@ async function runRedTeam() {
     const preDocs = [{ pmid: '23691095', title: 'Sertraline and sleep in mice', abstractText: preQuote, url: 'https://pubmed.ncbi.nlm.nih.gov/23691095/' }];
     const r = await runLens({ ...base, input: 'sertraline sleep', provider: providerOf(preDocs), model });
     ok('(11p) a strong-verified animal claim is capped to weak', r.status === 'assessed' && r.evidence.length === 1 && r.evidence[0].strength === 'weak', JSON.stringify(r.evidence.map((e) => e.strength)));
+  }
+  {
+    // (11w) WEB TIER (CHK-7.7): an injected webResearch surfaces a SEPARATE webFindings tier on a
+    // researched card; a non-sleep or framing-tripping web note is filtered server-side; refused/empty
+    // → no tier. (openRouterWebResearch's own grounding is unit-tested in the web-tier block above.)
+    const engineWeb = async () => [
+      { text: 'Doxylamine commonly causes next-day drowsiness', url: 'https://medlineplus.gov/x', domain: 'medlineplus.gov' },
+      { text: 'Doxylamine lowers blood pressure', url: 'https://drugs.com/y', domain: 'drugs.com' }, // no sleep concept → dropped
+      { text: 'Take doxylamine tonight for sleep', url: 'https://drugs.com/z', domain: 'drugs.com' }, // forbidden framing → dropped
+    ];
+    const { model } = makeEngineModel({
+      resolveReply: { sleepRelevant: true, resolvedName: 'doxylamine', aka: [], productClass: 'otc-drug', pubmedQuery: 'doxylamine AND sleep' },
+      extractReply: { claims: [{ text: 'Doxylamine reduced insomnia symptoms', sourcePmid: '23691095' }], doesNotShow: [], labelFacts: [] },
+      refuteByClaimSubstr: { 'reduced insomnia symptoms': [yes('reduced insomnia symptoms in the trial'), yes('reduced insomnia symptoms in the trial'), yes('reduced insomnia symptoms in the trial')] },
+    });
+    const wdocs = [{ pmid: '23691095', title: 'Doxylamine insomnia trial', abstractText: 'reduced insomnia symptoms in the trial', url: 'https://pubmed.ncbi.nlm.nih.gov/23691095/' }];
+    const r = await runLens({ ...base, input: 'doxylamine sleep aid product', provider: providerOf(wdocs), model, webResearch: engineWeb });
+    ok('(11w) assessed card carries a SEPARATE webFindings tier', Array.isArray(r.webFindings) && r.webFindings.length === 1 && /next-day drowsiness/.test(r.webFindings[0].text), JSON.stringify(r.webFindings));
+    ok('(11w) a non-sleep web note is filtered out', (r.webFindings || []).every((f) => !/blood pressure/.test(f.text)));
+    ok('(11w) a forbidden-framing web note is filtered out', (r.webFindings || []).every((f) => !/tonight/.test(f.text)));
+    ok('(11w) NO grade smell with a web tier', findGradeSmell(r) === null);
+    const rNoWeb = await runLens({ ...base, input: 'doxylamine sleep aid product', provider: providerOf(wdocs), model, webResearch: async () => [] });
+    ok('(11w) empty web → NO webFindings key', rNoWeb.webFindings === undefined);
+    const rRef = await runLens({ ...base, input: 'how much should I take for me each night?', provider: providerOf(wdocs), model, webResearch: engineWeb });
+    ok('(11w) refused card gets NO web tier', rRef.status === 'refused' && rRef.webFindings === undefined);
   }
   {
     // (11e) STREAMING (CHK-7.4): runLens fires real milestone events; counts are the real ones.

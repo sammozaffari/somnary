@@ -72,6 +72,19 @@ export const SAFETY_NOTE =
   'make a safety call on any product or dose — these pages cover the general cautions, and a pharmacist ' +
   'or doctor can weigh them with your own health and medicines.';
 
+// --- reputable web-references tier (CHK-7.7) -----------------------------------------------------
+// A SEPARATE, weaker tier shown BELOW the peer-reviewed study evidence. Its heading + caveat make the
+// distinction explicit: these are general medical references, not primary studies, and never a grade.
+
+/** Heading for the reputable-web-references block. */
+export const WEB_TIER_HEAD = 'From health references';
+
+/** The caveat under the web-references heading — states plainly that this tier is weaker than the
+ * studies above and is not a grade. Framing-linted like every other string in this file. */
+export const WEB_TIER_NOTE =
+  'These come from reputable medical and government health references, not primary studies — treat them ' +
+  'as background, weaker than the evidence above. They are not a Somnary grade.';
+
 // --- resolved-subject line (SERVER-composed; CHK-7.4) --------------------------------------------
 //
 // The Lens now interprets the input before researching (resolve.ts): a brand → its active ingredient,
