@@ -471,6 +471,7 @@ export const GLYCINE_SOURCES: GlyProduct[] = [
   // the genuine, AU-reachable, standalone-glycine additions.
   {
     slug: 'nutrabio-glycine',
+    imagePath: '/images/sources/glycine/nutrabio-glycine.jpg',
     brand: 'NutraBio',
     productName: 'Glycine Powder',
     bottomLine:
@@ -499,6 +500,7 @@ export const GLYCINE_SOURCES: GlyProduct[] = [
   },
   {
     slug: 'nutricost-glycine',
+    imagePath: '/images/sources/glycine/nutricost-glycine.jpg',
     brand: 'Nutricost',
     productName: 'Glycine Powder',
     bottomLine:
@@ -527,6 +529,7 @@ export const GLYCINE_SOURCES: GlyProduct[] = [
   },
   {
     slug: 'life-extension-glycine',
+    imagePath: '/images/sources/glycine/life-extension-glycine.jpg',
     brand: 'Life Extension',
     productName: 'Glycine',
     bottomLine:
@@ -555,6 +558,7 @@ export const GLYCINE_SOURCES: GlyProduct[] = [
   },
   {
     slug: 'source-naturals-glycine',
+    imagePath: '/images/sources/glycine/source-naturals-glycine.jpg',
     brand: 'Source Naturals',
     productName: 'Glycine',
     bottomLine:
@@ -583,6 +587,7 @@ export const GLYCINE_SOURCES: GlyProduct[] = [
   },
   {
     slug: 'pure-product-glycine',
+    imagePath: '/images/sources/glycine/pure-product-glycine.jpg',
     brand: 'Pure Product Australia',
     productName: 'Glycine',
     bottomLine:
@@ -611,6 +616,7 @@ export const GLYCINE_SOURCES: GlyProduct[] = [
   },
   {
     slug: 'micro-ingredients-glycine',
+    imagePath: '/images/sources/glycine/micro-ingredients-glycine.jpg',
     brand: 'Micro Ingredients',
     productName: 'Glycine Powder',
     bottomLine:
