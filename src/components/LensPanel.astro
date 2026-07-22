@@ -304,6 +304,7 @@
   :global(.lc-flag-list),
   :global(.lc-fu-list),
   :global(.lc-web-list),
+  :global(.lc-caution-list),
   :global(.lc-route-list) {
     list-style: none;
     margin: 0;
@@ -330,6 +331,40 @@
   }
   :global(.lc-dn-row) {
     color: var(--muted);
+  }
+
+  /* prominent usage/safety CAUTIONS — the source's guidance, high on the card, in the caution register */
+  :global(.lc-cautions) {
+    background: var(--warning-bg);
+    border: 1px solid var(--safety-ink);
+    border-radius: var(--r-md);
+    padding: var(--sp-4) var(--sp-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+  }
+  :global(.lc-cautions .lc-head) {
+    color: var(--safety-ink);
+  }
+  :global(.lc-caution-note) {
+    font-size: var(--text-xs);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: 0;
+    max-width: 64ch;
+  }
+  :global(.lc-caution-row) {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-1);
+  }
+  :global(.lc-caution-text) {
+    font-size: var(--text-sm);
+    line-height: var(--lh-base);
+    color: var(--ink);
+    font-weight: 600;
+    margin: 0;
+    max-width: 64ch;
   }
 
   /* reputable web-references tier — visually SET APART + quieter than the study evidence */

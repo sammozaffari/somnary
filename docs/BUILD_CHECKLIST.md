@@ -469,7 +469,7 @@ NOT a Somnary grade". Concierge (CHK-6.8) demotes to a secondary mode.
   human evidence. *Accept:* firewall unchanged (every claim still verbatim-verified + cited);
   no new keys/deps. Live: sertraline inconclusive → assessed (REM-in-mice shown WEAK);
   propranolol/prednisone improved. The paid web-search provider stays the next lever. *(Merged #104.)*
-- [ ] **CHK-7.7 Reputable web-references tier.** `HG` (medical-boundary AI core + cost).
+- [x] **CHK-7.7 Reputable web-references tier.** `HG` (medical-boundary AI core + cost).
   Owner: "search the web with the openrouter api." OpenRouter's `web` plugin (Exa) returns
   real results w/ URL + content. Owner chose "reputable health sites only, separate tier."
   New `websearch.ts`: one `web`-plugin call → grounds each model note against a REPUTABLE
@@ -481,7 +481,22 @@ NOT a Somnary grade". Concierge (CHK-6.8) demotes to a secondary mode.
   bills otherwise). *Accept:* only reputable hosts cited (host-based, not substring); every
   note verbatim-grounded; study tiers untouched if web fails; no marketing/blogs. Live:
   doxylamine → study evidence + drugs.com/ncbi web notes. Owner sets LENS_WEB_SEARCH=on in
-  Vercel to enable. Lens red-team 235 / card 39 / loop 40.
+  Vercel to enable. Lens red-team 235 / card 39 / loop 40. *(Merged #106; parallelized #108;
+  LENS_WEB_SEARCH=on set in Vercel + deployed — live.)*
+- [ ] **CHK-7.8 Plain language + prominent source cautions.** `HG` (medical-boundary AI core).
+  Owner: the Lens should give a digestible answer AND make the "don't take Restavit nightly"
+  message clear. RESOLVED (owner-picked): the Lens NEVER issues a recommendation/safety call
+  (that stays a founding non-negotiable) — instead it surfaces the SOURCES' OWN usage guidance,
+  quoted + attributed. (1) Extract prompt v3 → plain everyday-language study claims (still
+  verbatim-verifiable). (2) Web prompt v2 → notes gain `kind` effect|caution; CAUTIONS =
+  the source's own usage/duration/safety guidance ("short-term use only", "not with alcohol"),
+  verbatim + reputable-attributed. (3) Card renders cautions PROMINENTLY (⚠ block, above the
+  evidence) framed as the sources' words not the Lens's advice; effect notes stay in the lower
+  "health references" block. Cautions bypass the sleep-concept filter but keep the SAME
+  framing/grade/raw-id gates. *Accept:* no AI recommendation/dose/diagnosis; cautions are
+  source-attributed verbatim; compliance-reviewed. Live: Restavit → "short-term use only,
+  discontinue >2 weeks" (drugs.com) + "daytime drowsiness/impaired coordination" +
+  "not with alcohol/CNS depressants" (ncbi). Lens 239 / card 44 / loop 40.
 
 ---
 

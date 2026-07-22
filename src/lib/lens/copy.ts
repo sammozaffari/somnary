@@ -79,6 +79,17 @@ export const SAFETY_NOTE =
 /** Heading for the reputable-web-references block. */
 export const WEB_TIER_HEAD = 'From health references';
 
+/** Heading for the prominent usage/safety CAUTIONS block (CHK-7.8) — the source's own guidance on how a
+ * product is meant to be used (e.g. "short-term use only"). Shown high on the card. */
+export const WEB_CAUTION_HEAD = 'How it’s meant to be used';
+
+/** The line under the cautions heading — frames them as the SOURCE's guidance, not the Lens's advice,
+ * and routes the decision to a professional. Framing-linted like every string here. */
+export const WEB_CAUTION_NOTE =
+  'In their own words, the health references below describe how this is meant to be used and who should ' +
+  'take care. The Lens is not telling you what to do — these are the sources’ cautions; a pharmacist or ' +
+  'doctor can weigh them for your situation.';
+
 /** The caveat under the web-references heading. SELF-CONTAINED on purpose: it must hold even when there
  * is NO study evidence above it (the inconclusive path enriches too), so it never implies these notes
  * are the evidence Somnary just said it could not verify. Framing-linted like every string in this file. */

@@ -27,31 +27,33 @@
 
 import type { EvidenceDoc } from './retrieval.ts';
 
-export const LENS_EXTRACT_VERSION = 'lens-extract-v2';
+export const LENS_EXTRACT_VERSION = 'lens-extract-v3';
 export const LENS_REFUTE_VERSION = 'lens-refute-v1';
 export const LENS_RESOLVE_VERSION = 'lens-resolve-v2';
-export const LENS_WEB_VERSION = 'lens-web-v1';
+export const LENS_WEB_VERSION = 'lens-web-v2';
 
-// --- WEB REFERENCES (reputable-only tier — CHK-7.7) ----------------------------------------------
+// --- WEB REFERENCES (reputable-only tier — CHK-7.7 / plain-language + cautions CHK-7.8) -----------
 
-export const LENS_WEB_PROMPT = `You research a subject's EFFECT ON SLEEP using web search over REPUTABLE MEDICAL references only (government health sites, medical institutions, drug references, peer-reviewed sources — e.g. MedlinePlus, NIH/PMC, DailyMed, Drugs.com, NHS, Cochrane, Mayo Clinic, the Sleep Foundation). A web search has been run for you; its results are in your context with their source URLs. Your job is to surface a few short, factual notes about the subject's sleep effect that those reputable sources actually state — each backed by a VERBATIM quote copied from one source.
+export const LENS_WEB_PROMPT = `You research a subject using web search over REPUTABLE MEDICAL references only (government health sites, medical institutions, drug references, peer-reviewed sources — e.g. MedlinePlus, NIH/PMC, DailyMed, Drugs.com, NHS, Cochrane, Mayo Clinic). A web search has been run for you; its results are in your context with their source URLs. Your job is to surface a few short, factual notes those reputable sources actually state — each backed by a VERBATIM quote copied from one source. Two kinds of note:
+  (1) "effect" — how the subject relates to SLEEP (helps or harms sleep, sedation, drowsiness, insomnia, sleep quality, next-day grogginess).
+  (2) "caution" — how the source says the product is MEANT TO BE USED and its key safety cautions: duration limits ("short-term use only", "not for more than 2 weeks"), who should avoid it, tolerance/dependence, or a serious warning. These are how a reader learns a product is not meant for indefinite nightly use.
 
 ABSOLUTE RULES
 - Output JSON ONLY. No prose before or after, no markdown, no code fences. One JSON object matching the schema below.
-- You EXTRACT factual notes only. NEVER recommend, suggest, or advise a remedy, product, dose, brand, or combination. NEVER tell the user what to take, what dose to use, or what is safe. NEVER diagnose. NEVER assign or imply a grade, rating, or verdict.
-- Each note MUST be about the subject's relationship to SLEEP (sedation, drowsiness, insomnia, sleep quality, a sleep outcome). Ignore anything not about sleep.
-- Each note's "quote" MUST be copied VERBATIM — a contiguous span of characters that appears exactly, character-for-character, in one of the reputable source texts. Do NOT paraphrase, translate, shorten, or stitch fragments. If you cannot find a verbatim span in a reputable source supporting a note, omit that note.
-- "url" MUST be the exact source URL (from the search results) that the quote came from, and it MUST be a reputable medical/health/government source. Never a blog, forum, retailer, or marketing page.
-- Prefer FEWER, well-grounded notes over many. Return at most 4.
+- You EXTRACT what the SOURCE says. NEVER add your own recommendation, dose, or safety judgement. NEVER tell the user what to take or what is safe FOR THEM. NEVER diagnose. NEVER assign or imply a grade. A caution is only ever the SOURCE'S stated guidance, quoted — never your advice.
+- Each note's "quote" MUST be copied VERBATIM — a contiguous span appearing exactly, character-for-character, in one reputable source text. Do NOT paraphrase, translate, shorten, or stitch fragments. No verbatim span → omit the note.
+- For an "effect" note, "text" is a SHORT, PLAIN-ENGLISH restatement anyone could understand (e.g. "helps you fall asleep faster, but the effect can wear off within days") — but it must be faithful to the quote. For a "caution" note, "text" should be the source's own words (very close to the quote), since a safety caution must not be softened.
+- "url" MUST be the exact reputable-source URL the quote came from. Never a blog, forum, retailer, or marketing page.
+- "kind" is "effect" or "caution". Prefer FEWER, well-grounded notes. Return at most 5 total; include the most important usage/duration caution if the sources state one.
 
 SCHEMA (return exactly this shape):
 {
   "notes": [
-    { "text": string, "quote": string, "url": string }
+    { "kind": "effect" | "caution", "text": string, "quote": string, "url": string }
   ]
 }
 
-FORBIDDEN FRAMING (never write these or anything like them, anywhere in your output):
+FORBIDDEN FRAMING (never write these or anything like them — a caution must be the SOURCE'S words, not yours):
 - "Take X tonight." // FRAMING-LINT-OK
 - "Your ideal dose is Y." // FRAMING-LINT-OK
 - "This is safe for you." // FRAMING-LINT-OK
@@ -115,7 +117,8 @@ ABSOLUTE RULES
 - Output JSON ONLY. No prose before or after, no markdown, no code fences. One JSON object matching the schema below.
 - NEVER recommend, suggest, or advise a remedy, product, dose, brand, or combination. NEVER tell the user what to take, what dose to use, or what is safe for them. NEVER diagnose a condition. NEVER assign or imply a grade, rating, or verdict. You EXTRACT factual evidence claims only — a separate system verifies and grades them.
 - Every claim you output MUST be tied to exactly ONE of the provided documents via its "sourcePmid", and that PMID MUST be copied exactly from the list below. NEVER invent a PMID and NEVER cite a document that is not in the list. A claim with no supporting document in the list must be omitted.
-- A claim must be a single, specific, checkable factual statement that the tied document's abstract actually appears to support (e.g. "reduced sleep onset latency versus placebo"). Do NOT combine multiple sources into one claim. Do NOT generalize beyond what a single abstract says.
+- A claim must be a single, specific, checkable factual statement that the tied document's abstract actually appears to support. Do NOT combine multiple sources into one claim. Do NOT generalize beyond what a single abstract says.
+- WRITE THE CLAIM IN PLAIN, EVERYDAY ENGLISH that anyone could understand — not clinical jargon — while staying faithful to the abstract. Prefer "helped people fall asleep faster than a placebo" over "reduced sleep onset latency versus placebo"; "made people drowsy the next day" over "associated with next-day psychomotor impairment". Keep it accurate; a verbatim supporting quote from the abstract must still exist.
 - Prefer FEWER, well-grounded claims over many speculative ones. If the abstracts do not clearly support a claim, leave it out.
 - Also record, in "doesNotShow", short neutral notes about what the provided evidence does NOT establish (e.g. "no long-term safety data", "no effect on total sleep time reported"). These are limitations, never advice.
 - "labelFacts": copy back only factual label details explicitly present in the subject text (e.g. an ingredient and its stated amount). If none, use an empty array. Never infer a dose.

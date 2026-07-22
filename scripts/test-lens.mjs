@@ -483,7 +483,7 @@ const n = () => ({ supported: 'no', strength: 'weak', quote: '' });
 
 async function runVerifier() {
   console.log('\nlens suite — prompts.ts (versioned, framing-safe shape):');
-  ok('extract version pinned', LENS_EXTRACT_VERSION === 'lens-extract-v2', LENS_EXTRACT_VERSION);
+  ok('extract version pinned', LENS_EXTRACT_VERSION === 'lens-extract-v3', LENS_EXTRACT_VERSION);
   ok('refute version pinned', LENS_REFUTE_VERSION === 'lens-refute-v1', LENS_REFUTE_VERSION);
   ok('extract prompt forbids grading', /grade|rating|verdict/i.test(LENS_EXTRACT_PROMPT));
   ok('extract prompt forbids invented PMIDs', /invent a PMID/i.test(LENS_EXTRACT_PROMPT));
@@ -1128,6 +1128,7 @@ async function runRedTeam() {
       { text: 'Take doxylamine tonight for sleep', url: 'https://drugs.com/z', domain: 'drugs.com' }, // forbidden framing → dropped
       { text: 'Doxylamine improves sleep says a blog', url: 'https://sleepblog.com/x', domain: 'sleepblog.com' }, // non-reputable url → engine drops
       { text: 'Doxylamine reduces insomnia onset per the reference', url: 'https://medlineplus.gov/z', domain: 'evil.com' }, // reputable url, LYING domain → engine recomputes
+      { text: 'This medicine is intended for short-term use only.', url: 'https://medlineplus.gov/c', domain: 'medlineplus.gov', kind: 'caution' }, // caution: kept despite NO sleep word
     ]; };
     const { model } = makeEngineModel({
       resolveReply: { sleepRelevant: true, resolvedName: 'doxylamine', aka: [], productClass: 'otc-drug', pubmedQuery: 'doxylamine AND sleep' },
@@ -1136,7 +1137,8 @@ async function runRedTeam() {
     });
     const wdocs = [{ pmid: '23691095', title: 'Doxylamine insomnia trial', abstractText: 'reduced insomnia symptoms in the trial', url: 'https://pubmed.ncbi.nlm.nih.gov/23691095/' }];
     const r = await runLens({ ...base, input: 'doxylamine sleep aid product', provider: providerOf(wdocs), model, webResearch: engineWeb });
-    ok('(11w) assessed card carries a SEPARATE webFindings tier', Array.isArray(r.webFindings) && r.webFindings.length === 2 && r.webFindings.some((f) => /next-day drowsiness/.test(f.text)), JSON.stringify(r.webFindings));
+    ok('(11w) assessed card carries a SEPARATE webFindings tier', Array.isArray(r.webFindings) && r.webFindings.length === 3 && r.webFindings.some((f) => /next-day drowsiness/.test(f.text)), JSON.stringify(r.webFindings));
+    ok('(11w) a CAUTION note is kept despite no sleep word + tagged kind:caution', (r.webFindings || []).some((f) => f.kind === 'caution' && /short-term use only/.test(f.text)));
     ok('(11w) a non-sleep web note is filtered out', (r.webFindings || []).every((f) => !/blood pressure/.test(f.text)));
     ok('(11w) a forbidden-framing web note is filtered out', (r.webFindings || []).every((f) => !/tonight/.test(f.text)));
     ok('(11w) a non-reputable web url is dropped by the ENGINE guard', (r.webFindings || []).every((f) => f.domain !== 'sleepblog.com' && !/says a blog/.test(f.text)));

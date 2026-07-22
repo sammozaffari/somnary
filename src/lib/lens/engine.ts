@@ -750,13 +750,18 @@ async function attachWeb(
     // Defense-in-depth: the engine INDEPENDENTLY enforces reputability (webResearch is injectable) and
     // recomputes the shown domain from the URL — never trusts a passed-in domain.
     if (!isReputableUrl(f.url)) continue;
-    if (!isSleepConcept(f.text)) continue; // only the subject's SLEEP effect, same as study evidence
+    const kind: 'effect' | 'caution' = f.kind === 'caution' ? 'caution' : 'effect';
+    // An EFFECT note must name a sleep concept (like study evidence). A CAUTION is the source's stated
+    // usage/safety guidance (duration limits, who should avoid) and needn't mention sleep — but it still
+    // passes the SAME forbidden-framing + raw-id + grade gates (it must read as the source's words, never
+    // an AI directive to the reader).
+    if (kind === 'effect' && !isSleepConcept(f.text)) continue;
     if (lintForbiddenFraming(f.text).length > 0 || hasRawIdentifier(f.text) || GRADE_SMELL.test(f.text)) continue;
     const key = f.text.toLowerCase().replace(/\s+/g, ' ').trim();
     if (!key || seen.has(key)) continue;
     seen.add(key);
-    clean.push({ text: f.text, url: f.url, domain: domainOf(f.url) });
-    if (clean.length >= 4) break;
+    clean.push({ text: f.text, url: f.url, domain: domainOf(f.url), kind });
+    if (clean.length >= 5) break;
   }
   if (clean.length === 0) return result;
   return { ...result, webFindings: clean };

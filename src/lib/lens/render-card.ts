@@ -26,7 +26,7 @@
 
 // The reputable-web-references caveat lives in copy.ts (the [HUMAN-GATE] framing surface); import it so
 // the renderer never authors that medical framing itself. copy.ts is a light leaf (no engine graph).
-import { WEB_TIER_HEAD, WEB_TIER_NOTE } from './copy.ts';
+import { WEB_TIER_HEAD, WEB_TIER_NOTE, WEB_CAUTION_HEAD, WEB_CAUTION_NOTE } from './copy.ts';
 
 export type LensCardStatus = 'assessed' | 'short-circuit' | 'refused' | 'inconclusive';
 
@@ -70,6 +70,7 @@ export interface LensCardWebFinding {
   text: string;
   url: string;
   domain: string;
+  kind?: 'effect' | 'caution';
 }
 export interface LensCardAssessment {
   input: { kind: 'ingredient' | 'product' | 'question'; normalized: string };
@@ -222,6 +223,34 @@ export function renderLensCard(assessment: LensCardAssessment, container: HTMLEl
     card.appendChild(el(doc, 'p', 'lc-disclaimer', assessment.disclaimer));
   }
 
+  // PROMINENT usage/safety CAUTIONS (CHK-7.8) — the source's OWN guidance (e.g. "short-term use only"),
+  // placed high on the card so the "not meant for indefinite nightly use" message is unmissable. Each is
+  // the source's words + its domain; the note frames them as the SOURCES' cautions, never the Lens's advice.
+  const cautions = Array.isArray(assessment.webFindings)
+    ? assessment.webFindings.filter((w) => w && w.kind === 'caution' && typeof w.text === 'string' && w.text)
+    : [];
+  if (cautions.length) {
+    const section = el(doc, 'section', 'lc-block lc-cautions');
+    section.appendChild(el(doc, 'p', 'lc-head', WEB_CAUTION_HEAD));
+    section.appendChild(el(doc, 'p', 'lc-caution-note', WEB_CAUTION_NOTE));
+    const list = el(doc, 'ul', 'lc-caution-list');
+    cautions.forEach((w) => {
+      const li = el(doc, 'li', 'lc-caution-row');
+      li.appendChild(el(doc, 'p', 'lc-caution-text', w.text));
+      if (w.url && w.domain) {
+        const a = el(doc, 'a', 'lc-web-src');
+        a.href = w.url;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.textContent = w.domain;
+        li.appendChild(a);
+      }
+      list.appendChild(li);
+    });
+    section.appendChild(list);
+    card.appendChild(section);
+  }
+
   // "What the evidence shows" — one row per evidence[]; strength as TEXT label + chip; sources → chips.
   if (status === 'assessed' && Array.isArray(assessment.evidence) && assessment.evidence.length) {
     const { section } = block(doc, LABEL.evidenceHead, 'lc-evidence');
@@ -268,15 +297,17 @@ export function renderLensCard(assessment: LensCardAssessment, container: HTMLEl
     card.appendChild(section);
   }
 
-  // "From health references" (CHK-7.7) — the reputable-only web tier, DISTINCT + weaker, shown below the
-  // study evidence with an explicit caveat + each note's source domain. Never peer-reviewed; grounded
-  // server-side (verbatim quote in a reputable source) before it can appear here.
-  if (Array.isArray(assessment.webFindings) && assessment.webFindings.length) {
+  // "From health references" (CHK-7.7) — the reputable-only web tier (EFFECT notes; cautions render in
+  // their own prominent block above). DISTINCT + weaker, shown below the study evidence with an explicit
+  // caveat + each note's source domain. Never peer-reviewed; grounded server-side before it appears.
+  const webEffects = Array.isArray(assessment.webFindings)
+    ? assessment.webFindings.filter((w) => w && w.kind !== 'caution' && typeof w.text === 'string' && w.text)
+    : [];
+  if (webEffects.length) {
     const { section } = block(doc, WEB_TIER_HEAD, 'lc-web');
     section.appendChild(el(doc, 'p', 'lc-web-note', WEB_TIER_NOTE)); // server caveat (copy.ts), textContent
     const list = el(doc, 'ul', 'lc-web-list');
-    assessment.webFindings.forEach((w) => {
-      if (!w || typeof w.text !== 'string' || !w.text) return;
+    webEffects.forEach((w) => {
       const li = el(doc, 'li', 'lc-web-row');
       li.appendChild(el(doc, 'p', 'lc-web-text', w.text));
       if (w.url && w.domain) {
