@@ -447,7 +447,7 @@ NOT a Somnary grade". Concierge (CHK-6.8) demotes to a secondary mode.
   self-merged — medical boundary). Lens red-team 183/39/40 green; live: Restavit →
   doxylamine → assessed, 2 verified claims (weak+strong). *(Merged #99; scope broadened
   to ANY substance's sleep effect per owner.)*
-- [ ] **CHK-7.5 Retrieval recall.** `HG` (medical-boundary AI core). Owner: "put in any
+- [x] **CHK-7.5 Retrieval recall.** `HG` (medical-boundary AI core). Owner: "put in any
   drug and get a response" without loosening the no-uncited-claims firewall. PubMed Best
   Match ranks a broad drug's non-sleep literature above its sleep papers, so a bounded
   top-N missed them → wrongly inconclusive. Fix: run the resolver's query AND a
@@ -457,7 +457,18 @@ NOT a Somnary grade". Concierge (CHK-6.8) demotes to a secondary mode.
   *Accept:* no new model calls (both searches are PubMed); invariant holds; more drugs
   return cited evidence, the rest stay honestly inconclusive. Live: prednisone → insomnia
   (strong), propranolol now assessed (was inconclusive); deeper recall (paid web-search
-  provider) remains the follow-up for drugs PubMed doesn't surface (e.g. sertraline).
+  provider) remains the follow-up for drugs PubMed doesn't surface (e.g. sertraline). *(Merged #102.)*
+- [ ] **CHK-7.6 Multi-source retrieval (Europe PMC).** `HG` (medical-boundary AI core).
+  Owner asked to broaden beyond PubMed ("Google Scholar or something"). Scholar has no API
+  + is bot-blocked; Europe PMC is the right free/keyless add — covers PubMed PLUS PMC
+  full-text + preprints with a DIFFERENT relevance ranking, which surfaces the sleep papers
+  PubMed's Best Match buries. New `EuropePmcProvider` (PMID-only, so the PMID-keyed
+  verification pipeline is unchanged) + `MultiProvider` (fan out, merge deduped by PMID);
+  the route now queries PubMed + Europe PMC. Also caps ANIMAL/in-vitro claims to weak
+  (`isPreclinical`) since broader indexes surface more preclinical studies — never "strong"
+  human evidence. *Accept:* firewall unchanged (every claim still verbatim-verified + cited);
+  no new keys/deps. Live: sertraline inconclusive → assessed (REM-in-mice shown WEAK);
+  propranolol/prednisone improved. The paid web-search provider stays the next lever.
 
 ---
 
