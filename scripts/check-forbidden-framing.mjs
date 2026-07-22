@@ -33,10 +33,28 @@ const TARGETS = [
     .filter((f) => f.endsWith('.ts'))
     .sort()
     .map((f) => `src/lib/guide/${f}`),
+  // Somnary Lens engine (CHK-7.1): the extraction + refute prompts ship model-adjacent prose. Every
+  // forbidden framing in them must be an intentional, sentinel-tagged negative example, never live
+  // copy — the same bar as the guide's prompt.
+  ...(await readdir(join(ROOT, 'src/lib/lens')))
+    .filter((f) => f.endsWith('.ts'))
+    .sort()
+    .map((f) => `src/lib/lens/${f}`),
   ...(await readdir(join(ROOT, 'src/components')))
     .filter((f) => f.endsWith('.astro'))
     .sort()
     .map((f) => `src/components/${f}`),
+  // Somnary Lens UI pages (CHK-7.2): the flagship /lens shell and the /request-a-review page ship
+  // product-boundary prose next to a live AI surface — every forbidden framing in them must be an
+  // intentional, sentinel-tagged negative example, never live copy (same bar as the /guide shell copy).
+  'src/pages/lens.astro',
+  'src/pages/request-a-review.astro',
+  // Somnary Lens human-grade loop (CHK-7.3): the Lens route (one demand-log call added) and the
+  // nominate route carry reader-facing / model-adjacent prose — every forbidden framing must be an
+  // intentional, sentinel-tagged negative example, never live copy. (src/lib/lens/demand-log.ts is
+  // already covered by the src/lib/lens/*.ts sweep above.)
+  'src/pages/api/lens.ts',
+  'src/pages/api/nominate.ts',
 ];
 
 async function loadPatterns() {

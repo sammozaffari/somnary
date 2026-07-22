@@ -5,7 +5,7 @@ import TierBadge from '../components/TierBadge.astro';
 import HeroCarousel from '../components/HeroCarousel.astro';
 import type { SlideSpec } from '../lib/hero-slides';
 import { TIERS } from '../lib/tiers';
-import { Pill, Package, Timer, AlarmClock, ShieldAlert, Baby, MessagesSquare } from '@lucide/astro';
+import { Pill, Package, Timer, AlarmClock, ShieldAlert, Baby, MessagesSquare, ScanSearch } from '@lucide/astro';
 
 // Home — CHK-3.1 (strategy 03 "Homepage Above-The-Fold"; DESIGN_SYSTEM §1/§10).
 // Decision-first front door: route by intent, not by molecule. Replaces the v1 "enemy hero".
@@ -83,18 +83,27 @@ const situations = [
     <!-- situation route tiles — route by intent -->
     <section class="section" id="situations">
       <p class="section-eyebrow">What are you trying to decide?</p>
-      <a class="guide-entry" href="/guide">
+      <!-- Primary AI front door: the Somnary Lens. A distinct --primary-soft affordance (NOT the
+           oxblood --action CTA — that is spent once on the hero). The guide is demoted to a secondary
+           text link below it. -->
+      <a class="guide-entry" href="/lens">
         <span class="guide-entry-icon">
-          <MessagesSquare size={26} strokeWidth={1.75} aria-hidden="true" />
+          <ScanSearch size={26} strokeWidth={1.75} aria-hidden="true" />
         </span>
         <span class="guide-entry-text">
-          <span class="guide-entry-title">Not sure where to start? Talk it through →</span>
+          <span class="guide-entry-title">Researching a supplement we haven’t graded? Use the Lens →</span>
           <span class="guide-entry-dek">
-            Answer a few questions and get a map of what to read on Somnary for your situation —
-            never a recommendation, a dose, or a diagnosis.
+            Name a product or ingredient — or paste a label — and the Lens researches the published
+            evidence and shows what it does and doesn’t establish. AI-assisted research, never a grade,
+            a recommendation, or a dose.
           </span>
         </span>
       </a>
+      <p class="guide-secondary">
+        <MessagesSquare size={16} strokeWidth={1.75} aria-hidden="true" />
+        Not sure where to start? <a href="/guide">Talk it through</a> — answer a few questions and get
+        a map of what to read on Somnary for your situation.
+      </p>
       <div class="tiles">
         {
           situations.map((t) => (
@@ -293,6 +302,26 @@ const situations = [
     font-size: var(--text-sm);
     line-height: var(--lh-sm);
     color: var(--muted);
+  }
+  /* secondary AI on-ramp — the guide concierge, demoted to a plain text line (no card, no accent
+     fill) so the Lens reads as the primary front door. */
+  .guide-secondary {
+    display: flex;
+    align-items: baseline;
+    gap: var(--sp-2);
+    margin: 0 0 var(--sp-5);
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+  }
+  .guide-secondary :global(svg) {
+    flex-shrink: 0;
+    align-self: center;
+    color: var(--primary);
+  }
+  .guide-secondary a {
+    color: var(--primary);
+    font-weight: 600;
   }
   .tiles {
     display: grid;

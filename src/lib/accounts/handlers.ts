@@ -17,7 +17,7 @@
  * Erasable TS so the CI runner imports it directly. The client is typed structurally (only the
  * methods used) so the mock needs no Supabase SDK.
  */
-import { validateSaveBody, deriveMapTitle } from './save-input.ts';
+import { validateSaveBody, deriveMapTitle, validateRoutePlan } from './save-input.ts';
 
 // --- structural client shapes (only what we call; the mock implements these) --------------------
 
@@ -47,13 +47,20 @@ export interface AccountsClient {
     insert(values: Record<string, unknown>): {
       select(cols: string): { single(): Promise<QueryResult<{ id: string }>> };
     };
-    // saved-maps GET: select → eq → order
+    // saved-maps GET list: select → eq → order
+    // saved-maps GET one: select → eq(id) → eq(user_id) → maybeSingle
     select(cols: string): {
       eq(
         col: string,
         val: string,
       ): {
         order(col: string, opts: { ascending: boolean }): Promise<QueryResult<Array<{ id: string; route_plan: unknown; created_at: string }>>>;
+        eq(
+          col: string,
+          val: string,
+        ): {
+          maybeSingle(): Promise<QueryResult<{ id: string; route_plan: unknown; guide_state: unknown; created_at: string } | null>>;
+        };
       };
     };
     // saved-maps DELETE: delete → eq → eq → select
@@ -146,6 +153,53 @@ export async function handleList(client: AccountsClient): Promise<HandlerResult>
 
   const maps = (data ?? []).map((row) => ({ id: row.id, title: deriveMapTitle(row.route_plan), createdAt: row.created_at }));
   return { status: 200, body: { maps } };
+}
+
+// --- get one ------------------------------------------------------------------------------------
+
+/**
+ * Fetch ONE of the caller's own saved maps in FULL (CHK-6.9e) — for the read-only /account view and the
+ * guide "resume" path. RLS + the explicit `.eq('user_id', …)` both scope the select to the caller, so a
+ * row that isn't theirs returns nothing → 404 `not-found` (identical to a truly missing id; existence is
+ * NEVER leaked). A non-uuid id → 400 `invalid-id` before any query.
+ *
+ * DEFENSE-IN-DEPTH: the stored `route_plan` was already sanitized by validateRoutePlan when it was SAVED,
+ * but we re-run it through the SAME validator before returning — so a view can NEVER render an external
+ * href even if the row were tampered with in the DB. A stored plan that somehow fails validation is
+ * treated as not-found rather than returned raw. `guide_state` is returned verbatim (it is opaque
+ * fixed-enum signals; the resume path re-coerces it through /api/guide's coercePriorState server-side).
+ */
+export async function handleGetOne(client: AccountsClient, id: string): Promise<HandlerResult> {
+  const user = await requireUser(client);
+  if (isHandlerResult(user)) return user;
+
+  if (!UUID_RE.test(id)) return { status: 400, body: { error: 'invalid-id' } };
+
+  const { data, error } = await client
+    .from('saved_maps')
+    .select('id, route_plan, guide_state, created_at')
+    .eq('id', id)
+    .eq('user_id', user.id)
+    .maybeSingle();
+  if (error) return { status: 500, body: { error: 'get-failed' } };
+  // No matching OWN row → 404. Never distinguishes "not yours" from "does not exist" (no existence leak).
+  if (!data) return { status: 404, body: { error: 'not-found' } };
+
+  // Re-sanitize the stored route_plan (internal hrefs only, capped text, tone validated). A stored plan
+  // that fails validation is not surfaced — treat it as not-found rather than render something unvetted.
+  const planCheck = validateRoutePlan(data.route_plan);
+  if (!planCheck.ok) return { status: 404, body: { error: 'not-found' } };
+
+  return {
+    status: 200,
+    body: {
+      id: data.id,
+      title: deriveMapTitle(planCheck.plan),
+      createdAt: data.created_at,
+      route_plan: planCheck.plan,
+      guide_state: data.guide_state ?? {},
+    },
+  };
 }
 
 // --- delete -------------------------------------------------------------------------------------

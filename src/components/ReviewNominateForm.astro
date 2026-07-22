@@ -1,0 +1,259 @@
+---
+// Review-nomination form (CHK-7.3a). Same progressive-enhancement pattern as ClaimSubmitForm: a real
+// <form method="POST" action="/api/nominate"> that works with JS off, enhanced by an inline <script>
+// that POSTs via fetch and shows an aria-live status.
+//
+// Framing (real-promises rule): nominating a product FEEDS SOMNARY'S GRADING BACKLOG — it is not a
+// grade, not a verdict, and not a reply. The page's copy already states we can't promise an individual
+// reply or a turnaround time; this form does not weaken that. Email is OPTIONAL. We ask people NOT to
+// include personal health details — this is not medical advice and not a place for a personal case.
+// Minimal fields, clear purpose, link to /privacy. Honeypot, no CAPTCHA. Tokens only.
+---
+
+<form class="nf" method="POST" action="/api/nominate" data-nf-form novalidate>
+  <div class="nf-field">
+    <label class="nf-label" for="nf-subject">Product or ingredient to review</label>
+    <input
+      type="text"
+      id="nf-subject"
+      name="subject"
+      class="nf-input"
+      required
+      minlength="2"
+      maxlength="200"
+      autocomplete="off"
+      placeholder="E.g. “apigenin”, or a specific gummy brand"
+      aria-describedby="nf-note"
+      data-nf-subject
+    />
+  </div>
+
+  <div class="nf-field">
+    <label class="nf-label" for="nf-note">Why it’s worth a look <span class="nf-optional">(optional)</span></label>
+    <textarea
+      id="nf-note"
+      name="note"
+      class="nf-textarea"
+      rows="4"
+      maxlength="2000"
+      spellcheck="true"
+      placeholder="What claim caught your eye, or where you saw it — no personal health details, please."
+      data-nf-note></textarea>
+  </div>
+
+  <div class="nf-field">
+    <label class="nf-label" for="nf-email">Your email <span class="nf-optional">(optional — only if you want a reply)</span></label>
+    <input
+      type="email"
+      id="nf-email"
+      name="email"
+      class="nf-input"
+      autocomplete="email"
+      spellcheck="false"
+      placeholder="you@example.com"
+      data-nf-email
+    />
+  </div>
+
+  <!-- honeypot -->
+  <div class="nf-hp" aria-hidden="true">
+    <label for="nf-website">Leave this field empty</label>
+    <input type="text" id="nf-website" name="website" tabindex="-1" autocomplete="off" />
+  </div>
+
+  <p id="nf-note-copy" class="nf-note">
+    A nomination adds a subject to the grading backlog — it isn’t a grade, a verdict, or a reply, and we
+    can’t promise a turnaround time. This isn’t medical advice and we can’t look at your personal
+    situation — please don’t include personal health details. An email is only used if you want a
+    reply. See the <a href="/privacy">privacy policy</a>.
+  </p>
+
+  <div class="nf-actions">
+    <button type="submit" class="nf-submit" data-nf-submit>Nominate for review</button>
+  </div>
+
+  <p class="nf-status" role="status" aria-live="polite" data-nf-status hidden></p>
+</form>
+
+<style>
+  .nf {
+    background: var(--surface);
+    border: var(--border-hairline);
+    border-radius: var(--r-lg);
+    padding: var(--sp-6);
+  }
+  .nf-field {
+    margin: 0 0 var(--sp-5);
+  }
+  .nf-label {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+    margin-bottom: var(--sp-2);
+  }
+  .nf-optional {
+    color: var(--muted);
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .nf-textarea,
+  .nf-input {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid var(--mineral);
+    background: var(--paper);
+    border-radius: var(--r-md);
+    padding: var(--sp-4);
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--ink);
+  }
+  .nf-input {
+    min-height: 46px;
+    padding: 0 var(--sp-4);
+  }
+  .nf-textarea {
+    resize: vertical;
+    min-height: 110px;
+  }
+  .nf-textarea::placeholder,
+  .nf-input::placeholder {
+    color: var(--muted);
+  }
+  .nf-textarea:focus-visible,
+  .nf-input:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+    border-color: var(--primary);
+  }
+
+  .nf-hp {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  .nf-note {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: 0 0 var(--sp-5);
+    max-width: 60ch;
+  }
+  .nf-note a {
+    color: var(--primary);
+  }
+
+  .nf-actions {
+    display: flex;
+  }
+  .nf-submit {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    min-height: 46px;
+    padding: 0 var(--sp-5);
+    border-radius: var(--r-sm);
+    cursor: pointer;
+    background: var(--primary);
+    color: var(--surface);
+    border: 1px solid var(--primary);
+    transition: background var(--dur-fast) var(--ease-soft), border-color var(--dur-fast) var(--ease-soft);
+  }
+  .nf-submit:hover {
+    background: var(--primary-deep);
+    border-color: var(--primary-deep);
+  }
+  .nf-submit:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+  }
+  .nf-submit[disabled] {
+    opacity: 0.6;
+    cursor: default;
+  }
+
+  .nf-status {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    margin: var(--sp-5) 0 0;
+    padding: var(--sp-3) var(--sp-4);
+    border-radius: var(--r-md);
+    border: var(--border-hairline);
+  }
+  .nf-status[hidden] {
+    display: none;
+  }
+  .nf-status[data-tone='ok'] {
+    color: var(--eucalyptus);
+    background: var(--pistachio);
+    border-color: var(--eucalyptus);
+  }
+  /* neutral, NOT the reserved safety register — a form error is not a health warning */
+  .nf-status[data-tone='err'] {
+    color: var(--ink);
+    background: var(--surface);
+    border-color: var(--ink);
+    font-weight: 600;
+  }
+
+  @media (max-width: 640px) {
+    .nf {
+      padding: var(--sp-5);
+    }
+    .nf-submit {
+      flex: 1;
+    }
+  }
+</style>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>('[data-nf-form]');
+  const subject = document.querySelector<HTMLInputElement>('[data-nf-subject]');
+  const note = document.querySelector<HTMLTextAreaElement>('[data-nf-note]');
+  const email = document.querySelector<HTMLInputElement>('[data-nf-email]');
+  const submit = document.querySelector<HTMLButtonElement>('[data-nf-submit]');
+  const status = document.querySelector<HTMLElement>('[data-nf-status]');
+
+  if (form && subject && submit && status) {
+    const show = (message: string, tone: 'ok' | 'err') => {
+      status.textContent = message;
+      status.dataset.tone = tone;
+      status.hidden = false;
+    };
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      status.hidden = true;
+      submit.disabled = true;
+      try {
+        const res = await fetch(form.action, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json', accept: 'application/json' },
+          body: JSON.stringify({
+            subject: subject.value,
+            note: note?.value ?? '',
+            email: email?.value ?? '',
+            website: (form.elements.namedItem('website') as HTMLInputElement)?.value ?? '',
+          }),
+        });
+        const data = (await res.json().catch(() => ({}))) as { ok?: boolean; message?: string; error?: string };
+        if (data.ok) {
+          show(data.message ?? 'Thanks — it’s on the backlog.', 'ok');
+          form.reset();
+        } else {
+          show(data.error ?? 'Something went wrong — please try again.', 'err');
+        }
+      } catch {
+        show('Couldn’t reach the server — please try again in a moment.', 'err');
+      } finally {
+        submit.disabled = false;
+      }
+    });
+  }
+</script>

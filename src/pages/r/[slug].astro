@@ -153,6 +153,13 @@ const jsonLd = remedyJsonLd(d, canonical, site);
     <div class="disclaimer-slot">
       <Disclaimer variant="standard" />
     </div>
+
+    {/* foot: return to the remedies board without scrolling back to the breadcrumb */}
+    <nav class="back-nav" aria-label="Back to the remedies board">
+      <a class="back-link" href="/tiers">
+        <span aria-hidden="true">←</span> Back to all {isIntervention ? 'interventions' : 'remedies'}
+      </a>
+    </nav>
   </main>
 
   {/* coda plate — the hero's world settled toward sleep; the page leaves through it (§11.3) */}
@@ -251,6 +258,23 @@ const jsonLd = remedyJsonLd(d, canonical, site);
 
   .disclaimer-slot {
     margin-top: var(--sp-8);
+  }
+
+  /* foot back-nav to the remedies board — the primary return path now the crumb is retired */
+  .back-nav {
+    margin-top: var(--sp-7);
+    padding-top: var(--sp-5);
+    border-top: var(--hairline);
+  }
+  .back-link {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+    text-decoration: none;
+  }
+  .back-link:hover {
+    color: var(--ink);
   }
 
   /* breakpoints (§3.2): body 1-col @900 (sidebar static below main); title lives in the

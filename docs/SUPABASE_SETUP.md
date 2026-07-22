@@ -192,6 +192,40 @@ signup (the save route also upserts the profile defensively, so accounts predati
 `/api/saved-maps` return **503** and store nothing — the site still builds and works signed-out. So
 you can defer this migration until you turn accounts on.
 
+## 8. Lens human-grade loop — nominations + demand backlog (CHK-7.3a)
+
+The Lens compounding loop needs two tables in the **separate, firewalled** backlog store: reader
+nominations from `/request-a-review`, and an aggregate count of which named products/ingredients the
+Lens researches. Run the migration once:
+
+1. In the project, open **SQL Editor** → **New query**.
+2. Paste the entire contents of
+   [`supabase/migrations/0003_lens_backlog.sql`](../supabase/migrations/0003_lens_backlog.sql) and click **Run**.
+3. Confirm under **Table Editor** that `review_nominations` and `lens_demand` exist and both show **RLS enabled**.
+
+This adds:
+
+- `review_nominations` — one row per reader nomination (subject + optional note + optional email).
+- `lens_demand` — one row per **normalized product/ingredient name** with a bumped `run_count`.
+- `lens_demand_bump(p_subject)` — the security-definer RPC the Lens route calls to upsert-and-bump.
+
+**Same security model as `0001` / `rate-limit.sql`:** RLS on, **no policies** — reached only by the
+service-role key (server). `lens_demand` is written only through `lens_demand_bump()`.
+
+**The firewall (non-negotiable).** These tables have **no foreign key** into any corpus / remedy /
+grade / tier / scorecard table, no grading module imports them, and nothing on the site reads them
+(owner-facing SQL only). Nomination and demand data can never set, influence, or gate a grade —
+grading stays human-gated.
+
+**Privacy (must match `/privacy`).** `lens_demand` stores **only** the normalized name + a count. It
+never stores the free-text question you type, never a refused or short-circuited run, never raw text,
+never an IP, and never a per-search row. The Lens logger derives a subject only for `ingredient` /
+`product` runs (or matched panel names) and skips everything else.
+
+**Graceful degradation:** with no Supabase env vars, `/api/nominate` returns **503** and the Lens
+demand logger is a silent no-op — the site still builds and the Lens still answers. You can defer this
+migration until you turn the backlog on.
+
 ## Data handling notes
 
 - We store the minimum: an email (dispatch) or the submitted text + optional product/email

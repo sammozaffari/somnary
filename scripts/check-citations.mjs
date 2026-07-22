@@ -18,6 +18,11 @@ import { readdir, readFile } from 'node:fs/promises';
 import { join, relative } from 'node:path';
 import matter from 'gray-matter';
 import yaml from 'js-yaml';
+// SINGLE SOURCE OF TRUTH for identifier format + canonical URL (CHK-7.1a). The Lens engine
+// (src/lib/lens/retrieval.ts) imports the SAME RE + canonical-URL map, so the CI build gate and the
+// model-facing evidence pipeline agree byte-for-byte on what a real citation id is. Node type-strips
+// the erasable-TS module on import.
+import { RE, canonicalUrlByKind as canonicalUrl } from '../src/lib/lens/citations.ts';
 
 // Default corpus; overridable via env so the fake-PMID regression test (test-resolver.mjs)
 // can point the resolver at a throwaway fixture without touching the real content.
@@ -28,18 +33,8 @@ const CONTENT_DIR = process.env.SOMNARY_CONTENT_DIR || 'src/content/remedies';
 const WATCHLIST_FILE = process.env.SOMNARY_WATCHLIST_FILE || 'src/data/additive-watchlist.yaml';
 const ONLINE = process.argv.includes('--online');
 
-// Identifier formats — must match the regexes in src/content.config.ts.
-const RE = {
-  pmid: /^\d+$/,
-  doi: /^10\.\d{4,9}\/\S+$/,
-  registry: /^NCT\d{8}$/,
-};
-
-const canonicalUrl = {
-  pmid: (v) => `https://pubmed.ncbi.nlm.nih.gov/${v}/`,
-  doi: (v) => `https://doi.org/${v}`,
-  registry: (v) => `https://clinicaltrials.gov/study/${v}`,
-};
+// RE (identifier formats — must match src/content.config.ts) and canonicalUrl are imported from
+// src/lib/lens/citations.ts (CHK-7.1a single source of truth). See the import at the top of the file.
 
 async function mdxFiles(dir) {
   const out = [];

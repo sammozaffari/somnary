@@ -21,7 +21,7 @@
  */
 import { coercePriorState } from '../guide/route-input.ts';
 import type { GuideState } from '../guide/engine.ts';
-import type { RoutePlan, RouteItem, RouteSection } from '../guide/router.ts';
+import type { RoutePlan, RouteItem, RouteSection, SummaryFragment } from '../guide/router.ts';
 
 // --- caps (a saved map is small; anything larger is abuse/padding) ------------------------------
 export const MAX_SECTIONS = 12;
@@ -31,6 +31,8 @@ export const MAX_LABEL_LEN = 200;
 export const MAX_NOTE_LEN = 500;
 export const MAX_CHECKLIST_KEYS = 64;
 export const MAX_CHECKLIST_KEY_LEN = 64;
+export const MAX_SUMMARY_FRAGMENTS = 24;
+export const MAX_FRAGMENT_TEXT_LEN = 600;
 /** Reject a raw body larger than this many bytes BEFORE parsing shape (defence against padding). */
 export const MAX_BODY_BYTES = 64 * 1024;
 
@@ -44,6 +46,9 @@ const SECTION_KINDS = [
   'fallback',
 ] as const;
 type SectionKind = (typeof SECTION_KINDS)[number];
+
+const SUMMARY_TONES = ['crisis', 'boundary', 'normal'] as const;
+type SummaryTone = (typeof SUMMARY_TONES)[number];
 
 function asRecord(v: unknown): Record<string, unknown> {
   return v && typeof v === 'object' && !Array.isArray(v) ? (v as Record<string, unknown>) : {};
@@ -104,7 +109,29 @@ export function validateRoutePlan(raw: unknown): RoutePlanCheck {
     sections.push({ kind, title: cappedString(s.title, MAX_LABEL_LEN), items });
   }
 
-  return { ok: true, plan: { stop: root.stop === true, sections } };
+  // The woven narrative summary (CHK-6.8c). Rebuilt from an allow-list the same way as sections:
+  // capped text, tone validated against the enum (default 'normal'), and every link internal-only
+  // (an external href rejects the whole payload). A missing/non-array summary → []. Not required, so a
+  // structurally-odd summary is dropped to [] rather than failing the save (unlike a broken section).
+  const summary: SummaryFragment[] = [];
+  if (Array.isArray(root.summary)) {
+    for (const rawFrag of root.summary.slice(0, MAX_SUMMARY_FRAGMENTS)) {
+      const f = asRecord(rawFrag);
+      const links: RouteItem[] = [];
+      const rawLinks = Array.isArray(f.links) ? f.links.slice(0, MAX_ITEMS_PER_SECTION) : [];
+      for (const rawLink of rawLinks) {
+        const l = asRecord(rawLink);
+        if (!isInternalHref(l.href)) return { ok: false, error: 'external-href' };
+        links.push({ href: l.href, label: cappedString(l.label, MAX_LABEL_LEN) });
+      }
+      const tone: SummaryTone = SUMMARY_TONES.includes(f.tone as SummaryTone)
+        ? (f.tone as SummaryTone)
+        : 'normal';
+      summary.push({ text: cappedString(f.text, MAX_FRAGMENT_TEXT_LEN), links, tone });
+    }
+  }
+
+  return { ok: true, plan: { stop: root.stop === true, sections, summary } };
 }
 
 /**

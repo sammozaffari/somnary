@@ -1,0 +1,206 @@
+---
+// /request-a-review (CHK-7.2) — the real page the Lens's reviewRoute links to (else that link 404s and
+// the promise is broken). A STATIC, crawlable Base page. Per the real-promises rule (MEMORY): an
+// outward-facing commitment must be REAL and keepable, never invented. So this page is scrupulously
+// honest about what nominating a product actually does — it FEEDS SOMNARY'S GRADING BACKLOG — and it
+// states plainly that we cannot promise an individual reply or a turnaround time. It invents NO inbox,
+// NO SLA, NO "we'll email you back".
+//
+// A capture FORM is deliberately NOT shipped here: the env-gated Supabase capture pattern (CHK-4.2)
+// needs the owner's project + keys, and wiring/self-hiding it is more than trivial — so per the plan
+// this ships as the honest static page and the optional form is noted as a 7.3 follow-up. Nothing on
+// this page makes a promise the site can't keep today.
+//
+// CHK-7.3a adds the capture FORM (the 7.2 follow-up noted below): a progressive-enhancement nomination
+// form posting to /api/nominate (env-gated Supabase capture, mirrors CHK-4.2). It writes to the SEPARATE,
+// firewalled backlog store (review_nominations) — never a grade. The honest real-promises copy is
+// UNCHANGED; the form sits under the "what it honestly can't promise" section so the limits are read first.
+import Base from '../layouts/Base.astro';
+import ContextBanner from '../components/ContextBanner.astro';
+import ReviewNominateForm from '../components/ReviewNominateForm.astro';
+---
+
+<Base
+  title="Request a full human review | Somnary"
+  description="Nominate a sleep supplement or ingredient for a full human evidence review on Somnary. Nominations feed Somnary's grading backlog and help decide what gets graded next — we can't promise an individual reply or a turnaround time. Educational, not medical advice."
+  canonical="https://somnary.vercel.app/request-a-review"
+>
+  <main class="page">
+    <header class="head">
+      <p class="eyebrow">Request a review · feed the grading backlog</p>
+      <h1 class="title">Nominate a remedy for a full human review</h1>
+      <p class="dek">
+        Somnary’s grades come from a human reading the published evidence — not from an algorithm and
+        not from the Lens. If the Lens researched something the tier board doesn’t cover yet, you can
+        nominate it here so a person looks at it for a full graded write-up.
+      </p>
+    </header>
+
+    <ContextBanner
+      note="This is a nomination, not a grade and not a reply. It adds a subject to Somnary's grading backlog — it doesn't return a verdict or a personalised answer."
+    />
+
+    <section class="prose" aria-label="What a review request does">
+      <h2 class="h2">What nominating a remedy does</h2>
+      <p>
+        A nomination goes onto Somnary’s <strong>grading backlog</strong> — the running list of
+        supplements and ingredients waiting for a full, human, source-first review. What gets graded
+        next is decided by that backlog together with what readers are searching for and where the
+        evidence is worth the work. Nominating something makes it a candidate; it does not put it at the
+        front of the queue.
+      </p>
+
+      <h2 class="h2">What it honestly can’t promise</h2>
+      <p>
+        We want to be straight with you about the limits, because a promise we can’t keep is worse than
+        no promise:
+      </p>
+      <ul class="list">
+        <li>We <strong>can’t promise an individual reply.</strong> There is no support inbox behind this page and no “we’ll email you back”.</li>
+        <li>We <strong>can’t promise a turnaround time.</strong> There is no service-level guarantee — a full human review is slow, careful work, and some subjects never clear the evidence bar to earn a graded page.</li>
+        <li>A nomination is <strong>not medical advice</strong> and not a verdict on whether something works or is safe.</li>
+      </ul>
+      <p>
+        What we can say honestly: every nomination is read, and the backlog is what the grading work
+        draws from.
+      </p>
+    </section>
+
+    <section class="nominate" aria-label="Nominate a remedy for review">
+      <h2 class="h2">Nominate a remedy</h2>
+      <p class="nominate-lead">
+        Name the product or ingredient. It joins the grading backlog for a human to weigh — nothing
+        here returns a grade, a verdict, or a reply.
+      </p>
+      <ReviewNominateForm />
+    </section>
+
+    <section class="prose" aria-label="What to read now">
+      <h2 class="h2">In the meantime</h2>
+      <p>
+        The evidence that already exists is here now, graded and cited:
+      </p>
+      <ul class="list">
+        <li><a href="/tiers">Browse the graded tier board</a> — every remedy Somnary has reviewed, S–F, on human evidence.</li>
+        <li><a href="/lens">Use the Lens</a> to research a product the corpus doesn’t cover yet — it shows what the published evidence does and doesn’t establish.</li>
+        <li><a href="/compare">Compare remedies side by side</a>, or check a product’s label with the <a href="/label-checker">label checker</a>.</li>
+        <li>If a sleep problem is ongoing or serious, <a href="/when-to-see-a-doctor">see when to talk to a doctor</a> — that deserves a real clinical assessment, not a supplement.</li>
+      </ul>
+    </section>
+
+    <p class="review-line">
+      Reviewed 2026-07-21 · found an error? <a href="/methodology#corrections">corrections →</a>
+    </p>
+  </main>
+</Base>
+
+<style>
+  .page {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: var(--sp-8) var(--sp-7) var(--sp-9);
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+    margin: 0;
+  }
+  .head {
+    margin-bottom: var(--sp-6);
+  }
+  .title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-3xl);
+    line-height: var(--lh-3xl);
+    letter-spacing: var(--tracking-tight);
+    color: var(--ink);
+    margin: var(--sp-3) 0 var(--sp-5);
+  }
+  .dek {
+    font-size: var(--text-md);
+    line-height: var(--lh-md);
+    color: var(--muted);
+    max-width: 64ch;
+    margin: 0;
+  }
+
+  .prose {
+    margin-top: var(--sp-7);
+  }
+  .h2 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-xl);
+    line-height: var(--lh-xl);
+    color: var(--ink);
+    margin: var(--sp-7) 0 var(--sp-3);
+  }
+  .prose p {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--ink);
+    margin: 0 0 var(--sp-4);
+    max-width: 64ch;
+  }
+  .list {
+    margin: 0 0 var(--sp-4);
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+  }
+  .list li {
+    position: relative;
+    padding-left: var(--sp-5);
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--ink);
+    max-width: 64ch;
+  }
+  .list li::before {
+    content: '·';
+    position: absolute;
+    left: var(--sp-1);
+    top: 0;
+    color: var(--primary);
+    font-weight: 700;
+  }
+  .prose a {
+    color: var(--primary);
+  }
+
+  .nominate {
+    margin-top: var(--sp-7);
+  }
+  .nominate-lead {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--ink);
+    max-width: 64ch;
+    margin: 0 0 var(--sp-5);
+  }
+
+  .review-line {
+    margin-top: var(--sp-8);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+  }
+  .review-line a {
+    color: var(--primary);
+  }
+
+  @media (max-width: 640px) {
+    .page {
+      padding: var(--sp-6) var(--sp-5) var(--sp-8);
+    }
+    .title {
+      font-size: var(--text-2xl);
+    }
+  }
+</style>

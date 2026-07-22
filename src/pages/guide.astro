@@ -27,6 +27,11 @@ import GuidePanel from '../components/GuidePanel.astro';
         safety boundaries. It is a map to the reading that already exists on this site. It does
         <em>not</em> recommend a remedy, tell you what to take, diagnose you, or give you a dose.
       </p>
+      <p class="secondary-note">
+        This is a secondary way in. To research a specific supplement or ingredient, the
+        <a href="/lens">Somnary Lens</a> is the main tool — it shows what the published evidence does and
+        doesn’t establish.
+      </p>
     </header>
 
     <ContextBanner
@@ -62,23 +67,6 @@ import GuidePanel from '../components/GuidePanel.astro';
 
     <!-- The island. Progressive enhancement: the shell above stands on its own without it. -->
     <GuidePanel />
-
-    <!-- Third-party-AI disclosure (reuses AskPanel's wording) + privacy note. Server-rendered. -->
-    <section class="notes" aria-label="How this works and your privacy">
-      <p class="note">
-        <span class="note-tag">How it works</span>
-        Your message is sent to a third-party AI service — OpenRouter, which routes it to a DeepSeek
-        model (or Google's Gemini API as a fallback) — only to read the signals in what you wrote: the
-        problems, the timing, and any safety flags. A deterministic system on Somnary, not the AI,
-        decides which pages you are shown; the AI can never name a remedy, a dose, or a link. Don't
-        include personal or identifying details.
-      </p>
-      <p class="note">
-        <span class="note-tag">Your privacy</span>
-        We don't save your answers. Each step is handled and then forgotten — there is no account,
-        no history, and nothing about your sleep is stored on Somnary.
-      </p>
-    </section>
 
     <p class="review-line">
       Reviewed 2026-07-19 · found an error? <a href="/methodology#corrections">corrections →</a>
@@ -117,6 +105,16 @@ import GuidePanel from '../components/GuidePanel.astro';
     color: var(--muted);
     max-width: 68ch;
     margin: 0;
+  }
+  .secondary-note {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    max-width: 68ch;
+    margin: var(--sp-4) 0 0;
+  }
+  .secondary-note a {
+    color: var(--primary);
   }
 
   .boundary-slot {
@@ -167,32 +165,6 @@ import GuidePanel from '../components/GuidePanel.astro';
     font-weight: 700;
   }
   .col-list a {
-    color: var(--primary);
-  }
-
-  /* disclosure + privacy notes */
-  .notes {
-    margin-top: var(--sp-7);
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-4);
-    max-width: 82ch;
-  }
-  .note {
-    font-size: var(--text-sm);
-    line-height: var(--lh-sm);
-    color: var(--muted);
-    margin: 0;
-  }
-  .note-tag {
-    display: inline-block;
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
-    color: var(--primary);
-    margin-right: var(--sp-2);
-  }
-  .note a {
     color: var(--primary);
   }
 
