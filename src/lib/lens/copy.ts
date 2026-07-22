@@ -79,11 +79,12 @@ export const SAFETY_NOTE =
 /** Heading for the reputable-web-references block. */
 export const WEB_TIER_HEAD = 'From health references';
 
-/** The caveat under the web-references heading — states plainly that this tier is weaker than the
- * studies above and is not a grade. Framing-linted like every other string in this file. */
+/** The caveat under the web-references heading. SELF-CONTAINED on purpose: it must hold even when there
+ * is NO study evidence above it (the inconclusive path enriches too), so it never implies these notes
+ * are the evidence Somnary just said it could not verify. Framing-linted like every string in this file. */
 export const WEB_TIER_NOTE =
-  'These come from reputable medical and government health references, not primary studies — treat them ' +
-  'as background, weaker than the evidence above. They are not a Somnary grade.';
+  'These come from reputable medical and government health references — general background, not primary ' +
+  'studies, and not a sign this works. They are not a Somnary grade.';
 
 // --- resolved-subject line (SERVER-composed; CHK-7.4) --------------------------------------------
 //

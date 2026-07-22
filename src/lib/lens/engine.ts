@@ -37,7 +37,7 @@ import {
 import type { Flag, LabelEntry } from '../label-rules.ts';
 import { normalizeLensInput, type LensInputKind, type LensShortCircuit } from './input.ts';
 import { resolveSubject, type ResolvedSubject, type LensProductClass } from './resolve.ts';
-import { defaultWebResearch, type WebFinding, type WebResearchFn } from './websearch.ts';
+import { defaultWebResearch, isReputableUrl, domainOf, type WebFinding, type WebResearchFn } from './websearch.ts';
 import type { EvidenceProvider, EvidenceDoc } from './retrieval.ts';
 import { parseCitation, type CitationId } from './citations.ts';
 import {
@@ -60,6 +60,14 @@ import * as copy from './copy.ts';
 export const LENS_MAX_CLAIMS = 5;
 /** Default wall-clock budget for a whole Lens run (ms). Research + N×claims refute calls must fit. */
 const DEFAULT_DEADLINE_MS = 60_000;
+/** The reputable web tier (CHK-7.7) runs AFTER the study result is composed, so it is bounded by a
+ * separate WALL-clock ceiling (just under the Vercel maxDuration of 90s) rather than the study deadline —
+ * this guarantees a slow study run + the web call can never blow the platform cap and lose the answer. */
+const WEB_WALL_BUDGET_MS = 85_000;
+/** Don't start the web tier without at least this much wall-clock left — else the study result ships now. */
+const WEB_MIN_BUDGET_MS = 8_000;
+/** Upper bound on a single web call regardless of how much budget remains. */
+const WEB_MAX_TIMEOUT_MS = 25_000;
 
 // --- the assessment schema — NO tier/grade/score FIELD ANYWHERE ----------------------------------
 
@@ -369,6 +377,7 @@ function hasResolvedDisplay(d: LensResolvedDisplay): boolean {
 export async function runLens(args: RunLensArgs): Promise<LensAssessment> {
   const providerName = args.providerName ?? 'pubmed';
   const now = args.now ?? Date.now;
+  const runStart = now(); // wall-clock start, for the web tier's platform-cap budget (CHK-7.7)
   const corpus = Array.isArray(args.corpus) ? args.corpus : [];
   const labelEntries = Array.isArray(args.labelEntries) ? args.labelEntries : [];
   const additiveWatchlist = Array.isArray(args.additiveWatchlist) ? args.additiveWatchlist : [];
@@ -511,7 +520,7 @@ export async function runLens(args: RunLensArgs): Promise<LensAssessment> {
       );
       // Even with NO study evidence, reputable web references (if enabled) can still help — this is
       // exactly when a reader most wants them. Enrich before returning.
-      return await enrichWithWeb(studyResult, resolved.resolvedName || normalized.normalized, webResearch, deadline, now, emit);
+      return await enrichWithWeb(studyResult, resolved.resolvedName || normalized.normalized, webResearch, runStart, now, emit);
     }
 
     // (5) EXTRACT — ONE model call over the docs fetched for the resolved subject.
@@ -554,7 +563,7 @@ export async function runLens(args: RunLensArgs): Promise<LensAssessment> {
     // (7)+(8) COMPOSE — server-side, from verified claims + rubric flags + copy.ts templates.
     emit({ type: 'composing' });
     const studyResult = compose(base, verified, rubric.labelFlags, rubric.additiveFindings, normalized.normalized, candidates.length, meta, resolvedDisplay);
-    return await enrichWithWeb(studyResult, extractSubject, webResearch, deadline, now, emit);
+    return await enrichWithWeb(studyResult, extractSubject, webResearch, runStart, now, emit);
   } catch {
     // Any unexpected error ⇒ honest inconclusive with empty rubric (never a fabricated verdict).
     const normalized = typeof args.input === 'string' ? args.input.slice(0, 4000).trim() : '';
@@ -693,16 +702,20 @@ async function enrichWithWeb(
   result: LensAssessment,
   subject: string,
   webResearch: WebResearchFn,
-  deadline: number,
+  runStart: number,
   now: () => number,
   emit: (event: LensEvent) => void,
 ): Promise<LensAssessment> {
   if (result.status !== 'assessed' && result.status !== 'inconclusive') return result;
-  if (typeof webResearch !== 'function' || deadline - now() <= 0) return result;
+  if (typeof webResearch !== 'function') return result;
+  // WALL-clock budget (not the study deadline): only run with real headroom under the platform cap, and
+  // clamp the call so a slow study run + the web call can never exceed it and lose the composed answer.
+  const webBudget = Math.min(WEB_MAX_TIMEOUT_MS, WEB_WALL_BUDGET_MS - (now() - runStart));
+  if (webBudget < WEB_MIN_BUDGET_MS) return result;
   emit({ type: 'web-search' });
   let findings: WebFinding[] = [];
   try {
-    findings = await webResearch(subject);
+    findings = await webResearch(subject, webBudget);
   } catch {
     findings = [];
   }
@@ -711,12 +724,15 @@ async function enrichWithWeb(
   const seen = new Set<string>();
   for (const f of findings) {
     if (!f || typeof f.text !== 'string' || typeof f.url !== 'string' || !f.url) continue;
+    // Defense-in-depth: the engine INDEPENDENTLY enforces reputability (webResearch is injectable) and
+    // recomputes the shown domain from the URL — never trusts a passed-in domain.
+    if (!isReputableUrl(f.url)) continue;
     if (!isSleepConcept(f.text)) continue; // only the subject's SLEEP effect, same as study evidence
     if (lintForbiddenFraming(f.text).length > 0 || hasRawIdentifier(f.text) || GRADE_SMELL.test(f.text)) continue;
     const key = f.text.toLowerCase().replace(/\s+/g, ' ').trim();
     if (!key || seen.has(key)) continue;
     seen.add(key);
-    clean.push({ text: f.text, url: f.url, domain: typeof f.domain === 'string' ? f.domain : '' });
+    clean.push({ text: f.text, url: f.url, domain: domainOf(f.url) });
     if (clean.length >= 4) break;
   }
   if (clean.length === 0) return result;

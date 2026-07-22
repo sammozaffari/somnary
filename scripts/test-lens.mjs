@@ -1125,6 +1125,8 @@ async function runRedTeam() {
       { text: 'Doxylamine commonly causes next-day drowsiness', url: 'https://medlineplus.gov/x', domain: 'medlineplus.gov' },
       { text: 'Doxylamine lowers blood pressure', url: 'https://drugs.com/y', domain: 'drugs.com' }, // no sleep concept → dropped
       { text: 'Take doxylamine tonight for sleep', url: 'https://drugs.com/z', domain: 'drugs.com' }, // forbidden framing → dropped
+      { text: 'Doxylamine improves sleep says a blog', url: 'https://sleepblog.com/x', domain: 'sleepblog.com' }, // non-reputable url → engine drops
+      { text: 'Doxylamine reduces insomnia onset per the reference', url: 'https://medlineplus.gov/z', domain: 'evil.com' }, // reputable url, LYING domain → engine recomputes
     ];
     const { model } = makeEngineModel({
       resolveReply: { sleepRelevant: true, resolvedName: 'doxylamine', aka: [], productClass: 'otc-drug', pubmedQuery: 'doxylamine AND sleep' },
@@ -1133,9 +1135,11 @@ async function runRedTeam() {
     });
     const wdocs = [{ pmid: '23691095', title: 'Doxylamine insomnia trial', abstractText: 'reduced insomnia symptoms in the trial', url: 'https://pubmed.ncbi.nlm.nih.gov/23691095/' }];
     const r = await runLens({ ...base, input: 'doxylamine sleep aid product', provider: providerOf(wdocs), model, webResearch: engineWeb });
-    ok('(11w) assessed card carries a SEPARATE webFindings tier', Array.isArray(r.webFindings) && r.webFindings.length === 1 && /next-day drowsiness/.test(r.webFindings[0].text), JSON.stringify(r.webFindings));
+    ok('(11w) assessed card carries a SEPARATE webFindings tier', Array.isArray(r.webFindings) && r.webFindings.length === 2 && r.webFindings.some((f) => /next-day drowsiness/.test(f.text)), JSON.stringify(r.webFindings));
     ok('(11w) a non-sleep web note is filtered out', (r.webFindings || []).every((f) => !/blood pressure/.test(f.text)));
     ok('(11w) a forbidden-framing web note is filtered out', (r.webFindings || []).every((f) => !/tonight/.test(f.text)));
+    ok('(11w) a non-reputable web url is dropped by the ENGINE guard', (r.webFindings || []).every((f) => f.domain !== 'sleepblog.com' && !/says a blog/.test(f.text)));
+    ok('(11w) the shown domain is RECOMPUTED from the url (a lying domain field is ignored)', (r.webFindings || []).every((f) => f.domain !== 'evil.com') && (r.webFindings || []).some((f) => f.domain === 'medlineplus.gov' && /reduces insomnia onset/.test(f.text)));
     ok('(11w) NO grade smell with a web tier', findGradeSmell(r) === null);
     const rNoWeb = await runLens({ ...base, input: 'doxylamine sleep aid product', provider: providerOf(wdocs), model, webResearch: async () => [] });
     ok('(11w) empty web → NO webFindings key', rNoWeb.webFindings === undefined);

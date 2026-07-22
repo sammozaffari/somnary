@@ -61,7 +61,9 @@ export const REPUTABLE_DOMAINS: readonly string[] = [
   'health.gov',
   'nice.org.uk',
   'merckmanuals.com',
-  'sleepfoundation.org',
+  // sleepfoundation.org deliberately EXCLUDED — it runs product/mattress review content with commercial
+  // ties (D2: no commerce-adjacency). aasm.org + sleepeducation.org (both American Academy of Sleep
+  // Medicine, non-commercial) cover the sleep-medicine reference need.
   'aasm.org',
   'sleepeducation.org',
 ];
@@ -225,13 +227,16 @@ export async function openRouterWebResearch(args: WebResearchArgs): Promise<WebF
 /** The injectable web-research function the engine calls. ENV-GATED: returns a no-op ([]) unless
  * LENS_WEB_SEARCH is truthy AND an OpenRouter key is present — so the paid `web` plugin never bills
  * unless the owner opts in. Tests inject their own function; the engine default reads env here. */
-export type WebResearchFn = (subject: string) => Promise<WebFinding[]>;
+export type WebResearchFn = (subject: string, timeoutMs?: number) => Promise<WebFinding[]>;
 
 export function defaultWebResearch(): WebResearchFn {
   const env = typeof process !== 'undefined' ? process.env : undefined;
-  const enabled = !!env?.LENS_WEB_SEARCH && env.LENS_WEB_SEARCH !== '0' && env.LENS_WEB_SEARCH !== 'false';
+  // Truthy-but-not-whitespace opt-in: "1"/"on"/"true" enable; unset/"0"/"false"/" " do not (no billing).
+  const flag = (env?.LENS_WEB_SEARCH ?? '').trim();
+  const enabled = !!flag && flag !== '0' && flag.toLowerCase() !== 'false';
   const apiKey = env?.OPENROUTER_API_KEY ?? '';
   const model = env?.OPENROUTER_MODEL || 'deepseek/deepseek-chat';
   if (!enabled || !apiKey) return async () => [];
-  return (subject: string) => openRouterWebResearch({ subject, apiKey, model });
+  // The engine passes a timeout clamped to the remaining wall-clock budget (CHK-7.7 latency fix).
+  return (subject: string, timeoutMs?: number) => openRouterWebResearch({ subject, apiKey, model, timeoutMs });
 }
