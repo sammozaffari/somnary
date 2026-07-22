@@ -27,14 +27,14 @@ const imp = (rel) => import(pathToFileURL(join(ROOT, rel)).href);
 const { isValidId, isResolvableId, parseCitation, canonicalUrl, canonicalUrlByKind } = await imp(
   'src/lib/lens/citations.ts',
 );
-const { PubMedProvider } = await imp('src/lib/lens/retrieval.ts');
+const { PubMedProvider, EuropePmcProvider, MultiProvider } = await imp('src/lib/lens/retrieval.ts');
 const { normalizeLensInput, MAX_LENS_INPUT_LEN } = await imp('src/lib/lens/input.ts');
 const { verifyClaims, quoteIsGrounded, parseVerdict, coerceVerdict, REFUTE_N, REFUTE_QUORUM, LENS_MAX_MODEL_CALLS } =
   await imp('src/lib/lens/verify.ts');
 const { LENS_EXTRACT_PROMPT, LENS_REFUTE_PROMPT, LENS_EXTRACT_VERSION, LENS_REFUTE_VERSION, buildRefuteUserPrompt, buildExtractUserPrompt } =
   await imp('src/lib/lens/prompts.ts');
 // CHK-7.1c — the composer/orchestrator + rubric + copy + the red-team gate.
-const { runLens, parseExtraction, LENS_MAX_CLAIMS, mergeDocs, sleepScore, rerankBySleep, sleepFocusedQuery } = await imp('src/lib/lens/engine.ts');
+const { runLens, parseExtraction, LENS_MAX_CLAIMS, mergeDocs, sleepScore, rerankBySleep, sleepFocusedQuery, isPreclinical } = await imp('src/lib/lens/engine.ts');
 const { applyRubric } = await imp('src/lib/lens/rubric.ts');
 const { parseAdditiveWatchlist } = await imp('src/lib/lens/additive-watchlist.ts');
 const lensCopy = await imp('src/lib/lens/copy.ts');
@@ -262,6 +262,45 @@ async function run() {
     const provider = new PubMedProvider({ fetchImpl: spyFetch });
     await provider.search('doxylamine AND (sleep OR insomnia)');
     ok('esearch requests relevance (Best Match) sort', /[?&]sort=relevance(&|$)/.test(esearchUrl), esearchUrl);
+  }
+
+  console.log('\nlens suite — Europe PMC + MultiProvider (CHK-7.6):');
+  {
+    // EuropePmcProvider: parses resultList.result[], keeps ONLY records with a valid PMID (the pipeline
+    // is PMID-keyed), strips markup, maps to the canonical PMID url; a DOI-only preprint is skipped.
+    const epmcJson = {
+      resultList: {
+        result: [
+          { pmid: '23691095', title: 'Apigenin <i>and</i> sleep', abstractText: 'reduced <b>sleep</b> latency', pubYear: '2020', doi: '10.1/x' },
+          { pmid: '', doi: '10.2/preprint', title: 'A DOI-only preprint' },
+          { title: 'No ids at all' },
+          { pmid: 'not-a-pmid', title: 'Bad pmid' },
+        ],
+      },
+    };
+    const epmcFetch = async (url) => {
+      ok('epmc query hits the Europe PMC search endpoint', url.includes('ebi.ac.uk/europepmc') && /[?&]resultType=core(&|$)/.test(url) && /[?&]format=json(&|$)/.test(url));
+      return { ok: true, json: async () => epmcJson };
+    };
+    const epmc = new EuropePmcProvider({ fetchImpl: epmcFetch });
+    const docs = await epmc.search('apigenin sleep');
+    ok('EuropePmc keeps ONLY valid-PMID records (drops DOI-only + bad-pmid)', docs.length === 1 && docs[0].pmid === '23691095');
+    ok('EuropePmc strips markup from title + abstract', docs[0].title === 'Apigenin and sleep' && docs[0].abstractText === 'reduced sleep latency');
+    ok('EuropePmc maps to the canonical PMID url + year', docs[0].url === canonicalUrlByKind.pmid('23691095') && docs[0].year === '2020');
+    ok('EuropePmc empty query → [] (no fetch)', (await epmc.search('  ')).length === 0);
+    ok('EuropePmc non-ok/bad JSON → [] (never throws)', (await new EuropePmcProvider({ fetchImpl: async () => ({ ok: false }) }).search('x')).length === 0 && (await new EuropePmcProvider({ fetchImpl: async () => ({ ok: true, json: async () => { throw new Error('bad'); } }) }).search('x')).length === 0);
+  }
+  {
+    // MultiProvider: fans out to N sources with the SAME query, merges deduped by PMID preserving
+    // provider order (first source's copy of a shared PMID wins); a throwing source contributes [].
+    const a = { search: async () => [{ pmid: '111', title: 'A-only', abstractText: '', url: 'u1' }, { pmid: '999', title: 'shared-from-A', abstractText: '', url: 'uA' }] };
+    const b = { search: async () => [{ pmid: '999', title: 'shared-from-B', abstractText: '', url: 'uB' }, { pmid: '222', title: 'B-only', abstractText: '', url: 'u2' }] };
+    const boom = { search: async () => { throw new Error('down'); } };
+    const merged = await new MultiProvider([a, boom, b]).search('q');
+    ok('MultiProvider merges deduped by PMID, provider order preserved', merged.map((d) => d.pmid).join() === '111,999,222');
+    ok('MultiProvider keeps the FIRST source copy of a shared PMID', merged.find((d) => d.pmid === '999').title === 'shared-from-A');
+    ok('MultiProvider tolerates a throwing source (contributes [])', merged.length === 3);
+    ok('MultiProvider with no providers → []', (await new MultiProvider([]).search('q')).length === 0);
   }
 
   console.log('\nlens suite — input.ts (normalize + classify + short-circuit):');
@@ -1018,6 +1057,20 @@ async function runRedTeam() {
       const r = await runLens({ ...base, input: 'somedrug', provider: twoQ, model });
       ok('(11r) engine ran two searches + surfaced the sleep paper → assessed', r.status === 'assessed' && r.evidence.length === 1 && r.evidence[0].sources[0].pmid === '23691095', JSON.stringify({ q: twoQ.queries.length, st: r.status }));
     }
+  }
+  {
+    // (11p) PRECLINICAL DOWNGRADE (CHK-7.6): a verified but ANIMAL/in-vitro finding is never shown as
+    // "strong" HUMAN evidence — the composer caps it to weak (anti-hype). Broader indexes surface more
+    // preclinical studies, so this keeps strength honest even when 3/3 verifiers call it strong.
+    ok('(11p) isPreclinical flags animal/in-vitro text', isPreclinical('reduced REM sleep in mice') && isPreclinical('in vitro cell culture assay') && !isPreclinical('a randomized trial in adults'));
+    const preQuote = 'sertraline reduced rapid eye movement sleep in mice';
+    const { model } = makeEngineModel({
+      extractReply: { claims: [{ text: 'Sertraline reduced REM sleep in mice', sourcePmid: '23691095' }], doesNotShow: [], labelFacts: [] },
+      refuteByClaimSubstr: { 'reduced REM sleep in mice': [yes(preQuote), yes(preQuote), yes(preQuote)] },
+    });
+    const preDocs = [{ pmid: '23691095', title: 'Sertraline and sleep in mice', abstractText: preQuote, url: 'https://pubmed.ncbi.nlm.nih.gov/23691095/' }];
+    const r = await runLens({ ...base, input: 'sertraline sleep', provider: providerOf(preDocs), model });
+    ok('(11p) a strong-verified animal claim is capped to weak', r.status === 'assessed' && r.evidence.length === 1 && r.evidence[0].strength === 'weak', JSON.stringify(r.evidence.map((e) => e.strength)));
   }
   {
     // (11e) STREAMING (CHK-7.4): runLens fires real milestone events; counts are the real ones.
