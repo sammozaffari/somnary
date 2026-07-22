@@ -259,7 +259,7 @@ export const ASHWAGANDHA_SOURCES: AshProduct[] = [
   },
   {
     slug: 'fusion-health-stress-anxiety',
-    imagePath: undefined,
+    imagePath: '/images/sources/ashwagandha/fusion-health-stress-anxiety.jpg',
     brand: 'Fusion Health',
     productName: 'Stress & Anxiety',
     bottomLine:
@@ -597,6 +597,7 @@ export const ASHWAGANDHA_SOURCES: AshProduct[] = [
   },
   {
     slug: 'nutricost-ksm66-ashwagandha',
+    imagePath: '/images/sources/ashwagandha/nutricost-ksm66-ashwagandha.jpg',
     brand: 'Nutricost',
     productName: 'Ashwagandha KSM-66',
     bottomLine:
@@ -718,6 +719,7 @@ export const ASHWAGANDHA_SOURCES: AshProduct[] = [
   },
   {
     slug: 'thorne-ashwagandha',
+    imagePath: '/images/sources/ashwagandha/thorne-ashwagandha.jpg',
     brand: 'Thorne',
     productName: 'Ashwagandha',
     bottomLine:

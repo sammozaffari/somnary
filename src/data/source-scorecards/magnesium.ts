@@ -78,6 +78,7 @@ export interface MagProduct {
 export const MAGNESIUM_SOURCES: MagProduct[] = [
   {
     slug: 'blackmores-sleep-sound-magnesium',
+    imagePath: '/images/sources/magnesium/blackmores-sleep-sound-magnesium.jpg',
     brand: 'Blackmores',
     productName: 'Sleep Sound Magnesium',
     bottomLine:
@@ -167,6 +168,7 @@ export const MAGNESIUM_SOURCES: MagProduct[] = [
   },
   {
     slug: 'swisse-ultiboost-magnesium',
+    imagePath: '/images/sources/magnesium/swisse-ultiboost-magnesium.jpg',
     brand: 'Swisse',
     productName: 'Ultiboost Magnesium',
     bottomLine:
@@ -196,6 +198,7 @@ export const MAGNESIUM_SOURCES: MagProduct[] = [
   },
   {
     slug: 'bioglan-active-magnesium-pm',
+    imagePath: '/images/sources/magnesium/bioglan-active-magnesium-pm.jpg',
     brand: 'Bioglan',
     productName: 'Active Magnesium PM',
     bottomLine:
@@ -225,6 +228,7 @@ export const MAGNESIUM_SOURCES: MagProduct[] = [
   },
   {
     slug: 'carusos-super-magnesium',
+    imagePath: '/images/sources/magnesium/carusos-super-magnesium.jpg',
     brand: "Caruso's",
     productName: 'Super Magnesium',
     bottomLine:
@@ -254,6 +258,7 @@ export const MAGNESIUM_SOURCES: MagProduct[] = [
   },
   {
     slug: 'swisse-magnesium-glycinate',
+    imagePath: '/images/sources/magnesium/swisse-magnesium-glycinate.jpg',
     brand: 'Swisse',
     productName: 'Ultiboost Magnesium Glycinate',
     bottomLine:
@@ -283,6 +288,7 @@ export const MAGNESIUM_SOURCES: MagProduct[] = [
   },
   {
     slug: 'natures-own-magnesium-sleep-effervescent',
+    imagePath: '/images/sources/magnesium/natures-own-magnesium-sleep-effervescent.jpg',
     brand: "Nature's Own",
     productName: 'Magnesium + Sleep Effervescent',
     bottomLine:
@@ -312,6 +318,7 @@ export const MAGNESIUM_SOURCES: MagProduct[] = [
   },
   {
     slug: 'bioceuticals-ultra-muscleze-night',
+    imagePath: '/images/sources/magnesium/bioceuticals-ultra-muscleze-night.jpg',
     brand: 'BioCeuticals',
     productName: 'Ultra Muscleze Night',
     bottomLine:
@@ -682,6 +689,7 @@ export const MAGNESIUM_SOURCES: MagProduct[] = [
   },
   {
     slug: 'now-magnesium-glycinate',
+    imagePath: '/images/sources/magnesium/now-magnesium-glycinate.jpg',
     brand: 'NOW Foods',
     productName: 'Magnesium Glycinate',
     bottomLine:
