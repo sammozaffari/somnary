@@ -179,6 +179,17 @@ export function isSleepConcept(text: string): boolean {
   return typeof text === 'string' && SLEEP_CLAIM_RE.test(text);
 }
 
+/** Preclinical (animal / in-vitro) markers. Broader indexes (Europe PMC, CHK-7.6) surface more animal
+ * studies; a mouse or cell-line finding is never "strong" HUMAN evidence, so the composer caps it to
+ * weak (anti-hype). The claim text itself still names the model ("in mice"), so it stays transparent. */
+const PRECLINICAL_RE =
+  /\b(?:mice|mouse|murine|rats?|rodents?|zebrafish|drosophila|preclinical|in\svitro|in\ssilico|animal\smodels?|cell\s(?:line|culture)s?)\b/i;
+
+/** True iff a claim reads as a preclinical (non-human) finding. Exported for the red-team suite. */
+export function isPreclinical(text: string): boolean {
+  return typeof text === 'string' && PRECLINICAL_RE.test(text);
+}
+
 // --- retrieval recall: two searches, merge, rerank by sleep relevance (CHK-7.5) ------------------
 //
 // PubMed's Best Match ranks by overall relevance, so for a subject with a large NON-sleep literature
@@ -615,7 +626,9 @@ function compose(
       GRADE_SMELL.test(v.text)
     )
       continue;
-    evidence.push({ text: v.text, strength: v.strength === 'strong' ? 'strong' : 'weak', sources });
+    // A preclinical (animal / in-vitro) finding is never "strong" HUMAN evidence — cap it to weak.
+    const strength: 'strong' | 'weak' = v.strength === 'strong' && !isPreclinical(v.text) ? 'strong' : 'weak';
+    evidence.push({ text: v.text, strength, sources });
   }
 
   const mergedFlags = mergeAdditiveIntoFlags(labelFlags, additiveFindings);
