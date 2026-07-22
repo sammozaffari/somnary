@@ -60,14 +60,14 @@ import * as copy from './copy.ts';
 export const LENS_MAX_CLAIMS = 5;
 /** Default wall-clock budget for a whole Lens run (ms). Research + N×claims refute calls must fit. */
 const DEFAULT_DEADLINE_MS = 60_000;
-/** The reputable web tier (CHK-7.7) runs AFTER the study result is composed, so it is bounded by a
- * separate WALL-clock ceiling (just under the Vercel maxDuration of 90s) rather than the study deadline —
- * this guarantees a slow study run + the web call can never blow the platform cap and lose the answer. */
-const WEB_WALL_BUDGET_MS = 85_000;
-/** Don't start the web tier without at least this much wall-clock left — else the study result ships now. */
-const WEB_MIN_BUDGET_MS = 8_000;
-/** Upper bound on a single web call regardless of how much budget remains. */
-const WEB_MAX_TIMEOUT_MS = 25_000;
+/** The reputable web tier (CHK-7.7) is fired IN PARALLEL with the study path (right after resolution) so
+ * it OVERLAPS the ~60s study work and adds no wall time — then it's awaited + attached at the end. Its
+ * own timeout is generous (it runs inside the study window) but still bounded well under the platform
+ * cap so a request can never approach Vercel's maxDuration. */
+const WEB_MAX_TIMEOUT_MS = 45_000;
+/** Wall-clock ceiling (under the 90s Vercel maxDuration): the web call is clamped so its deadline, from
+ * the moment it fires, can never push total time past this. */
+const WEB_WALL_BUDGET_MS = 82_000;
 
 // --- the assessment schema — NO tier/grade/score FIELD ANYWHERE ----------------------------------
 
@@ -489,6 +489,12 @@ export async function runLens(args: RunLensArgs): Promise<LensAssessment> {
       };
     }
 
+    // (3.6) FIRE the reputable web tier IN PARALLEL (CHK-7.7). It overlaps the ~60s study path below, so
+    // it adds no wall time and gets the full window to complete — then it's awaited + filtered at the end.
+    // Fired only HERE (after the refused/short-circuit/empty exits), so it never runs on a non-researched
+    // card. Never throws.
+    const webPromise = startWebResearch(webResearch, resolved.resolvedName || normalized.normalized, runStart, now);
+
     // (4) RESEARCH — bounded external search. Runs the resolver's query AND a deterministic
     // sleep-FOCUSED query (CHK-7.5), so a subject with a large non-sleep literature still surfaces its
     // sleep papers; results are merged, deduped, and reranked so the most sleep-relevant abstracts reach
@@ -519,8 +525,8 @@ export async function runLens(args: RunLensArgs): Promise<LensAssessment> {
         resolvedDisplay,
       );
       // Even with NO study evidence, reputable web references (if enabled) can still help — this is
-      // exactly when a reader most wants them. Enrich before returning.
-      return await enrichWithWeb(studyResult, resolved.resolvedName || normalized.normalized, webResearch, runStart, now, emit);
+      // exactly when a reader most wants them. Attach the (parallel) web result before returning.
+      return await attachWeb(studyResult, webPromise, emit);
     }
 
     // (5) EXTRACT — ONE model call over the docs fetched for the resolved subject.
@@ -563,7 +569,7 @@ export async function runLens(args: RunLensArgs): Promise<LensAssessment> {
     // (7)+(8) COMPOSE — server-side, from verified claims + rubric flags + copy.ts templates.
     emit({ type: 'composing' });
     const studyResult = compose(base, verified, rubric.labelFlags, rubric.additiveFindings, normalized.normalized, candidates.length, meta, resolvedDisplay);
-    return await enrichWithWeb(studyResult, extractSubject, webResearch, runStart, now, emit);
+    return await attachWeb(studyResult, webPromise, emit);
   } catch {
     // Any unexpected error ⇒ honest inconclusive with empty rubric (never a fabricated verdict).
     const normalized = typeof args.input === 'string' ? args.input.slice(0, 4000).trim() : '';
@@ -698,24 +704,41 @@ function compose(
  * forbidden-framing + raw-identifier + grade-smell gates as study evidence. Never throws; on any failure
  * the study result is returned unchanged (the study tiers never depend on the web tier).
  */
-async function enrichWithWeb(
-  result: LensAssessment,
-  subject: string,
+/** Fire the reputable web tier in PARALLEL with the study path (CHK-7.7). Returns a promise that always
+ * resolves to an array (never rejects) — the web call is clamped so, from the moment it fires, it can
+ * never push total time past the wall budget. A disabled/absent webResearch → resolves []. */
+function startWebResearch(
   webResearch: WebResearchFn,
+  subject: string,
   runStart: number,
   now: () => number,
+): Promise<WebFinding[]> {
+  if (typeof webResearch !== 'function') return Promise.resolve([]);
+  const webBudget = Math.min(WEB_MAX_TIMEOUT_MS, WEB_WALL_BUDGET_MS - (now() - runStart));
+  if (webBudget < 1000) return Promise.resolve([]);
+  return Promise.resolve()
+    .then(() => webResearch(subject, webBudget))
+    .then((r) => (Array.isArray(r) ? r : []))
+    .catch(() => []);
+}
+
+/**
+ * Await the parallel web tier and attach its GROUNDED, re-filtered notes to a researched study result
+ * (CHK-7.7). Runs ONLY on assessed/inconclusive cards. Every note is re-validated server-side: reputable
+ * host (independently, since webResearch is injectable), names a sleep concept, and passes the SAME
+ * forbidden-framing + raw-identifier + grade-smell gates as study evidence; the shown domain is
+ * recomputed from the URL. Never throws; on any failure the study result is returned unchanged.
+ */
+async function attachWeb(
+  result: LensAssessment,
+  webPromise: Promise<WebFinding[]>,
   emit: (event: LensEvent) => void,
 ): Promise<LensAssessment> {
   if (result.status !== 'assessed' && result.status !== 'inconclusive') return result;
-  if (typeof webResearch !== 'function') return result;
-  // WALL-clock budget (not the study deadline): only run with real headroom under the platform cap, and
-  // clamp the call so a slow study run + the web call can never exceed it and lose the composed answer.
-  const webBudget = Math.min(WEB_MAX_TIMEOUT_MS, WEB_WALL_BUDGET_MS - (now() - runStart));
-  if (webBudget < WEB_MIN_BUDGET_MS) return result;
   emit({ type: 'web-search' });
   let findings: WebFinding[] = [];
   try {
-    findings = await webResearch(subject, webBudget);
+    findings = await webPromise;
   } catch {
     findings = [];
   }
