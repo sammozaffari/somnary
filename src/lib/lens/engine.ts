@@ -321,6 +321,12 @@ function toResolvableSource(id: CitationId): LensSource | null {
 const GRADE_SMELL =
   /\b(?:grade[sd]?|tier)\s+(?:of\s+)?[a-fs]\b|\b[a-fs][-+]?[-\s]+(?:grade|tier)\b|\b(?:rated|scored|graded|earns?)\s+(?:an?\s+)?(?:\w+\s+)?[a-fs][-+]?\b/i;
 
+/** A dose/quantity shape (number + a dose unit or a tablet/capsule count). Used to drop any web CAUTION
+ * that carries a dose, so a source's 3rd-person dosing line can never surface in the prominent block (a
+ * caution is duration/who-should-avoid/interaction guidance, never a dose). "2 weeks"/"12 years" don't
+ * match (time/age units are excluded). Deterministic backstop the forbidden-framing lint doesn't provide. */
+const DOSE_SHAPE = /\b\d[\d.,]*\s?(?:mg|milligram|mcg|microgram|µg|ml|millilitre|milliliter|tablets?|capsules?|pills?|drops?|doses?|puffs?|sprays?|iu)\b/i;
+
 /** Run a composed line through the forbidden-framing lint + raw-identifier + grade-smell checks. Returns
  * the line if clean, or a safe replacement if it trips any gate — a composed line can NEVER ship a
  * forbidden framing, a smuggled raw identifier, or grade-shaped prose even if a template were ever
@@ -757,6 +763,11 @@ async function attachWeb(
     // an AI directive to the reader).
     if (kind === 'effect' && !isSleepConcept(f.text)) continue;
     if (lintForbiddenFraming(f.text).length > 0 || hasRawIdentifier(f.text) || GRADE_SMELL.test(f.text)) continue;
+    // DOSE GUARD (adversarial review): a caution is usage/duration/who-should-avoid guidance — NEVER a
+    // dose. The forbidden-framing lint only catches 2nd-person imperatives, so a source's 3rd-person dose
+    // line ("the usual dose is 25 mg at bedtime") could otherwise reach the prominent block. Drop any
+    // caution carrying a dose quantity; the important cautions (short-term use, interactions) never do.
+    if (kind === 'caution' && DOSE_SHAPE.test(f.text)) continue;
     const key = f.text.toLowerCase().replace(/\s+/g, ' ').trim();
     if (!key || seen.has(key)) continue;
     seen.add(key);

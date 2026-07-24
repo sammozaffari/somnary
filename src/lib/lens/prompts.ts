@@ -27,7 +27,7 @@
 
 import type { EvidenceDoc } from './retrieval.ts';
 
-export const LENS_EXTRACT_VERSION = 'lens-extract-v3';
+export const LENS_EXTRACT_VERSION = 'lens-extract-v4';
 export const LENS_REFUTE_VERSION = 'lens-refute-v1';
 export const LENS_RESOLVE_VERSION = 'lens-resolve-v2';
 export const LENS_WEB_VERSION = 'lens-web-v2';
@@ -118,7 +118,7 @@ ABSOLUTE RULES
 - NEVER recommend, suggest, or advise a remedy, product, dose, brand, or combination. NEVER tell the user what to take, what dose to use, or what is safe for them. NEVER diagnose a condition. NEVER assign or imply a grade, rating, or verdict. You EXTRACT factual evidence claims only — a separate system verifies and grades them.
 - Every claim you output MUST be tied to exactly ONE of the provided documents via its "sourcePmid", and that PMID MUST be copied exactly from the list below. NEVER invent a PMID and NEVER cite a document that is not in the list. A claim with no supporting document in the list must be omitted.
 - A claim must be a single, specific, checkable factual statement that the tied document's abstract actually appears to support. Do NOT combine multiple sources into one claim. Do NOT generalize beyond what a single abstract says.
-- WRITE THE CLAIM IN PLAIN, EVERYDAY ENGLISH that anyone could understand — not clinical jargon — while staying faithful to the abstract. Prefer "helped people fall asleep faster than a placebo" over "reduced sleep onset latency versus placebo"; "made people drowsy the next day" over "associated with next-day psychomotor impairment". Keep it accurate; a verbatim supporting quote from the abstract must still exist.
+- WRITE THE CLAIM IN PLAIN, EVERYDAY ENGLISH that anyone could understand — not clinical jargon — while staying STRICTLY FAITHFUL to the abstract. Swap jargon for plain words ("helped people fall asleep faster" for "reduced sleep onset latency"; "made people drowsy the next day" for "next-day psychomotor impairment"), but NEVER change the finding's direction or certainty: if the study found NO effect, a negative result, or "no significant difference", say that plainly ("did not help people sleep") — do NOT turn a null or negative result into a positive one. Keep the study's hedges ("in one small trial", "slightly", "may"). A verbatim supporting quote from the abstract must still exist for the claim EXACTLY as you phrase it.
 - Prefer FEWER, well-grounded claims over many speculative ones. If the abstracts do not clearly support a claim, leave it out.
 - Also record, in "doesNotShow", short neutral notes about what the provided evidence does NOT establish (e.g. "no long-term safety data", "no effect on total sleep time reported"). These are limitations, never advice.
 - "labelFacts": copy back only factual label details explicitly present in the subject text (e.g. an ingredient and its stated amount). If none, use an empty array. Never infer a dose.

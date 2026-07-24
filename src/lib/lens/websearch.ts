@@ -219,10 +219,16 @@ export async function openRouterWebResearch(args: WebResearchArgs): Promise<WebF
     if (!url) continue;
     // THE FIREWALL: the quote must be a real verbatim substring of THIS reputable source's text.
     if (!quoteIsGrounded(n.quote, sources.get(url) as string, n.text)) continue;
-    const key = n.text.toLowerCase().replace(/\s+/g, ' ').trim();
+    // A CAUTION is safety-critical and shown prominently, so display the VERBATIM source quote itself —
+    // never the model's paraphrase — so it is unambiguously the source's own words. An EFFECT note keeps
+    // its plain restatement (consistent with the study tier). Both are grounded to the reputable source.
+    const displayText =
+      n.kind === 'caution' ? n.quote.replace(/\s+/g, ' ').trim().slice(0, 240) : n.text;
+    if (!displayText) continue;
+    const key = displayText.toLowerCase().replace(/\s+/g, ' ').trim();
     if (!key || seen.has(key)) continue;
     seen.add(key);
-    out.push({ text: n.text, url, domain: domainOf(url), kind: n.kind });
+    out.push({ text: displayText, url, domain: domainOf(url), kind: n.kind });
     if (out.length >= maxNotes) break;
   }
   return out;

@@ -87,8 +87,8 @@ export const WEB_CAUTION_HEAD = 'How it’s meant to be used';
  * and routes the decision to a professional. Framing-linted like every string here. */
 export const WEB_CAUTION_NOTE =
   'In their own words, the health references below describe how this is meant to be used and who should ' +
-  'take care. The Lens is not telling you what to do — these are the sources’ cautions; a pharmacist or ' +
-  'doctor can weigh them for your situation.';
+  'take care. The Lens is not telling you what to do and this is not a Somnary grade — these are the ' +
+  'sources’ own cautions, quoted; a pharmacist or doctor can weigh them for your situation.';
 
 /** The caveat under the web-references heading. SELF-CONTAINED on purpose: it must hold even when there
  * is NO study evidence above it (the inconclusive path enriches too), so it never implies these notes
