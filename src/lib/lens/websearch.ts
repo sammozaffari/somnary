@@ -26,11 +26,14 @@ import { LENS_WEB_PROMPT } from './prompts.ts';
 
 const ENDPOINT = 'https://openrouter.ai/api/v1/chat/completions';
 
-/** One grounded web note the card can show: a short factual sleep note + its reputable source. */
+/** One grounded web note the card can show: a short factual note + its reputable source. `kind`
+ * distinguishes a sleep-EFFECT note (plain restatement) from a usage/safety CAUTION (the source's own
+ * words on how it's meant to be used) so the card can surface cautions prominently. */
 export interface WebFinding {
   text: string;
   url: string;
   domain: string;
+  kind: 'effect' | 'caution';
 }
 
 /**
@@ -88,7 +91,7 @@ export function isReputableUrl(url: unknown): boolean {
 
 /** Parse the model's web reply into candidate notes. Tolerant of code-fence/prose wrapping; ANY failure
  * → []. Each note is {text, quote, url}; malformed entries are skipped. */
-export function parseWebNotes(raw: string): Array<{ text: string; quote: string; url: string }> {
+export function parseWebNotes(raw: string): Array<{ text: string; quote: string; url: string; kind: 'effect' | 'caution' }> {
   const text = typeof raw === 'string' ? raw : '';
   const start = text.indexOf('{');
   const end = text.lastIndexOf('}');
@@ -101,15 +104,16 @@ export function parseWebNotes(raw: string): Array<{ text: string; quote: string;
   }
   const root = parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? (parsed as Record<string, unknown>) : {};
   const rawNotes = Array.isArray(root.notes) ? root.notes : [];
-  const out: Array<{ text: string; quote: string; url: string }> = [];
+  const out: Array<{ text: string; quote: string; url: string; kind: 'effect' | 'caution' }> = [];
   for (const n of rawNotes) {
     if (!n || typeof n !== 'object') continue;
     const rec = n as Record<string, unknown>;
     const noteText = typeof rec.text === 'string' ? rec.text.trim() : '';
     const quote = typeof rec.quote === 'string' ? rec.quote.trim() : '';
     const url = typeof rec.url === 'string' ? rec.url.trim() : '';
+    const kind = rec.kind === 'caution' ? 'caution' : 'effect';
     if (!noteText || !quote) continue;
-    out.push({ text: noteText, quote, url });
+    out.push({ text: noteText, quote, url, kind });
   }
   return out;
 }
@@ -140,7 +144,7 @@ export interface WebResearchArgs {
 }
 
 /** Bound on notes shown; keeps the tier tight and the cost bounded. */
-const DEFAULT_MAX_NOTES = 4;
+const DEFAULT_MAX_NOTES = 5;
 
 /**
  * Run one reputable-only web research pass via OpenRouter's `web` plugin. Returns GROUNDED findings:
@@ -215,10 +219,16 @@ export async function openRouterWebResearch(args: WebResearchArgs): Promise<WebF
     if (!url) continue;
     // THE FIREWALL: the quote must be a real verbatim substring of THIS reputable source's text.
     if (!quoteIsGrounded(n.quote, sources.get(url) as string, n.text)) continue;
-    const key = n.text.toLowerCase().replace(/\s+/g, ' ').trim();
+    // A CAUTION is safety-critical and shown prominently, so display the VERBATIM source quote itself —
+    // never the model's paraphrase — so it is unambiguously the source's own words. An EFFECT note keeps
+    // its plain restatement (consistent with the study tier). Both are grounded to the reputable source.
+    const displayText =
+      n.kind === 'caution' ? n.quote.replace(/\s+/g, ' ').trim().slice(0, 240) : n.text;
+    if (!displayText) continue;
+    const key = displayText.toLowerCase().replace(/\s+/g, ' ').trim();
     if (!key || seen.has(key)) continue;
     seen.add(key);
-    out.push({ text: n.text, url, domain: domainOf(url) });
+    out.push({ text: displayText, url, domain: domainOf(url), kind: n.kind });
     if (out.length >= maxNotes) break;
   }
   return out;

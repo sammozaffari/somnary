@@ -323,13 +323,14 @@ async function run() {
           message: {
             content: JSON.stringify({
               notes: [
-                { text: 'Doxylamine makes you very sleepy soon after taking it', quote: grounded, url: REP },
+                { kind: 'effect', text: 'Doxylamine makes you very sleepy soon after taking it', quote: grounded, url: REP },
+                { kind: 'caution', text: 'do not take doxylamine longer than 2 weeks', quote: 'Do not take doxylamine for longer than 2 weeks unless directed by a doctor', url: REP },
                 { text: 'Fabricated sleep claim never in any source', quote: 'this exact text appears in no source at all', url: REP },
                 { text: 'Doxylamine helps you sleep', quote: 'helps you sleep according to a blog', url: 'https://sleepblog.com/x' },
               ],
             }),
             annotations: [
-              { type: 'url_citation', url_citation: { url: REP, title: 'MedlinePlus', content: `If you are taking doxylamine to treat insomnia, ${grounded} and will remain sleepy the next day.` } },
+              { type: 'url_citation', url_citation: { url: REP, title: 'MedlinePlus', content: `If you are taking doxylamine to treat insomnia, ${grounded} and will remain sleepy the next day. Do not take doxylamine for longer than 2 weeks unless directed by a doctor.` } },
               { type: 'url_citation', url_citation: { url: 'https://sleepblog.com/x', title: 'Blog', content: 'helps you sleep according to a blog says the author' } },
             ],
           },
@@ -341,7 +342,9 @@ async function run() {
       return { ok: true, json: async () => webBody };
     };
     const findings = await openRouterWebResearch({ subject: 'doxylamine', apiKey: 'k', fetchImpl: webFetch });
-    ok('web tier keeps the grounded reputable note only', findings.length === 1 && findings[0].domain === 'medlineplus.gov' && /very sleepy/.test(findings[0].text));
+    ok('web tier keeps the two grounded reputable notes (effect + caution)', findings.length === 2 && findings.every((f) => f.domain === 'medlineplus.gov'));
+    ok('web tier: a CAUTION displays the VERBATIM source quote, not the model paraphrase', findings.some((f) => f.kind === 'caution' && f.text === 'Do not take doxylamine for longer than 2 weeks unless directed by a doctor'));
+    ok('web tier: an EFFECT displays its plain restatement', findings.some((f) => f.kind === 'effect' && /very sleepy/.test(f.text)));
     ok('web tier drops a fabricated (non-substring) quote', findings.every((f) => !/Fabricated/.test(f.text)));
     ok('web tier drops a non-reputable (blog) source', findings.every((f) => f.domain !== 'sleepblog.com'));
     ok('web tier: missing key or subject → [] (never bills)', (await openRouterWebResearch({ subject: 'x', apiKey: '' })).length === 0 && (await openRouterWebResearch({ subject: '', apiKey: 'k' })).length === 0);
@@ -483,7 +486,7 @@ const n = () => ({ supported: 'no', strength: 'weak', quote: '' });
 
 async function runVerifier() {
   console.log('\nlens suite — prompts.ts (versioned, framing-safe shape):');
-  ok('extract version pinned', LENS_EXTRACT_VERSION === 'lens-extract-v2', LENS_EXTRACT_VERSION);
+  ok('extract version pinned', LENS_EXTRACT_VERSION === 'lens-extract-v4', LENS_EXTRACT_VERSION);
   ok('refute version pinned', LENS_REFUTE_VERSION === 'lens-refute-v1', LENS_REFUTE_VERSION);
   ok('extract prompt forbids grading', /grade|rating|verdict/i.test(LENS_EXTRACT_PROMPT));
   ok('extract prompt forbids invented PMIDs', /invent a PMID/i.test(LENS_EXTRACT_PROMPT));
@@ -512,6 +515,12 @@ async function runVerifier() {
   // F1 hardening: a trivial or topically-irrelevant real substring can't anchor a claim.
   ok('NOT grounded: trivial short substring below min length', !quoteIsGrounded('sleep', MEL_ABSTRACT, MEL_CLAIM));
   ok('NOT grounded: real span with NO content-token overlap with the (unrelated) claim', !quoteIsGrounded('melatonin reduced sleep onset latency', MEL_ABSTRACT, 'Apigenin cures cancer in humans.'));
+  // POLARITY GUARD (adversarial CHK-7.8): a positively-worded claim CANNOT quote its way out of a
+  // negated finding — a negation right before the span with a non-negated claim ⇒ rejected.
+  const NEG_ABSTRACT = 'In this randomized trial, valerian did not improve sleep quality or reduce sleep onset latency compared with placebo.';
+  ok('NOT grounded: claim INVERTS a negated finding (quote excludes the "did not")', !quoteIsGrounded('improve sleep quality or reduce sleep onset latency', NEG_ABSTRACT, 'Valerian can improve sleep quality and reduce sleep onset latency.'));
+  ok('grounded: a FAITHFUL negative claim keeps the negation', quoteIsGrounded('did not improve sleep quality or reduce sleep onset latency', NEG_ABSTRACT, 'Valerian did not improve sleep quality or reduce sleep onset latency.'));
+  ok('grounded: a positive finding with no nearby negation still passes', quoteIsGrounded('melatonin reduced sleep onset latency', MEL_ABSTRACT, MEL_CLAIM));
   // parseVerdict / coerceVerdict: malformed → skeptical default.
   ok('parseVerdict malformed JSON → supported:no', parseVerdict('not json at all').supported === 'no');
   ok('parseVerdict empty → supported:no', parseVerdict('').supported === 'no');
@@ -1128,6 +1137,8 @@ async function runRedTeam() {
       { text: 'Take doxylamine tonight for sleep', url: 'https://drugs.com/z', domain: 'drugs.com' }, // forbidden framing → dropped
       { text: 'Doxylamine improves sleep says a blog', url: 'https://sleepblog.com/x', domain: 'sleepblog.com' }, // non-reputable url → engine drops
       { text: 'Doxylamine reduces insomnia onset per the reference', url: 'https://medlineplus.gov/z', domain: 'evil.com' }, // reputable url, LYING domain → engine recomputes
+      { text: 'This medicine is intended for short-term use only.', url: 'https://medlineplus.gov/c', domain: 'medlineplus.gov', kind: 'caution' }, // caution: kept despite NO sleep word
+      { text: 'The usual dose is 25 mg taken at bedtime.', url: 'https://www.drugs.com/d', domain: 'drugs.com', kind: 'caution' }, // caution carrying a DOSE → dropped by the dose guard
     ]; };
     const { model } = makeEngineModel({
       resolveReply: { sleepRelevant: true, resolvedName: 'doxylamine', aka: [], productClass: 'otc-drug', pubmedQuery: 'doxylamine AND sleep' },
@@ -1136,7 +1147,9 @@ async function runRedTeam() {
     });
     const wdocs = [{ pmid: '23691095', title: 'Doxylamine insomnia trial', abstractText: 'reduced insomnia symptoms in the trial', url: 'https://pubmed.ncbi.nlm.nih.gov/23691095/' }];
     const r = await runLens({ ...base, input: 'doxylamine sleep aid product', provider: providerOf(wdocs), model, webResearch: engineWeb });
-    ok('(11w) assessed card carries a SEPARATE webFindings tier', Array.isArray(r.webFindings) && r.webFindings.length === 2 && r.webFindings.some((f) => /next-day drowsiness/.test(f.text)), JSON.stringify(r.webFindings));
+    ok('(11w) assessed card carries a SEPARATE webFindings tier', Array.isArray(r.webFindings) && r.webFindings.length === 3 && r.webFindings.some((f) => /next-day drowsiness/.test(f.text)), JSON.stringify(r.webFindings));
+    ok('(11w) a CAUTION note is kept despite no sleep word + tagged kind:caution', (r.webFindings || []).some((f) => f.kind === 'caution' && /short-term use only/.test(f.text)));
+    ok('(11w) a caution carrying a DOSE (25 mg) is dropped by the dose guard', (r.webFindings || []).every((f) => !/25\s?mg/.test(f.text)));
     ok('(11w) a non-sleep web note is filtered out', (r.webFindings || []).every((f) => !/blood pressure/.test(f.text)));
     ok('(11w) a forbidden-framing web note is filtered out', (r.webFindings || []).every((f) => !/tonight/.test(f.text)));
     ok('(11w) a non-reputable web url is dropped by the ENGINE guard', (r.webFindings || []).every((f) => f.domain !== 'sleepblog.com' && !/says a blog/.test(f.text)));

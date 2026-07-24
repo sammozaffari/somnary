@@ -134,6 +134,10 @@ const assessed = {
   labelFlags: [
     { rule: 'R5', ingredient: 'melatonin', text: 'This label lists melatonin, an additive on the watchlist.', href: '/safety', linkLabel: "melatonin: why it's on the watchlist" },
   ],
+  webFindings: [
+    { kind: 'caution', text: 'Short-term use only; discontinue if insomnia persists beyond 2 weeks.', url: 'https://www.drugs.com/x', domain: 'drugs.com' },
+    { kind: 'effect', text: 'Can cause next-day drowsiness in some people.', url: 'https://medlineplus.gov/y', domain: 'medlineplus.gov' },
+  ],
   safety: { routes: [{ href: '/safety', label: 'Safety & who should be careful' }, { href: '/when-to-see-a-doctor', label: 'When to see a doctor' }], note: SAFETY_NOTE },
   stamp: STAMP,
   reviewRoute: { href: '/request-a-review', label: 'Request a full human review' },
@@ -202,9 +206,16 @@ const GRADE_RE = /\b(?:grade|tier)\s+[A-FS]\b|\b[A-FS]\s+(?:grade|tier)\b|\btier
   ok('assessed: doesNotShow head + lines present', text.includes('What it does NOT show') && text.includes('did not survive verification'));
   ok('assessed: label-flag head + text present', text.includes('Label reality') && text.includes('additive on the watchlist'));
   ok('assessed: safety head + note present', text.includes('Safety & interactions') && text.includes('who should be careful are personal'));
+  // CHK-7.8: usage/safety cautions render PROMINENTLY (above the evidence) as the source's words + domain;
+  // sleep-effect web notes render in the lower "From health references" block.
+  ok('assessed: caution head + source-worded text present', text.includes('How it’s meant to be used') && text.includes('Short-term use only'));
+  ok('assessed: caution appears ABOVE the study evidence (prominent)', text.indexOf('Short-term use only') < text.indexOf('What the evidence shows'));
+  ok('assessed: effect web note renders in the health-references block', text.includes('From health references') && text.includes('next-day drowsiness'));
+  ok('assessed: caution is NOT duplicated into the health-references block', (text.match(/Short-term use only/g) || []).length === 1);
 
   const anchors = c.anchors();
   const hrefs = anchors.map((a) => a.href);
+  ok('assessed: caution + effect source domains link out', hrefs.includes('https://www.drugs.com/x') && hrefs.includes('https://medlineplus.gov/y'));
   ok('assessed: source chip hrefs come from server sources', hrefs.includes(source.url) && hrefs.includes(doiSource.url));
   ok('assessed: source chip labels are pmid/doi text', c.allText().includes('PMID 12345678') && c.allText().includes('DOI 10.1000/xyz'));
   ok('assessed: label-flag link href is server flag href', hrefs.includes('/safety'));
