@@ -483,7 +483,7 @@ NOT a Somnary grade". Concierge (CHK-6.8) demotes to a secondary mode.
   doxylamine → study evidence + drugs.com/ncbi web notes. Owner sets LENS_WEB_SEARCH=on in
   Vercel to enable. Lens red-team 235 / card 39 / loop 40. *(Merged #106; parallelized #108;
   LENS_WEB_SEARCH=on set in Vercel + deployed — live.)*
-- [ ] **CHK-7.8 Plain language + prominent source cautions.** `HG` (medical-boundary AI core).
+- [x] **CHK-7.8 Plain language + prominent source cautions.** `HG` (medical-boundary AI core).
   Owner: the Lens should give a digestible answer AND make the "don't take Restavit nightly"
   message clear. RESOLVED (owner-picked): the Lens NEVER issues a recommendation/safety call
   (that stays a founding non-negotiable) — instead it surfaces the SOURCES' OWN usage guidance,
