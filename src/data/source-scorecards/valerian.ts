@@ -438,4 +438,120 @@ export const VALERIAN_SOURCES: ValProduct[] = [
     communityThemes: VALERIAN_COMMUNITY,
     ratified: true,
   },
+
+  // ── Phase 2: Chemist Warehouse / Amazon AU / iHerb bestsellers (deduped). Ratified 2026-07-24.
+  // Valerian is a thin AU category: live CW + Amazon AU discovery surfaced these 4 genuine single-herb
+  // additions; the rest were excluded on the lead-ingredient gate (Swisse Relax & Sleep is explicitly
+  // valerian-FREE; Henry Blooms Sleep Well is a probiotic drink with trace valerian; The Patch Remedy is
+  // a transdermal patch with no established valerian dose; the tea/kids/magnesium-combo hits are off-axis).
+  {
+    slug: 'cenovis-easy-sleep-valerian',
+    imagePath: '/images/sources/valerian/cenovis-easy-sleep-valerian.jpg',
+    brand: 'Cenovis',
+    productName: 'Easy Sleep Valerian 2000',
+    bottomLine:
+      'A mainstream single-herb valerian at the studied ~2 g dry-root dose — TGA-listed, but it doesn’t disclose its valerenic-acid figure and has no independent lab test.',
+    form: 'single-herb',
+    strength: '2 g dry-root eq (500 mg extract) · valerenic acid not stated',
+    ausL: '375753',
+    channel: 'Chemist Warehouse · Amazon AU',
+    certSummary: 'TGA-listed (AUST L 375753)',
+    additiveSummary: 'Single-herb; contains soya, sulfites and beeswax (disclosed)',
+    scores: {
+      testing_purity: { score: 0, note: 'No third-party product cert (USP/NSF/Informed) and no published lab test; no valerian product here is independently tested.' },
+      label_accuracy: { score: 0, note: 'No independent lab test of the exact product and no public batch lab report.' },
+      additives: { score: 5, note: 'Single-herb capsule; discloses soya, sulfites and beeswax — none a watchlist additive of concern.' },
+      regulatory: { score: 5, note: 'No TGA action names this product or line (AUST L 375753, Sanofi, active).' },
+      transparency: { score: 3, note: 'Named maker + AUST L + dry-root equivalent disclosed (2 g), but it does not print the valerenic-acid figure (like Nature’s Own Forte 2000).' },
+      marketing_honesty: { score: 5, note: 'TGA-permitted traditional-use indication; no unsupported cert or proof claim.' },
+    },
+    verdict:
+      'A mainstream, TGA-listed single-herb valerian that delivers the studied ~2 g dry-root dose, but withholds its valerenic-acid figure and — like every valerian here — has no independent lab testing.',
+    heldItems: ['Whether the pack discloses a valerenic-acid figure — if so, transparency would rise to 4'],
+    communityStatus: 'gathering',
+    ratified: true,
+  },
+  {
+    slug: 'wanderlust-valerian',
+    imagePath: '/images/sources/valerian/wanderlust-valerian.jpg',
+    brand: 'Wanderlust',
+    productName: 'Valerian (liquid)',
+    bottomLine:
+      'The only liquid valerian here — a TGA-listed single-herb tincture at ~2 g dry-root equivalent — but no valerenic-acid figure and no independent lab test.',
+    form: 'single-herb liquid extract',
+    strength: '2 g dry-root eq per 2.25 mL · valerenic acid not stated',
+    ausL: '352103',
+    channel: 'Chemist Warehouse · Woolworths · Amazon AU',
+    certSummary: 'TGA-listed (AUST L 352103)',
+    additiveSummary: 'Single-herb liquid; glycerol + peppermint oil, 54% alcohol (disclosed)',
+    scores: {
+      testing_purity: { score: 0, note: 'No third-party product cert and no published lab test.' },
+      label_accuracy: { score: 0, note: 'No independent lab test of the exact product; no public batch lab report.' },
+      additives: { score: 5, note: 'Single-herb liquid; discloses glycerol, peppermint oil and 54% alcohol (format-inherent) — no watchlist additive of concern.' },
+      regulatory: { score: 5, note: 'No TGA action names this product; AUST L 352103 (active), and a March-2025 TGA compliance report confirmed it remains permitted for supply.' },
+      transparency: { score: 3, note: 'Named maker + AUST L + dry-root equivalent disclosed (2 g / 2.25 mL), but it does not print the valerenic-acid figure.' },
+      marketing_honesty: { score: 5, note: 'TGA-permitted traditional-use indication; no unsupported cert or proof claim.' },
+    },
+    verdict:
+      'The one liquid valerian in the set — a TGA-listed single-herb tincture at the studied ~2 g dry-root equivalent whose 2025 compliance review it passed — but it withholds its valerenic-acid figure and has no independent lab testing.',
+    heldItems: [],
+    communityStatus: 'gathering',
+    ratified: true,
+  },
+  {
+    slug: 'solaray-valerian-root',
+    imagePath: '/images/sources/valerian/solaray-valerian-root.jpg',
+    brand: 'Solaray',
+    productName: 'Valerian Root 470 mg',
+    bottomLine:
+      'A clean whole-root import with no fillers — but whole root (no valerenic figure), no AU liver warning, and no independent product test.',
+    form: 'single-herb (whole root)',
+    strength: '470 mg whole root · not standardised (no valerenic figure)',
+    ausL: null,
+    channel: 'iHerb AU · Amazon AU (import)',
+    importSafety: { note: 'Imported into Australia (no TGA listing), so it carries no AU-mandated valerian liver-caution warning — an AU buyer misses the local advisory.' },
+    certSummary: 'Not TGA-listed (import)',
+    additiveSummary: 'Whole root, veg cap, no fillers; Non-GMO Project Verified (an agricultural cert)',
+    scores: {
+      testing_purity: { score: 0, note: 'No finished-product third-party cert (USP/NSF/Informed) and no public COA; "lab verified / triple-tested each lot" is the maker’s own testing, and Non-GMO Verified is an agricultural cert, not a content/potency test.' },
+      label_accuracy: { score: 0, note: 'No independent third-party lab test of the exact product; no public per-lot COA.' },
+      additives: { score: 5, note: 'Whole root in a vegetable capsule with no fillers or flow agents — the cleanest panel of the new set.' },
+      regulatory: { score: 5, note: 'No FDA/FTC action names this product or line.' },
+      transparency: { score: 2, note: 'Named maker + dose disclosed (470 mg), but whole root with no valerenic-acid figure, an import with no AUST L, and no public lab report.' },
+      marketing_honesty: { score: 5, note: 'Restrained copy; "lab verified" describes in-house testing without claiming a certification it doesn’t hold.' },
+    },
+    verdict:
+      'A clean, filler-free whole-root import that keeps its copy restrained — but it’s whole root with no valerenic-acid figure, an import carrying no AU liver warning, and it has no independent product test.',
+    heldItems: [],
+    communityStatus: 'gathering',
+    ratified: true,
+  },
+  {
+    slug: 'vitamatic-valerian-root',
+    imagePath: '/images/sources/valerian/vitamatic-valerian-root.jpg',
+    brand: 'Vitamatic',
+    productName: 'Valerian Root (High Potency)',
+    bottomLine:
+      'A high-potency 20:1 extract import that discloses its extract ratio — but no valerenic figure, no AU liver warning, and no independent product test.',
+    form: 'single-herb (20:1 extract)',
+    strength: '250 mg of 20:1 extract (5,000 mg dry-root eq) · valerenic acid not stated',
+    ausL: null,
+    channel: 'iHerb AU · Amazon AU (import)',
+    importSafety: { note: 'Imported into Australia (no TGA listing), so it carries no AU-mandated valerian liver-caution warning — an AU buyer misses the local advisory.' },
+    certSummary: 'Not TGA-listed (import)',
+    additiveSummary: 'Discloses the 20:1 extract ratio; veg cap, rice flour, magnesium stearate, silica',
+    scores: {
+      testing_purity: { score: 0, note: 'No finished-product third-party cert and no public COA; a GMP facility is not a product test.' },
+      label_accuracy: { score: 0, note: 'No independent third-party lab test of the exact product; no public per-lot COA.' },
+      additives: { score: 5, note: 'Disclosed benign panel (rice flour, magnesium stearate, silica); no additive of concern.' },
+      regulatory: { score: 5, note: 'No FDA/FTC action names this product or line.' },
+      transparency: { score: 2, note: 'Named maker + discloses both the extract amount and the 20:1 ratio (5,000 mg equivalent), but no valerenic-acid figure, an import with no AUST L, and no public lab report.' },
+      marketing_honesty: { score: 5, note: 'The "5,000 mg" is clearly labelled as a dry-root equivalent from a disclosed 20:1 extract — standard herbal labelling, not an overclaim.' },
+    },
+    verdict:
+      'A high-potency import that is upfront about its 20:1 extract ratio and equivalent dose, but gives no valerenic-acid figure, carries no AU liver warning as an import, and has no independent product test.',
+    heldItems: [],
+    communityStatus: 'gathering',
+    ratified: true,
+  },
 ];
