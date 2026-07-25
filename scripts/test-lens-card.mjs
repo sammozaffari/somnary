@@ -199,7 +199,7 @@ const GRADE_RE = /\b(?:grade|tier)\s+[A-FS]\b|\b[A-FS]\s+(?:grade|tier)\b|\btier
   ok('assessed: renders without innerHTML markup injection (fake DOM would have thrown)', true);
   ok('assessed: verdict line present', text.includes('verified 2 claims'));
   ok('assessed: stamp present', text.includes(STAMP));
-  ok('assessed: disclaimer present (near verdict)', text.includes('educational, not medical advice'));
+  ok('assessed: disclaimer present at the card FOOT (after the evidence, not stacked up top)', text.includes('educational, not medical advice') && text.indexOf('educational, not medical advice') > text.indexOf('What the evidence shows'));
   ok('assessed: evidence head present', text.includes('What the evidence shows'));
   ok('assessed: both evidence texts rendered', text.includes('time to fall asleep') && text.includes('self-reported sleep quality'));
   ok('assessed: strength shown as TEXT label (weaker/stronger), not color-only', text.includes('weaker evidence') && text.includes('stronger evidence'));
@@ -234,11 +234,11 @@ const GRADE_RE = /\b(?:grade|tier)\s+[A-FS]\b|\b[A-FS]\s+(?:grade|tier)\b|\btier
   const withBottom = {
     ...assessed,
     resolved: { subject: 'Restavit', resolvedName: 'doxylamine', productClass: 'otc-drug', line: 'The Lens read “Restavit” as doxylamine, an over-the-counter medicine, and researched the evidence below.' },
-    bottomLine: 'Restavit is doxylamine, an over-the-counter medicine. The published studies the Lens could verify point to an effect on sleep, but the evidence is weak. Read the evidence and any cautions below — this is not a Somnary grade.',
+    bottomLine: 'Restavit is doxylamine, an over-the-counter medicine — the studies the Lens could verify point to an effect on sleep, but the evidence is weak.',
   };
   renderLensCard(withBottom, c);
   const text = c.allText();
-  ok('bottomLine: rendered as the lead', text.includes('Restavit is doxylamine, an over-the-counter medicine.') && c.byClassContains('lc-bottomline').length === 1);
+  ok('bottomLine: rendered as the lead', text.includes('Restavit is doxylamine, an over-the-counter medicine') && c.byClassContains('lc-bottomline').length === 1);
   ok('bottomLine: appears BEFORE the evidence section', text.indexOf('point to an effect on sleep') < text.indexOf('What the evidence shows'));
   ok('bottomLine: suppresses the meta verdict line', !text.includes('The Lens verified 2 claims against published sources'));
   ok('bottomLine: suppresses the redundant resolved interpreted-as line', !text.includes('The Lens read “Restavit” as doxylamine'));

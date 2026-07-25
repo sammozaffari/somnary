@@ -227,9 +227,10 @@ export function renderLensCard(assessment: LensCardAssessment, container: HTMLEl
   if (assessment.stamp) {
     card.appendChild(el(doc, 'p', 'lc-stamp', assessment.stamp)); // the not-a-grade stamp, prominent
   }
-  if (assessment.disclaimer) {
-    card.appendChild(el(doc, 'p', 'lc-disclaimer', assessment.disclaimer));
-  }
+  // NOTE: the full "educational, not medical advice" disclaimer used to sit here, stacking a THIRD
+  // framing on top of the lede + stamp. It now renders at the card FOOT (below the safety block) so the
+  // top leads with content — the not-a-grade stamp stays up here, and the safety block + foot disclaimer
+  // keep the boundary present within the result.
 
   // PROMINENT usage/safety CAUTIONS (CHK-7.8) — the source's OWN guidance (e.g. "short-term use only"),
   // placed high on the card so the "not meant for indefinite nightly use" message is unmissable. Each is
@@ -372,6 +373,13 @@ export function renderLensCard(assessment: LensCardAssessment, container: HTMLEl
     });
     section.appendChild(list);
     card.appendChild(section);
+  }
+
+  // The full "educational, not medical advice" disclaimer at the card FOOT — present within the result
+  // (near the decision, not the page footer), without stacking on the lede up top. The not-a-grade stamp
+  // is up top and the safety block is mid-card, so the boundary stays prominent.
+  if (assessment.disclaimer) {
+    card.appendChild(el(doc, 'p', 'lc-disclaimer lc-disclaimer-foot', assessment.disclaimer));
   }
 
   // review route — request a human review (the real-promise page).
