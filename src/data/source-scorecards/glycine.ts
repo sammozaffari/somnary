@@ -79,6 +79,11 @@ export interface GlyProduct {
   heldItems: string[];
   communityStatus: 'gathering' | 'summarized';
   communityThemes?: { note: string; url?: string }[];
+  /** Where an Australian can find it — PLAIN retailer URLs, zero affiliate/tracking params (D2).
+   * Display priority: amazon > chemistWarehouse > iherb. */
+  retailers?: { amazon?: string; chemistWarehouse?: string; iherb?: string };
+  /** Disclosed ingredients panel (from the dossier), actives first — omitted when the brand doesn't publish one. */
+  ingredients?: string[];
   imagePath?: string;
   ratified: boolean;
 }
@@ -111,6 +116,7 @@ export const GLYCINE_SOURCES: GlyProduct[] = [
     regulated: 'food',
     ausL: null,
     channel: 'Pharmacy Online · Natural Chemist',
+    ingredients: ['Glycine (pure powder — no fillers declared)'],
     certSummary: 'Food — not TGA-listed',
     additiveSummary: 'Single-ingredient, no fillers or flow agents',
     scores: {
@@ -205,6 +211,7 @@ export const GLYCINE_SOURCES: GlyProduct[] = [
     regulated: 'food',
     ausL: null,
     channel: 'iHerb AU · Amazon AU (import)',
+    retailers: { iherb: 'https://au.iherb.com/pr/now-foods-glycine-pure-powder-1-lb-454-g/615' },
     certSummary: 'Food — not TGA-listed (import)',
     additiveSummary: 'Single-ingredient — "other ingredients: none"',
     scores: {
@@ -235,6 +242,7 @@ export const GLYCINE_SOURCES: GlyProduct[] = [
     regulated: 'food',
     ausL: null,
     channel: 'Amazon AU (import)',
+    retailers: { amazon: 'https://www.amazon.com.au/dp/B00EOXU0MM' },
     certSummary: 'Food — not TGA-listed (import)',
     certVerified: true,
     additiveSummary: 'Single-ingredient; NSF-registered facility; lab reports on request',
@@ -266,6 +274,7 @@ export const GLYCINE_SOURCES: GlyProduct[] = [
     regulated: 'food',
     ausL: null,
     channel: 'iHerb AU · Amazon AU (import)',
+    retailers: { iherb: 'https://au.iherb.com/pr/swanson-glycine-powder-8-oz-227-g/118150' },
     certSummary: 'Food — not TGA-listed (import)',
     certVerified: true,
     additiveSummary: 'Single-ingredient; Ajinomoto AjiPure raw material',
@@ -297,6 +306,7 @@ export const GLYCINE_SOURCES: GlyProduct[] = [
     regulated: 'food',
     ausL: null,
     channel: 'iHerb AU · Amazon AU (import)',
+    retailers: { iherb: 'https://au.iherb.com/pr/now-foods-glycine-1-000-mg-100-veg-capsules/18106' },
     certSummary: 'Food — not TGA-listed (import)',
     additiveSummary: 'Disclosed benign capsule shell',
     scores: {
@@ -327,6 +337,7 @@ export const GLYCINE_SOURCES: GlyProduct[] = [
     regulated: 'food',
     ausL: null,
     channel: 'iHerb AU · Amazon AU (import)',
+    retailers: { iherb: 'https://au.iherb.com/pr/thorne-glycine-250-capsules-500-mg-per-capsule/18505' },
     certSummary: 'Food — not TGA-listed (import)',
     additiveSummary: 'Disclosed benign capsule shell',
     scores: {
@@ -357,6 +368,7 @@ export const GLYCINE_SOURCES: GlyProduct[] = [
     regulated: 'food',
     ausL: null,
     channel: 'iHerb AU · Amazon AU (import)',
+    retailers: { amazon: 'https://www.amazon.com.au/dp/B00020IA0K', iherb: 'https://au.iherb.com/pr/solgar-glycine-500-mg-100-vegetable-capsules/15193' },
     certSummary: 'Food — not TGA-listed (import)',
     additiveSummary: 'Disclosed benign panel; makes no grade claim',
     scores: {
@@ -417,6 +429,7 @@ export const GLYCINE_SOURCES: GlyProduct[] = [
     regulated: 'medicine',
     ausL: '312974',
     channel: 'Chemist Warehouse · Woolworths',
+    retailers: { chemistWarehouse: 'https://www.chemistwarehouse.com.au/buy/105734' },
     certSummary: 'TGA-listed medicine (AUST L 312974)',
     additiveSummary: 'Each active dosed; full ingredients list not published',
     scores: {
@@ -447,6 +460,7 @@ export const GLYCINE_SOURCES: GlyProduct[] = [
     regulated: 'medicine',
     ausL: '490772',
     channel: 'Chemist Warehouse · pharmacy',
+    retailers: { chemistWarehouse: 'https://www.chemistwarehouse.com.au/buy/114030' },
     certSummary: 'TGA-listed medicine (AUST L 490772)',
     additiveSummary: 'Panel disclosed (stevia, flavour, silica, sucrose)',
     scores: {
@@ -482,6 +496,8 @@ export const GLYCINE_SOURCES: GlyProduct[] = [
     regulated: 'food',
     ausL: null,
     channel: 'Amazon AU (import)',
+    retailers: { amazon: 'https://www.amazon.com.au/dp/B0BGT9SF2G' },
+    ingredients: ['Glycine (pure single-ingredient powder)'],
     certSummary: 'Food — not TGA-listed (import)',
     additiveSummary: 'Pure glycine; public per-lot lab-report lookup by lot number',
     scores: {
@@ -511,6 +527,8 @@ export const GLYCINE_SOURCES: GlyProduct[] = [
     regulated: 'food',
     ausL: null,
     channel: 'Amazon AU · iHerb AU (import)',
+    retailers: { amazon: 'https://www.amazon.com.au/dp/B09F83CPX8', iherb: 'https://au.iherb.com/pr/nutricost-glycine-unflavored-16-oz-454-g/128939' },
+    ingredients: ['Glycine (pure single-ingredient powder)'],
     certSummary: 'Food — not TGA-listed (import)',
     additiveSummary: 'Pure glycine; "third-party tested / GMP" is a self-claim (no openable report)',
     scores: {
@@ -540,6 +558,8 @@ export const GLYCINE_SOURCES: GlyProduct[] = [
     regulated: 'food',
     ausL: null,
     channel: 'iHerb AU (import)',
+    retailers: { amazon: 'https://www.amazon.com.au/dp/B00B35A394', iherb: 'https://au.iherb.com/pr/life-extension-glycine-1-000-mg-100-vegetarian-capsules/47810' },
+    ingredients: ['Glycine 1,000 mg', 'Vegetarian capsule', 'Ascorbyl palmitate'],
     certSummary: 'Food — not TGA-listed (import)',
     additiveSummary: 'The cleanest panel here — veg cap + ascorbyl palmitate only; no grade claim',
     scores: {
@@ -569,6 +589,8 @@ export const GLYCINE_SOURCES: GlyProduct[] = [
     regulated: 'food',
     ausL: null,
     channel: 'iHerb AU · Amazon AU (import)',
+    retailers: { amazon: 'https://www.amazon.com.au/dp/B0014GW84K', iherb: 'https://au.iherb.com/pr/source-naturals-glycine-500-mg-100-capsules/144252' },
+    ingredients: ['Glycine 500 mg', 'Gelatin capsule', 'Magnesium stearate', 'Microcrystalline cellulose', 'Silicon dioxide'],
     certSummary: 'Food — not TGA-listed (import)',
     additiveSummary: 'Disclosed benign panel; gelatin (non-vegetarian) capsule; no grade claim',
     scores: {
@@ -598,6 +620,8 @@ export const GLYCINE_SOURCES: GlyProduct[] = [
     regulated: 'food',
     ausL: null,
     channel: 'brand webstore (AU-domestic)',
+    retailers: { amazon: 'https://www.amazon.com.au/dp/B0016BX8O2' },
+    ingredients: ['Glycine (pure single-ingredient powder)'],
     certSummary: 'Food (sports-food) — not TGA-listed',
     additiveSummary: 'Pure glycine; "Independently Tested" is a badge, not a linked report',
     scores: {
@@ -627,6 +651,8 @@ export const GLYCINE_SOURCES: GlyProduct[] = [
     regulated: 'food',
     ausL: null,
     channel: 'Amazon AU · iHerb AU (import)',
+    retailers: { amazon: 'https://www.amazon.com.au/dp/B01LBILPCG', iherb: 'https://au.iherb.com/pr/micro-ingredients-glycine-powder-2-2-lbs-1-kg/156441' },
+    ingredients: ['Glycine (pure single-ingredient powder)'],
     certSummary: 'Food — not TGA-listed (import)',
     additiveSummary: 'Pure glycine; no openable lab report',
     scores: {

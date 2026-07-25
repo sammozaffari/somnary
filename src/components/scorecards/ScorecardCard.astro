@@ -5,9 +5,10 @@ import type { TierMeta } from '../../data/source-scorecards/tiers';
 interface Props {
   card: ScorecardCardData;
   tier?: TierMeta;
+  /** Product-page URL — when set, the whole card becomes a link (stretched-link pattern). */
+  href?: string;
 }
-const { card: p, tier } = Astro.props;
-const segs = [1, 2, 3, 4, 5];
+const { card: p, tier, href } = Astro.props;
 ---
 
 <article class="card">
@@ -43,55 +44,22 @@ const segs = [1, 2, 3, 4, 5];
       </div>
     )}
 
-    <details class="why">
-      <summary>Why these scores</summary>
-      <div class="why-body">
-        <p class="verdict">{p.verdict}</p>
-
-        {p.detailLines.map((d) => (
-          <p class:list={['detailline', d.kind]}><span class="tag">{d.tag}</span> {d.note}</p>
-        ))}
-
-        <div class="meters">
-          {DIMENSION_ORDER.map((key) => (
-            <div class="meter">
-              <span class="meter-label">{DIMENSION_LABELS[key]}</span>
-              <span class="meter-row">
-                <span class="bar" aria-hidden="true">
-                  {segs.map((i) => <i class:list={['seg', { on: i <= p.scores[key].score }]} />)}
-                </span>
-                <span class="meter-num">{p.scores[key].score}<span class="of">/5</span></span>
-              </span>
-            </div>
-          ))}
-        </div>
-
-        <dl class="why-list">
-          {DIMENSION_ORDER.map((key) => (
-            <div class="why-row">
-              <dt>{DIMENSION_LABELS[key]} · {p.scores[key].score}/5</dt>
-              <dd>{p.scores[key].note}</dd>
-            </div>
-          ))}
-        </dl>
-
-        {p.heldItems.length > 0 && (
-          <p class="held"><span class="tag">Under review</span> {p.heldItems.join(' ')}</p>
-        )}
-      </div>
-    </details>
+    <p class="go">
+      {href ? <a class="go-link" href={href}>Full scorecard →</a> : null}
+    </p>
   </div>
 </article>
 
 <style>
   .card {
+    position: relative; /* containing block for the stretched card link */
     display: flex;
     flex-direction: column;
     border: var(--border-hairline);
     border-radius: var(--r-xl);
     background: var(--surface);
     overflow: hidden;
-    container-type: inline-size; /* meters grid adapts to the CARD's width, not the viewport */
+    container-type: inline-size;
   }
   .shot {
     position: relative;
@@ -235,129 +203,26 @@ const segs = [1, 2, 3, 4, 5];
     margin: var(--sp-1) 0 0;
   }
 
-  .why {
+  .go {
     border-top: var(--border-hairline);
     padding-top: var(--sp-3);
-    margin-top: auto; /* pin the toggle to the bottom so it lines up across a row */
+    margin: 0;
+    margin-top: auto; /* pin to the bottom so it lines up across a row */
   }
-  .why > summary {
+  .go-link {
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
     color: var(--primary);
-    cursor: pointer;
+    text-decoration: none;
   }
-  .why-body {
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-4);
-    margin-top: var(--sp-4);
+  /* stretched link — the entire card is clickable */
+  .go-link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
   }
-  .verdict {
-    font-family: var(--font-body);
-    font-size: var(--text-sm);
-    line-height: var(--lh-sm);
-    color: var(--muted);
-    margin: 0;
-  }
-  .detailline {
-    font-size: var(--text-sm);
-    line-height: var(--lh-sm);
-    color: var(--muted);
-    margin: 0;
-    padding: var(--sp-3) var(--sp-4);
-    border-radius: var(--r-sm);
-    background: var(--primary-soft);
-  }
-  .detailline.safety .tag {
-    color: var(--safety-ink, var(--ink));
-  }
-  .detailline.trial .tag {
-    color: var(--eucalyptus, var(--ink));
-  }
-
-  /* single column by default; two columns only when the CARD is wide enough for the
-     fixed-width segment bars + numbers (fixes the clipped "5/5" on narrow cards) */
-  .meters {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: var(--sp-4) var(--sp-5);
-  }
-  @container (min-width: 360px) {
-    .meters {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-  }
-  .meter {
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-2);
-    min-width: 0;
-  }
-  .meter-label {
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
-    color: var(--muted);
-    font-family: var(--font-mono);
-  }
-  .meter-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--sp-2);
-  }
-  .bar {
-    display: inline-flex;
-    gap: var(--sp-1);
-  }
-  .seg {
-    width: var(--sp-4);
-    height: var(--sp-2);
-    border-radius: var(--r-sm);
-    background: var(--primary-soft);
-  }
-  .seg.on {
-    background: var(--ink);
-  }
-  .meter-num {
-    font-family: var(--font-mono);
-    font-size: var(--text-sm);
-    color: var(--ink);
-    font-weight: 600;
-  }
-  .meter-num .of {
-    color: var(--muted);
-    font-weight: 400;
-  }
-
-  .why-list {
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-3);
-  }
-  .why-row dt {
-    font-size: var(--text-sm);
-    font-weight: 600;
-    color: var(--ink);
-    margin: 0 0 var(--sp-1);
-  }
-  .why-row dd {
-    font-size: var(--text-sm);
-    line-height: var(--lh-sm);
-    color: var(--muted);
-    margin: 0;
-  }
-  .held {
-    font-size: var(--text-xs);
-    line-height: var(--lh-sm);
-    color: var(--muted);
-    margin: 0;
-  }
-  .tag {
-    font-family: var(--font-mono);
-    letter-spacing: var(--tracking-label);
-    color: var(--ink);
-    margin-right: var(--sp-1);
+  .card:has(.go-link):hover {
+    border-color: var(--primary);
   }
 </style>

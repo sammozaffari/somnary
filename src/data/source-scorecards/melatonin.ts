@@ -70,6 +70,11 @@ export interface SourceProduct {
   /** Recurring themes from public Reddit/forum threads — display-only, never scored. */
   communityThemes?: { note: string; url?: string }[];
   /** Product photo in public/images/sources/melatonin/. Omit for a graceful lettered fallback. */
+  /** Where an Australian can find it — PLAIN retailer URLs, zero affiliate/tracking params (D2).
+   * Display priority: amazon > chemistWarehouse > iherb. */
+  retailers?: { amazon?: string; chemistWarehouse?: string; iherb?: string };
+  /** Disclosed ingredients panel (from the dossier), actives first — omitted when the brand doesn't publish one. */
+  ingredients?: string[];
   imagePath?: string;
   ratified: boolean;
   /** Whether an Australian can buy this OTC. Melatonin is Rx in AU, so the only OTC route is
@@ -98,6 +103,7 @@ export const MELATONIN_SOURCES: SourceProduct[] = [
     singleOrCombo: 'combo',
     manufacturerUrl:
       'https://www.natrol.com/products/melatonin-sleep-support-time-release-tablets-5mg',
+    retailers: { iherb: 'https://au.iherb.com/pr/natrol-melatonin-time-release-5-mg-100-tablets/8738' },
     certSummary: 'No third-party certification',
     additiveSummary: 'Benign ingredients; dose above the studied extended-release amount',
     scores: {
@@ -129,6 +135,7 @@ export const MELATONIN_SOURCES: SourceProduct[] = [
     market: 'US',
     singleOrCombo: 'single',
     manufacturerUrl: 'https://www.naturemade.com/products/nature-made-melatonin-3-mg-tablets',
+    retailers: { iherb: 'https://au.iherb.com/pr/nature-made-melatonin-3-mg-120-tablets/145605' },
     certSummary: 'USP Verified',
     certVerified: true,
     additiveSummary: 'No flagged additives',
@@ -160,6 +167,7 @@ export const MELATONIN_SOURCES: SourceProduct[] = [
     market: 'US',
     singleOrCombo: 'single',
     manufacturerUrl: 'https://naturesbounty.com/collections/melatonin',
+    retailers: { iherb: 'https://au.iherb.com/pr/nature-s-bounty-dual-spectrum-melatonin-5-mg-60-bi-layer-tablets/67800' },
     certSummary: 'No third-party certification',
     additiveSummary: 'No flagged additives',
     scores: {
@@ -194,6 +202,7 @@ export const MELATONIN_SOURCES: SourceProduct[] = [
     market: 'US',
     singleOrCombo: 'single',
     manufacturerUrl: 'https://www.nowfoods.com/products/supplements/melatonin-3-mg-veg-capsules',
+    retailers: { iherb: 'https://au.iherb.com/pr/now-foods-melatonin-3-mg-180-veg-capsules/328' },
     certSummary: 'No third-party cert (self-published COAs)',
     additiveSummary: 'No flagged additives (two-ingredient)',
     scores: {
@@ -225,6 +234,7 @@ export const MELATONIN_SOURCES: SourceProduct[] = [
     market: 'US',
     singleOrCombo: 'single',
     manufacturerUrl: 'https://www.lifeextension.com/vitamins-supplements/item01668/melatonin',
+    retailers: { iherb: 'https://au.iherb.com/pr/life-extension-melatonin-300-mcg-100-vegetarian-capsules/47809' },
     certSummary: 'No third-party certification',
     additiveSummary: 'No flagged additives',
     scores: {
@@ -407,6 +417,7 @@ export const MELATONIN_SOURCES: SourceProduct[] = [
     market: 'US',
     singleOrCombo: 'single',
     manufacturerUrl: 'https://www.thorne.com/products/dp/melaton-5-trade',
+    retailers: { iherb: 'https://au.iherb.com/pr/thorne-melaton-5-60-capsules-5-mg-per-capsule/18579' },
     certSummary: 'Cert is for Melaton-3, not this SKU',
     additiveSummary: 'No flagged additives',
     scores: {
@@ -471,6 +482,8 @@ export const MELATONIN_SOURCES: SourceProduct[] = [
     market: 'US',
     singleOrCombo: 'single',
     manufacturerUrl: 'https://www.iherb.com/pr/california-gold-nutrition-melatonin-3-mg-90-veggie-capsules/130826',
+    retailers: { iherb: 'https://au.iherb.com/pr/california-gold-nutrition-melatonin-3-mg-90-veggie-capsules/130826' },
+    ingredients: ['Melatonin 3 mg', 'Microcrystalline cellulose', 'Hypromellose (veggie capsule)', 'Silicon dioxide'],
     certSummary: 'iHerb iTested (3rd-party labs) + public per-batch lab report',
     additiveSummary: 'Clean three-ingredient panel (cellulose, hypromellose, silica)',
     imagePath: '/images/sources/melatonin/california-gold-nutrition-melatonin-3mg.jpg',
@@ -499,6 +512,8 @@ export const MELATONIN_SOURCES: SourceProduct[] = [
     market: 'US',
     singleOrCombo: 'single',
     manufacturerUrl: 'https://www.iherb.com/pr/21st-century-melatonin-5-mg-120-tablets/10813',
+    retailers: { iherb: 'https://au.iherb.com/pr/21st-century-melatonin-5-mg-120-tablets/10813' },
+    ingredients: ['Melatonin 5 mg', 'Calcium carbonate (94 mg calcium)', 'Cellulose', 'Croscarmellose sodium', 'Gum acacia', 'Stearic acid', 'Magnesium stearate', 'Silicon dioxide'],
     certSummary: 'Facility GMP only',
     additiveSummary: 'Clean panel, no synthetic dye (+ calcium carbonate base)',
     imagePath: '/images/sources/melatonin/21st-century-melatonin-5mg.jpg',
@@ -527,6 +542,8 @@ export const MELATONIN_SOURCES: SourceProduct[] = [
     market: 'US',
     singleOrCombo: 'single',
     manufacturerUrl: 'https://www.iherb.com/pr/swanson-melatonin-3-mg-120-vegan-capsules/111021',
+    retailers: { iherb: 'https://au.iherb.com/pr/swanson-melatonin-3-mg-120-vegan-capsules/111021' },
+    ingredients: ['Melatonin 3 mg', 'Rice flour', 'Hypromellose (vegan capsule)'],
     certSummary: 'Facility GMP only',
     additiveSummary: 'Two-ingredient vegan panel (rice flour, hypromellose)',
     imagePath: '/images/sources/melatonin/swanson-melatonin-3mg.jpg',
@@ -555,6 +572,8 @@ export const MELATONIN_SOURCES: SourceProduct[] = [
     market: 'US',
     singleOrCombo: 'single',
     manufacturerUrl: 'https://www.iherb.com/pr/vitamatic-melatonin-berry-10-mg-365-fast-dissolve-tablets/147514',
+    retailers: { iherb: 'https://au.iherb.com/pr/vitamatic-melatonin-berry-10-mg-365-fast-dissolve-tablets/147514' },
+    ingredients: ['Melatonin 10 mg', 'Microcrystalline cellulose', 'Natural berry flavour', 'Dextrose', 'Mannitol', 'Sucralose', 'Bilberry extract', 'Magnesium stearate', 'Silicon dioxide', 'Croscarmellose sodium', 'FD&C Blue #2 (synthetic colour)'],
     certSummary: 'Facility GMP only',
     additiveSummary: 'Fast-dissolve tablet with FD&C Blue #2, sucralose, mannitol (disclosed)',
     imagePath: '/images/sources/melatonin/vitamatic-melatonin-10mg.jpg',

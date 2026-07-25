@@ -5,8 +5,10 @@ import type { ScorecardCardData } from '../../data/source-scorecards/card';
 
 interface Props {
   cards: ScorecardCardData[];
+  /** Base path for per-product pages, e.g. "/sources/magnesium" — cards link through when set. */
+  basePath?: string;
 }
-const { cards } = Astro.props;
+const { cards, basePath } = Astro.props;
 
 const grouped = groupByTier(
   cards,
@@ -32,7 +34,7 @@ const total = cards.length;
         </div>
 
         <div class="stack">
-          {g.items.map((c) => <ScorecardCard card={c} tier={g.tier} />)}
+          {g.items.map((c) => <ScorecardCard card={c} tier={g.tier} href={basePath ? `${basePath}/${c.slug}/` : undefined} />)}
         </div>
       </section>
     ))

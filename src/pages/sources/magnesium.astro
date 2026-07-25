@@ -8,36 +8,11 @@ import ScorecardGrid from '../../components/scorecards/ScorecardGrid.astro';
 import TierLegend from '../../components/scorecards/TierLegend.astro';
 import { MAGNESIUM_SOURCES, type MagProduct } from '../../data/source-scorecards/magnesium';
 import type { ScorecardCardData, Chip, DetailLine } from '../../data/source-scorecards/card';
+import { toMagCard as toCard } from '../../lib/sources/cards';
 
 const reviewDate = '2026-07-20';
 
 // Map a magnesium product into the shared card shape.
-function toCard(p: MagProduct): ScorecardCardData {
-  const chips: Chip[] = [];
-  if (p.b6) chips.push({ label: '⚠ Contains B6', kind: 'warn', note: p.b6.note });
-  if (p.certVerified) chips.push({ label: '✓ Third-party tested', kind: 'good', note: p.certSummary });
-
-  const detailLines: DetailLine[] = [];
-  if (p.b6) detailLines.push({ tag: 'Safety', note: p.b6.note, kind: 'safety' });
-
-  return {
-    slug: p.slug,
-    brand: p.brand,
-    productName: p.productName,
-    specLines: [`${p.elementalMg} mg elemental`, p.form],
-    metaLine: `${p.ausL ? `AUST L ${p.ausL}` : (p.channel.includes('import') ? 'Not TGA-listed (import)' : 'AUST L — unconfirmed')} · ${p.channel}`,
-    certSummary: p.certSummary,
-    certVerified: p.certVerified,
-    imagePath: p.imagePath,
-    bottomLine: p.bottomLine,
-    chips,
-    scores: p.scores,
-    verdict: p.verdict,
-    detailLines,
-    heldItems: p.heldItems,
-    hasB6: !!p.b6,
-  };
-}
 
 const cards = MAGNESIUM_SOURCES.filter((p) => p.ratified).map(toCard);
 
@@ -127,7 +102,7 @@ const whyCareExample = 'For example, Australia’s regulator is <a href="https:/
 
     <TierLegend />
 
-    <ScorecardGrid cards={cards} />
+    <ScorecardGrid cards={cards} basePath="/sources/magnesium" />
 
     <p class="footer-strip">
       Somnary · Magnesium source scorecards · Reviewed {reviewDate} · Educational, not medical
