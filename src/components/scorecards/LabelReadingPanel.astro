@@ -1,0 +1,117 @@
+---
+/**
+ * Reading-the-label panel — the "assume zero knowledge" primer (EWG-inspired IA).
+ * Two columns: what a good label shows vs what makes us cautious. Bullets are
+ * distilled from the page's OWNER-RATIFIED scorecard findings — label-reading
+ * education only, never product advice (the no-recommendation line holds).
+ * Bodies may carry <strong> emphasis via set:html.
+ */
+interface Props {
+  lookFor: string[];
+  cautious: string[];
+}
+const { lookFor, cautious } = Astro.props;
+---
+
+<section class="panel" aria-label="How to read the label">
+  <h2 class="title">Reading the label</h2>
+  <p class="sub">
+    You don’t need to know the science — these are the things worth spotting on the pack, drawn
+    from what we found rating the products below.
+  </p>
+
+  <div class="cols">
+    <div class="col" data-tone="good">
+      <h3 class="col-title"><span class="mark" aria-hidden="true">✓</span> On the label, look for</h3>
+      <ul class="list">
+        {lookFor.map((item) => <li class="item" set:html={item} />)}
+      </ul>
+    </div>
+
+    <div class="col" data-tone="wary">
+      <h3 class="col-title"><span class="mark" aria-hidden="true">⚠</span> What makes us cautious</h3>
+      <ul class="list">
+        {cautious.map((item) => <li class="item" set:html={item} />)}
+      </ul>
+    </div>
+  </div>
+</section>
+
+<style>
+  .panel {
+    margin: var(--sp-8) 0;
+  }
+  .title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-2xl);
+    line-height: var(--lh-2xl);
+    letter-spacing: var(--tracking-tight);
+    color: var(--ink);
+    margin: 0;
+  }
+  .sub {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--muted);
+    margin: var(--sp-2) 0 0;
+    max-width: 72ch;
+  }
+
+  .cols {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--sp-6);
+    margin-top: var(--sp-6);
+  }
+  @media (max-width: 720px) {
+    .cols {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .col {
+    border-top: 3px solid var(--muted);
+    padding-top: var(--sp-4);
+  }
+  .col[data-tone='good'] {
+    border-top-color: var(--eucalyptus, var(--primary));
+  }
+  .col[data-tone='wary'] {
+    border-top-color: var(--safety-ink, var(--vermilion));
+  }
+
+  .col-title {
+    display: flex;
+    align-items: baseline;
+    gap: var(--sp-2);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-md);
+    line-height: var(--lh-md);
+    color: var(--ink);
+    margin: 0;
+  }
+  .col[data-tone='good'] .mark {
+    color: var(--eucalyptus, var(--primary));
+  }
+  .col[data-tone='wary'] .mark {
+    color: var(--safety-ink, var(--vermilion));
+  }
+
+  .list {
+    list-style: none;
+    margin: var(--sp-3) 0 0;
+    padding: 0;
+  }
+  .item {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--ink);
+    padding: var(--sp-3) 0;
+    border-bottom: var(--border-hairline);
+  }
+  .item:last-child {
+    border-bottom: none;
+  }
+</style>

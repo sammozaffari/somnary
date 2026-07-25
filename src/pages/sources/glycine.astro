@@ -2,6 +2,7 @@
 import Base from '../../layouts/Base.astro';
 import SafetyCallout from '../../components/scorecards/SafetyCallout.astro';
 import RatingLegend from '../../components/scorecards/RatingLegend.astro';
+import LabelReadingPanel from '../../components/scorecards/LabelReadingPanel.astro';
 import ScorecardGrid from '../../components/scorecards/ScorecardGrid.astro';
 import { GLYCINE_SOURCES, type GlyProduct } from '../../data/source-scorecards/glycine';
 import type { ScorecardCardData, Chip, DetailLine } from '../../data/source-scorecards/card';
@@ -60,6 +61,20 @@ const safetyItems = [
       'The sleep studies use about <strong>3 g</strong>. Some products reach that in one serving; others need up to <strong>six capsules</strong>; the combos hold far less. Each card notes what its serving delivers — it doesn’t change the score, but it changes what you’d actually take.',
   },
 ];
+// Reading-the-label primer — distilled from the ratified findings below (label education, not advice).
+const labelReading = {
+  lookFor: [
+    'A serving that actually reaches <strong>~3 g</strong> — the amount used in the sleep studies',
+    'A pure, <strong>single-ingredient powder</strong> — glycine needs no fillers',
+    'An openable <strong>lab report</strong> — only one product here has a per-lot lookup',
+  ],
+  cautious: [
+    'Capsules that need <strong>3–6 caps</strong> to reach the studied amount',
+    '“Pharmaceutical grade” or “third-party tested” words with <strong>no document</strong> behind them',
+    'Mixing up <strong>magnesium glycinate</strong> with glycine — it’s a magnesium product, and the most common confusion',
+  ],
+};
+
 ---
 
 <Base
@@ -96,6 +111,8 @@ const safetyItems = [
       tone="info"
       items={safetyItems}
     />
+
+    <LabelReadingPanel lookFor={labelReading.lookFor} cautious={labelReading.cautious} />
 
     <RatingLegend items={ratingLegend} remedyHref="/r/glycine" />
 

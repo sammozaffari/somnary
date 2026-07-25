@@ -2,6 +2,7 @@
 import Base from '../../layouts/Base.astro';
 import SafetyCallout from '../../components/scorecards/SafetyCallout.astro';
 import RatingLegend from '../../components/scorecards/RatingLegend.astro';
+import LabelReadingPanel from '../../components/scorecards/LabelReadingPanel.astro';
 import ScorecardGrid from '../../components/scorecards/ScorecardGrid.astro';
 import { MAGNESIUM_SOURCES, type MagProduct } from '../../data/source-scorecards/magnesium';
 import type { ScorecardCardData, Chip, DetailLine } from '../../data/source-scorecards/card';
@@ -59,6 +60,22 @@ const safetyItems = [
       'If you’re pregnant or breastfeeding, check any added ingredients with a pharmacist before taking magnesium supplements regularly.',
   },
 ];
+// Reading-the-label primer — distilled from the ratified findings below (label education, not advice).
+const labelReading = {
+  lookFor: [
+    'The amount of <strong>each form</strong> disclosed separately (e.g. “citrate 296 mg + glycinate 24 mg”) — not one combined number',
+    'A named, well-absorbed form such as <strong>glycinate</strong> or <strong>citrate</strong>',
+    'An <strong>AUST L</strong> number — a TGA-listed medicine rather than an unlisted import',
+    'A genuine third-party mark (<strong>NSF / USP</strong>) — rare: only one product here has one',
+  ],
+  cautious: [
+    'Added <strong>vitamin B6</strong> — the TGA is acting on B6 supplements after nerve-damage reports (see the safety notes above)',
+    '“High absorption” or “bioavailable” claims on blends that are mostly <strong>oxide</strong>',
+    'A “proprietary blend” that hides how much of each form is inside',
+    'Imports with no AUST L — outside TGA oversight, and they skip Australia’s mandated warnings',
+  ],
+};
+
 ---
 
 <Base
@@ -96,6 +113,8 @@ const safetyItems = [
       items={safetyItems}
       foot="These flags are shown for your safety and sit apart from the scores — if you take magnesium daily, check your product’s B6 amount and talk to a pharmacist."
     />
+
+    <LabelReadingPanel lookFor={labelReading.lookFor} cautious={labelReading.cautious} />
 
     <RatingLegend items={ratingLegend} remedyHref="/r/magnesium" />
 
