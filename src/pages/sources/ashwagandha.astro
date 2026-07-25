@@ -5,6 +5,7 @@ import RatingLegend from '../../components/scorecards/RatingLegend.astro';
 import LabelReadingPanel from '../../components/scorecards/LabelReadingPanel.astro';
 import WhyCareStrip from '../../components/scorecards/WhyCareStrip.astro';
 import ScorecardGrid from '../../components/scorecards/ScorecardGrid.astro';
+import TierLegend from '../../components/scorecards/TierLegend.astro';
 import { ASHWAGANDHA_SOURCES, type AshProduct } from '../../data/source-scorecards/ashwagandha';
 import type { ScorecardCardData, Chip, DetailLine } from '../../data/source-scorecards/card';
 
@@ -132,6 +133,8 @@ const whyCareExample = 'For example, in 2024 Australia’s regulator issued a <a
     <LabelReadingPanel lookFor={labelReading.lookFor} cautious={labelReading.cautious} />
 
     <RatingLegend items={ratingLegend} remedyHref="/r/ashwagandha" />
+
+    <TierLegend />
 
     <ScorecardGrid cards={cards} />
 

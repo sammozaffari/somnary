@@ -32,7 +32,7 @@ const total = cards.length;
         </div>
 
         <div class="stack">
-          {g.items.map((c) => <ScorecardCard card={c} />)}
+          {g.items.map((c) => <ScorecardCard card={c} tier={g.tier} />)}
         </div>
       </section>
     ))

@@ -5,6 +5,7 @@ import RatingLegend from '../../components/scorecards/RatingLegend.astro';
 import LabelReadingPanel from '../../components/scorecards/LabelReadingPanel.astro';
 import WhyCareStrip from '../../components/scorecards/WhyCareStrip.astro';
 import ScorecardGrid from '../../components/scorecards/ScorecardGrid.astro';
+import TierLegend from '../../components/scorecards/TierLegend.astro';
 import { GLYCINE_SOURCES, type GlyProduct } from '../../data/source-scorecards/glycine';
 import type { ScorecardCardData, Chip, DetailLine } from '../../data/source-scorecards/card';
 
@@ -121,6 +122,8 @@ const whyCareExample = 'For example, the pure glycine people take for sleep is u
     <LabelReadingPanel lookFor={labelReading.lookFor} cautious={labelReading.cautious} />
 
     <RatingLegend items={ratingLegend} remedyHref="/r/glycine" />
+
+    <TierLegend />
 
     <ScorecardGrid cards={cards} />
 

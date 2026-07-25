@@ -5,6 +5,7 @@ import RatingLegend from '../../components/scorecards/RatingLegend.astro';
 import LabelReadingPanel from '../../components/scorecards/LabelReadingPanel.astro';
 import WhyCareStrip from '../../components/scorecards/WhyCareStrip.astro';
 import ScorecardGrid from '../../components/scorecards/ScorecardGrid.astro';
+import TierLegend from '../../components/scorecards/TierLegend.astro';
 import {
   MELATONIN_SOURCES,
   PRESCRIPTION_NOTE,
@@ -122,6 +123,8 @@ const whyCareExample = 'For example, when researchers tested 31 over-the-counter
     <LabelReadingPanel lookFor={labelReading.lookFor} cautious={labelReading.cautious} />
 
     <RatingLegend items={ratingLegend} remedyHref="/r/melatonin" />
+
+    <TierLegend />
 
     <ScorecardGrid cards={cards} />
 
