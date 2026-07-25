@@ -1155,6 +1155,7 @@ async function runRedTeam() {
     ok('(11w) a non-reputable web url is dropped by the ENGINE guard', (r.webFindings || []).every((f) => f.domain !== 'sleepblog.com' && !/says a blog/.test(f.text)));
     ok('(11w) the shown domain is RECOMPUTED from the url (a lying domain field is ignored)', (r.webFindings || []).every((f) => f.domain !== 'evil.com') && (r.webFindings || []).some((f) => f.domain === 'medlineplus.gov' && /reduces insomnia onset/.test(f.text)));
     ok('(11w) NO grade smell with a web tier', findGradeSmell(r) === null);
+    ok('(11w) assessed card carries a plain-language bottomLine', typeof r.bottomLine === 'string' && /doxylamine/i.test(r.bottomLine) && /effect on sleep/i.test(r.bottomLine) && findGradeSmell({ x: r.bottomLine }) === null);
     ok('(11w) web tier fired ONCE with a bounded timeout (parallel budget)', webCalls.length === 1 && webCalls[0].timeoutMs > 1000 && webCalls[0].timeoutMs <= 45000, JSON.stringify(webCalls.map((c) => c.timeoutMs)));
     const rNoWeb = await runLens({ ...base, input: 'doxylamine sleep aid product', provider: providerOf(wdocs), model, webResearch: async () => [] });
     ok('(11w) empty web → NO webFindings key', rNoWeb.webFindings === undefined);

@@ -122,6 +122,9 @@ export interface LensAssessment {
   shortCircuit?: LensShortCircuit;
   /** What the query was resolved to (CHK-7.4). Present on assessed/inconclusive researched cards. */
   resolved?: LensResolvedDisplay;
+  /** The plain-language "Bottom line" (CHK-7.9) — the digestible lead summary, server-composed. Present
+   * on assessed/inconclusive; the card renders it FIRST and suppresses the meta resolved/verdict lines. */
+  bottomLine?: string;
   verdictLine: string;
   evidence: LensEvidence[];
   /** The signature anti-hype block — always populated on assessed/inconclusive. */
@@ -608,9 +611,21 @@ function inconclusive(
     copy.DOES_NOT_SHOW_STANDING,
   ];
   const productClass = resolved?.productClass ?? 'unknown';
+  const bottom = safeLine(
+    copy.bottomLine({
+      subject: resolved?.subject ?? subject,
+      resolvedName: resolved?.resolvedName ?? '',
+      productClass,
+      verifiedCount: 0,
+      minStrength: 'weak',
+      inconclusive: true,
+    }),
+    '',
+  );
   return {
     ...base,
     ...(resolved && hasResolvedDisplay(resolved) ? { resolved } : {}),
+    ...(bottom ? { bottomLine: bottom } : {}),
     status: 'inconclusive',
     verdictLine: safeLine(copy.INCONCLUSIVE_MESSAGE, copy.INCONCLUSIVE_MESSAGE),
     evidence: [],
@@ -690,9 +705,22 @@ function compose(
   if (cutCount > 0) doesNotShow.push(safeLine(copy.doesNotShowCut(cutCount), copy.DOES_NOT_SHOW_STANDING));
   doesNotShow.push(copy.DOES_NOT_SHOW_STANDING);
 
+  const bottom = safeLine(
+    copy.bottomLine({
+      subject: resolved?.subject ?? subject,
+      resolvedName: resolved?.resolvedName ?? '',
+      productClass: resolved?.productClass ?? 'unknown',
+      verifiedCount: evidence.length,
+      minStrength,
+      inconclusive: false,
+    }),
+    '',
+  );
+
   return {
     ...base,
     ...(resolved && hasResolvedDisplay(resolved) ? { resolved } : {}),
+    ...(bottom ? { bottomLine: bottom } : {}),
     status: 'assessed',
     verdictLine,
     evidence,

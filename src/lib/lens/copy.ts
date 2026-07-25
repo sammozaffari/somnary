@@ -142,6 +142,50 @@ export function interpretedAsLine(subject: string, resolvedName: string, product
 }
 
 /**
+ * The plain-language "Bottom line" (CHK-7.9) — the digestible 1–2 sentence summary that LEADS the card,
+ * so a reader gets the gist before the structured detail. SERVER-composed from already-verified data:
+ * the resolved entity, whether verified studies point to a sleep effect (and how weak/strong), and a
+ * pointer down to the evidence + cautions. Neutral on DIRECTION (helps vs harms — the claims below say
+ * which) so it never overstates. No model prose; interpolates only the bounded subject/name + counts.
+ */
+export function bottomLine(args: {
+  subject: string;
+  resolvedName: string;
+  productClass: string;
+  verifiedCount: number;
+  minStrength: 'strong' | 'weak';
+  inconclusive: boolean;
+}): string {
+  const s = (typeof args.subject === 'string' ? args.subject : '').trim();
+  const r = (typeof args.resolvedName === 'string' ? args.resolvedName : '').trim();
+  const label = PRODUCT_CLASS_LABEL[args.productClass] || '';
+  // entity clause — "Restavit is doxylamine, an over-the-counter medicine."
+  let entity = '';
+  if (s) {
+    if (r && !sameName(r, s)) entity = `${s} is ${r}${label ? `, ${label}` : ''}.`;
+    else if (label) entity = `${s} is ${label}.`;
+  }
+  // effect clause — neutral on direction; captures verified-count + strength (or the honest gap).
+  const n = Math.max(0, Math.trunc(args.verifiedCount));
+  let effect: string;
+  if (args.inconclusive || n <= 0) {
+    effect =
+      'The Lens could not find published human evidence it could verify for its effect on sleep — a gap ' +
+      'in the research, not proof it does or does not work.';
+  } else if (args.minStrength === 'weak') {
+    effect =
+      `The published ${plural(n, 'study', 'studies')} the Lens could verify point to an effect on sleep, ` +
+      'but the evidence is weak — small, preliminary, or hedged in the studies themselves.';
+  } else {
+    effect = 'The published studies the Lens verified point to a clearer effect on sleep.';
+  }
+  const pointer = 'Read the evidence and any cautions below — this is not a Somnary grade.';
+  const line = [entity, effect, pointer].filter(Boolean).join(' ');
+  // Capitalize the opening letter — the subject (which may lead, e.g. "ashwagandha") is often lowercase.
+  return line ? line.charAt(0).toUpperCase() + line.slice(1) : line;
+}
+
+/**
  * The safety note, augmented for medicines. An OTC or prescription sleep drug carries real, personal
  * risk that a supplement note under-states, so we prepend a "this is a medicine" reminder — still a
  * ROUTING note, never a safety call on a dose. All other classes get the standing SAFETY_NOTE.
