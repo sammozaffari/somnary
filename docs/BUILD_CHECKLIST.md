@@ -496,7 +496,17 @@ NOT a Somnary grade". Concierge (CHK-6.8) demotes to a secondary mode.
   framing/grade/raw-id gates. *Accept:* no AI recommendation/dose/diagnosis; cautions are
   source-attributed verbatim; compliance-reviewed. Live: Restavit → "short-term use only,
   discontinue >2 weeks" (drugs.com) + "daytime drowsiness/impaired coordination" +
-  "not with alcohol/CNS depressants" (ncbi). Lens 239 / card 44 / loop 40.
+  "not with alcohol/CNS depressants" (ncbi). Lens 239 / card 44 / loop 40. *(Merged #110;
+  hardened: polarity guard + verbatim cautions + dose guard.)*
+- [x] **CHK-7.9 Plain-language "Bottom line" lead summary.** `HG` (medical-boundary AI core).
+  Owner: the card was a structured breakdown, not the "digestible paragraph or 2" asked for.
+  SERVER-composed `bottomLine()` leads the card: entity (resolved) + whether verified studies
+  point to a sleep effect (weak/strong, or the honest gap) + pointer; neutral on direction so
+  it never overstates; carries "not a Somnary grade"; safeLine-linted. When present it subsumes
+  + suppresses the meta resolved/verdict lines. NO new model prose. Compliance PASS. Live:
+  Restavit → "Restavit is doxylamine, an over-the-counter medicine. The published studies … point
+  to an effect on sleep, but the evidence is weak … not a Somnary grade." Lens 246 / card 49 /
+  loop 40. Merged #114; LENS_WEB_SEARCH=on live in Vercel.
 
 ---
 
