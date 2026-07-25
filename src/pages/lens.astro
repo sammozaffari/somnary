@@ -23,11 +23,6 @@ import LensPanel from '../components/LensPanel.astro';
     <header class="head">
       <p class="eyebrow">Somnary Lens · AI-assisted research</p>
       <h1 class="title">Research any sleep remedy, supplement, or drug</h1>
-      <p class="dek">
-        Name a product, ingredient, or medicine — the Lens searches the published evidence, verifies
-        every claim against its source, and gives you a plain-language read of what it does <em>and
-        doesn’t</em> establish. AI-assisted research — <em>not</em> a grade, a recommendation, or a dose.
-      </p>
     </header>
 
     <!-- The island, right up front so the prompt is the first thing you reach — no scrolling to type. -->
@@ -88,23 +83,17 @@ import LensPanel from '../components/LensPanel.astro';
     margin: 0;
   }
   .head {
-    margin-bottom: var(--sp-6);
+    margin-bottom: var(--sp-5);
   }
   .title {
     font-family: var(--font-display);
     font-weight: 700;
-    font-size: var(--text-3xl);
-    line-height: var(--lh-3xl);
+    font-size: var(--text-xl);
+    line-height: var(--lh-xl);
     letter-spacing: var(--tracking-tight);
     color: var(--ink);
-    margin: var(--sp-3) 0 var(--sp-5);
-  }
-  .dek {
-    font-size: var(--text-md);
-    line-height: var(--lh-md);
-    color: var(--muted);
-    max-width: 68ch;
-    margin: 0;
+    margin: var(--sp-2) 0 0;
+    max-width: 22ch;
   }
 
   .banner-slot {
@@ -182,7 +171,7 @@ import LensPanel from '../components/LensPanel.astro';
       padding: var(--sp-6) var(--sp-5) var(--sp-8);
     }
     .title {
-      font-size: var(--text-2xl);
+      font-size: var(--text-lg);
     }
   }
 </style>

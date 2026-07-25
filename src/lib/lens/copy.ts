@@ -162,25 +162,22 @@ export function bottomLine(args: {
   // entity clause — "Restavit is doxylamine, an over-the-counter medicine."
   let entity = '';
   if (s) {
-    if (r && !sameName(r, s)) entity = `${s} is ${r}${label ? `, ${label}` : ''}.`;
-    else if (label) entity = `${s} is ${label}.`;
+    if (r && !sameName(r, s)) entity = `${s} is ${r}${label ? `, ${label}` : ''}`;
+    else if (label) entity = `${s} is ${label}`;
   }
-  // effect clause — neutral on direction; captures verified-count + strength (or the honest gap).
+  // effect clause — ONE short clause, neutral on direction. Kept lean so the whole line is a single
+  // digestible sentence (the not-a-grade / read-below framing lives in the stamp + card, not repeated here).
   const n = Math.max(0, Math.trunc(args.verifiedCount));
   let effect: string;
   if (args.inconclusive || n <= 0) {
-    effect =
-      'The Lens could not find published human evidence it could verify for its effect on sleep — a gap ' +
-      'in the research, not proof it does or does not work.';
+    effect = 'the Lens found no published human evidence it could verify for its effect on sleep';
   } else if (args.minStrength === 'weak') {
-    effect =
-      `The published ${plural(n, 'study', 'studies')} the Lens could verify point to an effect on sleep, ` +
-      'but the evidence is weak — small, preliminary, or hedged in the studies themselves.';
+    effect = 'the studies the Lens could verify point to an effect on sleep, but the evidence is weak';
   } else {
-    effect = 'The published studies the Lens verified point to a clearer effect on sleep.';
+    effect = 'the studies the Lens verified point to a clearer effect on sleep';
   }
-  const pointer = 'Read the evidence and any cautions below — this is not a Somnary grade.';
-  const line = [entity, effect, pointer].filter(Boolean).join(' ');
+  // Join as one sentence: "<entity> — <effect>." When there's no entity, the effect stands alone.
+  const line = entity ? `${entity} — ${effect}.` : `${effect}.`;
   // Capitalize the opening letter — the subject (which may lead, e.g. "ashwagandha") is often lowercase.
   return line ? line.charAt(0).toUpperCase() + line.slice(1) : line;
 }

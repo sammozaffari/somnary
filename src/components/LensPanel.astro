@@ -264,17 +264,15 @@
     margin: 0;
     max-width: 64ch;
   }
-  /* the plain-language "Bottom line" lead — the most prominent text on the card: big + semibold so the
-     eye lands here FIRST (the card-IA fix: one clear entry point, then bold section chunks below) */
+  /* the plain-language "Bottom line" lead — a CALM lede (one sentence), not a heading: readable and
+     inviting, so it summarises without shouting. The bold section heads below carry the scanning. */
   :global(.lc-bottomline) {
-    font-family: var(--font-display);
-    font-weight: 600;
-    font-size: var(--text-lg);
+    font-size: var(--text-md);
     line-height: var(--lh-md);
-    letter-spacing: var(--tracking-tight);
+    font-weight: 500;
     color: var(--ink);
     margin: 0;
-    max-width: 58ch;
+    max-width: 60ch;
   }
   :global(.lc-verdict) {
     font-size: var(--text-base);
