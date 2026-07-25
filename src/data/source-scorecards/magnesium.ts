@@ -15,7 +15,7 @@
 // SAFETY: brand-negative penalties only from primary, verbatim-verified regulator documents naming
 // the product or its line; other-product brand history is held ("under review").
 //
-// ADDITIVES CAVEAT: most AU brands don't publish full full ingredients lists online, so `additives` is a
+// ADDITIVES CAVEAT: most AU brands don't publish full ingredients lists online, so `additives` is a
 // provisional 5 with "panel not disclosed" for those — it is NOT a claim of a clean panel.
 
 export type DimensionKey =
@@ -92,7 +92,7 @@ export const MAGNESIUM_SOURCES: MagProduct[] = [
     scores: {
       testing_purity: { score: 0, note: 'No third-party product cert (USP/NSF/Informed) and no published lab test; AUST L is a TGA listing, not third-party testing.' },
       label_accuracy: { score: 0, note: 'No independent lab test of the exact product and no public batch lab report (dimension shows "no lab-test data").' },
-      additives: { score: 5, note: 'Provisional — full full ingredients list not published online; no confirmed additive of concern.' },
+      additives: { score: 5, note: 'Provisional — full ingredients list not published online; no confirmed additive of concern.' },
       regulatory: { score: 5, note: 'No TGA/FDA action names this product; the 2025 B6 class action and Daily Magnesium cancellation are other products (this SKU is B6-free).' },
       transparency: { score: 4, note: 'Named maker + AUST L, and a high-water-mark disclosure of how much of each type is inside (citrate 296 + glycinate 24 mg); no public lab report.' },
       marketing_honesty: { score: 5, note: 'Indications hedged in TGA-permitted form; blend is genuinely citrate + glycinate, so absorption claims aren’t oxide-mislabeling.' },
@@ -152,7 +152,7 @@ export const MAGNESIUM_SOURCES: MagProduct[] = [
     scores: {
       testing_purity: { score: 0, note: 'No third-party product cert and no published lab test; AUST L is a listing, not testing.' },
       label_accuracy: { score: 0, note: 'No independent lab test of the exact product; no public batch lab report.' },
-      additives: { score: 5, note: 'Provisional — full full ingredients list not published online; no confirmed additive of concern.' },
+      additives: { score: 5, note: 'Provisional — full ingredients list not published online; no confirmed additive of concern.' },
       regulatory: { score: 5, note: 'No action names this product/line; the B6-containing sibling "High Strength" is a separate product.' },
       transparency: { score: 4, note: 'Named maker + AUST L + full 4-salt disclosure of how much of each type is inside; compound weights and full ingredients list not given.' },
       marketing_honesty: { score: 5, note: 'AU-permitted indication copy; no disease or unsupported-proof claim.' },
@@ -212,7 +212,7 @@ export const MAGNESIUM_SOURCES: MagProduct[] = [
     scores: {
       testing_purity: { score: 0, note: 'No third-party product cert and no published lab test; AUST L is a listing, not testing.' },
       label_accuracy: { score: 0, note: 'No independent lab test of the exact product; no public batch lab report.' },
-      additives: { score: 5, note: 'Provisional — full full ingredients list not published; the aspartame implied by the phenylalanine line is a watchlist-excluded sweetener (no deduction).' },
+      additives: { score: 5, note: 'Provisional — full ingredients list not published; the aspartame implied by the phenylalanine line is a watchlist-excluded sweetener (no deduction).' },
       regulatory: { score: 5, note: 'No action names this product/line; B6-free.' },
       transparency: { score: 4, note: 'Named maker + AUST L + full disclosure of how much of each type is inside (oxide 100 + phosphate 100 + glycinate 25); no public lab report.' },
       marketing_honesty: { score: 4, note: '−1: markets "3 bioavailable forms" while ~44% of the magnesium is poorly-absorbed oxide.' },
@@ -242,7 +242,7 @@ export const MAGNESIUM_SOURCES: MagProduct[] = [
     scores: {
       testing_purity: { score: 0, note: 'No third-party product cert and no published lab test; AUST L is a listing, not testing.' },
       label_accuracy: { score: 0, note: 'No independent lab test of the exact product; no public batch lab report.' },
-      additives: { score: 5, note: 'Provisional — full full ingredients list not published; no confirmed additive of concern.' },
+      additives: { score: 5, note: 'Provisional — full ingredients list not published; no confirmed additive of concern.' },
       regulatory: { score: 3, note: '−2: a 2024 TGA compliance report named this product (ARTG 298635) for unsubstantiated performance claims and the maker received infringement notices.' },
       transparency: { score: 4, note: 'Named maker + AUST L + full 6-salt disclosure of how much of each type is inside; no public lab report.' },
       marketing_honesty: { score: 4, note: '−1: the TGA formally found this product’s exercise/muscle/performance claims unsubstantiated (2024).' },
@@ -332,7 +332,7 @@ export const MAGNESIUM_SOURCES: MagProduct[] = [
     scores: {
       testing_purity: { score: 0, note: 'No third-party product cert and no published lab test; AUST L is a listing, not testing.' },
       label_accuracy: { score: 0, note: 'No independent lab test of the exact product; no public batch lab report.' },
-      additives: { score: 5, note: 'Provisional — full full ingredients list not published; no confirmed additive of concern.' },
+      additives: { score: 5, note: 'Provisional — full ingredients list not published; no confirmed additive of concern.' },
       regulatory: { score: 5, note: 'No action names this product; the B6-overage recall was Ethical Nutrients (a different brand), not attributed; the Night SKU is B6-free.' },
       transparency: { score: 3, note: 'Named maker + AUST L, but the manufacturer calls its own magnesium a "proprietary blend" and hides the split between the different types of magnesium; no public lab report.' },
       marketing_honesty: { score: 5, note: 'Claims hedged; absorption claim carries a named comparator ("vs Mg oxide alone").' },
