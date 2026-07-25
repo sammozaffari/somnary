@@ -22,31 +22,34 @@ import LensPanel from '../components/LensPanel.astro';
   <main class="page">
     <header class="head">
       <p class="eyebrow">Somnary Lens · AI-assisted research</p>
-      <h1 class="title">Research a remedy the tier board doesn’t cover yet</h1>
+      <h1 class="title">Research any sleep remedy, supplement, or drug</h1>
       <p class="dek">
-        Name a product or ingredient — or paste a supplement-facts panel — and the Lens applies
-        Somnary’s method to it: it searches the published literature, verifies each claim against its
-        own source, and shows what the evidence does <em>and doesn’t</em> establish. It is
-        AI-assisted research, <em>not</em> a Somnary grade. It never recommends, never diagnoses, and
-        never tells you what to take or what dose.
+        Name a product, ingredient, or medicine — the Lens searches the published evidence, verifies
+        every claim against its source, and gives you a plain-language read of what it does <em>and
+        doesn’t</em> establish. AI-assisted research — <em>not</em> a grade, a recommendation, or a dose.
       </p>
     </header>
 
-    <ContextBanner
-      note="This is AI-assisted research, not a Somnary grade. It applies Somnary’s method to products the graded corpus doesn’t cover — a human grade always beats fresh AI, so anything already on the tier board links you straight there instead."
-    />
+    <!-- The island, right up front so the prompt is the first thing you reach — no scrolling to type. -->
+    <LensPanel />
 
-    <!-- Medical boundary, near the top (server-rendered — present with JS off). -->
+    <div class="banner-slot">
+      <ContextBanner
+        note="This is AI-assisted research, not a Somnary grade. It applies Somnary’s method to products the graded corpus doesn’t cover — a human grade always beats fresh AI, so anything already on the tier board links you straight there instead."
+      />
+    </div>
+
+    <!-- Medical boundary, kept adjacent to the prompt (server-rendered — present with JS off). -->
     <div class="boundary-slot">
       <Disclaimer variant="standard" />
     </div>
 
-    <!-- What it does / doesn't — server-rendered so a crawler and a no-JS reader see the whole contract. -->
+    <!-- What it does / doesn't — below the fold, still server-rendered so a crawler + no-JS reader see it. -->
     <section class="contract" aria-label="What the Lens does and does not do">
       <div class="col">
         <p class="col-tag">What it does</p>
         <ul class="col-list">
-          <li>Researches a product or ingredient the graded corpus doesn’t cover yet, or reads a pasted supplement-facts panel.</li>
+          <li>Researches any sleep product, ingredient, or drug the graded corpus doesn’t cover, or reads a pasted supplement-facts panel.</li>
           <li>Searches the published literature and verifies each claim against its own cited source — dropping any it can’t stand up.</li>
           <li>Shows what the evidence does <em>not</em> establish, and labels weak evidence weak.</li>
           <li>Points you to the <a href="/tiers">graded tier board</a> when a subject is already covered — a human grade beats fresh AI.</li>
@@ -64,9 +67,6 @@ import LensPanel from '../components/LensPanel.astro';
         </ul>
       </div>
     </section>
-
-    <!-- The island. Progressive enhancement: the shell above stands on its own without it. -->
-    <LensPanel />
 
     <p class="review-line">
       Reviewed 2026-07-21 · found an error? <a href="/methodology#corrections">corrections →</a>
@@ -107,8 +107,11 @@ import LensPanel from '../components/LensPanel.astro';
     margin: 0;
   }
 
-  .boundary-slot {
+  .banner-slot {
     margin-top: var(--sp-6);
+  }
+  .boundary-slot {
+    margin-top: var(--sp-5);
   }
 
   /* what it does / doesn't — two calm columns, no grade coloring */
