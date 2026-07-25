@@ -1,0 +1,339 @@
+---
+import Base from '../../layouts/Base.astro';
+// Bundle the cited watchlist as a raw string at build time (Vite ?raw) — same source of truth the
+// scoring rubric uses; no runtime file read, so it works from the built bundle.
+import yamlText from '../../data/additive-watchlist.yaml?raw';
+import { parseAdditiveContent, type AdditiveContentEntry } from '../../lib/sources/additive-content';
+
+const reviewDate = '2026-07-17';
+const { flagged, notFlagged } = parseAdditiveContent(yamlText);
+
+// Clean display headings (the id title-cases awkwardly for a couple).
+const DISPLAY: Record<string, string> = {
+  'titanium-dioxide': 'Titanium dioxide',
+  'artificial-azo-dyes': 'Synthetic azo dyes',
+  'erythrosine-red-3': 'Erythrosine (Red 3)',
+  'sodium-benzoate': 'Sodium benzoate',
+  'bha-bht': 'BHA & BHT',
+  'partially-hydrogenated-oils': 'Partially hydrogenated oils',
+  'sugar-alcohol-load': 'Sugar alcohols (polyols)',
+  'proprietary-blend': 'Proprietary blends',
+  'silicon-dioxide': 'Silicon dioxide',
+  'magnesium-stearate': 'Magnesium stearate',
+};
+const displayName = (e: AdditiveContentEntry) =>
+  DISPLAY[e.id] ?? e.id.replace(/-/g, ' ').replace(/^\w/, (c) => c.toUpperCase());
+
+const sevLabel = (e: AdditiveContentEntry) =>
+  e.structural ? 'Transparency defect' : e.severity === 'concern' ? 'Stronger evidence · −2' : 'Precautionary · −1';
+---
+
+<Base
+  title="What we watch for in the ingredients list — Somnary source scorecards"
+  description="The cited additive watchlist behind the Somnary source scorecards: the extra ingredients that lower a sleep supplement's Additives score, in plain English, with the synonyms to spot on a label and a primary source for each. Plus the benign excipients we deliberately do NOT flag."
+>
+  <main class="page">
+    <header class="head">
+      <p class="eyebrow">Source scorecards · Additives</p>
+      <h1 class="title">What we watch for in the ingredients list</h1>
+      <p class="dek">
+        When we rate a sleep supplement’s <strong>Additives</strong>, we’re asking one thing: does it
+        add ingredients that do nothing for sleep and carry a documented concern? Here’s the whole
+        list, in plain words, with the names to look for on a label — and a
+        <a href="/sources/methodology">primary source</a> for every one.
+      </p>
+    </header>
+
+    <aside class="banner">
+      <p class="banner-line">
+        This is <strong>not</strong> a “clean-label” checklist. An ingredient is here only when a real
+        regulatory review or human study backs the concern — and we’ve listed the common excipients we
+        <strong>don’t</strong> flag, so the list can’t be mistaken for chemical-scare marketing.
+      </p>
+      <p class="banner-sub">
+        Artificial sweeteners aren’t on this list. Every product page rates against exactly this
+        watchlist. <a href="/sources/methodology">How we rate →</a>
+      </p>
+    </aside>
+
+    <section class="group" aria-label="Additives we flag">
+      <h2 class="group-title">What lowers the score</h2>
+      <p class="group-sub">
+        Found in a product, each of these subtracts from its Additives score. A stronger deduction
+        (−2) means a regulator has withdrawn approval or the human evidence is firmer; a precautionary
+        one (−1) is minor or dose-dependent.
+      </p>
+
+      <ol class="list">
+        {
+          flagged.map((e) => (
+            <li class="entry" id={e.id} data-sev={e.structural ? 'structural' : e.severity}>
+              <div class="entry-head">
+                <h3 class="entry-name">{displayName(e)}</h3>
+                <span class="sev">{sevLabel(e)}</span>
+              </div>
+              <p class="entry-class">{e.class}</p>
+              <p class="rationale">{e.rationale}</p>
+              <p class="synonyms">
+                <span class="syn-label">Spot it on labels as:</span>
+                {e.names.map((n, i) => (
+                  <>
+                    <span class="syn">{n}</span>
+                    {i < e.names.length - 1 ? <span class="syn-sep" aria-hidden="true"> · </span> : null}
+                  </>
+                ))}
+              </p>
+              {e.sources.length > 0 ? (
+                <p class="sources">
+                  <span class="src-label">Source:</span>
+                  {e.sources.map((s) => (
+                    <a class="src" href={s.url} target="_blank" rel="noopener">
+                      {s.title} ({s.year}) · {s.ref}
+                    </a>
+                  ))}
+                </p>
+              ) : (
+                <p class="sources">
+                  <span class="src-label">Basis:</span> a labelling-transparency defect under our rubric — no external citation applies.
+                </p>
+              )}
+            </li>
+          ))
+        }
+      </ol>
+    </section>
+
+    <section class="group group-ok" aria-label="Excipients we do not flag">
+      <h2 class="group-title">Reviewed — <span class="ok-word">not</span> flagged</h2>
+      <p class="group-sub">
+        These common capsule/tablet helpers get attacked by scare marketing, but the evidence doesn’t
+        support a flag at the tiny amounts used. Seeing them on a label is not a mark against a product.
+      </p>
+
+      <ol class="list">
+        {
+          notFlagged.map((e) => (
+            <li class="entry" id={e.id} data-sev="ok">
+              <div class="entry-head">
+                <h3 class="entry-name">{displayName(e)}</h3>
+                <span class="sev sev-ok">Not flagged</span>
+              </div>
+              <p class="rationale">{e.rationale}</p>
+              <p class="synonyms">
+                <span class="syn-label">Also on labels as:</span>
+                {e.names.map((n, i) => (
+                  <>
+                    <span class="syn">{n}</span>
+                    {i < e.names.length - 1 ? <span class="syn-sep" aria-hidden="true"> · </span> : null}
+                  </>
+                ))}
+              </p>
+              {e.sources.length > 0 && (
+                <p class="sources">
+                  <span class="src-label">Source:</span>
+                  {e.sources.map((s) => (
+                    <a class="src" href={s.url} target="_blank" rel="noopener">
+                      {s.title} ({s.year}) · {s.ref}
+                    </a>
+                  ))}
+                </p>
+              )}
+            </li>
+          ))
+        }
+      </ol>
+    </section>
+
+    <p class="footer-strip">
+      Somnary · Additive watchlist · Reviewed {reviewDate} · Educational, not medical advice · This
+      list applies the Additives dimension of the source scorecards and is the same watchlist the
+      scoring uses. Found an error, or think an ingredient belongs here (or doesn’t)? We aim to fix
+      verified errors within 7 days — <a href="mailto:sammymoz@gmail.com">sammymoz@gmail.com</a>.
+    </p>
+  </main>
+</Base>
+
+<style>
+  .page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: var(--sp-8) var(--sp-7) var(--sp-9);
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+    margin: 0;
+  }
+  .head {
+    margin-bottom: var(--sp-6);
+  }
+  .title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-3xl);
+    line-height: var(--lh-3xl);
+    letter-spacing: var(--tracking-tight);
+    color: var(--ink);
+    margin: var(--sp-2) 0 0;
+  }
+  .dek {
+    font-size: var(--text-md);
+    line-height: var(--lh-md);
+    color: var(--ink);
+    margin: var(--sp-4) 0 0;
+    max-width: 72ch;
+  }
+
+  .banner {
+    margin: var(--sp-6) 0;
+    padding: var(--sp-5) var(--sp-6);
+    border: var(--border-hairline);
+    border-radius: var(--r-lg);
+    background: var(--primary-soft);
+  }
+  .banner-line {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--ink);
+    margin: 0;
+  }
+  .banner-sub {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: var(--sp-3) 0 0;
+  }
+
+  .group {
+    margin: var(--sp-8) 0;
+  }
+  .group-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-2xl);
+    line-height: var(--lh-2xl);
+    letter-spacing: var(--tracking-tight);
+    color: var(--ink);
+    margin: 0;
+  }
+  .ok-word {
+    color: var(--eucalyptus, var(--primary));
+  }
+  .group-sub {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--muted);
+    margin: var(--sp-2) 0 0;
+    max-width: 74ch;
+  }
+
+  .list {
+    list-style: none;
+    margin: var(--sp-5) 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+  }
+  .entry {
+    border: var(--border-hairline);
+    border-left: 3px solid var(--muted);
+    border-radius: var(--r-lg);
+    background: var(--surface);
+    padding: var(--sp-5) var(--sp-6);
+  }
+  .entry[data-sev='concern'] {
+    border-left-color: var(--safety-ink, var(--vermilion));
+  }
+  .entry[data-sev='structural'] {
+    border-left-color: var(--primary);
+  }
+  .entry[data-sev='ok'] {
+    border-left-color: var(--eucalyptus, var(--primary));
+  }
+
+  .entry-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--sp-3);
+    flex-wrap: wrap;
+  }
+  .entry-name {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-lg);
+    line-height: var(--lh-lg);
+    color: var(--ink);
+    margin: 0;
+  }
+  .sev {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--safety-ink, var(--ink));
+    white-space: nowrap;
+  }
+  .sev-ok {
+    color: var(--eucalyptus, var(--primary));
+  }
+  .entry-class {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: var(--sp-1) 0 0;
+  }
+  .rationale {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--ink);
+    margin: var(--sp-3) 0 0;
+    max-width: 74ch;
+  }
+  .synonyms {
+    font-size: var(--text-xs);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: var(--sp-3) 0 0;
+  }
+  .syn-label,
+  .src-label {
+    font-family: var(--font-mono);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+    margin-right: var(--sp-1);
+  }
+  .syn {
+    color: var(--ink);
+  }
+  .sources {
+    font-size: var(--text-xs);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: var(--sp-2) 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-1);
+  }
+  .src {
+    color: var(--primary);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .footer-strip {
+    margin-top: var(--sp-8);
+    padding-top: var(--sp-5);
+    border-top: var(--border-hairline);
+    font-size: var(--text-xs);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+  }
+  .footer-strip a {
+    color: var(--primary);
+  }
+</style>
