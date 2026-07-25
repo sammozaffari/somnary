@@ -561,7 +561,7 @@ export const MELATONIN_SOURCES: SourceProduct[] = [
     scores: {
       testing_purity: { score: 0, note: 'No third-party product cert and no published lab test; a GMP facility is not a product test.' },
       label_accuracy: { score: 0, note: 'No independent lab test of the exact product; no public per-batch lab report.' },
-      additives: { score: 4, note: '−1: the fast-dissolve tablet contains the synthetic colour FD&C Blue #2 (a watchlist additive), alongside sucralose and mannitol — all disclosed.' },
+      additives: { score: 4, note: '−1: the fast-dissolve tablet adds the synthetic colour FD&C Blue #2 — a colour that serves no active function in a sleep supplement — alongside sucralose and mannitol; all disclosed.' },
       regulatory: { score: 5, note: 'No verified action names this product or line.' },
       transparency: { score: 2, note: 'Manufacturer identifiable (+2) and dose disclosed; but no lab report and no AUST L (US import).' },
       marketing_honesty: { score: 5, note: 'Structure/function claims under the DSHEA disclaimer; no unbacked-cert claim. (The 10 mg dose is ~30× the physiologic ~0.3 mg — shown as context, not scored.)' },
