@@ -39,7 +39,10 @@ import LensPanel from '../components/LensPanel.astro';
       <Disclaimer variant="standard" />
     </div>
 
-    <!-- What it does / doesn't — below the fold, still server-rendered so a crawler + no-JS reader see it. -->
+    <!-- What it does / doesn't — tucked into a native <details> so the post-result page is quiet, but
+         still server-rendered (in the DOM) so a crawler + no-JS reader see the full contract. -->
+    <details class="about">
+      <summary>About the Lens — what it does &amp; doesn’t</summary>
     <section class="contract" aria-label="What the Lens does and does not do">
       <div class="col">
         <p class="col-tag">What it does</p>
@@ -62,6 +65,7 @@ import LensPanel from '../components/LensPanel.astro';
         </ul>
       </div>
     </section>
+    </details>
 
     <p class="review-line">
       Reviewed 2026-07-21 · found an error? <a href="/methodology#corrections">corrections →</a>
@@ -104,11 +108,36 @@ import LensPanel from '../components/LensPanel.astro';
   }
 
   /* what it does / doesn't — two calm columns, no grade coloring */
+  /* collapsible "About the Lens" — quiets the post-result tail; native <details>, works with JS off */
+  .about {
+    margin-top: var(--sp-6);
+    border-top: var(--border-hairline);
+    padding-top: var(--sp-5);
+  }
+  .about > summary {
+    cursor: pointer;
+    list-style: none;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--primary);
+  }
+  .about > summary::-webkit-details-marker {
+    display: none;
+  }
+  .about > summary::after {
+    content: ' +';
+  }
+  .about[open] > summary::after {
+    content: ' –';
+  }
+  .about[open] > summary {
+    margin-bottom: var(--sp-5);
+  }
   .contract {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: var(--sp-6);
-    margin-top: var(--sp-7);
   }
   .col {
     background: var(--surface);
