@@ -3,6 +3,7 @@ import Base from '../../layouts/Base.astro';
 import SafetyCallout from '../../components/scorecards/SafetyCallout.astro';
 import RatingLegend from '../../components/scorecards/RatingLegend.astro';
 import LabelReadingPanel from '../../components/scorecards/LabelReadingPanel.astro';
+import WhyCareStrip from '../../components/scorecards/WhyCareStrip.astro';
 import ScorecardGrid from '../../components/scorecards/ScorecardGrid.astro';
 import { ASHWAGANDHA_SOURCES, type AshProduct } from '../../data/source-scorecards/ashwagandha';
 import type { ScorecardCardData, Chip, DetailLine } from '../../data/source-scorecards/card';
@@ -85,6 +86,9 @@ const labelReading = {
   ],
 };
 
+// Why-this-matters hook — one ingredient-specific cited example (EWG-inspired IA, Phase A).
+const whyCareExample = 'For example, in 2024 Australia’s regulator issued a <a href="https://www.tga.gov.au/news/safety-updates/withania-somnifera-ashwagandha-and-very-rare-risk-liver-injury" target="_blank" rel="noopener">safety advisory on ashwagandha and a very rare risk of liver injury</a> — and a batch of one product on this page was recalled over suspected tampering (both flagged on the cards below).';
+
 ---
 
 <Base
@@ -115,6 +119,8 @@ const labelReading = {
         a score, or to remove one. <a href="/sources/methodology">How we rate →</a>
       </p>
     </aside>
+
+    <WhyCareStrip example={whyCareExample} />
 
     <SafetyCallout
       title="Ashwagandha safety notes worth knowing"
