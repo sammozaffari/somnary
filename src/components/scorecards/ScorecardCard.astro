@@ -45,7 +45,7 @@ const { card: p, tier, href } = Astro.props;
     )}
 
     <p class="go">
-      {href ? <a class="go-link" href={href}>Full scorecard →</a> : null}
+      {href ? <a class="go-link" href={href} aria-label={`Full scorecard — ${p.brand} ${p.productName}${tier ? ` (${tier.label})` : ''}`}>Full scorecard →</a> : null}
     </p>
   </div>
 </article>

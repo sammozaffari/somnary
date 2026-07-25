@@ -157,7 +157,7 @@ if (retailers?.iherb) retailerLinks.push({ label: 'iHerb AU', href: retailers.ih
       <h2 class="h2">Where to find it</h2>
       <div class="where-links">
         {retailerLinks.map((r) => (
-          <a class="where-link" href={r.href} target="_blank" rel="noopener">{r.label} →</a>
+          <a class="where-link" href={r.href} target="_blank" rel="noopener nofollow">{r.label} →</a>
         ))}
       </div>
       <p class="where-foot">
@@ -365,6 +365,9 @@ if (retailers?.iherb) retailerLinks.push({ label: 'iHerb AU', href: retailers.ih
     padding: var(--sp-3) var(--sp-4);
     border-radius: var(--r-sm);
     background: var(--primary-soft);
+  }
+  .flagline.safety {
+    background: var(--warning-bg, var(--primary-soft));
   }
   .flagline.safety .tag {
     color: var(--safety-ink, var(--ink));

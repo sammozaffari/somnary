@@ -40,7 +40,7 @@ export function toAshCard(p: AshProduct): ScorecardCardData {
   const chips: Chip[] = [];
   if (p.trialFlag) chips.push({ label: '🔬 Used in trials', kind: 'good', note: p.trialFlag.note });
   if (p.rootPart === 'root+leaf')
-    chips.push({ label: '🍃 Root + leaf', kind: 'good', note: 'Made from root and leaf — the plant part under extra liver scrutiny (see the safety notes above).' });
+    chips.push({ label: '🍃 Root + leaf', kind: 'good', note: 'Made from root and leaf — the plant part under extra liver scrutiny.' });
   if (p.b6) chips.push({ label: '⚠ Contains B6', kind: 'warn', note: p.b6.note });
   if (p.importSafety) chips.push({ label: '⚠ Import — no AU warning', kind: 'warn', note: p.importSafety.note });
 
@@ -75,7 +75,9 @@ export function toGlyCard(p: GlyProduct): ScorecardCardData {
       : { label: '⚠ Below the studied 3 g', kind: 'warn', note: p.doseReach.note },
   ];
 
-  const detailLines: DetailLine[] = [];
+  const detailLines: DetailLine[] = [
+    { tag: 'Dose', note: p.doseReach.note, kind: p.doseReach.reaches ? 'trial' : 'safety' },
+  ];
 
   return {
     slug: p.slug,
