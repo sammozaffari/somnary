@@ -2,6 +2,7 @@
 import Base from '../../layouts/Base.astro';
 import SafetyCallout from '../../components/scorecards/SafetyCallout.astro';
 import RatingLegend from '../../components/scorecards/RatingLegend.astro';
+import LabelReadingPanel from '../../components/scorecards/LabelReadingPanel.astro';
 import ScorecardGrid from '../../components/scorecards/ScorecardGrid.astro';
 import {
   MELATONIN_SOURCES,
@@ -60,6 +61,20 @@ const safetyItems = [
       'In Australia, melatonin is a <strong>prescription medicine</strong> (with a limited pharmacist-only option for adults 55+). None of these are sold over the counter in Australian chemists — Amazon AU and Chemist Warehouse carry no OTC human melatonin. The ones here are imported for personal use via iHerb.',
   },
 ];
+// Reading-the-label primer — distilled from the ratified findings below (label education, not advice).
+const labelReading = {
+  lookFor: [
+    'A public <strong>per-batch lab report</strong> or a <strong>USP</strong> mark — only three products here have either',
+    'A short ingredients list — capsules usually carry fewer additives than gummies',
+    'In Australia the regulated route is a <strong>prescription</strong> (see the note above) — personal imports sit outside any local oversight',
+  ],
+  cautious: [
+    'Very high doses (<strong>10 mg+</strong>) — far above the levels used in most published trials',
+    'Gummies and fast-dissolves with <strong>dyes and sweeteners</strong> the capsule versions don’t need',
+    '“Tested” claims with no lab report you can open',
+  ],
+};
+
 ---
 
 <Base
@@ -97,6 +112,8 @@ const safetyItems = [
       items={safetyItems}
       foot="This is context on how you’d get melatonin in Australia — not medical advice. For a pharmacy option, Circadin (below) is available on prescription; talk to a pharmacist or doctor before starting melatonin."
     />
+
+    <LabelReadingPanel lookFor={labelReading.lookFor} cautious={labelReading.cautious} />
 
     <RatingLegend items={ratingLegend} remedyHref="/r/melatonin" />
 

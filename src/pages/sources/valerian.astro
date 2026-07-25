@@ -2,6 +2,7 @@
 import Base from '../../layouts/Base.astro';
 import SafetyCallout from '../../components/scorecards/SafetyCallout.astro';
 import RatingLegend from '../../components/scorecards/RatingLegend.astro';
+import LabelReadingPanel from '../../components/scorecards/LabelReadingPanel.astro';
 import ScorecardGrid from '../../components/scorecards/ScorecardGrid.astro';
 import { VALERIAN_SOURCES, type ValProduct } from '../../data/source-scorecards/valerian';
 import type { ScorecardCardData, Chip, DetailLine } from '../../data/source-scorecards/card';
@@ -64,6 +65,20 @@ const safetyItems = [
     body: 'The standard advice is to avoid valerian in pregnancy and breastfeeding.',
   },
 ];
+// Reading-the-label primer — distilled from the ratified findings below (label education, not advice).
+const labelReading = {
+  lookFor: [
+    'The <strong>valerenic acid</strong> figure printed — the strength marker; most labels here don’t show it',
+    'A dry-root equivalent around <strong>2 g</strong> — the range used in studies',
+    'An <strong>AUST L</strong> number and Australia’s <strong>liver-caution</strong> wording on the pack',
+  ],
+  cautious: [
+    'No valerenic-acid figure — you’re trusting the brand on strength',
+    'Imports that skip Australia’s mandated liver warning',
+    '“Sleep” blends where valerian is a <strong>trace ingredient</strong> — check it leads the formula',
+  ],
+};
+
 ---
 
 <Base
@@ -100,6 +115,8 @@ const safetyItems = [
       items={safetyItems}
       foot="These flags are shown for your safety and sit apart from the scores — talk to a pharmacist before taking valerian regularly."
     />
+
+    <LabelReadingPanel lookFor={labelReading.lookFor} cautious={labelReading.cautious} />
 
     <RatingLegend items={ratingLegend} remedyHref="/r/valerian" />
 

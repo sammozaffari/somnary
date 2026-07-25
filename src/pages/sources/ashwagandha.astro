@@ -2,6 +2,7 @@
 import Base from '../../layouts/Base.astro';
 import SafetyCallout from '../../components/scorecards/SafetyCallout.astro';
 import RatingLegend from '../../components/scorecards/RatingLegend.astro';
+import LabelReadingPanel from '../../components/scorecards/LabelReadingPanel.astro';
 import ScorecardGrid from '../../components/scorecards/ScorecardGrid.astro';
 import { ASHWAGANDHA_SOURCES, type AshProduct } from '../../data/source-scorecards/ashwagandha';
 import type { ScorecardCardData, Chip, DetailLine } from '../../data/source-scorecards/card';
@@ -68,6 +69,22 @@ const safetyItems = [
     body: 'The standard advice is to avoid ashwagandha in pregnancy and breastfeeding.',
   },
 ];
+// Reading-the-label primer — distilled from the ratified findings below (label education, not advice).
+const labelReading = {
+  lookFor: [
+    'The <strong>withanolide</strong> figure printed (mg or %) — the strength marker many labels leave off',
+    'A named, studied extract (<strong>KSM-66</strong>, <strong>Shoden</strong>) — the material used in published trials',
+    '<strong>Root-only</strong> on the label — leaf is the plant part under extra liver scrutiny',
+    'An <strong>AUST L</strong> number',
+  ],
+  cautious: [
+    '“Clinically proven” wording without a named extract — or at a different dose than the trials used',
+    '<strong>Root + leaf</strong> products (flagged 🍃 on the cards below)',
+    'Added <strong>vitamin B6</strong> — one product here is above Australia’s warning threshold',
+    'Imports that skip Australia’s liver-caution advisory',
+  ],
+};
+
 ---
 
 <Base
@@ -105,6 +122,8 @@ const safetyItems = [
       items={safetyItems}
       foot="These flags are shown for your safety and sit apart from the scores — talk to a pharmacist before taking ashwagandha regularly."
     />
+
+    <LabelReadingPanel lookFor={labelReading.lookFor} cautious={labelReading.cautious} />
 
     <RatingLegend items={ratingLegend} remedyHref="/r/ashwagandha" />
 
