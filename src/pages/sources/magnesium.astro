@@ -5,6 +5,7 @@ import RatingLegend from '../../components/scorecards/RatingLegend.astro';
 import LabelReadingPanel from '../../components/scorecards/LabelReadingPanel.astro';
 import WhyCareStrip from '../../components/scorecards/WhyCareStrip.astro';
 import ScorecardGrid from '../../components/scorecards/ScorecardGrid.astro';
+import TierLegend from '../../components/scorecards/TierLegend.astro';
 import { MAGNESIUM_SOURCES, type MagProduct } from '../../data/source-scorecards/magnesium';
 import type { ScorecardCardData, Chip, DetailLine } from '../../data/source-scorecards/card';
 
@@ -123,6 +124,8 @@ const whyCareExample = 'For example, Australia’s regulator is <a href="https:/
     <LabelReadingPanel lookFor={labelReading.lookFor} cautious={labelReading.cautious} />
 
     <RatingLegend items={ratingLegend} remedyHref="/r/magnesium" />
+
+    <TierLegend />
 
     <ScorecardGrid cards={cards} />
 

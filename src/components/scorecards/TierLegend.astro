@@ -1,0 +1,115 @@
+---
+/**
+ * Tier legend — teach the scale first (EWG's Best→Worst bar analog).
+ * A compact, always-in-order key to the four trust tiers, shown once at the top of
+ * the grid so a reader understands the system before scrolling into it. Readable
+ * without colour (icon + label + one-line meaning); the coloured left rule matches
+ * the tier-group headers and per-card badges.
+ */
+import { TIER_ORDER, TIERS } from '../../data/source-scorecards/tiers';
+
+// One-line, plainer-than-the-blurb meaning for the compact legend.
+const SHORT: Record<string, string> = {
+  'well-documented': 'Studied form + strength, and/or independently tested. The most you can verify.',
+  reasonable: 'Discloses the basics, nothing alarming — but no independent lab test.',
+  'bare-bones': 'Generic or doesn’t say much — you’re largely trusting the brand.',
+  'heads-up': 'A documented red flag worth reading before you decide.',
+};
+---
+
+<section class="legend" aria-label="What the trust tiers mean">
+  <h2 class="title">The trust tiers</h2>
+  <p class="sub">
+    We group the products into four tiers by how much you can verify — best-documented first. It’s
+    about <strong>how much stands behind the label</strong>, not whether a product works or whether
+    you should buy it.
+  </p>
+
+  <ol class="tiers">
+    {
+      TIER_ORDER.map((key) => (
+        <li class="tier" data-tier={key}>
+          <p class="tier-name">
+            <span class="tier-icon" aria-hidden="true">{TIERS[key].icon}</span>
+            {TIERS[key].label}
+          </p>
+          <p class="tier-meaning">{SHORT[key]}</p>
+        </li>
+      ))
+    }
+  </ol>
+</section>
+
+<style>
+  .legend {
+    margin: var(--sp-8) 0 var(--sp-6);
+  }
+  .title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-2xl);
+    line-height: var(--lh-2xl);
+    letter-spacing: var(--tracking-tight);
+    color: var(--ink);
+    margin: 0;
+  }
+  .sub {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--muted);
+    margin: var(--sp-2) 0 0;
+    max-width: 74ch;
+  }
+
+  .tiers {
+    list-style: none;
+    margin: var(--sp-5) 0 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--sp-4);
+  }
+  @media (max-width: 860px) {
+    .tiers {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 460px) {
+    .tiers {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .tier {
+    padding-left: var(--sp-3);
+    border-left: 3px solid var(--muted);
+  }
+  .tier[data-tier='well-documented'],
+  .tier[data-tier='reasonable'] {
+    border-left-color: var(--eucalyptus, var(--primary));
+  }
+  .tier[data-tier='heads-up'] {
+    border-left-color: var(--safety-ink, var(--vermilion));
+  }
+
+  .tier-name {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-md);
+    line-height: var(--lh-md);
+    color: var(--ink);
+    margin: 0;
+  }
+  .tier-icon {
+    font-size: var(--text-sm);
+  }
+  .tier-meaning {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: var(--sp-2) 0 0;
+  }
+</style>

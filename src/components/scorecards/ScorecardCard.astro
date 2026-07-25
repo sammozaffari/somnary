@@ -1,15 +1,22 @@
 ---
 import { DIMENSION_ORDER, DIMENSION_LABELS, type ScorecardCardData } from '../../data/source-scorecards/card';
+import type { TierMeta } from '../../data/source-scorecards/tiers';
 
 interface Props {
   card: ScorecardCardData;
+  tier?: TierMeta;
 }
-const { card: p } = Astro.props;
+const { card: p, tier } = Astro.props;
 const segs = [1, 2, 3, 4, 5];
 ---
 
 <article class="card">
   <div class="shot">
+    {tier && (
+      <span class="tier-badge" data-tier={tier.key}>
+        <span class="tier-badge-icon" aria-hidden="true">{tier.icon}</span>{tier.label}
+      </span>
+    )}
     {p.imagePath ? (
       <img src={p.imagePath} alt={`${p.brand} ${p.productName}`} loading="lazy" decoding="async" />
     ) : (
@@ -110,6 +117,36 @@ const segs = [1, 2, 3, 4, 5];
     font-weight: 700;
     font-size: var(--text-3xl);
     color: var(--primary);
+  }
+
+  /* tier verdict, so a card carries its rating standalone (EWG score-chip analog) */
+  .tier-badge {
+    position: absolute;
+    top: var(--sp-3);
+    left: var(--sp-3);
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-1);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--ink);
+    background: var(--surface);
+    border: var(--border-hairline);
+    border-left: 3px solid var(--muted);
+    border-radius: var(--r-sm);
+    padding: var(--sp-1) var(--sp-2);
+  }
+  .tier-badge[data-tier='well-documented'],
+  .tier-badge[data-tier='reasonable'] {
+    border-left-color: var(--eucalyptus, var(--primary));
+  }
+  .tier-badge[data-tier='heads-up'] {
+    border-left-color: var(--safety-ink, var(--vermilion));
+  }
+  .tier-badge-icon {
+    font-size: var(--text-xs);
   }
 
   .body {
