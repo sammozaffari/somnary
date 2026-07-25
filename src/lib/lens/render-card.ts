@@ -77,6 +77,7 @@ export interface LensCardAssessment {
   status: LensCardStatus;
   shortCircuit?: LensCardShortCircuit;
   resolved?: LensCardResolved;
+  bottomLine?: string;
   verdictLine: string;
   evidence: LensCardEvidence[];
   doesNotShow: string[];
@@ -205,15 +206,22 @@ export function renderLensCard(assessment: LensCardAssessment, container: HTMLEl
   }
 
   // --- ASSESSED / INCONCLUSIVE — the full card. ------------------------------------------------------
-  // "What the Lens read your query as" (CHK-7.4) — the server-composed interpreted-as line, at the very
-  // top so the reader sees the entity was understood (the Perplexity "it got my intent" beat). Verbatim
-  // server field via textContent; it states no evidence, no advice, no grade.
-  if (assessment.resolved && typeof assessment.resolved.line === 'string' && assessment.resolved.line) {
+  // "Bottom line" (CHK-7.9) — the plain-language lead summary, FIRST so a reader gets the gist before the
+  // detail. When present it subsumes the meta resolved/verdict lines (they'd repeat it), so those are
+  // suppressed below. Server-composed field, textContent.
+  const hasBottomLine = typeof assessment.bottomLine === 'string' && !!assessment.bottomLine;
+  if (hasBottomLine) {
+    card.appendChild(el(doc, 'p', 'lc-bottomline', assessment.bottomLine as string));
+  }
+
+  // "What the Lens read your query as" (CHK-7.4) — the interpreted-as line. Shown only when there is NO
+  // bottom line (which already states what the subject is), to avoid repeating it.
+  if (!hasBottomLine && assessment.resolved && typeof assessment.resolved.line === 'string' && assessment.resolved.line) {
     card.appendChild(el(doc, 'p', 'lc-resolved', assessment.resolved.line));
   }
 
-  // verdict + disclaimer sit together near the top (disclaimer prominent, near the decision).
-  if (assessment.verdictLine) {
+  // verdict — the meta "verified N claims" line. Suppressed when the bottom line is present (it covers it).
+  if (!hasBottomLine && assessment.verdictLine) {
     card.appendChild(el(doc, 'p', 'lc-verdict', assessment.verdictLine));
   }
   if (assessment.stamp) {

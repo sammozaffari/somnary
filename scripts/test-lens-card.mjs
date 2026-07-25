@@ -228,6 +228,23 @@ const GRADE_RE = /\b(?:grade|tier)\s+[A-FS]\b|\b[A-FS]\s+(?:grade|tier)\b|\btier
   ok('assessed: strength chip has is-weak / is-strong class (redundant with text)', c.byClassContains('is-weak').length >= 1 && c.byClassContains('is-strong').length >= 1);
 }
 
+// --- BOTTOM LINE (CHK-7.9): leads the card + suppresses the meta resolved/verdict lines ------------
+{
+  const c = makeContainer();
+  const withBottom = {
+    ...assessed,
+    resolved: { subject: 'Restavit', resolvedName: 'doxylamine', productClass: 'otc-drug', line: 'The Lens read “Restavit” as doxylamine, an over-the-counter medicine, and researched the evidence below.' },
+    bottomLine: 'Restavit is doxylamine, an over-the-counter medicine. The published studies the Lens could verify point to an effect on sleep, but the evidence is weak. Read the evidence and any cautions below — this is not a Somnary grade.',
+  };
+  renderLensCard(withBottom, c);
+  const text = c.allText();
+  ok('bottomLine: rendered as the lead', text.includes('Restavit is doxylamine, an over-the-counter medicine.') && c.byClassContains('lc-bottomline').length === 1);
+  ok('bottomLine: appears BEFORE the evidence section', text.indexOf('point to an effect on sleep') < text.indexOf('What the evidence shows'));
+  ok('bottomLine: suppresses the meta verdict line', !text.includes('The Lens verified 2 claims against published sources'));
+  ok('bottomLine: suppresses the redundant resolved interpreted-as line', !text.includes('The Lens read “Restavit” as doxylamine'));
+  ok('bottomLine: stamp + disclaimer still present', text.includes(STAMP) && text.includes('educational, not medical advice'));
+}
+
 // --- INCONCLUSIVE --------------------------------------------------------------------------------
 {
   const c = makeContainer();
