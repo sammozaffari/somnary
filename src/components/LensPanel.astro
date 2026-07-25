@@ -781,6 +781,9 @@
       return done;
     };
 
+    const GENERIC_ERR =
+      'Something went wrong researching that. You can try again, or browse Somnary’s graded evidence directly. This is educational, not medical advice.';
+
     const submit = async () => {
       if (busy) return;
       const value = input.value.trim();
@@ -795,57 +798,88 @@
       }
       setBusy(true);
       startProgress();
+
+      // Resilient fallback: a plain, non-streaming JSON request. The live SSE stream is a long-held
+      // connection that can drop (proxy/browser/network) even when the research itself succeeds — so if
+      // the stream fails, we retry ONCE over the simpler request/response path before showing an error.
+      // Returns the assessment or null; never throws.
+      const attemptJson = async (): Promise<LensCardAssessment | null> => {
+        try {
+          const res = await fetch('/api/lens', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ input: value }),
+          });
+          if (!res.ok) return null;
+          return (await res.json()) as LensCardAssessment;
+        } catch {
+          return null;
+        }
+      };
+
       try {
-        const res = await fetch('/api/lens', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Accept: 'text/event-stream' },
-          body: JSON.stringify({ input: value }),
-        });
-        if (res.status === 503) {
-          stopProgress();
-          showNotice('The Lens isn’t available right now. You can still browse the graded tier board and each remedy’s cited evidence in the meantime.');
-          return;
-        }
-        if (res.status === 429) {
-          stopProgress();
-          showNotice('You’re going a little faster than the Lens can keep up with — give it a moment and try again. Nothing you entered is lost.');
-          return;
-        }
-        if (res.status === 413) {
-          stopProgress();
-          showNotice('That’s longer than the Lens can take in one go. Trim it to the ingredients you want checked and try again.');
-          return;
-        }
-        if (res.status === 400) {
-          stopProgress();
-          showNotice('Type a product name, an ingredient, or paste a supplement-facts panel to research.');
-          return;
-        }
-        if (!res.ok) {
-          stopProgress();
-          showNotice('Something went wrong researching that. You can try again, or browse Somnary’s graded evidence directly. This is educational, not medical advice.');
-          return;
+        let assessment: LensCardAssessment | null = null;
+        let recoverable = false; // a 5xx / stream drop / network blip → worth a single JSON retry
+
+        try {
+          const res = await fetch('/api/lens', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Accept: 'text/event-stream' },
+            body: JSON.stringify({ input: value }),
+          });
+          // Definitive states — surface directly, no retry.
+          if (res.status === 503) {
+            stopProgress();
+            showNotice('The Lens isn’t available right now. You can still browse the graded tier board and each remedy’s cited evidence in the meantime.');
+            return;
+          }
+          if (res.status === 429) {
+            stopProgress();
+            showNotice('You’re going a little faster than the Lens can keep up with — give it a moment and try again. Nothing you entered is lost.');
+            return;
+          }
+          if (res.status === 413) {
+            stopProgress();
+            showNotice('That’s longer than the Lens can take in one go. Trim it to the ingredients you want checked and try again.');
+            return;
+          }
+          if (res.status === 400) {
+            stopProgress();
+            showNotice('Type a product name, an ingredient, or paste a supplement-facts panel to research.');
+            return;
+          }
+          if (!res.ok) {
+            recoverable = true; // 5xx — try the JSON path once
+          } else {
+            const contentType = res.headers.get('content-type') || '';
+            if (contentType.includes('text/event-stream') && res.body) {
+              assessment = await consumeStream(res);
+              if (!assessment) recoverable = true; // stream ended without a done frame
+            } else {
+              startFallbackStepper();
+              assessment = (await res.json()) as LensCardAssessment;
+            }
+          }
+        } catch {
+          recoverable = true; // network / stream error mid-flight
         }
 
-        let assessment: LensCardAssessment | null = null;
-        const contentType = res.headers.get('content-type') || '';
-        if (contentType.includes('text/event-stream') && res.body) {
-          assessment = await consumeStream(res);
-        } else {
-          // Non-streaming fallback (JSON): step the fallback bar while we await, then render.
+        // The one retry — over the plain request/response path — when the stream didn't deliver.
+        if (!assessment && recoverable) {
           startFallbackStepper();
-          assessment = (await res.json()) as LensCardAssessment;
+          assessment = await attemptJson();
         }
+
         stopProgress();
         if (!assessment) {
-          showNotice('Something went wrong researching that. You can try again, or browse Somnary’s graded evidence directly. This is educational, not medical advice.');
+          showNotice(GENERIC_ERR);
           return;
         }
         renderLensCard(assessment, cardRegion);
         cardRegion.focus?.();
       } catch {
         stopProgress();
-        showNotice('Something went wrong reaching the Lens. You can try again, or browse Somnary’s graded evidence directly. This is educational, not medical advice.');
+        showNotice(GENERIC_ERR);
       } finally {
         setBusy(false);
       }
