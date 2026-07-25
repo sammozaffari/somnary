@@ -264,13 +264,17 @@
     margin: 0;
     max-width: 64ch;
   }
-  /* the plain-language "Bottom line" lead — the most prominent text on the card */
+  /* the plain-language "Bottom line" lead — the most prominent text on the card: big + semibold so the
+     eye lands here FIRST (the card-IA fix: one clear entry point, then bold section chunks below) */
   :global(.lc-bottomline) {
+    font-family: var(--font-display);
+    font-weight: 600;
     font-size: var(--text-lg);
-    line-height: var(--lh-base);
+    line-height: var(--lh-md);
+    letter-spacing: var(--tracking-tight);
     color: var(--ink);
     margin: 0;
-    max-width: 64ch;
+    max-width: 58ch;
   }
   :global(.lc-verdict) {
     font-size: var(--text-base);
@@ -299,11 +303,23 @@
     flex-direction: column;
     gap: var(--sp-3);
   }
+  /* hairline separators between the flat sections — the card reads as clear, bite-size chunks */
+  :global(.lc-evidence),
+  :global(.lc-doesnot),
+  :global(.lc-label),
+  :global(.lc-safety),
+  :global(.lc-followups) {
+    border-top: var(--border-hairline);
+    padding-top: var(--sp-5);
+  }
+  /* section heads: BOLD sentence-case headings in ink — the scannable anchors (were tiny mono labels) */
   :global(.lc-head) {
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
-    color: var(--primary);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-md);
+    line-height: var(--lh-md);
+    letter-spacing: var(--tracking-tight);
+    color: var(--ink);
     margin: 0;
   }
 
@@ -321,23 +337,34 @@
     flex-direction: column;
     gap: var(--sp-4);
   }
+  /* each evidence finding is its own bite-size chunk — a soft paper tile, not a run-on list */
   :global(.lc-ev-row) {
     display: flex;
     flex-direction: column;
     gap: var(--sp-2);
-    padding-left: var(--sp-4);
-    border-left: 2px solid var(--mineral);
+    background: var(--paper);
+    border: var(--border-hairline);
+    border-radius: var(--r-md);
+    padding: var(--sp-4) var(--sp-5);
   }
+  /* body text: full ink at reading size — no more light-gray walls */
   :global(.lc-ev-text),
   :global(.lc-dn-row),
   :global(.lc-flag-text) {
-    font-size: var(--text-sm);
+    font-size: var(--text-base);
     line-height: var(--lh-base);
     color: var(--ink);
     margin: 0;
     max-width: 64ch;
   }
   :global(.lc-dn-row) {
+    position: relative;
+    padding-left: var(--sp-5);
+  }
+  :global(.lc-dn-row)::before {
+    content: '—';
+    position: absolute;
+    left: 0;
     color: var(--muted);
   }
 
@@ -367,7 +394,7 @@
     gap: var(--sp-1);
   }
   :global(.lc-caution-text) {
-    font-size: var(--text-sm);
+    font-size: var(--text-base);
     line-height: var(--lh-base);
     color: var(--ink);
     font-weight: 600;
