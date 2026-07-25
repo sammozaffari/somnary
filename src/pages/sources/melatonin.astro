@@ -12,35 +12,11 @@ import {
   type SourceProduct,
 } from '../../data/source-scorecards/melatonin';
 import type { ScorecardCardData, Chip, DetailLine } from '../../data/source-scorecards/card';
+import { toMelCard as toCard } from '../../lib/sources/cards';
 
 const reviewDate = '2026-07-19';
 
 // Map a melatonin product into the shared card shape.
-function toCard(p: SourceProduct): ScorecardCardData {
-  const chips: Chip[] = [];
-  if (p.certVerified)
-    chips.push({ label: '✓ Third-party verified', kind: 'good', note: p.certSummary });
-
-  const detailLines: DetailLine[] = [];
-
-  return {
-    slug: p.slug,
-    brand: p.brand,
-    productName: p.productName,
-    specLines: [`${p.doseMg} mg`, p.form],
-    metaLine: `${p.market} · ${p.singleOrCombo}`,
-    certSummary: p.certSummary,
-    certVerified: p.certVerified,
-    imagePath: p.imagePath,
-    bottomLine: p.bottomLine,
-    chips,
-    scores: p.scores,
-    verdict: p.verdict,
-    detailLines,
-    heldItems: p.heldItems,
-    hasB6: false,
-  };
-}
 
 // Publish gate mirrors the Supabase view: only owner-ratified rows render.
 // AU audience: melatonin is prescription-only here, so the only OTC route is personal import
@@ -126,7 +102,7 @@ const whyCareExample = 'For example, when researchers tested 31 over-the-counter
 
     <TierLegend />
 
-    <ScorecardGrid cards={cards} />
+    <ScorecardGrid cards={cards} basePath="/sources/melatonin" />
 
     <section class="rx">
       <h2 class="rx-title">Prescription option (not scored here)</h2>

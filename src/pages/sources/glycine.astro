@@ -8,37 +8,11 @@ import ScorecardGrid from '../../components/scorecards/ScorecardGrid.astro';
 import TierLegend from '../../components/scorecards/TierLegend.astro';
 import { GLYCINE_SOURCES, type GlyProduct } from '../../data/source-scorecards/glycine';
 import type { ScorecardCardData, Chip, DetailLine } from '../../data/source-scorecards/card';
+import { toGlyCard as toCard } from '../../lib/sources/cards';
 
 const reviewDate = '2026-07-20';
 
 // Map a glycine product into the shared card shape.
-function toCard(p: GlyProduct): ScorecardCardData {
-  const chips: Chip[] = [
-    p.doseReach.reaches
-      ? { label: '✓ Reaches the studied 3 g', kind: 'good', note: p.doseReach.note }
-      : { label: '⚠ Below the studied 3 g', kind: 'warn', note: p.doseReach.note },
-  ];
-
-  const detailLines: DetailLine[] = [];
-
-  return {
-    slug: p.slug,
-    brand: p.brand,
-    productName: p.productName,
-    specLines: [p.dose, p.form],
-    metaLine: `${p.regulated === 'medicine' && p.ausL ? `AUST L ${p.ausL}` : 'Food · not TGA-listed'} · ${p.channel}`,
-    certSummary: p.certSummary,
-    certVerified: p.certVerified,
-    imagePath: p.imagePath,
-    bottomLine: p.bottomLine,
-    chips,
-    scores: p.scores,
-    verdict: p.verdict,
-    detailLines,
-    heldItems: p.heldItems,
-    hasB6: false,
-  };
-}
 
 const cards = GLYCINE_SOURCES.filter((p) => p.ratified).map(toCard);
 
@@ -125,7 +99,7 @@ const whyCareExample = 'For example, the pure glycine people take for sleep is u
 
     <TierLegend />
 
-    <ScorecardGrid cards={cards} />
+    <ScorecardGrid cards={cards} basePath="/sources/glycine" />
 
     <p class="footer-strip">
       Somnary · Glycine source scorecards · Reviewed {reviewDate} · Educational, not medical

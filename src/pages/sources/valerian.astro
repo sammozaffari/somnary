@@ -8,37 +8,11 @@ import ScorecardGrid from '../../components/scorecards/ScorecardGrid.astro';
 import TierLegend from '../../components/scorecards/TierLegend.astro';
 import { VALERIAN_SOURCES, type ValProduct } from '../../data/source-scorecards/valerian';
 import type { ScorecardCardData, Chip, DetailLine } from '../../data/source-scorecards/card';
+import { toValCard as toCard } from '../../lib/sources/cards';
 
 const reviewDate = '2026-07-20';
 
 // Map a valerian product into the shared card shape.
-function toCard(p: ValProduct): ScorecardCardData {
-  const chips: Chip[] = [];
-  if (p.trialFlag) chips.push({ label: '🔬 Used in trials', kind: 'good', note: p.trialFlag.note });
-  if (p.importSafety) chips.push({ label: '⚠ Import — no AU warning', kind: 'warn', note: p.importSafety.note });
-
-  const detailLines: DetailLine[] = [];
-  if (p.importSafety) detailLines.push({ tag: 'Safety', note: p.importSafety.note, kind: 'safety' });
-  if (p.trialFlag) detailLines.push({ tag: 'Used in trials', note: p.trialFlag.note, kind: 'trial' });
-
-  return {
-    slug: p.slug,
-    brand: p.brand,
-    productName: p.productName,
-    specLines: [p.strength, p.form],
-    metaLine: `${p.ausL ? `AUST L ${p.ausL}` : 'Not TGA-listed (import)'} · ${p.channel}`,
-    certSummary: p.certSummary,
-    certVerified: p.certVerified,
-    imagePath: p.imagePath,
-    bottomLine: p.bottomLine,
-    chips,
-    scores: p.scores,
-    verdict: p.verdict,
-    detailLines,
-    heldItems: p.heldItems,
-    hasB6: false,
-  };
-}
 
 const cards = VALERIAN_SOURCES.filter((p) => p.ratified).map(toCard);
 
@@ -129,7 +103,7 @@ const whyCareExample = 'For example, Australia’s regulator <a href="https://ww
 
     <TierLegend />
 
-    <ScorecardGrid cards={cards} />
+    <ScorecardGrid cards={cards} basePath="/sources/valerian" />
 
     <p class="footer-strip">
       Somnary · Valerian source scorecards · Reviewed {reviewDate} · Educational, not medical

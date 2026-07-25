@@ -84,6 +84,11 @@ export interface AshProduct {
   heldItems: string[];
   communityStatus: 'gathering' | 'summarized';
   communityThemes?: { note: string; url?: string }[];
+  /** Where an Australian can find it — PLAIN retailer URLs, zero affiliate/tracking params (D2).
+   * Display priority: amazon > chemistWarehouse > iherb. */
+  retailers?: { amazon?: string; chemistWarehouse?: string; iherb?: string };
+  /** Disclosed ingredients panel (from the dossier), actives first — omitted when the brand doesn't publish one. */
+  ingredients?: string[];
   imagePath?: string;
   ratified: boolean;
 }
@@ -115,6 +120,7 @@ export const ASHWAGANDHA_SOURCES: AshProduct[] = [
     regulated: 'medicine',
     ausL: '406701',
     channel: 'Chemist Warehouse · Amazon AU',
+    retailers: { chemistWarehouse: 'https://www.chemistwarehouse.com.au/buy/89831' },
     certSummary: 'KSM-66 · TGA-listed (AUST L 406701)',
     trialFlag: { note: 'Built on KSM-66, a named ashwagandha extract with published RCTs — a "used in trials" signal for the ingredient (context, not a quality endorsement).' },
     additiveSummary: 'Highest disclosed withanolide in the set; full panel not published',
@@ -239,6 +245,7 @@ export const ASHWAGANDHA_SOURCES: AshProduct[] = [
     regulated: 'medicine',
     ausL: '508647',
     channel: 'Chemist Warehouse · Amazon AU',
+    retailers: { chemistWarehouse: 'https://www.chemistwarehouse.com.au/buy/163899' },
     certSummary: 'KSM-66 · TGA-listed (AUST L 508647)',
     trialFlag: { note: 'Built on KSM-66, a named ashwagandha extract with published RCTs — a "used in trials" signal for the ingredient (context, not a quality endorsement).' },
     additiveSummary: 'KSM-66 but withanolide figure NOT disclosed; full panel not published',
@@ -270,6 +277,7 @@ export const ASHWAGANDHA_SOURCES: AshProduct[] = [
     regulated: 'medicine',
     ausL: '353060',
     channel: 'Practitioner · health-store',
+    retailers: { amazon: 'https://www.amazon.com.au/dp/B00WJGRP6K' },
     certSummary: 'KSM-66 · TGA-listed (AUST L 353060)',
     trialFlag: { note: 'Contains KSM-66 (a named ashwagandha extract with RCTs); its headline clinical claim actually rests on the holy basil (OciBest), which has its own trial. Context, not a quality endorsement.' },
     additiveSummary: '6-herb combo, each herb dosed; withanolide figure not disclosed',
@@ -332,6 +340,7 @@ export const ASHWAGANDHA_SOURCES: AshProduct[] = [
     regulated: 'medicine',
     ausL: '310894',
     channel: 'Chemist Warehouse · Amazon AU',
+    retailers: { chemistWarehouse: 'https://www.chemistwarehouse.com.au/buy/91132' },
     certSummary: 'Generic extract · TGA-listed (AUST L 310894)',
     b6: { note: 'Contains vitamin B6 at ~41 mg/day at label use — above the 10 mg/day the TGA sets its neuropathy warning at — and carries the mandated peripheral-neuropathy warning. Shown for your safety; separate from the scores.' },
     additiveSummary: 'Generic low-withanolide ashwagandha in a B-vitamin/mineral combo',
@@ -363,6 +372,7 @@ export const ASHWAGANDHA_SOURCES: AshProduct[] = [
     regulated: 'medicine',
     ausL: '390319',
     channel: 'Chemist Warehouse · Amazon AU',
+    retailers: { amazon: 'https://www.amazon.com.au/dp/B09T3JR8F3', chemistWarehouse: 'https://www.chemistwarehouse.com.au/buy/107843' },
     certSummary: 'Generic extract · TGA-listed (AUST L 390319)',
     additiveSummary: 'Lowest ashwagandha dose in the set; generic extract',
     scores: {
@@ -393,6 +403,7 @@ export const ASHWAGANDHA_SOURCES: AshProduct[] = [
     regulated: 'medicine',
     ausL: '430133',
     channel: 'Chemist Warehouse · Amazon AU',
+    retailers: { chemistWarehouse: 'https://www.chemistwarehouse.com.au/buy/116926' },
     certSummary: 'Generic extract · TGA-listed (AUST L 430133)',
     additiveSummary: 'Generic ashwagandha in a passionflower/lavender sleep combo',
     scores: {
@@ -423,6 +434,7 @@ export const ASHWAGANDHA_SOURCES: AshProduct[] = [
     regulated: 'food',
     ausL: null,
     channel: 'iHerb AU (import)',
+    retailers: { iherb: 'https://au.iherb.com/pr/gaia-herbs-ashwagandha-root-120-liquid-phyto-caps-350-mg-per-cap/76244' },
     certSummary: 'Per-batch lab reports (Meet Your Herbs)',
     certVerified: true,
     importSafety: { note: 'Imported into Australia (no TGA listing). Carries no AU-mandated ashwagandha liver-caution advisory — an AU buyer misses the local warning.' },
@@ -455,6 +467,8 @@ export const ASHWAGANDHA_SOURCES: AshProduct[] = [
     regulated: 'food',
     ausL: null,
     channel: 'iHerb AU (import)',
+    retailers: { iherb: 'https://au.iherb.com/pr/now-foods-ashwagandha-standardized-extract-450-mg-90-veg-capsules/310' },
+    ingredients: ['Ashwagandha extract 450 mg (root & leaf, min 2.5% withanolides)', 'Hypromellose (capsule)', 'Rice flour', 'Magnesium stearate'],
     certSummary: 'Not TGA-listed (import)',
     importSafety: { note: 'Imported into Australia (no TGA listing) and made from root AND leaf (the higher-liver-scrutiny form). Carries no AU-mandated ashwagandha liver-caution advisory — an AU buyer misses the local warning.' },
     additiveSummary: 'Generic standardised extract (no named clinical extract); root+leaf',
@@ -488,6 +502,7 @@ export const ASHWAGANDHA_SOURCES: AshProduct[] = [
     regulated: 'medicine',
     ausL: '403964',
     channel: 'sports retailers · brand',
+    ingredients: ['KSM-66 ashwagandha root extract 300 mg', 'Rice flour', 'HPMC (capsule)', 'Magnesium stearate', 'Silicon dioxide (551)'],
     trialFlag: { note: 'Uses the named KSM-66 extract, which has published stress/sleep trials — a factual "used in trials" signal, not a quality endorsement of this product.' },
     certSummary: 'TGA-listed (AUST L 403964)',
     additiveSummary: 'Full excipient panel disclosed (rice flour, HPMC, magnesium stearate, silica)',
@@ -518,6 +533,7 @@ export const ASHWAGANDHA_SOURCES: AshProduct[] = [
     regulated: 'medicine',
     ausL: '378376',
     channel: 'Chemist Warehouse · Amazon AU',
+    retailers: { chemistWarehouse: 'https://www.chemistwarehouse.com.au/buy/114657' },
     trialFlag: { note: 'Uses the named KSM-66 extract at 600 mg/day — the dose used in its published stress trials — a factual "used in trials" signal, not a quality endorsement.' },
     certSummary: 'TGA-listed (AUST L 378376)',
     additiveSummary: 'Named KSM-66 + B5; full ingredients list not published',
@@ -548,6 +564,7 @@ export const ASHWAGANDHA_SOURCES: AshProduct[] = [
     regulated: 'medicine',
     ausL: '474850',
     channel: 'Chemist Warehouse · Amazon AU',
+    retailers: { chemistWarehouse: 'https://www.chemistwarehouse.com.au/buy/151530' },
     trialFlag: { note: 'Uses the named KSM-66 extract at 600 mg/day — a factual "used in trials" signal, not a quality endorsement.' },
     certSummary: 'TGA-listed (AUST L 474850)',
     additiveSummary: 'Named KSM-66 sleep combo; full ingredients list not published',
@@ -608,6 +625,7 @@ export const ASHWAGANDHA_SOURCES: AshProduct[] = [
     regulated: 'food',
     ausL: null,
     channel: 'iHerb AU · Amazon AU (import)',
+    retailers: { iherb: 'https://au.iherb.com/pr/nutricost-ksm-66-ashwagandha-root-extract-60-capsules/139433' },
     trialFlag: { note: 'Uses the named KSM-66 extract at 600 mg — a factual "used in trials" signal, not a quality endorsement.' },
     importSafety: { note: 'Imported into Australia (no TGA listing), so it carries no AU-mandated ashwagandha liver-caution advisory — an AU buyer misses the local warning. Also adds BioPerine (piperine), which can affect how the body processes some medicines.' },
     certSummary: 'Not TGA-listed (import)',
@@ -669,6 +687,7 @@ export const ASHWAGANDHA_SOURCES: AshProduct[] = [
     regulated: 'medicine',
     ausL: '520807',
     channel: 'Chemist Warehouse · Amazon AU',
+    retailers: { chemistWarehouse: 'https://www.chemistwarehouse.com.au/buy/167807' },
     trialFlag: { note: 'Uses the named KSM-66 extract at 600 mg/day — a factual "used in trials" signal, not a quality endorsement.' },
     b6: { note: 'Contains vitamin B6 at a low dose (~4 mg/day) — well below the TGA neuropathy-warning band, but it is added B6.' },
     certSummary: 'TGA-listed (AUST L 520807)',
@@ -700,6 +719,7 @@ export const ASHWAGANDHA_SOURCES: AshProduct[] = [
     regulated: 'medicine',
     ausL: '416008',
     channel: 'Chemist Warehouse · Amazon AU',
+    retailers: { chemistWarehouse: 'https://www.chemistwarehouse.com.au/buy/135184' },
     b6: { note: 'Contains a high dose of vitamin B6 — pyridoxine 25 mg per tablet; at 2 tablets/day (~50 mg/day) it is above the TGA on-pack-warning threshold and carries the mandated tingling/numbness warning.' },
     certSummary: 'TGA-listed (AUST L 416008)',
     additiveSummary: 'Root+leaf extract; no named clinical extract confirmed; full ingredients list not published',
@@ -730,6 +750,7 @@ export const ASHWAGANDHA_SOURCES: AshProduct[] = [
     regulated: 'food',
     ausL: null,
     channel: 'iHerb AU (import)',
+    retailers: { iherb: 'https://au.iherb.com/pr/thorne-ashwagandha-120-mg-30-capsules/156374' },
     trialFlag: { note: 'Uses the named Shoden extract (35% withanolide glycosides), which has published trials — a factual "used in trials" signal, not a quality endorsement.' },
     importSafety: { note: 'Imported into Australia (no TGA listing) and made from root AND leaf (the higher-liver-scrutiny form). Carries no AU-mandated ashwagandha liver-caution advisory — an AU buyer misses the local warning.' },
     certSummary: 'Not TGA-listed (import)',
@@ -761,6 +782,7 @@ export const ASHWAGANDHA_SOURCES: AshProduct[] = [
     regulated: 'food',
     ausL: null,
     channel: 'iHerb AU · Amazon AU (import)',
+    retailers: { iherb: 'https://au.iherb.com/pr/himalaya-organic-ashwagandha-30-caplets/128017' },
     importSafety: { note: 'Imported into Australia (no TGA listing), so it carries no AU-mandated ashwagandha liver-caution advisory — an AU buyer misses the local warning.' },
     certSummary: 'Not TGA-listed (import)',
     additiveSummary: 'USDA-Organic/cGMP are agricultural/facility certs, not content tests',

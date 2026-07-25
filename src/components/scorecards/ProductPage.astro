@@ -1,0 +1,564 @@
+---
+/**
+ * Per-product detail page (EWG product-page analog). The card is the teaser; THIS is where the
+ * depth lives at comfortable reading width: big tier chip, full-width six-dimension reasoning,
+ * disclosed ingredients (linked to the additive watchlist / remedy page where we have content),
+ * and plain no-affiliate retailer links.
+ */
+import { DIMENSION_ORDER, DIMENSION_LABELS, type ScorecardCardData } from '../../data/source-scorecards/card';
+import type { TierMeta } from '../../data/source-scorecards/tiers';
+import watchlistYaml from '../../data/additive-watchlist.yaml?raw';
+import { parseAdditiveContent } from '../../lib/sources/additive-content';
+
+interface Retailers {
+  amazon?: string;
+  chemistWarehouse?: string;
+  iherb?: string;
+}
+
+interface Props {
+  card: ScorecardCardData;
+  tier: TierMeta;
+  remedy: { name: string; slug: string }; // e.g. { name: 'Magnesium', slug: 'magnesium' }
+  retailers?: Retailers;
+  ingredients?: string[];
+  /** Extra line shown beside the retailer links (e.g. the melatonin Rx note). */
+  retailerNote?: string;
+  reviewDate: string;
+}
+const { card: p, tier, remedy, retailers, ingredients, retailerNote, reviewDate } = Astro.props;
+const segs = [1, 2, 3, 4, 5];
+
+// Link ingredients we have content for: watchlist entries (flagged AND not-flagged) → /sources/additives#id.
+const { flagged, notFlagged } = parseAdditiveContent(watchlistYaml);
+const WATCH = [...flagged, ...notFlagged];
+function ingredientLink(name: string): { href: string; kind: 'flagged' | 'ok' } | null {
+  const n = name.toLowerCase();
+  for (const e of flagged) if (e.names.some((x) => n.includes(x.toLowerCase()))) return { href: `/sources/additives#${e.id}`, kind: 'flagged' };
+  for (const e of notFlagged) if (e.names.some((x) => n.includes(x.toLowerCase()))) return { href: `/sources/additives#${e.id}`, kind: 'ok' };
+  return null;
+}
+
+const retailerLinks: { label: string; href: string }[] = [];
+if (retailers?.amazon) retailerLinks.push({ label: 'Amazon AU', href: retailers.amazon });
+if (retailers?.chemistWarehouse) retailerLinks.push({ label: 'Chemist Warehouse', href: retailers.chemistWarehouse });
+if (retailers?.iherb) retailerLinks.push({ label: 'iHerb AU', href: retailers.iherb });
+---
+
+<main class="page">
+  <nav class="crumbs" aria-label="Breadcrumb">
+    <a href="/sources/methodology">Source scorecards</a>
+    <span aria-hidden="true">·</span>
+    <a href={`/sources/${remedy.slug}`}>{remedy.name}</a>
+    <span aria-hidden="true">·</span>
+    <span>{p.brand} {p.productName}</span>
+  </nav>
+
+  <header class="hero">
+    <div class="hero-main">
+      <div class="tier-chip" data-tier={tier.key}>
+        <span class="tier-chip-icon" aria-hidden="true">{tier.icon}</span>
+        <span class="tier-chip-text">
+          <span class="tier-chip-label">{tier.label}</span>
+          <span class="tier-chip-blurb">{tier.blurb}</span>
+        </span>
+      </div>
+      <h1 class="title">{p.brand} <span class="title-product">{p.productName}</span></h1>
+      {p.specLines.map((s) => <p class="spec">{s}</p>)}
+      <p class="meta">{p.metaLine}</p>
+      <p class="cert" data-kind={p.certVerified ? 'yes' : 'none'}>{p.certSummary}</p>
+      <p class="bottomline">{p.bottomLine}</p>
+      {p.chips.length > 0 && (
+        <div class="chips">
+          {p.chips.map((c) => (
+            <span class="chip" data-kind={c.kind} title={c.note}>{c.label}</span>
+          ))}
+        </div>
+      )}
+    </div>
+    <div class="hero-shot">
+      {p.imagePath ? (
+        <img src={p.imagePath} alt={`${p.brand} ${p.productName}`} decoding="async" />
+      ) : (
+        <span class="shot-fallback" aria-hidden="true">{p.brand.charAt(0)}</span>
+      )}
+    </div>
+  </header>
+
+  {p.detailLines.length > 0 && (
+    <section class="flags" aria-label="Flags worth knowing">
+      {p.detailLines.map((d) => (
+        <p class:list={['flagline', d.kind]}><span class="tag">{d.tag}</span> {d.note}</p>
+      ))}
+    </section>
+  )}
+
+  <section class="verdict-block" aria-label="Verdict">
+    <h2 class="h2">The verdict</h2>
+    <p class="verdict">{p.verdict}</p>
+  </section>
+
+  <section class="scores" aria-label="The six ratings">
+    <h2 class="h2">The six ratings</h2>
+    <div class="score-rows">
+      {DIMENSION_ORDER.map((key) => (
+        <div class="score-row">
+          <div class="score-head">
+            <h3 class="score-label">{DIMENSION_LABELS[key]}</h3>
+            <span class="score-meter">
+              <span class="bar" aria-hidden="true">
+                {segs.map((i) => <i class:list={['seg', { on: i <= p.scores[key].score }]} />)}
+              </span>
+              <span class="score-num">{p.scores[key].score}<span class="of">/5</span></span>
+            </span>
+          </div>
+          <p class="score-note">{p.scores[key].note}</p>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <section class="ingredients" aria-label="Ingredients">
+    <h2 class="h2">What’s in it</h2>
+    {ingredients && ingredients.length > 0 ? (
+      <>
+        <ul class="ing-list">
+          {ingredients.map((name) => {
+            const link = ingredientLink(name);
+            return (
+              <li class="ing">
+                {link ? (
+                  <a href={link.href} class="ing-link" data-kind={link.kind}>
+                    {name}
+                    <span class="ing-note">{link.kind === 'flagged' ? ' — on our additive watchlist →' : ' — reviewed, not flagged →'}</span>
+                  </a>
+                ) : (
+                  name
+                )}
+              </li>
+            );
+          })}
+        </ul>
+        <p class="ing-foot">
+          Ingredients as disclosed by the maker. <a href="/sources/additives">What we watch for in an ingredients list →</a>
+        </p>
+      </>
+    ) : (
+      <p class="ing-none">
+        The maker doesn’t publish a full ingredients list online — a recurring transparency gap in this
+        category. The Additives rating above covers what is known.
+        <a href="/sources/additives">What we watch for in an ingredients list →</a>
+      </p>
+    )}
+  </section>
+
+  {retailerLinks.length > 0 && (
+    <section class="where" aria-label="Where to find it">
+      <h2 class="h2">Where to find it</h2>
+      <div class="where-links">
+        {retailerLinks.map((r) => (
+          <a class="where-link" href={r.href} target="_blank" rel="noopener nofollow">{r.label} →</a>
+        ))}
+      </div>
+      <p class="where-foot">
+        Plain links — no affiliate codes, ever. Somnary earns nothing if you buy.
+        {retailerNote ? ` ${retailerNote}` : ''}
+      </p>
+    </section>
+  )}
+
+  {p.heldItems.length > 0 && (
+    <section class="held-block" aria-label="Under review">
+      <h2 class="h2">Under review</h2>
+      {p.heldItems.map((h) => (
+        <p class="held">{h}</p>
+      ))}
+    </section>
+  )}
+
+  <p class="footer-strip">
+    Somnary · {remedy.name} source scorecard · Reviewed {reviewDate} · Educational, not medical advice
+    · A scorecard is about what’s in a bottle, never about whether you should take it — talk to a
+    clinician before changing what you take. Found an error?
+    We aim to fix verified errors within 7 days — <a href="mailto:sammymoz@gmail.com">sammymoz@gmail.com</a>.
+  </p>
+</main>
+
+<style>
+  .page {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: var(--sp-8) var(--sp-7) var(--sp-9);
+  }
+  .crumbs {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+    display: flex;
+    gap: var(--sp-2);
+    flex-wrap: wrap;
+  }
+  .crumbs a {
+    color: var(--muted);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(200px, 280px);
+    gap: var(--sp-7);
+    margin-top: var(--sp-6);
+    align-items: start;
+  }
+  @media (max-width: 720px) {
+    .hero {
+      grid-template-columns: 1fr;
+    }
+    .hero-shot {
+      order: -1;
+      max-width: 280px;
+    }
+  }
+
+  /* the EWG-style big verdict chip */
+  .tier-chip {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--sp-3);
+    border: var(--border-hairline);
+    border-left: 6px solid var(--muted);
+    border-radius: var(--r-lg);
+    background: var(--surface);
+    padding: var(--sp-4) var(--sp-5);
+    margin-bottom: var(--sp-5);
+  }
+  .tier-chip[data-tier='well-documented'],
+  .tier-chip[data-tier='reasonable'] {
+    border-left-color: var(--eucalyptus, var(--primary));
+  }
+  .tier-chip[data-tier='heads-up'] {
+    border-left-color: var(--safety-ink, var(--vermilion));
+  }
+  .tier-chip-icon {
+    font-size: var(--text-xl);
+    line-height: var(--lh-xl);
+  }
+  .tier-chip-text {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-1);
+  }
+  .tier-chip-label {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-lg);
+    line-height: var(--lh-lg);
+    color: var(--ink);
+  }
+  .tier-chip-blurb {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    max-width: 52ch;
+  }
+
+  .title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-2xl);
+    line-height: var(--lh-2xl);
+    letter-spacing: var(--tracking-tight);
+    color: var(--ink);
+    margin: 0;
+  }
+  .title-product {
+    color: var(--muted);
+    font-weight: 700;
+  }
+  .spec {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: var(--sp-1) 0 0;
+  }
+  .meta,
+  .cert {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+    margin: var(--sp-2) 0 0;
+  }
+  .cert[data-kind='yes'] {
+    color: var(--eucalyptus, var(--primary));
+  }
+  .bottomline {
+    font-size: var(--text-md);
+    line-height: var(--lh-md);
+    font-weight: 600;
+    color: var(--ink);
+    margin: var(--sp-4) 0 0;
+    max-width: 62ch;
+  }
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2);
+    margin-top: var(--sp-4);
+  }
+  .chip {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    border-radius: var(--r-sm);
+    padding: var(--sp-1) var(--sp-2);
+    white-space: nowrap;
+  }
+  .chip[data-kind='good'] {
+    color: var(--eucalyptus, var(--primary));
+    border: 1px solid var(--eucalyptus, var(--primary));
+  }
+  .chip[data-kind='warn'] {
+    color: var(--safety-ink, var(--ink));
+    border: 1px solid var(--safety-ink, var(--muted));
+  }
+
+  .hero-shot {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--primary-soft);
+    border: var(--border-hairline);
+    border-radius: var(--r-xl);
+    overflow: hidden;
+  }
+  .hero-shot img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: var(--sp-5);
+  }
+  .shot-fallback {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-3xl);
+    color: var(--primary);
+  }
+
+  .flags {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+    margin-top: var(--sp-7);
+  }
+  .flagline {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--ink);
+    margin: 0;
+    padding: var(--sp-3) var(--sp-4);
+    border-radius: var(--r-sm);
+    background: var(--primary-soft);
+  }
+  .flagline.safety {
+    background: var(--warning-bg, var(--primary-soft));
+  }
+  .flagline.safety .tag {
+    color: var(--safety-ink, var(--ink));
+  }
+  .flagline.trial .tag {
+    color: var(--eucalyptus, var(--ink));
+  }
+  .tag {
+    font-family: var(--font-mono);
+    letter-spacing: var(--tracking-label);
+    margin-right: var(--sp-1);
+  }
+
+  .h2 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-xl);
+    line-height: var(--lh-xl);
+    letter-spacing: var(--tracking-tight);
+    color: var(--ink);
+    margin: 0 0 var(--sp-4);
+  }
+  .verdict-block,
+  .scores,
+  .ingredients,
+  .where,
+  .held-block {
+    margin-top: var(--sp-8);
+  }
+  .verdict {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--ink);
+    margin: 0;
+    max-width: 72ch;
+  }
+
+  .score-rows {
+    display: flex;
+    flex-direction: column;
+  }
+  .score-row {
+    padding: var(--sp-4) 0;
+    border-bottom: var(--border-hairline);
+  }
+  .score-row:last-child {
+    border-bottom: none;
+  }
+  .score-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-4);
+    flex-wrap: wrap;
+  }
+  .score-label {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-md);
+    line-height: var(--lh-md);
+    color: var(--ink);
+    margin: 0;
+  }
+  .score-meter {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-3);
+  }
+  .bar {
+    display: inline-flex;
+    gap: var(--sp-1);
+  }
+  .seg {
+    width: var(--sp-4);
+    height: var(--sp-2);
+    border-radius: var(--r-sm);
+    background: var(--primary-soft);
+  }
+  .seg.on {
+    background: var(--ink);
+  }
+  .score-num {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .of {
+    color: var(--muted);
+    font-weight: 400;
+  }
+  .score-note {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: var(--sp-2) 0 0;
+    max-width: 74ch;
+  }
+
+  .ing-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .ing {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--ink);
+    padding: var(--sp-3) 0;
+    border-bottom: var(--border-hairline);
+  }
+  .ing:last-child {
+    border-bottom: none;
+  }
+  .ing-link {
+    color: var(--ink);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .ing-link[data-kind='flagged'] .ing-note {
+    color: var(--safety-ink, var(--ink));
+  }
+  .ing-link[data-kind='ok'] .ing-note {
+    color: var(--eucalyptus, var(--primary));
+  }
+  .ing-note {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+  }
+  .ing-foot,
+  .ing-none {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: var(--sp-4) 0 0;
+    max-width: 74ch;
+  }
+  .ing-foot a,
+  .ing-none a,
+  .where-foot a {
+    color: var(--primary);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .where-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-3);
+  }
+  .where-link {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    letter-spacing: var(--tracking-label);
+    color: var(--ink);
+    border: var(--border-hairline);
+    border-radius: var(--r-sm);
+    padding: var(--sp-3) var(--sp-5);
+    text-decoration: none;
+    background: var(--surface);
+  }
+  .where-link:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+  .where-foot {
+    font-size: var(--text-xs);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: var(--sp-3) 0 0;
+    max-width: 74ch;
+  }
+
+  .held {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: 0 0 var(--sp-2);
+    max-width: 74ch;
+  }
+
+  .footer-strip {
+    margin-top: var(--sp-8);
+    padding-top: var(--sp-5);
+    border-top: var(--border-hairline);
+    font-size: var(--text-xs);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+  }
+  .footer-strip a {
+    color: var(--primary);
+  }
+</style>
