@@ -35,6 +35,10 @@ const { lookFor, cautious } = Astro.props;
       </ul>
     </div>
   </div>
+
+  <p class="more">
+    Curious about a specific additive? <a href="/sources/additives">See exactly what we watch for in the ingredients list →</a>
+  </p>
 </section>
 
 <style>
@@ -113,5 +117,16 @@ const { lookFor, cautious } = Astro.props;
   }
   .item:last-child {
     border-bottom: none;
+  }
+  .more {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: var(--sp-5) 0 0;
+  }
+  .more a {
+    color: var(--primary);
+    text-decoration: underline;
+    text-underline-offset: 2px;
   }
 </style>
