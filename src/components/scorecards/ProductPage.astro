@@ -52,12 +52,17 @@ type IngStatus = { kind: 'concern' | 'flag' | 'ok' | 'active' | 'none'; label: s
 function ingredientStatus(name: string): IngStatus {
   const n = name.toLowerCase();
   for (const e of flagged)
-    if (e.names.some((x) => n.includes(x.toLowerCase())))
+    if (e.names.some((x) => n.includes(x.toLowerCase()))) {
+      // Structural entries (proprietary blend) are transparency defects, not additive deductions —
+      // never show a numeric additive severity for them (matches /sources/additives + the rubric).
+      if (e.structural)
+        return { kind: 'flag', label: 'Transparency defect', href: `/sources/additives#${e.id}` };
       return {
         kind: e.severity === 'concern' ? 'concern' : 'flag',
         label: e.severity === 'concern' ? 'On our watchlist · −2' : 'On our watchlist · −1',
         href: `/sources/additives#${e.id}`,
       };
+    }
   for (const e of notFlagged)
     if (e.names.some((x) => n.includes(x.toLowerCase())))
       return { kind: 'ok', label: 'Reviewed — not flagged', href: `/sources/additives#${e.id}` };
