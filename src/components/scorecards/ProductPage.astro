@@ -29,14 +29,46 @@ interface Props {
 const { card: p, tier, remedy, retailers, ingredients, retailerNote, reviewDate } = Astro.props;
 const segs = [1, 2, 3, 4, 5];
 
-// Link ingredients we have content for: watchlist entries (flagged AND not-flagged) → /sources/additives#id.
+/**
+ * Owner-ratified colour semantics (2026-07-25): colour says WHY, not just how much.
+ * - Verification dimensions (testing, label, transparency): points are EARNED → eucalyptus;
+ *   a zero means "no one verified", not "bad product" → calm neutral, never red.
+ * - Deduction dimensions (additives, regulatory, marketing): start at 5 and are DOCKED only
+ *   for documented negatives → anything below 5 shows the safety register.
+ */
+const VERIFY_DIMS = new Set(['testing_purity', 'label_accuracy', 'transparency']);
+function scoreTone(key: string, score: number): 'earned' | 'neutral' | 'docked' {
+  if (VERIFY_DIMS.has(key)) {
+    if (key === 'transparency') return score >= 4 ? 'earned' : 'neutral';
+    return score >= 1 ? 'earned' : 'neutral'; // any point on testing/label is rare and meaningful
+  }
+  return score === 5 ? 'earned' : 'docked';
+}
+
+// Classify each ingredient row (EWG-style, but only claims we can defend): watchlist severity
+// from the ratified list, the active links to its evidence grade, everything else is honest neutral.
 const { flagged, notFlagged } = parseAdditiveContent(watchlistYaml);
-const WATCH = [...flagged, ...notFlagged];
-function ingredientLink(name: string): { href: string; kind: 'flagged' | 'ok' } | null {
+type IngStatus = { kind: 'concern' | 'flag' | 'ok' | 'active' | 'none'; label: string; href?: string };
+function ingredientStatus(name: string): IngStatus {
   const n = name.toLowerCase();
-  for (const e of flagged) if (e.names.some((x) => n.includes(x.toLowerCase()))) return { href: `/sources/additives#${e.id}`, kind: 'flagged' };
-  for (const e of notFlagged) if (e.names.some((x) => n.includes(x.toLowerCase()))) return { href: `/sources/additives#${e.id}`, kind: 'ok' };
-  return null;
+  for (const e of flagged)
+    if (e.names.some((x) => n.includes(x.toLowerCase()))) {
+      // Structural entries (proprietary blend) are transparency defects, not additive deductions —
+      // never show a numeric additive severity for them (matches /sources/additives + the rubric).
+      if (e.structural)
+        return { kind: 'flag', label: 'Transparency defect', href: `/sources/additives#${e.id}` };
+      return {
+        kind: e.severity === 'concern' ? 'concern' : 'flag',
+        label: e.severity === 'concern' ? 'On our watchlist · −2' : 'On our watchlist · −1',
+        href: `/sources/additives#${e.id}`,
+      };
+    }
+  for (const e of notFlagged)
+    if (e.names.some((x) => n.includes(x.toLowerCase())))
+      return { kind: 'ok', label: 'Reviewed — not flagged', href: `/sources/additives#${e.id}` };
+  if (n.includes(remedy.slug) || n.includes(remedy.name.toLowerCase()))
+    return { kind: 'active', label: 'The active — evidence grade', href: `/r/${remedy.slug}` };
+  return { kind: 'none', label: 'Not yet reviewed' };
 }
 
 const retailerLinks: { label: string; href: string }[] = [];
@@ -102,7 +134,7 @@ if (retailers?.iherb) retailerLinks.push({ label: 'iHerb AU', href: retailers.ih
     <h2 class="h2">The six ratings</h2>
     <div class="score-rows">
       {DIMENSION_ORDER.map((key) => (
-        <div class="score-row">
+        <div class="score-row" data-tone={scoreTone(key, p.scores[key].score)}>
           <div class="score-head">
             <h3 class="score-label">{DIMENSION_LABELS[key]}</h3>
             <span class="score-meter">
@@ -124,16 +156,14 @@ if (retailers?.iherb) retailerLinks.push({ label: 'iHerb AU', href: retailers.ih
       <>
         <ul class="ing-list">
           {ingredients.map((name) => {
-            const link = ingredientLink(name);
+            const st = ingredientStatus(name);
             return (
               <li class="ing">
-                {link ? (
-                  <a href={link.href} class="ing-link" data-kind={link.kind}>
-                    {name}
-                    <span class="ing-note">{link.kind === 'flagged' ? ' — on our additive watchlist →' : ' — reviewed, not flagged →'}</span>
-                  </a>
+                <span class="ing-name">{name}</span>
+                {st.href ? (
+                  <a href={st.href} class="ing-pill" data-kind={st.kind}>{st.label} →</a>
                 ) : (
-                  name
+                  <span class="ing-pill" data-kind={st.kind}>{st.label}</span>
                 )}
               </li>
             );
@@ -449,6 +479,22 @@ if (retailers?.iherb) retailerLinks.push({ label: 'iHerb AU', href: retailers.ih
   .seg.on {
     background: var(--ink);
   }
+  /* colour says WHY (owner-ratified): earned = eucalyptus, docked = safety register, neutral stays calm */
+  .score-row[data-tone='earned'] .seg.on {
+    background: var(--eucalyptus, var(--ink));
+  }
+  .score-row[data-tone='earned'] .score-num {
+    color: var(--eucalyptus, var(--ink));
+  }
+  .score-row[data-tone='docked'] .seg.on {
+    background: var(--safety-ink, var(--ink));
+  }
+  .score-row[data-tone='docked'] .score-num {
+    color: var(--safety-ink, var(--ink));
+  }
+  .score-row[data-tone='neutral'] .score-num {
+    color: var(--muted);
+  }
   .score-num {
     font-family: var(--font-mono);
     font-size: var(--text-sm);
@@ -473,6 +519,11 @@ if (retailers?.iherb) retailerLinks.push({ label: 'iHerb AU', href: retailers.ih
     padding: 0;
   }
   .ing {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-4);
+    flex-wrap: wrap;
     font-size: var(--text-sm);
     line-height: var(--lh-sm);
     color: var(--ink);
@@ -482,21 +533,38 @@ if (retailers?.iherb) retailerLinks.push({ label: 'iHerb AU', href: retailers.ih
   .ing:last-child {
     border-bottom: none;
   }
-  .ing-link {
-    color: var(--ink);
-    text-decoration: underline;
-    text-underline-offset: 2px;
+  .ing-name {
+    min-width: 0;
   }
-  .ing-link[data-kind='flagged'] .ing-note {
-    color: var(--safety-ink, var(--ink));
-  }
-  .ing-link[data-kind='ok'] .ing-note {
-    color: var(--eucalyptus, var(--primary));
-  }
-  .ing-note {
+  .ing-pill {
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
+    border-radius: var(--r-sm);
+    padding: var(--sp-1) var(--sp-2);
+    white-space: nowrap;
+    text-decoration: none;
+  }
+  .ing-pill[data-kind='concern'] {
+    color: var(--safety-ink, var(--ink));
+    background: var(--warning-bg, var(--primary-soft));
+    border: 1px solid var(--safety-ink, var(--muted));
+  }
+  .ing-pill[data-kind='flag'] {
+    color: var(--safety-ink, var(--ink));
+    border: 1px solid var(--safety-ink, var(--muted));
+  }
+  .ing-pill[data-kind='ok'] {
+    color: var(--eucalyptus, var(--primary));
+    border: 1px solid var(--eucalyptus, var(--primary));
+  }
+  .ing-pill[data-kind='active'] {
+    color: var(--primary);
+    border: 1px solid var(--primary);
+  }
+  .ing-pill[data-kind='none'] {
+    color: var(--muted);
+    border: var(--border-hairline);
   }
   .ing-foot,
   .ing-none {
