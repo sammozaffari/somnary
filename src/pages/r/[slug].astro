@@ -31,6 +31,11 @@ const { entry } = Astro.props;
 const d = entry.data;
 const { Content } = await render(entry);
 
+// Remedies that also have a product-sourcing scorecard (/sources/<slug>).
+const SCORECARD_SLUGS = new Set(['magnesium', 'ashwagandha', 'valerian', 'glycine', 'melatonin']);
+const hasScorecard = SCORECARD_SLUGS.has(entry.id);
+const remedyName = entry.id.charAt(0).toUpperCase() + entry.id.slice(1);
+
 const isIntervention = d.format === 'intervention';
 const studiedDose = d.doses.length ? d.doses[0].studiedDose : null;
 const safetyFlag: { label: string; variant: GateVariant } = {
@@ -118,6 +123,18 @@ const jsonLd = remedyJsonLd(d, canonical, site);
           <h2 class="block-title">{isIntervention ? 'What counts as the real thing' : 'What to look for on a label'}</h2>
           <p class="prose-p">{d.standardization}</p>
         </section>
+
+        {hasScorecard && (
+          <section class="block">
+            <a class="scorecard-cta" href={`/sources/${entry.id}`}>
+              <span class="scorecard-cta-title">Which brand should you look at? →</span>
+              <span class="scorecard-cta-sub">
+                See the {remedyName} source scorecards — every product you can buy in Australia, rated on
+                how well it discloses what’s in the bottle. Independent, no affiliate links.
+              </span>
+            </a>
+          </section>
+        )}
 
         {/* 8 — mechanism */}
         <section class="block">
@@ -292,5 +309,30 @@ const jsonLd = remedyJsonLd(d, canonical, site);
     .remedy {
       padding: var(--sp-6) var(--sp-5) var(--sp-8);
     }
+  }
+
+  .scorecard-cta {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+    border: var(--border-hairline);
+    border-left: 3px solid var(--primary);
+    border-radius: var(--r-lg);
+    background: var(--primary-soft);
+    padding: var(--sp-5) var(--sp-6);
+    text-decoration: none;
+  }
+  .scorecard-cta:hover { border-color: var(--primary); }
+  .scorecard-cta-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-md);
+    line-height: var(--lh-md);
+    color: var(--ink);
+  }
+  .scorecard-cta-sub {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
   }
 </style>
