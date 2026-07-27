@@ -28,6 +28,10 @@
      don't each need editing — nothing renders in a monospace face anymore. Where digits must line
      up (data tables, stat values) use font-variant-numeric: tabular-nums, not a mono family. */
   --font-mono:    "Instrument Sans Variable", "Instrument Sans", system-ui, -apple-system, sans-serif;
+  /* reading voice (v4 D-1): a text serif for long-form article prose ONLY — the two-voice
+     system (sans UI/display/data + serif reading) that reads as an evidence reference, not a
+     templated SaaS page. Applied via the .prose/.prose-p rule below; never on UI. */
+  --font-reading: "Newsreader", Georgia, Cambria, "Times New Roman", serif;
 
   /* ---- surfaces (warm off-whites) ---- */
   --paper:   #FCFAF2;
@@ -156,4 +160,15 @@
   /* v4: let multi-line headings break for even ragging, and body for fewer orphans */
   h1, h2, h3 { text-wrap: balance; }
   p { text-wrap: pretty; }
+
+  /* v4 D-1: the serif reading voice. Scoped to long-form article prose (the .prose/.prose-p
+     convention used across remedy + context pages) and its body elements — NEVER headings,
+     labels, tables, chips, or any UI, which stay Instrument Sans. Family only, so each page's
+     own prose sizing is preserved; per-page rules never set font-family, so this always wins. */
+  .prose p,
+  .prose li,
+  .prose blockquote,
+  .prose-p {
+    font-family: var(--font-reading);
+  }
 }
