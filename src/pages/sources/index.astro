@@ -171,11 +171,15 @@ const remedies = [
   .card:hover {
     border-color: var(--primary);
   }
+  /* Stack the name over the count: the display-font ingredient names (e.g. "Ashwagandha",
+     "Melatonin") are too wide to sit inline beside the nowrap "N products" count at the 3-up
+     card width, which clipped the count. A quiet subtitle under the name never overflows and
+     reads consistently across every card. */
   .card-head {
     display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: var(--sp-3);
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--sp-1);
   }
   .card-title {
     font-family: var(--font-display);
