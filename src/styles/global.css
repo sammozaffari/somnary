@@ -77,8 +77,13 @@
   --text-base:    16px;   --lh-base:    1.60;  /* Instrument Sans 400 (body reading — looser for legibility) */
   --text-sm:      14px;   --lh-sm:      1.50;  /* Instrument Sans 400 */
   --text-xs:      12px;   --lh-xs:      1.40;  /* Instrument Sans 600, 0.09em, UPPERCASE */
-  --tracking-tight: -0.04em;
-  --tracking-label:  0.09em;
+  /* v4 type tuning (2026-07-27): the old −0.04em was size-blind — at 21–32px headings it
+     pulled letters so tight that word spaces collapsed ("I'mconsidering"). Retuned to a
+     moderate −0.02em that reads cleanly across the whole heading range; the largest display
+     type gets its own tighter token so it still feels poster-set. See docs/plans v4 Appendix A. */
+  --tracking-tight:   -0.02em;   /* mid + small headings (h2/h3/tiles/stats) */
+  --tracking-display: -0.035em;  /* ≥40px hero/page display only */
+  --tracking-label:    0.09em;
 
   /* ---- spacing (8px base, 4px step) ---- */
   --sp-1: 4px;  --sp-2: 8px;   --sp-3: 12px; --sp-4: 16px; --sp-5: 24px;
@@ -118,13 +123,23 @@
     background:
       radial-gradient(circle at 12% 0%, rgba(126, 31, 43, 0.06), transparent 28%),
       linear-gradient(180deg, #FEFDF9 0%, var(--paper) 45%, #F4EFE2 100%);
-    background-attachment: fixed;
+    /* background-attachment:fixed removed 2026-07-27 — it caused repaint jank on mobile Safari */
     color: var(--ink);
     font-family: var(--font-body);
+    /* v4: body was rendering at weight 400 (the "too thin / light" complaint). 440 gives text
+       the weight of set ink on the warm ground without reading as medium/bold. Headings set
+       their own 600/700 and are unaffected. */
+    font-weight: 440;
     font-size: var(--text-base);
     line-height: var(--lh-base);
     letter-spacing: normal;  /* reading text: no tracking/kerning adjustment */
+    font-kerning: normal;
+    text-rendering: optimizeLegibility;
   }
   ::selection { background: var(--primary-soft); }
   :focus-visible { box-shadow: var(--focus-ring); outline: none; }
+
+  /* v4: let multi-line headings break for even ragging, and body for fewer orphans */
+  h1, h2, h3 { text-wrap: balance; }
+  p { text-wrap: pretty; }
 }
