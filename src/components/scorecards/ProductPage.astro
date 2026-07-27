@@ -471,10 +471,10 @@ if (retailers?.iherb) retailerLinks.push({ label: 'iHerb AU', href: retailers.ih
     gap: var(--sp-1);
   }
   .seg {
-    width: var(--sp-4);
-    height: var(--sp-2);
+    width: var(--sp-6);
+    height: var(--sp-3);
     border-radius: var(--r-sm);
-    background: var(--primary-soft);
+    background: var(--stone); /* visible empty track — the old primary-soft vanished on paper */
   }
   .seg.on {
     background: var(--ink);
@@ -492,14 +492,19 @@ if (retailers?.iherb) retailerLinks.push({ label: 'iHerb AU', href: retailers.ih
   .score-row[data-tone='docked'] .score-num {
     color: var(--safety-ink, var(--ink));
   }
+  .score-row[data-tone='neutral'] .seg.on {
+    background: var(--muted); /* neutral = calm grey so earned-green / docked-red draw the eye */
+  }
   .score-row[data-tone='neutral'] .score-num {
     color: var(--muted);
   }
   .score-num {
     font-family: var(--font-mono);
-    font-size: var(--text-sm);
+    font-size: var(--text-md);
     color: var(--ink);
-    font-weight: 600;
+    font-weight: 700;
+    min-width: 3ch;
+    text-align: right;
   }
   .of {
     color: var(--muted);
