@@ -519,11 +519,12 @@
       if (res.answeredFrom) routeLinks.push({ href: res.answeredFrom.url, label: `From the ${res.answeredFrom.name} page` });
       if (res.route) routeLinks.push(res.route);
       for (const l of res.links ?? []) routeLinks.push(l);
-      // Handoff to the Somnary Lens: the in-palette corpus answer above is scoped to reviewed evidence;
-      // the Lens researches products/ingredients the corpus doesn't cover. Deep-link the typed query so
-      // /lens?q= prefills + auto-submits. Encoded href only — never rendered as content.
+      // Handoff to research: the in-palette corpus answer above is scoped to reviewed evidence; the
+      // no-hit research flow lives on the unified /search surface, which short-circuits a corpus hit
+      // and otherwise renders the audited Lens card inline (which reads ?q= + auto-submits). Deep-link
+      // the typed query there. Encoded href only — never rendered as content.
       const q = input.value.trim();
-      if (q) routeLinks.push({ href: `/lens?q=${encodeURIComponent(q)}`, label: 'Research this in the Lens' });
+      if (q) routeLinks.push({ href: `/search?q=${encodeURIComponent(q)}`, label: 'Research this in the Lens' });
       if (routeLinks.length) {
         askRoutes.hidden = false;
         askRoutes.innerHTML = routeLinks.map((l) => `<a href="${esc(l.href)}">→ ${esc(l.label)}</a>`).join('');
