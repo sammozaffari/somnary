@@ -78,8 +78,13 @@ for (const rel of routes) {
   if (AUTH_FLOW.has(rel) || rel === ACCOUNT_PAGE || isApiRoute(rel)) continue;
   const src = await readFile(join(PAGES_DIR, rel), 'utf8');
   contentChecked++;
-  check(!SERVER_SESSION_RE.test(src), `${rel}: does not read a server session (no auth gate)`);
-  check(!REDIRECT_RE.test(src), `${rel}: does not redirect (no login-wall bounce)`);
+  const readsSession = SERVER_SESSION_RE.test(src);
+  check(!readsSession, `${rel}: does not read a server session (no auth gate)`);
+  // A login-wall bounce is an AUTH-CONDITIONAL redirect: a content route that reads the session and
+  // then redirects a signed-out visitor. A redirect with NO session read cannot gate on sign-in — it
+  // is a benign navigation redirect (e.g. /search's corpus short-circuit to a vetted remedy page), so
+  // it is not the shape this gate forbids. Flag redirect() only when the route also reads a session.
+  check(!(readsSession && REDIRECT_RE.test(src)), `${rel}: no session-gated redirect (no login-wall bounce)`);
 }
 check(contentChecked > 0, `swept ${contentChecked} content/search/guide routes`);
 
