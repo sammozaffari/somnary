@@ -1,0 +1,195 @@
+---
+// HeroSearch — search-first Phase 2. The primary front-door affordance on / and /sources.
+// Crawlable, progressive-enhancement baseline: a real GET form to /search plus example chips that
+// are plain <a> links to /search?q=…. With JS on, tapping/clicking the input opens the existing
+// command palette (the nav .search-trigger) for the live experience — the palette is REUSED, never
+// duplicated. Keyboard users are NOT trapped: plain focus does nothing special (type + Enter → /search),
+// only pointer interaction hands off to the palette. Tokens only; input matches SearchPalette's .p-input.
+interface Props {
+  heading: string;
+  examples?: string[];
+}
+const { heading, examples = [] } = Astro.props;
+---
+
+<section class="hero-search" aria-labelledby="hero-search-heading">
+  <h2 class="hs-heading" id="hero-search-heading">{heading}</h2>
+  <form class="hs-form" method="get" action="/search" role="search" data-hero-search>
+    <label class="hs-label sr-only" for="hero-search-input">{heading}</label>
+    <span class="hs-mag" aria-hidden="true">⌕</span>
+    <input
+      type="text"
+      class="hs-input"
+      id="hero-search-input"
+      name="q"
+      placeholder="A remedy, a product, an ingredient…"
+      autocomplete="off"
+      spellcheck="false"
+      data-hero-search-input
+    />
+    <button type="submit" class="hs-submit">Search</button>
+  </form>
+  {
+    examples.length > 0 && (
+      <ul class="hs-examples" aria-label="Example searches">
+        {examples.map((ex) => (
+          <li>
+            <a class="hs-chip" href={`/search?q=${encodeURIComponent(ex)}`}>
+              {ex}
+            </a>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+</section>
+
+<style>
+  .hero-search {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+  }
+  .hs-heading {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-xl);
+    line-height: var(--lh-xl);
+    letter-spacing: var(--tracking-tight);
+    color: var(--ink);
+    margin: 0;
+  }
+
+  /* input row — mirrors SearchPalette's .p-input-row aesthetic (surface, hairline, focus ring) */
+  .hs-form {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    background: var(--surface);
+    border: var(--border-hairline);
+    border-radius: var(--r-lg);
+    padding: var(--sp-3) var(--sp-4);
+    transition: border-color var(--dur-fast) var(--ease-soft);
+  }
+  .hs-form:hover {
+    border-color: var(--mineral);
+  }
+  /* mirror the palette input's focus ring on the whole row when the field is focused */
+  .hs-form:focus-within {
+    border-color: var(--mineral);
+    box-shadow: var(--ring);
+  }
+  .hs-mag {
+    color: var(--muted);
+    font-size: var(--text-lg);
+    line-height: 1;
+    flex: none;
+  }
+  .hs-input {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    background: transparent;
+    padding: var(--sp-2) 0;
+    font-family: var(--font-body);
+    font-size: var(--text-md);
+    color: var(--ink);
+  }
+  .hs-input::placeholder {
+    color: var(--muted);
+  }
+  .hs-input:focus {
+    outline: none;
+  }
+  .hs-submit {
+    flex: none;
+    border: none;
+    background: var(--primary);
+    color: var(--surface);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    border-radius: var(--r-md);
+    padding: var(--sp-2) var(--sp-4);
+    cursor: pointer;
+    transition: background-color var(--dur-fast) var(--ease-soft);
+  }
+  .hs-submit:hover {
+    background: var(--primary-deep);
+  }
+  .hs-submit:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+  }
+
+  /* example chips — real links to /search?q=… */
+  .hs-examples {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2);
+    align-items: center;
+  }
+  .hs-chip {
+    display: inline-flex;
+    align-items: center;
+    height: 32px;
+    padding: 0 var(--sp-3);
+    background: var(--surface);
+    border: var(--border-hairline);
+    border-radius: var(--r-pill);
+    color: var(--muted);
+    text-decoration: none;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    transition: border-color var(--dur-fast) var(--ease-soft);
+  }
+  .hs-chip:hover {
+    border-color: var(--mineral);
+    color: var(--ink);
+  }
+  .hs-chip:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  @media (max-width: 640px) {
+    .hs-heading {
+      font-size: var(--text-lg);
+      line-height: var(--lh-lg);
+    }
+  }
+</style>
+
+<script>
+  // Progressive enhancement: with JS on, a pointer interaction on the hero input hands off to the
+  // existing command palette (the nav .search-trigger, which opens the modal and focuses its input).
+  // We REUSE the palette — no logic is duplicated. Keyboard users are NOT hijacked: plain focus is
+  // left alone, so Tab-through works and type + Enter submits the native GET form to /search. If the
+  // trigger is absent for any reason, the native form is left to work normally.
+  const input = document.querySelector<HTMLInputElement>('[data-hero-search-input]');
+  const trigger = document.querySelector<HTMLElement>('.search-trigger');
+  if (input && trigger) {
+    const openPalette = (e: Event) => {
+      e.preventDefault();
+      trigger.click();
+    };
+    input.addEventListener('pointerdown', openPalette);
+    input.addEventListener('click', openPalette);
+  }
+</script>
