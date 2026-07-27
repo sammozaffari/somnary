@@ -1,13 +1,13 @@
 # Search-First IA Redesign — Design Doc
 
-> **Status:** Owner-driven design, ratified in direction on 2026-07-27. NOT yet implemented.
-> Hand this to a fresh session for execution. Confirm the "Open decisions" with the owner
-> before building any phase that depends on them.
+> **Status (updated 2026-07-27):** Direction ratified. **Phase 1 (chrome) SHIPPED — PR #131.**
+> **All five "Open decisions" below are now RESOLVED by the owner**, so Phases 2–5 are unblocked.
 >
 > **For the executing session:** this is a design/strategy doc, not a task-by-task plan.
 > Turn each phase into a `superpowers:writing-plans` implementation plan as you reach it.
-> Ship Phase 1 first (chrome-only, low risk); later phases depend on owner sign-off on the
-> open decisions below.
+> Phase 2 (search-first front door) is next — build against the resolved decisions below. Run the
+> saved `/design-qa` gate + the manual rendered-visual pass (`qa/README.md`) on every UI change; the
+> 390px navbar overflow noted in decision 1 is the first thing Phase 2 should close.
 
 ## Trigger
 
@@ -131,20 +131,25 @@ standalone "Lens" tab was — search-first is inherently less chatty.
 5. **Lens cleanup** — footer link to a `/lens` methodology page (if kept), result-card
    "draft, not a grade" framing, remove residual "Lens"/"Ask" nav references.
 
-## Open decisions for the owner (confirm before the phase that needs them)
+## Open decisions — ALL RESOLVED by owner 2026-07-27 (Phases 2+ unblocked)
 
-1. **Search item presentation** — icon-only (🔍) like EWG, or **🔍 + "Search"** label? (Recommend
-   icon **+ label**: Somnary's search does more than EWG's, so name it.)
-2. **Does the Lens keep a landing page** at `/lens` (methodology/about + "how our AI research
-   works"), reachable from footer + result cards, even though it's out of the nav? (Recommend
-   **yes** — it explains the rigor and the "draft, not a grade" boundary; killing it loses that
-   trust surface.)
-3. **Label-checker page** — 301-redirect to search (preserve links/SEO) or hard-remove?
-   (Recommend **redirect**.)
-4. **FAQ scope** — which additives/products get pre-generated FAQ first? (Recommend the 8
-   flagged watchlist additives + the melatonin products, where data is richest.)
-5. **"Ask"/"Lens" wording anywhere user-facing** — the result-card verb. (Recommend framing by
-   query — "Here's what we found on *X*" — not a product name.)
+Status update: Phase 1 (chrome) shipped in PR #131. The five decisions below were confirmed with the
+owner on 2026-07-27 — each landed on the recommendation. Execute later phases against these answers.
+
+1. **Search item presentation** — ✅ **Icon + label on desktop, icon-only below 640px (responsive).**
+   Names the feature where there's room, and the mobile collapse fixes the 390px navbar overflow found
+   when QA-ing Phase 1 (the 125px "Search ⌘K" pill + 24px gaps push the nav to ~412px min-width; a
+   mobile icon-only search saves ~90px). Do this as part of the Phase 2 search work.
+2. **Lens landing page at `/lens`** — ✅ **Keep it** (methodology/about + "how our AI research works"),
+   reachable from footer + result cards. It's the trust surface that explains the rigor and the
+   "draft, not a grade" boundary.
+3. **Label-checker page** — ✅ **301-redirect to search** (preserve links/SEO). Keep `label-rules.ts`
+   → `/safety` routing intact when folding it in (Phase 3).
+4. **FAQ scope (Phase 4)** — ✅ **8 flagged watchlist additives + the melatonin products first**
+   (data is richest there: additive-watchlist.yaml + the melatonin dossiers).
+5. **Result-card wording** — ✅ **Frame by the query** ("Here's what we found on *X*"), NOT an
+   "Ask"/"Lens" product name. Self-evident from the user's own search; avoids the jargon the redesign
+   is removing.
 
 ## Guardrails (unchanged, load-bearing)
 
