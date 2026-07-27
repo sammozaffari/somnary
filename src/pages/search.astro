@@ -8,15 +8,28 @@ export const prerender = false;
 
 import Base from '../layouts/Base.astro';
 import TierBadge from '../components/TierBadge.astro';
-import { getSearchDocs, searchDocs } from '../lib/search';
+import LensPanel from '../components/LensPanel.astro';
+import { getSearchDocs } from '../lib/search';
+import { searchDocsScored } from '../lib/search-rank';
 
 const q = (Astro.url.searchParams.get('q') ?? '').trim();
 const docs = await getSearchDocs();
-const results = q ? searchDocs(q, docs) : [];
+const scored = q ? searchDocsScored(q, docs) : [];
+
+// Corpus short-circuit (search-first Phase 2 · D1): a UNIQUE exact-name hit is a vetted page, and a
+// human grade always beats fresh AI research — so redirect straight to it before any Lens work. Only
+// a lone score-100 match short-circuits; prefix/substring/alias/multiple-100 queries render the list.
+if (q && scored[0]?.score === 100 && (scored.length === 1 || scored[1].score < 100)) {
+  return Astro.redirect(scored[0].doc.url, 302);
+}
+
+const results = scored.map((r) => r.doc);
 
 // group by kind (only 'remedy' today; interventions/outcomes/context join as they ship)
 const KIND_LABEL: Record<string, string> = {
   remedy: 'Remedies',
+  product: 'Products',
+  additive: 'Additives',
   intervention: 'Interventions',
   outcome: 'Outcomes',
   context: 'Context',
@@ -69,7 +82,9 @@ const suggestions = ['melatonin', 'magnesium', 'jet lag', "can't fall asleep", '
                 {rows.map((r) => (
                   <li>
                     <a class="row" href={r.url}>
-                      <TierBadge tier={r.tier} size="inline" />
+                      {/* Products/additives carry no Somnary grade (tier === null): skip the grade
+                          badge rather than fabricate one. A graded remedy still shows its badge. */}
+                      {r.tier && <TierBadge tier={r.tier} size="inline" />}
                       <span class="row-main">
                         <span class="row-name">{r.name}</span>
                         <span class="row-cat">{r.category}</span>
@@ -86,18 +101,29 @@ const suggestions = ['melatonin', 'magnesium', 'jet lag', "can't fall asleep", '
     }
 
     {
+      /* Genuine no-hit: nothing in the corpus matched. Frame the section BY THE QUERY (owner
+         decision — the query framing is the point, not an "Ask"/"Lens" brand), then embed the
+         audited LensPanel. It reads ?q= from the URL and auto-submits, so it researches the typed
+         query for free. Every word inside the card — the "not a grade" stamp, the "does NOT show"
+         beat, the safety routing, the request-a-review route — comes FROM the engine/LensPanel; the
+         only strings authored here are the framed heading and the boundary lead. */
       q && results.length === 0 && (
-        <div class="empty">
-          <p class="empty-lead">No matches. Try a compound, an outcome, or a symptom.</p>
+        <section class="noreply" aria-label={`Research results for ${q}`}>
+          <p class="empty-lead">
+            No graded remedy or product matched. Here’s what the published evidence shows —
+            AI-assisted research, not a Somnary grade.
+          </p>
+          <h2 class="noreply-head">Here’s what we found on “{q}”</h2>
+          <LensPanel />
           <p class="empty-sub">
-            Popular:
+            Or search a graded remedy:
             {suggestions.map((s) => (
               <a class="chip" href={`/search?q=${encodeURIComponent(s)}`}>
                 {s}
               </a>
             ))}
           </p>
-        </div>
+        </section>
       )
     }
 
@@ -257,6 +283,23 @@ const suggestions = ['melatonin', 'magnesium', 'jet lag', "can't fall asleep", '
 
   .empty {
     padding: var(--sp-7) 0;
+  }
+  /* no-hit → query-framed research section (the audited LensPanel sits inside) */
+  .noreply {
+    padding: var(--sp-6) 0 0;
+  }
+  .noreply-head {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-lg);
+    line-height: var(--lh-lg);
+    letter-spacing: var(--tracking-tight);
+    color: var(--ink);
+    margin: var(--sp-4) 0 0;
+    max-width: 40ch;
+  }
+  .noreply .empty-sub {
+    margin-top: var(--sp-6);
   }
   .empty-lead {
     font-size: var(--text-md);

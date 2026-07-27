@@ -55,6 +55,10 @@ const TARGETS = [
   // already covered by the src/lib/lens/*.ts sweep above.)
   'src/pages/api/lens.ts',
   'src/pages/api/nominate.ts',
+  // search-first Phase 2: /search now embeds the live Lens island on a genuine no-hit and authors a
+  // query-framed heading + boundary lead next to it — that reader-facing copy must be held to the
+  // same forbidden-framing bar as the /lens shell.
+  'src/pages/search.astro',
 ];
 
 async function loadPatterns() {

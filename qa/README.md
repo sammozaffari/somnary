@@ -71,15 +71,27 @@ styles, or a shared component. Do not call a chrome change done without it.
 5. Paste the result (pass, or a finding with a capture path) into
    `qa/pr-findings.md` under "Rendered-visual pass".
 
-### Known open finding (from the Phase 1 chrome QA, PR #131)
+### RESOLVED finding (Phase 1 chrome QA, PR #131 → closed in search-first Phase 2)
 
-At mobile the navbar needs **~412px** (wordmark 40 + `.links` 324 + 2×24 padding),
-so it **overflows a 390px viewport by ~22px** (52px at 360px). The 125px
-"Search ⌘K" pill and the 24px flex gaps are the drivers; `.links` has no
-`flex-wrap` and there's no hamburger. Phase 1 *improved* this (9 items → 2 +
-search) but did not eliminate it. Owned by the typography Phase B mobile-nav work
-and tied to search-first **Open Decision 1** (an icon-only search on mobile saves
-~90px and makes it fit). Not a Phase-1 regression.
+The original Phase-1 note read "navbar needs ~412px, overflows 390px by ~22px."
+That reading was a **measurement artifact**: it was taken with the Chrome window
+at ≥500px, where `@media (max-width: 640px)` is inactive, so the search trigger
+was still the full 124px "Search ⌘K" pill. The icon-only collapse has existed in
+`SearchPalette.astro` since CHK-4.2 — it just wasn't firing at measurement time.
+
+**Re-measured at a true 390px and 360px viewport** (via a same-origin iframe so
+the ≤640px media query is active — `st-label` hidden, trigger = 44px icon):
+
+| viewport | wordmark | `.links` | need | fits |
+|---|---|---|---|---|
+| 390px | 40 | 242 | **330** | ✅ (60px headroom) |
+| 360px | 40 | 242 | **330** | ✅ (30px headroom) |
+
+No overflow at either width; `nav.scrollWidth === clientWidth` (no horizontal
+scroll). Desktop still shows 🔍 + "Search" (124px pill). **No code change was
+needed** — the fix was already in place; Phase 2 verified and documented it.
+Always measure at the true target width (iframe or device emulation), never a
+resized desktop window.
 
 ## Editing / extending
 

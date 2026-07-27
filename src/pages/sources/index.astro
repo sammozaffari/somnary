@@ -1,5 +1,6 @@
 ---
 import Base from '../../layouts/Base.astro';
+import HeroSearch from '../../components/HeroSearch.astro';
 import { MAGNESIUM_SOURCES } from '../../data/source-scorecards/magnesium';
 import { ASHWAGANDHA_SOURCES } from '../../data/source-scorecards/ashwagandha';
 import { GLYCINE_SOURCES } from '../../data/source-scorecards/glycine';
@@ -61,6 +62,13 @@ const remedies = [
       </p>
     </header>
 
+    <div class="hero-search-slot">
+      <HeroSearch
+        heading="Find a product or ingredient"
+        examples={['magnesium glycinate', 'ashwagandha', 'valerian', 'ZzzQuil']}
+      />
+    </div>
+
     <section class="grid" aria-label="Source scorecards by remedy">
       {
         remedies.map((r) => (
@@ -111,6 +119,9 @@ const remedies = [
     margin: 0;
   }
   .head {
+    margin-bottom: var(--sp-6);
+  }
+  .hero-search-slot {
     margin-bottom: var(--sp-8);
   }
   .title {
@@ -160,11 +171,15 @@ const remedies = [
   .card:hover {
     border-color: var(--primary);
   }
+  /* Stack the name over the count: the display-font ingredient names (e.g. "Ashwagandha",
+     "Melatonin") are too wide to sit inline beside the nowrap "N products" count at the 3-up
+     card width, which clipped the count. A quiet subtitle under the name never overflows and
+     reads consistently across every card. */
   .card-head {
     display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: var(--sp-3);
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--sp-1);
   }
   .card-title {
     font-family: var(--font-display);

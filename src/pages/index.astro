@@ -3,6 +3,7 @@ import Base from '../layouts/Base.astro';
 import Disclaimer from '../components/Disclaimer.astro';
 import TierBadge from '../components/TierBadge.astro';
 import HeroCarousel from '../components/HeroCarousel.astro';
+import HeroSearch from '../components/HeroSearch.astro';
 import type { SlideSpec } from '../lib/hero-slides';
 import { TIERS } from '../lib/tiers';
 import { Pill, Package, Timer, AlarmClock, ShieldAlert, Baby, MessagesSquare, ScanSearch } from '@lucide/astro';
@@ -74,7 +75,16 @@ const situations = [
   canonical="https://somnary.vercel.app/"
 >
   <main class="home">
-    <!-- hero — one full-width panel that morphs between slides (brand → remedies ⇄ utility) -->
+    <!-- primary front door (search-first Phase 2): a prominent search box above the carousel.
+         Crawlable GET form to /search; with JS on, tapping the input opens the command palette. -->
+    <div class="hero-search-slot">
+      <HeroSearch
+        heading="Search sleep remedies, products & ingredients"
+        examples={['melatonin', 'magnesium', 'ashwagandha', 'ZzzQuil']}
+      />
+    </div>
+
+    <!-- hero — secondary: one full-width panel that morphs between slides (brand → remedies ⇄ utility) -->
     <HeroCarousel slides={heroSlides} />
 
     <!-- disclaimer — adjacent to the decision block, not footer-only -->
@@ -237,6 +247,10 @@ const situations = [
     max-width: var(--page);
     margin: 0 auto;
     padding: var(--sp-8) var(--sp-7) var(--sp-8);
+  }
+  /* primary search box sits above the (secondary) carousel */
+  .hero-search-slot {
+    margin-bottom: var(--sp-7);
   }
   .section-eyebrow {
     font-family: var(--font-mono);
