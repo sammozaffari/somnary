@@ -6,19 +6,14 @@ import Wordmark from './Wordmark.astro';
 import SearchPalette from './SearchPalette.astro';
 import SessionNav from './account/SessionNav.astro';
 
-// CHK-7.3c — /lens is the primary AI nav entry (the Lens is the AI front door). /guide is DROPPED from
-// the top nav (the homepage carries the demoted "Talk it through" secondary line); /guide stays
-// reachable by URL and internal links — this only demotes it from the global chrome.
+// Search-first IA (2026-07-27, Phase 1): the navbar collapses to two real destinations plus a
+// first-class search affordance — Remedies (does it work?) + Which to buy (which product?) + Search.
+// Everything else moves to the footer (Start here, Sleep habits, Compare, Safety, Label checker,
+// Lens, Methodology) so the chrome stops overloading; all pages stay crawlable via footer + internal
+// links. Lens becomes the search fallback engine (Phase 2), Label checker folds into search (Phase 3).
 const links = [
-  { href: '/start-here', label: 'Start here' },
   { href: '/tiers', label: 'Remedies' },
-  { href: '/sources', label: 'Products' },
-  { href: '/lens', label: 'Lens' },
-  { href: '/label-checker', label: 'Label checker' },
-  { href: '/compare', label: 'Compare' },
-  { href: '/sleep-habits', label: 'Sleep habits' },
-  { href: '/safety', label: 'Safety' },
-  { href: '/methodology', label: 'Methodology' },
+  { href: '/sources', label: 'Which to buy' },
 ];
 const path = Astro.url.pathname.replace(/\/$/, '') || '/';
 ---
@@ -69,17 +64,19 @@ const path = Astro.url.pathname.replace(/\/$/, '') || '/';
     padding: 0;
     list-style: none;
   }
+  /* Resting colour moved from --muted (too light, per owner 2026-07-27) to full --ink; the
+     current/hover state is oxblood --primary so state stays legibly distinct. Tokens only. */
   .link {
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    color: var(--muted);
+    color: var(--ink);
     text-decoration: none;
     transition: color var(--dur-fast) var(--ease-soft);
   }
   .link:hover,
   .link.current {
-    color: var(--ink);
+    color: var(--primary);
   }
   @media (max-width: 640px) {
     .nav {
