@@ -1,5 +1,6 @@
 ---
 import Base from '../../layouts/Base.astro';
+import HeroSearch from '../../components/HeroSearch.astro';
 import { MAGNESIUM_SOURCES } from '../../data/source-scorecards/magnesium';
 import { ASHWAGANDHA_SOURCES } from '../../data/source-scorecards/ashwagandha';
 import { GLYCINE_SOURCES } from '../../data/source-scorecards/glycine';
@@ -61,6 +62,13 @@ const remedies = [
       </p>
     </header>
 
+    <div class="hero-search-slot">
+      <HeroSearch
+        heading="Find a product or ingredient"
+        examples={['magnesium glycinate', 'ashwagandha', 'valerian', 'ZzzQuil']}
+      />
+    </div>
+
     <section class="grid" aria-label="Source scorecards by remedy">
       {
         remedies.map((r) => (
@@ -111,6 +119,9 @@ const remedies = [
     margin: 0;
   }
   .head {
+    margin-bottom: var(--sp-6);
+  }
+  .hero-search-slot {
     margin-bottom: var(--sp-8);
   }
   .title {
