@@ -55,14 +55,15 @@
   // hidden (no CTA, no wall). Signed-in → reveal Account + Sign out.
   import { getBrowserSupabase } from '../../lib/auth.ts';
 
-  const el = document.querySelector<HTMLElement>('[data-session]');
-  if (el) {
+  // Rendered in both the desktop nav and the mobile disclosure panel, so handle every instance.
+  const els = Array.from(document.querySelectorAll<HTMLElement>('[data-session]'));
+  if (els.length) {
     const supabase = getBrowserSupabase();
     if (!supabase) {
-      el.remove();
+      els.forEach((el) => el.remove());
     } else {
       void supabase.auth.getUser().then(({ data }) => {
-        if (data?.user) el.hidden = false;
+        if (data?.user) els.forEach((el) => (el.hidden = false));
       });
     }
   }
