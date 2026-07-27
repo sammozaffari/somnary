@@ -146,6 +146,9 @@
     letter-spacing: normal;  /* reading text: no tracking/kerning adjustment */
     font-kerning: normal;
     text-rendering: optimizeLegibility;
+    /* inherited: long unbreakable tokens (raw PubMed/DOI URLs in citations) break instead of
+       forcing the page wider than a phone. Only affects words that would otherwise overflow. */
+    overflow-wrap: break-word;
   }
   ::selection { background: var(--primary-soft); }
   :focus-visible { box-shadow: var(--focus-ring); outline: none; }

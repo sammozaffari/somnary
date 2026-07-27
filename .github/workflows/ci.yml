@@ -67,3 +67,6 @@ jobs:
 
       - name: Crawlability (content is server-rendered, not client-only)
         run: npm run verify:crawl
+
+      - name: Responsive (no page scrolls horizontally at 360px — drives headless Chrome over CDP)
+        run: npm run verify:responsive
