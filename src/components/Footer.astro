@@ -128,10 +128,16 @@ const participate = [
   .legal a {
     color: var(--on-carbon-muted);
     text-decoration: none;
-    transition: color var(--dur-fast) var(--ease-soft);
+    padding-bottom: 2px;
+    /* same signature underline-draw as the nav — paper-white here so it reads on carbon */
+    background: linear-gradient(var(--on-carbon), var(--on-carbon)) 0 100% / 0 1px no-repeat;
+    transition:
+      color var(--dur-fast) var(--ease-soft),
+      background-size var(--dur-base) var(--ease-settle);
   }
   .legal a:hover {
     color: var(--on-carbon);
+    background-size: 100% 1px;
   }
   .reflinks {
     display: flex;
@@ -160,10 +166,15 @@ const participate = [
   .linkrow a {
     color: var(--on-carbon-muted);
     text-decoration: none;
-    transition: color var(--dur-fast) var(--ease-soft);
+    padding-bottom: 2px;
+    background: linear-gradient(var(--on-carbon), var(--on-carbon)) 0 100% / 0 1px no-repeat;
+    transition:
+      color var(--dur-fast) var(--ease-soft),
+      background-size var(--dur-base) var(--ease-settle);
   }
   .linkrow a:hover {
     color: var(--on-carbon);
+    background-size: 100% 1px;
   }
   @media (max-width: 640px) {
     .footer {

@@ -162,11 +162,21 @@ const isCurrent = (href: string) => path === href.replace(/\/$/, '');
     color: var(--muted);
     text-decoration: none;
     white-space: nowrap;
-    transition: color var(--dur-fast) var(--ease-soft);
+    padding-bottom: 3px;
+    /* the site's one signature interaction: an oxblood underline that draws in from the left */
+    background: linear-gradient(var(--primary), var(--primary)) 0 100% / 0 1.5px no-repeat;
+    transition:
+      color var(--dur-fast) var(--ease-soft),
+      background-size var(--dur-base) var(--ease-settle);
   }
-  .link:hover,
+  .link:hover {
+    color: var(--ink);
+    background-size: 100% 1.5px;
+  }
+  /* current page: a settled full underline (state, not motion) */
   .link.current {
     color: var(--ink);
+    background-size: 100% 1.5px;
   }
   .link:focus-visible {
     outline: none;
