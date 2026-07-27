@@ -1,0 +1,43 @@
+{
+  "$comment": "Design-QA route map. The /design-qa workflow intersects this with the branch diff to decide which rendered routes to visually check. Astro is file-based, so a changed page under src/pages/ maps to its own route automatically; this map exists for SHARED code (layouts, chrome, components) that has no single route of its own — it names a representative sample of routes that exercise that code. Extend it when the workflow reports an uncovered file. Widths mirror the design breakpoints; the 640px nav breakpoint is why 390 is mandatory.",
+  "widths": [390, 768, 1440],
+  "shared": {
+    "src/layouts/Base.astro": {
+      "why": "global shell + back button; affects every page",
+      "routes": ["/", "/tiers", "/r/melatonin", "/sources", "/safety", "/compare"],
+      "states": ["default", "homepage-no-backbutton", "interior-with-backbutton"]
+    },
+    "src/components/Nav.astro": {
+      "why": "primary chrome; overflow risk at <=640px",
+      "routes": ["/", "/tiers", "/r/melatonin"],
+      "states": ["default", "current-page-highlight"],
+      "checks": ["nav must not overflow at 390px (measure wordmark + .links scrollWidth + 2*--sp-5 <= viewport)"]
+    },
+    "src/components/Footer.astro": {
+      "why": "global footer link groups + compact disclaimer",
+      "routes": ["/", "/tiers", "/safety"],
+      "states": ["default"]
+    },
+    "src/components/scorecards/ScorecardCard.astro": {
+      "why": "product scorecard card, used across /sources",
+      "routes": ["/sources", "/sources/melatonin"],
+      "states": ["default"]
+    },
+    "src/components/LensPanel.astro": {
+      "why": "Lens research card",
+      "routes": ["/lens"],
+      "states": ["default", "loading", "result", "error"]
+    }
+  },
+  "representative_routes": [
+    "/",
+    "/tiers",
+    "/r/melatonin",
+    "/sources",
+    "/sources/melatonin",
+    "/safety",
+    "/compare",
+    "/lens",
+    "/label-checker"
+  ]
+}

@@ -100,6 +100,30 @@ rulebook for every content, design, AI, ad, and product decision.
 5. Append one line to the BUILD_CHECKLIST session log. Tick the box only when
    every acceptance criterion is verified; report anything deferred.
 
+## Operating loop & review gate (added 2026-07-27)
+Every task runs the same loop: **Brief → Generate → Critique → Revise → Ship.**
+The critique step is first-class, not a rubber stamp — most defects escape when
+it is skipped or vague.
+- **Brief subagents like a real brief:** context, constraints, references, and
+  the review criteria — never a one-line prompt. Encode standards in files
+  (this contract, DESIGN_SYSTEM.md, `.claude/agents/*`, the `verify:*` scripts),
+  not in one-off prompts.
+- **Findings must be actionable:** every reviewer finding carries `file:line`,
+  the offending value, a severity (P0–P3), a concrete fix, and evidence (a quote,
+  token name, computed ratio, or capture path). "Looks off" is not a finding.
+- **Reviewers are read-only.** The builder/author fixes; the review run never
+  edits. Reviewer agents keep their read-only tool sets.
+- **Scope the gate to the diff**, and *report* uncovered surfaces rather than
+  silently skip them. A clean gate ≠ a good design; humans decide disputes.
+- **Rendered-visual + keyboard pass is mandatory for any chrome/template/shared-
+  component change** (Nav, Footer, Base, global styles). Contrast-from-tokens and
+  built-HTML greps do NOT substitute for viewing the changed routes at
+  **390 / 768 / 1440px** and doing a keyboard pass — 390px nav overflow is a known
+  Somnary risk. See `qa/README.md`; run the saved `/design-qa` gate
+  (`.claude/workflows/design-qa.js`) to scope + rank findings. Headless
+  screenshotting stays a HUMAN-GATE (no new Playwright dep) — the visual pass uses
+  the Chrome MCP by hand.
+
 ## Human gates (never auto-merge)
 - Tier grade assignment or change on any remedy.
 - Anything monetization, legal-page, or medical-boundary related.
@@ -122,6 +146,8 @@ the assistant all read this one structure — never duplicate content.
 - Every claim cited; resolver + auditor green.
 - Safety module present and prominent (remedy/decision pages).
 - Tokens only; no hardcoded style values.
+- Rendered-visual + keyboard pass done for any chrome/template/shared-component
+  change (routes viewed at 390/768/1440px; nav overflow measured). See `qa/README.md`.
 - Review date + correction link on every article-type page.
 - Session log line appended; branch merged or PR opened per gate rules.
 
