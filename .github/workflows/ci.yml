@@ -67,3 +67,6 @@ jobs:
 
       - name: Crawlability (content is server-rendered, not client-only)
         run: npm run verify:crawl
+
+      - name: Search index (one index spans remedies + products + additives; remedy short-circuit precedence; runs against built dist)
+        run: npm run verify:search

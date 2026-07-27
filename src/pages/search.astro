@@ -17,6 +17,8 @@ const results = q ? searchDocs(q, docs) : [];
 // group by kind (only 'remedy' today; interventions/outcomes/context join as they ship)
 const KIND_LABEL: Record<string, string> = {
   remedy: 'Remedies',
+  product: 'Products',
+  additive: 'Additives',
   intervention: 'Interventions',
   outcome: 'Outcomes',
   context: 'Context',
@@ -69,7 +71,9 @@ const suggestions = ['melatonin', 'magnesium', 'jet lag', "can't fall asleep", '
                 {rows.map((r) => (
                   <li>
                     <a class="row" href={r.url}>
-                      <TierBadge tier={r.tier} size="inline" />
+                      {/* Products/additives carry no Somnary grade (tier === null): skip the grade
+                          badge rather than fabricate one. A graded remedy still shows its badge. */}
+                      {r.tier && <TierBadge tier={r.tier} size="inline" />}
                       <span class="row-main">
                         <span class="row-name">{r.name}</span>
                         <span class="row-cat">{r.category}</span>

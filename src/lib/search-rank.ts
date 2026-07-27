@@ -10,8 +10,8 @@ export interface SearchDoc {
   slug: string;
   url: string;
   name: string;
-  kind: 'remedy'; // interventions / outcomes / context join as those pages ship
-  tier: TierId;
+  kind: 'remedy' | 'product' | 'additive'; // interventions / outcomes / context join as those pages ship
+  tier: TierId | null; // null for product/additive — those have no Somnary grade
   category: string;
   latin: string | null;
   keyCompound: string | null;

@@ -395,6 +395,8 @@
 
     const KIND_LABEL: Record<string, string> = {
       remedy: 'Remedies',
+      product: 'Products',
+      additive: 'Additives',
       intervention: 'Interventions',
       outcome: 'Outcomes',
       context: 'Context',
@@ -418,7 +420,10 @@
         ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c] as string,
       );
 
-    const badge = (tier: string) => {
+    // Products/additives carry no Somnary grade (tier === null): render no grade badge rather than
+    // fabricate one. A vetted remedy still shows its grade — tier never boosts ranking, only display.
+    const badge = (tier: string | null) => {
+      if (!tier) return '';
       const t = tier.toLowerCase();
       return (
         `<span class="p-badge" style="background:var(--grade-${t}-tint);border:1px solid var(--grade-${t});color:var(--grade-${t})">` +
@@ -435,11 +440,14 @@
       for (const [kind, rows] of groups) {
         html += `<li class="p-group" role="presentation">${esc(KIND_LABEL[kind] ?? kind)} · ${rows.length}</li>`;
         for (const d of rows) {
+          // Graded remedy → "grade B"; product/additive (no grade) → its category (e.g. "Product · …").
+          const meta = d.tier ? `grade ${esc(d.tier)}` : esc(d.category);
+          const label = d.tier ? `grade ${esc(d.tier)}, ${esc(d.name)}` : `${esc(d.name)}, ${esc(d.category)}`;
           html +=
-            `<li id="p-opt-${i}" class="p-row" role="option" aria-selected="${i === active}" data-i="${i}" data-url="${esc(d.url)}" aria-label="grade ${esc(d.tier)}, ${esc(d.name)}">` +
+            `<li id="p-opt-${i}" class="p-row" role="option" aria-selected="${i === active}" data-i="${i}" data-url="${esc(d.url)}" aria-label="${label}">` +
             badge(d.tier) +
             `<span class="p-main"><span class="p-name">${esc(d.name)}</span><span class="p-cat">${esc(d.category)}</span></span>` +
-            `<span class="p-grade">grade ${esc(d.tier)}</span></li>`;
+            `<span class="p-grade">${meta}</span></li>`;
           i++;
         }
       }
