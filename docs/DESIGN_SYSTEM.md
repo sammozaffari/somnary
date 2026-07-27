@@ -224,12 +224,30 @@ var(--focus-ring); outline: none; }` (3px `--primary` at 40% alpha). This is
 the one addition to the prototype's motion/state set — it defined no focus
 styling and shipping without it fails accessibility.
 
-## 7. Breakpoints
+## 7. Breakpoints (v4 canonical set, 2026-07-27)
 
-- **≤980px** — nav links hidden; hero/split/label-checker collapse to 1 col;
-  6/4-up grids → 2-up; hero radius 18px.
-- **≤640px** — everything 1 col; display type 52px; search button full-width;
-  cell right-borders become bottom-borders.
+Four mobile-first breakpoints, defined once as `--bp-*` in `global.css` and mirrored in
+`tailwind.config.mjs` `screens`. **A CSS custom property cannot be used inside an `@media`
+condition**, so `--bp-*` are the *documented reference* (write the literal px in scoped
+`@media`) plus a JS-readable source for `matchMedia`; they are not consumed by media queries
+directly.
+
+| Token | Value | Role |
+|---|---|---|
+| `--bp-sm` | 480px | large phone |
+| `--bp-md` | **768px** | tablet — the primary phone→desktop switch; **the nav collapses to the hamburger disclosure below this** |
+| `--bp-lg` | 1024px | small laptop |
+| `--bp-xl` | 1440px | wide desktop |
+
+**Convention.** New or reworked components use these four values. The codebase still holds
+bespoke per-component breakpoints from v1–v3 (640/720/760/900/1180/1240…), each tuned to its
+own content — **migrate one to the nearest standard only when you rework that component, never
+in a bulk find-replace** (the tuned collapse points are load-bearing; changing them blind
+shifts layouts). A `min-width: 768px` query is `--bp-md`.
+
+**Regression guard.** `npm run verify:responsive` (CI, post-build) drives headless Chrome over
+CDP and fails the build if any prerendered route scrolls horizontally at 360px — so a bad
+breakpoint can't ship a sideways-scrolling phone page again.
 
 ## 8. Contrast (computed 2026-07-08 for warm/oxblood v3, WCAG 2.1)
 

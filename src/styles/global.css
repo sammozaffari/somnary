@@ -126,6 +126,17 @@
 
   /* ---- page shell ---- */
   --page: min(1460px, calc(100vw - 32px));
+
+  /* ---- breakpoints (v4 §7) — the canonical mobile-first set. NOTE: CSS custom properties
+     cannot be used inside an @media condition, so these are NOT consumed by media queries
+     directly. They are (a) the single documented reference — new/edited components write these
+     literal px in their scoped @media, and (b) readable by JS via getComputedStyle for matchMedia.
+     Existing bespoke values (640/720/760/900/1180…) were each tuned to a component's content;
+     migrate one to the nearest standard only when reworking that component, never in bulk. */
+  --bp-sm:  480px;   /* large phone */
+  --bp-md:  768px;   /* tablet — the primary phone→desktop switch (nav collapses below this) */
+  --bp-lg: 1024px;   /* small laptop */
+  --bp-xl: 1440px;   /* wide desktop */
 }
 
 /* ---- DESIGN_SYSTEM v3 §1 — base document ---- */

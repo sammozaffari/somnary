@@ -65,8 +65,11 @@ const somnaryTheme = {
     settle: 'cubic-bezier(0.22, 1, 0.36, 1)',
     soft:   'cubic-bezier(0.4, 0, 0.2, 1)',
   },
+  // Canonical v4 breakpoints (mobile-first min-width), mirroring --bp-* in global.css §7.
+  // Currently no component uses Tailwind responsive utilities (all responsiveness is scoped
+  // @media), so this is the documented standard for any future utility use.
   screens: {
-    'mx-lap': { max: '900px' }, 'mx-tab': { max: '760px' }, 'mx-phone': { max: '640px' },
+    sm: '480px', md: '768px', lg: '1024px', xl: '1440px',
   },
 };
 
