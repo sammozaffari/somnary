@@ -35,6 +35,13 @@
   --stone:   #EEE8DA;
   --mineral: #DBD5CD;
 
+  /* ---- dark "carbon" register (v4 §C) — one dark slab breaks the continuous cream so the
+     page has rhythm instead of one flat wash. Footer today; optional hero band later. ---- */
+  --carbon:          #191510;                   /* warm near-black ground */
+  --on-carbon:       #FBF8F0;                   /* primary text on carbon — ~16:1 */
+  --on-carbon-muted: rgba(251, 248, 240, 0.62); /* secondary text on carbon — AA */
+  --on-carbon-line:  rgba(251, 248, 240, 0.14); /* hairline dividers on carbon */
+
   /* ---- text ---- */
   --ink:    #171512;   /* primary text on paper/surface */
   --raisin: #2B2028;   /* secondary emphasis */
@@ -90,7 +97,11 @@
   --sp-6: 32px; --sp-7: 48px;  --sp-8: 64px; --sp-9: 96px; --sp-10: 128px;
 
   /* ---- radii ---- */
-  --r-xs: 3px; --r-sm: 7px; --r-md: 11px; --r-lg: 16px; --r-xl: 24px; --r-pill: 999px;
+  /* v4 radius discipline (2026-07-27): the old 3/7/11/16/24 spread gave cards no shared
+     radius identity (four different card roundings on one screen reads as templated). Tightened
+     to a systematic 4/8/10/12/16 step — the dominant card drops 16→12 and heroes 24→16, so the
+     generic panels calm down and the illustrated heroes + grade system carry the personality. */
+  --r-xs: 4px; --r-sm: 8px; --r-md: 10px; --r-lg: 12px; --r-xl: 16px; --r-pill: 999px;
 
   /* ---- borders ---- */
   --line:          rgba(23, 21, 18, 0.13);   /* hairline color (grids/dividers) */
