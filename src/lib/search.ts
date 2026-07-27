@@ -28,6 +28,7 @@ import { VALERIAN_SOURCES } from '../data/source-scorecards/valerian';
 // parses with the fs-free pure parser.
 import additiveWatchlistYaml from '../data/additive-watchlist.yaml?raw';
 import { parseAdditiveWatchlist } from './lens/additive-watchlist';
+import { ADDITIVE_DISPLAY } from './additive-display';
 
 export type { SearchDoc } from './search-rank';
 export { searchDocs } from './search-rank';
@@ -100,7 +101,7 @@ export async function getSearchDocs(): Promise<SearchDoc[]> {
       category: `Product · ${p.brand}`,
       latin: null,
       keyCompound: null,
-      aliases: [p.brand, p.productName, ingredient],
+      aliases: [...new Set([p.brand, p.productName, ingredient].filter(Boolean))],
       outcomes: [],
       symptoms: [],
       oneLiner: p.bottomLine,
@@ -114,8 +115,11 @@ export async function getSearchDocs(): Promise<SearchDoc[]> {
   const additiveDocs: SearchDoc[] = additives
     .map((a) => ({
       slug: a.id,
+      // Title the result the SAME as its destination section heading (shared ADDITIVE_DISPLAY), so a
+      // search for e.g. "FD&C Red 40" reads "Synthetic azo dyes" — the heading its anchor lands on.
+      // Aliases stay the full names[] below, so every label form still matches.
       url: `/sources/additives#${a.id}`,
-      name: a.names[0] ?? a.id,
+      name: ADDITIVE_DISPLAY[a.id] ?? a.names[0] ?? a.id,
       kind: 'additive' as const,
       tier: null,
       category: `Additive · ${a.severity}`,

@@ -12,6 +12,10 @@
  *      kinds with resolvable URLs. Skipped (not failed) when dist hasn't been built yet, so the test
  *      is meaningful pre-build and stronger post-build.
  *
+ * NOTE: the built-index layer only reflects the CURRENT code immediately after `npm run build` (it
+ * reads the last-emitted dist). CI is safe because it rebuilds before this gate; run it after a build
+ * locally too, or a stale dist will assert against old data.
+ *
  *   node scripts/test-search-index.mjs   # deterministic, fully offline.
  */
 import { readFile } from 'node:fs/promises';
@@ -133,7 +137,17 @@ if (!raw) {
   const additives = byKind('additive');
   ok('≥ 31 remedy docs', remedies.length >= 31, `got ${remedies.length}`);
   ok('≥ 65 product docs', products.length >= 65, `got ${products.length}`);
-  ok('≥ 1 additive doc', additives.length >= 1, `got ${additives.length}`);
+  ok('≥ 8 additive docs (the flagged set)', additives.length >= 8, `got ${additives.length}`);
+
+  // A known additive is present by its exact anchor URL — catches an anchor-format or DISPLAY-name
+  // regression (e.g. if the id→title map drifts from the /sources/additives headings).
+  const titanium = additives.find((d) => d.url === '/sources/additives#titanium-dioxide');
+  ok('titanium-dioxide additive present by anchor url', !!titanium, 'no doc with that url');
+  ok(
+    "titanium-dioxide title matches the page heading ('Titanium dioxide')",
+    titanium?.name === 'Titanium dioxide',
+    `name was ${JSON.stringify(titanium?.name)}`,
+  );
 
   const urlOk = (u) =>
     /^\/r\//.test(u) || /^\/sources\/.+\/.+/.test(u) || /^\/sources\/additives#/.test(u);

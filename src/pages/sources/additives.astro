@@ -4,25 +4,14 @@ import Base from '../../layouts/Base.astro';
 // scoring rubric uses; no runtime file read, so it works from the built bundle.
 import yamlText from '../../data/additive-watchlist.yaml?raw';
 import { parseAdditiveContent, type AdditiveContentEntry } from '../../lib/sources/additive-content';
+// Shared with the build-time search index (src/lib/search.ts) so a search result title always matches
+// the heading of the section it lands on. Curated display headings (the id title-cases awkwardly).
+import { additiveDisplayName } from '../../lib/additive-display';
 
 const reviewDate = '2026-07-17';
 const { flagged, notFlagged } = parseAdditiveContent(yamlText);
 
-// Clean display headings (the id title-cases awkwardly for a couple).
-const DISPLAY: Record<string, string> = {
-  'titanium-dioxide': 'Titanium dioxide',
-  'artificial-azo-dyes': 'Synthetic azo dyes',
-  'erythrosine-red-3': 'Erythrosine (Red 3)',
-  'sodium-benzoate': 'Sodium benzoate',
-  'bha-bht': 'BHA & BHT',
-  'partially-hydrogenated-oils': 'Partially hydrogenated oils',
-  'sugar-alcohol-load': 'Sugar alcohols (polyols)',
-  'proprietary-blend': 'Proprietary blends',
-  'silicon-dioxide': 'Silicon dioxide',
-  'magnesium-stearate': 'Magnesium stearate',
-};
-const displayName = (e: AdditiveContentEntry) =>
-  DISPLAY[e.id] ?? e.id.replace(/-/g, ' ').replace(/^\w/, (c) => c.toUpperCase());
+const displayName = (e: AdditiveContentEntry) => additiveDisplayName(e.id);
 
 const sevLabel = (e: AdditiveContentEntry) =>
   e.structural ? 'Transparency defect' : e.severity === 'concern' ? 'Stronger evidence · −2' : 'Precautionary · −1';
