@@ -6,7 +6,13 @@
 // below the marker, flip above on overflow, clamp against the popover's MEASURED height, re-clamp on
 // rAF + 140ms, with max-height+overflow as the hard backstop. Fade only (geometry must stay stable
 // for the clamp). One open at a time; Esc / outside-click close; focus returns to the trigger.
-import { sourceUrl, sourceIdLabel, sourceTypeLabel, type CiteSource } from '../lib/cite';
+import {
+  sourceUrl,
+  sourceIdLabel,
+  sourceTypeLabel,
+  sourceStrength,
+  type CiteSource,
+} from '../lib/cite';
 
 interface Props {
   sources: CiteSource[];
@@ -21,13 +27,18 @@ const payload = sources.map((s) => ({
   url: sourceUrl(s),
   idLabel: sourceIdLabel(s),
   typeLabel: sourceTypeLabel(s.type),
+  strength: sourceStrength(s.type), // { tier, filled, label } — evidence weight pip (DOM-1)
 }));
 ---
 
 <script type="application/json" id="cite-data" set:html={JSON.stringify(payload)} />
 
 <div class="cite-pop" role="dialog" aria-label="Citation" tabindex="-1" hidden>
-  <p class="cp-head"><span class="cp-n"></span> · <span class="cp-type"></span></p>
+  <p class="cp-head">
+    <span class="cp-n"></span> ·
+    <span class="cp-pip pip" aria-hidden="true"><span /><span /><span /></span>
+    <span class="cp-type"></span>
+  </p>
   <p class="cp-title"></p>
   <p class="cp-line"></p>
   <p class="cp-finding"></p>
@@ -70,11 +81,41 @@ const payload = sources.map((s) => ({
   }
 
   .cp-head {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    flex-wrap: wrap;
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
     color: var(--primary);
     margin: 0 0 var(--sp-3);
+  }
+  /* Evidence-weight pip (DOM-1) — same neutral-ink system as SourcesList; strength set in JS. */
+  .cp-pip.pip {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    flex: none;
+  }
+  .cp-pip.pip span {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    border: 1px solid var(--mineral);
+    background: transparent;
+  }
+  .cp-pip[data-tier='strong'] span {
+    background: var(--raisin);
+    border-color: var(--raisin);
+  }
+  .cp-pip[data-tier='moderate'] span:nth-child(-n + 2) {
+    background: var(--raisin);
+    border-color: var(--raisin);
+  }
+  .cp-pip[data-tier='weak'] span:nth-child(1) {
+    background: var(--raisin);
+    border-color: var(--raisin);
   }
   .cp-title {
     font-family: var(--font-display);
@@ -132,6 +173,7 @@ const payload = sources.map((s) => ({
       url: string;
       idLabel: string;
       typeLabel: string;
+      strength?: { tier: string; filled: number; label: string };
     };
     let map: Record<string, Cite> = {};
     try {
@@ -170,6 +212,14 @@ const payload = sources.map((s) => ({
       };
       setText('.cp-n', `Citation ${n}`);
       setText('.cp-type', s.typeLabel);
+      // evidence-weight pip (DOM-1): reflect this source's strength tier + announce it to AT
+      const pip = q('.cp-pip');
+      if (pip && s.strength) {
+        pip.setAttribute('data-tier', s.strength.tier);
+        pip.setAttribute('role', 'img');
+        pip.setAttribute('aria-label', `${s.strength.label} evidence`);
+        pip.removeAttribute('aria-hidden');
+      }
       setText('.cp-title', s.title);
       setText('.cp-line', s.sourceLine);
       setText('.cp-finding', s.finding);
