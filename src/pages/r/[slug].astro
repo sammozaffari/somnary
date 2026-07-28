@@ -15,6 +15,7 @@ import ClaimsDataTable from '../../components/ClaimsDataTable.astro';
 import DosingGrid from '../../components/DosingGrid.astro';
 import SafetyCallout from '../../components/SafetyCallout.astro';
 import MetadataCard from '../../components/MetadataCard.astro';
+import PublicationStatePanel from '../../components/PublicationStatePanel.astro';
 import CommunityBar from '../../components/CommunityBar.astro';
 import AskPanel from '../../components/AskPanel.astro';
 import SourcesList from '../../components/SourcesList.astro';
@@ -75,6 +76,16 @@ const jsonLd = remedyJsonLd(d, canonical, site);
       biggestRisk={d.biggestRisk}
       studiedDose={studiedDose}
       reviewDate={d.reviewDate}
+    />
+
+    <PublicationStatePanel
+      workflowState={d.workflowState}
+      epistemicState={d.epistemicState}
+      freshnessState={d.freshnessState}
+      statusReason={d.statusReason}
+      reviewDueAt={d.reviewDueAt}
+      supersededBy={d.supersededBy}
+      validTo={d.validTo}
     />
 
     {/* 2 — verdict band */}
