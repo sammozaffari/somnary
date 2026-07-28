@@ -31,7 +31,13 @@
   </div>
 
   <!-- results: aria-live so flags are announced; server-rendered empty until the user checks -->
-  <div class="lc-results" role="region" aria-live="polite" aria-label="Label observations" data-lc-results>
+  <div
+    class="lc-results"
+    role="status"
+    aria-live="polite"
+    aria-atomic="true"
+    aria-label="Label checker state: idle"
+    data-lc-results>
     <p class="lc-idle" data-lc-idle>No label checked yet.</p>
   </div>
 </section>
@@ -95,6 +101,7 @@
     margin-top: var(--sp-4);
   }
   .btn-check,
+  .btn-retry,
   .btn-clear {
     font-family: var(--font-mono);
     font-size: var(--text-xs);
@@ -110,7 +117,16 @@
     color: var(--surface);
     border: 1px solid var(--primary);
   }
-  .btn-check:hover {
+  .btn-retry {
+    background: var(--primary);
+    color: var(--surface);
+    border: 1px solid var(--primary);
+    margin-top: var(--sp-4);
+  }
+  .btn-check:hover,
+  .btn-retry:hover,
+  .btn-check:active,
+  .btn-retry:active {
     background: var(--primary-deep);
     border-color: var(--primary-deep);
   }
@@ -123,13 +139,24 @@
     border-color: var(--mineral);
     color: var(--ink);
   }
+  .btn-clear:active {
+    background: var(--paper);
+    border-color: var(--mineral);
+    color: var(--ink);
+  }
   .btn-check:focus-visible,
+  .btn-retry:focus-visible,
   .btn-clear:focus-visible {
     outline: none;
     box-shadow: var(--ring);
   }
   .btn-clear[hidden] {
     display: none;
+  }
+  .btn-check:disabled,
+  .btn-clear:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
   }
 
   .lc-results {
@@ -264,7 +291,15 @@
 </style>
 
 <script>
-  import { checkLabel, EMPTY_STATE, type LabelEntry } from '../lib/label-rules';
+  import {
+    checkLabelState,
+    createLoadedIndex,
+    EMPTY_STATE,
+    type CheckerFlag,
+    type CheckerState,
+    type IndexFailureReason,
+    type LoadedIndex,
+  } from '../lib/label-rules';
 
   const input = document.querySelector<HTMLTextAreaElement>('[data-lc-input]');
   const checkBtn = document.querySelector<HTMLButtonElement>('[data-lc-check]');
@@ -272,9 +307,9 @@
   const results = document.querySelector<HTMLElement>('[data-lc-results]');
 
   if (input && checkBtn && clearBtn && results) {
-    const IDLE_HTML = '<p class="lc-idle">No label checked yet.</p>';
-    let entries: LabelEntry[] | null = null;
-    let loading = false;
+    let state: CheckerState = { kind: 'idle' };
+    let loadedIndex: LoadedIndex | null = null;
+    let loadPromise: Promise<LoadedIndex> | null = null;
 
     // Human-readable name for each rule id (matches the server-rendered rules documentation).
     const RULE_LABEL: Record<string, string> = {
@@ -290,34 +325,66 @@
         ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c] as string,
       );
 
-    const loadEntries = async (): Promise<LabelEntry[]> => {
-      if (entries) return entries;
-      if (loading) return [];
-      loading = true;
+    class IndexLoadError extends Error {
+      reason: IndexFailureReason;
+
+      constructor(reason: IndexFailureReason) {
+        super(reason);
+        this.reason = reason;
+      }
+    }
+
+    const loadIndex = async (): Promise<LoadedIndex> => {
+      if (loadedIndex) return loadedIndex;
+      if (loadPromise) return loadPromise;
+      loadPromise = (async () => {
+        let response: Response;
+        try {
+          response = await fetch('/label-index.json');
+        } catch {
+          throw new IndexLoadError('request_failed');
+        }
+        if (!response.ok) throw new IndexLoadError('request_failed');
+        let json: unknown;
+        try {
+          json = await response.json();
+        } catch {
+          throw new IndexLoadError('invalid_index');
+        }
+        const index = createLoadedIndex(json);
+        if (!index) throw new IndexLoadError('invalid_index');
+        loadedIndex = index;
+        return index;
+      })();
       try {
-        const res = await fetch('/label-index.json');
-        entries = (await res.json()) as LabelEntry[];
-      } catch {
-        entries = [];
+        return await loadPromise;
+      } finally {
+        loadPromise = null;
       }
-      loading = false;
-      return entries;
     };
 
-    const renderEmpty = () => {
-      results.innerHTML =
-        `<div class="lc-panel">` +
-        `<div class="lc-head"><span class="lc-head-title">What the label shows</span></div>` +
-        `<p class="lc-empty">${esc(EMPTY_STATE)}</p>` +
-        `</div>`;
+    const panel = (title: string, body: string, extra = '') =>
+      `<div class="lc-panel">` +
+      `<div class="lc-head"><span class="lc-head-title">${esc(title)}</span></div>` +
+      `<p class="lc-empty">${esc(body)}</p>` +
+      extra +
+      `</div>`;
+
+    const countBySeverity = (flags: readonly CheckerFlag[]) => ({
+      cautions: flags.filter((flag) => flag.severity === 'caution').length,
+      observations: flags.filter((flag) => flag.severity === 'observation').length,
+    });
+
+    const flagSummary = (flags: readonly CheckerFlag[]) => {
+      const { cautions, observations } = countBySeverity(flags);
+      const parts: string[] = [];
+      if (cautions) parts.push(`${cautions} ${cautions === 1 ? 'caution' : 'cautions'}`);
+      if (observations) parts.push(`${observations} ${observations === 1 ? 'observation' : 'observations'}`);
+      return parts.join(' and ');
     };
 
-    const render = (flags: ReturnType<typeof checkLabel>) => {
-      if (flags.length === 0) {
-        renderEmpty();
-        return;
-      }
-      const rows = flags
+    const renderFlagRows = (flags: readonly CheckerFlag[]) =>
+      flags
         .map((f) => {
           const ruleName = RULE_LABEL[f.rule] ?? f.rule;
           return (
@@ -332,33 +399,129 @@
           );
         })
         .join('');
-      const noun = flags.length === 1 ? 'observation' : 'observations';
-      results.innerHTML =
-        `<div class="lc-panel">` +
-        `<div class="lc-head">` +
-        `<span class="lc-head-title">What the label shows</span>` +
-        `<span class="lc-count">${flags.length} ${noun} — described, not a grade or a recommendation.</span>` +
-        `</div>` +
-        `<ul class="flag-list">${rows}</ul>` +
-        `</div>`;
+
+    const renderState = (next: CheckerState) => {
+      state = next;
+      const busy = next.kind === 'loading' || next.kind === 'parsing';
+      results.setAttribute('aria-busy', String(busy));
+      checkBtn.disabled = busy;
+      clearBtn.disabled = busy;
+
+      switch (next.kind) {
+        case 'idle':
+          results.setAttribute('aria-label', 'Label checker state: idle');
+          results.innerHTML = '<p class="lc-idle"><strong>Idle.</strong> No label checked yet.</p>';
+          return;
+        case 'loading':
+          results.setAttribute('aria-label', 'Label checker state: loading');
+          results.innerHTML = panel('Loading', 'The label index is loading. The check has not run yet.');
+          return;
+        case 'index_unavailable':
+          results.setAttribute('aria-label', 'Label checker state: index unavailable');
+          results.innerHTML = panel(
+            'Index unavailable',
+            'The check could not run because the label index did not load. Nothing was checked.',
+            '<button type="button" class="btn-retry" data-lc-retry>Retry</button>',
+          );
+          return;
+        case 'parsing':
+          results.setAttribute('aria-label', 'Label checker state: parsing');
+          results.innerHTML = panel('Parsing', 'The pasted text is being read on this device. No result is available yet.');
+          return;
+        case 'parse_failed':
+          results.setAttribute('aria-label', 'Label checker state: parse failed');
+          results.innerHTML = panel('Parse failed', 'The label text could not be read. Nothing was checked.');
+          return;
+        case 'unrecognised':
+          results.setAttribute('aria-label', 'Label checker state: unrecognised');
+          results.innerHTML = panel(
+            'Unrecognised',
+            `No ingredient rules were applied. Not recognised: ${next.items.join(', ')}.`,
+          );
+          return;
+        case 'partial': {
+          results.setAttribute('aria-label', 'Label checker state: partial');
+          const summary = next.flags.length ? flagSummary(next.flags) : '';
+          const title = summary ? `Partial check — ${summary} on recognised items` : 'Partial check';
+          const coverage = `Checked: ${next.checked.map((item) => item.name).join(', ')}. Not recognised or checked: ${next.unrecognised.join(', ')}.`;
+          const rows = next.flags.length ? `<ul class="flag-list">${renderFlagRows(next.flags)}</ul>` : '';
+          results.innerHTML = panel(title, coverage, rows);
+          return;
+        }
+        case 'flags_found': {
+          results.setAttribute('aria-label', 'Label checker state: flags found');
+          const summary = flagSummary(next.flags);
+          results.innerHTML =
+            `<div class="lc-panel">` +
+            `<div class="lc-head"><span class="lc-head-title">What the label shows</span>` +
+            `<span class="lc-count">${esc(summary)} — described, not a grade or a recommendation.</span></div>` +
+            `<ul class="flag-list">${renderFlagRows(next.flags)}</ul>` +
+            `</div>`;
+          return;
+        }
+        case 'no_flags_checked':
+          results.setAttribute('aria-label', 'Label checker state: no flags checked');
+          results.innerHTML = panel('No flags after checking', EMPTY_STATE);
+          return;
+      }
     };
 
     const run = async () => {
-      const list = await loadEntries();
-      const flags = checkLabel(input.value, list);
-      render(flags);
-      clearBtn.hidden = input.value.trim().length === 0;
+      const panelText = input.value;
+      clearBtn.hidden = panelText.trim().length === 0;
+      if (!panelText.trim()) {
+        renderState({ kind: 'idle' });
+        return;
+      }
+
+      let index = loadedIndex;
+      if (!index) {
+        renderState({ kind: 'loading' });
+        try {
+          index = await loadIndex();
+        } catch (error) {
+          const reason = error instanceof IndexLoadError ? error.reason : 'request_failed';
+          renderState({ kind: 'index_unavailable', reason });
+          return;
+        }
+      }
+
+      renderState({ kind: 'parsing' });
+      await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+      renderState(checkLabelState(panelText, index));
     };
 
-    checkBtn.addEventListener('click', run);
+    checkBtn.addEventListener('click', () => void run());
     clearBtn.addEventListener('click', () => {
       input.value = '';
-      results.innerHTML = IDLE_HTML;
+      renderState({ kind: 'idle' });
       clearBtn.hidden = true;
       input.focus();
     });
+    results.addEventListener('click', (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement) || !target.closest('[data-lc-retry]')) return;
+      loadedIndex = null;
+      loadPromise = null;
+      void run();
+    });
 
     // warm the index on first focus so the first check feels instant (still no data leaves the page)
-    input.addEventListener('focus', () => void loadEntries(), { once: true });
+    input.addEventListener(
+      'focus',
+      () => {
+        if (loadedIndex || loadPromise) return;
+        renderState({ kind: 'loading' });
+        void loadIndex()
+          .then(() => {
+            if (state.kind === 'loading') renderState({ kind: 'idle' });
+          })
+          .catch((error: unknown) => {
+            const reason = error instanceof IndexLoadError ? error.reason : 'request_failed';
+            renderState({ kind: 'index_unavailable', reason });
+          });
+      },
+      { once: true },
+    );
   }
 </script>
