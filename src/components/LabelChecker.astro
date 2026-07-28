@@ -315,6 +315,7 @@
     EMPTY_STATE,
     type CheckerFlag,
     type CheckerState,
+    type DoseCheckGap,
     type IndexFailureReason,
     type LoadedIndex,
   } from '../lib/label-rules';
@@ -408,6 +409,19 @@
       return parts.join(' and ');
     };
 
+    const renderDoseGaps = (gaps: readonly DoseCheckGap[]) =>
+      gaps
+        .map((gap) => {
+          const reason =
+            gap.reason === 'form_unknown'
+              ? 'This remedy has multiple forms, and this checker does not resolve label forms yet, so Rule R3 was not applied. Other applicable rules still ran.'
+              : gap.reason === 'amount_missing'
+                ? 'The checker could not parse an amount for this ingredient, so Rule R3 was not applied. Other applicable rules still ran.'
+                : 'The loaded index has no single numeric study-dose floor for this ingredient, so Rule R3 was not applied. Other applicable rules still ran.';
+          return `<p class="lc-coverage"><strong>Dose check not applied for ${esc(gap.ingredient)}.</strong> ${esc(reason)}</p>`;
+        })
+        .join('');
+
     const renderFlagRows = (flags: readonly CheckerFlag[]) =>
       flags
         .map((f) => {
@@ -486,7 +500,7 @@
             `<p class="lc-empty"><strong>Coverage is incomplete.</strong> Checked against the loaded index: ${esc(next.checked.map((item) => item.name).join(', '))}. ` +
             `Not recognised and not checked: ${esc(next.unrecognised.join(', '))}. Any cautions or observations below apply only to the recognised items.</p>`;
           const rows = next.flags.length ? `<ul class="flag-list">${renderFlagRows(next.flags)}</ul>` : '';
-          results.innerHTML = panelHtml(title, coverage, rows);
+          results.innerHTML = panelHtml(title, coverage + renderDoseGaps([...next.doseChecksNotApplied]), rows);
           return;
         }
         case 'flags_found': {
@@ -498,6 +512,7 @@
             `<div class="lc-head"><span class="lc-head-title">${esc(title)}</span>` +
             `<span class="lc-count">Described, not a grade or a recommendation.</span></div>` +
             `<p class="lc-empty">Checked against the loaded index: ${esc(next.checked.map((item) => item.name).join(', ') || 'label structure only')}. This is not a complete safety or quality check.</p>` +
+            renderDoseGaps([...next.doseChecksNotApplied]) +
             `<ul class="flag-list">${renderFlagRows(next.flags)}</ul>` +
             `</div>`;
           return;
@@ -509,6 +524,7 @@
             'No flags after checking',
             `<p class="lc-empty"><strong>${esc(EMPTY_STATE)}</strong></p>` +
               `<p class="lc-coverage"><strong>Checked against the loaded index:</strong> ${esc(checked)}. The checker looked for proprietary-blend wording, melatonin above 5 mg, doses below a parsed study floor, missing botanical standardisation, and curated interaction cautions.</p>` +
+              renderDoseGaps([...next.doseChecksNotApplied]) +
               `<p class="lc-coverage"><strong>Not covered:</strong> Unknown ingredients or forms, missing amounts, every possible interaction, manufacturing quality, contaminants, or anything not pasted.</p>`,
           );
           return;

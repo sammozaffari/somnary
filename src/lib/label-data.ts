@@ -21,9 +21,9 @@ export async function getLabelEntries(): Promise<LabelEntry[]> {
     .map((e) => {
       const d = e.data;
       const category = indexBySlug.get(e.id)?.category ?? '';
-      // Lowest studied-dose floor across every dose form, plus the verbatim form-string that
-      // produced it (used in the R3 message). Unparseable forms are skipped, so the floor stays
-      // null when NO form yields a clean mg/g amount — the rule then never fires.
+      // Keep the existing aggregate for the ten single-form remedies. For multi-form remedies the
+      // client receives doseFormCount and refuses to apply R3; it does not attempt form resolution.
+      // Per-form entities and matching remain deferred IA work.
       let floorMg: number | null = null;
       let floorText: string | null = null;
       for (const dose of d.doses) {
@@ -43,6 +43,7 @@ export async function getLabelEntries(): Promise<LabelEntry[]> {
         isBotanical: /botanical/i.test(category),
         studiedDoseText: floorText,
         studiedDoseFloorMg: floorMg,
+        doseFormCount: d.doses.length,
         interactions: d.safety.interactions,
         tier: d.tier,
       } satisfies LabelEntry;

@@ -12,6 +12,7 @@ const entries = [
     isBotanical: false,
     studiedDoseText: '0.3–0.5 mg',
     studiedDoseFloorMg: 0.3,
+    doseFormCount: 3,
     interactions: ['sedatives; anticoagulants'],
     tier: 'B',
   },
@@ -25,6 +26,7 @@ const entries = [
     isBotanical: false,
     studiedDoseText: '≈250–450 mg elemental daily',
     studiedDoseFloorMg: 250,
+    doseFormCount: 3,
     interactions: [],
     tier: 'B',
   },
@@ -67,5 +69,19 @@ assert.equal(
 
 const longInput = `Melatonin 20 mg\n${'Moon Root 10 mg\n'.repeat(5_000)}`;
 assert.equal(checkLabelState(longInput, index).kind, 'partial');
+
+const unknownMagnesiumForm = checkLabelState('Magnesium 100 mg', index);
+assert.ok(
+  unknownMagnesiumForm.kind === 'flags_found' || unknownMagnesiumForm.kind === 'no_flags_checked',
+  'other applicable magnesium rules may determine the top-level result state',
+);
+assert.deepEqual(
+  'doseChecksNotApplied' in unknownMagnesiumForm ? unknownMagnesiumForm.doseChecksNotApplied : [],
+  [{ ingredient: 'Magnesium', reason: 'form_unknown' }],
+);
+assert.ok(
+  !('flags' in unknownMagnesiumForm) || !unknownMagnesiumForm.flags.some((flag) => flag.rule === 'R3'),
+  'R3 must not use an aggregate floor for a multi-form remedy',
+);
 
 console.log('label-checker state tests passed');

@@ -24,6 +24,7 @@ export interface LabelEntry {
   isBotanical: boolean;
   studiedDoseText: string | null; // the dose-form string that produced the floor (verbatim from corpus)
   studiedDoseFloorMg: number | null; // lowest studied dose in mg, or null when nothing parses cleanly
+  doseFormCount?: number; // conservative R3 gate; per-form entities and matching are deliberately deferred
   interactions: string[];
   tier: string;
 }
@@ -127,6 +128,7 @@ function isLabelEntry(value: unknown): value is LabelEntry {
     typeof entry.isBotanical === 'boolean' &&
     (typeof entry.studiedDoseText === 'string' || entry.studiedDoseText === null) &&
     (typeof entry.studiedDoseFloorMg === 'number' || entry.studiedDoseFloorMg === null) &&
+    (typeof entry.doseFormCount === 'number' || entry.doseFormCount === undefined) &&
     Array.isArray(entry.interactions) &&
     entry.interactions.every((interaction) => typeof interaction === 'string') &&
     typeof entry.tier === 'string'
@@ -306,7 +308,18 @@ export function checkLabelState(panel: string, index: LoadedIndex, parser: Panel
     ),
   ];
   const flags = checkLabel(panel, index.entries);
-  const base = { index, checked, doseChecksNotApplied: [] as const };
+  const doseChecksNotApplied = matched.flatMap<DoseCheckGap>((match) => {
+    const entry = match.entry;
+    if (entry.doseFormCount !== undefined && entry.doseFormCount > 1) {
+      return [{ ingredient: entry.name, reason: 'form_unknown' }];
+    }
+    if (match.doseMg === null) return [{ ingredient: entry.name, reason: 'amount_missing' }];
+    if (entry.doseFormCount !== 1 || entry.studiedDoseFloorMg === null) {
+      return [{ ingredient: entry.name, reason: 'studied_floor_missing' }];
+    }
+    return [];
+  });
+  const base = { index, checked, doseChecksNotApplied };
 
   // Coverage always wins over result severity: partial is the state, with flags retained inside it.
   if (checked.length > 0 && unrecognised.length > 0) {
@@ -400,9 +413,15 @@ export function checkLabel(panel: string, entries: readonly LabelEntry[]): Check
   for (const mt of matched) {
     const e = mt.entry;
 
-    // R3 — dose below the studied floor. Fires ONLY when both a clean numeric floor and a parsed
-    // panel amount exist; otherwise silent (no invented threshold, no false flag).
-    if (e.studiedDoseFloorMg !== null && mt.doseMg !== null && mt.doseMg < e.studiedDoseFloorMg) {
+    // R3 — dose below the studied floor. The interim checker does not resolve free-text form rows,
+    // so R3 is allowed only for remedies with exactly one dose row. Multi-form remedies surface a
+    // coverage gap instead of silently borrowing the lowest floor from a different form.
+    if (
+      e.doseFormCount === 1 &&
+      e.studiedDoseFloorMg !== null &&
+      mt.doseMg !== null &&
+      mt.doseMg < e.studiedDoseFloorMg
+    ) {
       flags.push({
         rule: 'R3',
         severity: 'observation',
