@@ -92,6 +92,11 @@ const dose = z.object({
   studiedDose: z.string(),
   timing: z.string(),
   marketComparison: z.string(), // how studied dose compares to typical products
+  // Studied population/condition (audit DOM-3): a dose is not a universal instruction — it was
+  // trialled in a specific group (e.g. "older adults with insomnia"). Optional; cite it like any
+  // evidence claim so "who it was studied in" is never a bare, self-applicable number.
+  population: z.string().nullable().default(null),
+  sources: z.array(z.number().int().positive()).default([]), // → source.n
 });
 
 /**
@@ -199,6 +204,7 @@ const remedies = defineCollection({
       data.safety.risks.forEach((r, ri) => check(r.sources, ['safety', 'risks', ri, 'sources']));
       check(data.safety.interactionsSources, ['safety', 'interactionsSources']);
       data.forms.forEach((f, fi) => check(f.sources, ['forms', fi, 'sources']));
+      data.doses.forEach((d, di) => check(d.sources, ['doses', di, 'sources']));
     }),
 });
 

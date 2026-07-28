@@ -2,11 +2,14 @@
 // Dosing reality — DESIGN_SYSTEM §3.2 dosing grid. One card per dose form; inside, a 4-column
 // grid of labelled fields (form / studied dose / timing / vs. the market), 4→2 col at ≤640px.
 // "market comparison" is where this site earns trust — it's the studied dose vs. what's on shelves.
+import CiteMarker from './CiteMarker.astro';
 interface Dose {
   form: string;
   studiedDose: string;
   timing: string;
   marketComparison: string;
+  population: string | null;
+  sources: number[];
 }
 interface Props {
   doses: Dose[];
@@ -18,22 +21,33 @@ const { doses } = Astro.props;
   {
     doses.map((d) => (
       <div class="dose">
-        <div class="cell">
-          <p class="lbl">Form</p>
-          <p class="val val-form">{d.form}</p>
+        <div class="dose-fields">
+          <div class="cell">
+            <p class="lbl">Form</p>
+            <p class="val val-form">{d.form}</p>
+          </div>
+          <div class="cell">
+            <p class="lbl">Studied dose</p>
+            <p class="val">{d.studiedDose}</p>
+          </div>
+          <div class="cell">
+            <p class="lbl">Timing</p>
+            <p class="val">{d.timing}</p>
+          </div>
+          <div class="cell">
+            <p class="lbl">Vs. the market</p>
+            <p class="val">{d.marketComparison}</p>
+          </div>
         </div>
-        <div class="cell">
-          <p class="lbl">Studied dose</p>
-          <p class="val">{d.studiedDose}</p>
-        </div>
-        <div class="cell">
-          <p class="lbl">Timing</p>
-          <p class="val">{d.timing}</p>
-        </div>
-        <div class="cell">
-          <p class="lbl">Vs. the market</p>
-          <p class="val">{d.marketComparison}</p>
-        </div>
+        {d.population && (
+          <p class="dose-pop">
+            <span class="dose-pop-lbl">Studied in</span>
+            {d.population}
+            {d.sources.map((n) => (
+              <CiteMarker n={n} />
+            ))}
+          </p>
+        )}
       </div>
     ))
   }
@@ -46,16 +60,38 @@ const { doses } = Astro.props;
     gap: var(--sp-4);
   }
   .dose {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: var(--sp-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
     padding: var(--sp-5);
     background: var(--surface);
     border: var(--border-hairline);
     border-radius: var(--r-lg);
   }
+  .dose-fields {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--sp-5);
+  }
   .cell {
     min-width: 0;
+  }
+  /* "Studied in" — the population/condition a dose was trialled in (DOM-3). A quiet full-width
+     caption under the fields, so the number is never read as a universal instruction. */
+  .dose-pop {
+    margin: 0;
+    padding-top: var(--sp-3);
+    border-top: var(--hairline);
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+  }
+  .dose-pop-lbl {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+    margin-right: var(--sp-2);
   }
   .lbl {
     font-family: var(--font-mono);
@@ -77,7 +113,7 @@ const { doses } = Astro.props;
   }
 
   @media (max-width: 640px) {
-    .dose {
+    .dose-fields {
       grid-template-columns: repeat(2, 1fr);
       gap: var(--sp-4);
     }
