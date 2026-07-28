@@ -46,6 +46,15 @@ assert.deepEqual(
   'control must return R2 and R5',
 );
 assert.equal(control.kind === 'flags_found' ? control.index : null, index, 'result must retain its loaded index');
+assert.ok(
+  control.kind === 'flags_found' && control.flags.every((flag) => flag.why.length > 0),
+  'every surfaced rule must explain why it fired',
+);
+assert.match(
+  control.kind === 'flags_found' ? control.flags[0].why : '',
+  /parsed 20 mg.*5 mg threshold/,
+  'R2 provenance must name the parsed dose and threshold',
+);
 
 const partial = checkLabelState('Melatonin 20 mg\nMoon Root 10 mg', index);
 assert.equal(partial.kind, 'partial');

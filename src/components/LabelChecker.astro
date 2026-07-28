@@ -38,7 +38,10 @@
     aria-atomic="true"
     aria-label="Label checker state: idle"
     data-lc-results>
-    <p class="lc-idle" data-lc-idle><strong>Idle.</strong> Paste a supplement facts panel, then check the label.</p>
+    <span class="lc-announcement" data-lc-announcement>Label checker state entered: idle.</span>
+    <div data-lc-result-content>
+      <p class="lc-idle" data-lc-idle><strong>Idle.</strong> Paste a supplement facts panel, then check the label.</p>
+    </div>
   </div>
 </section>
 
@@ -162,6 +165,12 @@
   .lc-results {
     margin-top: var(--sp-6);
   }
+  .lc-announcement {
+    position: absolute;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
   /* Results are injected via innerHTML, so they carry no scoped data-cid — every
      result selector must be :global() under .lc-results (the static, scoped parent)
      or it renders unstyled. */
@@ -242,7 +251,7 @@
   }
   .lc-results :global(.flag-row) {
     display: grid;
-    grid-template-columns: 24px 1fr auto;
+    grid-template-columns: 24px 1fr;
     gap: var(--sp-4);
     align-items: start;
     padding: var(--sp-4) 0;
@@ -269,6 +278,25 @@
   .lc-results :global(.flag-body) {
     min-width: 0;
   }
+  .lc-results :global(.flag-label) {
+    font-size: var(--text-xs);
+    line-height: var(--lh-sm);
+    color: var(--ink);
+    margin: 0 0 var(--sp-1);
+  }
+  .lc-results :global(.flag-label strong) {
+    font-weight: 600;
+  }
+  .lc-results :global(.flag-reason) {
+    font-size: var(--text-xs);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: 0 0 var(--sp-2);
+  }
+  .lc-results :global(.flag-reason strong) {
+    color: var(--ink);
+    font-weight: 600;
+  }
   .lc-results :global(.flag-text) {
     font-size: var(--text-sm);
     line-height: var(--lh-sm);
@@ -290,22 +318,6 @@
     box-shadow: var(--ring);
     border-radius: var(--r-xs);
   }
-  .lc-results :global(.flag-rule) {
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
-    color: var(--muted);
-    white-space: nowrap;
-  }
-
-  @media (max-width: 640px) {
-    .lc-results :global(.flag-row) {
-      grid-template-columns: 24px 1fr;
-    }
-    .lc-results :global(.flag-rule) {
-      display: none;
-    }
-  }
 </style>
 
 <script>
@@ -324,8 +336,10 @@
   const checkBtn = document.querySelector<HTMLButtonElement>('[data-lc-check]');
   const clearBtn = document.querySelector<HTMLButtonElement>('[data-lc-clear]');
   const results = document.querySelector<HTMLElement>('[data-lc-results]');
+  const announcement = document.querySelector<HTMLElement>('[data-lc-announcement]');
+  const resultContent = document.querySelector<HTMLElement>('[data-lc-result-content]');
 
-  if (input && checkBtn && clearBtn && results) {
+  if (input && checkBtn && clearBtn && results && announcement && resultContent) {
     let state: CheckerState = { kind: 'idle' };
     let loadedIndex: LoadedIndex | null = null;
     let loadPromise: Promise<LoadedIndex> | null = null;
@@ -426,14 +440,16 @@
       flags
         .map((f) => {
           const ruleName = RULE_LABEL[f.rule] ?? f.rule;
+          const severityName = f.severity === 'caution' ? 'Caution' : 'Observation';
           return (
             `<li class="flag-row">` +
             `<span class="flag-icon" aria-hidden="true">!</span>` +
             `<div class="flag-body">` +
+            `<p class="flag-label"><strong>${esc(severityName)} · ${esc(ruleName)}</strong></p>` +
+            `<p class="flag-reason"><strong>Why this fired:</strong> ${esc(f.why)}</p>` +
             `<p class="flag-text">${esc(f.text)}</p>` +
             `<a class="flag-link" href="${esc(f.href)}">${esc(f.linkLabel)} →</a>` +
             `</div>` +
-            `<span class="flag-rule" title="${esc(ruleName)}" aria-label="${esc(ruleName)}">${esc(f.rule)}</span>` +
             `</li>`
           );
         })
@@ -442,26 +458,26 @@
     const renderState = (next: CheckerState) => {
       state = next;
       const busy = next.kind === 'loading' || next.kind === 'parsing';
+      const stateName = next.kind.replaceAll('_', ' ');
+      results.setAttribute('aria-label', `Label checker state: ${stateName}`);
+      announcement.textContent = `Label checker state entered: ${stateName}.`;
       results.setAttribute('aria-busy', String(busy));
       checkBtn.disabled = busy;
       clearBtn.disabled = busy;
 
       switch (next.kind) {
         case 'idle':
-          results.setAttribute('aria-label', 'Label checker state: idle');
-          results.innerHTML =
+          resultContent.innerHTML =
             '<p class="lc-idle"><strong>Idle.</strong> Paste a supplement facts panel, then choose Check the label. Nothing has been checked yet.</p>';
           return;
         case 'loading':
-          results.setAttribute('aria-label', 'Label checker state: loading');
-          results.innerHTML = panel(
+          resultContent.innerHTML = panel(
             'Loading the checker',
             'The local remedy index is loading. The check has not run yet.',
           );
           return;
         case 'index_unavailable':
-          results.setAttribute('aria-label', 'Label checker state: index unavailable');
-          results.innerHTML = panel(
+          resultContent.innerHTML = panel(
             'The check could not run',
             next.reason === 'invalid_index'
               ? 'The remedy index returned data this checker could not use, so nothing in this label was checked. This is a site problem. Retry the check.'
@@ -470,15 +486,13 @@
           );
           return;
         case 'parsing':
-          results.setAttribute('aria-label', 'Label checker state: parsing');
-          results.innerHTML = panel(
+          resultContent.innerHTML = panel(
             'Reading the label',
             'The pasted text is being parsed on this device. No result is available yet.',
           );
           return;
         case 'parse_failed':
-          results.setAttribute('aria-label', 'Label checker state: parse failed');
-          results.innerHTML = panel(
+          resultContent.innerHTML = panel(
             'The label could not be read',
             next.reason === 'parser_error'
               ? 'The checker hit an error while reading this text, so nothing was checked. Try again or reformat the label text.'
@@ -486,8 +500,7 @@
           );
           return;
         case 'unrecognised':
-          results.setAttribute('aria-label', 'Label checker state: unrecognised');
-          results.innerHTML = panel(
+          resultContent.innerHTML = panel(
             'Nothing was recognised',
             `The text could be read, but none of these ingredient names matched the checker’s curated index: ${next.items.join(', ')}. No ingredient rules were applied. Check the spelling or use the ingredient pages.`,
           );
@@ -495,19 +508,17 @@
         case 'partial': {
           const summary = next.flags.length ? flagSummary(next.flags) : '';
           const title = summary ? `Partial check — ${summary} on recognised items` : 'Partial check';
-          results.setAttribute('aria-label', `Label checker state: ${title}`);
           const coverage =
             `<p class="lc-empty"><strong>Coverage is incomplete.</strong> Checked against the loaded index: ${esc(next.checked.map((item) => item.name).join(', '))}. ` +
             `Not recognised and not checked: ${esc(next.unrecognised.join(', '))}. Any cautions or observations below apply only to the recognised items.</p>`;
           const rows = next.flags.length ? `<ul class="flag-list">${renderFlagRows(next.flags)}</ul>` : '';
-          results.innerHTML = panelHtml(title, coverage + renderDoseGaps([...next.doseChecksNotApplied]), rows);
+          resultContent.innerHTML = panelHtml(title, coverage + renderDoseGaps([...next.doseChecksNotApplied]), rows);
           return;
         }
         case 'flags_found': {
           const summary = flagSummary(next.flags);
           const title = `${summary.charAt(0).toUpperCase()}${summary.slice(1)} found`;
-          results.setAttribute('aria-label', `Label checker state: flags found — ${summary}`);
-          results.innerHTML =
+          resultContent.innerHTML =
             `<div class="lc-panel">` +
             `<div class="lc-head"><span class="lc-head-title">${esc(title)}</span>` +
             `<span class="lc-count">Described, not a grade or a recommendation.</span></div>` +
@@ -518,9 +529,8 @@
           return;
         }
         case 'no_flags_checked': {
-          results.setAttribute('aria-label', 'Label checker state: no flags checked');
           const checked = next.checked.map((item) => item.name).join(', ');
-          results.innerHTML = panelHtml(
+          resultContent.innerHTML = panelHtml(
             'No flags after checking',
             `<p class="lc-empty"><strong>${esc(EMPTY_STATE)}</strong></p>` +
               `<p class="lc-coverage"><strong>Checked against the loaded index:</strong> ${esc(checked)}. The checker looked for proprietary-blend wording, melatonin above 5 mg, doses below a parsed study floor, missing botanical standardisation, and curated interaction cautions.</p>` +

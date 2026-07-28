@@ -106,6 +106,8 @@ export interface Flag {
 /** Label-checker rules always classify their display severity; other Flag consumers stay compatible. */
 export interface CheckerFlag extends Flag {
   severity: FlagSeverity;
+  /** Plain-language provenance: the exact match or threshold that caused this rule to fire. */
+  why: string;
 }
 
 /** Empty-state copy (data, so compliance can vet it): honest, never an endorsement. */
@@ -385,10 +387,14 @@ export function checkLabel(panel: string, entries: readonly LabelEntry[]): Check
     (l) => /\bblend\b/i.test(l) && /(\d+(?:[.,]\d+)?)\s*(mg|mcg|µg|ug|g)\b/i.test(l),
   );
   if (/proprietary\s+blend/i.test(panel) || blendLine) {
+    const explicitProprietaryBlend = /proprietary\s+blend/i.test(panel);
     flags.push({
       rule: 'R1',
       severity: 'observation',
       ingredient: null,
+      why: explicitProprietaryBlend
+        ? 'The pasted text explicitly names a proprietary blend.'
+        : 'A line containing “blend” gives one combined amount rather than amounts for each ingredient.',
       text: "This panel lists a proprietary blend, so the amount of each ingredient is hidden. No ingredient's dose can be checked against the dose that was studied.",
       href: '/sleep-blends',
       linkLabel: 'why hidden doses can’t be checked',
@@ -402,6 +408,7 @@ export function checkLabel(panel: string, entries: readonly LabelEntry[]): Check
       rule: 'R2',
       severity: 'caution',
       ingredient: 'melatonin',
+      why: `The checker matched melatonin and parsed ${fmtMg(mel.doseMg)} mg, above this rule’s 5 mg threshold.`,
       text: `This lists melatonin at ${fmtMg(mel.doseMg)} mg. Trials found the benefit at 0.5–5 mg; higher amounts haven't been shown to work better and raise next-day grogginess.`,
       href: '/melatonin-dose-timing',
       linkLabel: 'what the melatonin trials actually used',
@@ -426,6 +433,7 @@ export function checkLabel(panel: string, entries: readonly LabelEntry[]): Check
         rule: 'R3',
         severity: 'observation',
         ingredient: e.name,
+        why: `The checker matched ${e.name}, parsed ${fmtMg(mt.doseMg)} mg, and compared it with this single-form remedy’s ${fmtMg(e.studiedDoseFloorMg)} mg study floor.`,
         text: `This lists ${e.name} at ${fmtMg(mt.doseMg)} mg. Studies of ${e.name} used ${e.studiedDoseText}.`,
         href: e.url,
         linkLabel: `${e.name}: the dose studies used`,
@@ -438,6 +446,7 @@ export function checkLabel(panel: string, entries: readonly LabelEntry[]): Check
         rule: 'R4',
         severity: 'observation',
         ingredient: e.name,
+        why: `The checker matched ${e.name} as a botanical and found no recognised standardisation marker in the pasted text.`,
         text: `${e.name} is a botanical whose active content varies by extract; this panel doesn't state a standardized extract.`,
         href: e.url,
         linkLabel: `${e.name}: what to look for on a label`,
@@ -451,6 +460,7 @@ export function checkLabel(panel: string, entries: readonly LabelEntry[]): Check
         rule: 'R5',
         severity: 'caution',
         ingredient: e.name,
+        why: `The loaded index lists one or more curated interaction cautions for ${e.name}.`,
         text: `${e.name} has documented interaction cautions (${e.interactions.join('; ')}). This is a question for a pharmacist or clinician, especially if you take other medications.`,
         href: '/safety',
         linkLabel: `${e.name}: safety & interactions`,
@@ -467,6 +477,7 @@ export function checkLabel(panel: string, entries: readonly LabelEntry[]): Check
       rule: 'R5',
       severity: 'caution',
       ingredient: null,
+      why: `More than one recognised ingredient carries a sedation-type caution in the loaded index: ${sedaters.map((item) => item.entry.name).join(', ')}.`,
       text: 'More than one ingredient here carries a sedation caution — worth raising with a pharmacist or clinician.',
       href: '/safety',
       linkLabel: 'read the safety boundary',
