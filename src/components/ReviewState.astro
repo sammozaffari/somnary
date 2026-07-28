@@ -1,0 +1,40 @@
+---
+import { gradeStampState, WORKFLOW_LABELS, type WorkflowState } from '../lib/remedy-state';
+
+interface Props {
+  state: WorkflowState;
+  detail?: boolean;
+  class?: string;
+}
+
+const { state, detail = false, class: className } = Astro.props;
+const compact = gradeStampState(state);
+const label = detail ? WORKFLOW_LABELS[state] : compact.label;
+const classes = ['review-state', compact.prominent ? 'is-prominent' : 'is-secondary', className]
+  .filter(Boolean)
+  .join(' ');
+---
+
+<span class={classes}>{label}</span>
+
+<style>
+  .review-state {
+    display: inline-flex;
+    align-items: center;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    line-height: var(--lh-xs);
+    letter-spacing: var(--tracking-label);
+  }
+  .is-secondary {
+    color: var(--muted);
+  }
+  .is-prominent {
+    width: fit-content;
+    padding: var(--sp-1) var(--sp-2);
+    color: var(--primary-deep);
+    background: var(--primary-soft);
+    border-radius: var(--r-xs);
+    font-weight: 800;
+  }
+</style>

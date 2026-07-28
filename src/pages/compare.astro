@@ -13,17 +13,25 @@
 import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import TierBadge from '../components/TierBadge.astro';
+import ReviewState from '../components/ReviewState.astro';
 import EvidenceGateChip from '../components/EvidenceGateChip.astro';
 import ContextBanner from '../components/ContextBanner.astro';
 import Disclaimer from '../components/Disclaimer.astro';
 import type { GateId } from '../lib/evidence-gates';
 import { TIERS, getTier, type TierId } from '../lib/tiers';
 import { contentIndex } from '../lib/content-index';
+import {
+  isDefaultRankingEligible,
+  isOrdinarySearchEligible,
+  type WorkflowState,
+} from '../lib/remedy-state';
 
 interface Row {
   slug: string;
   name: string;
   tier: TierId;
+  workflowState: WorkflowState;
+  rankingEligible: boolean;
   decisionTranslation: string;
   verdict: string; // data.oneLineVerdict — used verbatim, never re-derived
   outcomes: string[];
@@ -41,11 +49,16 @@ const goalKey = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').repla
 // [HUMAN-GATE]); read it by slug exactly as tiers.astro does. No content is duplicated.
 const categoryOf = new Map(contentIndex.map((e) => [e.slug, e.category]));
 
-const remedies = await getCollection('remedies', (e) => !e.data.draft);
-const rows: Row[] = remedies.map((e) => ({
+const remedies = await getCollection(
+  'remedies',
+  (e) => !e.data.draft && isOrdinarySearchEligible(e.data),
+);
+const allRows: Row[] = remedies.map((e) => ({
   slug: e.id,
   name: e.data.name,
   tier: e.data.tier,
+  workflowState: e.data.workflowState,
+  rankingEligible: isDefaultRankingEligible(e.data),
   decisionTranslation: getTier(e.data.tier).decisionTranslation,
   verdict: e.data.oneLineVerdict,
   outcomes: e.data.outcomes,
@@ -65,7 +78,13 @@ const rows: Row[] = remedies.map((e) => ({
 
 // Canonical server order: grade(S→F) then name(A–Z). This flat list is the crawlable content.
 const rankOf = new Map<TierId, number>(TIERS.map((t, i) => [t.id, i]));
-rows.sort((a, b) => (rankOf.get(a.tier)! - rankOf.get(b.tier)!) || a.name.localeCompare(b.name));
+const rankedRows = allRows
+  .filter((row) => row.rankingEligible)
+  .sort((a, b) => (rankOf.get(a.tier)! - rankOf.get(b.tier)!) || a.name.localeCompare(b.name));
+const underReviewRows = allRows
+  .filter((row) => !row.rankingEligible)
+  .sort((a, b) => a.name.localeCompare(b.name));
+const rows = [...rankedRows, ...underReviewRows];
 
 // Goal filter facets = the DISTINCT outcome strings already in the corpus (frequency-ranked, then
 // A–Z). Nothing invented: each facet is a verbatim outcome, and a row matches it iff that outcome is
@@ -102,7 +121,8 @@ const catFacets = [...new Set(rows.map((r) => r.category).filter(Boolean))].sort
         Every reviewed remedy, side by side on the things that decide it: the evidence grade, what
         it's studied for, the one-line effect, the evidence gates behind the grade, who should avoid
         it, and any documented interaction cautions. Narrow the list by goal or category — the full
-        table stands with filters off.
+        table stands with filters off. Review-complete grades appear first; every other grade is
+        kept in a separate under-review group.
       </p>
     </header>
 
@@ -162,14 +182,33 @@ const catFacets = [...new Set(rows.map((r) => r.category).filter(Boolean))].sort
     {/* canonical flat comparison: ALL remedies, grade(S→F)→name(A–Z). This is the crawlable content. */}
     <ul id="compare-grid" class="grid">
       {
-        rows.map((r) => (
-          <li
-            class="row"
-            data-rank={rankOf.get(r.tier)}
-            data-name={r.name.toLowerCase()}
-            data-category={r.category}
-            data-goals={r.outcomes.map(goalKey).join(' ')}
-          >
+        rows.map((r, index) => (
+          <>
+            {index === 0 && rankedRows.length > 0 && (
+              <li id="ranked-group-label" class="group-label">
+                <p class="eyebrow">Default comparison</p>
+                <h2 class="group-title">Review complete</h2>
+                <p class="group-dek">Ordered by evidence grade, then A–Z.</p>
+              </li>
+            )}
+            {index === rankedRows.length && underReviewRows.length > 0 && (
+              <li id="reviewing-group-label" class="group-label">
+                <p class="eyebrow">Not in the ranking</p>
+                <h2 class="group-title">Under author review</h2>
+                <p class="group-dek">
+                  Grades remain visible for transparency and are listed A–Z until the author marks
+                  the review complete.
+                </p>
+              </li>
+            )}
+            <li
+              class="row"
+              data-group={r.rankingEligible ? 'ranked' : 'reviewing'}
+              data-rank={rankOf.get(r.tier)}
+              data-name={r.name.toLowerCase()}
+              data-category={r.category}
+              data-goals={r.outcomes.map(goalKey).join(' ')}
+            >
             <div class="row-head">
               <TierBadge tier={r.tier} size="card" />
               <div class="head-text">
@@ -178,7 +217,10 @@ const catFacets = [...new Set(rows.map((r) => r.category).filter(Boolean))].sort
                 <p class="verdict">{r.verdict}</p>
                 <p class="decision">
                   <span class="grade-k">Grade {r.tier} · {getTier(r.tier).name}</span>
-                  {r.decisionTranslation}
+                  <span class="review-line">
+                    <ReviewState state={r.workflowState} />
+                    <span>{r.decisionTranslation}</span>
+                  </span>
                 </p>
               </div>
             </div>
@@ -251,7 +293,8 @@ const catFacets = [...new Set(rows.map((r) => r.category).filter(Boolean))].sort
                 <dd class="v"><span class="cat">{r.category}</span></dd>
               </div>
             </dl>
-          </li>
+            </li>
+          </>
         ))
       }
     </ul>
@@ -270,6 +313,8 @@ const catFacets = [...new Set(rows.map((r) => r.category).filter(Boolean))].sort
   const grid = document.getElementById('compare-grid');
   const countEl = document.getElementById('compare-count');
   const emptyEl = document.getElementById('compare-empty');
+  const rankedGroupLabel = document.getElementById('ranked-group-label');
+  const reviewingGroupLabel = document.getElementById('reviewing-group-label');
   const goalBtns = Array.from(document.querySelectorAll<HTMLButtonElement>('.facet-goal .facet'));
   const catBtns = Array.from(document.querySelectorAll<HTMLButtonElement>('.facet-cat .facet'));
 
@@ -281,6 +326,8 @@ const catFacets = [...new Set(rows.map((r) => r.category).filter(Boolean))].sort
 
     const apply = () => {
       let shown = 0;
+      let rankedShown = 0;
+      let reviewingShown = 0;
       for (const row of rows) {
         const goals = (row.dataset.goals ?? '').split(' ').filter(Boolean);
         const cat = row.dataset.category ?? '';
@@ -288,8 +335,14 @@ const catFacets = [...new Set(rows.map((r) => r.category).filter(Boolean))].sort
         const okCat = activeCat === 'all' || cat === activeCat;
         const visible = okGoal && okCat;
         row.hidden = !visible;
-        if (visible) shown += 1;
+        if (visible) {
+          shown += 1;
+          if (row.dataset.group === 'ranked') rankedShown += 1;
+          if (row.dataset.group === 'reviewing') reviewingShown += 1;
+        }
       }
+      if (rankedGroupLabel) rankedGroupLabel.hidden = rankedShown === 0;
+      if (reviewingGroupLabel) reviewingGroupLabel.hidden = reviewingShown === 0;
       if (emptyEl) emptyEl.hidden = shown > 0;
       if (countEl) {
         countEl.textContent =
@@ -458,6 +511,27 @@ const catFacets = [...new Set(rows.map((r) => r.category).filter(Boolean))].sort
     border-radius: var(--r-lg);
     padding: var(--sp-5);
   }
+  .group-label {
+    grid-column: 1 / -1;
+    padding-top: var(--sp-5);
+  }
+  .group-label[hidden] {
+    display: none;
+  }
+  .group-title {
+    margin: var(--sp-2) 0 0;
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    line-height: var(--lh-xl);
+    color: var(--ink);
+  }
+  .group-dek {
+    max-width: 68ch;
+    margin: var(--sp-2) 0 0;
+    color: var(--muted);
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+  }
   .row[hidden] {
     display: none;
   }
@@ -504,6 +578,11 @@ const catFacets = [...new Set(rows.map((r) => r.category).filter(Boolean))].sort
     letter-spacing: var(--tracking-label);
     color: var(--ink);
     margin-bottom: var(--sp-1);
+  }
+  .review-line {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-1);
   }
 
   /* labelled cells */

@@ -59,7 +59,7 @@ const jsonLd = remedyJsonLd(d, canonical, site);
   <script type="application/ld+json" is:inline set:html={JSON.stringify(jsonLd)} />
   {/* 1 — hero plate + label row (h1 + grade stamp), full-bleed above the content column
       (DESIGN_SYSTEM §11.3 "labeled plate"; crumb retired — navigation stays in the nav) */}
-  <RemedyHero slug={entry.id} name={d.name} tier={d.tier} />
+  <RemedyHero slug={entry.id} name={d.name} tier={d.tier} workflowState={d.workflowState} />
   <main class="remedy">
     <header class="head">
       <p class="dek">{d.oneLineVerdict}</p>

@@ -368,6 +368,7 @@
 
 <script>
   import { searchDocsScored, shouldOfferAsk, type SearchDoc } from '../lib/search-rank';
+  import { gradeStampState } from '../lib/remedy-state';
 
   interface AskCitation {
     n: number;
@@ -443,10 +444,11 @@
       for (const [kind, rows] of groups) {
         html += `<li class="p-group" role="presentation">${esc(KIND_LABEL[kind] ?? kind)} · ${rows.length}</li>`;
         for (const d of rows) {
+          const state = gradeStampState(d.workflowState);
           html +=
-            `<li id="p-opt-${i}" class="p-row" role="option" aria-selected="${i === active}" data-i="${i}" data-url="${esc(d.url)}" aria-label="grade ${esc(d.tier)}, ${esc(d.name)}">` +
+            `<li id="p-opt-${i}" class="p-row" role="option" aria-selected="${i === active}" data-i="${i}" data-url="${esc(d.url)}" aria-label="grade ${esc(d.tier)}, ${esc(d.name)}, ${esc(state.label)}">` +
             badge(d.tier) +
-            `<span class="p-main"><span class="p-name">${esc(d.name)}</span><span class="p-cat">${esc(d.category)}</span></span>` +
+            `<span class="p-main"><span class="p-name">${esc(d.name)}</span><span class="p-cat">${esc(d.category)} · ${esc(state.label)}</span></span>` +
             `<span class="p-grade">grade ${esc(d.tier)}</span></li>`;
           i++;
         }

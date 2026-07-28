@@ -13,11 +13,17 @@ import RemedyCard from '../components/RemedyCard.astro';
 import Disclaimer from '../components/Disclaimer.astro';
 import { TIERS, type TierId } from '../lib/tiers';
 import { contentIndex } from '../lib/content-index';
+import {
+  isDefaultRankingEligible,
+  isOrdinarySearchEligible,
+  type WorkflowState,
+} from '../lib/remedy-state';
 
 interface Card {
   slug: string;
   name: string;
   tier: TierId;
+  workflowState: WorkflowState;
   oneLiner: string;
   category: string;
 }
@@ -28,17 +34,27 @@ interface Card {
 // one existing registry.
 const categoryOf = new Map(contentIndex.map((e) => [e.slug, e.category]));
 
-const remedies = await getCollection('remedies', (e) => !e.data.draft);
+const remedies = await getCollection(
+  'remedies',
+  (e) => !e.data.draft && isOrdinarySearchEligible(e.data),
+);
+const cards: Card[] = remedies.map((e) => ({
+  slug: e.id,
+  name: e.data.name,
+  tier: e.data.tier,
+  workflowState: e.data.workflowState,
+  oneLiner: e.data.oneLineVerdict,
+  category: categoryOf.get(e.id) ?? '',
+}));
+const rankedCards = cards.filter((card) => {
+  const remedy = remedies.find((entry) => entry.id === card.slug)!;
+  return isDefaultRankingEligible(remedy.data);
+});
+const underReview = cards
+  .filter((card) => !rankedCards.some((ranked) => ranked.slug === card.slug))
+  .sort((a, b) => a.name.localeCompare(b.name));
 const byTier = new Map<TierId, Card[]>(TIERS.map((t) => [t.id, []]));
-for (const e of remedies) {
-  byTier.get(e.data.tier)!.push({
-    slug: e.id,
-    name: e.data.name,
-    tier: e.data.tier,
-    oneLiner: e.data.oneLineVerdict,
-    category: categoryOf.get(e.id) ?? '',
-  });
-}
+for (const card of rankedCards) byTier.get(card.tier)!.push(card);
 // Within each tier, name A–Z. Rank = position in the S→F TIERS order.
 for (const arr of byTier.values()) arr.sort((a, b) => a.name.localeCompare(b.name));
 const rankOf = new Map<TierId, number>(TIERS.map((t, i) => [t.id, i]));
@@ -53,24 +69,23 @@ const sortModes = [
 ---
 
 <Base
-  title="Every remedy we've reviewed, graded S–F | Somnary"
-  description="The full reference index of natural sleep remedies, each graded S to F by the strength of the published human evidence. Sort by grade, alphabetically, or by category. Weak evidence labelled weak, shown not hidden. Zero brand money."
+  title="Somnary remedy evidence index, graded S–F"
+  description="The full reference index of natural sleep remedies. Review-complete grades are ranked S to F; provisional grades remain visible in a separate under-review group."
   canonical="https://somnary.vercel.app/tiers"
 >
   <main class="page">
     <header class="head">
       <p class="eyebrow">Remedies · Reference overview</p>
-      <h1 class="title">Every remedy we've reviewed</h1>
+      <h1 class="title">The remedy evidence index</h1>
       <p class="dek">
-        The full index, graded S–F by one thing only: the strength of the published human evidence
-        behind each remedy — not popularity, not tradition, not the marketing. Weak evidence is
-        labelled weak and shown, never buried. Sort it however helps.
+        Review-complete grades are ranked S–F by the strength of the published human evidence.
+        Grades still under the author’s review remain visible below, but do not enter the ranking.
       </p>
       <Disclaimer variant="compact" />
     </header>
 
     <!-- overview legend: what each tier means + how many remedies sit in it -->
-    <div class="legend" aria-label="The tiers, and how many remedies sit in each">
+    <div class="legend" aria-label="The tiers, and how many review-complete remedies sit in each">
       {
         TIERS.map((t) => {
           const count = byTier.get(t.id)!.length;
@@ -87,9 +102,9 @@ const sortModes = [
       }
     </div>
 
-    <!-- sort control — progressive enhancement; server order (grade→name) is the default -->
+    <!-- sort control — progressive enhancement; applies only to the review-complete ranking -->
     <div class="controls">
-      <span id="sort-label" class="controls-label">Sort</span>
+      <span id="sort-label" class="controls-label">Sort ranking</span>
       <div class="segmented" role="group" aria-labelledby="sort-label">
         {
           sortModes.map((m) => (
@@ -118,11 +133,46 @@ const sortModes = [
             data-name={c.name.toLowerCase()}
             data-category={c.category}
           >
-            <RemedyCard slug={c.slug} name={c.name} tier={c.tier} oneLiner={c.oneLiner} />
+            <RemedyCard
+              slug={c.slug}
+              name={c.name}
+              tier={c.tier}
+              workflowState={c.workflowState}
+              oneLiner={c.oneLiner}
+            />
           </li>
         ))
       }
     </ul>
+
+    <section class="under-review" aria-labelledby="under-review-title">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Not in the ranking</p>
+          <h2 id="under-review-title" class="section-title">Under author review</h2>
+        </div>
+        <p class="section-count">{underReview.length} remedies · A–Z</p>
+      </div>
+      <p class="section-dek">
+        These grades remain visible for transparency. They are excluded from the default ranking
+        until the author marks the review complete.
+      </p>
+      <ul class="grid">
+        {
+          underReview.map((c) => (
+            <li class="cell">
+              <RemedyCard
+                slug={c.slug}
+                name={c.name}
+                tier={c.tier}
+                workflowState={c.workflowState}
+                oneLiner={c.oneLiner}
+              />
+            </li>
+          ))
+        }
+      </ul>
+    </section>
   </main>
 </Base>
 
@@ -311,6 +361,39 @@ const sortModes = [
   }
   .cell > :global(.card) {
     width: 100%;
+  }
+  .under-review {
+    margin-top: var(--sp-9);
+    padding-top: var(--sp-7);
+    border-top: var(--border-strong);
+  }
+  .section-head {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: var(--sp-5);
+    flex-wrap: wrap;
+  }
+  .section-title {
+    margin: var(--sp-2) 0 0;
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    line-height: var(--lh-xl);
+    color: var(--ink);
+  }
+  .section-count {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+  }
+  .section-dek {
+    max-width: 68ch;
+    margin: var(--sp-3) 0 var(--sp-6);
+    color: var(--muted);
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
   }
 
   @media (max-width: 640px) {

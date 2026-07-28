@@ -8,6 +8,7 @@ export const prerender = false;
 
 import Base from '../layouts/Base.astro';
 import TierBadge from '../components/TierBadge.astro';
+import ReviewState from '../components/ReviewState.astro';
 import { getSearchDocs, searchDocs } from '../lib/search';
 
 const q = (Astro.url.searchParams.get('q') ?? '').trim();
@@ -71,7 +72,10 @@ const suggestions = ['melatonin', 'magnesium', 'jet lag', "can't fall asleep", '
                     <a class="row" href={r.url}>
                       <TierBadge tier={r.tier} size="inline" />
                       <span class="row-main">
-                        <span class="row-name">{r.name}</span>
+                        <span class="row-title">
+                          <span class="row-name">{r.name}</span>
+                          <ReviewState state={r.workflowState} />
+                        </span>
                         <span class="row-cat">{r.category}</span>
                         <span class="row-dek">{r.oneLiner}</span>
                       </span>
@@ -242,6 +246,13 @@ const suggestions = ['melatonin', 'magnesium', 'jet lag', "can't fall asleep", '
   .row-name {
     font-size: var(--text-base);
     color: var(--ink);
+  }
+  .row-title {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--sp-3);
+    flex-wrap: wrap;
   }
   .row-cat {
     font-family: var(--font-mono);
