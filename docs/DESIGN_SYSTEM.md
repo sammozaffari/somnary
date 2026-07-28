@@ -32,9 +32,14 @@ The former ALL-CAPS label/eyebrow treatment is **dropped**: micro-labels, kicker
 and table headers render in Sentence case, keeping only their letterspacing.
 (Brand wordmark casing is unchanged — see below.)
 
-**Brand casing (D3, unchanged):** wordmark is `Somnary.` — **capitalized**,
-trailing period, the period dot in oxblood `--primary`. Do not lowercase. Brand
-styling (27px, weight 700 in Instrument Sans, −0.04em, circular oxblood mark).
+**Brand casing (D3, amended 2026-07-08 / 2026-07-09):** the wordmark is **`Somnary`
+— capitalized, NO trailing period** (the earlier `Somnary.` trailing-period form is
+retired per CLAUDE.md D3). The brand **symbol** is a white crescent moon in a circular
+oxblood `--primary` disc. In the nav the **moon mark stands alone** — the "Somnary"
+logotype text was dropped (owner, 2026-07-09) and the mark enlarged to carry the brand
+on its own; the accessible name stays "Somnary" via `aria-label` (see
+`src/components/Wordmark.astro`). Do not lowercase. Brand styling: weight 700 in
+Instrument Sans, circular oxblood mark.
 
 ---
 
