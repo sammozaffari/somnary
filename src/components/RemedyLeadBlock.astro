@@ -42,6 +42,16 @@ const showDose = format !== 'intervention';
       <strong class="gline">Grade {tier} · {t.name}</strong> — {t.decisionTranslation}
     </p>
 
+    {/* Grade-scope boundary (audit DOM-2): a big confident grade must not be read as "proven safe/
+        right for me". Placed adjacent to the grade, routing to the on-page safety section and a
+        clinician — the not-medical-advice pathway as a designed step, not only the footer. Calm,
+        neutral register (never the vermilion safety alarm): this bounds the grade, it is not a hazard. */}
+    <p class="grade-scope">
+      <strong>What the grade means:</strong> it rates the strength of the published human evidence —
+      not whether this is safe or right for you. Read the <a href="#safety">safety notes</a> and
+      <a href="/when-to-see-a-doctor">talk to a clinician</a> before acting on it.
+    </p>
+
     <dl class="grid">
       <div class="drow">
         <dt class="dlabel">Best for</dt>
@@ -100,6 +110,29 @@ const showDose = format !== 'intervention';
      letter + word too) */
   .gline {
     font-weight: 700;
+  }
+
+  /* Grade-scope boundary (DOM-2): visible-but-calm inset next to the grade. Neutral tokens
+     (--stone / --mineral / --raisin) — NOT the vermilion safety register (§10: that's for hazards),
+     and NOT a grade color. It qualifies the grade; it does not warn. */
+  .grade-scope {
+    margin: 0 0 var(--sp-5);
+    padding: var(--sp-3) var(--sp-4);
+    background: var(--stone);
+    border-left: 2px solid var(--mineral);
+    border-radius: var(--r-sm);
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--raisin);
+    max-width: 60ch;
+  }
+  .grade-scope a {
+    color: var(--primary);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .grade-scope a:hover {
+    text-decoration: none;
   }
 
   .grid {

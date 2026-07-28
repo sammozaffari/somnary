@@ -105,8 +105,8 @@ const jsonLd = remedyJsonLd(d, canonical, site);
           </section>
         )}
 
-        {/* 6 — safety & interactions (prominent) */}
-        <section class="block">
+        {/* 6 — safety & interactions (prominent). id=safety: the lead block's grade-scope note links here. */}
+        <section class="block" id="safety">
           <SafetyCallout
             severity={d.safety.severity}
             lead={d.safety.lead}
