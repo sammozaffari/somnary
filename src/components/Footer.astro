@@ -106,11 +106,12 @@ const tools = [
 </footer>
 
 <style>
+  /* the one dark slab on the page — closes the cream with a carbon ground for rhythm */
   .footer {
-    border-top: var(--border-hairline);
     margin-top: var(--sp-10);
-    padding: var(--sp-7) var(--sp-7) var(--sp-8);
-    color: var(--muted);
+    padding: var(--sp-8) var(--sp-7) var(--sp-8);
+    background: var(--carbon);
+    color: var(--on-carbon-muted);
   }
   .row {
     display: flex;
@@ -122,18 +123,30 @@ const tools = [
     font-family: var(--font-display);
     font-weight: 700;
     font-size: var(--text-lg);
-    color: var(--ink);
+    letter-spacing: var(--tracking-tight);
+    color: var(--on-carbon);
   }
   .independence {
     margin: 0;
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    color: var(--muted);
+    color: var(--on-carbon-muted);
   }
   .disclaimer {
     margin: var(--sp-4) 0 0;
     max-width: 70ch;
+  }
+  /* the compact disclaimer defaults to dark ink (it's also used on the light /tiers page);
+     recolor it for the carbon ground here only, keeping it fully legible per the disclaimer-
+     prominence rule */
+  .disclaimer :global(.disc-compact) {
+    color: var(--on-carbon-muted);
+  }
+  .disclaimer :global(.disc-compact a) {
+    color: var(--on-carbon);
+    text-decoration: underline;
+    text-underline-offset: 2px;
   }
   .legal {
     display: flex;
@@ -147,12 +160,18 @@ const tools = [
     letter-spacing: var(--tracking-label);
   }
   .legal a {
-    color: var(--muted);
+    color: var(--on-carbon-muted);
     text-decoration: none;
-    transition: color var(--dur-fast) var(--ease-soft);
+    padding-bottom: 2px;
+    /* same signature underline-draw as the nav — paper-white here so it reads on carbon */
+    background: linear-gradient(var(--on-carbon), var(--on-carbon)) 0 100% / 0 1px no-repeat;
+    transition:
+      color var(--dur-fast) var(--ease-soft),
+      background-size var(--dur-base) var(--ease-settle);
   }
   .legal a:hover {
-    color: var(--ink);
+    color: var(--on-carbon);
+    background-size: 100% 1px;
   }
   .reflinks {
     display: flex;
@@ -165,7 +184,7 @@ const tools = [
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    color: var(--eucalyptus);
+    color: var(--on-carbon);
   }
   .linkrow {
     display: flex;
@@ -179,12 +198,17 @@ const tools = [
     letter-spacing: var(--tracking-label);
   }
   .linkrow a {
-    color: var(--muted);
+    color: var(--on-carbon-muted);
     text-decoration: none;
-    transition: color var(--dur-fast) var(--ease-soft);
+    padding-bottom: 2px;
+    background: linear-gradient(var(--on-carbon), var(--on-carbon)) 0 100% / 0 1px no-repeat;
+    transition:
+      color var(--dur-fast) var(--ease-soft),
+      background-size var(--dur-base) var(--ease-settle);
   }
   .linkrow a:hover {
-    color: var(--ink);
+    color: var(--on-carbon);
+    background-size: 100% 1px;
   }
   @media (max-width: 640px) {
     .footer {

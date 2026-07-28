@@ -35,6 +35,13 @@
   --stone:   #EEE8DA;
   --mineral: #DBD5CD;
 
+  /* ---- dark "carbon" register (v4 §C) — one dark slab breaks the continuous cream so the
+     page has rhythm instead of one flat wash. Footer today; optional hero band later. ---- */
+  --carbon:          #191510;                   /* warm near-black ground */
+  --on-carbon:       #FBF8F0;                   /* primary text on carbon — ~16:1 */
+  --on-carbon-muted: rgba(251, 248, 240, 0.62); /* secondary text on carbon — AA */
+  --on-carbon-line:  rgba(251, 248, 240, 0.14); /* hairline dividers on carbon */
+
   /* ---- text ---- */
   --ink:    #171512;   /* primary text on paper/surface */
   --raisin: #2B2028;   /* secondary emphasis */
@@ -77,15 +84,24 @@
   --text-base:    16px;   --lh-base:    1.60;  /* Instrument Sans 400 (body reading — looser for legibility) */
   --text-sm:      14px;   --lh-sm:      1.50;  /* Instrument Sans 400 */
   --text-xs:      12px;   --lh-xs:      1.40;  /* Instrument Sans 600, 0.09em, UPPERCASE */
-  --tracking-tight: -0.04em;
-  --tracking-label:  0.09em;
+  /* v4 type tuning (2026-07-27): the old −0.04em was size-blind — at 21–32px headings it
+     pulled letters so tight that word spaces collapsed ("I'mconsidering"). Retuned to a
+     moderate −0.02em that reads cleanly across the whole heading range; the largest display
+     type gets its own tighter token so it still feels poster-set. See docs/plans v4 Appendix A. */
+  --tracking-tight:   -0.02em;   /* mid + small headings (h2/h3/tiles/stats) */
+  --tracking-display: -0.035em;  /* ≥40px hero/page display only */
+  --tracking-label:    0.09em;
 
   /* ---- spacing (8px base, 4px step) ---- */
   --sp-1: 4px;  --sp-2: 8px;   --sp-3: 12px; --sp-4: 16px; --sp-5: 24px;
   --sp-6: 32px; --sp-7: 48px;  --sp-8: 64px; --sp-9: 96px; --sp-10: 128px;
 
   /* ---- radii ---- */
-  --r-xs: 3px; --r-sm: 7px; --r-md: 11px; --r-lg: 16px; --r-xl: 24px; --r-pill: 999px;
+  /* v4 radius discipline (2026-07-27): the old 3/7/11/16/24 spread gave cards no shared
+     radius identity (four different card roundings on one screen reads as templated). Tightened
+     to a systematic 4/8/10/12/16 step — the dominant card drops 16→12 and heroes 24→16, so the
+     generic panels calm down and the illustrated heroes + grade system carry the personality. */
+  --r-xs: 4px; --r-sm: 8px; --r-md: 10px; --r-lg: 12px; --r-xl: 16px; --r-pill: 999px;
 
   /* ---- borders ---- */
   --line:          rgba(23, 21, 18, 0.13);   /* hairline color (grids/dividers) */
@@ -110,6 +126,17 @@
 
   /* ---- page shell ---- */
   --page: min(1460px, calc(100vw - 32px));
+
+  /* ---- breakpoints (v4 §7) — the canonical mobile-first set. NOTE: CSS custom properties
+     cannot be used inside an @media condition, so these are NOT consumed by media queries
+     directly. They are (a) the single documented reference — new/edited components write these
+     literal px in their scoped @media, and (b) readable by JS via getComputedStyle for matchMedia.
+     Existing bespoke values (640/720/760/900/1180…) were each tuned to a component's content;
+     migrate one to the nearest standard only when reworking that component, never in bulk. */
+  --bp-sm:  480px;   /* large phone */
+  --bp-md:  768px;   /* tablet — the primary phone→desktop switch (nav collapses below this) */
+  --bp-lg: 1024px;   /* small laptop */
+  --bp-xl: 1440px;   /* wide desktop */
 }
 
 /* ---- DESIGN_SYSTEM v3 §1 — base document ---- */
@@ -118,13 +145,26 @@
     background:
       radial-gradient(circle at 12% 0%, rgba(126, 31, 43, 0.06), transparent 28%),
       linear-gradient(180deg, #FEFDF9 0%, var(--paper) 45%, #F4EFE2 100%);
-    background-attachment: fixed;
+    /* background-attachment:fixed removed 2026-07-27 — it caused repaint jank on mobile Safari */
     color: var(--ink);
     font-family: var(--font-body);
+    /* v4: body was rendering at weight 400 (the "too thin / light" complaint). 440 gives text
+       the weight of set ink on the warm ground without reading as medium/bold. Headings set
+       their own 600/700 and are unaffected. */
+    font-weight: 440;
     font-size: var(--text-base);
     line-height: var(--lh-base);
     letter-spacing: normal;  /* reading text: no tracking/kerning adjustment */
+    font-kerning: normal;
+    text-rendering: optimizeLegibility;
+    /* inherited: long unbreakable tokens (raw PubMed/DOI URLs in citations) break instead of
+       forcing the page wider than a phone. Only affects words that would otherwise overflow. */
+    overflow-wrap: break-word;
   }
   ::selection { background: var(--primary-soft); }
   :focus-visible { box-shadow: var(--focus-ring); outline: none; }
+
+  /* v4: let multi-line headings break for even ragging, and body for fewer orphans */
+  h1, h2, h3 { text-wrap: balance; }
+  p { text-wrap: pretty; }
 }

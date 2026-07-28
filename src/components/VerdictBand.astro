@@ -32,7 +32,9 @@ const t = getTier(tier);
 <style>
   .verdict-band {
     display: grid;
-    grid-template-columns: 1.5fr 1fr;
+    /* minmax(0, …) lets both tracks shrink below their content's min-width so a long chip or
+       word can't push the band past the viewport (the 360px overflow the responsive gate caught) */
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
     gap: var(--sp-6);
     background: var(--surface);
     border: var(--border-hairline);
@@ -45,6 +47,8 @@ const t = getTier(tier);
     line-height: var(--lh-lg);
     color: var(--ink);
     margin: 0;
+    min-width: 0;
+    overflow-wrap: break-word;
     padding-right: var(--sp-6);
     border-right: var(--border-hairline);
   }
@@ -52,6 +56,7 @@ const t = getTier(tier);
     display: flex;
     flex-direction: column;
     gap: var(--sp-4);
+    min-width: 0;
   }
   .grade-note {
     font-size: var(--text-sm);

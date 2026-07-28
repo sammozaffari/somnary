@@ -441,7 +441,9 @@ const catFacets = [...new Set(rows.map((r) => r.category).filter(Boolean))].sort
   /* comparison grid */
   .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    /* min(100%, 360px) so cards are ≥360px on wide screens but collapse to full width on a phone
+       narrower than 360px — a bare minmax(360px,…) forces the column past the viewport (overflow). */
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr));
     gap: var(--sp-5);
     margin: 0;
     padding: 0;
