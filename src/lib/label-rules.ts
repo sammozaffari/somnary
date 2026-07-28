@@ -109,7 +109,7 @@ export interface CheckerFlag extends Flag {
 
 /** Empty-state copy (data, so compliance can vet it): honest, never an endorsement. */
 export const EMPTY_STATE =
-  'No automated flags fired on this text. That does NOT mean a product is fine, effective, or safe — this checker only applies the handful of documented rules below, and it can only see what you pasted. Read the rules and each ingredient’s own evidence page.';
+  'No automated flags fired on this text. That does not mean a product is fine, effective, or safe.';
 
 const UNIT_TOKENS = new Set(['mg', 'mcg', 'g', 'ug', 'iu', 'ml', 'kg']);
 

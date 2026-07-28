@@ -38,7 +38,7 @@
     aria-atomic="true"
     aria-label="Label checker state: idle"
     data-lc-results>
-    <p class="lc-idle" data-lc-idle>No label checked yet.</p>
+    <p class="lc-idle" data-lc-idle><strong>Idle.</strong> Paste a supplement facts panel, then check the label.</p>
   </div>
 </section>
 
@@ -214,6 +214,24 @@
     color: var(--muted);
     margin: 0;
   }
+  .lc-results :global(.lc-empty strong),
+  .lc-results :global(.lc-coverage strong) {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .lc-results :global(.lc-coverage) {
+    padding-top: var(--sp-4);
+    margin: var(--sp-4) 0 0;
+    border-top: var(--border-hairline);
+    font-size: var(--text-xs);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+  }
+  .lc-results :global(.lc-coverage + .lc-coverage) {
+    padding-top: var(--sp-2);
+    margin-top: var(--sp-2);
+    border-top: none;
+  }
 
   /* flag rows — observations about the label. Neutral/informational marker, NOT the
      vermilion safety register (these are label notes, not health warnings). */
@@ -370,6 +388,13 @@
       extra +
       `</div>`;
 
+    const panelHtml = (title: string, bodyHtml: string, extra = '') =>
+      `<div class="lc-panel">` +
+      `<div class="lc-head"><span class="lc-head-title">${esc(title)}</span></div>` +
+      bodyHtml +
+      extra +
+      `</div>`;
+
     const countBySeverity = (flags: readonly CheckerFlag[]) => ({
       cautions: flags.filter((flag) => flag.severity === 'caution').length,
       observations: flags.filter((flag) => flag.severity === 'observation').length,
@@ -410,59 +435,84 @@
       switch (next.kind) {
         case 'idle':
           results.setAttribute('aria-label', 'Label checker state: idle');
-          results.innerHTML = '<p class="lc-idle"><strong>Idle.</strong> No label checked yet.</p>';
+          results.innerHTML =
+            '<p class="lc-idle"><strong>Idle.</strong> Paste a supplement facts panel, then choose Check the label. Nothing has been checked yet.</p>';
           return;
         case 'loading':
           results.setAttribute('aria-label', 'Label checker state: loading');
-          results.innerHTML = panel('Loading', 'The label index is loading. The check has not run yet.');
+          results.innerHTML = panel(
+            'Loading the checker',
+            'The local remedy index is loading. The check has not run yet.',
+          );
           return;
         case 'index_unavailable':
           results.setAttribute('aria-label', 'Label checker state: index unavailable');
           results.innerHTML = panel(
-            'Index unavailable',
-            'The check could not run because the label index did not load. Nothing was checked.',
+            'The check could not run',
+            next.reason === 'invalid_index'
+              ? 'The remedy index returned data this checker could not use, so nothing in this label was checked. This is a site problem. Retry the check.'
+              : 'The remedy index did not load, so nothing in this label was checked. This may be a network or server problem. Retry the check.',
             '<button type="button" class="btn-retry" data-lc-retry>Retry</button>',
           );
           return;
         case 'parsing':
           results.setAttribute('aria-label', 'Label checker state: parsing');
-          results.innerHTML = panel('Parsing', 'The pasted text is being read on this device. No result is available yet.');
+          results.innerHTML = panel(
+            'Reading the label',
+            'The pasted text is being parsed on this device. No result is available yet.',
+          );
           return;
         case 'parse_failed':
           results.setAttribute('aria-label', 'Label checker state: parse failed');
-          results.innerHTML = panel('Parse failed', 'The label text could not be read. Nothing was checked.');
+          results.innerHTML = panel(
+            'The label could not be read',
+            next.reason === 'parser_error'
+              ? 'The checker hit an error while reading this text, so nothing was checked. Try again or reformat the label text.'
+              : 'The checker could not identify label items in this text, so nothing was checked. Paste ingredient names and amounts, preferably one item per line, and try again.',
+          );
           return;
         case 'unrecognised':
           results.setAttribute('aria-label', 'Label checker state: unrecognised');
           results.innerHTML = panel(
-            'Unrecognised',
-            `No ingredient rules were applied. Not recognised: ${next.items.join(', ')}.`,
+            'Nothing was recognised',
+            `The text could be read, but none of these ingredient names matched the checker’s curated index: ${next.items.join(', ')}. No ingredient rules were applied. Check the spelling or use the ingredient pages.`,
           );
           return;
         case 'partial': {
-          results.setAttribute('aria-label', 'Label checker state: partial');
           const summary = next.flags.length ? flagSummary(next.flags) : '';
           const title = summary ? `Partial check — ${summary} on recognised items` : 'Partial check';
-          const coverage = `Checked: ${next.checked.map((item) => item.name).join(', ')}. Not recognised or checked: ${next.unrecognised.join(', ')}.`;
+          results.setAttribute('aria-label', `Label checker state: ${title}`);
+          const coverage =
+            `<p class="lc-empty"><strong>Coverage is incomplete.</strong> Checked against the loaded index: ${esc(next.checked.map((item) => item.name).join(', '))}. ` +
+            `Not recognised and not checked: ${esc(next.unrecognised.join(', '))}. Any cautions or observations below apply only to the recognised items.</p>`;
           const rows = next.flags.length ? `<ul class="flag-list">${renderFlagRows(next.flags)}</ul>` : '';
-          results.innerHTML = panel(title, coverage, rows);
+          results.innerHTML = panelHtml(title, coverage, rows);
           return;
         }
         case 'flags_found': {
-          results.setAttribute('aria-label', 'Label checker state: flags found');
           const summary = flagSummary(next.flags);
+          const title = `${summary.charAt(0).toUpperCase()}${summary.slice(1)} found`;
+          results.setAttribute('aria-label', `Label checker state: flags found — ${summary}`);
           results.innerHTML =
             `<div class="lc-panel">` +
-            `<div class="lc-head"><span class="lc-head-title">What the label shows</span>` +
-            `<span class="lc-count">${esc(summary)} — described, not a grade or a recommendation.</span></div>` +
+            `<div class="lc-head"><span class="lc-head-title">${esc(title)}</span>` +
+            `<span class="lc-count">Described, not a grade or a recommendation.</span></div>` +
+            `<p class="lc-empty">Checked against the loaded index: ${esc(next.checked.map((item) => item.name).join(', ') || 'label structure only')}. This is not a complete safety or quality check.</p>` +
             `<ul class="flag-list">${renderFlagRows(next.flags)}</ul>` +
             `</div>`;
           return;
         }
-        case 'no_flags_checked':
+        case 'no_flags_checked': {
           results.setAttribute('aria-label', 'Label checker state: no flags checked');
-          results.innerHTML = panel('No flags after checking', EMPTY_STATE);
+          const checked = next.checked.map((item) => item.name).join(', ');
+          results.innerHTML = panelHtml(
+            'No flags after checking',
+            `<p class="lc-empty"><strong>${esc(EMPTY_STATE)}</strong></p>` +
+              `<p class="lc-coverage"><strong>Checked against the loaded index:</strong> ${esc(checked)}. The checker looked for proprietary-blend wording, melatonin above 5 mg, doses below a parsed study floor, missing botanical standardisation, and curated interaction cautions.</p>` +
+              `<p class="lc-coverage"><strong>Not covered:</strong> Unknown ingredients or forms, missing amounts, every possible interaction, manufacturing quality, contaminants, or anything not pasted.</p>`,
+          );
           return;
+        }
       }
     };
 
