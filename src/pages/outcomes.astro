@@ -1,0 +1,128 @@
+---
+// Browse-by-problem index (audit IA-3) — the first-class "start from your sleep problem" landing
+// page, the outcome-collection equivalent of /tiers for remedies. Serves the largest naive-user
+// intent ("what helps me sleep") as its own bookmarkable/crawlable destination WITHOUT adding a
+// third nav pillar (the 2-pillar search-first nav is owner-ratified 2026-07-27). Reads the single
+// outcome taxonomy in lib/outcomes; ranking on each outcome page is by grade, never anecdote.
+import Base from '../layouts/Base.astro';
+import { OUTCOMES } from '../lib/outcomes';
+---
+
+<Base
+  title="Sleep problems — browse by goal — Somnary"
+  description="Start from the sleep problem, not the supplement. Browse every sleep goal — falling asleep, staying asleep, sleep quality, anxiety, jet lag — and the remedies with human evidence for it, ranked by grade."
+>
+  <main class="page">
+    <header class="head">
+      <p class="eyebrow">Browse by goal</p>
+      <h1 class="title">What are you trying to fix?</h1>
+      <p class="lede">
+        Start from the sleep problem, not the supplement. Each goal lists the remedies with real
+        human evidence for that specific measure — ranked by grade, never by popularity.
+      </p>
+    </header>
+
+    <ul class="grid">
+      {
+        OUTCOMES.map((o) => (
+          <li>
+            <a class="card" href={`/outcome/${o.id}`}>
+              <p class="card-title">{o.title}</p>
+              <p class="card-dek">{o.dek}</p>
+              <p class="card-meta">
+                {o.remedies.length} remed{o.remedies.length === 1 ? 'y' : 'ies'} with evidence{' '}
+                <span aria-hidden="true">→</span>
+              </p>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </main>
+</Base>
+
+<style>
+  .page {
+    max-width: var(--page);
+    margin: 0 auto;
+    padding: var(--sp-8) var(--sp-5) var(--sp-9);
+  }
+  .head {
+    max-width: 60ch;
+    margin-bottom: var(--sp-7);
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+    margin: 0;
+  }
+  .title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-3xl);
+    line-height: var(--lh-3xl);
+    letter-spacing: var(--tracking-display);
+    color: var(--ink);
+    margin: var(--sp-3) 0 var(--sp-4);
+  }
+  .lede {
+    font-size: var(--text-md);
+    line-height: var(--lh-md);
+    color: var(--muted);
+    margin: 0;
+  }
+
+  .grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+    gap: var(--sp-5);
+  }
+  .card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+    height: 100%;
+    padding: var(--sp-6);
+    background: var(--surface);
+    border: var(--border-hairline);
+    border-radius: var(--r-lg);
+    text-decoration: none;
+    transition:
+      transform var(--dur-fast) var(--ease-soft),
+      box-shadow var(--dur-fast) var(--ease-soft);
+  }
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+  .card:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+  }
+  .card-title {
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    line-height: var(--lh-lg);
+    color: var(--ink);
+    margin: 0;
+  }
+  .card-dek {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: 0;
+    flex: 1;
+  }
+  .card-meta {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--primary);
+    margin: var(--sp-3) 0 0;
+  }
+</style>
