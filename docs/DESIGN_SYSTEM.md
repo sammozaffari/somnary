@@ -45,8 +45,10 @@ Instrument Sans, circular oxblood mark.
 
 ## 1. Tokens — CSS `:root`
 
-Warm/oxblood v3 values, with roles annotated. Names match `src/styles/global.css`
-and `tailwind.config.mjs` exactly.
+Warm/oxblood v3 values, with roles annotated. `src/styles/global.css` `:root` is the
+single source of truth. *(The former `tailwind.config.mjs` token mirror was removed —
+audit CRAFT-1 — as no Tailwind utility consumed it and it had drifted; Tailwind is kept
+only for its Preflight reset.)*
 
 ```css
 :root {
@@ -231,8 +233,9 @@ styling and shipping without it fails accessibility.
 
 ## 7. Breakpoints (v4 canonical set, 2026-07-27)
 
-Four mobile-first breakpoints, defined once as `--bp-*` in `global.css` and mirrored in
-`tailwind.config.mjs` `screens`. **A CSS custom property cannot be used inside an `@media`
+Four mobile-first breakpoints, defined once as `--bp-*` in `global.css` (the sole source;
+the `tailwind.config.mjs` `screens` mirror was removed with the rest of the unused theme —
+audit CRAFT-1). **A CSS custom property cannot be used inside an `@media`
 condition**, so `--bp-*` are the *documented reference* (write the literal px in scoped
 `@media`) plus a JS-readable source for `matchMedia`; they are not consumed by media queries
 directly.
