@@ -13,6 +13,7 @@ import RemedyLeadBlock from '../../components/RemedyLeadBlock.astro';
 import VerdictBand from '../../components/VerdictBand.astro';
 import ClaimsDataTable from '../../components/ClaimsDataTable.astro';
 import DosingGrid from '../../components/DosingGrid.astro';
+import RemedyForms from '../../components/RemedyForms.astro';
 import SafetyCallout from '../../components/SafetyCallout.astro';
 import MetadataCard from '../../components/MetadataCard.astro';
 import CommunityBar from '../../components/CommunityBar.astro';
@@ -95,6 +96,15 @@ const jsonLd = remedyJsonLd(d, canonical, site);
           <h2 class="block-title">What the trials actually found</h2>
           <div class="prose"><Content /></div>
         </section>
+
+        {/* 4.5 — per-form evidence (audit IA-1; only when the remedy has a form breakdown) */}
+        {d.forms.length > 0 && (
+          <section class="block">
+            <p class="eyebrow">Form matters</p>
+            <h2 class="block-title">Not every form is equal</h2>
+            <RemedyForms forms={d.forms} />
+          </section>
+        )}
 
         {/* 5 — dosing reality (supplements only; interventions have no dose) */}
         {d.doses.length > 0 && (
