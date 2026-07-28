@@ -19,6 +19,12 @@ interface Props {
 }
 const { title, description, canonical, ogType = 'website', ogImage } = Astro.props;
 
+// Every page gets a share card: remedy pages pass their own generated og:image; everything else
+// falls back to the site-wide branded default at /og.png (see src/pages/og.png.ts). Absolute URL
+// per the OG spec — derived from Astro.site so previews don't render an imageless `summary` card.
+const site = Astro.site?.href?.replace(/\/$/, '') ?? 'https://somnary.vercel.app';
+const ogImageUrl = ogImage ?? `${site}/og.png`;
+
 // Search-first IA (2026-07-27, Phase 1): a global "Back" affordance on every interior page (not the
 // homepage). The anchor points at "/" so it works with JS disabled / no history (no-referrer fallback);
 // the inline script upgrades it to history.back() when there is somewhere to go back to.
@@ -37,25 +43,20 @@ const isHome = path === '/';
     {description && <meta name="description" content={description} />}
     {canonical && <link rel="canonical" href={canonical} />}
 
-    {/* Open Graph / Twitter (CHK-2.2). Per-remedy generated og:image is a follow-up. */}
+    {/* Open Graph / Twitter (CHK-2.2). Remedy pages pass a generated og:image; every other page
+        falls back to the site-wide branded default (ogImageUrl), so no page ships an imageless card. */}
     <meta property="og:site_name" content="Somnary" />
     <meta property="og:type" content={ogType} />
     <meta property="og:title" content={title} />
     {description && <meta property="og:description" content={description} />}
     {canonical && <meta property="og:url" content={canonical} />}
-    {
-      ogImage && (
-        <>
-          <meta property="og:image" content={ogImage} />
-          <meta property="og:image:width" content="1200" />
-          <meta property="og:image:height" content="630" />
-        </>
-      )
-    }
-    <meta name="twitter:card" content={ogImage ? 'summary_large_image' : 'summary'} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     {description && <meta name="twitter:description" content={description} />}
-    {ogImage && <meta name="twitter:image" content={ogImage} />}
+    <meta name="twitter:image" content={ogImageUrl} />
 
     {/* Brand typefaces are self-hosted via @fontsource (imported in the frontmatter,
         bundled by Astro) — DESIGN_SYSTEM v3 §2: Instrument Sans display+body, IBM Plex

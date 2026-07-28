@@ -26,7 +26,9 @@ import { join } from 'node:path';
 const ROOT = 'src';
 const EXEMPT = new Set([
   'src/styles/global.css',
+  'src/lib/og.ts', // shared OG card tokens/machinery — satori needs literal hex
   'src/pages/r/[slug]/og.png.ts',
+  'src/pages/og.png.ts', // site-wide default OG card
 ]);
 const EXT = /\.(astro|ts|tsx|js|mjs|css)$/;
 
