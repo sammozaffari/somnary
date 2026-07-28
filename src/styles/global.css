@@ -1,7 +1,8 @@
 /* Global stylesheet — Tailwind layers + design tokens.
    Tokens below are DESIGN_SYSTEM.md v3 §1 (warm/oxblood · Instrument Sans), the
    source of truth that component specs reference directly (e.g. var(--grade-d),
-   var(--ink)). tailwind.config.mjs mirrors the same values as utility classes.
+   var(--ink)). These tokens are the SINGLE source of truth — tailwind.config.mjs no longer
+   mirrors them (audit CRAFT-1: the mirror was unused by any utility and had drifted; removed).
    Never hardcode raw values — see DESIGN_SYSTEM §10 guardrails.
 
    v3 RE-SKIN NOTE: token NAMES are unchanged from v2 (evidence-teal); only their

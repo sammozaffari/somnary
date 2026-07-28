@@ -138,6 +138,8 @@ const { claims } = Astro.props;
     font-size: 16px;
     line-height: var(--lh-base);
     color: var(--ink);
+    /* study figures (n, minutes, effect sizes) read as data — tabular figures, mono retired (§1) */
+    font-variant-numeric: tabular-nums;
     /* FINAL state = visible; JS sets the hidden start inline then animates back to this */
     display: inline-block;
     opacity: 1;
@@ -147,18 +149,27 @@ const { claims } = Astro.props;
       transform var(--dur-base) var(--ease-settle);
   }
 
+  /* "no trial tests this" is content, not a blank — and an evidence GAP, not evidence.
+     Rendered as a distinct neutral chip so it never reads as just another data cell.
+     Deliberately NOT the vermilion safety register (§10: safety only) and NOT a grade/
+     green color (must not imply evidence exists) — a stone chip + nil-ring marker. */
   .nodata {
     display: inline-flex;
     align-items: center;
     gap: var(--sp-2);
     font-family: var(--font-mono);
     font-size: 13px;
-    color: var(--muted);
+    font-weight: 600;
+    color: var(--raisin);
+    background: var(--stone);
+    padding: var(--sp-1) var(--sp-3);
+    border-radius: var(--r-pill);
   }
   .dash {
-    width: 18px;
-    height: 1px;
-    background: var(--mineral);
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 1.5px solid var(--muted);
     flex: none;
   }
 

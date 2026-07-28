@@ -69,6 +69,8 @@ const { doses } = Astro.props;
     line-height: var(--lh-sm);
     color: var(--ink);
     margin: 0;
+    /* mono retired (DESIGN_SYSTEM §1) — keep dose/timing digits aligned column-to-column */
+    font-variant-numeric: tabular-nums;
   }
   .val-form {
     font-weight: 600;

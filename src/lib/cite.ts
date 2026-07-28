@@ -61,3 +61,49 @@ export function sourceTypeLabel(type: string): string {
   };
   return MAP[type] ?? type;
 }
+
+export type SourceStrength = {
+  tier: 'strong' | 'moderate' | 'weak';
+  filled: 1 | 2 | 3; // filled pips out of 3
+  label: string; // accessible strength word
+};
+
+/**
+ * Where a source sits on the standard evidence hierarchy (meta-analysis / guideline > RCT >
+ * observational > mechanistic). Drives the visual "evidence weight" pip so a reader sees at a
+ * glance that an animal study is weaker than a meta-analysis — evidence strength is STRUCTURAL,
+ * not a flat green label (audit DOM-1).
+ *
+ * IMPORTANT: this ranks the STUDY TYPE only. It is NOT a per-source quality score and NOT the
+ * remedy tier grade (grades stay [HUMAN-GATE], set only by a human). The edge cases
+ * (case-series / review / registry / other) are ranked CONSERVATIVELY — never overstate an
+ * uncharacterised source. These conservative EBM placements were RATIFIED 2026-07-28
+ * (owner-delegated); any future change to a placement is a content-methodology decision.
+ */
+const STRENGTH: Record<string, 'strong' | 'moderate' | 'weak'> = {
+  'meta-analysis': 'strong',
+  'systematic-review': 'strong',
+  rct: 'strong',
+  guideline: 'strong',
+  cohort: 'moderate',
+  review: 'moderate', // narrative review — below a systematic review, which is 'strong'
+  animal: 'weak',
+  'in-vitro': 'weak',
+  'case-series': 'weak', // uncontrolled, no comparator — near the EBM floor, below cohort
+  registry: 'weak', // a registration/protocol, not a completed result — ranked conservatively
+  other: 'weak', // uncharacterised — never imply strength
+  // Edge rows (case-series / review / registry / other) ranked conservatively (err low) and
+  // RATIFIED as these EBM defaults 2026-07-28 (owner-delegated); apex/floor rows uncontroversial.
+};
+
+export function sourceStrength(type: string): SourceStrength {
+  const tier = STRENGTH[type] ?? 'weak';
+  const filled = tier === 'strong' ? 3 : tier === 'moderate' ? 2 : 1;
+  const label = tier === 'strong' ? 'Strong' : tier === 'moderate' ? 'Moderate' : 'Weak';
+  return { tier, filled, label };
+}
+
+/** Comparator: strongest evidence first, stable by footnote number within a strength tier. */
+export function byStrength(a: CiteSource, b: CiteSource): number {
+  return sourceStrength(b.type).filled - sourceStrength(a.type).filled || a.n - b.n;
+}

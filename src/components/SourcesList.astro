@@ -4,13 +4,22 @@
 // CHK-0.5 resolver validates. Rendered server-side so all citation detail is in the HTML and
 // crawlable even with JS off (the popover is progressive enhancement on top of this). No
 // rel="sponsored" anywhere — independence non-negotiable.
-import { sourceUrl, sourceIdLabel, sourceTypeLabel, type CiteSource } from '../lib/cite';
+import {
+  sourceUrl,
+  sourceIdLabel,
+  sourceTypeLabel,
+  sourceStrength,
+  byStrength,
+  type CiteSource,
+} from '../lib/cite';
 
 interface Props {
   sources: CiteSource[];
 }
 const { sources } = Astro.props;
-const ordered = [...sources].sort((a, b) => a.n - b.n);
+// Strongest evidence first (audit DOM-1): a meta-analysis outranks an animal study. Each entry
+// still shows its footnote number, so inline [n] cross-references resolve regardless of order.
+const ordered = [...sources].sort(byStrength);
 ---
 
 <ol class="sources">
@@ -19,7 +28,17 @@ const ordered = [...sources].sort((a, b) => a.n - b.n);
       <li id={`source-${s.n}`} class="source">
         <span class="num" aria-hidden="true">{s.n}</span>
         <div class="body">
-          <p class="s-type">{sourceTypeLabel(s.type)}</p>
+          <p class="s-type">
+            <span
+              class="pip"
+              data-tier={sourceStrength(s.type).tier}
+              role="img"
+              aria-label={`${sourceStrength(s.type).label} evidence`}
+            >
+              <span /><span /><span />
+            </span>
+            <span class="s-type-word">{sourceTypeLabel(s.type)}</span>
+          </p>
           <p class="s-title">{s.title}</p>
           <p class="s-line">{s.sourceLine}</p>
           <p class="s-finding">{s.finding}</p>
@@ -60,12 +79,45 @@ const ordered = [...sources].sort((a, b) => a.n - b.n);
   .body {
     min-width: 0;
   }
+  /* Type label was a flat --eucalyptus (green) on EVERY source — which read as "verified" on weak
+     sources too (audit DOM-1). Now neutral, with the strength pip carrying the evidence weight. */
   .s-type {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    color: var(--eucalyptus);
+    color: var(--muted);
     margin: 0 0 var(--sp-2);
+  }
+  /* Evidence-weight pip: 3 dots, filled-count = strength. Neutral ink (--raisin) NOT green — it
+     shows how much evidence weight, never implies "verified/positive" (§10). Text label + the
+     pip's role=img aria-label carry the meaning; the dots themselves are decorative. */
+  .pip {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    flex: none;
+  }
+  .pip span {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    border: 1px solid var(--mineral);
+    background: transparent;
+  }
+  .pip[data-tier='strong'] span {
+    background: var(--raisin);
+    border-color: var(--raisin);
+  }
+  .pip[data-tier='moderate'] span:nth-child(-n + 2) {
+    background: var(--raisin);
+    border-color: var(--raisin);
+  }
+  .pip[data-tier='weak'] span:nth-child(1) {
+    background: var(--raisin);
+    border-color: var(--raisin);
   }
   .s-title {
     font-family: var(--font-display);

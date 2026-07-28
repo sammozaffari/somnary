@@ -53,6 +53,8 @@ const accentColor: Record<'eucalyptus' | 'primary', string> = {
     font-size: var(--text-2xl);
     line-height: 1;
     color: var(--ink);
+    /* mono retired (DESIGN_SYSTEM §1) — align stat digits with tabular figures, not a mono face */
+    font-variant-numeric: tabular-nums;
   }
   .label {
     margin-top: var(--sp-3);

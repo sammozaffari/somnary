@@ -97,8 +97,9 @@ const { remedyName, slug } = Astro.props;
     box-shadow: var(--ring);
   }
   .send {
-    width: 30px;
-    height: 30px;
+    /* match the 44px input height — meets the touch-target minimum and aligns the row (A11Y-2) */
+    width: 44px;
+    height: 44px;
     flex: none;
     display: inline-flex;
     align-items: center;
