@@ -15,6 +15,7 @@ const entries = [
     doseFormCount: 3,
     interactions: ['sedatives; anticoagulants'],
     tier: 'B',
+    workflowState: 'unreviewed',
   },
   {
     slug: 'magnesium',
@@ -29,6 +30,7 @@ const entries = [
     doseFormCount: 3,
     interactions: [],
     tier: 'B',
+    workflowState: 'unreviewed',
   },
 ];
 

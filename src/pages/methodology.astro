@@ -125,6 +125,16 @@ const killers: { term: string; body: string; link?: { href: string; text: string
         reason, due date, or successor link when one applies. Those detailed axes stay off cards,
         search results, and social images.
       </p>
+      <dl class="state-key">
+        <div>
+          <dt>Evidence status</dt>
+          <dd>Established · Provisional · Disputed · Insufficient</dd>
+        </div>
+        <div>
+          <dt>Freshness</dt>
+          <dd>Current · Review due · Superseded</dd>
+        </div>
+      </dl>
     </aside>
 
     <!-- Section 2 — the tier system (renders from src/lib/tiers.ts) -->
@@ -456,6 +466,28 @@ const killers: { term: string; body: string; link?: { href: string; text: string
     line-height: var(--lh-sm);
     color: var(--muted);
   }
+  .state-key {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--sp-4);
+    margin: var(--sp-5) 0 0;
+  }
+  .state-key > div {
+    padding-top: var(--sp-4);
+    border-top: var(--border-hairline);
+  }
+  .state-key dt {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+  }
+  .state-key dd {
+    margin: var(--sp-2) 0 0;
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--ink);
+  }
 
   /* sections */
   .section {
@@ -645,6 +677,9 @@ const killers: { term: string; body: string; link?: { href: string; text: string
     .tier-row {
       grid-template-columns: 1fr;
       gap: var(--sp-4);
+    }
+    .state-key {
+      grid-template-columns: 1fr;
     }
     .glossary-row {
       grid-template-columns: 1fr;

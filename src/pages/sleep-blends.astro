@@ -8,13 +8,26 @@
 import Base from '../layouts/Base.astro';
 import TierBadge from '../components/TierBadge.astro';
 import GateChip from '../components/GateChip.astro';
+import ReviewState from '../components/ReviewState.astro';
 import Disclaimer from '../components/Disclaimer.astro';
-import { contentIndex } from '../lib/content-index';
+import { getCollection } from 'astro:content';
+import { isOrdinarySearchEligible } from '../lib/remedy-state';
 
-// Link out to whichever ingredient pages are actually live (so the page grows itself, honestly).
-const liveIngredients = contentIndex
-  .filter((e) => e.researchStatus === 'live' && e.kind === 'remedy' && e.plannedTier !== null)
-  .map((e) => ({ name: e.name, slug: e.slug, tier: e.plannedTier! }));
+// Link out to current supplement records from the validated collection. Workflow is collapsed to
+// the one public review label; evidence/freshness remain exclusive to each remedy detail page.
+const liveIngredients = (
+  await getCollection(
+    'remedies',
+    (e) => !e.data.draft && e.data.format === 'supplement' && isOrdinarySearchEligible(e.data),
+  )
+)
+  .map((e) => ({
+    name: e.data.name,
+    slug: e.id,
+    tier: e.data.tier,
+    workflowState: e.data.workflowState,
+  }))
+  .sort((a, b) => a.name.localeCompare(b.name));
 
 // what the label implies vs what you can actually verify (static explainer table — no cited claims)
 const rows = [
@@ -101,8 +114,8 @@ const rows = [
         </p>
         <p>
           This is the <a href="/methodology#rankings">proprietary-blend penalty</a> in the
-          methodology (§3.2): a label you can’t verify is downgraded on principle, because we don’t
-          grade on faith.
+          methodology (§3.2): a label you can’t verify is downgraded on principle, because Somnary
+          doesn’t grade on faith.
         </p>
       </div>
     </section>
@@ -172,7 +185,7 @@ const rows = [
       <div class="prose">
         <p>
           The honest way to judge a blend is to look up each ingredient on its own and check the
-          dose. Graded so far:
+          dose. Evidence pages available:
         </p>
       </div>
       <ul class="links">
@@ -181,7 +194,8 @@ const rows = [
             <li>
               <a href={`/r/${i.slug}`}>
                 <TierBadge tier={i.tier} size="inline" />
-                <span>{i.name}</span>
+                <span class="ingredient-name">{i.name}</span>
+                <ReviewState state={i.workflowState} />
               </a>
             </li>
           ))
@@ -189,7 +203,7 @@ const rows = [
       </ul>
       <div class="prose">
         <p>
-          More ingredients are graded as the catalog grows. The grading rules themselves live in the
+          More ingredients are documented as the catalog grows. The grading rules themselves live in the
           <a href="/methodology">methodology</a>.
         </p>
       </div>
@@ -380,9 +394,15 @@ const rows = [
   .links a:hover {
     border-color: var(--mineral);
   }
+  .links a:active {
+    border-color: var(--primary);
+  }
   .links a:focus-visible {
     outline: none;
     box-shadow: var(--ring);
+  }
+  .ingredient-name {
+    font-weight: 650;
   }
 
   .disclaimer-slot {

@@ -33,6 +33,7 @@ const CONTENT_DIR = join(ROOT, 'src/content/remedies');
 
 const imp = (rel) => import(pathToFileURL(join(ROOT, rel)).href);
 const { buildAskCorpus } = await imp('src/lib/ask/corpus.ts');
+const { gradeStampState } = await imp('src/lib/remedy-state.ts');
 const { runGuideBeat, sanitizeAck } = await imp('src/lib/guide/engine.ts');
 const { planHrefs, summaryHrefs } = await imp('src/lib/guide/router.ts');
 const { NEUTRAL_ACK } = await imp('src/lib/guide/schema.ts');
@@ -60,6 +61,7 @@ async function loadCorpus() {
       slug: f.replace(/\.mdx$/, ''),
       name: data.name,
       tier: data.tier,
+      workflowState: data.workflowState,
       aliases: data.aliases ?? [],
       oneLineVerdict: data.oneLineVerdict,
       verdict: data.verdict,
@@ -440,7 +442,7 @@ async function runRealUrlSweep(corpus, routable) {
 // The summary must be composed DETERMINISTICALLY from (a) fixed enum→phrase templates and (b) verbatim
 // corpus data — NEVER the user's raw text, the model's notes, or the model's ack. These cases prove:
 //   (a) no raw user/model free-text (a planted PURPLEELEPHANT token) leaks into ANY summary fragment;
-//   (b) a tried-remedy fragment uses the CORPUS name + a Grade letter, not the user's raw phrasing;
+//   (b) a tried-remedy fragment uses the CORPUS name + Grade + collapsed review label, not raw phrasing;
 //   (c) NO summary fragment text trips lintForbiddenFraming (containment on the composed prose);
 //   (d) crisis → the summary carries ONLY the single crisis fragment.
 async function runSummaryInvariants(corpus, routable) {
@@ -460,8 +462,9 @@ async function runSummaryInvariants(corpus, routable) {
     check(noLeak, 'summary/no-raw-user-or-model-text-leaks');
     console.log(`  ${noLeak ? '✓' : '✗'} no PURPLEELEPHANT (input/ack/notes) leaks into any summary fragment`);
 
-    // (b) the tried fragment names the CORPUS remedy (Melatonin) with a Grade letter, not the raw string.
+    // (b) the tried fragment names the CORPUS remedy with its Grade and public review label.
     const mel = corpus.find((r) => r.slug === 'melatonin');
+    const melReview = mel?.workflowState ? gradeStampState(mel.workflowState).label : '';
     const triedFrag = (res.plan.summary ?? []).find(
       (f) => f.links.some((l) => l.href === '/r/melatonin'),
     );
@@ -470,10 +473,11 @@ async function runSummaryInvariants(corpus, routable) {
       !!mel &&
       triedFrag.text.includes(mel.name) &&
       /\bGrade\s+\S+/.test(triedFrag.text) &&
+      triedFrag.text.includes(melReview) &&
       !triedFrag.text.includes('PURPLEELEPHANT');
     check(usesCorpusName, 'summary/tried-remedy-uses-corpus-name-and-grade');
     console.log(
-      `  ${usesCorpusName ? '✓' : '✗'} tried fragment uses corpus name "${mel?.name}" + a Grade letter, not the raw string`,
+      `  ${usesCorpusName ? '✓' : '✗'} tried fragment uses corpus name "${mel?.name}" + Grade + review label, not the raw string`,
     );
 
     // (c) containment on the composed summary prose (the forbidden "recommend/safe for you" ack must

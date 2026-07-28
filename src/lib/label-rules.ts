@@ -12,6 +12,7 @@
  * product is "safe", never recommends OR forbids a combination (D4), never diagnoses, and assigns
  * NO grade to a pasted panel.
  */
+import { WORKFLOW_LABELS, type WorkflowState } from './remedy-state.ts';
 
 /** One remedy, projected to the fields the rules need. Shipped as /label-index.json (build-time). */
 export interface LabelEntry {
@@ -27,6 +28,7 @@ export interface LabelEntry {
   doseFormCount?: number; // conservative R3 gate; per-form entities and matching are deliberately deferred
   interactions: string[];
   tier: string;
+  workflowState: WorkflowState;
 }
 
 export type RuleId = 'R1' | 'R2' | 'R3' | 'R4' | 'R5';
@@ -133,7 +135,9 @@ function isLabelEntry(value: unknown): value is LabelEntry {
     (typeof entry.doseFormCount === 'number' || entry.doseFormCount === undefined) &&
     Array.isArray(entry.interactions) &&
     entry.interactions.every((interaction) => typeof interaction === 'string') &&
-    typeof entry.tier === 'string'
+    typeof entry.tier === 'string' &&
+    typeof entry.workflowState === 'string' &&
+    entry.workflowState in WORKFLOW_LABELS
   );
 }
 

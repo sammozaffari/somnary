@@ -22,7 +22,7 @@ const sourcesCited = contentIndex
   .reduce((n, e) => n + e.sourceCount, 0);
 
 const statCells = [
-  { value: String(remediesGraded), label: 'Remedies graded' },
+  { value: String(remediesGraded), label: 'Remedies documented' },
   { value: String(sourcesCited), label: 'Sources cited' },
   { value: '0', label: 'Hallucinated cites', accent: 'eucalyptus' as const },
   { value: '$0', label: 'Brand money', accent: 'primary' as const },

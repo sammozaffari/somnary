@@ -94,7 +94,10 @@ const others = OUTCOMES.filter((o) => o.id !== outcome.id);
                 <span class="row-name">{r.name}</span>
                 <span class="row-note">{r.oneLiner}</span>
               </span>
-              <span class="row-grade">Grade {r.tier}</span>
+              <span class="row-status">
+                <span class="row-grade">Grade {r.tier}</span>
+                <ReviewState state={r.workflowState} />
+              </span>
             </a>
           </li>
         ))
@@ -127,7 +130,9 @@ const others = OUTCOMES.filter((o) => o.id !== outcome.id);
                     <span class="row-name">{r.name}</span>
                     <span class="row-note">{r.oneLiner}</span>
                   </span>
-                  <ReviewState state={r.workflowState} />
+                  <span class="row-status">
+                    <ReviewState state={r.workflowState} />
+                  </span>
                 </a>
               </li>
             ))}
@@ -300,6 +305,12 @@ const others = OUTCOMES.filter((o) => o.id !== outcome.id);
     color: var(--muted);
     white-space: nowrap;
   }
+  .row-status {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: var(--sp-1);
+  }
   .ranking-empty {
     margin: 0;
     padding: var(--sp-6);
@@ -419,6 +430,10 @@ const others = OUTCOMES.filter((o) => o.id !== outcome.id);
     }
     .row-grade {
       display: none;
+    }
+    .row-status {
+      grid-column: 3;
+      align-items: flex-start;
     }
   }
 </style>

@@ -25,7 +25,7 @@ function card() {
         wordmark('36px'),
         h(
           { fontSize: '22px', fontWeight: 600, color: PRIMARY, letterSpacing: '0.01em' },
-          'Independent · evidence-graded · reader-funded',
+          'Single-author · evidence-graded · reader-funded',
         ),
       ]),
       // middle: the homepage headline + value-prop dek

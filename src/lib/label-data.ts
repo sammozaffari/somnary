@@ -46,6 +46,7 @@ export async function getLabelEntries(): Promise<LabelEntry[]> {
         doseFormCount: d.doses.length,
         interactions: d.safety.interactions,
         tier: d.tier,
+        workflowState: d.workflowState,
       } satisfies LabelEntry;
     })
     .sort((a, b) => a.name.localeCompare(b.name));

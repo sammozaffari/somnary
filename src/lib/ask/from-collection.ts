@@ -16,6 +16,7 @@ export async function getAskCorpus(): Promise<AskRemedy[]> {
       slug: e.id,
       name: d.name,
       tier: d.tier,
+      workflowState: d.workflowState,
       aliases: d.aliases,
       oneLineVerdict: d.oneLineVerdict,
       verdict: d.verdict,

@@ -5,12 +5,14 @@
 import type { APIRoute, GetStaticPaths } from 'astro';
 import { getCollection } from 'astro:content';
 import type { TierId } from '../../../lib/tiers';
-import { GRADE, INK, MUTED, PAPER, OG_TAGLINE, SOFT, h, toPng, wordmark } from '../../../lib/og';
+import { gradeStampState, type WorkflowState } from '../../../lib/remedy-state';
+import { GRADE, INK, MUTED, PAPER, PRIMARY_DEEP, OG_TAGLINE, SOFT, h, toPng, wordmark } from '../../../lib/og';
 
 export const prerender = true;
 
-function card(name: string, tier: TierId, dek: string) {
+function card(name: string, tier: TierId, workflowState: WorkflowState, dek: string) {
   const g = GRADE[tier];
+  const state = gradeStampState(workflowState);
   return h(
     {
       width: '1200px',
@@ -25,17 +27,28 @@ function card(name: string, tier: TierId, dek: string) {
       // top row: wordmark + grade badge (filled, white letter)
       h({ justifyContent: 'space-between', alignItems: 'flex-start' }, [
         wordmark('36px'),
-        h(
-          {
-            width: '150px',
-            height: '150px',
-            alignItems: 'center',
-            justifyContent: 'center',
-            borderRadius: '20px',
-            background: `linear-gradient(145deg, ${g.fill}, ${g.anchor})`,
-          },
-          h({ fontFamily: 'Instrument Sans', fontWeight: 700, fontSize: '104px', color: '#ffffff', lineHeight: 1, letterSpacing: '-0.06em' }, tier),
-        ),
+        h({ flexDirection: 'column', alignItems: 'center' }, [
+          h(
+            {
+              width: '150px',
+              height: '150px',
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: '20px',
+              background: `linear-gradient(145deg, ${g.fill}, ${g.anchor})`,
+            },
+            h({ fontFamily: 'Instrument Sans', fontWeight: 700, fontSize: '104px', color: '#ffffff', lineHeight: 1, letterSpacing: '-0.06em' }, tier),
+          ),
+          h(
+            {
+              fontSize: state.prominent ? '28px' : '22px',
+              fontWeight: state.prominent ? 700 : 600,
+              color: state.prominent ? PRIMARY_DEEP : MUTED,
+              marginTop: '14px',
+            },
+            state.label,
+          ),
+        ]),
       ]),
       // middle: name + verdict
       h({ flexDirection: 'column' }, [
@@ -55,13 +68,23 @@ export const getStaticPaths: GetStaticPaths = async () => {
   const remedies = await getCollection('remedies', (e) => !e.data.draft);
   return remedies.map((e) => ({
     params: { slug: e.id },
-    props: { name: e.data.name, tier: e.data.tier, dek: e.data.oneLineVerdict },
+    props: {
+      name: e.data.name,
+      tier: e.data.tier,
+      workflowState: e.data.workflowState,
+      dek: e.data.oneLineVerdict,
+    },
   }));
 };
 
 export const GET: APIRoute = async ({ props }) => {
-  const { name, tier, dek } = props as { name: string; tier: TierId; dek: string };
-  const png = await toPng(card(name, tier, dek));
+  const { name, tier, workflowState, dek } = props as {
+    name: string;
+    tier: TierId;
+    workflowState: WorkflowState;
+    dek: string;
+  };
+  const png = await toPng(card(name, tier, workflowState, dek));
   return new Response(new Uint8Array(png), {
     headers: { 'Content-Type': 'image/png', 'Cache-Control': 'public, max-age=31536000, immutable' },
   });
