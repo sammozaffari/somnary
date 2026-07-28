@@ -645,24 +645,37 @@ const resolved: Resolved[] = slides
   .hc-dots {
     display: flex;
     align-items: center;
-    gap: var(--sp-3);
+    /* dots carry their own 24px tap padding; gap 0 keeps the original 12px visual dot rhythm */
+    gap: 0;
   }
+  /* Button is a 24px tap target (WCAG 2.5.8, A11Y-2); the visible 12px dot is drawn by ::before,
+     so the touch/click area grows without enlarging the dot. */
   .hc-dot {
+    width: var(--sp-5);
+    height: var(--sp-5);
+    padding: 0;
+    border: none;
+    background: none;
+    border-radius: var(--r-pill);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .hc-dot::before {
+    content: '';
     width: var(--sp-3);
     height: var(--sp-3);
-    padding: 0;
     border-radius: var(--r-pill);
     background: var(--line);
-    border: none;
-    cursor: pointer;
     transition:
       background var(--dur-fast) var(--ease-soft),
       transform var(--dur-fast) var(--ease-soft);
   }
-  .hc-dot:hover {
+  .hc-dot:hover::before {
     background: var(--muted);
   }
-  .hc-dot[aria-current='true'] {
+  .hc-dot[aria-current='true']::before {
     background: var(--primary);
     transform: scale(1.25);
   }
