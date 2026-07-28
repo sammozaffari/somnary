@@ -76,8 +76,9 @@ export type SourceStrength = {
  *
  * IMPORTANT: this ranks the STUDY TYPE only. It is NOT a per-source quality score and NOT the
  * remedy tier grade (grades stay [HUMAN-GATE], set only by a human). The edge cases
- * (registry / review / other) are ranked CONSERVATIVELY — never overstate an uncharacterised
- * source. These edge placements are a candidate for owner ratification.
+ * (case-series / review / registry / other) are ranked CONSERVATIVELY — never overstate an
+ * uncharacterised source. These conservative EBM placements were RATIFIED 2026-07-28
+ * (owner-delegated); any future change to a placement is a content-methodology decision.
  */
 const STRENGTH: Record<string, 'strong' | 'moderate' | 'weak'> = {
   'meta-analysis': 'strong',
@@ -91,9 +92,8 @@ const STRENGTH: Record<string, 'strong' | 'moderate' | 'weak'> = {
   'case-series': 'weak', // uncontrolled, no comparator — near the EBM floor, below cohort
   registry: 'weak', // a registration/protocol, not a completed result — ranked conservatively
   other: 'weak', // uncharacterised — never imply strength
-  // [HUMAN-GATE] the four arguable edge rows — case-series / review / registry / other — are
-  // ranked conservatively (err low). Their exact placement is a published evidence-hierarchy
-  // claim and awaits owner ratification; the apex/floor rows are uncontroversial.
+  // Edge rows (case-series / review / registry / other) ranked conservatively (err low) and
+  // RATIFIED as these EBM defaults 2026-07-28 (owner-delegated); apex/floor rows uncontroversial.
 };
 
 export function sourceStrength(type: string): SourceStrength {
