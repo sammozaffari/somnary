@@ -1,9 +1,9 @@
 # Remedy grade-state audit
 
-**Status:** Phase A audit complete; Phase B implemented on `fix/publication-states`  
-**Date:** 28 July 2026  
-**Scope:** 31 remedy records at repository HEAD `ffc072b00647522aa3ac5c64bbdf9c4a55a58292`  
-**Repository inspected:** `/Users/sammozaffari/Desktop/PROJECTS/somnary`  
+**Status:** Phase A audit complete; Phase B implemented on `fix/publication-states`
+**Date:** 28 July 2026
+**Scope:** 31 remedy records at repository HEAD `ffc072b00647522aa3ac5c64bbdf9c4a55a58292`
+**Repository inspected:** `/Users/sammozaffari/Desktop/PROJECTS/somnary`
 **Implementation commits:** `ba958c5`, `390d7f3`, `6f61b46` plus the final surface commit that follows this document
 
 ## Executive finding
