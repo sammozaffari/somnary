@@ -117,6 +117,9 @@ const situations = [
           ))
         }
       </div>
+      <p class="browse-all">
+        <a href="/outcomes">Browse all sleep problems →</a>
+      </p>
     </section>
 
     <!-- how to read a grade — S–F legend, legible without color alone -->
@@ -327,6 +330,25 @@ const situations = [
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: var(--sp-4);
+  }
+  /* first-class entry to the browse-by-problem index (IA-3) */
+  .browse-all {
+    margin: var(--sp-5) 0 0;
+  }
+  .browse-all a {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    letter-spacing: var(--tracking-label);
+    color: var(--primary);
+    text-decoration: none;
+  }
+  .browse-all a:hover {
+    text-decoration: underline;
+  }
+  .browse-all a:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+    border-radius: var(--r-sm);
   }
   .tile {
     display: flex;
