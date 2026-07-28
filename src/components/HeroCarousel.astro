@@ -227,6 +227,23 @@ const resolved: Resolved[] = slides
     </div>
   </div>
 
+  <noscript>
+    <style>
+      /* No-JS fallback (audit A11Y-1): the carousel advances with JS, so without it every slide is
+         shown stacked (un-hiding restores them to the a11y tree too) and the JS-only controls are
+         hidden. All slide content stays reachable with scripting off. */
+      .hc-slide[hidden] {
+        display: block !important;
+      }
+      .hc-slide + .hc-slide {
+        margin-top: var(--sp-6);
+      }
+      .hc-controls {
+        display: none !important;
+      }
+    </style>
+  </noscript>
+
   <div class="hc-controls" data-hc-controls hidden>
     <button class="hc-arrow" type="button" data-hc-prev aria-label="Previous slide">
       <span aria-hidden="true">‹</span>
