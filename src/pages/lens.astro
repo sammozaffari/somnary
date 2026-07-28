@@ -22,31 +22,32 @@ import LensPanel from '../components/LensPanel.astro';
   <main class="page">
     <header class="head">
       <p class="eyebrow">Somnary Lens · AI-assisted research</p>
-      <h1 class="title">Research a remedy the tier board doesn’t cover yet</h1>
-      <p class="dek">
-        Name a product or ingredient — or paste a supplement-facts panel — and the Lens applies
-        Somnary’s method to it: it searches the published literature, verifies each claim against its
-        own source, and shows what the evidence does <em>and doesn’t</em> establish. It is
-        AI-assisted research, <em>not</em> a Somnary grade. It never recommends, never diagnoses, and
-        never tells you what to take or what dose.
-      </p>
+      <h1 class="title">Research any sleep remedy, supplement, or drug</h1>
     </header>
 
-    <ContextBanner
-      note="This is AI-assisted research, not a Somnary grade. It applies Somnary’s method to products the graded corpus doesn’t cover — a human grade always beats fresh AI, so anything already on the tier board links you straight there instead."
-    />
+    <!-- The island, right up front so the prompt is the first thing you reach — no scrolling to type. -->
+    <LensPanel />
 
-    <!-- Medical boundary, near the top (server-rendered — present with JS off). -->
+    <div class="banner-slot">
+      <ContextBanner
+        note="This is AI-assisted research, not a Somnary grade. It applies Somnary’s method to products the graded corpus doesn’t cover — a human grade always beats fresh AI, so anything already on the tier board links you straight there instead."
+      />
+    </div>
+
+    <!-- Medical boundary, kept adjacent to the prompt (server-rendered — present with JS off). -->
     <div class="boundary-slot">
       <Disclaimer variant="standard" />
     </div>
 
-    <!-- What it does / doesn't — server-rendered so a crawler and a no-JS reader see the whole contract. -->
+    <!-- What it does / doesn't — tucked into a native <details> so the post-result page is quiet, but
+         still server-rendered (in the DOM) so a crawler + no-JS reader see the full contract. -->
+    <details class="about">
+      <summary>About the Lens — what it does &amp; doesn’t</summary>
     <section class="contract" aria-label="What the Lens does and does not do">
       <div class="col">
         <p class="col-tag">What it does</p>
         <ul class="col-list">
-          <li>Researches a product or ingredient the graded corpus doesn’t cover yet, or reads a pasted supplement-facts panel.</li>
+          <li>Researches any sleep product, ingredient, or drug the graded corpus doesn’t cover, or reads a pasted supplement-facts panel.</li>
           <li>Searches the published literature and verifies each claim against its own cited source — dropping any it can’t stand up.</li>
           <li>Shows what the evidence does <em>not</em> establish, and labels weak evidence weak.</li>
           <li>Points you to the <a href="/tiers">graded tier board</a> when a subject is already covered — a human grade beats fresh AI.</li>
@@ -64,9 +65,7 @@ import LensPanel from '../components/LensPanel.astro';
         </ul>
       </div>
     </section>
-
-    <!-- The island. Progressive enhancement: the shell above stands on its own without it. -->
-    <LensPanel />
+    </details>
 
     <p class="review-line">
       Reviewed 2026-07-21 · found an error? <a href="/methodology#corrections">corrections →</a>
@@ -88,35 +87,57 @@ import LensPanel from '../components/LensPanel.astro';
     margin: 0;
   }
   .head {
-    margin-bottom: var(--sp-6);
+    margin-bottom: var(--sp-5);
   }
   .title {
     font-family: var(--font-display);
     font-weight: 700;
-    font-size: var(--text-3xl);
-    line-height: var(--lh-3xl);
+    font-size: var(--text-xl);
+    line-height: var(--lh-xl);
     letter-spacing: var(--tracking-tight);
     color: var(--ink);
-    margin: var(--sp-3) 0 var(--sp-5);
-  }
-  .dek {
-    font-size: var(--text-md);
-    line-height: var(--lh-md);
-    color: var(--muted);
-    max-width: 68ch;
-    margin: 0;
+    margin: var(--sp-2) 0 0;
+    max-width: 22ch;
   }
 
-  .boundary-slot {
+  .banner-slot {
     margin-top: var(--sp-6);
+  }
+  .boundary-slot {
+    margin-top: var(--sp-5);
   }
 
   /* what it does / doesn't — two calm columns, no grade coloring */
+  /* collapsible "About the Lens" — quiets the post-result tail; native <details>, works with JS off */
+  .about {
+    margin-top: var(--sp-6);
+    border-top: var(--border-hairline);
+    padding-top: var(--sp-5);
+  }
+  .about > summary {
+    cursor: pointer;
+    list-style: none;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--primary);
+  }
+  .about > summary::-webkit-details-marker {
+    display: none;
+  }
+  .about > summary::after {
+    content: ' +';
+  }
+  .about[open] > summary::after {
+    content: ' –';
+  }
+  .about[open] > summary {
+    margin-bottom: var(--sp-5);
+  }
   .contract {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: var(--sp-6);
-    margin-top: var(--sp-7);
   }
   .col {
     background: var(--surface);
@@ -179,7 +200,7 @@ import LensPanel from '../components/LensPanel.astro';
       padding: var(--sp-6) var(--sp-5) var(--sp-8);
     }
     .title {
-      font-size: var(--text-2xl);
+      font-size: var(--text-lg);
     }
   }
 </style>

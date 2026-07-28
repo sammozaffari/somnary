@@ -2,44 +2,17 @@
 import Base from '../../layouts/Base.astro';
 import SafetyCallout from '../../components/scorecards/SafetyCallout.astro';
 import RatingLegend from '../../components/scorecards/RatingLegend.astro';
+import LabelReadingPanel from '../../components/scorecards/LabelReadingPanel.astro';
+import WhyCareStrip from '../../components/scorecards/WhyCareStrip.astro';
 import ScorecardGrid from '../../components/scorecards/ScorecardGrid.astro';
+import TierLegend from '../../components/scorecards/TierLegend.astro';
 import { ASHWAGANDHA_SOURCES, type AshProduct } from '../../data/source-scorecards/ashwagandha';
 import type { ScorecardCardData, Chip, DetailLine } from '../../data/source-scorecards/card';
+import { toAshCard as toCard } from '../../lib/sources/cards';
 
 const reviewDate = '2026-07-21';
 
 // Map an ashwagandha product into the shared card shape.
-function toCard(p: AshProduct): ScorecardCardData {
-  const chips: Chip[] = [];
-  if (p.trialFlag) chips.push({ label: '🔬 Used in trials', kind: 'good', note: p.trialFlag.note });
-  if (p.rootPart === 'root+leaf')
-    chips.push({ label: '🍃 Root + leaf', kind: 'good', note: 'Made from root and leaf — the plant part under extra liver scrutiny (see the safety notes above).' });
-  if (p.b6) chips.push({ label: '⚠ Contains B6', kind: 'warn', note: p.b6.note });
-  if (p.importSafety) chips.push({ label: '⚠ Import — no AU warning', kind: 'warn', note: p.importSafety.note });
-
-  const detailLines: DetailLine[] = [];
-  if (p.b6) detailLines.push({ tag: 'Safety', note: p.b6.note, kind: 'safety' });
-  if (p.importSafety) detailLines.push({ tag: 'Safety', note: p.importSafety.note, kind: 'safety' });
-  if (p.trialFlag) detailLines.push({ tag: 'Used in trials', note: p.trialFlag.note, kind: 'trial' });
-
-  return {
-    slug: p.slug,
-    brand: p.brand,
-    productName: p.productName,
-    specLines: [p.strength, p.form],
-    metaLine: `${p.regulated === 'medicine' && p.ausL ? `AUST L ${p.ausL}` : 'Food · not TGA-listed (import)'} · ${p.channel}`,
-    certSummary: p.certSummary,
-    certVerified: p.certVerified,
-    imagePath: p.imagePath,
-    bottomLine: p.bottomLine,
-    chips,
-    scores: p.scores,
-    verdict: p.verdict,
-    detailLines,
-    heldItems: p.heldItems,
-    hasB6: !!p.b6,
-  };
-}
 
 const cards = ASHWAGANDHA_SOURCES.filter((p) => p.ratified).map(toCard);
 
@@ -61,13 +34,32 @@ const safetyItems = [
   {
     label: 'Vitamin B6',
     body:
-      'One product here (Blackmores Ashwagandha+) also packs in a lot of <strong>vitamin B6</strong>. Taking too much B6 over months can cause <strong>tingling or numbness in the hands and feet</strong> (nerve irritation — usually reversible if you stop), which is why Australia mandates a warning on high-B6 products. We show it as a <strong>⚠ B6</strong> flag on that card.',
+      'A few products here also add <strong>vitamin B6</strong> — one (Nature’s Own Mild Anxiety) at a high enough dose to carry Australia’s mandated warning. Taking too much B6 over months can cause <strong>tingling or numbness in the hands and feet</strong> (nerve irritation — usually reversible if you stop). We show a <strong>⚠ B6</strong> flag on every product that contains it.',
   },
   {
     label: 'Pregnancy',
     body: 'The standard advice is to avoid ashwagandha in pregnancy and breastfeeding.',
   },
 ];
+// Reading-the-label primer — distilled from the ratified findings below (label education, not advice).
+const labelReading = {
+  lookFor: [
+    'The <strong>withanolide</strong> figure printed (mg or %) — the strength marker many labels leave off',
+    'A named, studied extract (<strong>KSM-66</strong>, <strong>Shoden</strong>) — the material used in published trials',
+    '<strong>Root-only</strong> on the label — leaf is the plant part under extra liver scrutiny',
+    'An <strong>AUST L</strong> number',
+  ],
+  cautious: [
+    '“Clinically proven” wording without a named extract — or at a different dose than the trials used',
+    '<strong>Root + leaf</strong> products (flagged 🍃 on the cards below)',
+    'Added <strong>vitamin B6</strong> — one product here is above Australia’s warning threshold',
+    'Imports that skip Australia’s liver-caution advisory',
+  ],
+};
+
+// Why-this-matters hook — one ingredient-specific cited example (EWG-inspired IA, Phase A).
+const whyCareExample = 'For example, in 2024 Australia’s regulator issued a <a href="https://www.tga.gov.au/news/safety-updates/withania-somnifera-ashwagandha-and-very-rare-risk-liver-injury" target="_blank" rel="noopener">safety advisory on ashwagandha and a very rare risk of liver injury</a> — and a batch of one product on this page was recalled over suspected tampering (both flagged on the cards below).';
+
 ---
 
 <Base
@@ -99,6 +91,8 @@ const safetyItems = [
       </p>
     </aside>
 
+    <WhyCareStrip example={whyCareExample} />
+
     <SafetyCallout
       title="Ashwagandha safety notes worth knowing"
       tone="safety"
@@ -106,9 +100,13 @@ const safetyItems = [
       foot="These flags are shown for your safety and sit apart from the scores — talk to a pharmacist before taking ashwagandha regularly."
     />
 
+    <LabelReadingPanel lookFor={labelReading.lookFor} cautious={labelReading.cautious} />
+
     <RatingLegend items={ratingLegend} remedyHref="/r/ashwagandha" />
 
-    <ScorecardGrid cards={cards} />
+    <TierLegend />
+
+    <ScorecardGrid cards={cards} basePath="/sources/ashwagandha" />
 
     <p class="footer-strip">
       Somnary · Ashwagandha source scorecards · Reviewed {reviewDate} · Educational, not medical

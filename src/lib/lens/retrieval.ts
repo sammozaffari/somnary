@@ -51,7 +51,10 @@ export interface PubMedProviderOptions {
 const ESEARCH = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi';
 const EFETCH = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi';
 
-const DEFAULT_MAX_RESULTS = 6;
+// Per-search fetch breadth. The engine runs TWO searches (resolver query + sleep-focused, CHK-7.5) and
+// reranks the merged set by sleep relevance, so a slightly wider fetch gives the reranker more real
+// sleep papers to surface for broad-literature subjects without a large prompt (it caps before extract).
+const DEFAULT_MAX_RESULTS = 8;
 const DEFAULT_TIMEOUT_MS = 12000;
 // NCBI polite-use: identify the tool. `email` is added when provided. Keyless — no API key needed.
 const TOOL = 'somnary';
@@ -260,5 +263,117 @@ export class PubMedProvider implements EvidenceProvider {
       if (docs.length >= this.maxResults) break;
     }
     return docs;
+  }
+}
+
+// --- Europe PMC provider (CHK-7.6) ---------------------------------------------------------------
+// Free, keyless REST index that covers PubMed/Medline PLUS PMC full-text, preprints, and more, with a
+// DIFFERENT relevance ranking than NCBI Best Match — which is exactly what surfaces the sleep papers
+// PubMed buries for a broad drug. We keep only records that carry a valid PMID, so the whole downstream
+// pipeline (citation + verbatim verification, all PMID-keyed) is UNCHANGED; a DOI-only preprint is
+// skipped for now (a future step could generalise to DOI-cited claims). NEVER throws → [].
+
+const EUROPEPMC_SEARCH = 'https://www.ebi.ac.uk/europepmc/webservices/rest/search';
+
+export interface EuropePmcProviderOptions {
+  fetchImpl?: FetchLike;
+  timeoutMs?: number;
+  maxResults?: number;
+}
+
+/** Strip inline markup + collapse whitespace (Europe PMC titles/abstracts can carry light HTML). The
+ * SAME normalised abstract text is what the verifier verbatim-matches against, so extraction + verify
+ * see identical text. */
+function cleanEpmcText(s: unknown): string {
+  return typeof s === 'string' ? s.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() : '';
+}
+
+export class EuropePmcProvider implements EvidenceProvider {
+  private readonly doFetch: FetchLike;
+  private readonly timeoutMs: number;
+  private readonly maxResults: number;
+
+  constructor(opts: EuropePmcProviderOptions = {}) {
+    this.doFetch = (opts.fetchImpl ?? (globalThis.fetch as unknown as FetchLike)) as FetchLike;
+    this.timeoutMs = opts.timeoutMs ?? DEFAULT_TIMEOUT_MS;
+    this.maxResults = Math.max(1, opts.maxResults ?? DEFAULT_MAX_RESULTS);
+  }
+
+  async search(query: string): Promise<EvidenceDoc[]> {
+    const q = typeof query === 'string' ? query.trim() : '';
+    if (!q) return [];
+    // resultType=core returns the abstract; default sort is relevance. Keyless.
+    const url = toQuery(EUROPEPMC_SEARCH, {
+      query: q,
+      format: 'json',
+      resultType: 'core',
+      pageSize: String(this.maxResults),
+    });
+    const res = await guardedFetch(url, this.doFetch, this.timeoutMs);
+    if (!res) return [];
+    let data: unknown;
+    try {
+      data = await res.json();
+    } catch {
+      return [];
+    }
+    const results = (data as { resultList?: { result?: unknown } })?.resultList?.result;
+    if (!Array.isArray(results)) return [];
+    const seen = new Set<string>();
+    const docs: EvidenceDoc[] = [];
+    for (const r of results) {
+      if (!r || typeof r !== 'object') continue;
+      const rec = r as Record<string, unknown>;
+      const pmid = typeof rec.pmid === 'string' ? rec.pmid.trim() : '';
+      // PMID-only (keeps the PMID-keyed pipeline unchanged), validated through the shared format-check.
+      if (!isValidId('pmid', pmid) || seen.has(pmid)) continue;
+      const title = cleanEpmcText(rec.title);
+      if (!title) continue;
+      seen.add(pmid);
+      docs.push({
+        pmid,
+        title,
+        abstractText: cleanEpmcText(rec.abstractText),
+        url: canonicalUrlByKind.pmid(pmid),
+        year: typeof rec.pubYear === 'string' ? rec.pubYear : undefined,
+      });
+      if (docs.length >= this.maxResults) break;
+    }
+    return docs;
+  }
+}
+
+// --- MultiProvider — fan out to several sources, merge deduped by PMID (CHK-7.6) -----------------
+// Lets the engine treat "PubMed + Europe PMC (+ more later)" as one provider. Each source is queried
+// with the SAME query string; results are concatenated and deduped by PMID, preserving provider order
+// (the first provider's copy of a shared PMID wins). A source that errors contributes []. NEVER throws.
+
+export class MultiProvider implements EvidenceProvider {
+  private readonly providers: EvidenceProvider[];
+
+  constructor(providers: EvidenceProvider[]) {
+    this.providers = Array.isArray(providers) ? providers.filter((p): p is EvidenceProvider => !!p) : [];
+  }
+
+  async search(query: string): Promise<EvidenceDoc[]> {
+    if (this.providers.length === 0) return [];
+    const lists = await Promise.all(
+      this.providers.map((p) =>
+        p.search(query).then(
+          (r) => (Array.isArray(r) ? r : []),
+          () => [],
+        ),
+      ),
+    );
+    const seen = new Set<string>();
+    const out: EvidenceDoc[] = [];
+    for (const list of lists) {
+      for (const d of list) {
+        if (!d || typeof d.pmid !== 'string' || !d.pmid || seen.has(d.pmid)) continue;
+        seen.add(d.pmid);
+        out.push(d);
+      }
+    }
+    return out;
   }
 }

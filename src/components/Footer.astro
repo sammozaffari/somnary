@@ -32,6 +32,20 @@ const participate = [
   { href: '/dispatch', label: 'The dispatch' },
   { href: '/submit-a-claim', label: 'Submit a claim' },
 ];
+// Search-first IA (2026-07-27, Phase 1) — items demoted from the primary navbar keep a
+// site-wide home here so nothing is orphaned (crawlability non-negotiable). "Get started" carries
+// the orientation + safety-boundary pages; "Tools" carries the interactive surfaces. Lens and the
+// Label checker sit here provisionally until Phases 2–3 fold them into search.
+const guides = [
+  { href: '/start-here', label: 'Start here' },
+  { href: '/sleep-habits', label: 'Sleep habits' },
+  { href: '/safety', label: 'Safety' },
+];
+const tools = [
+  { href: '/compare', label: 'Compare' },
+  { href: '/label-checker', label: 'Label checker' },
+  { href: '/lens', label: 'Lens' },
+];
 ---
 
 <footer class="footer">
@@ -42,6 +56,26 @@ const participate = [
   <div class="disclaimer">
     <Disclaimer variant="compact" />
   </div>
+  <nav class="reflinks" aria-label="Get started">
+    <span class="group-label">Get started</span>
+    <ul class="linkrow">
+      {guides.map((l) => (
+        <li>
+          <a href={l.href}>{l.label}</a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+  <nav class="reflinks" aria-label="Tools">
+    <span class="group-label">Tools</span>
+    <ul class="linkrow">
+      {tools.map((l) => (
+        <li>
+          <a href={l.href}>{l.label}</a>
+        </li>
+      ))}
+    </ul>
+  </nav>
   <nav class="reflinks" aria-label="Context">
     <span class="group-label">Context · not graded</span>
     <ul class="linkrow">

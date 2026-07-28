@@ -20,9 +20,7 @@
 <section class="lens" aria-label="Somnary Lens" data-lens>
   <p class="lens-label"><span class="dot" aria-hidden="true"></span> Somnary Lens</p>
   <p class="prompt">
-    Name any sleep product or ingredient — a brand the tier board doesn’t cover, an unfamiliar
-    supplement, or paste a supplement-facts panel. The Lens researches the published evidence and shows
-    what it does — and doesn’t — establish. It is not a Somnary grade.
+    Name any sleep product, ingredient, or drug — or paste a supplement-facts panel.
   </p>
 
   <form class="field" data-lens-form>
@@ -264,6 +262,16 @@
     margin: 0;
     max-width: 64ch;
   }
+  /* the plain-language "Bottom line" lead — a CALM lede (one sentence), not a heading: readable and
+     inviting, so it summarises without shouting. The bold section heads below carry the scanning. */
+  :global(.lc-bottomline) {
+    font-size: var(--text-md);
+    line-height: var(--lh-md);
+    font-weight: 500;
+    color: var(--ink);
+    margin: 0;
+    max-width: 60ch;
+  }
   :global(.lc-verdict) {
     font-size: var(--text-base);
     line-height: var(--lh-base);
@@ -291,11 +299,23 @@
     flex-direction: column;
     gap: var(--sp-3);
   }
+  /* hairline separators between the flat sections — the card reads as clear, bite-size chunks */
+  :global(.lc-evidence),
+  :global(.lc-doesnot),
+  :global(.lc-label),
+  :global(.lc-safety),
+  :global(.lc-followups) {
+    border-top: var(--border-hairline);
+    padding-top: var(--sp-5);
+  }
+  /* section heads: BOLD sentence-case headings in ink — the scannable anchors (were tiny mono labels) */
   :global(.lc-head) {
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
-    color: var(--primary);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-md);
+    line-height: var(--lh-md);
+    letter-spacing: var(--tracking-tight);
+    color: var(--ink);
     margin: 0;
   }
 
@@ -303,6 +323,8 @@
   :global(.lc-dn-list),
   :global(.lc-flag-list),
   :global(.lc-fu-list),
+  :global(.lc-web-list),
+  :global(.lc-caution-list),
   :global(.lc-route-list) {
     list-style: none;
     margin: 0;
@@ -311,24 +333,110 @@
     flex-direction: column;
     gap: var(--sp-4);
   }
+  /* each evidence finding is its own bite-size chunk — a soft paper tile, not a run-on list */
   :global(.lc-ev-row) {
     display: flex;
     flex-direction: column;
     gap: var(--sp-2);
-    padding-left: var(--sp-4);
-    border-left: 2px solid var(--mineral);
+    background: var(--paper);
+    border: var(--border-hairline);
+    border-radius: var(--r-md);
+    padding: var(--sp-4) var(--sp-5);
   }
+  /* body text: full ink at reading size — no more light-gray walls */
   :global(.lc-ev-text),
   :global(.lc-dn-row),
   :global(.lc-flag-text) {
-    font-size: var(--text-sm);
+    font-size: var(--text-base);
     line-height: var(--lh-base);
     color: var(--ink);
     margin: 0;
     max-width: 64ch;
   }
   :global(.lc-dn-row) {
+    position: relative;
+    padding-left: var(--sp-5);
+  }
+  :global(.lc-dn-row)::before {
+    content: '—';
+    position: absolute;
+    left: 0;
     color: var(--muted);
+  }
+
+  /* prominent usage/safety CAUTIONS — the source's guidance, high on the card, in the caution register */
+  :global(.lc-cautions) {
+    background: var(--warning-bg);
+    border: 1px solid var(--safety-ink);
+    border-radius: var(--r-md);
+    padding: var(--sp-4) var(--sp-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+  }
+  :global(.lc-cautions .lc-head) {
+    color: var(--safety-ink);
+  }
+  :global(.lc-caution-note) {
+    font-size: var(--text-xs);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: 0;
+    max-width: 64ch;
+  }
+  :global(.lc-caution-row) {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-1);
+  }
+  :global(.lc-caution-text) {
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--ink);
+    font-weight: 600;
+    margin: 0;
+    max-width: 64ch;
+  }
+
+  /* reputable web-references tier — visually SET APART + quieter than the study evidence */
+  :global(.lc-web) {
+    background: var(--stone);
+    border-radius: var(--r-md);
+    padding: var(--sp-4) var(--sp-5);
+  }
+  :global(.lc-web .lc-head) {
+    color: var(--muted);
+  }
+  :global(.lc-web-note) {
+    font-size: var(--text-xs);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: 0;
+    max-width: 64ch;
+  }
+  :global(.lc-web-row) {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-1);
+  }
+  :global(.lc-web-text) {
+    font-size: var(--text-sm);
+    line-height: var(--lh-base);
+    color: var(--ink);
+    margin: 0;
+    max-width: 64ch;
+  }
+  :global(.lc-web-src) {
+    align-self: flex-start;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--primary);
+    text-decoration: none;
+  }
+  :global(.lc-web-src:focus-visible) {
+    outline: none;
+    box-shadow: var(--ring);
+    border-radius: var(--r-sm);
   }
 
   /* strength: a TEXT-labelled chip — legible WITHOUT color (the word says it), color only reinforces */
@@ -511,7 +619,7 @@
   // REAL pipeline milestones (CHK-7.4): the engine streams these as SSE events. Each maps to an honest
   // stage label; counts (sources, claims) come from the event, never fabricated. The FALLBACK sequence
   // is used only when the stream is unavailable (a JSON-only response) so the bar still moves.
-  const STAGE_ORDER = ['resolving', 'searching', 'sources', 'extracting', 'verifying', 'composing'];
+  const STAGE_ORDER = ['resolving', 'searching', 'sources', 'extracting', 'verifying', 'composing', 'web-search'];
   const FALLBACK_STAGES = [
     'Understanding your query…',
     'Searching published sources…',
@@ -614,7 +722,11 @@
           break;
         case 'composing':
           stageEl.textContent = 'Composing the assessment…';
-          if (!reduce) setBar(0.95);
+          if (!reduce) setBar(0.9);
+          break;
+        case 'web-search':
+          stageEl.textContent = 'Checking reputable health references…';
+          if (!reduce) setBar(0.96);
           break;
       }
     };
@@ -669,6 +781,9 @@
       return done;
     };
 
+    const GENERIC_ERR =
+      'Something went wrong researching that. You can try again, or browse Somnary’s graded evidence directly. This is educational, not medical advice.';
+
     const submit = async () => {
       if (busy) return;
       const value = input.value.trim();
@@ -683,57 +798,88 @@
       }
       setBusy(true);
       startProgress();
+
+      // Resilient fallback: a plain, non-streaming JSON request. The live SSE stream is a long-held
+      // connection that can drop (proxy/browser/network) even when the research itself succeeds — so if
+      // the stream fails, we retry ONCE over the simpler request/response path before showing an error.
+      // Returns the assessment or null; never throws.
+      const attemptJson = async (): Promise<LensCardAssessment | null> => {
+        try {
+          const res = await fetch('/api/lens', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ input: value }),
+          });
+          if (!res.ok) return null;
+          return (await res.json()) as LensCardAssessment;
+        } catch {
+          return null;
+        }
+      };
+
       try {
-        const res = await fetch('/api/lens', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Accept: 'text/event-stream' },
-          body: JSON.stringify({ input: value }),
-        });
-        if (res.status === 503) {
-          stopProgress();
-          showNotice('The Lens isn’t available right now. You can still browse the graded tier board and each remedy’s cited evidence in the meantime.');
-          return;
-        }
-        if (res.status === 429) {
-          stopProgress();
-          showNotice('You’re going a little faster than the Lens can keep up with — give it a moment and try again. Nothing you entered is lost.');
-          return;
-        }
-        if (res.status === 413) {
-          stopProgress();
-          showNotice('That’s longer than the Lens can take in one go. Trim it to the ingredients you want checked and try again.');
-          return;
-        }
-        if (res.status === 400) {
-          stopProgress();
-          showNotice('Type a product name, an ingredient, or paste a supplement-facts panel to research.');
-          return;
-        }
-        if (!res.ok) {
-          stopProgress();
-          showNotice('Something went wrong researching that. You can try again, or browse Somnary’s graded evidence directly. This is educational, not medical advice.');
-          return;
+        let assessment: LensCardAssessment | null = null;
+        let recoverable = false; // a 5xx / stream drop / network blip → worth a single JSON retry
+
+        try {
+          const res = await fetch('/api/lens', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Accept: 'text/event-stream' },
+            body: JSON.stringify({ input: value }),
+          });
+          // Definitive states — surface directly, no retry.
+          if (res.status === 503) {
+            stopProgress();
+            showNotice('The Lens isn’t available right now. You can still browse the graded tier board and each remedy’s cited evidence in the meantime.');
+            return;
+          }
+          if (res.status === 429) {
+            stopProgress();
+            showNotice('You’re going a little faster than the Lens can keep up with — give it a moment and try again. Nothing you entered is lost.');
+            return;
+          }
+          if (res.status === 413) {
+            stopProgress();
+            showNotice('That’s longer than the Lens can take in one go. Trim it to the ingredients you want checked and try again.');
+            return;
+          }
+          if (res.status === 400) {
+            stopProgress();
+            showNotice('Type a product name, an ingredient, or paste a supplement-facts panel to research.');
+            return;
+          }
+          if (!res.ok) {
+            recoverable = true; // 5xx — try the JSON path once
+          } else {
+            const contentType = res.headers.get('content-type') || '';
+            if (contentType.includes('text/event-stream') && res.body) {
+              assessment = await consumeStream(res);
+              if (!assessment) recoverable = true; // stream ended without a done frame
+            } else {
+              startFallbackStepper();
+              assessment = (await res.json()) as LensCardAssessment;
+            }
+          }
+        } catch {
+          recoverable = true; // network / stream error mid-flight
         }
 
-        let assessment: LensCardAssessment | null = null;
-        const contentType = res.headers.get('content-type') || '';
-        if (contentType.includes('text/event-stream') && res.body) {
-          assessment = await consumeStream(res);
-        } else {
-          // Non-streaming fallback (JSON): step the fallback bar while we await, then render.
+        // The one retry — over the plain request/response path — when the stream didn't deliver.
+        if (!assessment && recoverable) {
           startFallbackStepper();
-          assessment = (await res.json()) as LensCardAssessment;
+          assessment = await attemptJson();
         }
+
         stopProgress();
         if (!assessment) {
-          showNotice('Something went wrong researching that. You can try again, or browse Somnary’s graded evidence directly. This is educational, not medical advice.');
+          showNotice(GENERIC_ERR);
           return;
         }
         renderLensCard(assessment, cardRegion);
         cardRegion.focus?.();
       } catch {
         stopProgress();
-        showNotice('Something went wrong reaching the Lens. You can try again, or browse Somnary’s graded evidence directly. This is educational, not medical advice.');
+        showNotice(GENERIC_ERR);
       } finally {
         setBusy(false);
       }

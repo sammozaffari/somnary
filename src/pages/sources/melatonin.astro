@@ -2,42 +2,21 @@
 import Base from '../../layouts/Base.astro';
 import SafetyCallout from '../../components/scorecards/SafetyCallout.astro';
 import RatingLegend from '../../components/scorecards/RatingLegend.astro';
+import LabelReadingPanel from '../../components/scorecards/LabelReadingPanel.astro';
+import WhyCareStrip from '../../components/scorecards/WhyCareStrip.astro';
 import ScorecardGrid from '../../components/scorecards/ScorecardGrid.astro';
+import TierLegend from '../../components/scorecards/TierLegend.astro';
 import {
   MELATONIN_SOURCES,
   PRESCRIPTION_NOTE,
   type SourceProduct,
 } from '../../data/source-scorecards/melatonin';
 import type { ScorecardCardData, Chip, DetailLine } from '../../data/source-scorecards/card';
+import { toMelCard as toCard } from '../../lib/sources/cards';
 
 const reviewDate = '2026-07-19';
 
 // Map a melatonin product into the shared card shape.
-function toCard(p: SourceProduct): ScorecardCardData {
-  const chips: Chip[] = [];
-  if (p.certVerified)
-    chips.push({ label: '✓ Third-party verified', kind: 'good', note: p.certSummary });
-
-  const detailLines: DetailLine[] = [];
-
-  return {
-    slug: p.slug,
-    brand: p.brand,
-    productName: p.productName,
-    specLines: [`${p.doseMg} mg`, p.form],
-    metaLine: `${p.market} · ${p.singleOrCombo}`,
-    certSummary: p.certSummary,
-    certVerified: p.certVerified,
-    imagePath: p.imagePath,
-    bottomLine: p.bottomLine,
-    chips,
-    scores: p.scores,
-    verdict: p.verdict,
-    detailLines,
-    heldItems: p.heldItems,
-    hasB6: false,
-  };
-}
 
 // Publish gate mirrors the Supabase view: only owner-ratified rows render.
 // AU audience: melatonin is prescription-only here, so the only OTC route is personal import
@@ -60,6 +39,23 @@ const safetyItems = [
       'In Australia, melatonin is a <strong>prescription medicine</strong> (with a limited pharmacist-only option for adults 55+). None of these are sold over the counter in Australian chemists — Amazon AU and Chemist Warehouse carry no OTC human melatonin. The ones here are imported for personal use via iHerb.',
   },
 ];
+// Reading-the-label primer — distilled from the ratified findings below (label education, not advice).
+const labelReading = {
+  lookFor: [
+    'A public <strong>per-batch lab report</strong> or a <strong>USP</strong> mark — only three products here have either',
+    'A short ingredients list — capsules usually carry fewer additives than gummies',
+    'In Australia the regulated route is a <strong>prescription</strong> (see the note above) — personal imports sit outside any local oversight',
+  ],
+  cautious: [
+    'Very high doses (<strong>10 mg+</strong>) — far above the levels used in most published trials',
+    'Gummies and fast-dissolves with <strong>dyes and sweeteners</strong> the capsule versions don’t need',
+    '“Tested” claims with no lab report you can open',
+  ],
+};
+
+// Why-this-matters hook — one ingredient-specific cited example (EWG-inspired IA, Phase A).
+const whyCareExample = 'For example, when researchers tested 31 over-the-counter melatonin supplements, the actual amount ranged from <a href="https://pubmed.ncbi.nlm.nih.gov/27855744/" target="_blank" rel="noopener">83% below to 478% above the label</a>; a 2023 analysis of 25 melatonin gummies found <a href="https://pubmed.ncbi.nlm.nih.gov/37097362/" target="_blank" rel="noopener">22 were mislabeled, with real content from 74% to 347% of the stated amount</a>.';
+
 ---
 
 <Base
@@ -91,6 +87,8 @@ const safetyItems = [
       </p>
     </aside>
 
+    <WhyCareStrip example={whyCareExample} />
+
     <SafetyCallout
       title="Melatonin in Australia — the prescription reality"
       tone="info"
@@ -98,9 +96,13 @@ const safetyItems = [
       foot="This is context on how you’d get melatonin in Australia — not medical advice. For a pharmacy option, Circadin (below) is available on prescription; talk to a pharmacist or doctor before starting melatonin."
     />
 
+    <LabelReadingPanel lookFor={labelReading.lookFor} cautious={labelReading.cautious} />
+
     <RatingLegend items={ratingLegend} remedyHref="/r/melatonin" />
 
-    <ScorecardGrid cards={cards} />
+    <TierLegend />
+
+    <ScorecardGrid cards={cards} basePath="/sources/melatonin" />
 
     <section class="rx">
       <h2 class="rx-title">Prescription option (not scored here)</h2>

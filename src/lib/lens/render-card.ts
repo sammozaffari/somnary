@@ -24,6 +24,10 @@
 // Re-declared here (not imported from engine.ts) so the renderer stays a leaf module the offline harness
 // and the island can both import without pulling the whole engine graph. Kept in sync by the T1 harness.
 
+// The reputable-web-references caveat lives in copy.ts (the [HUMAN-GATE] framing surface); import it so
+// the renderer never authors that medical framing itself. copy.ts is a light leaf (no engine graph).
+import { WEB_TIER_HEAD, WEB_TIER_NOTE, WEB_CAUTION_HEAD, WEB_CAUTION_NOTE } from './copy.ts';
+
 export type LensCardStatus = 'assessed' | 'short-circuit' | 'refused' | 'inconclusive';
 
 export interface LensCardSource {
@@ -61,14 +65,23 @@ export interface LensCardResolved {
   productClass: string;
   line: string;
 }
+/** One reputable-web-reference note (CHK-7.7) — a short sleep note + its source domain/url. */
+export interface LensCardWebFinding {
+  text: string;
+  url: string;
+  domain: string;
+  kind?: 'effect' | 'caution';
+}
 export interface LensCardAssessment {
   input: { kind: 'ingredient' | 'product' | 'question'; normalized: string };
   status: LensCardStatus;
   shortCircuit?: LensCardShortCircuit;
   resolved?: LensCardResolved;
+  bottomLine?: string;
   verdictLine: string;
   evidence: LensCardEvidence[];
   doesNotShow: string[];
+  webFindings?: LensCardWebFinding[];
   labelFlags: LensCardFlag[];
   safety: { routes: LensCardRoute[]; note: string };
   stamp: string;
@@ -193,22 +206,58 @@ export function renderLensCard(assessment: LensCardAssessment, container: HTMLEl
   }
 
   // --- ASSESSED / INCONCLUSIVE — the full card. ------------------------------------------------------
-  // "What the Lens read your query as" (CHK-7.4) — the server-composed interpreted-as line, at the very
-  // top so the reader sees the entity was understood (the Perplexity "it got my intent" beat). Verbatim
-  // server field via textContent; it states no evidence, no advice, no grade.
-  if (assessment.resolved && typeof assessment.resolved.line === 'string' && assessment.resolved.line) {
+  // "Bottom line" (CHK-7.9) — the plain-language lead summary, FIRST so a reader gets the gist before the
+  // detail. When present it subsumes the meta resolved/verdict lines (they'd repeat it), so those are
+  // suppressed below. Server-composed field, textContent.
+  const hasBottomLine = typeof assessment.bottomLine === 'string' && !!assessment.bottomLine;
+  if (hasBottomLine) {
+    card.appendChild(el(doc, 'p', 'lc-bottomline', assessment.bottomLine as string));
+  }
+
+  // "What the Lens read your query as" (CHK-7.4) — the interpreted-as line. Shown only when there is NO
+  // bottom line (which already states what the subject is), to avoid repeating it.
+  if (!hasBottomLine && assessment.resolved && typeof assessment.resolved.line === 'string' && assessment.resolved.line) {
     card.appendChild(el(doc, 'p', 'lc-resolved', assessment.resolved.line));
   }
 
-  // verdict + disclaimer sit together near the top (disclaimer prominent, near the decision).
-  if (assessment.verdictLine) {
+  // verdict — the meta "verified N claims" line. Suppressed when the bottom line is present (it covers it).
+  if (!hasBottomLine && assessment.verdictLine) {
     card.appendChild(el(doc, 'p', 'lc-verdict', assessment.verdictLine));
   }
   if (assessment.stamp) {
     card.appendChild(el(doc, 'p', 'lc-stamp', assessment.stamp)); // the not-a-grade stamp, prominent
   }
-  if (assessment.disclaimer) {
-    card.appendChild(el(doc, 'p', 'lc-disclaimer', assessment.disclaimer));
+  // NOTE: the full "educational, not medical advice" disclaimer used to sit here, stacking a THIRD
+  // framing on top of the lede + stamp. It now renders at the card FOOT (below the safety block) so the
+  // top leads with content — the not-a-grade stamp stays up here, and the safety block + foot disclaimer
+  // keep the boundary present within the result.
+
+  // PROMINENT usage/safety CAUTIONS (CHK-7.8) — the source's OWN guidance (e.g. "short-term use only"),
+  // placed high on the card so the "not meant for indefinite nightly use" message is unmissable. Each is
+  // the source's words + its domain; the note frames them as the SOURCES' cautions, never the Lens's advice.
+  const cautions = Array.isArray(assessment.webFindings)
+    ? assessment.webFindings.filter((w) => w && w.kind === 'caution' && typeof w.text === 'string' && w.text)
+    : [];
+  if (cautions.length) {
+    const section = el(doc, 'section', 'lc-block lc-cautions');
+    section.appendChild(el(doc, 'p', 'lc-head', WEB_CAUTION_HEAD));
+    section.appendChild(el(doc, 'p', 'lc-caution-note', WEB_CAUTION_NOTE));
+    const list = el(doc, 'ul', 'lc-caution-list');
+    cautions.forEach((w) => {
+      const li = el(doc, 'li', 'lc-caution-row');
+      li.appendChild(el(doc, 'p', 'lc-caution-text', w.text));
+      if (w.url && w.domain) {
+        const a = el(doc, 'a', 'lc-web-src');
+        a.href = w.url;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.textContent = w.domain;
+        li.appendChild(a);
+      }
+      list.appendChild(li);
+    });
+    section.appendChild(list);
+    card.appendChild(section);
   }
 
   // "What the evidence shows" — one row per evidence[]; strength as TEXT label + chip; sources → chips.
@@ -257,6 +306,33 @@ export function renderLensCard(assessment: LensCardAssessment, container: HTMLEl
     card.appendChild(section);
   }
 
+  // "From health references" (CHK-7.7) — the reputable-only web tier (EFFECT notes; cautions render in
+  // their own prominent block above). DISTINCT + weaker, shown below the study evidence with an explicit
+  // caveat + each note's source domain. Never peer-reviewed; grounded server-side before it appears.
+  const webEffects = Array.isArray(assessment.webFindings)
+    ? assessment.webFindings.filter((w) => w && w.kind !== 'caution' && typeof w.text === 'string' && w.text)
+    : [];
+  if (webEffects.length) {
+    const { section } = block(doc, WEB_TIER_HEAD, 'lc-web');
+    section.appendChild(el(doc, 'p', 'lc-web-note', WEB_TIER_NOTE)); // server caveat (copy.ts), textContent
+    const list = el(doc, 'ul', 'lc-web-list');
+    webEffects.forEach((w) => {
+      const li = el(doc, 'li', 'lc-web-row');
+      li.appendChild(el(doc, 'p', 'lc-web-text', w.text));
+      if (w.url && w.domain) {
+        const a = el(doc, 'a', 'lc-web-src');
+        a.href = w.url; // reputable source url (server-vetted host)
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.textContent = w.domain; // show the source domain so the reader judges it
+        li.appendChild(a);
+      }
+      list.appendChild(li);
+    });
+    section.appendChild(list);
+    card.appendChild(section);
+  }
+
   // "Label reality" — each labelFlags[] → text + a link to its basis.
   if (Array.isArray(assessment.labelFlags) && assessment.labelFlags.length) {
     const { section } = block(doc, LABEL.labelHead, 'lc-label');
@@ -297,6 +373,13 @@ export function renderLensCard(assessment: LensCardAssessment, container: HTMLEl
     });
     section.appendChild(list);
     card.appendChild(section);
+  }
+
+  // The full "educational, not medical advice" disclaimer at the card FOOT — present within the result
+  // (near the decision, not the page footer), without stacking on the lede up top. The not-a-grade stamp
+  // is up top and the safety block is mid-card, so the boundary stays prominent.
+  if (assessment.disclaimer) {
+    card.appendChild(el(doc, 'p', 'lc-disclaimer lc-disclaimer-foot', assessment.disclaimer));
   }
 
   // review route — request a human review (the real-promise page).

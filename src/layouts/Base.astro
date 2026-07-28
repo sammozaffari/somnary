@@ -18,6 +18,12 @@ interface Props {
   ogImage?: string; // absolute URL to a per-page OG image (remedy pages generate one, CHK-2.2)
 }
 const { title, description, canonical, ogType = 'website', ogImage } = Astro.props;
+
+// Search-first IA (2026-07-27, Phase 1): a global "Back" affordance on every interior page (not the
+// homepage). The anchor points at "/" so it works with JS disabled / no history (no-referrer fallback);
+// the inline script upgrades it to history.back() when there is somewhere to go back to.
+const path = Astro.url.pathname.replace(/\/+$/, '') || '/';
+const isHome = path === '/';
 ---
 
 <!doctype html>
@@ -57,7 +63,53 @@ const { title, description, canonical, ogType = 'website', ogImage } = Astro.pro
   </head>
   <body>
     <Nav />
+    {
+      !isHome && (
+        <div class="backbar">
+          <a href="/" class="backlink" data-back>
+            <span aria-hidden="true">←</span> Back
+          </a>
+        </div>
+      )
+    }
     <slot />
     <Footer />
+    <script>
+      // Upgrade the "Back" link to history.back() when there is history to return to; otherwise the
+      // anchor's href="/" is the graceful fallback (works with JS off or when opened in a fresh tab).
+      const back = document.querySelector('[data-back]');
+      if (back && window.history.length > 1) {
+        back.addEventListener('click', (event) => {
+          event.preventDefault();
+          window.history.back();
+        });
+      }
+    </script>
   </body>
 </html>
+
+<style>
+  .backbar {
+    padding: var(--sp-4) var(--sp-7) 0;
+  }
+  /* muted-but-legible per the design doc: resting --muted, hover --ink. Tokens only. */
+  .backlink {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-2);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+    text-decoration: none;
+    transition: color var(--dur-fast) var(--ease-soft);
+  }
+  .backlink:hover {
+    color: var(--ink);
+  }
+  @media (max-width: 640px) {
+    .backbar {
+      padding: var(--sp-4) var(--sp-5) 0;
+    }
+  }
+</style>

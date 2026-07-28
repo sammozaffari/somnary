@@ -27,14 +27,15 @@ const imp = (rel) => import(pathToFileURL(join(ROOT, rel)).href);
 const { isValidId, isResolvableId, parseCitation, canonicalUrl, canonicalUrlByKind } = await imp(
   'src/lib/lens/citations.ts',
 );
-const { PubMedProvider } = await imp('src/lib/lens/retrieval.ts');
+const { PubMedProvider, EuropePmcProvider, MultiProvider } = await imp('src/lib/lens/retrieval.ts');
+const { isReputableUrl, domainOf, parseWebNotes, openRouterWebResearch, REPUTABLE_DOMAINS } = await imp('src/lib/lens/websearch.ts');
 const { normalizeLensInput, MAX_LENS_INPUT_LEN } = await imp('src/lib/lens/input.ts');
 const { verifyClaims, quoteIsGrounded, parseVerdict, coerceVerdict, REFUTE_N, REFUTE_QUORUM, LENS_MAX_MODEL_CALLS } =
   await imp('src/lib/lens/verify.ts');
 const { LENS_EXTRACT_PROMPT, LENS_REFUTE_PROMPT, LENS_EXTRACT_VERSION, LENS_REFUTE_VERSION, buildRefuteUserPrompt, buildExtractUserPrompt } =
   await imp('src/lib/lens/prompts.ts');
 // CHK-7.1c — the composer/orchestrator + rubric + copy + the red-team gate.
-const { runLens, parseExtraction, LENS_MAX_CLAIMS } = await imp('src/lib/lens/engine.ts');
+const { runLens, parseExtraction, LENS_MAX_CLAIMS, mergeDocs, sleepScore, rerankBySleep, sleepFocusedQuery, isPreclinical } = await imp('src/lib/lens/engine.ts');
 const { applyRubric } = await imp('src/lib/lens/rubric.ts');
 const { parseAdditiveWatchlist } = await imp('src/lib/lens/additive-watchlist.ts');
 const lensCopy = await imp('src/lib/lens/copy.ts');
@@ -264,6 +265,92 @@ async function run() {
     ok('esearch requests relevance (Best Match) sort', /[?&]sort=relevance(&|$)/.test(esearchUrl), esearchUrl);
   }
 
+  console.log('\nlens suite — Europe PMC + MultiProvider (CHK-7.6):');
+  {
+    // EuropePmcProvider: parses resultList.result[], keeps ONLY records with a valid PMID (the pipeline
+    // is PMID-keyed), strips markup, maps to the canonical PMID url; a DOI-only preprint is skipped.
+    const epmcJson = {
+      resultList: {
+        result: [
+          { pmid: '23691095', title: 'Apigenin <i>and</i> sleep', abstractText: 'reduced <b>sleep</b> latency', pubYear: '2020', doi: '10.1/x' },
+          { pmid: '', doi: '10.2/preprint', title: 'A DOI-only preprint' },
+          { title: 'No ids at all' },
+          { pmid: 'not-a-pmid', title: 'Bad pmid' },
+        ],
+      },
+    };
+    const epmcFetch = async (url) => {
+      ok('epmc query hits the Europe PMC search endpoint', url.includes('ebi.ac.uk/europepmc') && /[?&]resultType=core(&|$)/.test(url) && /[?&]format=json(&|$)/.test(url));
+      return { ok: true, json: async () => epmcJson };
+    };
+    const epmc = new EuropePmcProvider({ fetchImpl: epmcFetch });
+    const docs = await epmc.search('apigenin sleep');
+    ok('EuropePmc keeps ONLY valid-PMID records (drops DOI-only + bad-pmid)', docs.length === 1 && docs[0].pmid === '23691095');
+    ok('EuropePmc strips markup from title + abstract', docs[0].title === 'Apigenin and sleep' && docs[0].abstractText === 'reduced sleep latency');
+    ok('EuropePmc maps to the canonical PMID url + year', docs[0].url === canonicalUrlByKind.pmid('23691095') && docs[0].year === '2020');
+    ok('EuropePmc empty query → [] (no fetch)', (await epmc.search('  ')).length === 0);
+    ok('EuropePmc non-ok/bad JSON → [] (never throws)', (await new EuropePmcProvider({ fetchImpl: async () => ({ ok: false }) }).search('x')).length === 0 && (await new EuropePmcProvider({ fetchImpl: async () => ({ ok: true, json: async () => { throw new Error('bad'); } }) }).search('x')).length === 0);
+  }
+  {
+    // MultiProvider: fans out to N sources with the SAME query, merges deduped by PMID preserving
+    // provider order (first source's copy of a shared PMID wins); a throwing source contributes [].
+    const a = { search: async () => [{ pmid: '111', title: 'A-only', abstractText: '', url: 'u1' }, { pmid: '999', title: 'shared-from-A', abstractText: '', url: 'uA' }] };
+    const b = { search: async () => [{ pmid: '999', title: 'shared-from-B', abstractText: '', url: 'uB' }, { pmid: '222', title: 'B-only', abstractText: '', url: 'u2' }] };
+    const boom = { search: async () => { throw new Error('down'); } };
+    const merged = await new MultiProvider([a, boom, b]).search('q');
+    ok('MultiProvider merges deduped by PMID, provider order preserved', merged.map((d) => d.pmid).join() === '111,999,222');
+    ok('MultiProvider keeps the FIRST source copy of a shared PMID', merged.find((d) => d.pmid === '999').title === 'shared-from-A');
+    ok('MultiProvider tolerates a throwing source (contributes [])', merged.length === 3);
+    ok('MultiProvider with no providers → []', (await new MultiProvider([]).search('q')).length === 0);
+  }
+
+  console.log('\nlens suite — reputable web tier (CHK-7.7):');
+  {
+    // Domain allowlist: reputable hosts + subdomains pass; blogs/retailers/path-embedded do NOT.
+    ok('isReputableUrl allows a reputable host', isReputableUrl('https://medlineplus.gov/druginfo/x.html') && isReputableUrl('https://pmc.ncbi.nlm.nih.gov/articles/PMC1/'));
+    ok('isReputableUrl allows a subdomain of an allowed host', isReputableUrl('https://sub.drugs.com/monograph/x'));
+    ok('isReputableUrl rejects a blog/retailer', !isReputableUrl('https://sleepblog.com/x') && !isReputableUrl('https://amazon.com/x') && !isReputableUrl('https://reddit.com/r/sleep'));
+    ok('isReputableUrl rejects a domain merely EMBEDDED in a junk path (host-based, not substring)', !isReputableUrl('https://evil.com/nih.gov/fake') && !isReputableUrl('https://medlineplus.gov.evil.com/x'));
+    ok('domainOf strips www + lowercases', domainOf('https://WWW.Drugs.com/x') === 'drugs.com');
+    ok('parseWebNotes tolerates prose-wrapped JSON + skips malformed', parseWebNotes('here: {"notes":[{"text":"a","quote":"q","url":"u"},{"text":"","quote":"q"}]} end').length === 1);
+    // openRouterWebResearch: grounds each note against a REPUTABLE annotation's verbatim text; a note
+    // whose quote isn't a real substring, or whose source isn't reputable, is DROPPED.
+    const REP = 'https://medlineplus.gov/druginfo/meds/a682537.html';
+    const grounded = 'you will probably become very sleepy soon after you take the medication';
+    const webBody = {
+      choices: [
+        {
+          message: {
+            content: JSON.stringify({
+              notes: [
+                { kind: 'effect', text: 'Doxylamine makes you very sleepy soon after taking it', quote: grounded, url: REP },
+                { kind: 'caution', text: 'do not take doxylamine longer than 2 weeks', quote: 'Do not take doxylamine for longer than 2 weeks unless directed by a doctor', url: REP },
+                { text: 'Fabricated sleep claim never in any source', quote: 'this exact text appears in no source at all', url: REP },
+                { text: 'Doxylamine helps you sleep', quote: 'helps you sleep according to a blog', url: 'https://sleepblog.com/x' },
+              ],
+            }),
+            annotations: [
+              { type: 'url_citation', url_citation: { url: REP, title: 'MedlinePlus', content: `If you are taking doxylamine to treat insomnia, ${grounded} and will remain sleepy the next day. Do not take doxylamine for longer than 2 weeks unless directed by a doctor.` } },
+              { type: 'url_citation', url_citation: { url: 'https://sleepblog.com/x', title: 'Blog', content: 'helps you sleep according to a blog says the author' } },
+            ],
+          },
+        },
+      ],
+    };
+    const webFetch = async (url, init) => {
+      ok('web research POSTs to OpenRouter with the web plugin', url.includes('openrouter.ai') && /"id":"web"/.test(init.body) && /"plugins"/.test(init.body));
+      return { ok: true, json: async () => webBody };
+    };
+    const findings = await openRouterWebResearch({ subject: 'doxylamine', apiKey: 'k', fetchImpl: webFetch });
+    ok('web tier keeps the two grounded reputable notes (effect + caution)', findings.length === 2 && findings.every((f) => f.domain === 'medlineplus.gov'));
+    ok('web tier: a CAUTION displays the VERBATIM source quote, not the model paraphrase', findings.some((f) => f.kind === 'caution' && f.text === 'Do not take doxylamine for longer than 2 weeks unless directed by a doctor'));
+    ok('web tier: an EFFECT displays its plain restatement', findings.some((f) => f.kind === 'effect' && /very sleepy/.test(f.text)));
+    ok('web tier drops a fabricated (non-substring) quote', findings.every((f) => !/Fabricated/.test(f.text)));
+    ok('web tier drops a non-reputable (blog) source', findings.every((f) => f.domain !== 'sleepblog.com'));
+    ok('web tier: missing key or subject → [] (never bills)', (await openRouterWebResearch({ subject: 'x', apiKey: '' })).length === 0 && (await openRouterWebResearch({ subject: '', apiKey: 'k' })).length === 0);
+    ok('web tier: non-ok response → [] (never throws)', (await openRouterWebResearch({ subject: 'x', apiKey: 'k', fetchImpl: async () => ({ ok: false }) })).length === 0);
+  }
+
   console.log('\nlens suite — input.ts (normalize + classify + short-circuit):');
 
   // a real corpus remedy short-circuits.
@@ -399,7 +486,7 @@ const n = () => ({ supported: 'no', strength: 'weak', quote: '' });
 
 async function runVerifier() {
   console.log('\nlens suite — prompts.ts (versioned, framing-safe shape):');
-  ok('extract version pinned', LENS_EXTRACT_VERSION === 'lens-extract-v2', LENS_EXTRACT_VERSION);
+  ok('extract version pinned', LENS_EXTRACT_VERSION === 'lens-extract-v4', LENS_EXTRACT_VERSION);
   ok('refute version pinned', LENS_REFUTE_VERSION === 'lens-refute-v1', LENS_REFUTE_VERSION);
   ok('extract prompt forbids grading', /grade|rating|verdict/i.test(LENS_EXTRACT_PROMPT));
   ok('extract prompt forbids invented PMIDs', /invent a PMID/i.test(LENS_EXTRACT_PROMPT));
@@ -428,6 +515,12 @@ async function runVerifier() {
   // F1 hardening: a trivial or topically-irrelevant real substring can't anchor a claim.
   ok('NOT grounded: trivial short substring below min length', !quoteIsGrounded('sleep', MEL_ABSTRACT, MEL_CLAIM));
   ok('NOT grounded: real span with NO content-token overlap with the (unrelated) claim', !quoteIsGrounded('melatonin reduced sleep onset latency', MEL_ABSTRACT, 'Apigenin cures cancer in humans.'));
+  // POLARITY GUARD (adversarial CHK-7.8): a positively-worded claim CANNOT quote its way out of a
+  // negated finding — a negation right before the span with a non-negated claim ⇒ rejected.
+  const NEG_ABSTRACT = 'In this randomized trial, valerian did not improve sleep quality or reduce sleep onset latency compared with placebo.';
+  ok('NOT grounded: claim INVERTS a negated finding (quote excludes the "did not")', !quoteIsGrounded('improve sleep quality or reduce sleep onset latency', NEG_ABSTRACT, 'Valerian can improve sleep quality and reduce sleep onset latency.'));
+  ok('grounded: a FAITHFUL negative claim keeps the negation', quoteIsGrounded('did not improve sleep quality or reduce sleep onset latency', NEG_ABSTRACT, 'Valerian did not improve sleep quality or reduce sleep onset latency.'));
+  ok('grounded: a positive finding with no nearby negation still passes', quoteIsGrounded('melatonin reduced sleep onset latency', MEL_ABSTRACT, MEL_CLAIM));
   // parseVerdict / coerceVerdict: malformed → skeptical default.
   ok('parseVerdict malformed JSON → supported:no', parseVerdict('not json at all').supported === 'no');
   ok('parseVerdict empty → supported:no', parseVerdict('').supported === 'no');
@@ -921,9 +1014,10 @@ async function runRedTeam() {
       resolveReply: { sleepRelevant: true, resolvedName: 'doxylamine', aka: ['Restavit'], productClass: 'otc-drug', pubmedQuery: 'doxylamine AND (sleep OR insomnia OR sedation)' },
       extractReply: { claims: [], doesNotShow: [], labelFacts: [] },
     });
-    const spy = { query: null, search: async (q) => { spy.query = q; return []; } };
+    const spy = { queries: [], search: async (q) => { spy.queries.push(q); return []; } };
     const r = await runLens({ ...base, input: 'Restavit', provider: spy, model });
-    ok('(11a) resolved query (ingredient + sleep) reaches the provider, not the raw brand', spy.query === 'doxylamine AND (sleep OR insomnia OR sedation)', String(spy.query));
+    ok('(11a) resolved query (ingredient + sleep) reaches the provider, not the raw brand', spy.queries[0] === 'doxylamine AND (sleep OR insomnia OR sedation)', JSON.stringify(spy.queries));
+    ok('(11a) a second sleep-focused search also runs (CHK-7.5)', spy.queries.length === 2 && /insomnia OR nightmares/.test(spy.queries[1]), JSON.stringify(spy.queries));
     ok('(11a) resolution consumed one model call', calls.resolve === 1);
     ok('(11a) meta.modelCalls counts the resolve call', r.meta.modelCalls >= 1);
     ok('(11a) card shows the resolved entity', !!r.resolved && r.resolved.resolvedName === 'doxylamine' && /doxylamine/.test(r.resolved.line));
@@ -939,9 +1033,9 @@ async function runRedTeam() {
       resolveReply: { sleepRelevant: true, resolvedName: 'propranolol', aka: ['Inderal'], productClass: 'prescription-drug', pubmedQuery: 'propranolol AND (sleep OR insomnia OR nightmares)' },
       extractReply: { claims: [], doesNotShow: [], labelFacts: [] },
     });
-    const spy = { query: null, search: async (q) => { spy.query = q; return []; } };
+    const spy = { queries: [], search: async (q) => { spy.queries.push(q); return []; } };
     const r = await runLens({ ...base, input: 'propranolol', provider: spy, model });
-    ok('(11a2) a non-sleep-aid drug is researched for its sleep effect', spy.query === 'propranolol AND (sleep OR insomnia OR nightmares)', String(spy.query));
+    ok('(11a2) a non-sleep-aid drug is researched for its sleep effect', spy.queries[0] === 'propranolol AND (sleep OR insomnia OR nightmares)', JSON.stringify(spy.queries));
     ok('(11a2) resolved line reads "a prescription medicine", not "sleep medicine"', !!r.resolved && /prescription medicine/.test(r.resolved.line) && !/sleep medicine/.test(r.resolved.line), r.resolved?.line);
     ok('(11a2) routes to the medications page + clinician', r.safety.routes.some((rt) => rt.href === '/medications-and-sleep-aids') && r.safety.routes.some((rt) => rt.href === '/when-to-see-a-doctor'));
     ok('(11a2) NO grade smell', findGradeSmell(r) === null);
@@ -958,10 +1052,10 @@ async function runRedTeam() {
   }
   {
     // (11c) resolution model FAILS → passthrough: research runs on the (sanitised) subject, no crash.
-    const spy = { query: null, search: async (q) => { spy.query = q; return []; } };
+    const spy = { queries: [], search: async (q) => { spy.queries.push(q); return []; } };
     const failResolveModel = async ({ system }) => (system.includes('RESOLVER') ? { ok: false, text: '' } : { ok: true, text: '{}' });
     const r = await runLens({ ...base, input: 'someunlistedcompound', provider: spy, model: failResolveModel });
-    ok('(11c) model failure → passthrough searches the subject', typeof spy.query === 'string' && /someunlistedcompound/.test(spy.query), String(spy.query));
+    ok('(11c) model failure → passthrough searches the subject', spy.queries.some((q) => /someunlistedcompound/.test(q)), JSON.stringify(spy.queries));
     ok('(11c) model failure → inconclusive, never a crash/verdict', r.status === 'inconclusive');
   }
   {
@@ -990,6 +1084,83 @@ async function runRedTeam() {
       const shown = r.resolved ? `${r.resolved.line} ${r.resolved.resolvedName}` : '';
       ok(`(11d2) grade-shaped resolved name "${badName}" → dropped from display`, !/grade|tier|rated/i.test(shown), shown);
     }
+  }
+  {
+    // (11r) RETRIEVAL RECALL (CHK-7.5): two searches merge + dedupe; rerank floats sleep papers to the
+    // top so a broad drug's sleep evidence reaches extraction; a title sleep-match outranks abstract-only.
+    ok('(11r) sleepFocusedQuery builds a specific sleep query from a name', /propranolol AND \(insomnia OR nightmares/.test(sleepFocusedQuery('propranolol')) && sleepFocusedQuery('') === '');
+    const dTitleSleep = { pmid: '1', title: 'Zopiclone and insomnia: a trial', abstractText: 'unrelated body' };
+    const dAbsSleep = { pmid: '2', title: 'A cardiology review', abstractText: 'the drug affected sleep quality and insomnia in some patients' };
+    const dNoSleep = { pmid: '3', title: 'Portal hypertension outcomes', abstractText: 'decompensation and death' };
+    ok('(11r) sleepScore weights a title sleep-match above an abstract-only one', sleepScore(dTitleSleep) > sleepScore(dAbsSleep) && sleepScore(dAbsSleep) > sleepScore(dNoSleep));
+    const merged = mergeDocs([dNoSleep, dAbsSleep], [dTitleSleep, dNoSleep]);
+    ok('(11r) mergeDocs dedupes by PMID, preserves first-seen', merged.length === 3 && merged[0].pmid === '3' && merged.map((d) => d.pmid).join() === '3,2,1');
+    const ranked = rerankBySleep([dNoSleep, dAbsSleep, dTitleSleep]);
+    ok('(11r) rerankBySleep floats the most sleep-relevant doc first, no-sleep last', ranked[0].pmid === '1' && ranked[ranked.length - 1].pmid === '3');
+    // The engine runs BOTH searches and reranks: give it a non-sleep top result + a sleep-focused second
+    // result; the reranked docs put the sleep paper first so extraction sees it.
+    {
+      const nonSleep = [{ pmid: '30060537', title: 'Migraine prophylaxis', abstractText: 'propranolol first-line for migraine', url: 'https://pubmed.ncbi.nlm.nih.gov/30060537/' }];
+      const sleepDoc = [{ pmid: '23691095', title: 'Drug and insomnia: a sleep trial', abstractText: 'reduced insomnia and improved sleep quality', url: 'https://pubmed.ncbi.nlm.nih.gov/23691095/' }];
+      const twoQ = { queries: [], search: async (q) => { twoQ.queries.push(q); return twoQ.queries.length === 1 ? nonSleep : sleepDoc; } };
+      const { model } = makeEngineModel({
+        resolveReply: { sleepRelevant: true, resolvedName: 'somedrug', aka: [], productClass: 'prescription-drug', pubmedQuery: 'somedrug AND sleep' },
+        extractReply: { claims: [{ text: 'Somedrug reduced insomnia and improved sleep quality', sourcePmid: '23691095' }], doesNotShow: [], labelFacts: [] },
+        refuteByClaimSubstr: { 'reduced insomnia': [yes('reduced insomnia and improved sleep quality'), yes('reduced insomnia and improved sleep quality'), yes('reduced insomnia and improved sleep quality')] },
+      });
+      const r = await runLens({ ...base, input: 'somedrug', provider: twoQ, model });
+      ok('(11r) engine ran two searches + surfaced the sleep paper → assessed', r.status === 'assessed' && r.evidence.length === 1 && r.evidence[0].sources[0].pmid === '23691095', JSON.stringify({ q: twoQ.queries.length, st: r.status }));
+    }
+  }
+  {
+    // (11p) PRECLINICAL DOWNGRADE (CHK-7.6): a verified but ANIMAL/in-vitro finding is never shown as
+    // "strong" HUMAN evidence — the composer caps it to weak (anti-hype). Broader indexes surface more
+    // preclinical studies, so this keeps strength honest even when 3/3 verifiers call it strong.
+    ok('(11p) isPreclinical flags animal/in-vitro text', isPreclinical('reduced REM sleep in mice') && isPreclinical('in vitro cell culture assay') && !isPreclinical('a randomized trial in adults'));
+    const preQuote = 'sertraline reduced rapid eye movement sleep in mice';
+    const { model } = makeEngineModel({
+      extractReply: { claims: [{ text: 'Sertraline reduced REM sleep in mice', sourcePmid: '23691095' }], doesNotShow: [], labelFacts: [] },
+      refuteByClaimSubstr: { 'reduced REM sleep in mice': [yes(preQuote), yes(preQuote), yes(preQuote)] },
+    });
+    const preDocs = [{ pmid: '23691095', title: 'Sertraline and sleep in mice', abstractText: preQuote, url: 'https://pubmed.ncbi.nlm.nih.gov/23691095/' }];
+    const r = await runLens({ ...base, input: 'sertraline sleep', provider: providerOf(preDocs), model });
+    ok('(11p) a strong-verified animal claim is capped to weak', r.status === 'assessed' && r.evidence.length === 1 && r.evidence[0].strength === 'weak', JSON.stringify(r.evidence.map((e) => e.strength)));
+  }
+  {
+    // (11w) WEB TIER (CHK-7.7): an injected webResearch surfaces a SEPARATE webFindings tier on a
+    // researched card; a non-sleep or framing-tripping web note is filtered server-side; refused/empty
+    // → no tier. (openRouterWebResearch's own grounding is unit-tested in the web-tier block above.)
+    const webCalls = [];
+    const engineWeb = async (subj, timeoutMs) => { webCalls.push({ subj, timeoutMs }); return [
+      { text: 'Doxylamine commonly causes next-day drowsiness', url: 'https://medlineplus.gov/x', domain: 'medlineplus.gov' },
+      { text: 'Doxylamine lowers blood pressure', url: 'https://drugs.com/y', domain: 'drugs.com' }, // no sleep concept → dropped
+      { text: 'Take doxylamine tonight for sleep', url: 'https://drugs.com/z', domain: 'drugs.com' }, // forbidden framing → dropped
+      { text: 'Doxylamine improves sleep says a blog', url: 'https://sleepblog.com/x', domain: 'sleepblog.com' }, // non-reputable url → engine drops
+      { text: 'Doxylamine reduces insomnia onset per the reference', url: 'https://medlineplus.gov/z', domain: 'evil.com' }, // reputable url, LYING domain → engine recomputes
+      { text: 'This medicine is intended for short-term use only.', url: 'https://medlineplus.gov/c', domain: 'medlineplus.gov', kind: 'caution' }, // caution: kept despite NO sleep word
+      { text: 'The usual dose is 25 mg taken at bedtime.', url: 'https://www.drugs.com/d', domain: 'drugs.com', kind: 'caution' }, // caution carrying a DOSE → dropped by the dose guard
+    ]; };
+    const { model } = makeEngineModel({
+      resolveReply: { sleepRelevant: true, resolvedName: 'doxylamine', aka: [], productClass: 'otc-drug', pubmedQuery: 'doxylamine AND sleep' },
+      extractReply: { claims: [{ text: 'Doxylamine reduced insomnia symptoms', sourcePmid: '23691095' }], doesNotShow: [], labelFacts: [] },
+      refuteByClaimSubstr: { 'reduced insomnia symptoms': [yes('reduced insomnia symptoms in the trial'), yes('reduced insomnia symptoms in the trial'), yes('reduced insomnia symptoms in the trial')] },
+    });
+    const wdocs = [{ pmid: '23691095', title: 'Doxylamine insomnia trial', abstractText: 'reduced insomnia symptoms in the trial', url: 'https://pubmed.ncbi.nlm.nih.gov/23691095/' }];
+    const r = await runLens({ ...base, input: 'doxylamine sleep aid product', provider: providerOf(wdocs), model, webResearch: engineWeb });
+    ok('(11w) assessed card carries a SEPARATE webFindings tier', Array.isArray(r.webFindings) && r.webFindings.length === 3 && r.webFindings.some((f) => /next-day drowsiness/.test(f.text)), JSON.stringify(r.webFindings));
+    ok('(11w) a CAUTION note is kept despite no sleep word + tagged kind:caution', (r.webFindings || []).some((f) => f.kind === 'caution' && /short-term use only/.test(f.text)));
+    ok('(11w) a caution carrying a DOSE (25 mg) is dropped by the dose guard', (r.webFindings || []).every((f) => !/25\s?mg/.test(f.text)));
+    ok('(11w) a non-sleep web note is filtered out', (r.webFindings || []).every((f) => !/blood pressure/.test(f.text)));
+    ok('(11w) a forbidden-framing web note is filtered out', (r.webFindings || []).every((f) => !/tonight/.test(f.text)));
+    ok('(11w) a non-reputable web url is dropped by the ENGINE guard', (r.webFindings || []).every((f) => f.domain !== 'sleepblog.com' && !/says a blog/.test(f.text)));
+    ok('(11w) the shown domain is RECOMPUTED from the url (a lying domain field is ignored)', (r.webFindings || []).every((f) => f.domain !== 'evil.com') && (r.webFindings || []).some((f) => f.domain === 'medlineplus.gov' && /reduces insomnia onset/.test(f.text)));
+    ok('(11w) NO grade smell with a web tier', findGradeSmell(r) === null);
+    ok('(11w) assessed card carries a plain-language bottomLine', typeof r.bottomLine === 'string' && /doxylamine/i.test(r.bottomLine) && /effect on sleep/i.test(r.bottomLine) && findGradeSmell({ x: r.bottomLine }) === null);
+    ok('(11w) web tier fired ONCE with a bounded timeout (parallel budget)', webCalls.length === 1 && webCalls[0].timeoutMs > 1000 && webCalls[0].timeoutMs <= 45000, JSON.stringify(webCalls.map((c) => c.timeoutMs)));
+    const rNoWeb = await runLens({ ...base, input: 'doxylamine sleep aid product', provider: providerOf(wdocs), model, webResearch: async () => [] });
+    ok('(11w) empty web → NO webFindings key', rNoWeb.webFindings === undefined);
+    const rRef = await runLens({ ...base, input: 'how much should I take for me each night?', provider: providerOf(wdocs), model, webResearch: engineWeb });
+    ok('(11w) refused card gets NO web tier', rRef.status === 'refused' && rRef.webFindings === undefined);
   }
   {
     // (11e) STREAMING (CHK-7.4): runLens fires real milestone events; counts are the real ones.

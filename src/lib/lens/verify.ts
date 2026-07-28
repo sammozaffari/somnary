@@ -190,17 +190,32 @@ function contentTokens(s: string): Set<string> {
   return out;
 }
 
+/** A negation immediately BEFORE a quoted span flips its polarity: quoting "improve sleep quality" out
+ * of "did NOT improve sleep quality" inverts the finding. We look for a negation cue within the ~24
+ * chars right before the span (kept tight so a distant, unrelated negation doesn't over-reject). */
+const NEG_BEFORE_RE =
+  /\b(?:no|not|never|without|cannot|fail(?:ed|s|ing)?|lack(?:ed|s|ing)?|neither|nor|absence|did\s*n['’]?t|does\s*n['’]?t|do\s*n['’]?t|was\s*n['’]?t|were\s*n['’]?t|is\s*n['’]?t|are\s*n['’]?t|un(?:able|likely))\b[^.;:!?]{0,24}$/i;
+/** Whether the CLAIM itself is negated (so it faithfully carries the source's null/negative polarity). */
+const CLAIM_NEG_RE =
+  /\b(?:no|not|never|without|cannot|fail(?:ed|s|ing)?|lack(?:ed|s|ing)?|little|minimal|insufficient|unable|unlikely|neither|nor|absence)\b|n['’]t\b/i;
+
 /** TRUE iff `quote` is a verbatim substring of `sourceText` (whitespace-normalized) AND non-trivial
- * (≥ MIN_QUOTE_CHARS) AND shares ≥ MIN_SHARED_TOKENS content words with `claim`. This is the
- * server-side re-check the model cannot fake: a fabricated/paraphrased quote isn't a substring, and a
- * real-but-irrelevant span (e.g. a lone "trial") can't anchor an unrelated claim. Conservative by
- * design — it prefers cutting a genuine claim to admitting an unsupported one. */
+ * (≥ MIN_QUOTE_CHARS) AND shares ≥ MIN_SHARED_TOKENS content words with `claim` AND does not INVERT the
+ * source's polarity (a negation right before the quoted span with a non-negated claim ⇒ rejected). This
+ * is the server-side re-check the model cannot fake: a fabricated/paraphrased quote isn't a substring, a
+ * real-but-irrelevant span can't anchor an unrelated claim, and a positively-worded claim can't quote its
+ * way out of a negated finding. Conservative — it prefers cutting a genuine claim to admitting a false one. */
 export function quoteIsGrounded(quote: string, sourceText: string, claim: string): boolean {
   if (typeof quote !== 'string' || typeof sourceText !== 'string') return false;
   const q = normalizeWs(quote);
   if (q.length < MIN_QUOTE_CHARS) return false;
-  if (!normalizeWs(sourceText).includes(q)) return false;
-  const claimTokens = contentTokens(typeof claim === 'string' ? claim : '');
+  const src = normalizeWs(sourceText);
+  const idx = src.indexOf(q);
+  if (idx < 0) return false;
+  const claimStr = typeof claim === 'string' ? claim : '';
+  // POLARITY GUARD: negation immediately before the span, but the claim isn't negated ⇒ likely inversion.
+  if (NEG_BEFORE_RE.test(src.slice(Math.max(0, idx - 48), idx)) && !CLAIM_NEG_RE.test(claimStr)) return false;
+  const claimTokens = contentTokens(claimStr);
   let shared = 0;
   for (const t of contentTokens(q)) {
     if (claimTokens.has(t) && ++shared >= MIN_SHARED_TOKENS) return true;

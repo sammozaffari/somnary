@@ -1,122 +1,44 @@
 ---
-// Sticky top nav — DESIGN_SYSTEM global chrome. Wordmark (moon mark) left; on desktop the
-// section links + ⌘K search + signed-in indicator sit right. On mobile (≤767px) the links
-// collapse behind a disclosure menu (search stays in the bar). The menu is a native <details>
-// so it works with JS OFF (crawlable, keyboard-operable); a scoped script enhances it with
-// aria-expanded sync, Esc-to-close + focus-return, outside-click close, and auto-close on
-// resize-to-desktop. Only links to pages that exist today are rendered, to avoid 404s.
+// Sticky top nav — DESIGN_SYSTEM §3 global chrome. Wordmark left; section links right.
+// The ⌘K search trigger is intentionally deferred to CHK-4.2 (slot left below). Only links
+// to pages that exist today are rendered, to avoid 404s; add more as routes land.
 import Wordmark from './Wordmark.astro';
 import SearchPalette from './SearchPalette.astro';
 import SessionNav from './account/SessionNav.astro';
 
+// Search-first IA (2026-07-27, Phase 1): the navbar collapses to two real destinations plus a
+// first-class search affordance — Remedies (does it work?) + Which to buy (which product?) + Search.
+// Everything else moves to the footer (Start here, Sleep habits, Compare, Safety, Label checker,
+// Lens, Methodology) so the chrome stops overloading; all pages stay crawlable via footer + internal
+// links. Lens becomes the search fallback engine (Phase 2), Label checker folds into search (Phase 3).
 const links = [
-  { href: '/start-here', label: 'Start here' },
   { href: '/tiers', label: 'Remedies' },
-  { href: '/lens', label: 'Lens' },
-  { href: '/label-checker', label: 'Label checker' },
-  { href: '/compare', label: 'Compare' },
-  { href: '/sleep-habits', label: 'Sleep habits' },
-  { href: '/safety', label: 'Safety' },
-  { href: '/methodology', label: 'Methodology' },
+  { href: '/sources', label: 'Which to buy' },
 ];
 const path = Astro.url.pathname.replace(/\/$/, '') || '/';
-const isCurrent = (href: string) => path === href.replace(/\/$/, '');
 ---
 
 <nav class="nav" aria-label="Primary">
   <Wordmark />
-
-  <div class="nav-right">
-    {/* desktop links — hidden ≤767px */}
-    <ul class="links">
-      {
-        links.map((l) => (
+  <ul class="links">
+    {
+      links.map((l) => {
+        const current = path === l.href.replace(/\/$/, '');
+        return (
           <li>
-            <a
-              href={l.href}
-              aria-current={isCurrent(l.href) ? 'page' : undefined}
-              class:list={['link', { current: isCurrent(l.href) }]}
-            >
+            <a href={l.href} aria-current={current ? 'page' : undefined} class:list={['link', { current }]}>
               {l.label}
             </a>
           </li>
-        ))
-      }
-      <SessionNav />
-    </ul>
-
-    <div class="nav-actions">
-      <SearchPalette />
-
-      {/* mobile disclosure menu — hidden ≥768px. Native <details> = no-JS fallback. */}
-      <details class="menu" data-menu>
-        <summary class="menu-btn" aria-label="Menu" aria-expanded="false">
-          <span class="menu-icon" aria-hidden="true">
-            <span class="bar"></span>
-            <span class="bar"></span>
-            <span class="bar"></span>
-          </span>
-        </summary>
-        <div class="menu-panel">
-          <ul class="menu-links">
-            {
-              links.map((l) => (
-                <li>
-                  <a
-                    href={l.href}
-                    aria-current={isCurrent(l.href) ? 'page' : undefined}
-                    class:list={['menu-link', { current: isCurrent(l.href) }]}
-                  >
-                    {l.label}
-                  </a>
-                </li>
-              ))
-            }
-            <SessionNav />
-          </ul>
-        </div>
-      </details>
-    </div>
-  </div>
+        );
+      })
+    }
+    <li><SearchPalette /></li>
+    {/* Signed-in indicator (CHK-6.9c): hidden by default; revealed only for a real session.
+        Adds NO sign-in CTA — no login wall in the global chrome. */}
+    <SessionNav />
+  </ul>
 </nav>
-
-<script>
-  const details = document.querySelector<HTMLDetailsElement>('[data-menu]');
-  if (details) {
-    const summary = details.querySelector<HTMLElement>('summary');
-    const sync = () => summary?.setAttribute('aria-expanded', details.open ? 'true' : 'false');
-    sync();
-    details.addEventListener('toggle', sync);
-
-    // Esc closes and returns focus to the trigger (WCAG focus management)
-    details.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && details.open) {
-        details.open = false;
-        summary?.focus();
-      }
-    });
-
-    // click outside the menu closes it
-    document.addEventListener('click', (e) => {
-      if (details.open && e.target instanceof Node && !details.contains(e.target)) {
-        details.open = false;
-      }
-    });
-
-    // choosing a link closes the panel (covers same-page anchors that don't reload)
-    details.querySelectorAll('a').forEach((a) =>
-      a.addEventListener('click', () => {
-        details.open = false;
-      }),
-    );
-
-    // if the viewport grows to desktop while open, close (the panel is hidden there)
-    const desktop = window.matchMedia('(min-width: 768px)');
-    desktop.addEventListener('change', (e) => {
-      if (e.matches) details.open = false;
-    });
-  }
-</script>
 
 <style>
   .nav {
@@ -126,42 +48,30 @@ const isCurrent = (href: string) => path === href.replace(/\/$/, '');
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: var(--sp-4);
-    min-height: 64px;
-    padding: 0 var(--sp-5);
-    /* translucent paper + blur + hairline rule */
+    gap: var(--sp-5);
+    height: 64px;
+    padding: 0 var(--sp-7);
+    /* §3: translucent paper + blur + hairline rule. */
     background: color-mix(in srgb, var(--paper) 86%, transparent);
     backdrop-filter: blur(10px);
     border-bottom: var(--border-hairline);
   }
-  .nav-right {
-    display: flex;
-    align-items: center;
-    gap: var(--sp-5);
-    min-width: 0;
-  }
-  .nav-actions {
-    display: flex;
-    align-items: center;
-    gap: var(--sp-3);
-  }
-
-  /* desktop section links — shown ≥768px only */
   .links {
-    display: none;
+    display: flex;
     align-items: center;
     gap: var(--sp-5);
     margin: 0;
     padding: 0;
     list-style: none;
   }
+  /* Resting colour moved from --muted (too light, per owner 2026-07-27) to full --ink; the
+     current/hover state is oxblood --primary so state stays legibly distinct. Tokens only. */
   .link {
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    color: var(--muted);
+    color: var(--ink);
     text-decoration: none;
-    white-space: nowrap;
     padding-bottom: 3px;
     /* the site's one signature interaction: an oxblood underline that draws in from the left */
     background: linear-gradient(var(--primary), var(--primary)) 0 100% / 0 1.5px no-repeat;
@@ -170,12 +80,12 @@ const isCurrent = (href: string) => path === href.replace(/\/$/, '');
       background-size var(--dur-base) var(--ease-settle);
   }
   .link:hover {
-    color: var(--ink);
+    color: var(--primary);
     background-size: 100% 1.5px;
   }
   /* current page: a settled full underline (state, not motion) */
   .link.current {
-    color: var(--ink);
+    color: var(--primary);
     background-size: 100% 1.5px;
   }
   .link:focus-visible {
@@ -183,123 +93,9 @@ const isCurrent = (href: string) => path === href.replace(/\/$/, '');
     box-shadow: var(--focus-ring);
     border-radius: var(--r-xs);
   }
-
-  /* mobile disclosure menu — shown ≤767px only */
-  .menu {
-    position: relative;
-  }
-  .menu-btn {
-    display: grid;
-    place-items: center;
-    width: 44px;
-    height: 44px;
-    margin-right: calc(-1 * var(--sp-2)); /* optical: pull the tap target to the edge */
-    border-radius: var(--r-sm);
-    cursor: pointer;
-    list-style: none; /* strip default disclosure marker */
-    color: var(--ink);
-    -webkit-tap-highlight-color: transparent;
-  }
-  .menu-btn::-webkit-details-marker {
-    display: none;
-  }
-  .menu-btn:focus-visible {
-    outline: none;
-    box-shadow: var(--focus-ring);
-  }
-  .menu-icon {
-    display: grid;
-    gap: 5px;
-    width: 20px;
-  }
-  .menu-icon .bar {
-    height: 2px;
-    width: 100%;
-    background: currentColor;
-    border-radius: var(--r-pill);
-    transition:
-      transform var(--dur-fast) var(--ease-soft),
-      opacity var(--dur-fast) var(--ease-soft);
-  }
-  /* hamburger → X when open */
-  .menu[open] .menu-icon .bar:nth-child(1) {
-    transform: translateY(7px) rotate(45deg);
-  }
-  .menu[open] .menu-icon .bar:nth-child(2) {
-    opacity: 0;
-  }
-  .menu[open] .menu-icon .bar:nth-child(3) {
-    transform: translateY(-7px) rotate(-45deg);
-  }
-
-  .menu-panel {
-    position: absolute;
-    top: calc(100% + var(--sp-3));
-    right: calc(-1 * var(--sp-5)); /* bleed to the nav's right padding edge */
-    width: min(320px, calc(100vw - var(--sp-6)));
-    background: var(--surface);
-    border: var(--border-hairline);
-    border-radius: var(--r-md);
-    box-shadow: var(--shadow-md);
-    overflow: hidden;
-  }
-  .menu-links {
-    margin: 0;
-    padding: var(--sp-2);
-    list-style: none;
-  }
-  .menu-link,
-  .menu-links :global(.session-link) {
-    display: flex;
-    align-items: center;
-    min-height: 48px;
-    padding: 0 var(--sp-4);
-    border-radius: var(--r-sm);
-    font-family: var(--font-body);
-    font-size: var(--text-md);
-    font-weight: 550;
-    letter-spacing: normal;
-    color: var(--ink);
-    text-decoration: none;
-    transition: background var(--dur-fast) var(--ease-soft);
-  }
-  .menu-link:hover,
-  .menu-links :global(.session-link):hover {
-    background: var(--stone);
-  }
-  .menu-link.current {
-    color: var(--primary);
-    background: var(--primary-soft);
-  }
-  .menu-link:focus-visible,
-  .menu-links :global(.session-link):focus-visible {
-    outline: none;
-    box-shadow: var(--focus-ring);
-  }
-  /* the signed-in session row sits inside the panel as its own bordered group */
-  .menu-links :global(.session) {
-    display: block;
-    margin-top: var(--sp-2);
-    padding-top: var(--sp-2);
-    border-top: var(--border-hairline);
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .menu-icon .bar {
-      transition: none;
-    }
-  }
-
-  /* ≥768px: inline links, no hamburger */
-  @media (min-width: 768px) {
+  @media (max-width: 640px) {
     .nav {
-      padding: 0 var(--sp-7);
-    }
-    .links {
-      display: flex;
-    }
-    .menu {
-      display: none;
+      padding: 0 var(--sp-5);
     }
   }
 </style>

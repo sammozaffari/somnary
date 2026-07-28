@@ -70,6 +70,11 @@ export interface SourceProduct {
   /** Recurring themes from public Reddit/forum threads — display-only, never scored. */
   communityThemes?: { note: string; url?: string }[];
   /** Product photo in public/images/sources/melatonin/. Omit for a graceful lettered fallback. */
+  /** Where an Australian can find it — PLAIN retailer URLs, zero affiliate/tracking params (D2).
+   * Display priority: amazon > chemistWarehouse > iherb. */
+  retailers?: { amazon?: string; chemistWarehouse?: string; iherb?: string };
+  /** Disclosed ingredients panel (from the dossier), actives first — omitted when the brand doesn't publish one. */
+  ingredients?: string[];
   imagePath?: string;
   ratified: boolean;
   /** Whether an Australian can buy this OTC. Melatonin is Rx in AU, so the only OTC route is
@@ -98,6 +103,7 @@ export const MELATONIN_SOURCES: SourceProduct[] = [
     singleOrCombo: 'combo',
     manufacturerUrl:
       'https://www.natrol.com/products/melatonin-sleep-support-time-release-tablets-5mg',
+    retailers: { iherb: 'https://au.iherb.com/pr/natrol-melatonin-time-release-5-mg-100-tablets/8738' },
     certSummary: 'No third-party certification',
     additiveSummary: 'Benign ingredients; dose above the studied extended-release amount',
     scores: {
@@ -129,6 +135,7 @@ export const MELATONIN_SOURCES: SourceProduct[] = [
     market: 'US',
     singleOrCombo: 'single',
     manufacturerUrl: 'https://www.naturemade.com/products/nature-made-melatonin-3-mg-tablets',
+    retailers: { iherb: 'https://au.iherb.com/pr/nature-made-melatonin-3-mg-120-tablets/145605' },
     certSummary: 'USP Verified',
     certVerified: true,
     additiveSummary: 'No flagged additives',
@@ -160,6 +167,7 @@ export const MELATONIN_SOURCES: SourceProduct[] = [
     market: 'US',
     singleOrCombo: 'single',
     manufacturerUrl: 'https://naturesbounty.com/collections/melatonin',
+    retailers: { iherb: 'https://au.iherb.com/pr/nature-s-bounty-dual-spectrum-melatonin-5-mg-60-bi-layer-tablets/67800' },
     certSummary: 'No third-party certification',
     additiveSummary: 'No flagged additives',
     scores: {
@@ -194,6 +202,7 @@ export const MELATONIN_SOURCES: SourceProduct[] = [
     market: 'US',
     singleOrCombo: 'single',
     manufacturerUrl: 'https://www.nowfoods.com/products/supplements/melatonin-3-mg-veg-capsules',
+    retailers: { iherb: 'https://au.iherb.com/pr/now-foods-melatonin-3-mg-180-veg-capsules/328' },
     certSummary: 'No third-party cert (self-published COAs)',
     additiveSummary: 'No flagged additives (two-ingredient)',
     scores: {
@@ -225,6 +234,7 @@ export const MELATONIN_SOURCES: SourceProduct[] = [
     market: 'US',
     singleOrCombo: 'single',
     manufacturerUrl: 'https://www.lifeextension.com/vitamins-supplements/item01668/melatonin',
+    retailers: { iherb: 'https://au.iherb.com/pr/life-extension-melatonin-300-mcg-100-vegetarian-capsules/47809' },
     certSummary: 'No third-party certification',
     additiveSummary: 'No flagged additives',
     scores: {
@@ -407,6 +417,7 @@ export const MELATONIN_SOURCES: SourceProduct[] = [
     market: 'US',
     singleOrCombo: 'single',
     manufacturerUrl: 'https://www.thorne.com/products/dp/melaton-5-trade',
+    retailers: { iherb: 'https://au.iherb.com/pr/thorne-melaton-5-60-capsules-5-mg-per-capsule/18579' },
     certSummary: 'Cert is for Melaton-3, not this SKU',
     additiveSummary: 'No flagged additives',
     scores: {
@@ -455,6 +466,129 @@ export const MELATONIN_SOURCES: SourceProduct[] = [
     communityThemes: [
       { note: 'No threads specific to this product surfaced. On Reddit, melatonin discussion is dose-level rather than brand-level — many prefer 1 mg or less and cite next-morning grogginess.' },
     ],
+    ratified: true,
+  },
+
+  // ── Phase 2: top iHerb-importable melatonin bestsellers not already covered (deduped). Ratified 2026-07-24.
+  // Melatonin is Rx/S4 in Australia (import-only via iHerb), so these are US products an AU buyer imports.
+  {
+    slug: 'california-gold-nutrition-melatonin-3mg',
+    brand: 'California Gold Nutrition',
+    productName: 'Melatonin 3 mg',
+    bottomLine:
+      'The transparency standout of the imported melatonin here — iHerb’s iTested program has independent labs test each batch and posts a public per-batch lab report — though the testing is contaminant-focused, not a formal USP/NSF cert.',
+    form: 'capsule',
+    doseMg: 3,
+    market: 'US',
+    singleOrCombo: 'single',
+    manufacturerUrl: 'https://www.iherb.com/pr/california-gold-nutrition-melatonin-3-mg-90-veggie-capsules/130826',
+    retailers: { iherb: 'https://au.iherb.com/pr/california-gold-nutrition-melatonin-3-mg-90-veggie-capsules/130826' },
+    ingredients: ['Melatonin 3 mg', 'Microcrystalline cellulose', 'Hypromellose (veggie capsule)', 'Silicon dioxide'],
+    certSummary: 'iHerb iTested (3rd-party labs) + public per-batch lab report',
+    additiveSummary: 'Clean three-ingredient panel (cellulose, hypromellose, silica)',
+    imagePath: '/images/sources/melatonin/california-gold-nutrition-melatonin-3mg.jpg',
+    scores: {
+      testing_purity: { score: 1, note: 'iHerb’s iTested program has independent labs (Eurofins, Alkemist) test each batch for contaminants (microbial, heavy metals) — a real third-party signal, but iHerb’s own clean-label program rather than a formal USP/NSF certification (owner-ratified partial credit).' },
+      label_accuracy: { score: 2, note: 'No independent potency test naming the product, but iTested publishes a public per-batch certificate of analysis a reader can pull up by lot (public-COA credit, capped at 2).' },
+      additives: { score: 5, note: 'Clean three-ingredient panel (microcrystalline cellulose, hypromellose veg capsule, silica); no watchlist additive.' },
+      regulatory: { score: 5, note: 'No verified action names this product or the California Gold Nutrition line.' },
+      transparency: { score: 4, note: 'Manufacturer identifiable (+2) and a public per-batch lab-report program via iTested (+2); melatonin raw-material origin not disclosed.' },
+      marketing_honesty: { score: 5, note: 'Structure/function claims under the DSHEA disclaimer; no disease or unbacked-cert claim.' },
+    },
+    verdict:
+      'iHerb’s own house brand is the transparency standout of the imported melatonin: its iTested program has independent labs test each batch and posts a public per-batch certificate of analysis, on a clean three-ingredient capsule. The catch is that iTested is a contaminant/clean-label program run by iHerb rather than a formal USP or NSF certification, and there is no independent potency test naming the product.',
+    heldItems: [],
+    communityStatus: 'gathering',
+    ratified: true,
+  },
+  {
+    slug: '21st-century-melatonin-5mg',
+    brand: '21st Century',
+    productName: 'Melatonin 5 mg',
+    bottomLine:
+      'A cheap mass-market tablet with a clean, no-dye panel from a named maker — but no independent testing and no lab report.',
+    form: 'tablet',
+    doseMg: 5,
+    market: 'US',
+    singleOrCombo: 'single',
+    manufacturerUrl: 'https://www.iherb.com/pr/21st-century-melatonin-5-mg-120-tablets/10813',
+    retailers: { iherb: 'https://au.iherb.com/pr/21st-century-melatonin-5-mg-120-tablets/10813' },
+    ingredients: ['Melatonin 5 mg', 'Calcium carbonate (94 mg calcium)', 'Cellulose', 'Croscarmellose sodium', 'Gum acacia', 'Stearic acid', 'Magnesium stearate', 'Silicon dioxide'],
+    certSummary: 'Facility GMP only',
+    additiveSummary: 'Clean panel, no synthetic dye (+ calcium carbonate base)',
+    imagePath: '/images/sources/melatonin/21st-century-melatonin-5mg.jpg',
+    scores: {
+      testing_purity: { score: 0, note: 'No third-party product cert (USP/NSF/Informed) and no published lab test; a GMP facility is not a product test.' },
+      label_accuracy: { score: 0, note: 'No independent lab test of the exact product; no public per-batch lab report.' },
+      additives: { score: 5, note: 'Disclosed panel (cellulose, croscarmellose, gum acacia, stearic acid, magnesium stearate, silica) with no added colour, flavour or sweetener — no watchlist additive.' },
+      regulatory: { score: 5, note: 'No verified action names this product or line.' },
+      transparency: { score: 2, note: 'Manufacturer identifiable (+2) and dose disclosed; but no lab report and no AUST L (US import).' },
+      marketing_honesty: { score: 5, note: 'Structure/function claims under the DSHEA disclaimer; no unbacked-cert or disease claim.' },
+    },
+    verdict:
+      'A budget mass-market tablet from a named maker with a clean, dye-free ingredients panel — but, like most melatonin, no independent testing and no lab report to verify what’s in the tablet.',
+    heldItems: [],
+    communityStatus: 'gathering',
+    ratified: true,
+  },
+  {
+    slug: 'swanson-melatonin-3mg',
+    brand: 'Swanson',
+    productName: 'Melatonin 3 mg',
+    bottomLine:
+      'A clean two-ingredient vegan capsule from a named maker — but no independent testing and no lab report.',
+    form: 'capsule',
+    doseMg: 3,
+    market: 'US',
+    singleOrCombo: 'single',
+    manufacturerUrl: 'https://www.iherb.com/pr/swanson-melatonin-3-mg-120-vegan-capsules/111021',
+    retailers: { iherb: 'https://au.iherb.com/pr/swanson-melatonin-3-mg-120-vegan-capsules/111021' },
+    ingredients: ['Melatonin 3 mg', 'Rice flour', 'Hypromellose (vegan capsule)'],
+    certSummary: 'Facility GMP only',
+    additiveSummary: 'Two-ingredient vegan panel (rice flour, hypromellose)',
+    imagePath: '/images/sources/melatonin/swanson-melatonin-3mg.jpg',
+    scores: {
+      testing_purity: { score: 0, note: 'No third-party product cert and no published lab test; a "purity/potency guaranteed" self-claim and a GMP facility are not product tests.' },
+      label_accuracy: { score: 0, note: 'No independent lab test of the exact product; no public per-batch lab report.' },
+      additives: { score: 5, note: 'Clean two-ingredient vegan panel (rice flour, hypromellose veg capsule); no watchlist additive.' },
+      regulatory: { score: 5, note: 'No verified action names this product or line.' },
+      transparency: { score: 2, note: 'Manufacturer identifiable (+2) and dose disclosed; but no lab report and no AUST L (US import).' },
+      marketing_honesty: { score: 5, note: 'Structure/function claims under the DSHEA disclaimer; the "purity guaranteed" wording is a self-claim, not an implied certification.' },
+    },
+    verdict:
+      'A clean two-ingredient vegan capsule from a named maker at the common 3 mg dose — but no independent testing and no lab report, the near-universal gap in this category.',
+    heldItems: [],
+    communityStatus: 'gathering',
+    ratified: true,
+  },
+  {
+    slug: 'vitamatic-melatonin-10mg',
+    brand: 'Vitamatic',
+    productName: 'Melatonin 10 mg (Fast Dissolve)',
+    bottomLine:
+      'A high-dose (10 mg) fast-dissolve tablet that adds a synthetic dye (FD&C Blue #2) and sucralose — no independent testing, and a dose well above the physiologic range.',
+    form: 'tablet (fast dissolve)',
+    doseMg: 10,
+    market: 'US',
+    singleOrCombo: 'single',
+    manufacturerUrl: 'https://www.iherb.com/pr/vitamatic-melatonin-berry-10-mg-365-fast-dissolve-tablets/147514',
+    retailers: { iherb: 'https://au.iherb.com/pr/vitamatic-melatonin-berry-10-mg-365-fast-dissolve-tablets/147514' },
+    ingredients: ['Melatonin 10 mg', 'Microcrystalline cellulose', 'Natural berry flavour', 'Dextrose', 'Mannitol', 'Sucralose', 'Bilberry extract', 'Magnesium stearate', 'Silicon dioxide', 'Croscarmellose sodium', 'FD&C Blue #2 (synthetic colour)'],
+    certSummary: 'Facility GMP only',
+    additiveSummary: 'Fast-dissolve tablet with FD&C Blue #2, sucralose, mannitol (disclosed)',
+    imagePath: '/images/sources/melatonin/vitamatic-melatonin-10mg.jpg',
+    scores: {
+      testing_purity: { score: 0, note: 'No third-party product cert and no published lab test; a GMP facility is not a product test.' },
+      label_accuracy: { score: 0, note: 'No independent lab test of the exact product; no public per-batch lab report.' },
+      additives: { score: 4, note: '−1: the fast-dissolve tablet adds the synthetic colour FD&C Blue #2 — a colour that serves no active function in a sleep supplement — alongside sucralose and mannitol; all disclosed.' },
+      regulatory: { score: 5, note: 'No verified action names this product or line.' },
+      transparency: { score: 2, note: 'Manufacturer identifiable (+2) and dose disclosed; but no lab report and no AUST L (US import).' },
+      marketing_honesty: { score: 5, note: 'Structure/function claims under the DSHEA disclaimer; no unbacked-cert claim. (The 10 mg dose is ~30× the physiologic ~0.3 mg — shown as context, not scored.)' },
+    },
+    verdict:
+      'A high-dose 10 mg fast-dissolve tablet — roughly thirty times the physiologic dose — that adds a synthetic colour (FD&C Blue #2) and sucralose, with no independent testing and no lab report. The dose and dye are the story here, both disclosed on the label.',
+    heldItems: [],
+    communityStatus: 'gathering',
     ratified: true,
   },
 ];

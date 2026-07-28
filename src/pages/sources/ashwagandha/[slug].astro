@@ -1,0 +1,31 @@
+---
+import Base from '../../../layouts/Base.astro';
+import ProductPage from '../../../components/scorecards/ProductPage.astro';
+import { ASHWAGANDHA_SOURCES, type AshProduct } from '../../../data/source-scorecards/ashwagandha';
+import { toAshCard as toCard } from '../../../lib/sources/cards';
+import { computeTier, TIERS } from '../../../data/source-scorecards/tiers';
+
+export function getStaticPaths() {
+  return ASHWAGANDHA_SOURCES.filter((p) => p.ratified).map((p) => ({ params: { slug: p.slug }, props: { product: p } }));
+}
+
+const { product } = Astro.props as { product: AshProduct };
+const card = toCard(product);
+const tier = TIERS[computeTier(product.scores, card.hasB6)];
+const retailerNote = null;
+---
+
+<Base
+  title={`${card.brand} ${card.productName} — Ashwagandha source scorecard — Somnary`}
+  description={card.bottomLine}
+>
+  <ProductPage
+    card={card}
+    tier={tier}
+    remedy={{ name: 'Ashwagandha', slug: 'ashwagandha' }}
+    retailers={product.retailers}
+    ingredients={product.ingredients}
+    retailerNote={retailerNote ?? undefined}
+    reviewDate="2026-07-21"
+  />
+</Base>

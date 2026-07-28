@@ -445,7 +445,68 @@ NOT a Somnary grade". Concierge (CHK-6.8) demotes to a secondary mode.
   dose, verified-only); off-topic still declined; drugs route harder to a clinician.
   Design `docs/plans/2026-07-21-lens-query-understanding-design.md`. PR for owner (never
   self-merged — medical boundary). Lens red-team 183/39/40 green; live: Restavit →
-  doxylamine → assessed, 2 verified claims (weak+strong).
+  doxylamine → assessed, 2 verified claims (weak+strong). *(Merged #99; scope broadened
+  to ANY substance's sleep effect per owner.)*
+- [x] **CHK-7.5 Retrieval recall.** `HG` (medical-boundary AI core). Owner: "put in any
+  drug and get a response" without loosening the no-uncited-claims firewall. PubMed Best
+  Match ranks a broad drug's non-sleep literature above its sleep papers, so a bounded
+  top-N missed them → wrongly inconclusive. Fix: run the resolver's query AND a
+  deterministic sleep-FOCUSED query, merge/dedupe, and rerank by sleep-term density so the
+  most sleep-relevant abstracts reach extraction. Firewall UNCHANGED — every surviving
+  claim still verbatim-verified; this only widens WHICH real papers are read.
+  *Accept:* no new model calls (both searches are PubMed); invariant holds; more drugs
+  return cited evidence, the rest stay honestly inconclusive. Live: prednisone → insomnia
+  (strong), propranolol now assessed (was inconclusive); deeper recall (paid web-search
+  provider) remains the follow-up for drugs PubMed doesn't surface (e.g. sertraline). *(Merged #102.)*
+- [x] **CHK-7.6 Multi-source retrieval (Europe PMC).** `HG` (medical-boundary AI core).
+  Owner asked to broaden beyond PubMed ("Google Scholar or something"). Scholar has no API
+  + is bot-blocked; Europe PMC is the right free/keyless add — covers PubMed PLUS PMC
+  full-text + preprints with a DIFFERENT relevance ranking, which surfaces the sleep papers
+  PubMed's Best Match buries. New `EuropePmcProvider` (PMID-only, so the PMID-keyed
+  verification pipeline is unchanged) + `MultiProvider` (fan out, merge deduped by PMID);
+  the route now queries PubMed + Europe PMC. Also caps ANIMAL/in-vitro claims to weak
+  (`isPreclinical`) since broader indexes surface more preclinical studies — never "strong"
+  human evidence. *Accept:* firewall unchanged (every claim still verbatim-verified + cited);
+  no new keys/deps. Live: sertraline inconclusive → assessed (REM-in-mice shown WEAK);
+  propranolol/prednisone improved. The paid web-search provider stays the next lever. *(Merged #104.)*
+- [x] **CHK-7.7 Reputable web-references tier.** `HG` (medical-boundary AI core + cost).
+  Owner: "search the web with the openrouter api." OpenRouter's `web` plugin (Exa) returns
+  real results w/ URL + content. Owner chose "reputable health sites only, separate tier."
+  New `websearch.ts`: one `web`-plugin call → grounds each model note against a REPUTABLE
+  source (host allowlist: MedlinePlus/NIH/PMC/DailyMed/Drugs.com/NHS/Cochrane/Mayo/Sleep
+  Foundation…) via the SAME verbatim quoteIsGrounded firewall; the model's synthesised prose
+  is discarded. Engine adds a SEPARATE `webFindings` tier (sleep-filtered + framing/grade
+  linted) shown BELOW the study evidence with a "not primary studies, weaker" caveat +
+  each source's domain. ENV-GATED `LENS_WEB_SEARCH` (paid ~$0.006/query → opt-in, never
+  bills otherwise). *Accept:* only reputable hosts cited (host-based, not substring); every
+  note verbatim-grounded; study tiers untouched if web fails; no marketing/blogs. Live:
+  doxylamine → study evidence + drugs.com/ncbi web notes. Owner sets LENS_WEB_SEARCH=on in
+  Vercel to enable. Lens red-team 235 / card 39 / loop 40. *(Merged #106; parallelized #108;
+  LENS_WEB_SEARCH=on set in Vercel + deployed — live.)*
+- [x] **CHK-7.8 Plain language + prominent source cautions.** `HG` (medical-boundary AI core).
+  Owner: the Lens should give a digestible answer AND make the "don't take Restavit nightly"
+  message clear. RESOLVED (owner-picked): the Lens NEVER issues a recommendation/safety call
+  (that stays a founding non-negotiable) — instead it surfaces the SOURCES' OWN usage guidance,
+  quoted + attributed. (1) Extract prompt v3 → plain everyday-language study claims (still
+  verbatim-verifiable). (2) Web prompt v2 → notes gain `kind` effect|caution; CAUTIONS =
+  the source's own usage/duration/safety guidance ("short-term use only", "not with alcohol"),
+  verbatim + reputable-attributed. (3) Card renders cautions PROMINENTLY (⚠ block, above the
+  evidence) framed as the sources' words not the Lens's advice; effect notes stay in the lower
+  "health references" block. Cautions bypass the sleep-concept filter but keep the SAME
+  framing/grade/raw-id gates. *Accept:* no AI recommendation/dose/diagnosis; cautions are
+  source-attributed verbatim; compliance-reviewed. Live: Restavit → "short-term use only,
+  discontinue >2 weeks" (drugs.com) + "daytime drowsiness/impaired coordination" +
+  "not with alcohol/CNS depressants" (ncbi). Lens 239 / card 44 / loop 40. *(Merged #110;
+  hardened: polarity guard + verbatim cautions + dose guard.)*
+- [x] **CHK-7.9 Plain-language "Bottom line" lead summary.** `HG` (medical-boundary AI core).
+  Owner: the card was a structured breakdown, not the "digestible paragraph or 2" asked for.
+  SERVER-composed `bottomLine()` leads the card: entity (resolved) + whether verified studies
+  point to a sleep effect (weak/strong, or the honest gap) + pointer; neutral on direction so
+  it never overstates; carries "not a Somnary grade"; safeLine-linted. When present it subsumes
+  + suppresses the meta resolved/verdict lines. NO new model prose. Compliance PASS. Live:
+  Restavit → "Restavit is doxylamine, an over-the-counter medicine. The published studies … point
+  to an effect on sleep, but the evidence is weak … not a Somnary grade." Lens 246 / card 49 /
+  loop 40. Merged #114; LENS_WEB_SEARCH=on live in Vercel.
 
 ---
 

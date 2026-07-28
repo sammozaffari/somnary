@@ -22,7 +22,7 @@ import { getLabelEntries } from '../../lib/label-data.ts';
 import { getAdditiveWatchlist } from '../../lib/lens/additive-watchlist-loader.ts';
 import { runLens } from '../../lib/lens/engine.ts';
 import { logLensDemand } from '../../lib/lens/demand-log.ts';
-import { PubMedProvider } from '../../lib/lens/retrieval.ts';
+import { PubMedProvider, EuropePmcProvider, MultiProvider } from '../../lib/lens/retrieval.ts';
 import { validateLensInput, lensRateLimitMax, lensConfigured, MAX_LENS_INPUT } from '../../lib/lens/route-input.ts';
 import { checkRateLimit, clientIpFrom, rateLimitConfig } from '../../lib/rate-limit.ts';
 
@@ -79,9 +79,12 @@ export const POST: APIRoute = async ({ request }) => {
   // NCBI polite-use email is optional; the provider is keyless. The engine's default model client
   // reads OPENROUTER_API_KEY from process.env server-side.
   const email = (typeof process !== 'undefined' ? process.env?.NCBI_EUTILS_EMAIL : undefined) || undefined;
-  const provider = new PubMedProvider({ email });
+  // Fan out over PubMed AND Europe PMC (both free/keyless, CHK-7.6) — Europe PMC's different ranking +
+  // full-text/preprint coverage surfaces sleep papers PubMed's Best Match buries. Results merge + rerank
+  // in the engine; the PMID-keyed verification firewall is unchanged.
+  const provider = new MultiProvider([new PubMedProvider({ email }), new EuropePmcProvider()]);
 
-  const runArgs = { input: check.input, corpus, labelEntries, additiveWatchlist, provider, providerName: 'pubmed' as const };
+  const runArgs = { input: check.input, corpus, labelEntries, additiveWatchlist, provider, providerName: 'pubmed+europepmc' as const };
 
   // Fire-and-await the ONE aggregate demand log (CHK-7.3b) — feeds the human grading backlog with which
   // NAMED products/ingredients get researched. Logs a normalized NAME + a count and NOTHING else (never

@@ -2,40 +2,17 @@
 import Base from '../../layouts/Base.astro';
 import SafetyCallout from '../../components/scorecards/SafetyCallout.astro';
 import RatingLegend from '../../components/scorecards/RatingLegend.astro';
+import LabelReadingPanel from '../../components/scorecards/LabelReadingPanel.astro';
+import WhyCareStrip from '../../components/scorecards/WhyCareStrip.astro';
 import ScorecardGrid from '../../components/scorecards/ScorecardGrid.astro';
+import TierLegend from '../../components/scorecards/TierLegend.astro';
 import { GLYCINE_SOURCES, type GlyProduct } from '../../data/source-scorecards/glycine';
 import type { ScorecardCardData, Chip, DetailLine } from '../../data/source-scorecards/card';
+import { toGlyCard as toCard } from '../../lib/sources/cards';
 
 const reviewDate = '2026-07-20';
 
 // Map a glycine product into the shared card shape.
-function toCard(p: GlyProduct): ScorecardCardData {
-  const chips: Chip[] = [
-    p.doseReach.reaches
-      ? { label: '✓ Reaches the studied 3 g', kind: 'good', note: p.doseReach.note }
-      : { label: '⚠ Below the studied 3 g', kind: 'warn', note: p.doseReach.note },
-  ];
-
-  const detailLines: DetailLine[] = [];
-
-  return {
-    slug: p.slug,
-    brand: p.brand,
-    productName: p.productName,
-    specLines: [p.dose, p.form],
-    metaLine: `${p.regulated === 'medicine' && p.ausL ? `AUST L ${p.ausL}` : 'Food · not TGA-listed'} · ${p.channel}`,
-    certSummary: p.certSummary,
-    certVerified: p.certVerified,
-    imagePath: p.imagePath,
-    bottomLine: p.bottomLine,
-    chips,
-    scores: p.scores,
-    verdict: p.verdict,
-    detailLines,
-    heldItems: p.heldItems,
-    hasB6: false,
-  };
-}
 
 const cards = GLYCINE_SOURCES.filter((p) => p.ratified).map(toCard);
 
@@ -60,6 +37,23 @@ const safetyItems = [
       'The sleep studies use about <strong>3 g</strong>. Some products reach that in one serving; others need up to <strong>six capsules</strong>; the combos hold far less. Each card notes what its serving delivers — it doesn’t change the score, but it changes what you’d actually take.',
   },
 ];
+// Reading-the-label primer — distilled from the ratified findings below (label education, not advice).
+const labelReading = {
+  lookFor: [
+    'A serving that actually reaches <strong>~3 g</strong> — the amount used in the sleep studies',
+    'A pure, <strong>single-ingredient powder</strong> — glycine needs no fillers',
+    'An openable <strong>lab report</strong> — only one product here has a per-lot lookup',
+  ],
+  cautious: [
+    'Capsules that need <strong>3–6 caps</strong> to reach the studied amount',
+    '“Pharmaceutical grade” or “third-party tested” words with <strong>no document</strong> behind them',
+    'Mixing up <strong>magnesium glycinate</strong> with glycine — it’s a magnesium product, and the most common confusion',
+  ],
+};
+
+// Why-this-matters hook — one ingredient-specific cited example (EWG-inspired IA, Phase A).
+const whyCareExample = 'For example, the pure glycine people take for sleep is usually sold as a <em>food</em>, not a medicine — so it carries no AUST&nbsp;L and sits outside the medicines regulator’s oversight entirely; the check that matters is whether anyone has independently verified the powder.';
+
 ---
 
 <Base
@@ -91,15 +85,21 @@ const safetyItems = [
       </p>
     </aside>
 
+    <WhyCareStrip example={whyCareExample} />
+
     <SafetyCallout
       title="Two things worth knowing before you read"
       tone="info"
       items={safetyItems}
     />
 
+    <LabelReadingPanel lookFor={labelReading.lookFor} cautious={labelReading.cautious} />
+
     <RatingLegend items={ratingLegend} remedyHref="/r/glycine" />
 
-    <ScorecardGrid cards={cards} />
+    <TierLegend />
+
+    <ScorecardGrid cards={cards} basePath="/sources/glycine" />
 
     <p class="footer-strip">
       Somnary · Glycine source scorecards · Reviewed {reviewDate} · Educational, not medical

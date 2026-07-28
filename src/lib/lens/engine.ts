@@ -37,6 +37,7 @@ import {
 import type { Flag, LabelEntry } from '../label-rules.ts';
 import { normalizeLensInput, type LensInputKind, type LensShortCircuit } from './input.ts';
 import { resolveSubject, type ResolvedSubject, type LensProductClass } from './resolve.ts';
+import { defaultWebResearch, isReputableUrl, domainOf, type WebFinding, type WebResearchFn } from './websearch.ts';
 import type { EvidenceProvider, EvidenceDoc } from './retrieval.ts';
 import { parseCitation, type CitationId } from './citations.ts';
 import {
@@ -59,6 +60,14 @@ import * as copy from './copy.ts';
 export const LENS_MAX_CLAIMS = 5;
 /** Default wall-clock budget for a whole Lens run (ms). Research + N×claims refute calls must fit. */
 const DEFAULT_DEADLINE_MS = 60_000;
+/** The reputable web tier (CHK-7.7) is fired IN PARALLEL with the study path (right after resolution) so
+ * it OVERLAPS the ~60s study work and adds no wall time — then it's awaited + attached at the end. Its
+ * own timeout is generous (it runs inside the study window) but still bounded well under the platform
+ * cap so a request can never approach Vercel's maxDuration. */
+const WEB_MAX_TIMEOUT_MS = 45_000;
+/** Wall-clock ceiling (under the 90s Vercel maxDuration): the web call is clamped so its deadline, from
+ * the moment it fires, can never push total time past this. */
+const WEB_WALL_BUDGET_MS = 82_000;
 
 // --- the assessment schema — NO tier/grade/score FIELD ANYWHERE ----------------------------------
 
@@ -98,7 +107,8 @@ export type LensEvent =
   | { type: 'sources'; count: number }
   | { type: 'extracting' }
   | { type: 'verifying'; total: number }
-  | { type: 'composing' };
+  | { type: 'composing' }
+  | { type: 'web-search' };
 
 /**
  * The Lens assessment — the server-composed card. There is DELIBERATELY no tier/grade/score field:
@@ -112,10 +122,16 @@ export interface LensAssessment {
   shortCircuit?: LensShortCircuit;
   /** What the query was resolved to (CHK-7.4). Present on assessed/inconclusive researched cards. */
   resolved?: LensResolvedDisplay;
+  /** The plain-language "Bottom line" (CHK-7.9) — the digestible lead summary, server-composed. Present
+   * on assessed/inconclusive; the card renders it FIRST and suppresses the meta resolved/verdict lines. */
+  bottomLine?: string;
   verdictLine: string;
   evidence: LensEvidence[];
   /** The signature anti-hype block — always populated on assessed/inconclusive. */
   doesNotShow: string[];
+  /** Reputable-only web references (CHK-7.7) — a SEPARATE, weaker tier shown below the study evidence;
+   * present only when the env-gated web tier ran and grounded ≥1 note. Never peer-reviewed. */
+  webFindings?: WebFinding[];
   labelFlags: Flag[];
   safety: { routes: Route[]; note: string };
   stamp: string;
@@ -146,6 +162,10 @@ export interface RunLensArgs {
   /** Optional streaming hook (CHK-7.4). Fired at each REAL pipeline milestone so the route can emit SSE
    * frames. Non-streaming callers omit it — the run is identical. Never expected to throw (wrapped). */
   onEvent?: (event: LensEvent) => void;
+  /** Injectable reputable-only web-references fn (CHK-7.7). Defaults to the ENV-GATED real one
+   * (LENS_WEB_SEARCH). Tests inject a mock; when it returns [] (or is disabled) there is simply no web
+   * tier. NEVER expected to throw. */
+  webResearch?: WebResearchFn;
 }
 
 // --- safety routing (deterministic; boundary pages, never a dose/diagnosis) ----------------------
@@ -177,6 +197,78 @@ const SLEEP_CLAIM_RE =
 /** True iff a claim text names a sleep concept (help or harm). Exported for the red-team suite. */
 export function isSleepConcept(text: string): boolean {
   return typeof text === 'string' && SLEEP_CLAIM_RE.test(text);
+}
+
+/** Preclinical (animal / in-vitro) markers. Broader indexes (Europe PMC, CHK-7.6) surface more animal
+ * studies; a mouse or cell-line finding is never "strong" HUMAN evidence, so the composer caps it to
+ * weak (anti-hype). The claim text itself still names the model ("in mice"), so it stays transparent. */
+const PRECLINICAL_RE =
+  /\b(?:mice|mouse|murine|rats?|rodents?|zebrafish|drosophila|preclinical|in\svitro|in\ssilico|animal\smodels?|cell\s(?:line|culture)s?)\b/i;
+
+/** True iff a claim reads as a preclinical (non-human) finding. Exported for the red-team suite. */
+export function isPreclinical(text: string): boolean {
+  return typeof text === 'string' && PRECLINICAL_RE.test(text);
+}
+
+// --- retrieval recall: two searches, merge, rerank by sleep relevance (CHK-7.5) ------------------
+//
+// PubMed's Best Match ranks by overall relevance, so for a subject with a large NON-sleep literature
+// (e.g. propranolol → cirrhosis/migraine reviews) a bounded top-N misses its sleep papers entirely,
+// and the Lens wrongly degrades to inconclusive. To find MORE citable evidence WITHOUT loosening the
+// verification firewall (every surviving claim is still verbatim-verified), we: (1) run the resolver's
+// query AND a deterministic sleep-FOCUSED query; (2) merge + dedupe; (3) rerank so the most
+// sleep-relevant abstracts are the ones fed to extraction. No model prose is ever trusted — this only
+// changes WHICH real papers we read.
+
+/** Global counter form of the sleep-concept regex (for scoring term density in a doc). */
+const SLEEP_TERM_G = new RegExp(SLEEP_CLAIM_RE.source, 'gi');
+
+/** Specific sleep-PROBLEM terms — deliberately NOT the bare word "sleep" (which nearly every clinical
+ * review mentions and so cannot discriminate). Used to build a second, sleep-focused query. */
+const SLEEP_FOCUS_TERMS =
+  '(insomnia OR nightmares OR "sleep quality" OR "sleep disturbance" OR somnolence OR "daytime sleepiness" OR sedation OR "sleep architecture" OR "sleep onset")';
+
+/** How many of the most-sleep-relevant merged docs to feed extraction (bounds prompt size + cost). */
+const EXTRACT_DOC_CAP = 8;
+
+/** A deterministic sleep-focused PubMed query from a resolved name — surfaces papers ABOUT the
+ * subject's sleep effect that Best Match buried. '' when there's no usable name. */
+export function sleepFocusedQuery(name: string): string {
+  const n = (typeof name === 'string' ? name : '').replace(/["\\]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 120);
+  return n ? `${n} AND ${SLEEP_FOCUS_TERMS}` : '';
+}
+
+/** A doc's sleep relevance: sleep-term hits in the title count triple (a title match means the paper is
+ * ABOUT sleep), abstract hits count once. Used to rerank so sleep papers reach extraction first. */
+export function sleepScore(doc: { title?: string; abstractText?: string }): number {
+  const title = typeof doc?.title === 'string' ? doc.title : '';
+  const abs = typeof doc?.abstractText === 'string' ? doc.abstractText : '';
+  const titleHits = (title.match(SLEEP_TERM_G) || []).length;
+  const absHits = (abs.match(SLEEP_TERM_G) || []).length;
+  return titleHits * 3 + absHits;
+}
+
+/** Merge doc lists, deduped by PMID, preserving first-seen order. */
+export function mergeDocs(...lists: EvidenceDoc[][]): EvidenceDoc[] {
+  const seen = new Set<string>();
+  const out: EvidenceDoc[] = [];
+  for (const list of lists) {
+    if (!Array.isArray(list)) continue;
+    for (const d of list) {
+      if (!d || typeof d.pmid !== 'string' || !d.pmid || seen.has(d.pmid)) continue;
+      seen.add(d.pmid);
+      out.push(d);
+    }
+  }
+  return out;
+}
+
+/** Rerank merged docs by sleep relevance (desc), stable on ties (V8 sort is stable, so Best-Match order
+ * survives as the tiebreak), then cap to EXTRACT_DOC_CAP. */
+export function rerankBySleep(docs: EvidenceDoc[]): EvidenceDoc[] {
+  return (Array.isArray(docs) ? docs.slice() : [])
+    .sort((a, b) => sleepScore(b) - sleepScore(a))
+    .slice(0, EXTRACT_DOC_CAP);
 }
 
 /** Parse ONE extraction reply into candidate claims. Tolerant of code-fence/prose wrapping (extract
@@ -231,6 +323,12 @@ function toResolvableSource(id: CitationId): LensSource | null {
  * pattern). Applied to composed evidence text AND (CHK-7.4) to the model-derived resolved name/line. */
 const GRADE_SMELL =
   /\b(?:grade[sd]?|tier)\s+(?:of\s+)?[a-fs]\b|\b[a-fs][-+]?[-\s]+(?:grade|tier)\b|\b(?:rated|scored|graded|earns?)\s+(?:an?\s+)?(?:\w+\s+)?[a-fs][-+]?\b/i;
+
+/** A dose/quantity shape (number + a dose unit or a tablet/capsule count). Used to drop any web CAUTION
+ * that carries a dose, so a source's 3rd-person dosing line can never surface in the prominent block (a
+ * caution is duration/who-should-avoid/interaction guidance, never a dose). "2 weeks"/"12 years" don't
+ * match (time/age units are excluded). Deterministic backstop the forbidden-framing lint doesn't provide. */
+const DOSE_SHAPE = /\b\d[\d.,]*\s?(?:mg|milligram|mcg|microgram|µg|ml|millilitre|milliliter|tablets?|capsules?|pills?|drops?|doses?|puffs?|sprays?|iu)\b/i;
 
 /** Run a composed line through the forbidden-framing lint + raw-identifier + grade-smell checks. Returns
  * the line if clean, or a safe replacement if it trips any gate — a composed line can NEVER ship a
@@ -288,6 +386,7 @@ function hasResolvedDisplay(d: LensResolvedDisplay): boolean {
 export async function runLens(args: RunLensArgs): Promise<LensAssessment> {
   const providerName = args.providerName ?? 'pubmed';
   const now = args.now ?? Date.now;
+  const runStart = now(); // wall-clock start, for the web tier's platform-cap budget (CHK-7.7)
   const corpus = Array.isArray(args.corpus) ? args.corpus : [];
   const labelEntries = Array.isArray(args.labelEntries) ? args.labelEntries : [];
   const additiveWatchlist = Array.isArray(args.additiveWatchlist) ? args.additiveWatchlist : [];
@@ -372,6 +471,7 @@ export async function runLens(args: RunLensArgs): Promise<LensAssessment> {
     const budget: CallBudget = args.budget ?? { used: 0, max: LENS_MAX_MODEL_CALLS };
     const deadline = now() + (typeof args.deadlineMs === 'number' ? args.deadlineMs : DEFAULT_DEADLINE_MS);
     const model = args.model ?? defaultLensModel();
+    const webResearch = args.webResearch ?? defaultWebResearch();
 
     if (normalized.empty) {
       return inconclusive(base, rubric.labelFlags, rubric.additiveFindings, normalized.normalized, emptyMeta(providerName));
@@ -398,19 +498,34 @@ export async function runLens(args: RunLensArgs): Promise<LensAssessment> {
       };
     }
 
-    // (4) RESEARCH — bounded external search on the RESOLVED query (a real ingredient + sleep scope),
-    // not the raw brand string. No docs ⇒ inconclusive (never a fabricated verdict).
+    // (3.6) FIRE the reputable web tier IN PARALLEL (CHK-7.7). It overlaps the ~60s study path below, so
+    // it adds no wall time and gets the full window to complete — then it's awaited + filtered at the end.
+    // Fired only HERE (after the refused/short-circuit/empty exits), so it never runs on a non-researched
+    // card. Never throws.
+    const webPromise = startWebResearch(webResearch, resolved.resolvedName || normalized.normalized, runStart, now);
+
+    // (4) RESEARCH — bounded external search. Runs the resolver's query AND a deterministic
+    // sleep-FOCUSED query (CHK-7.5), so a subject with a large non-sleep literature still surfaces its
+    // sleep papers; results are merged, deduped, and reranked so the most sleep-relevant abstracts reach
+    // extraction. Sequential (not parallel) to respect NCBI's ~3 req/s polite-use limit. No docs ⇒
+    // inconclusive (never a fabricated verdict). The verification firewall downstream is UNCHANGED —
+    // this only widens WHICH real papers we read, never what we trust.
     emit({ type: 'searching' });
-    let docs: EvidenceDoc[] = [];
-    try {
-      const searched = await args.provider.search(resolved.pubmedQuery);
-      docs = Array.isArray(searched) ? searched : [];
-    } catch {
-      docs = [];
-    }
+    const safeSearch = async (q: string): Promise<EvidenceDoc[]> => {
+      if (!q) return [];
+      try {
+        const searched = await args.provider.search(q);
+        return Array.isArray(searched) ? searched : [];
+      } catch {
+        return [];
+      }
+    };
+    const primaryDocs = await safeSearch(resolved.pubmedQuery);
+    const focusedDocs = await safeSearch(sleepFocusedQuery(resolved.resolvedName || normalized.normalized));
+    const docs = rerankBySleep(mergeDocs(primaryDocs, focusedDocs));
     emit({ type: 'sources', count: docs.length });
     if (docs.length === 0) {
-      return inconclusive(
+      const studyResult = inconclusive(
         base,
         rubric.labelFlags,
         rubric.additiveFindings,
@@ -418,6 +533,9 @@ export async function runLens(args: RunLensArgs): Promise<LensAssessment> {
         { ...emptyMeta(providerName), modelCalls: budget.used },
         resolvedDisplay,
       );
+      // Even with NO study evidence, reputable web references (if enabled) can still help — this is
+      // exactly when a reader most wants them. Attach the (parallel) web result before returning.
+      return await attachWeb(studyResult, webPromise, emit);
     }
 
     // (5) EXTRACT — ONE model call over the docs fetched for the resolved subject.
@@ -459,7 +577,8 @@ export async function runLens(args: RunLensArgs): Promise<LensAssessment> {
 
     // (7)+(8) COMPOSE — server-side, from verified claims + rubric flags + copy.ts templates.
     emit({ type: 'composing' });
-    return compose(base, verified, rubric.labelFlags, rubric.additiveFindings, normalized.normalized, candidates.length, meta, resolvedDisplay);
+    const studyResult = compose(base, verified, rubric.labelFlags, rubric.additiveFindings, normalized.normalized, candidates.length, meta, resolvedDisplay);
+    return await attachWeb(studyResult, webPromise, emit);
   } catch {
     // Any unexpected error ⇒ honest inconclusive with empty rubric (never a fabricated verdict).
     const normalized = typeof args.input === 'string' ? args.input.slice(0, 4000).trim() : '';
@@ -492,9 +611,21 @@ function inconclusive(
     copy.DOES_NOT_SHOW_STANDING,
   ];
   const productClass = resolved?.productClass ?? 'unknown';
+  const bottom = safeLine(
+    copy.bottomLine({
+      subject: resolved?.subject ?? subject,
+      resolvedName: resolved?.resolvedName ?? '',
+      productClass,
+      verifiedCount: 0,
+      minStrength: 'weak',
+      inconclusive: true,
+    }),
+    '',
+  );
   return {
     ...base,
     ...(resolved && hasResolvedDisplay(resolved) ? { resolved } : {}),
+    ...(bottom ? { bottomLine: bottom } : {}),
     status: 'inconclusive',
     verdictLine: safeLine(copy.INCONCLUSIVE_MESSAGE, copy.INCONCLUSIVE_MESSAGE),
     evidence: [],
@@ -545,7 +676,9 @@ function compose(
       GRADE_SMELL.test(v.text)
     )
       continue;
-    evidence.push({ text: v.text, strength: v.strength === 'strong' ? 'strong' : 'weak', sources });
+    // A preclinical (animal / in-vitro) finding is never "strong" HUMAN evidence — cap it to weak.
+    const strength: 'strong' | 'weak' = v.strength === 'strong' && !isPreclinical(v.text) ? 'strong' : 'weak';
+    evidence.push({ text: v.text, strength, sources });
   }
 
   const mergedFlags = mergeAdditiveIntoFlags(labelFlags, additiveFindings);
@@ -572,9 +705,22 @@ function compose(
   if (cutCount > 0) doesNotShow.push(safeLine(copy.doesNotShowCut(cutCount), copy.DOES_NOT_SHOW_STANDING));
   doesNotShow.push(copy.DOES_NOT_SHOW_STANDING);
 
+  const bottom = safeLine(
+    copy.bottomLine({
+      subject: resolved?.subject ?? subject,
+      resolvedName: resolved?.resolvedName ?? '',
+      productClass: resolved?.productClass ?? 'unknown',
+      verifiedCount: evidence.length,
+      minStrength,
+      inconclusive: false,
+    }),
+    '',
+  );
+
   return {
     ...base,
     ...(resolved && hasResolvedDisplay(resolved) ? { resolved } : {}),
+    ...(bottom ? { bottomLine: bottom } : {}),
     status: 'assessed',
     verdictLine,
     evidence,
@@ -583,6 +729,81 @@ function compose(
     safety: { routes: safetyRoutesFor(resolved?.productClass), note: copy.safetyNoteFor(resolved?.productClass ?? 'unknown') },
     meta,
   };
+}
+
+/**
+ * Enrich a researched study result with the reputable-only web tier (CHK-7.7). Runs ONLY on assessed/
+ * inconclusive cards, ONLY with deadline headroom, and ONLY when the injected webResearch fn is live
+ * (env-gated). Every note is re-filtered server-side: it must name a sleep concept AND pass the SAME
+ * forbidden-framing + raw-identifier + grade-smell gates as study evidence. Never throws; on any failure
+ * the study result is returned unchanged (the study tiers never depend on the web tier).
+ */
+/** Fire the reputable web tier in PARALLEL with the study path (CHK-7.7). Returns a promise that always
+ * resolves to an array (never rejects) — the web call is clamped so, from the moment it fires, it can
+ * never push total time past the wall budget. A disabled/absent webResearch → resolves []. */
+function startWebResearch(
+  webResearch: WebResearchFn,
+  subject: string,
+  runStart: number,
+  now: () => number,
+): Promise<WebFinding[]> {
+  if (typeof webResearch !== 'function') return Promise.resolve([]);
+  const webBudget = Math.min(WEB_MAX_TIMEOUT_MS, WEB_WALL_BUDGET_MS - (now() - runStart));
+  if (webBudget < 1000) return Promise.resolve([]);
+  return Promise.resolve()
+    .then(() => webResearch(subject, webBudget))
+    .then((r) => (Array.isArray(r) ? r : []))
+    .catch(() => []);
+}
+
+/**
+ * Await the parallel web tier and attach its GROUNDED, re-filtered notes to a researched study result
+ * (CHK-7.7). Runs ONLY on assessed/inconclusive cards. Every note is re-validated server-side: reputable
+ * host (independently, since webResearch is injectable), names a sleep concept, and passes the SAME
+ * forbidden-framing + raw-identifier + grade-smell gates as study evidence; the shown domain is
+ * recomputed from the URL. Never throws; on any failure the study result is returned unchanged.
+ */
+async function attachWeb(
+  result: LensAssessment,
+  webPromise: Promise<WebFinding[]>,
+  emit: (event: LensEvent) => void,
+): Promise<LensAssessment> {
+  if (result.status !== 'assessed' && result.status !== 'inconclusive') return result;
+  emit({ type: 'web-search' });
+  let findings: WebFinding[] = [];
+  try {
+    findings = await webPromise;
+  } catch {
+    findings = [];
+  }
+  if (!Array.isArray(findings) || findings.length === 0) return result;
+  const clean: WebFinding[] = [];
+  const seen = new Set<string>();
+  for (const f of findings) {
+    if (!f || typeof f.text !== 'string' || typeof f.url !== 'string' || !f.url) continue;
+    // Defense-in-depth: the engine INDEPENDENTLY enforces reputability (webResearch is injectable) and
+    // recomputes the shown domain from the URL — never trusts a passed-in domain.
+    if (!isReputableUrl(f.url)) continue;
+    const kind: 'effect' | 'caution' = f.kind === 'caution' ? 'caution' : 'effect';
+    // An EFFECT note must name a sleep concept (like study evidence). A CAUTION is the source's stated
+    // usage/safety guidance (duration limits, who should avoid) and needn't mention sleep — but it still
+    // passes the SAME forbidden-framing + raw-id + grade gates (it must read as the source's words, never
+    // an AI directive to the reader).
+    if (kind === 'effect' && !isSleepConcept(f.text)) continue;
+    if (lintForbiddenFraming(f.text).length > 0 || hasRawIdentifier(f.text) || GRADE_SMELL.test(f.text)) continue;
+    // DOSE GUARD (adversarial review): a caution is usage/duration/who-should-avoid guidance — NEVER a
+    // dose. The forbidden-framing lint only catches 2nd-person imperatives, so a source's 3rd-person dose
+    // line ("the usual dose is 25 mg at bedtime") could otherwise reach the prominent block. Drop any
+    // caution carrying a dose quantity; the important cautions (short-term use, interactions) never do.
+    if (kind === 'caution' && DOSE_SHAPE.test(f.text)) continue;
+    const key = f.text.toLowerCase().replace(/\s+/g, ' ').trim();
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    clean.push({ text: f.text, url: f.url, domain: domainOf(f.url), kind });
+    if (clean.length >= 5) break;
+  }
+  if (clean.length === 0) return result;
+  return { ...result, webFindings: clean };
 }
 
 /**

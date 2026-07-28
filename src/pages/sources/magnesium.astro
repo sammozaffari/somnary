@@ -2,39 +2,17 @@
 import Base from '../../layouts/Base.astro';
 import SafetyCallout from '../../components/scorecards/SafetyCallout.astro';
 import RatingLegend from '../../components/scorecards/RatingLegend.astro';
+import LabelReadingPanel from '../../components/scorecards/LabelReadingPanel.astro';
+import WhyCareStrip from '../../components/scorecards/WhyCareStrip.astro';
 import ScorecardGrid from '../../components/scorecards/ScorecardGrid.astro';
+import TierLegend from '../../components/scorecards/TierLegend.astro';
 import { MAGNESIUM_SOURCES, type MagProduct } from '../../data/source-scorecards/magnesium';
 import type { ScorecardCardData, Chip, DetailLine } from '../../data/source-scorecards/card';
+import { toMagCard as toCard } from '../../lib/sources/cards';
 
 const reviewDate = '2026-07-20';
 
 // Map a magnesium product into the shared card shape.
-function toCard(p: MagProduct): ScorecardCardData {
-  const chips: Chip[] = [];
-  if (p.b6) chips.push({ label: '⚠ Contains B6', kind: 'warn', note: p.b6.note });
-  if (p.certVerified) chips.push({ label: '✓ Third-party tested', kind: 'good', note: p.certSummary });
-
-  const detailLines: DetailLine[] = [];
-  if (p.b6) detailLines.push({ tag: 'Safety', note: p.b6.note, kind: 'safety' });
-
-  return {
-    slug: p.slug,
-    brand: p.brand,
-    productName: p.productName,
-    specLines: [`${p.elementalMg} mg elemental`, p.form],
-    metaLine: `${p.ausL ? `AUST L ${p.ausL}` : (p.channel.includes('import') ? 'Not TGA-listed (import)' : 'AUST L — unconfirmed')} · ${p.channel}`,
-    certSummary: p.certSummary,
-    certVerified: p.certVerified,
-    imagePath: p.imagePath,
-    bottomLine: p.bottomLine,
-    chips,
-    scores: p.scores,
-    verdict: p.verdict,
-    detailLines,
-    heldItems: p.heldItems,
-    hasB6: !!p.b6,
-  };
-}
 
 const cards = MAGNESIUM_SOURCES.filter((p) => p.ratified).map(toCard);
 
@@ -59,6 +37,25 @@ const safetyItems = [
       'If you’re pregnant or breastfeeding, check any added ingredients with a pharmacist before taking magnesium supplements regularly.',
   },
 ];
+// Reading-the-label primer — distilled from the ratified findings below (label education, not advice).
+const labelReading = {
+  lookFor: [
+    'The amount of <strong>each form</strong> disclosed separately (e.g. “citrate 296 mg + glycinate 24 mg”) — not one combined number',
+    'A named, well-absorbed form such as <strong>glycinate</strong> or <strong>citrate</strong>',
+    'An <strong>AUST L</strong> number — a TGA-listed medicine rather than an unlisted import',
+    'A genuine third-party mark (<strong>NSF / USP</strong>) — rare: only one product here has one',
+  ],
+  cautious: [
+    'Added <strong>vitamin B6</strong> — the TGA is acting on B6 supplements after nerve-damage reports (see the safety notes above)',
+    '“High absorption” or “bioavailable” claims on blends that are mostly <strong>oxide</strong>',
+    'A “proprietary blend” that hides how much of each form is inside',
+    'Imports with no AUST L — outside TGA oversight, and they skip Australia’s mandated warnings',
+  ],
+};
+
+// Why-this-matters hook — one ingredient-specific cited example (EWG-inspired IA, Phase A).
+const whyCareExample = 'For example, Australia’s regulator is <a href="https://www.tga.gov.au/news/safety-updates/peripheral-neuropathy-supplementary-vitamin-b6-pyridoxine" target="_blank" rel="noopener">acting on supplements that add vitamin&nbsp;B6</a>, after hundreds of reports of nerve symptoms like tingling and numbness — it now mandates on-pack warnings and has cancelled some products.';
+
 ---
 
 <Base
@@ -90,6 +87,8 @@ const safetyItems = [
       </p>
     </aside>
 
+    <WhyCareStrip example={whyCareExample} />
+
     <SafetyCallout
       title="The vitamin-B6 warning worth knowing"
       tone="safety"
@@ -97,9 +96,13 @@ const safetyItems = [
       foot="These flags are shown for your safety and sit apart from the scores — if you take magnesium daily, check your product’s B6 amount and talk to a pharmacist."
     />
 
+    <LabelReadingPanel lookFor={labelReading.lookFor} cautious={labelReading.cautious} />
+
     <RatingLegend items={ratingLegend} remedyHref="/r/magnesium" />
 
-    <ScorecardGrid cards={cards} />
+    <TierLegend />
+
+    <ScorecardGrid cards={cards} basePath="/sources/magnesium" />
 
     <p class="footer-strip">
       Somnary · Magnesium source scorecards · Reviewed {reviewDate} · Educational, not medical

@@ -2,40 +2,17 @@
 import Base from '../../layouts/Base.astro';
 import SafetyCallout from '../../components/scorecards/SafetyCallout.astro';
 import RatingLegend from '../../components/scorecards/RatingLegend.astro';
+import LabelReadingPanel from '../../components/scorecards/LabelReadingPanel.astro';
+import WhyCareStrip from '../../components/scorecards/WhyCareStrip.astro';
 import ScorecardGrid from '../../components/scorecards/ScorecardGrid.astro';
+import TierLegend from '../../components/scorecards/TierLegend.astro';
 import { VALERIAN_SOURCES, type ValProduct } from '../../data/source-scorecards/valerian';
 import type { ScorecardCardData, Chip, DetailLine } from '../../data/source-scorecards/card';
+import { toValCard as toCard } from '../../lib/sources/cards';
 
 const reviewDate = '2026-07-20';
 
 // Map a valerian product into the shared card shape.
-function toCard(p: ValProduct): ScorecardCardData {
-  const chips: Chip[] = [];
-  if (p.trialFlag) chips.push({ label: '🔬 Used in trials', kind: 'good', note: p.trialFlag.note });
-  if (p.importSafety) chips.push({ label: '⚠ Import — no AU warning', kind: 'warn', note: p.importSafety.note });
-
-  const detailLines: DetailLine[] = [];
-  if (p.importSafety) detailLines.push({ tag: 'Safety', note: p.importSafety.note, kind: 'safety' });
-  if (p.trialFlag) detailLines.push({ tag: 'Used in trials', note: p.trialFlag.note, kind: 'trial' });
-
-  return {
-    slug: p.slug,
-    brand: p.brand,
-    productName: p.productName,
-    specLines: [p.strength, p.form],
-    metaLine: `${p.ausL ? `AUST L ${p.ausL}` : 'Not TGA-listed (import)'} · ${p.channel}`,
-    certSummary: p.certSummary,
-    certVerified: p.certVerified,
-    imagePath: p.imagePath,
-    bottomLine: p.bottomLine,
-    chips,
-    scores: p.scores,
-    verdict: p.verdict,
-    detailLines,
-    heldItems: p.heldItems,
-    hasB6: false,
-  };
-}
 
 const cards = VALERIAN_SOURCES.filter((p) => p.ratified).map(toCard);
 
@@ -64,6 +41,23 @@ const safetyItems = [
     body: 'The standard advice is to avoid valerian in pregnancy and breastfeeding.',
   },
 ];
+// Reading-the-label primer — distilled from the ratified findings below (label education, not advice).
+const labelReading = {
+  lookFor: [
+    'The <strong>valerenic acid</strong> figure printed — the strength marker; most labels here don’t show it',
+    'A dry-root equivalent around <strong>2 g</strong> — the range used in studies',
+    'An <strong>AUST L</strong> number and Australia’s <strong>liver-caution</strong> wording on the pack',
+  ],
+  cautious: [
+    'No valerenic-acid figure — you’re trusting the brand on strength',
+    'Imports that skip Australia’s mandated liver warning',
+    '“Sleep” blends where valerian is a <strong>trace ingredient</strong> — check it leads the formula',
+  ],
+};
+
+// Why-this-matters hook — one ingredient-specific cited example (EWG-inspired IA, Phase A).
+const whyCareExample = 'For example, Australia’s regulator <a href="https://www.tga.gov.au/products/medicines/non-prescription-medicines/listed-medicines/listed-medicines-containing-valeriana-officinalis-requiring-warning-statements" target="_blank" rel="noopener">requires a liver-caution warning on valerian products</a> — and products imported for personal use skip it.';
+
 ---
 
 <Base
@@ -94,6 +88,8 @@ const safetyItems = [
       </p>
     </aside>
 
+    <WhyCareStrip example={whyCareExample} />
+
     <SafetyCallout
       title="Valerian safety notes worth knowing"
       tone="safety"
@@ -101,9 +97,13 @@ const safetyItems = [
       foot="These flags are shown for your safety and sit apart from the scores — talk to a pharmacist before taking valerian regularly."
     />
 
+    <LabelReadingPanel lookFor={labelReading.lookFor} cautious={labelReading.cautious} />
+
     <RatingLegend items={ratingLegend} remedyHref="/r/valerian" />
 
-    <ScorecardGrid cards={cards} />
+    <TierLegend />
+
+    <ScorecardGrid cards={cards} basePath="/sources/valerian" />
 
     <p class="footer-strip">
       Somnary · Valerian source scorecards · Reviewed {reviewDate} · Educational, not medical

@@ -1,0 +1,31 @@
+---
+import Base from '../../../layouts/Base.astro';
+import ProductPage from '../../../components/scorecards/ProductPage.astro';
+import { GLYCINE_SOURCES, type GlyProduct } from '../../../data/source-scorecards/glycine';
+import { toGlyCard as toCard } from '../../../lib/sources/cards';
+import { computeTier, TIERS } from '../../../data/source-scorecards/tiers';
+
+export function getStaticPaths() {
+  return GLYCINE_SOURCES.filter((p) => p.ratified).map((p) => ({ params: { slug: p.slug }, props: { product: p } }));
+}
+
+const { product } = Astro.props as { product: GlyProduct };
+const card = toCard(product);
+const tier = TIERS[computeTier(product.scores, card.hasB6)];
+const retailerNote = null;
+---
+
+<Base
+  title={`${card.brand} ${card.productName} — Glycine source scorecard — Somnary`}
+  description={card.bottomLine}
+>
+  <ProductPage
+    card={card}
+    tier={tier}
+    remedy={{ name: 'Glycine', slug: 'glycine' }}
+    retailers={product.retailers}
+    ingredients={product.ingredients}
+    retailerNote={retailerNote ?? undefined}
+    reviewDate="2026-07-20"
+  />
+</Base>

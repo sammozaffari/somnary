@@ -72,6 +72,31 @@ export const SAFETY_NOTE =
   'make a safety call on any product or dose — these pages cover the general cautions, and a pharmacist ' +
   'or doctor can weigh them with your own health and medicines.';
 
+// --- reputable web-references tier (CHK-7.7) -----------------------------------------------------
+// A SEPARATE, weaker tier shown BELOW the peer-reviewed study evidence. Its heading + caveat make the
+// distinction explicit: these are general medical references, not primary studies, and never a grade.
+
+/** Heading for the reputable-web-references block. */
+export const WEB_TIER_HEAD = 'From health references';
+
+/** Heading for the prominent usage/safety CAUTIONS block (CHK-7.8) — the source's own guidance on how a
+ * product is meant to be used (e.g. "short-term use only"). Shown high on the card. */
+export const WEB_CAUTION_HEAD = 'How it’s meant to be used';
+
+/** The line under the cautions heading — frames them as the SOURCE's guidance, not the Lens's advice,
+ * and routes the decision to a professional. Framing-linted like every string here. */
+export const WEB_CAUTION_NOTE =
+  'In their own words, the health references below describe how this is meant to be used and who should ' +
+  'take care. The Lens is not telling you what to do and this is not a Somnary grade — these are the ' +
+  'sources’ own cautions, quoted; a pharmacist or doctor can weigh them for your situation.';
+
+/** The caveat under the web-references heading. SELF-CONTAINED on purpose: it must hold even when there
+ * is NO study evidence above it (the inconclusive path enriches too), so it never implies these notes
+ * are the evidence Somnary just said it could not verify. Framing-linted like every string in this file. */
+export const WEB_TIER_NOTE =
+  'These come from reputable medical and government health references — general background, not primary ' +
+  'studies, and not a sign this works. They are not a Somnary grade.';
+
 // --- resolved-subject line (SERVER-composed; CHK-7.4) --------------------------------------------
 //
 // The Lens now interprets the input before researching (resolve.ts): a brand → its active ingredient,
@@ -114,6 +139,47 @@ export function interpretedAsLine(subject: string, resolvedName: string, product
     return `The Lens researched the published evidence for ${s}, ${label}, below.`;
   }
   return '';
+}
+
+/**
+ * The plain-language "Bottom line" (CHK-7.9) — the digestible 1–2 sentence summary that LEADS the card,
+ * so a reader gets the gist before the structured detail. SERVER-composed from already-verified data:
+ * the resolved entity, whether verified studies point to a sleep effect (and how weak/strong), and a
+ * pointer down to the evidence + cautions. Neutral on DIRECTION (helps vs harms — the claims below say
+ * which) so it never overstates. No model prose; interpolates only the bounded subject/name + counts.
+ */
+export function bottomLine(args: {
+  subject: string;
+  resolvedName: string;
+  productClass: string;
+  verifiedCount: number;
+  minStrength: 'strong' | 'weak';
+  inconclusive: boolean;
+}): string {
+  const s = (typeof args.subject === 'string' ? args.subject : '').trim();
+  const r = (typeof args.resolvedName === 'string' ? args.resolvedName : '').trim();
+  const label = PRODUCT_CLASS_LABEL[args.productClass] || '';
+  // entity clause — "Restavit is doxylamine, an over-the-counter medicine."
+  let entity = '';
+  if (s) {
+    if (r && !sameName(r, s)) entity = `${s} is ${r}${label ? `, ${label}` : ''}`;
+    else if (label) entity = `${s} is ${label}`;
+  }
+  // effect clause — ONE short clause, neutral on direction. Kept lean so the whole line is a single
+  // digestible sentence (the not-a-grade / read-below framing lives in the stamp + card, not repeated here).
+  const n = Math.max(0, Math.trunc(args.verifiedCount));
+  let effect: string;
+  if (args.inconclusive || n <= 0) {
+    effect = 'the Lens found no published human evidence it could verify for its effect on sleep';
+  } else if (args.minStrength === 'weak') {
+    effect = 'the studies the Lens could verify point to an effect on sleep, but the evidence is weak';
+  } else {
+    effect = 'the studies the Lens verified point to a clearer effect on sleep';
+  }
+  // Join as one sentence: "<entity> — <effect>." When there's no entity, the effect stands alone.
+  const line = entity ? `${entity} — ${effect}.` : `${effect}.`;
+  // Capitalize the opening letter — the subject (which may lead, e.g. "ashwagandha") is often lowercase.
+  return line ? line.charAt(0).toUpperCase() + line.slice(1) : line;
 }
 
 /**
