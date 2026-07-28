@@ -94,6 +94,25 @@ const dose = z.object({
   marketComparison: z.string(), // how studied dose compares to typical products
 });
 
+/**
+ * Per-form evidence breakdown (audit IA-1). A remedy is ONE graded entity, but its forms can differ
+ * sharply in evidence and absorption (magnesium glycinate vs oxide ~4%). This OPTIONAL structure
+ * lets a page show that difference WITHOUT splitting into per-form pages or per-form tier grades.
+ * `evidenceLevel` characterises how well-studied THIS FORM is — a deliberately separate vocabulary
+ * from the S–F tier grade (grades stay [HUMAN-GATE], human-ratified); it drives an evidence pip the
+ * same way a citation's strength does. Every claim here is cited (sources[]), same bar as the page.
+ */
+const remedyForm = z.object({
+  name: z.string(),
+  evidenceLevel: z.enum(['studied', 'limited', 'weak']),
+  // One cited line on this form's evidence/absorption status ("~4% absorbed", "used in the 2025
+  // trial"). Only claim what the cited source supports — do NOT assert good absorption for a form
+  // no source measured (citation-auditor gate).
+  basis: z.string(),
+  note: z.string().nullable().default(null), // optional colour, e.g. marketing context
+  sources: z.array(z.number().int().positive()).default([]), // → source.n
+});
+
 // A risk row may footnote its own sources[] — safety claims are health claims and get cited too
 // ("cite or don't claim"). Optional/defaulted so pages with general, uncited cautions still validate.
 const riskRow = z.object({
@@ -138,6 +157,9 @@ const remedies = defineCollection({
       claims: z.array(claimRow).default([]),
       evidenceGates: z.array(evidenceGate).default([]),
       doses: z.array(dose).default([]),
+      // Optional per-form evidence breakdown (audit IA-1). Empty for single-form remedies. When
+      // present, the page renders a forms block and scopes the grade to the best-studied forms.
+      forms: z.array(remedyForm).default([]),
       safety,
       standardization: z.string(),
       mechanism: z.string(),
@@ -176,6 +198,7 @@ const remedies = defineCollection({
       data.claims.forEach((c, ci) => check(c.sources, ['claims', ci, 'sources']));
       data.safety.risks.forEach((r, ri) => check(r.sources, ['safety', 'risks', ri, 'sources']));
       check(data.safety.interactionsSources, ['safety', 'interactionsSources']);
+      data.forms.forEach((f, fi) => check(f.sources, ['forms', fi, 'sources']));
     }),
 });
 

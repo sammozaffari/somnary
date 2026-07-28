@@ -1,0 +1,144 @@
+---
+// Per-form evidence breakdown (audit IA-1). A remedy is ONE graded entity, but forms differ in
+// evidence + absorption (magnesium glycinate vs oxide ~4%). This block shows that difference on the
+// one page and scopes the grade to the best-studied forms — without per-form pages or per-form
+// grades. `evidenceLevel` is a cited, human-ratified assessment (NOT a tier grade); it drives an
+// evidence pip in the SAME neutral-ink language as the citation pips (SourcesList), so "how strong
+// is this form's evidence" reads consistently and never borrows the grade or safety registers.
+import CiteMarker from './CiteMarker.astro';
+
+interface Form {
+  name: string;
+  evidenceLevel: 'studied' | 'limited' | 'weak';
+  basis: string;
+  note: string | null;
+  sources: number[];
+}
+interface Props {
+  forms: Form[];
+}
+const { forms } = Astro.props;
+
+const LABEL: Record<Form['evidenceLevel'], string> = {
+  studied: 'Well-studied form',
+  limited: 'Limited evidence',
+  weak: 'Weak evidence',
+};
+---
+
+<div class="forms">
+  <p class="lead">
+    This remedy's grade reflects the forms with the best evidence. How well each form is absorbed
+    and studied varies — so the form on the label matters as much as the ingredient.
+  </p>
+  <ul class="form-list">
+    {
+      forms.map((f) => (
+        <li class="form-row">
+          <div class="form-head">
+            <span class="pip" data-level={f.evidenceLevel} role="img" aria-label={LABEL[f.evidenceLevel]}>
+              <span /><span /><span />
+            </span>
+            <span class="form-name">{f.name}</span>
+            <span class="form-level">{LABEL[f.evidenceLevel]}</span>
+          </div>
+          <p class="form-basis">
+            {f.basis}
+            {f.sources.map((n) => (
+              <CiteMarker n={n} />
+            ))}
+          </p>
+          {f.note && <p class="form-note">{f.note}</p>}
+        </li>
+      ))
+    }
+  </ul>
+</div>
+
+<style>
+  .forms {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+  }
+  .lead {
+    margin: 0;
+    font-size: var(--text-base);
+    line-height: var(--lh-base);
+    color: var(--raisin);
+    max-width: 70ch;
+  }
+  .form-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+  }
+  .form-row {
+    padding: var(--sp-4);
+    background: var(--surface);
+    border: var(--border-hairline);
+    border-radius: var(--r-lg);
+  }
+  .form-head {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    flex-wrap: wrap;
+  }
+  .form-name {
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    line-height: var(--lh-lg);
+    color: var(--ink);
+  }
+  .form-level {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+  }
+  /* Evidence-weight pip — SAME neutral-ink system as the citation pips (SourcesList/CitationPopover).
+     Neutral --raisin fill / --mineral hollow: shows how much evidence weight a form carries, never a
+     grade color and never the vermilion safety register (§10). Meaning is in the count + the visible
+     "level" text + the role=img aria-label; the dots are decorative. */
+  .pip {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    flex: none;
+  }
+  .pip span {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    border: 1px solid var(--mineral);
+    background: transparent;
+  }
+  .pip[data-level='studied'] span {
+    background: var(--raisin);
+    border-color: var(--raisin);
+  }
+  .pip[data-level='limited'] span:nth-child(-n + 2) {
+    background: var(--raisin);
+    border-color: var(--raisin);
+  }
+  .pip[data-level='weak'] span:nth-child(1) {
+    background: var(--raisin);
+    border-color: var(--raisin);
+  }
+  .form-basis {
+    margin: var(--sp-2) 0 0;
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--ink);
+  }
+  .form-note {
+    margin: var(--sp-1) 0 0;
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+  }
+</style>
