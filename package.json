@@ -31,7 +31,9 @@
     "verify:auth": "node scripts/test-auth-plumbing.mjs",
     "verify:accounts": "node scripts/test-accounts.mjs",
     "verify:no-auth-wall": "node scripts/check-no-auth-wall.mjs",
-    "verify:label-checker": "node --experimental-strip-types scripts/test-label-checker.mjs"
+    "verify:label-checker": "node --experimental-strip-types scripts/test-label-checker.mjs",
+    "verify:publication-states": "node --experimental-strip-types scripts/test-publication-states.mjs",
+    "verify:publication-states:dist": "node --experimental-strip-types scripts/test-publication-states.mjs --dist"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.0.8",

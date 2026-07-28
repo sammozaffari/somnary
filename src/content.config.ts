@@ -16,6 +16,18 @@ import { glob } from 'astro/loaders';
 // tier is [HUMAN-GATE]: no agent assigns or changes a grade (CLAUDE.md non-negotiable).
 // The enum only constrains the shape; the VALUE is owner-ratified, never set by tooling.
 const tier = z.enum(['S', 'A', 'B', 'C', 'D', 'F']);
+const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'date must be YYYY-MM-DD');
+
+// Publication state is explicit: no record can silently inherit a ratified default.
+const workflowState = z.enum([
+  'owner_ratified',
+  'second_review',
+  'pending_signoff',
+  'unreviewed',
+  'withdrawn',
+]);
+const epistemicState = z.enum(['established', 'provisional', 'disputed', 'insufficient']);
+const freshnessState = z.enum(['current', 'review_due', 'superseded']);
 
 /**
  * Evidence change-log entry (CHK-1.4 evidence-change-log page reads changeLog[]). Records a
@@ -23,7 +35,7 @@ const tier = z.enum(['S', 'A', 'B', 'C', 'D', 'F']);
  * only on grade changes (themselves [HUMAN-GATE]).
  */
 const changeLogEntry = z.object({
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'date must be YYYY-MM-DD'),
+  date: isoDate,
   type: z.enum(['review', 'grade', 'source', 'correction']).default('review'),
   note: z.string(),
   fromTier: tier.optional(),
@@ -117,6 +129,16 @@ const remedies = defineCollection({
   schema: z
     .object({
       tier,
+      workflowState,
+      epistemicState,
+      freshnessState,
+      statusReason: z.string().min(1).optional(),
+      ratifiedBy: z.string().min(1).optional(),
+      ratifiedAt: isoDate.optional(),
+      reviewDueAt: isoDate.optional(),
+      supersededBy: z.string().min(1).optional(),
+      validFrom: isoDate,
+      validTo: isoDate.optional(),
       // supplement (default) vs behavioral/environmental intervention (Phase 6, e.g. cbt-i). Drives
       // template adaptation: interventions have no dose/compound, so those blocks are skipped and
       // the "standardization" block reframes as fidelity ("what counts as the real thing").
@@ -155,12 +177,57 @@ const remedies = defineCollection({
       // Review date + correction link on every article-type page (CLAUDE.md Definition of Done).
       // Required so no page ships without it; value is the real last-reviewed date (seeded from
       // each file's git history — never a fabricated date, per the real-promises rule).
-      reviewDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'reviewDate must be YYYY-MM-DD'),
+      reviewDate: isoDate,
       changeLog: z.array(changeLogEntry).default([]),
       draft: z.boolean().default(false),
     })
     // Integrity: every footnote (claims, risks, interactions) must exist in sources[].
     .superRefine((data, ctx) => {
+      if (data.workflowState === 'owner_ratified') {
+        if (!data.ratifiedBy) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['ratifiedBy'],
+            message: 'owner_ratified records require ratifiedBy',
+          });
+        }
+        if (!data.ratifiedAt) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['ratifiedAt'],
+            message: 'owner_ratified records require ratifiedAt',
+          });
+        }
+      }
+      if (data.epistemicState === 'disputed' && !data.statusReason) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['statusReason'],
+          message: 'disputed records require a public statusReason',
+        });
+      }
+      if (data.freshnessState === 'review_due' && !data.reviewDueAt) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['reviewDueAt'],
+          message: 'review_due records require reviewDueAt',
+        });
+      }
+      if (data.freshnessState === 'superseded' && !data.supersededBy) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['supersededBy'],
+          message: 'superseded records require supersededBy',
+        });
+      }
+      if (data.validTo && data.validTo < data.validFrom) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['validTo'],
+          message: 'validTo cannot be earlier than validFrom',
+        });
+      }
+
       const known = new Set(data.sources.map((s) => s.n));
       const check = (refs: number[], path: (string | number)[]) => {
         refs.forEach((ref) => {
