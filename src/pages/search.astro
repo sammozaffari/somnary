@@ -9,10 +9,54 @@ export const prerender = false;
 import Base from '../layouts/Base.astro';
 import TierBadge from '../components/TierBadge.astro';
 import { getSearchDocs, searchDocs } from '../lib/search';
+import { OUTCOMES } from '../lib/outcomes';
+import { TIERS } from '../lib/tiers';
 
-const q = (Astro.url.searchParams.get('q') ?? '').trim();
+const params = Astro.url.searchParams;
+const q = (params.get('q') ?? '').trim();
+
+// Facets (audit IA-4): filter by GRADE (evidence strength) and GOAL, read from the URL so a
+// filtered view is shareable / deep-linkable / crawlable (this route is already SSR). Both are
+// multi-select and combine with the query and each other.
+const GRADE_IDS = TIERS.map((t) => t.id) as string[];
+const activeGrades = new Set(params.getAll('grade').filter((g) => GRADE_IDS.includes(g)));
+const activeOutcomes = new Set(
+  params.getAll('outcome').filter((o) => OUTCOMES.some((x) => x.id === o))
+);
+const hasFilters = activeGrades.size > 0 || activeOutcomes.size > 0;
+
 const docs = await getSearchDocs();
-const results = q ? searchDocs(q, docs) : [];
+// Base set: ranked matches for q; else ALL docs when a facet is active (browse by grade/goal with no
+// query); else nothing (the prompt state).
+let results = q ? searchDocs(q, docs) : hasFilters ? docs : [];
+
+// Goal facet uses the AUTHORITATIVE outcome→remedy map (lib/outcomes), never the freeform
+// outcomes[] strings — a remedy matches a goal only if it's listed for that goal.
+if (activeOutcomes.size) {
+  const allowed = new Set<string>();
+  for (const o of OUTCOMES) if (activeOutcomes.has(o.id)) o.remedies.forEach((s) => allowed.add(s));
+  results = results.filter((r) => allowed.has(r.slug));
+}
+// Grade facet.
+if (activeGrades.size) results = results.filter((r) => activeGrades.has(r.tier));
+
+const active = Boolean(q) || hasFilters;
+
+// A URL with one facet value toggled on/off, preserving q + the other active facets.
+function toggleHref(kind: 'grade' | 'outcome', value: string): string {
+  const grades = new Set(activeGrades);
+  const outcomes = new Set(activeOutcomes);
+  const set = kind === 'grade' ? grades : outcomes;
+  if (set.has(value)) set.delete(value);
+  else set.add(value);
+  const p = new URLSearchParams();
+  if (q) p.set('q', q);
+  for (const g of GRADE_IDS) if (grades.has(g)) p.append('grade', g); // stable S→F order
+  for (const o of OUTCOMES) if (outcomes.has(o.id)) p.append('outcome', o.id);
+  const qs = p.toString();
+  return qs ? `/search?${qs}` : '/search';
+}
+const clearHref = q ? `/search?q=${encodeURIComponent(q)}` : '/search';
 
 // group by kind (only 'remedy' today; interventions/outcomes/context join as they ship)
 const KIND_LABEL: Record<string, string> = {
@@ -55,10 +99,60 @@ const suggestions = ['melatonin', 'magnesium', 'jet lag', "can't fall asleep", '
         />
         <button type="submit">Search</button>
       </form>
+
+      {/* Facets (IA-4) — toggle LINKS so filtering works with JS off and every filtered view has
+          its own shareable URL. Multi-select; combine with the query and each other. */}
+      <div class="facets">
+        <div class="facet-group" role="group" aria-label="Filter by evidence grade">
+          <span class="facet-label">Grade</span>
+          {
+            TIERS.map((t) => (
+              <a
+                class:list={['facet', { on: activeGrades.has(t.id) }]}
+                href={toggleHref('grade', t.id)}
+              >
+                {t.letter} · {t.name}
+                {activeGrades.has(t.id) && (
+                  <>
+                    <span class="facet-x" aria-hidden="true">×</span>
+                    <span class="sr-only"> — active filter, select to remove</span>
+                  </>
+                )}
+              </a>
+            ))
+          }
+        </div>
+        <div class="facet-group" role="group" aria-label="Filter by goal">
+          <span class="facet-label">Goal</span>
+          {
+            OUTCOMES.map((o) => (
+              <a
+                class:list={['facet', { on: activeOutcomes.has(o.id) }]}
+                href={toggleHref('outcome', o.id)}
+              >
+                {o.title}
+                {activeOutcomes.has(o.id) && (
+                  <>
+                    <span class="facet-x" aria-hidden="true">×</span>
+                    <span class="sr-only"> — active filter, select to remove</span>
+                  </>
+                )}
+              </a>
+            ))
+          }
+        </div>
+        {hasFilters && (
+          <a class="facet-clear" href={clearHref}>
+            Clear filters
+          </a>
+        )}
+      </div>
+
+      {active && <p class="result-count" aria-live="polite">{results.length} result{results.length === 1 ? '' : 's'}</p>}
     </header>
 
     {
-      q && results.length > 0 && (
+      active && results.length > 0 && (
         <div class="results">
           {[...groups.entries()].map(([kind, rows]) => (
             <section class="group" aria-label={KIND_LABEL[kind] ?? kind}>
@@ -86,23 +180,35 @@ const suggestions = ['melatonin', 'magnesium', 'jet lag', "can't fall asleep", '
     }
 
     {
-      q && results.length === 0 && (
+      active && results.length === 0 && (
         <div class="empty">
-          <p class="empty-lead">No matches. Try a compound, an outcome, or a symptom.</p>
-          <p class="empty-sub">
-            Popular:
-            {suggestions.map((s) => (
-              <a class="chip" href={`/search?q=${encodeURIComponent(s)}`}>
-                {s}
-              </a>
-            ))}
+          <p class="empty-lead">
+            {hasFilters
+              ? 'No matches for these filters.'
+              : 'No matches. Try a compound, an outcome, or a symptom.'}
           </p>
+          {hasFilters ? (
+            <p class="empty-sub">
+              <a class="chip" href={clearHref}>
+                Clear filters
+              </a>
+            </p>
+          ) : (
+            <p class="empty-sub">
+              Popular:
+              {suggestions.map((s) => (
+                <a class="chip" href={`/search?q=${encodeURIComponent(s)}`}>
+                  {s}
+                </a>
+              ))}
+            </p>
+          )}
         </div>
       )
     }
 
     {
-      !q && (
+      !active && (
         <div class="empty">
           <p class="empty-lead">Search remedies by name, alias, Latin name, outcome, or symptom.</p>
           <p class="empty-sub">
@@ -196,6 +302,84 @@ const suggestions = ['melatonin', 'magnesium', 'jet lag', "can't fall asleep", '
     padding: 0 var(--sp-4);
     min-height: 40px;
     cursor: pointer;
+  }
+
+  /* Facets (IA-4) — toggle-link filter chips; active = oxblood-soft fill + × affordance (not color
+     alone). Neutral tokens; the grade facet never borrows a grade color (it filters BY grade). */
+  .facets {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+    margin-top: var(--sp-5);
+  }
+  .facet-group {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: var(--sp-2);
+  }
+  .facet-label {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+    margin-right: var(--sp-2);
+  }
+  .facet {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-1);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--raisin);
+    background: var(--surface);
+    border: var(--hairline);
+    border-radius: var(--r-pill);
+    padding: var(--sp-1) var(--sp-3);
+    text-decoration: none;
+    transition:
+      background var(--dur-fast) var(--ease-soft),
+      border-color var(--dur-fast) var(--ease-soft);
+  }
+  .facet:hover {
+    background: var(--stone);
+    border-color: var(--mineral);
+  }
+  .facet:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+  }
+  .facet.on {
+    color: var(--primary);
+    background: var(--primary-soft);
+    border-color: transparent;
+    font-weight: 700;
+  }
+  .facet-x {
+    font-size: var(--text-sm);
+    line-height: 1;
+  }
+  .facet-clear {
+    align-self: flex-start;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--primary);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .facet-clear:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+    border-radius: var(--r-sm);
+  }
+  .result-count {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+    margin: var(--sp-5) 0 0;
   }
 
   .results {
