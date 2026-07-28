@@ -50,6 +50,16 @@ single source of truth. *(The former `tailwind.config.mjs` token mirror was remo
 audit CRAFT-1 — as no Tailwind utility consumed it and it had drifted; Tailwind is kept
 only for its Preflight reset.)*
 
+**Three-layer architecture (audit CRAFT-3).** Tokens read as three tiers:
+**primitive** (the raw values — `--ink`, `--paper`, `--primary`, `--sp-*`) → **semantic role**
+(`--color-text`, `--color-surface`, `--color-border`, `--color-link`, `--color-danger` … — what a
+value is *for*, each aliasing a primitive) → **component** (scoped `<style>` blocks consume the
+role). New or reworked components **should consume the semantic `--color-*` roles**, not the raw
+primitives, so a role can be re-pointed in one place. This is additive and non-breaking — the
+primitives stay valid, so adoption is incremental; there is deliberately **no big-bang migration**
+of the existing components (that churn, for zero visible change, is what the audit flagged to
+avoid). Roles are `--color-*` to avoid clashing with the `--text-*` type scale and `--sp-*` spacing.
+
 ```css
 :root {
   /* ---- surfaces (warm off-whites) ---- */

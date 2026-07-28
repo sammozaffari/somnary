@@ -138,6 +138,24 @@
   --bp-md:  768px;   /* tablet — the primary phone→desktop switch (nav collapses below this) */
   --bp-lg: 1024px;   /* small laptop */
   --bp-xl: 1440px;   /* wide desktop */
+
+  /* ---- Layer 2 · semantic role tokens (audit CRAFT-3) ------------------------------------------
+     A component-facing layer that ALIASES the primitives above, so the token architecture reads as
+     three tiers: primitive (the raw values, e.g. --ink / --paper) → semantic role (what it's FOR,
+     below) → component (scoped styles consume the role). New/reworked components SHOULD consume
+     these roles rather than the raw primitives, so a role can be re-pointed in ONE place. Additive
+     and non-breaking: the primitives stay valid, so adoption is incremental — no big-bang migration
+     (that churn, for zero visible change, is exactly what the audit said to avoid). Named
+     `--color-*` to avoid clashing with the `--text-*` type-scale and `--sp-*` spacing tokens. ---- */
+  --color-text:        var(--ink);      /* primary reading text */
+  --color-text-strong: var(--raisin);   /* secondary emphasis */
+  --color-text-muted:  var(--muted);    /* supporting text (AA small) */
+  --color-bg:          var(--paper);    /* page ground */
+  --color-surface:     var(--surface);  /* cards, tables, panels */
+  --color-sunken:      var(--stone);    /* inset / sunken fills */
+  --color-border:      var(--line);     /* hairline dividers */
+  --color-link:        var(--primary);  /* links / brand accent */
+  --color-danger:      var(--vermilion);/* safety register ONLY (never decorative) */
 }
 
 /* ---- DESIGN_SYSTEM v3 §1 — base document ---- */
@@ -147,7 +165,7 @@
       radial-gradient(circle at 12% 0%, rgba(126, 31, 43, 0.06), transparent 28%),
       linear-gradient(180deg, #FEFDF9 0%, var(--paper) 45%, #F4EFE2 100%);
     /* background-attachment:fixed removed 2026-07-27 — it caused repaint jank on mobile Safari */
-    color: var(--ink);
+    color: var(--color-text); /* semantic role (CRAFT-3) → --ink; components adopt roles incrementally */
     font-family: var(--font-body);
     /* v4: body was rendering at weight 400 (the "too thin / light" complaint). 440 gives text
        the weight of set ink on the warm ground without reading as medium/bold. Headings set
