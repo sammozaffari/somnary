@@ -244,12 +244,17 @@ if (retailers?.iherb) retailerLinks.push({ label: 'iHerb AU', href: retailers.ih
   }
   @media (max-width: 720px) {
     .hero {
-      grid-template-columns: 1fr;
+      grid-template-columns: minmax(0, 1fr);
     }
     .hero-shot {
       order: -1;
       max-width: 280px;
     }
+  }
+  /* min-width:0 so the flex children (tier chip + its text column) can shrink/wrap below their
+     content's min-width instead of forcing the hero past a 360px viewport */
+  .hero-main {
+    min-width: 0;
   }
 
   /* the EWG-style big verdict chip */
@@ -279,6 +284,7 @@ if (retailers?.iherb) retailerLinks.push({ label: 'iHerb AU', href: retailers.ih
     display: flex;
     flex-direction: column;
     gap: var(--sp-1);
+    min-width: 0;
   }
   .tier-chip-label {
     font-family: var(--font-display);

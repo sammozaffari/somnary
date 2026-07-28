@@ -18,7 +18,10 @@
 </li>
 
 <style>
-  .session {
+  /* :not([hidden]) is load-bearing — a bare `display: flex` overrides the `hidden` attribute, so
+     the signed-out placeholder was rendering (Account/Sign out visible when it shouldn't be, and
+     forcing the nav past a 360px viewport). This keeps it truly hidden until JS reveals it. */
+  .session:not([hidden]) {
     display: flex;
     align-items: center;
     gap: var(--sp-4);

@@ -90,6 +90,14 @@
     border-radius: var(--r-xs);
     padding: 1px 5px;
   }
+  /* mobile: icon-only search — the "Search" label + ⌘K hint don't earn their width on a phone
+     (there's no keyboard for ⌘K anyway), and dropping them keeps the 2-pillar nav within 360px */
+  @media (max-width: 767px) {
+    .st-label,
+    .st-hint {
+      display: none;
+    }
+  }
 
   /* overlay + scrim */
   .search-overlay {
