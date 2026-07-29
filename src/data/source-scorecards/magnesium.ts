@@ -377,7 +377,7 @@ export const MAGNESIUM_SOURCES: MagProduct[] = [
     scores: {
       testing_purity: { score: 0, note: 'No third-party product cert (not in NSF/USP directories) and no published lab test; Albion TRAACS is a raw-material supplier assurance, not a product cert.' },
       label_accuracy: { score: 0, note: 'No independent lab test of the exact product; no public batch lab report.' },
-      additives: { score: 5, note: 'Full full ingredients list disclosed and clean — no additive of concern.' },
+      additives: { score: 5, note: 'Full ingredients list disclosed and clean — no additive of concern.' },
       regulatory: { score: 5, note: 'No FDA/FTC action against the product (a similarly-named moringa recall is a different company, quarantined).' },
       transparency: { score: 3, note: 'Named manufacturer + full disclosure of how much of each type is inside (elemental + compound), but no AUST L (US import, no TGA oversight of this product) and no public lab report.' },
       marketing_honesty: { score: 4, note: '−1: "up to 6× better absorbed" uses an unnamed comparator and an unpinned source.' },
