@@ -69,6 +69,7 @@ const focal = FOCAL[slug] ?? 'center 30%';
     overflow: hidden;
     /* the melt: the plate itself dissolves (alpha mask), so the page's real layered
        background shows through — seamless by construction, no color to match. */
+    /* raw-ok: #000 is the opaque end of a luminance mask (mask alpha, not ink) — C-02 */
     -webkit-mask-image: linear-gradient(to bottom, #000 50%, transparent 100%);
     mask-image: linear-gradient(to bottom, #000 50%, transparent 100%);
   }

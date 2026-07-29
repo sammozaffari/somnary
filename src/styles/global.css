@@ -142,6 +142,10 @@
 /* ---- DESIGN_SYSTEM v3 §1 — base document ---- */
 @layer base {
   body {
+    /* raw-ok: page-background gradient stops — a faint oxblood bloom (6% alpha) over a
+       three-stop paper wash. These are gradient MECHANICS local to the body ground, not
+       reusable palette colours; kept literal here in the token-definition file — C-02.
+       (If the owner later wants them named, --paper-hi/--paper-lo/--bloom is a HUMAN-GATE.) */
     background:
       radial-gradient(circle at 12% 0%, rgba(126, 31, 43, 0.06), transparent 28%),
       linear-gradient(180deg, #FEFDF9 0%, var(--paper) 45%, #F4EFE2 100%);
