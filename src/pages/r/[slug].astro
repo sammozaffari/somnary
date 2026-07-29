@@ -22,6 +22,11 @@ import SourcesList from '../../components/SourcesList.astro';
 import CitationPopover from '../../components/CitationPopover.astro';
 import Disclaimer from '../../components/Disclaimer.astro';
 import { remedyJsonLd } from '../../lib/seo';
+import { MAGNESIUM_SOURCES } from '../../data/source-scorecards/magnesium';
+import { ASHWAGANDHA_SOURCES } from '../../data/source-scorecards/ashwagandha';
+import { GLYCINE_SOURCES } from '../../data/source-scorecards/glycine';
+import { VALERIAN_SOURCES } from '../../data/source-scorecards/valerian';
+import { MELATONIN_SOURCES } from '../../data/source-scorecards/melatonin';
 
 export async function getStaticPaths() {
   const remedies = await getCollection('remedies', (e) => !e.data.draft);
@@ -36,6 +41,17 @@ const { Content } = await render(entry);
 const SCORECARD_SLUGS = new Set(['magnesium', 'ashwagandha', 'valerian', 'glycine', 'melatonin']);
 const hasScorecard = SCORECARD_SLUGS.has(entry.id);
 const remedyName = entry.id.charAt(0).toUpperCase() + entry.id.slice(1);
+
+// Real per-remedy scorecard count, derived from the same data /sources renders,
+// so the CTA never overstates how many products we've actually reviewed.
+const SCORECARD_COUNTS: Record<string, number> = {
+  magnesium: MAGNESIUM_SOURCES.filter((p) => p.ratified).length,
+  ashwagandha: ASHWAGANDHA_SOURCES.filter((p) => p.ratified).length,
+  valerian: VALERIAN_SOURCES.filter((p) => p.ratified).length,
+  glycine: GLYCINE_SOURCES.filter((p) => p.ratified).length,
+  melatonin: MELATONIN_SOURCES.filter((p) => p.ratified && p.availableInAU !== false).length,
+};
+const scorecardCount = SCORECARD_COUNTS[entry.id] ?? 0;
 
 const isIntervention = d.format === 'intervention';
 const studiedDose = d.doses.length ? d.doses[0].studiedDose : null;
@@ -140,8 +156,9 @@ const jsonLd = remedyJsonLd(d, canonical, site);
             <a class="scorecard-cta" href={`/sources/${entry.id}`}>
               <span class="scorecard-cta-title">Which brand should you look at? →</span>
               <span class="scorecard-cta-sub">
-                See the {remedyName} source scorecards — every product you can buy in Australia, rated on
-                how well it discloses what’s in the bottle. No affiliate links or brand money.
+                See the {remedyName} source scorecards — {scorecardCount} widely used products we’ve
+                reviewed and rated on how well each discloses what’s in the bottle. A curated set, not
+                every product on the market. No affiliate links or brand money.
               </span>
             </a>
           </section>
