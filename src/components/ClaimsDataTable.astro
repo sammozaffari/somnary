@@ -90,10 +90,12 @@ const { claims } = Astro.props;
     border-top: var(--border-hairline);
   }
   .claim-cell {
+    /* raw-ok: 20px table cell padding, off the 4px step by design */
     padding: 20px var(--sp-5);
     border-right: 1px solid var(--line);
   }
   .data-cell {
+    /* raw-ok: 20px table cell padding, off the 4px step by design */
     padding: 20px var(--sp-5);
     background: var(--surface);
   }
@@ -116,7 +118,7 @@ const { claims } = Astro.props;
   .claim {
     position: relative;
     display: inline;
-    font-size: 16px;
+    font-size: var(--text-base);
     line-height: var(--lh-base);
     color: var(--muted);
   }
@@ -135,7 +137,7 @@ const { claims } = Astro.props;
   }
 
   .data-text {
-    font-size: 16px;
+    font-size: var(--text-base);
     line-height: var(--lh-base);
     color: var(--ink);
     /* FINAL state = visible; JS sets the hidden start inline then animates back to this */
@@ -152,6 +154,7 @@ const { claims } = Astro.props;
     align-items: center;
     gap: var(--sp-2);
     font-family: var(--font-mono);
+    /* raw-ok: 13px dense no-data caption, below the --text-sm (14px) scale step */
     font-size: 13px;
     color: var(--muted);
   }

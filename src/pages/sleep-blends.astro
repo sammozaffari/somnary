@@ -356,8 +356,9 @@ const rows = [
     border-top: var(--border-hairline);
   }
   .td {
+    /* raw-ok: 20px table cell padding, off the 4px step by design */
     padding: 20px var(--sp-5);
-    font-size: 16px;
+    font-size: var(--text-base);
     line-height: var(--lh-base);
   }
   .td-implied {

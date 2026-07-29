@@ -623,7 +623,7 @@ const catFacets = [...new Set(rows.map((r) => r.category).filter(Boolean))].sort
     letter-spacing: normal;
     text-transform: none;
     line-height: 1;
-    /* §2.3 chip padding is a literal spec value (no token covers 5/11px) — matches GateChip. */
+    /* §2.3 chip padding is a literal spec value (no token covers 5/11px) — matches GateChip. raw-ok: chip spec padding */
     padding: 5px 11px;
     border-radius: var(--r-pill);
     white-space: nowrap;
