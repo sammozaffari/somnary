@@ -14,11 +14,13 @@ const { tier, size = 'card' } = Astro.props;
 
 // box / glyph / radius per size. glyph ≥19px (large-text band) at inline and up.
 // `lead` is the remedy lead-block "big badge" (DESIGN §3: 152×152, letter 112, gradient fill).
+// weight capped at 700: Instrument Sans Variable loads 400–700, so 800/900 clamped or
+// synthesized browser-dependently (T-01). 700 is the heaviest true cut the font ships.
 const SIZES = {
-  inline: { box: 30,  glyph: 19,  radius: 'var(--r-sm)', weight: 800, grad: false },
-  card:   { box: 44,  glyph: 27,  radius: 'var(--r-sm)', weight: 800, grad: false },
-  header: { box: 78,  glyph: 50,  radius: 'var(--r-lg)', weight: 900, grad: true },
-  lead:   { box: 152, glyph: 112, radius: 'var(--r-lg)', weight: 900, grad: true },
+  inline: { box: 30,  glyph: 19,  radius: 'var(--r-sm)', weight: 700, grad: false },
+  card:   { box: 44,  glyph: 27,  radius: 'var(--r-sm)', weight: 700, grad: false },
+  header: { box: 78,  glyph: 50,  radius: 'var(--r-lg)', weight: 700, grad: true },
+  lead:   { box: 152, glyph: 112, radius: 'var(--r-lg)', weight: 700, grad: true },
 } as const;
 const s = SIZES[size];
 const lc = tier.toLowerCase();
