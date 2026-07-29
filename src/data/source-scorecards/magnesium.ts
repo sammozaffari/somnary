@@ -101,7 +101,7 @@ export const MAGNESIUM_SOURCES: MagProduct[] = [
       additives: { score: 5, note: 'Provisional — full ingredients list not published online; no confirmed additive of concern.' },
       regulatory: { score: 5, note: 'No TGA/FDA action names this product; the 2025 B6 class action and Daily Magnesium cancellation are other products (this SKU is B6-free).' },
       transparency: { score: 4, note: 'Named maker + AUST L, and a high-water-mark disclosure of how much of each type is inside (citrate 296 + glycinate 24 mg); no public lab report.' },
-      marketing_honesty: { score: 5, note: 'Indications hedged in TGA-permitted form; blend is genuinely citrate + glycinate, so absorption claims aren’t oxide-mislabeling.' },
+      marketing_honesty: { score: 5, note: 'Indications hedged in TGA-permitted form; blend is genuinely citrate + glycinate, so absorption claims aren’t oxide-mislabelling.' },
     },
     verdict:
       'A clearly-made, TGA-listed multi-salt sleep combo with a standout disclosure of how much of each type is inside (citrate 296 mg + glycinate 24 mg) and no B6, but no independent lab testing, and an undisclosed full ingredients list.',
@@ -535,7 +535,7 @@ export const MAGNESIUM_SOURCES: MagProduct[] = [
       additives: { score: 5, note: 'Provisional — full ingredients list not published online (the “Ezyglide” coating is not itemised); no confirmed additive of concern.' },
       regulatory: { score: 3, note: 'A consumer-level TGA recall (Jun 2026, sponsor Sanofi-Aventis Healthcare) named this exact SKU — batch 4644931665576, for a glass fragment inside the bottle (not the tablets): a single-batch packaging defect, not a formulation or potency problem. Refund via place of purchase.' },
       transparency: { score: 3, note: 'Named maker + AUST L; single-salt glycinate with elemental disclosed, but no public lab report.' },
-      marketing_honesty: { score: 5, note: 'Glycinate is a genuinely well-absorbed form, so absorption framing isn’t oxide-mislabeling; no disease or unsupported-proof claim.' },
+      marketing_honesty: { score: 5, note: 'Glycinate is a genuinely well-absorbed form, so absorption framing isn’t oxide-mislabelling; no disease or unsupported-proof claim.' },
     },
     verdict:
       'A B6-free, well-absorbed single-salt glycinate whose one blemish is a 2026 single-batch recall for a glass fragment in the bottle (a packaging defect, not the tablets or the formula) — with no independent lab testing.',
