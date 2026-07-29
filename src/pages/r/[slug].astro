@@ -16,7 +16,6 @@ import DosingGrid from '../../components/DosingGrid.astro';
 import SafetyCallout from '../../components/SafetyCallout.astro';
 import MetadataCard from '../../components/MetadataCard.astro';
 import PublicationStatePanel from '../../components/PublicationStatePanel.astro';
-import CommunityBar from '../../components/CommunityBar.astro';
 import AskPanel from '../../components/AskPanel.astro';
 import SourcesList from '../../components/SourcesList.astro';
 import CitationPopover from '../../components/CitationPopover.astro';
@@ -179,7 +178,7 @@ const jsonLd = remedyJsonLd(d, canonical, site);
         </section>
       </div>
 
-      {/* sidebar: 10 community (walled off) · metadata · 11 ask stub */}
+      {/* sidebar: metadata · 11 ask stub */}
       <div class="sidebar">
         <MetadataCard
           tier={d.tier}
@@ -189,7 +188,6 @@ const jsonLd = remedyJsonLd(d, canonical, site);
           bestFor={d.bestFor}
           safetyFlag={safetyFlag}
         />
-        <CommunityBar reportsCount={d.community.reportsCount} />
         <AskPanel remedyName={d.name} slug={entry.id} />
       </div>
     </div>
