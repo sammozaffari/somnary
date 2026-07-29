@@ -168,3 +168,12 @@
   h1, h2, h3 { text-wrap: balance; }
   p { text-wrap: pretty; }
 }
+
+/* ---- utilities ---- */
+@layer utilities {
+  /* T-04: fixed-width figures so digits line up in compared columns (scores, doses, stat
+     rows). §1 (global.css:26-30) mandates this for compared digits; Instrument Sans ships
+     tabular figures, so this opts in wherever numbers stack or must align. Global class —
+     applied via markup in DosingGrid, StatRow, and the scorecard score meters. */
+  .tnum { font-variant-numeric: tabular-nums; }
+}
