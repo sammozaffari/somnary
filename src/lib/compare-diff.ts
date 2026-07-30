@@ -29,6 +29,7 @@ export interface DoseRow {
 export interface CompareEntity {
   slug: string;
   name: string;
+  verdict: string; // oneLineVerdict — identity header only, used verbatim
   tier: TierId;
   workflowState: WorkflowState;
   epistemicState: EpistemicState;

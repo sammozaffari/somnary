@@ -1,0 +1,616 @@
+---
+/**
+ * PairComparison — the difference-first pair view (L-01, Model 2). Exactly two remedies, sections
+ * stacked vertically, DIFFERENCES expanded and IDENTICAL values collapsed behind a reveal. Each
+ * section states which difference matters and why, without picking a winner. Grade, biggest-risk
+ * and interaction sections never collapse (safety + state must never hide). All same/different
+ * decisions come from compare-diff.ts (semantic, not string inequality). D4: interaction cautions
+ * are rendered strictly PER REMEDY — nothing here is a combined-stack claim.
+ *
+ * Server-rendered: the whole comparison is in the HTML (collapsed <details> content included), so a
+ * no-JS reader and a crawler see every fact. ?goal emphasis is layered on client-side in the page.
+ */
+import TierBadge from './TierBadge.astro';
+import ReviewState from './ReviewState.astro';
+import EvidenceGateChip from './EvidenceGateChip.astro';
+import {
+  orderedSections,
+  compareGrade,
+  effectSignal,
+  diffSets,
+  outcomeKey,
+  tierDecision,
+  type CompareEntity,
+  type EffectSignal,
+} from '../lib/compare-diff.ts';
+import { getTier } from '../lib/tiers.ts';
+import { EPISTEMIC_LABELS } from '../lib/remedy-state.ts';
+
+interface Props {
+  a: CompareEntity;
+  b: CompareEntity;
+}
+const { a, b } = Astro.props;
+
+const sections = orderedSections(a, b);
+const grade = compareGrade(a, b);
+const outcomeDiff = diffSets(a.outcomes, b.outcomes, outcomeKey);
+
+const EFFECT_LABEL: Record<EffectSignal, string> = {
+  reported: 'Effect size reported in trials',
+  small: 'Effect real but small',
+  'not-reported': 'No effect size reported',
+};
+const effA = effectSignal(a);
+const effB = effectSignal(b);
+
+const CAUTION_GATES = [
+  'effect-size-small',
+  'heterogeneous-trials',
+  'unstandardized',
+  'dose-mismatch',
+  'mechanism-only',
+  'little-no-human-data',
+] as const;
+const cautionGates = (e: CompareEntity) => e.gates.filter((g) => CAUTION_GATES.includes(g as any));
+
+// short summary shown on a collapsed (identical) section's reveal control.
+function summaryOf(id: string): string {
+  switch (id) {
+    case 'outcome':
+      return 'Both target the same sleep goals';
+    case 'effect-magnitude':
+      return EFFECT_LABEL[effA];
+    case 'form-protocol':
+      return 'Same form(s)';
+    case 'dose-timing':
+      return 'Same studied dose & timing';
+    case 'uncertainty':
+      return EPISTEMIC_LABELS[a.epistemicState];
+    default:
+      return 'The same for both';
+  }
+}
+
+const entities = [a, b];
+---
+
+<div class="pair">
+  {/* identity header — the two remedies as fixed reference columns */}
+  <div class="pair-head">
+    {
+      entities.map((e) => (
+        <div class="identity">
+          <TierBadge tier={e.tier} size="card" />
+          <div class="id-text">
+            <a class="id-name" href={`/r/${e.slug}`} aria-label={`Read ${e.name} — grade ${e.tier}`}>
+              {e.name}
+            </a>
+            <p class="id-grade">
+              Grade {e.tier} · {getTier(e.tier).name}
+              <ReviewState state={e.workflowState} class="id-review" />
+            </p>
+            <p class="id-verdict">{e.verdict}</p>
+          </div>
+        </div>
+      ))
+    }
+  </div>
+
+  {
+    sections.map((section) => {
+      const collapsible = section.state === 'identical' && !section.alwaysExpanded;
+      const Wrapper = collapsible ? 'details' : 'div';
+      return (
+        <Wrapper class="dim" data-state={section.state} data-dim={section.id}>
+          {collapsible ? (
+            <summary class="dim-summary">
+              <span class="dim-label">{section.label}</span>
+              <span class="dim-state is-identical">Same for both · reveal</span>
+              <span class="dim-summary-value">{summaryOf(section.id)}</span>
+            </summary>
+          ) : (
+            <div class="dim-head">
+              <span class="dim-label">{section.label}</span>
+              <span class={`dim-state is-${section.state}`}>
+                {section.state === 'different'
+                  ? 'Differs'
+                  : section.state === 'unrecorded'
+                    ? 'Not recorded yet'
+                    : 'Same for both'}
+              </span>
+            </div>
+          )}
+
+          <p class={`dim-why${section.id === 'grade' && grade.provisionalMismatch ? ' is-flag' : ''}`}>
+            {section.whyItMatters}
+          </p>
+
+          <div class="dim-body">
+            {/* GRADE */}
+            {section.id === 'grade' && (
+              <div class="cols">
+                {entities.map((e) => (
+                  <div class="col">
+                    <p class="scalar-grade">
+                      <span class="grade-letter">Grade {e.tier}</span>
+                      <span class="grade-name">{getTier(e.tier).name}</span>
+                    </p>
+                    <ReviewState state={e.workflowState} detail class="col-review" />
+                    <p class="scalar-note">{tierDecision(e.tier)}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* BIGGEST RISK */}
+            {section.id === 'biggest-risk' && (
+              <div class="cols">
+                {entities.map((e) => (
+                  <div class="col">
+                    <p class="col-who">{e.name}</p>
+                    {e.biggestRisk ? (
+                      <p class="risk">{e.biggestRisk}</p>
+                    ) : (
+                      <p class="unrecorded-note">No single headline risk recorded for {e.name} — read its safety section.</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* INTERACTIONS — strictly per remedy (D4) */}
+            {section.id === 'interactions' && (
+              <div class="cols">
+                {entities.map((e) => (
+                  <div class="col col-int">
+                    <p class="col-who">{e.name}</p>
+                    {e.interactions.length > 0 ? (
+                      <ul class="int-list">
+                        {e.interactions.map((i) => (
+                          <li>{i}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p class="unrecorded-note">No documented interaction cautions for {e.name}.</p>
+                    )}
+                  </div>
+                ))}
+                <p class="int-foot">
+                  Listed per remedy — this is never a readout of taking them together. Interactions are a
+                  question for a pharmacist or clinician. <a href="/safety">Safety boundary →</a>
+                  <a href="/medications-and-sleep-aids">Medications &amp; sleep aids →</a>
+                </p>
+              </div>
+            )}
+
+            {/* OUTCOME — set diff */}
+            {section.id === 'outcome' && (
+              <div class="set">
+                {outcomeDiff.shared.length > 0 && (
+                  <div class="set-row">
+                    <p class="set-label">Shared</p>
+                    <div class="chips">
+                      {outcomeDiff.shared.map((o) => (
+                        <span class="chip chip-goal chip-shared" data-goalkey={outcomeKey(o)}>{o}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {entities.map((e, i) => {
+                  const only = i === 0 ? outcomeDiff.aOnly : outcomeDiff.bOnly;
+                  return (
+                    only.length > 0 && (
+                      <div class="set-row">
+                        <p class="set-label">Only {e.name}</p>
+                        <div class="chips">
+                          {only.map((o) => (
+                            <span class="chip chip-goal" data-goalkey={outcomeKey(o)}>{o}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )
+                  );
+                })}
+              </div>
+            )}
+
+            {/* EFFECT MAGNITUDE — gate-derived signal */}
+            {section.id === 'effect-magnitude' && (
+              <div class="cols">
+                {entities.map((e, i) => (
+                  <div class="col">
+                    <p class="col-who">{e.name}</p>
+                    <p class="scalar">{EFFECT_LABEL[i === 0 ? effA : effB]}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* FORM & PROTOCOL / DOSE & TIMING */}
+            {(section.id === 'form-protocol' || section.id === 'dose-timing') && (
+              <div class="cols">
+                {entities.map((e) => (
+                  <div class="col">
+                    <p class="col-who">{e.name}</p>
+                    {e.format === 'intervention' ? (
+                      <p class="scalar-note">
+                        Not a dosed supplement — the protocol is the therapy itself. See its page for what
+                        counts as the real thing.
+                      </p>
+                    ) : e.doses.length > 0 ? (
+                      <ul class="dose-list">
+                        {e.doses.map((d) => (
+                          <li>
+                            <span class="dose-form">{d.form}</span>
+                            {section.id === 'dose-timing' ? (
+                              <span class="dose-meta">{d.studiedDose} · {d.timing}</span>
+                            ) : (
+                              <span class="dose-meta">{d.studiedDose}</span>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p class="unrecorded-note">No studied dose recorded for {e.name}.</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* UNCERTAINTY */}
+            {section.id === 'uncertainty' && (
+              <div class="cols">
+                {entities.map((e) => (
+                  <div class="col">
+                    <p class="col-who">{e.name}</p>
+                    <p class="scalar">{EPISTEMIC_LABELS[e.epistemicState]}</p>
+                    {cautionGates(e).length > 0 && (
+                      <div class="chips">
+                        {cautionGates(e).map((g) => (
+                          <EvidenceGateChip id={g as any} />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* UNRECORDED dimensions */}
+            {(section.id === 'studied-population' || section.id === 'time-to-effect') && (
+              <p class="unrecorded-note">
+                Not a separately recorded field in the corpus yet, so it isn't compared here — reading it
+                as "no difference" would be wrong. See each page:
+                <a href={`/r/${a.slug}`}>{a.name}</a>, <a href={`/r/${b.slug}`}>{b.name}</a>.
+              </p>
+            )}
+          </div>
+        </Wrapper>
+      );
+    })
+  }
+</div>
+
+<style>
+  .pair {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+  }
+
+  /* identity header */
+  .pair-head {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--sp-4);
+    margin-bottom: var(--sp-2);
+  }
+  .identity {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--sp-3);
+    background: var(--surface);
+    border: var(--border-hairline);
+    border-radius: var(--r-lg);
+    padding: var(--sp-5);
+  }
+  .id-text {
+    min-width: 0;
+  }
+  .id-name {
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    line-height: 1.1;
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .id-name:hover {
+    color: var(--primary);
+  }
+  .id-name:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+    border-radius: var(--r-xs);
+  }
+  .id-grade {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--sp-2);
+    margin: var(--sp-2) 0 0;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--ink);
+  }
+  .id-verdict {
+    margin: var(--sp-2) 0 0;
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+  }
+
+  /* one dimension section */
+  .dim {
+    background: var(--surface);
+    border: var(--border-hairline);
+    border-radius: var(--r-lg);
+    padding: var(--sp-5);
+  }
+  .dim[data-state='different'] {
+    border-left: 3px solid var(--primary); /* raw-ok: difference accent bar, no 3px token */
+  }
+  .dim-head,
+  .dim-summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--sp-2) var(--sp-4);
+  }
+  .dim-summary {
+    cursor: pointer;
+    list-style: none;
+  }
+  .dim-summary::-webkit-details-marker {
+    display: none;
+  }
+  .dim-summary:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+    border-radius: var(--r-xs);
+  }
+  .dim-label {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--ink);
+  }
+  .dim-state {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+  }
+  .dim-state.is-different {
+    color: var(--primary);
+  }
+  .dim-state.is-identical {
+    color: var(--muted);
+  }
+  .dim-state.is-unrecorded {
+    color: var(--soft);
+  }
+  .dim-summary-value {
+    font-size: var(--text-sm);
+    color: var(--muted);
+    flex-basis: 100%;
+  }
+  .dim-why {
+    margin: var(--sp-3) 0 var(--sp-4);
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    max-width: 70ch;
+  }
+  .dim-why.is-flag {
+    color: var(--safety-ink);
+    background: var(--warning-bg);
+    border-radius: var(--r-md);
+    padding: var(--sp-3) var(--sp-4);
+  }
+  details.dim[open] .dim-why {
+    margin-top: var(--sp-4);
+  }
+
+  /* two-column value layout */
+  .cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--sp-4);
+  }
+  .col {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+  }
+  .col-who {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+  }
+  .scalar,
+  .risk,
+  .scalar-note {
+    margin: 0;
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--ink);
+  }
+  .scalar-note {
+    color: var(--muted);
+  }
+  .scalar-grade {
+    display: flex;
+    align-items: baseline;
+    gap: var(--sp-2);
+    margin: 0;
+  }
+  .grade-letter {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--ink);
+  }
+  .grade-name {
+    font-size: var(--text-sm);
+    color: var(--muted);
+  }
+  .col-review {
+    align-self: flex-start;
+  }
+  .unrecorded-note {
+    margin: 0;
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+  }
+  .unrecorded-note a {
+    color: var(--primary);
+    text-decoration: underline;
+    text-underline-offset: 2px; /* raw-ok: inline-link underline offset, matches global links */
+  }
+
+  /* interactions */
+  .col-int .int-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+  }
+  .col-int .int-list li {
+    position: relative;
+    padding-left: var(--sp-4);
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--ink);
+  }
+  .col-int .int-list li::before {
+    content: '—';
+    position: absolute;
+    left: 0;
+    color: var(--muted);
+  }
+  .int-foot {
+    grid-column: 1 / -1;
+    margin: var(--sp-2) 0 0;
+    padding: var(--sp-4);
+    background: var(--grade-c-tint);
+    border-radius: var(--r-md);
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--ink);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2) var(--sp-4);
+    align-items: baseline;
+  }
+  .int-foot a {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--primary);
+    text-decoration: none;
+  }
+  .int-foot a:hover {
+    color: var(--primary-deep);
+  }
+  .int-foot a:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+    border-radius: var(--r-xs);
+  }
+
+  /* outcome set layout */
+  .set {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+  }
+  .set-row {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+  }
+  .set-label {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+  }
+  .chips {
+    display: flex;
+    flex-wrap: wrap; /* L-02: chips wrap; never nowrap-overflow */
+    gap: var(--sp-2);
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: normal;
+    line-height: 1;
+    padding: 5px 11px; /* raw-ok: chip spec padding, matches GateChip */
+    border-radius: var(--r-pill);
+    white-space: normal; /* L-02: allow multi-word chips to wrap instead of overflowing */
+  }
+  .chip-goal {
+    color: var(--primary-deep);
+    background: var(--primary-soft);
+  }
+  .chip-shared[data-goal-active='true'],
+  .chip-goal[data-goal-active='true'] {
+    outline: 2px solid var(--primary); /* raw-ok: ?goal emphasis ring */
+    outline-offset: 1px; /* raw-ok: ?goal emphasis ring offset */
+  }
+
+  /* dose lists */
+  .dose-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+  }
+  .dose-list li {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-1);
+  }
+  .dose-form {
+    font-size: var(--text-sm);
+    color: var(--ink);
+  }
+  .dose-meta {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+  }
+
+  @media (max-width: 640px) {
+    .pair-head,
+    .cols {
+      grid-template-columns: 1fr;
+    }
+    .int-foot {
+      grid-column: auto;
+    }
+  }
+</style>
