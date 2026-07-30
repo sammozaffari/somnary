@@ -219,7 +219,7 @@ export interface GradeComparison {
 }
 
 const GRADE_BASE =
-  'The grade rates how strong the published human evidence is — not how safe it is, and not how big the effect feels.';
+  'The grade rates how strong the published human evidence is — not how safe it is, and not how big the effect feels. This compares evidence strength, not a recommendation to pick one.';
 
 export function compareGrade(a: CompareEntity, b: CompareEntity): GradeComparison {
   const aStamp = gradeStampState(a.workflowState);

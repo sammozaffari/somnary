@@ -223,7 +223,8 @@ for (const o of OUTCOMES) {
     color: var(--muted);
   }
   .opt {
-    color: var(--soft);
+    /* --muted, not --soft: DESIGN §8 bars --soft below 19px (3.61:1); this hint is 12px. */
+    color: var(--muted);
   }
   .select {
     font-family: var(--font-body);

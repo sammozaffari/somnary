@@ -36,10 +36,12 @@ const sections = orderedSections(a, b);
 const grade = compareGrade(a, b);
 const outcomeDiff = diffSets(a.outcomes, b.outcomes, outcomeKey);
 
+// Gate-framed, NOT measured: these describe what the grade's evidence gates carry, so the label
+// can never read as a measured effect (and stays honest even alone on a collapsed section's reveal).
 const EFFECT_LABEL: Record<EffectSignal, string> = {
-  reported: 'Effect size reported in trials',
-  small: 'Effect real but small',
-  'not-reported': 'No effect size reported',
+  reported: 'Grade gates: an effect size was reported',
+  small: 'Grade gates: effect flagged small',
+  'not-reported': 'Grade gates: no effect size reported',
 };
 const effA = effectSignal(a);
 const effB = effectSignal(b);
@@ -399,7 +401,9 @@ const entities = [a, b];
     color: var(--muted);
   }
   .dim-state.is-unrecorded {
-    color: var(--soft);
+    /* --muted (7.16:1), not --soft: this is a 12px state label carrying meaning, and DESIGN §8
+       bars --soft below 19px (3.61:1 on surface). State stays word-carried, never colour-alone. */
+    color: var(--muted);
   }
   .dim-summary-value {
     font-size: var(--text-sm);
