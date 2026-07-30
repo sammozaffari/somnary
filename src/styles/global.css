@@ -115,7 +115,14 @@
   --shadow-lift: 0 24px 70px rgba(23,21,18,.16);
 
   /* ---- a11y + brand mechanics ---- */
-  --focus-ring:          0 0 0 3px rgba(126, 31, 43, 0.40);  /* :focus-visible (oxblood) */
+  /* A-01: two-tone focus ring — a --surface (white) inner band + a solid --primary (oxblood)
+     outer band. The single-colour 40%-alpha oxblood ring it replaces measured 1.19–2.21:1
+     (fails 3:1 non-text on carbon, tints, and grade fills). A two-tone ring is the WCAG
+     technique for indicators that must read on ANY ground: on light surfaces the oxblood
+     outer band carries it (9.49:1 on paper); on --carbon the white inner band carries it
+     (~17:1); and the white↔oxblood internal edge is ~10.7:1 everywhere, so the ring is always
+     perceivable. Solid, no alpha compositing. */
+  --focus-ring:          0 0 0 2px var(--surface), 0 0 0 4px var(--primary);
   --ring:                var(--focus-ring);
   --grade-optical-shift: 0.02em;  /* cap optical-center nudge in grade badges */
 
@@ -171,6 +178,41 @@
   /* v4: let multi-line headings break for even ragging, and body for fewer orphans */
   h1, h2, h3 { text-wrap: balance; }
   p { text-wrap: pretty; }
+
+  /* A-02: inline links inside running text are underlined so they are distinguishable
+     without relying on colour alone (WCAG 1.4.1 — oxblood on muted body measured 1.38:1).
+     Scoped to running-text elements (p / li / dd) so chrome links (nav, cards, buttons,
+     footer) are untouched. This lives in @layer base ON PURPOSE: Astro component <style> is
+     unlayered and therefore beats @layer base, so any chrome link that already sets
+     `text-decoration: none` in its own scoped styles stays clean automatically. A prose link
+     that must stay underlined but currently forces `none` (RemedyLeadBlock .review) is fixed
+     in its component. Offset/thickness are set on all links so the underline sits off the
+     baseline and reads as editorial, not default-browser. */
+  a { text-underline-offset: 0.18em; text-decoration-thickness: max(1px, 0.06em); }
+  :is(p, li, dd) a[href] { text-decoration-line: underline; }
+
+  /* CMP-03: consistent interaction states site-wide. The recon found 0 `:active` rules across
+     33 buttons / 249 links / 18 controls, and disabled controls that kept `cursor: pointer`
+     with identical styling. These :where() defaults have 0 specificity so any component can
+     still override them, but they apply everywhere a component does NOT — the missing baseline.
+     Disabled: real not-allowed cursor + dimmed, and pointer-events off so it can't be clicked.
+     (A scoped rule that hard-codes `cursor: pointer` on a disabled button — e.g. /search — is
+     overridden explicitly in that component.) */
+  :where(button, [role='button'], input, select, textarea):disabled,
+  :where(a, button, [role='button'])[aria-disabled='true'] {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+  :where(button, [role='button'], input, select, textarea):disabled {
+    pointer-events: none;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    /* press feedback — buttons settle 1px on activation (mirrors the −1px hover lift in §6).
+       Scoped to buttons: a translateY on classed card links would fight their −2px hover lift. */
+    :where(button, [role='button']):not(:disabled):not([aria-disabled='true']):active {
+      transform: translateY(1px);
+    }
+  }
 }
 
 /* ---- utilities ---- */

@@ -86,7 +86,7 @@ and `tailwind.config.mjs` exactly.
   /* ---- chrome (warm-neutral shadow tint) ---- */
   --shadow:      0 18px 60px rgba(23, 21, 18, 0.10);
   --hairline:    1px solid rgba(23, 21, 18, 0.13);
-  --focus-ring:  0 0 0 3px rgba(126, 31, 43, 0.40);  /* :focus-visible, all interactives — oxblood (G4) */
+  --focus-ring:  0 0 0 2px var(--surface), 0 0 0 4px var(--primary);  /* :focus-visible, all interactives — two-tone (A-01) */
   --radius:      7px;
   --page:        min(1460px, calc(100vw - 32px));
 }
@@ -220,9 +220,15 @@ One speed: **160ms ease** on `transform`, `background`, `border-color`,
 parallax, or ambient motion — the prototype defines none; don't add any.
 
 **Focus:** every interactive element gets `:focus-visible { box-shadow:
-var(--focus-ring); outline: none; }` (3px `--primary` at 40% alpha). This is
-the one addition to the prototype's motion/state set — it defined no focus
-styling and shipping without it fails accessibility.
+var(--focus-ring); outline: none; }`. The ring is **two-tone** — a `--surface`
+(white) inner band + a solid `--primary` (oxblood) outer band (A-01, 2026-07-30).
+The earlier single-colour 40%-alpha oxblood ring measured 1.19–2.21:1 and failed
+the 3:1 non-text requirement on carbon, tints, and grade fills. Two-tone is the
+WCAG technique for an indicator that must read on ANY ground: the oxblood band
+carries it on light surfaces (9.49:1 on paper), the white band carries it on
+`--carbon` (~17:1), and the white↔oxblood internal edge is ~10.7:1 everywhere.
+This is the one addition to the prototype's motion/state set — it defined no
+focus styling and shipping without it fails accessibility.
 
 ## 7. Breakpoints (v4 canonical set, 2026-07-27)
 
@@ -284,8 +290,9 @@ net accessibility gain from the darker brand color.
 - **G3 · Warn-chip text → `--safety-ink` `#A02C22`** (6.37:1 on
   `--warning-bg`), a darkened vermilion in the safety family — DISTINCT from the
   oxblood brand.
-- **G4 · Focus states → `--focus-ring`** (3px `--primary` oxblood @ 40% alpha) on
-  `:focus-visible` for all interactives.
+- **G4 · Focus states → `--focus-ring`** (two-tone: 2px `--surface` inner + 2px
+  `--primary` oxblood outer, A-01) on `:focus-visible` for all interactives.
+  Reads ≥3:1 on every ground incl. `--carbon`; superseded the 40%-alpha ring.
 
 **Still open:**
 - **G2 · Un-designed page types.** Prototype covers one instance each of:

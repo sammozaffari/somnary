@@ -141,12 +141,12 @@ const showDose = format !== 'intervention';
     letter-spacing: var(--tracking-label);
     color: var(--muted);
   }
+  /* A-02: inline link inside the running "Reviewed … corrections" line — underlined at rest so
+     it is distinguishable without colour alone (axe link-in-text-block). */
   .review a {
     color: var(--primary);
-    text-decoration: none;
-  }
-  .review a:hover {
     text-decoration: underline;
+    text-underline-offset: 0.18em;
   }
 
   @media (max-width: 640px) {
