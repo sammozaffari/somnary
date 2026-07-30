@@ -1,66 +1,74 @@
 # Design QA — PR findings
 
-**Verdict: RESOLVED** — the 1 P1 and both P3 notes are addressed; the rendered-visual + keyboard pass is complete. Re-review before merge; merge itself stays gated (medical-boundary + publication-state work).
+**Verdict: PASS-WITH-NOTES** — no P0/P1 findings; 3 low-severity (P3) notes below. All static gates green. Chrome changed, so the rendered-visual + keyboard pass is still REQUIRED before merge (see below).
 
 ## Findings (P0 → P3)
 
-**[P1 — FIXED] src/pages/outcome/[slug].astro** — The outcome page ranks remedies "best evidence first" for a sleep goal (a decision moment) but carried NO in-page "educational, not medical advice" disclaimer — it appeared only in the global Footer, a footer-only failure for a decision page (CLAUDE.md non-negotiable).
-_Fix applied:_ Imported `Disclaimer` and rendered `<Disclaimer variant="standard" />` in a `.disclaimer-top` block between the goal switcher and the ranked list, matching /compare. Verified rendered at 768px — the standard disclaimer now sits adjacent to the ranked decision.
-_Evidence (original):_ grep for Disclaimer/"not medical advice"/"educational" returned zero matches; ranked-list aria-label `Remedies for ${outcome.title}, best evidence first`; dek says grades are "ranked by the strength of the human evidence." /compare.astro:136 already does this.
+**[P3] tailwind.config.mjs:68** — boxShadow.ring still defines the RETIRED single-colour 40%-alpha oxblood focus ring `0 0 0 3px rgba(126,31,43,.40)` that DESIGN_SYSTEM §6/§9-G4/A-01 explicitly superseded (measured 1.19-2.21:1, fails the 3:1 non-text minimum on carbon/tints/grade fills).
+_Fix:_ Delete the `ring` key from boxShadow (no `shadow-ring` utility is consumed anywhere), or point it at the two-tone token so a stray `shadow-ring` cannot ship a WCAG-failing ring; the live tokens correctly use `var(--ring)=var(--focus-ring)='0 0 0 2px var(--surface),0 0 0 4px var(--primary)'`.
+_Evidence:_ `tailwind.config.mjs:68 ring: '0 0 0 3px rgba(126,31,43,.40)'` vs `global.css:125 --focus-ring: 0 0 0 2px var(--surface), 0 0 0 4px var(--primary)` (A-01). grep for `shadow-ring` across src/ returns zero usages — it is a dormant, contradictory token.
 
-**[P3 — FIXED] src/components/LabelChecker.astro** — Primary/retry buttons set their white label via `color: var(--surface)` instead of the sanctioned `--action-ink` token for text-on-oxblood.
-_Fix applied:_ Changed `color: var(--surface)` → `color: var(--action-ink)` on `.btn-check` and `.btn-retry`. Both tokens resolve to #FFFFFF — semantic-only change, no visual difference. DESIGN_SYSTEM §1 names `--action-ink` as the text color for oxblood/`--action` fills.
+**[P3] src/components/TierBadge.astro:5** — Stale contrast comment claims 'white-on-grade-C (3.75:1) clears WCAG AA large (3:1)', contradicting the ratified DESIGN_SYSTEM §8 value of 5.56:1 (grade C/D were darkened; white on grade C is now AA small, not merely AA-large).
+_Fix:_ Update the header comment to the ratified §8 figure (white on --grade-c = 5.56:1, AA small) so the rationale matches the darkened grade palette; the rendered `color:#ffffff` glyph fill is correct and needs no change.
+_Evidence:_ `TierBadge.astro:4-5` comment: 'white-on-grade-C (3.75:1) ... clears WCAG AA large (3:1)'. DESIGN_SYSTEM §8: 'white on grade C / D (darkened) 5.56 / 5.96 | AA' and §3: 'grade-C ... clears AA on their tints'.
 
-**[P3 — NO CHANGE NEEDED] src/pages/changelog.astro** — Reviewer flagged a possible two-adjacent-oxblood-soft-pill cluster on a provisional grade-change row (`type-grade` chip beside ReviewState `is-prominent`).
-_Disposition:_ Verified visually at 390px. Current changelog rows render the type chip as neutral grey ("Review entry") beside a single oxblood "Provisional" chip — clearly distinct, one oxblood pill per row. The double-oxblood cluster would only occur on a `type-grade` (grade-change) row, of which none exist in current content. As the reviewer noted, this was a verify-visually flag with no token change required. No change made.
+**[P3] src/pages/methodology.astro:359** — Corrections page states a concrete quantified time commitment ('within 7 days') repeated across seven public surfaces (methodology + all five source scorecards) with no described mechanism guaranteeing it — a borderline 'invented promise' under the real-promises rule.
+_Fix:_ Keep, but only if the 7-day target is actually tracked/kept; the current softening ('a target of', 'we aim to fix') makes it defensible as an aspiration rather than a hard SLA. If it is NOT tracked, drop the number and say 'Corrections are public; confirmed errors are fixed as fast as I can, and each fix is logged.' Verify one author can actually meet 7 days before leaving it as a stated commitment.
+_Evidence:_ "Corrections are public, with a target of fixing confirmed errors **within 7 days**." (echoed on sources pages as "We aim to fix verified errors within 7 days")
 
 ## Static gates
 
 | Gate | Result |
 | --- | --- |
-| tokens | PASS — no retired tokens or hardcoded colors; 32 non-blocking raw-px spacing warnings (pre-existing baseline) |
-| crawlability | PASS — 31 remedy pages + key routes carry content in static HTML |
-| forbidden-framing | PASS — 65 shipped files clean; self-test caught seeded bad string |
-| citations | PASS — 142 citations across 31 remedy files, all carry a valid identifier |
-| astro check | 1 error — pre-existing `src/lib/lens/websearch.ts:199` only; no new errors from these changes |
-| build | PASS — production build Complete |
-| verify:publication-states | PASS — 31 explicit records |
-| verify:label-checker | PASS — state tests pass (re-run after the token edit) |
+| tokens | PASS — exit 0; no unjustified raw values, 17 raw-ok exemptions honored |
+| crawlability | PASS — exit 0; 31 remedy pages + key routes carry content in static HTML |
+| forbidden-framing | PASS — exit 0; 64 shipped files clean, self-test caught the seeded bad string |
+| citations | PASS — exit 0; 142 citations across 31 remedy files all carry a valid identifier |
 
-## Rendered-visual + keyboard pass — COMPLETED
+## Rendered-visual pass
 
-Done by hand via Chrome MCP against the dev build (routes scoped from the diff):
+CHROME CHANGED — the rendered-visual + keyboard pass in qa/README.md is REQUIRED and has NOT run in this script. Capture the affected routes at 390/768/1440px and measure nav overflow before merge.
 
-| Route | 375 | 768 | 1440 | Result |
-| --- | --- | --- | --- | --- |
-| /tiers | ✅ | ✅ | ✅ | Two-tier board + "Under author review · 29 remedies" group; ranked = REVIEW COMPLETE, under-review = SECOND PASS |
-| /outcome/fall-asleep-faster | ✅ | ✅ (post-fix) | — | Honest empty ranked-state; under-review remedies with grade + state, no ordinal; disclaimer now adjacent |
-| /r/cbn | ✅ | — | — | Grade stamp "D WEAK PROVISIONAL" — pending_signoff surfaced prominently |
-| /search?q=cbn | ✅ | — | — | CBN result carries a "Provisional" chip beside the D grade |
-| /changelog | ✅ (390) | — | — | Chips render distinct (grey "Review entry" + oxblood "Provisional") |
+Uncovered files (not exercised by the static gates — review by hand):
 
-- **Nav overflow:** none at 375/390px on any route (the known Somnary risk — clear).
-- **Keyboard:** logical tab order (logo → Remedies → Which to buy → …), clear focus-visible rings on all interactive chrome.
-- **Only artifact:** the dev-only Astro toolbar pill (not shipped).
-
-Shared components the static map didn't cover were exercised through the routes above: GradeStamp/RemedyCard/RemedyHero/HeroCarousel via /tiers, /r/cbn, /; ReviewState via /outcome, /search, /changelog; PublicationStatePanel via /r/cbn; SearchPalette via nav chrome; LabelChecker at /label-checker (token-only edit, no visual change).
+- src/components/CitationPopover.astro
+- src/components/CiteMarker.astro
+- src/components/ClaimsDataTable.astro
+- src/components/CommunityBar.astro
+- src/components/DosingGrid.astro
+- src/components/Fn.astro
+- src/components/GateChip.astro
+- src/components/GradeStamp.astro
+- src/components/HeroCarousel.astro
+- src/components/LabelChecker.astro
+- src/components/PublicationStatePanel.astro
+- src/components/RemedyCard.astro
+- src/components/RemedyCoda.astro
+- src/components/RemedyHero.astro
+- src/components/ReviewState.astro
+- src/components/SafetyCallout.astro
+- src/components/SearchPalette.astro
+- src/components/StatRow.astro
+- src/components/TierBadge.astro
+- src/components/scorecards/ProductPage.astro
 
 ## PR comment
 
 ```
-Design QA: RESOLVED — P1 fixed, both P3s addressed, rendered-visual + keyboard pass done.
+Design QA: PASS-WITH-NOTES (0 P0/P1, 3 P3)
 
-P1 outcome/[slug].astro — added <Disclaimer variant="standard" /> adjacent to the ranked
-list (was footer-only on a "best evidence first" decision page). Verified at 768px.
-P3 LabelChecker.astro — CTA text --surface → --action-ink (same #FFFFFF, no visual change).
-P3 changelog.astro — verified at 390px: chips render distinct (grey type + oxblood state);
-double-oxblood cluster does not occur on current content. No change needed.
+Static gates all green: tokens · crawlability · forbidden-framing · citations (all exit 0).
 
-Gates: tokens · crawlability · forbidden-framing · citations · build · publication-states ·
-label-checker all PASS. astro check = 1 pre-existing error only (websearch.ts:199).
+P3 notes (non-blocking):
+- tailwind.config.mjs:68 — dormant boxShadow.ring uses the RETIRED single-colour oxblood
+  focus ring (fails 3:1); zero shadow-ring consumers. Delete it or point at var(--focus-ring).
+- TierBadge.astro:5 — stale contrast comment (3.75:1 / AA-large) contradicts ratified §8
+  (5.56:1, AA small). Comment-only; rendered #ffffff fill is correct.
+- methodology.astro:359 — "within 7 days" corrections target echoed on 7 public surfaces;
+  keep only if actually tracked (real-promises rule), else drop the number.
 
-Rendered-visual + keyboard pass complete: /tiers (375/768/1440), /outcome, /r/cbn, /search,
-/changelog. No nav overflow at 375/390px; focus-visible + tab order clean.
-
-Merge stays gated (medical-boundary + publication-state) — owner sign-off required.
+CHROME CHANGED — rendered-visual + keyboard pass (qa/README.md) is REQUIRED and has NOT run
+here. Capture affected routes at 390/768/1440px and measure nav overflow before merge. 20
+shared components (CitationPopover, RemedyCard, GradeStamp, Nav-adjacent chrome, etc.) are
+uncovered by static gates — review by hand.
 ```
