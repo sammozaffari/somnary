@@ -134,7 +134,7 @@ const jsonLd = remedyJsonLd(d, canonical, site);
         {/* 6 — safety & interactions (prominent) */}
         <section class="block">
           <SafetyCallout
-            severity={d.safety.severity}
+            register={d.safety.severity}
             lead={d.safety.lead}
             risks={d.safety.risks}
             pregnancy={d.safety.pregnancy}

@@ -1,6 +1,6 @@
 ---
 import Base from '../../layouts/Base.astro';
-import SafetyCallout from '../../components/scorecards/SafetyCallout.astro';
+import SafetyCallout from '../../components/SafetyCallout.astro';
 import RatingLegend from '../../components/scorecards/RatingLegend.astro';
 import LabelReadingPanel from '../../components/scorecards/LabelReadingPanel.astro';
 import WhyCareStrip from '../../components/scorecards/WhyCareStrip.astro';
@@ -91,7 +91,7 @@ const whyCareExample = 'For example, Australia’s regulator is <a href="https:/
 
     <SafetyCallout
       title="The vitamin-B6 warning worth knowing"
-      tone="safety"
+      register="serious"
       items={safetyItems}
       foot="These flags are shown for your safety and sit apart from the scores — if you take magnesium daily, check your product’s B6 amount and talk to a pharmacist."
     />

@@ -1,6 +1,6 @@
 ---
 import Base from '../../layouts/Base.astro';
-import SafetyCallout from '../../components/scorecards/SafetyCallout.astro';
+import SafetyCallout from '../../components/SafetyCallout.astro';
 import RatingLegend from '../../components/scorecards/RatingLegend.astro';
 import LabelReadingPanel from '../../components/scorecards/LabelReadingPanel.astro';
 import WhyCareStrip from '../../components/scorecards/WhyCareStrip.astro';
@@ -91,7 +91,7 @@ const whyCareExample = 'For example, when researchers tested 31 over-the-counter
 
     <SafetyCallout
       title="Melatonin in Australia — the prescription reality"
-      tone="info"
+      register="info"
       items={safetyItems}
       foot="This is context on how you’d get melatonin in Australia — not medical advice. For a pharmacy option, Circadin (below) is available on prescription; talk to a pharmacist or doctor before starting melatonin."
     />

@@ -1,6 +1,6 @@
 ---
 import Base from '../../layouts/Base.astro';
-import SafetyCallout from '../../components/scorecards/SafetyCallout.astro';
+import SafetyCallout from '../../components/SafetyCallout.astro';
 import RatingLegend from '../../components/scorecards/RatingLegend.astro';
 import LabelReadingPanel from '../../components/scorecards/LabelReadingPanel.astro';
 import WhyCareStrip from '../../components/scorecards/WhyCareStrip.astro';
@@ -89,7 +89,7 @@ const whyCareExample = 'For example, the pure glycine people take for sleep is u
 
     <SafetyCallout
       title="Two things worth knowing before you read"
-      tone="info"
+      register="info"
       items={safetyItems}
     />
 

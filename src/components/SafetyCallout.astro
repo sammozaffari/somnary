@@ -1,13 +1,27 @@
 ---
-// Safety & interactions — DESIGN_SYSTEM v2 §3/§8. TWO fixed severities only:
-// .sev-caution (amber advisory) for A/B pages, .sev-serious (vermilion safety register —
-// warning-bg / vermilion / safety-ink) for F-grade / documented harm. Serious uses the
-// dedicated safety palette, never a grade color (guardrail: grades never imply safety).
-// Small text is always dark (raisin/ink); hues carry the signal via sigil/border/tag.
-// Head = sigil + title + severity tag; body = lead + .risk grid
-// (category / text), with pregnancy and interactions folded in as their own rows so nothing about
-// safety is buried; foot = "research reference · not medical advice". role="note". .risk 160px 1fr
-// → 1-col ≤640.
+// Safety & interactions callout — the ONE canonical component (CMP-06 consolidation, 2026-07-30).
+// Previously two components with the same name and divergent semantics existed
+// (src/components/SafetyCallout.astro for remedy pages + src/components/scorecards/SafetyCallout.astro
+// for product scorecards), so safety messaging could drift by product area. They are now one API.
+//
+// THREE registers (colour + sigil + severity word), never a grade colour for the hazard registers
+// (guardrail: grades never imply safety):
+//   • serious — vermilion safety register (warning-bg / vermilion / safety-ink). Documented harm /
+//     F-grade, and the scorecard "safety" notes (they carry the same red safety family — mapping a
+//     safety note DOWN to amber would understate it, so scorecard tone="safety" → register="serious").
+//   • caution — amber advisory (grade-c family) for A/B-page cautions. White tag on --grade-c is
+//     5.56:1 AA (C-01).
+//   • info    — eucalyptus/pistachio informational register for non-hazard context (e.g. glycine's
+//     food-vs-medicine framing, melatonin's prescription reality). No health hazard.
+//
+// TWO content modes, either or both may be supplied:
+//   • risks[]  — rich remedy mode: category/text rows with citation markers, plus the folded-in
+//     pregnancy and interactions rows so nothing about safety is buried.
+//   • items[]  — simple scorecard mode: label/body pairs (body may contain <strong>/HTML).
+//
+// Small text is always dark (raisin/ink); the hue carries the signal via sigil/border/tag. The
+// severity tag shows in rich (risks) mode by default — scorecard items mode leans on its own title —
+// but `showTag` overrides either way. role="note". .row 160px 1fr → 1-col ≤640.
 import CiteMarker from './CiteMarker.astro';
 
 interface Risk {
@@ -15,31 +29,61 @@ interface Risk {
   text: string;
   sources?: number[];
 }
-interface Props {
-  severity: 'caution' | 'serious';
-  lead: string;
-  risks: Risk[];
-  pregnancy: string;
-  interactions: string[];
-  interactionsSources?: number[];
+interface Item {
+  label: string;
+  body: string; // may contain inline HTML (<strong>, links)
 }
-const { severity, lead, risks, pregnancy, interactions, interactionsSources = [] } = Astro.props;
-const sevWord = severity === 'serious' ? 'Serious' : 'Caution';
+interface Props {
+  register: 'serious' | 'caution' | 'info';
+  title?: string;
+  lead?: string;
+  risks?: Risk[];
+  items?: Item[];
+  pregnancy?: string;
+  interactions?: string[];
+  interactionsSources?: number[];
+  foot?: string | null; // null hides the footer; undefined → default reference line
+  showTag?: boolean;
+}
+const {
+  register,
+  title = 'Safety & interactions',
+  lead,
+  risks = [],
+  items = [],
+  pregnancy,
+  interactions = [],
+  interactionsSources = [],
+  foot,
+  showTag,
+} = Astro.props;
+
+const REGISTER = {
+  serious: { word: 'Serious', glyph: '!' },
+  caution: { word: 'Caution', glyph: '!' },
+  info: { word: 'Info', glyph: 'i' },
+} as const;
+const reg = REGISTER[register];
+
+// Rich (risks) mode shows the severity tag by default; items-only mode relies on its own title.
+const withTag = showTag ?? risks.length > 0;
+// undefined → the standard reference line; null → no footer.
+const footText = foot === null ? null : (foot ?? 'Research reference · not medical advice');
 ---
 
-<section class={`safety sev-${severity}`} role="note" aria-label="Safety and interactions">
+<section class={`safety reg-${register}`} role="note" aria-label={title}>
   <div class="head">
-    <span class="sigil" aria-hidden="true">!</span>
-    <p class="title">Safety &amp; interactions</p>
-    <span class="sev-tag">{sevWord}</span>
+    <span class="sigil" aria-hidden="true">{reg.glyph}</span>
+    <p class="title">{title}</p>
+    {withTag && <span class="sev-tag">{reg.word}</span>}
   </div>
 
-  <p class="lead">{lead}</p>
+  {lead && <p class="lead">{lead}</p>}
 
-  <div class="risks">
+  <div class="rows">
     {
       risks.map((r) => (
-        <div class="risk">
+        <div class="row">
           <p class="cat">{r.category}</p>
           <p class="text">
             {r.text}
@@ -50,13 +94,17 @@ const sevWord = severity === 'serious' ? 'Serious' : 'Caution';
         </div>
       ))
     }
-    <div class="risk">
-      <p class="cat">Pregnancy</p>
-      <p class="text">{pregnancy}</p>
-    </div>
+    {
+      pregnancy && (
+        <div class="row">
+          <p class="cat">Pregnancy</p>
+          <p class="text">{pregnancy}</p>
+        </div>
+      )
+    }
     {
       interactions.length > 0 && (
-        <div class="risk">
+        <div class="row">
           <p class="cat">Interactions</p>
           <div class="text">
             <ul class="int-list">
@@ -75,9 +123,17 @@ const sevWord = severity === 'serious' ? 'Serious' : 'Caution';
         </div>
       )
     }
+    {
+      items.map((it) => (
+        <div class="row">
+          <p class="cat">{it.label}</p>
+          <div class="text" set:html={it.body} />
+        </div>
+      ))
+    }
   </div>
 
-  <p class="foot">Research reference · not medical advice</p>
+  {footText && <p class="foot">{footText}</p>}
 </section>
 
 <style>
@@ -86,27 +142,36 @@ const sevWord = severity === 'serious' ? 'Serious' : 'Caution';
     border: 1px solid;
     padding: var(--sp-6);
   }
-  /* Two allowed registers. Small text = --raisin (14:1); hue lives in sigil/border/tag. */
-  .sev-caution {
-    background: var(--grade-c-tint);
-    border-color: var(--grade-c);
-  }
-  .sev-caution .sigil {
-    background: var(--grade-c);
-  }
-  .sev-caution .sev-tag {
-    background: var(--grade-c);
-    color: var(--ink);      /* dark on amber — white on amber fails AA small */
-  }
-  .sev-serious {
+  /* Three registers. Small text = --raisin/--ink; hue lives in sigil/border/tag. */
+  .reg-serious {
     background: var(--warning-bg);
     border-color: var(--vermilion);
   }
-  .sev-serious .sigil {
+  .reg-serious .sigil {
     background: var(--vermilion);
   }
-  .sev-serious .sev-tag {
-    background: var(--safety-ink);   /* white on safety-ink 6.5:1 (vermilion fails small) */
+  .reg-serious .sev-tag {
+    background: var(--safety-ink); /* white on safety-ink 6.5:1 (vermilion fails small) */
+  }
+  .reg-caution {
+    background: var(--grade-c-tint);
+    border-color: var(--grade-c);
+  }
+  .reg-caution .sigil {
+    background: var(--grade-c);
+  }
+  .reg-caution .sev-tag {
+    background: var(--grade-c); /* C-01: white on --grade-c is 5.56:1 (AA small, DESIGN §8) */
+  }
+  .reg-info {
+    background: var(--pistachio);
+    border-color: var(--eucalyptus);
+  }
+  .reg-info .sigil {
+    background: var(--eucalyptus);
+  }
+  .reg-info .sev-tag {
+    background: var(--eucalyptus); /* white on eucalyptus 6.16:1 (AA small, DESIGN §8) */
   }
   .title,
   .cat,
@@ -157,11 +222,11 @@ const sevWord = severity === 'serious' ? 'Serious' : 'Caution';
     margin: var(--sp-5) 0 var(--sp-4);
   }
 
-  .risks {
+  .rows {
     display: flex;
     flex-direction: column;
   }
-  .risk {
+  .row {
     display: grid;
     grid-template-columns: 160px 1fr;
     gap: var(--sp-5);
@@ -179,6 +244,9 @@ const sevWord = severity === 'serious' ? 'Serious' : 'Caution';
     line-height: var(--lh-sm);
     color: var(--ink);
     margin: 0;
+  }
+  .text :global(strong) {
+    font-weight: 700;
   }
   .int-list {
     list-style: none;
@@ -206,7 +274,7 @@ const sevWord = severity === 'serious' ? 'Serious' : 'Caution';
   }
 
   @media (max-width: 640px) {
-    .risk {
+    .row {
       grid-template-columns: 1fr;
       gap: var(--sp-2);
     }
