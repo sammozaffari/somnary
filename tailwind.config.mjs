@@ -65,7 +65,7 @@ const somnaryTheme = {
     sm:   '0 1px 2px rgba(23,21,18,.05), 0 1px 3px rgba(23,21,18,.06)',
     md:   '0 18px 60px rgba(23,21,18,.10)',
     lift: '0 24px 70px rgba(23,21,18,.16)',
-    ring: '0 0 0 3px rgba(126,31,43,.40)',
+    ring: '0 0 0 2px var(--surface), 0 0 0 4px var(--primary)', // mirror --focus-ring (A-01 two-tone); old 40%-alpha ring failed 3:1 non-text
   },
   transitionDuration: { instant:'120ms', fast:'160ms', base:'320ms', slow:'560ms', ambient:'2800ms' },
   transitionTimingFunction: {

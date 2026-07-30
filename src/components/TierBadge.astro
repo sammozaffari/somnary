@@ -1,9 +1,10 @@
 ---
 // Grade badge — DESIGN_SYSTEM v3 §3. Filled grade color, WHITE Instrument Sans glyph.
 // Header (big) variant uses the ratified gradient fill (grade → darker anchor).
-// Glyph sizes are kept in the "large text" band (≥18.66px bold) so white-on-grade-C
-// (3.75:1) clears WCAG AA large (3:1) at every size. Always paired with a text grade
-// label / aria-label — never color alone (§3, §10).
+// White glyph on the filled grade color: white-on-grade-C is 5.56:1 (AA small, per the
+// ratified DESIGN_SYSTEM §8 — grade C/D were darkened for the warm ground), so the glyph
+// clears AA at every size. Always paired with a text grade label / aria-label — never color
+// alone (§3, §10).
 import type { TierId } from '../lib/tiers';
 
 interface Props {
