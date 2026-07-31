@@ -16,6 +16,8 @@
 // actions outside the rubric's four event types) is listed in `heldItems`, carries NO penalty,
 // and is shown as "under review". We never publish an unverified negative claim about a brand.
 
+import type { Retailers } from './card';
+
 export type DimensionKey =
   | 'testing_purity'
   | 'label_accuracy'
@@ -72,7 +74,7 @@ export interface SourceProduct {
   /** Product photo in public/images/sources/melatonin/. Omit for a graceful lettered fallback. */
   /** Where an Australian can find it — PLAIN retailer URLs, zero affiliate/tracking params (D2).
    * Display priority: amazon > chemistWarehouse > iherb. */
-  retailers?: { amazon?: string; chemistWarehouse?: string; iherb?: string };
+  retailers?: Retailers;
   /** Disclosed ingredients panel (from the dossier), actives first — omitted when the brand doesn't publish one. */
   ingredients?: string[];
   imagePath?: string;
