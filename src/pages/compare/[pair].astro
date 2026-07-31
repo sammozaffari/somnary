@@ -1,0 +1,125 @@
+---
+/**
+ * /compare/[a]-vs-[b] — the difference-first pair page (L-01, Model 2). One SSG page per unordered
+ * remedy pair (getStaticPaths), so the comparison is server-rendered and crawlable (no client-only
+ * core content — CLAUDE.md non-negotiable). Canonical slug is the two remedy slugs alphabetical,
+ * joined by "-vs-"; ?goal is a client-side emphasis only. This is NOT a combine-your-stack tool
+ * (D4): comparing two here is never a suggestion to take both.
+ */
+import Base from '../../layouts/Base.astro';
+import ContextBanner from '../../components/ContextBanner.astro';
+import Disclaimer from '../../components/Disclaimer.astro';
+import PairComparison from '../../components/PairComparison.astro';
+import { getCompareEntities, pairSlug, allPairs } from '../../lib/compare-data.ts';
+import type { CompareEntity } from '../../lib/compare-diff.ts';
+
+export async function getStaticPaths() {
+  const entities = await getCompareEntities();
+  return allPairs(entities).map(([x, y]) => {
+    // canonical order: alphabetical by slug, so each unordered pair has ONE url.
+    const [a, b] = x.slug.localeCompare(y.slug) <= 0 ? [x, y] : [y, x];
+    return { params: { pair: pairSlug(a.slug, b.slug) }, props: { a, b } };
+  });
+}
+
+interface Props {
+  a: CompareEntity;
+  b: CompareEntity;
+}
+const { a, b } = Astro.props;
+const canonical = `https://somnary.vercel.app/compare/${pairSlug(a.slug, b.slug)}`;
+---
+
+<Base
+  title={`${a.name} vs ${b.name} — compared on the evidence | Somnary`}
+  description={`${a.name} and ${b.name} side by side on what decides them: evidence grade and review state, target outcome, effect, form and dose, biggest risk, and documented interaction cautions. Differences first; identical values collapsed. Not a suggestion to take both. Zero brand money.`}
+  canonical={canonical}
+>
+  <main class="page">
+    <header class="head">
+      <p class="eyebrow">Tool · compare</p>
+      <h1 class="title">{a.name} <span class="vs">vs</span> {b.name}</h1>
+      <p class="dek">
+        Two remedies, side by side on the things that decide them. Differences are shown first;
+        anything identical is collapsed. Each section says which difference matters and why — it
+        never picks a winner. <a href="/compare">Compare a different pair →</a>
+      </p>
+    </header>
+
+    <ContextBanner
+      note="This compares how each remedy stands on its own evidence and safety. It is not a tool for combining remedies, and comparing two here is not a suggestion to take both."
+    />
+
+    <div class="disclaimer-top">
+      <Disclaimer variant="standard" />
+    </div>
+
+    <PairComparison a={a} b={b} />
+  </main>
+</Base>
+
+<script>
+  // ?goal emphasis — progressive enhancement only. Marks outcome chips whose goal key matches the
+  // ?goal query param; changes emphasis, never which facts are shown. No-JS: every fact still shows.
+  const goal = new URLSearchParams(location.search).get('goal');
+  if (goal) {
+    for (const chip of document.querySelectorAll<HTMLElement>('.chip[data-goalkey]')) {
+      if (chip.dataset.goalkey === goal) chip.dataset.goalActive = 'true';
+    }
+  }
+</script>
+
+<style>
+  .page {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: var(--sp-8) var(--sp-7) var(--sp-9);
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+    margin: 0;
+  }
+  .head {
+    margin-bottom: var(--sp-6);
+  }
+  .title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-3xl);
+    line-height: var(--lh-3xl);
+    letter-spacing: var(--tracking-tight);
+    color: var(--ink);
+    margin: var(--sp-3) 0 var(--sp-4);
+  }
+  .vs {
+    color: var(--muted);
+    font-weight: 400;
+  }
+  .dek {
+    font-size: var(--text-md);
+    line-height: var(--lh-md);
+    color: var(--muted);
+    max-width: 70ch;
+    margin: 0;
+  }
+  .dek a {
+    color: var(--primary);
+    text-decoration: underline;
+    text-underline-offset: 2px; /* raw-ok: inline-link underline offset, matches global links */
+  }
+  .disclaimer-top {
+    margin: var(--sp-5) 0 var(--sp-6);
+  }
+
+  @media (max-width: 640px) {
+    .page {
+      padding: var(--sp-6) var(--sp-5) var(--sp-8);
+    }
+    .title {
+      font-size: var(--text-2xl);
+    }
+  }
+</style>

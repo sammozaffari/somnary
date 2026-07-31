@@ -1,371 +1,169 @@
 ---
-// Compare tool — CHK-6.1. Compares how each remedy stands ON ITS OWN across grade, goal, effect,
-// evidence gates, who-should-avoid, and (D4 salvage) per-remedy interaction cautions. It is NOT a
-// combine-your-stack tool: comparing two remedies here is never a suggestion to take both, and there
-// is ZERO cross-remedy interaction aggregation — every interaction cell is strictly per-remedy.
-//
-// ARCHITECTURE (mirrors tiers.astro, SSG non-negotiable): ALL 20 non-draft remedies are
-// server-rendered as row cards in canonical grade(S→F)→name order — that flat list IS the crawlable
-// content a no-JS user and a crawler see. A scoped <script> island then only HIDES existing rows by
-// goal + category (it toggles [hidden] on nodes it never created); with JS off every row stands.
-// No schema change (category is read from content-index by slug), no new endpoint, no new citations —
-// every dimension is read from the ONE existing corpus structure.
-import { getCollection } from 'astro:content';
+/**
+ * /compare — the pair PICKER and crawlable index (L-01, Model 2). The comparison itself lives at
+ * one SSG page per pair (/compare/[a]-vs-[b]); this page (a) server-renders every reviewed remedy
+ * with its grade so the index is crawlable and no-JS-usable, (b) offers a two-remedy picker that
+ * navigates to the canonical pair URL, and (c) links a handful of common comparisons directly.
+ * ?a=&b=&goal= is honoured as a client redirect alias to the canonical /compare/[pair]?goal.
+ * D4: comparing two remedies is never a suggestion to take both.
+ */
 import Base from '../layouts/Base.astro';
 import TierBadge from '../components/TierBadge.astro';
 import ReviewState from '../components/ReviewState.astro';
-import EvidenceGateChip from '../components/EvidenceGateChip.astro';
 import ContextBanner from '../components/ContextBanner.astro';
 import Disclaimer from '../components/Disclaimer.astro';
-import type { GateId } from '../lib/evidence-gates';
-import { TIERS, getTier, type TierId } from '../lib/tiers';
-import { contentIndex } from '../lib/content-index';
-import {
-  isDefaultRankingEligible,
-  isOrdinarySearchEligible,
-  type WorkflowState,
-} from '../lib/remedy-state';
+import { getCompareEntities, pairSlug } from '../lib/compare-data.ts';
+import { OUTCOMES } from '../lib/outcomes.ts';
 
-interface Row {
-  slug: string;
-  name: string;
-  tier: TierId;
-  workflowState: WorkflowState;
-  rankingEligible: boolean;
-  decisionTranslation: string;
-  verdict: string; // data.oneLineVerdict — used verbatim, never re-derived
-  outcomes: string[];
-  gates: GateId[]; // the tier's typical evidence gates (tiers.ts → evidence-gates.ts), rendered by id
-  notFor: string[];
-  biggestRisk: string | null;
-  interactions: string[];
-  category: string;
+const entities = await getCompareEntities();
+const bySlug = new Map(entities.map((e) => [e.slug, e]));
+
+// A few common comparisons, derived (not authored): for each outcome with ≥2 reviewed remedies,
+// pair its two best-graded ones. De-duped, canonical order, capped — real links, no JS needed.
+const seen = new Set<string>();
+const commonPairs: { a: typeof entities[number]; b: typeof entities[number]; goal: string; goalLabel: string }[] = [];
+for (const o of OUTCOMES) {
+  const ranked = o.remedies.map((s) => bySlug.get(s)).filter(Boolean) as typeof entities;
+  if (ranked.length < 2) continue;
+  const [x, y] = ranked;
+  const key = pairSlug(x.slug, y.slug);
+  if (seen.has(key)) continue;
+  seen.add(key);
+  const [a, b] = x.slug.localeCompare(y.slug) <= 0 ? [x, y] : [y, x];
+  commonPairs.push({ a, b, goal: o.id, goalLabel: o.title });
+  if (commonPairs.length >= 6) break;
 }
-
-// slug → keyed goal token (a stable slug of an existing outcome string; invents no new taxonomy).
-const goalKey = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-
-// Category lives in the content-index registry, not the remedy schema (a schema change is a
-// [HUMAN-GATE]); read it by slug exactly as tiers.astro does. No content is duplicated.
-const categoryOf = new Map(contentIndex.map((e) => [e.slug, e.category]));
-
-const remedies = await getCollection(
-  'remedies',
-  (e) => !e.data.draft && isOrdinarySearchEligible(e.data),
-);
-const allRows: Row[] = remedies.map((e) => ({
-  slug: e.id,
-  name: e.data.name,
-  tier: e.data.tier,
-  workflowState: e.data.workflowState,
-  rankingEligible: isDefaultRankingEligible(e.data),
-  decisionTranslation: getTier(e.data.tier).decisionTranslation,
-  verdict: e.data.oneLineVerdict,
-  outcomes: e.data.outcomes,
-  // Evidence gates read from the TIER's typical-gates set (tiers.ts, the same source the
-  // methodology page and tier rows use) rather than each remedy's own evidenceGates[]. Both are
-  // owner-ratified "established sources" (per the CHK-6.1 spec), but a per-remedy gate label can
-  // encode STUDY CONTEXT ("usually combined with valerian" on hops) that is a fair evidence caveat
-  // on a solo remedy page yet misreads as a combination signal on a side-by-side compare grid (D4,
-  // the #1 risk here). The tier-level gates carry no per-remedy combination language. The hops gate
-  // label itself is left untouched — a content change is out of scope and [HUMAN-GATE].
-  gates: getTier(e.data.tier).typicalGates,
-  notFor: e.data.notFor,
-  biggestRisk: e.data.biggestRisk,
-  interactions: e.data.safety.interactions,
-  category: categoryOf.get(e.id) ?? '',
-}));
-
-// Canonical server order: grade(S→F) then name(A–Z). This flat list is the crawlable content.
-const rankOf = new Map<TierId, number>(TIERS.map((t, i) => [t.id, i]));
-const rankedRows = allRows
-  .filter((row) => row.rankingEligible)
-  .sort((a, b) => (rankOf.get(a.tier)! - rankOf.get(b.tier)!) || a.name.localeCompare(b.name));
-const underReviewRows = allRows
-  .filter((row) => !row.rankingEligible)
-  .sort((a, b) => a.name.localeCompare(b.name));
-const rows = [...rankedRows, ...underReviewRows];
-
-// Goal filter facets = the DISTINCT outcome strings already in the corpus (frequency-ranked, then
-// A–Z). Nothing invented: each facet is a verbatim outcome, and a row matches it iff that outcome is
-// on the remedy's own outcomes[]. (bestFor[] is intentionally not rendered on the grid — see the
-// goal cell comment: a per-remedy bestFor caveat can name a sibling row and read as a pairing signal.)
-const goalCount = new Map<string, { label: string; n: number }>();
-for (const r of rows)
-  for (const o of r.outcomes) {
-    const k = goalKey(o);
-    const g = goalCount.get(k) ?? { label: o, n: 0 };
-    g.n += 1;
-    goalCount.set(k, g);
-  }
-const goalFacets = [...goalCount.entries()]
-  .map(([key, v]) => ({ key, label: v.label, n: v.n }))
-  .sort((a, b) => b.n - a.n || a.label.localeCompare(b.label));
-
-// Category filter facets = the DISTINCT categories among the rendered remedies (A–Z).
-const catFacets = [...new Set(rows.map((r) => r.category).filter(Boolean))].sort((a, b) =>
-  a.localeCompare(b),
-);
 ---
 
 <Base
-  title="Compare natural sleep remedies side by side | Somnary"
-  description="Compare every reviewed natural sleep remedy on its own evidence grade, goal, effect, evidence gates, who-should-avoid, and documented interaction cautions. This is not a tool for combining remedies — comparing two here is not a suggestion to take both. Zero brand money."
+  title="Compare two natural sleep remedies | Somnary"
+  description="Pick any two reviewed sleep remedies and compare them side by side on evidence grade and review state, target outcome, effect, form and dose, biggest risk, and documented interaction cautions. Differences first; identical values collapsed. Not a tool for combining remedies. Zero brand money."
   canonical="https://somnary.vercel.app/compare"
 >
   <main class="page">
     <header class="head">
       <p class="eyebrow">Tool · compare</p>
-      <h1 class="title">Compare remedies</h1>
+      <h1 class="title">Compare two remedies</h1>
       <p class="dek">
-        Every reviewed remedy, side by side on the things that decide it: the evidence grade, what
-        it's studied for, the one-line effect, the evidence gates behind the grade, who should avoid
-        it, and any documented interaction cautions. Narrow the list by goal or category — the full
-        table stands with filters off. Review-complete grades appear first; every other grade is
-        kept in a separate under-review group.
+        Pick two reviewed remedies and see them side by side on what decides them — evidence grade
+        and review state, what each is studied for, the effect, form and dose, the biggest risk,
+        and any documented interaction cautions. Differences are shown first; identical values are
+        collapsed. Each section says which difference matters and why — it never picks a winner.
       </p>
     </header>
 
-    {/* D4 framing — comparing is NOT combining. Rendered at the top, before any comparison. */}
+    {/* D4 framing — comparing is NOT combining. */}
     <ContextBanner
       note="This compares how each remedy stands on its own evidence and safety. It is not a tool for combining remedies, and comparing two here is not a suggestion to take both."
     />
 
-    {/* standard medical disclaimer, adjacent to the decisions — not footer-only */}
     <div class="disclaimer-top">
       <Disclaimer variant="standard" />
     </div>
 
-    {/* what this compares — states the grade/safety distinction the whole page rests on */}
-    <aside class="framing" role="note" aria-label="What this comparison shows">
-      <p class="framing-label">How to read this</p>
-      <p class="framing-text">
-        Each row is a remedy judged <strong>on its own</strong>. The grade rates the strength of the
-        published human evidence — <strong>it rates evidence, not safety</strong>, so always read the
-        who-should-avoid and interaction notes separately. Interaction cautions are listed
-        per remedy and are a question for a pharmacist or clinician; nothing here evaluates any
-        remedy alongside another.
-      </p>
-    </aside>
-
-    {/* filters — progressive enhancement. Server order (grade→name), all rows shown, is the default. */}
-    <div class="filters">
-      <div class="facet-row">
-        <span id="goal-label" class="filters-label">Goal</span>
-        <div class="facet-group facet-goal" role="group" aria-labelledby="goal-label">
-          <button type="button" class="facet" data-goal="all" aria-pressed="true">All goals</button>
-          {
-            goalFacets.map((g) => (
-              <button type="button" class="facet" data-goal={g.key} aria-pressed="false">
-                {g.label}
-              </button>
-            ))
-          }
-        </div>
+    {/* the picker — enhanced; navigates to the canonical pair URL */}
+    <form class="picker" id="compare-picker" action="/compare" method="get" aria-label="Choose two remedies to compare">
+      <div class="picker-fields">
+        <label class="field">
+          <span class="field-label">First remedy</span>
+          <select name="a" class="select" required>
+            <option value="" selected disabled>Choose a remedy…</option>
+            {entities.map((e) => <option value={e.slug}>{e.name} — grade {e.tier}</option>)}
+          </select>
+        </label>
+        <label class="field">
+          <span class="field-label">Second remedy</span>
+          <select name="b" class="select" required>
+            <option value="" selected disabled>Choose a remedy…</option>
+            {entities.map((e) => <option value={e.slug}>{e.name} — grade {e.tier}</option>)}
+          </select>
+        </label>
+        <label class="field">
+          <span class="field-label">Goal <span class="opt">(optional)</span></span>
+          <select name="goal" class="select">
+            <option value="" selected>Any goal</option>
+            {OUTCOMES.map((o) => <option value={o.id}>{o.title}</option>)}
+          </select>
+        </label>
       </div>
-      <div class="facet-row">
-        <span id="cat-label" class="filters-label">Category</span>
-        <div class="facet-group facet-cat" role="group" aria-labelledby="cat-label">
-          <button type="button" class="facet" data-cat="all" aria-pressed="true">All categories</button>
-          {
-            catFacets.map((c) => (
-              <button type="button" class="facet" data-cat={c} aria-pressed="false">
-                {c}
-              </button>
-            ))
-          }
-        </div>
-      </div>
-      <p id="compare-count" class="filters-count" aria-live="polite">Showing all {rows.length} remedies</p>
-    </div>
+      <button type="submit" class="picker-go">Compare →</button>
+      <p class="picker-err" id="picker-err" role="alert" hidden>Pick two different remedies.</p>
+    </form>
 
-    {/* canonical flat comparison: ALL remedies, grade(S→F)→name(A–Z). This is the crawlable content. */}
-    <ul id="compare-grid" class="grid">
-      {
-        rows.map((r, index) => (
-          <>
-            {index === 0 && rankedRows.length > 0 && (
-              <li id="ranked-group-label" class="group-label">
-                <p class="eyebrow">Default comparison</p>
-                <h2 class="group-title">Review complete</h2>
-                <p class="group-dek">Ordered by evidence grade, then A–Z.</p>
-              </li>
-            )}
-            {index === rankedRows.length && underReviewRows.length > 0 && (
-              <li id="reviewing-group-label" class="group-label">
-                <p class="eyebrow">Not in the ranking</p>
-                <h2 class="group-title">Under author review</h2>
-                <p class="group-dek">
-                  Grades remain visible for transparency and are listed A–Z until the author marks
-                  the review complete.
-                </p>
-              </li>
-            )}
-            <li
-              class="row"
-              data-group={r.rankingEligible ? 'ranked' : 'reviewing'}
-              data-rank={rankOf.get(r.tier)}
-              data-name={r.name.toLowerCase()}
-              data-category={r.category}
-              data-goals={r.outcomes.map(goalKey).join(' ')}
-            >
-            <div class="row-head">
-              <TierBadge tier={r.tier} size="card" />
-              <div class="head-text">
-                <a class="name" href={`/r/${r.slug}`} aria-label={`Read ${r.name} — grade ${r.tier}`}
-                  >{r.name}</a>
-                <p class="verdict">{r.verdict}</p>
-                <p class="decision">
-                  <span class="grade-k">Grade {r.tier} · {getTier(r.tier).name}</span>
-                  <span class="review-line">
-                    <ReviewState state={r.workflowState} />
-                    <span>{r.decisionTranslation}</span>
-                  </span>
-                </p>
-              </div>
-            </div>
-
-            <dl class="cells">
-              <div class="cell">
-                <dt class="k">Goal</dt>
-                <dd class="v">
-                  {/* Goal cell renders outcomes[] only. bestFor[] is intentionally NOT shown here:
-                      on a side-by-side grid a per-remedy bestFor caveat that names another remedy
-                      (e.g. hops "usually alongside valerian") reads as a cross-remedy pairing signal,
-                      which D4 forbids. bestFor stays on each remedy's own page; outcomes are the clean
-                      goal signal for comparison. */}
-                  <div class="chips">
-                    {r.outcomes.map((o) => (
-                      <span class="chip chip-goal">{o}</span>
-                    ))}
-                  </div>
-                </dd>
-              </div>
-
-              <div class="cell">
-                <dt class="k">Evidence gates</dt>
-                <dd class="v">
-                  <div class="chips">
-                    {r.gates.map((g) => (
-                      <EvidenceGateChip id={g} />
-                    ))}
-                  </div>
-                </dd>
-              </div>
-
-              {/* who-should-avoid — OMITTED when empty; absence must NEVER read as "no risk" (CHK-2.1). */}
-              {(r.notFor.length > 0 || r.biggestRisk) && (
-                <div class="cell">
-                  <dt class="k">Who should avoid</dt>
-                  <dd class="v">
-                    {r.notFor.length > 0 && (
-                      <ul class="avoid-list">
-                        {r.notFor.map((n) => (
-                          <li>{n}</li>
-                        ))}
-                      </ul>
-                    )}
-                    {r.biggestRisk && <p class="risk-line">{r.biggestRisk}</p>}
-                  </dd>
-                </div>
-              )}
-
-              {/* interaction cautions — PER REMEDY ONLY (D4 salvage, mirrors label-rules R5).
-                  OMITTED when empty. No cross-remedy aggregation anywhere on this page. */}
-              {r.interactions.length > 0 && (
-                <div class="cell cell-int">
-                  <dt class="k">Interaction cautions</dt>
-                  <dd class="v">
-                    <p class="int-line">
-                      {r.name} has documented interaction cautions ({r.interactions.join('; ')}). This
-                      is a question for a pharmacist or clinician.
-                    </p>
-                    <p class="int-links">
-                      <a href="/safety">Read the safety boundary →</a>
-                      <a href="/medications-and-sleep-aids">Medications &amp; sleep aids →</a>
-                    </p>
-                  </dd>
-                </div>
-              )}
-
-              <div class="cell">
-                <dt class="k">Category</dt>
-                <dd class="v"><span class="cat">{r.category}</span></dd>
-              </div>
-            </dl>
+    {/* common comparisons — real canonical links, work with JS off */}
+    {commonPairs.length > 0 && (
+      <section class="common" aria-labelledby="common-h">
+        <h2 id="common-h" class="section-h">Common comparisons</h2>
+        <ul class="common-list">
+          {commonPairs.map((p) => (
+            <li>
+              <a class="common-link" href={`/compare/${pairSlug(p.a.slug, p.b.slug)}?goal=${p.goal}`}>
+                <span class="common-names">{p.a.name} <span class="vs">vs</span> {p.b.name}</span>
+                <span class="common-goal">for {p.goalLabel}</span>
+              </a>
             </li>
-          </>
-        ))
-      }
-    </ul>
+          ))}
+        </ul>
+      </section>
+    )}
 
-    <p id="compare-empty" class="empty" hidden>
-      No reviewed remedy matches that goal and that category. Clear a filter to widen the list.
-    </p>
+    {/* crawlable index: every reviewed remedy + its grade. No-JS users browse from here. */}
+    <section class="all" aria-labelledby="all-h">
+      <h2 id="all-h" class="section-h">All reviewed remedies</h2>
+      <ul class="all-list">
+        {entities.map((e) => (
+          <li class="all-item">
+            <TierBadge tier={e.tier} size="inline" />
+            <a class="all-name" href={`/r/${e.slug}`}>{e.name}</a>
+            <span class="all-grade">Grade {e.tier}</span>
+            <ReviewState state={e.workflowState} class="all-review" />
+          </li>
+        ))}
+      </ul>
+    </section>
   </main>
 </Base>
 
 <script>
-  // Filter island (CHK-6.1) — mirrors tiers.astro: it only HIDES existing, server-rendered rows.
-  // It never creates content, so with JS off every row stands (the crawl check proves server-render).
-  // Hiding is an instant [hidden] toggle with no transition, so prefers-reduced-motion is honored by
-  // construction. Two single-select facets (goal, category); a row shows iff it matches BOTH.
-  const grid = document.getElementById('compare-grid');
-  const countEl = document.getElementById('compare-count');
-  const emptyEl = document.getElementById('compare-empty');
-  const rankedGroupLabel = document.getElementById('ranked-group-label');
-  const reviewingGroupLabel = document.getElementById('reviewing-group-label');
-  const goalBtns = Array.from(document.querySelectorAll<HTMLButtonElement>('.facet-goal .facet'));
-  const catBtns = Array.from(document.querySelectorAll<HTMLButtonElement>('.facet-cat .facet'));
+  // Picker + ?a&b alias. Two roles: (1) if the page was reached with ?a=&b= (the owner's alias URL),
+  // redirect to the canonical /compare/[pair]?goal; (2) wire the two selects to navigate on submit.
+  // Progressive enhancement only — the common-comparison links and remedy index work with JS off.
+  const canonicalPair = (a: string, b: string) =>
+    [a, b].sort((x, y) => x.localeCompare(y)).join('-vs-');
 
-  if (grid && goalBtns.length && catBtns.length) {
-    const rows = Array.from(grid.querySelectorAll<HTMLLIElement>('li.row'));
-    const total = rows.length;
-    let activeGoal = 'all';
-    let activeCat = 'all';
-
-    const apply = () => {
-      let shown = 0;
-      let rankedShown = 0;
-      let reviewingShown = 0;
-      for (const row of rows) {
-        const goals = (row.dataset.goals ?? '').split(' ').filter(Boolean);
-        const cat = row.dataset.category ?? '';
-        const okGoal = activeGoal === 'all' || goals.includes(activeGoal);
-        const okCat = activeCat === 'all' || cat === activeCat;
-        const visible = okGoal && okCat;
-        row.hidden = !visible;
-        if (visible) {
-          shown += 1;
-          if (row.dataset.group === 'ranked') rankedShown += 1;
-          if (row.dataset.group === 'reviewing') reviewingShown += 1;
-        }
-      }
-      if (rankedGroupLabel) rankedGroupLabel.hidden = rankedShown === 0;
-      if (reviewingGroupLabel) reviewingGroupLabel.hidden = reviewingShown === 0;
-      if (emptyEl) emptyEl.hidden = shown > 0;
-      if (countEl) {
-        countEl.textContent =
-          shown === total ? `Showing all ${total} remedies` : `Showing ${shown} of ${total} remedies`;
-      }
-    };
-
-    const wire = (btns: HTMLButtonElement[], set: (v: string) => void, key: 'goal' | 'cat') => {
-      for (const b of btns)
-        b.addEventListener('click', () => {
-          set(b.dataset[key] ?? 'all');
-          for (const other of btns) other.setAttribute('aria-pressed', String(other === b));
-          apply();
-        });
-    };
-    wire(goalBtns, (v) => (activeGoal = v), 'goal');
-    wire(catBtns, (v) => (activeCat = v), 'cat');
+  const params = new URLSearchParams(location.search);
+  const qa = params.get('a');
+  const qb = params.get('b');
+  const known = new Set(
+    Array.from(document.querySelectorAll<HTMLOptionElement>('select[name="a"] option[value]'))
+      .map((o) => o.value)
+      .filter(Boolean),
+  );
+  if (qa && qb && qa !== qb && known.has(qa) && known.has(qb)) {
+    const goal = params.get('goal');
+    location.replace(`/compare/${canonicalPair(qa, qb)}${goal ? `?goal=${encodeURIComponent(goal)}` : ''}`);
   }
+
+  const form = document.getElementById('compare-picker') as HTMLFormElement | null;
+  const err = document.getElementById('picker-err');
+  form?.addEventListener('submit', (ev) => {
+    ev.preventDefault();
+    const data = new FormData(form);
+    const a = String(data.get('a') || '');
+    const b = String(data.get('b') || '');
+    const goal = String(data.get('goal') || '');
+    if (!a || !b || a === b) {
+      if (err) err.hidden = false;
+      return;
+    }
+    if (err) err.hidden = true;
+    location.assign(`/compare/${canonicalPair(a, b)}${goal ? `?goal=${encodeURIComponent(goal)}` : ''}`);
+  });
 </script>
 
 <style>
   .page {
-    max-width: 1240px;
+    max-width: 1000px;
     margin: 0 auto;
     padding: var(--sp-8) var(--sp-7) var(--sp-9);
   }
@@ -375,9 +173,6 @@ const catFacets = [...new Set(rows.map((r) => r.category).filter(Boolean))].sort
     letter-spacing: var(--tracking-label);
     color: var(--muted);
     margin: 0;
-  }
-  .dot {
-    color: var(--primary);
   }
   .head {
     margin-bottom: var(--sp-6);
@@ -398,319 +193,167 @@ const catFacets = [...new Set(rows.map((r) => r.category).filter(Boolean))].sort
     max-width: 70ch;
     margin: 0;
   }
-
   .disclaimer-top {
-    margin: var(--sp-5) 0;
+    margin: var(--sp-5) 0 var(--sp-6);
   }
 
-  /* how-to-read framing */
-  .framing {
+  /* picker */
+  .picker {
     background: var(--surface);
     border: var(--border-hairline);
     border-radius: var(--r-lg);
     padding: var(--sp-5);
     margin-bottom: var(--sp-6);
   }
-  .framing-label {
-    margin: 0 0 var(--sp-2);
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
-    color: var(--muted);
+  .picker-fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: var(--sp-4);
   }
-  .framing-text {
-    margin: 0;
-    font-size: var(--text-sm);
-    line-height: var(--lh-sm);
-    color: var(--muted);
-    max-width: 74ch;
-  }
-  .framing-text strong {
-    color: var(--ink);
-    font-weight: 600;
-  }
-
-  /* filters */
-  .filters {
+  .field {
     display: flex;
     flex-direction: column;
-    gap: var(--sp-4);
-    margin-bottom: var(--sp-6);
-  }
-  .facet-row {
-    display: flex;
-    align-items: baseline;
-    gap: var(--sp-4);
-    flex-wrap: wrap;
-  }
-  .filters-label {
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
-    color: var(--muted);
-    flex: none;
-    min-width: var(--sp-8);
-  }
-  .facet-group {
-    display: flex;
-    flex-wrap: wrap;
     gap: var(--sp-2);
+    min-width: 0;
   }
-  .facet {
+  .field-label {
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
     color: var(--muted);
-    background: var(--surface);
-    border: var(--border-hairline);
-    border-radius: var(--r-pill);
-    padding: var(--sp-2) var(--sp-4);
-    cursor: pointer;
-    transition:
-      color var(--dur-fast) var(--ease-soft),
-      background var(--dur-fast) var(--ease-soft),
-      border-color var(--dur-fast) var(--ease-soft);
   }
-  .facet:hover {
+  .opt {
+    /* --muted, not --soft: DESIGN §8 bars --soft below 19px (3.61:1); this hint is 12px. */
+    color: var(--muted);
+  }
+  .select {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
     color: var(--ink);
+    background: var(--paper);
+    border: var(--border-hairline);
+    border-radius: var(--r-md);
+    padding: var(--sp-3) var(--sp-4);
+    width: 100%;
   }
-  .facet[aria-pressed='true'] {
-    color: var(--surface);
-    background: var(--primary);
-    border-color: var(--primary);
-  }
-  .facet:focus-visible {
+  .select:focus-visible {
     outline: none;
     box-shadow: var(--focus-ring);
   }
-  .filters-count {
-    margin: 0;
+  .picker-go {
+    margin-top: var(--sp-4);
     font-family: var(--font-mono);
-    font-size: var(--text-xs);
+    font-size: var(--text-sm);
     letter-spacing: var(--tracking-label);
-    color: var(--muted);
+    color: var(--surface);
+    background: var(--primary);
+    border: 1px solid var(--primary); /* raw-ok: 1px control border, matches buttons */
+    border-radius: var(--r-pill);
+    padding: var(--sp-3) var(--sp-5);
+    cursor: pointer;
+  }
+  .picker-go:hover {
+    background: var(--primary-deep);
+    border-color: var(--primary-deep);
+  }
+  .picker-go:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+  .picker-err {
+    margin: var(--sp-3) 0 0;
+    font-size: var(--text-sm);
+    color: var(--safety-ink);
   }
 
-  /* comparison grid */
-  .grid {
-    display: grid;
-    /* min(100%, 360px) so cards are ≥360px on wide screens but collapse to full width on a phone
-       narrower than 360px — a bare minmax(360px,…) forces the column past the viewport (overflow). */
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr));
-    gap: var(--sp-5);
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-  .row {
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-4);
-    background: var(--surface);
-    border: var(--border-hairline);
-    border-radius: var(--r-lg);
-    padding: var(--sp-5);
-  }
-  .group-label {
-    grid-column: 1 / -1;
-    padding-top: var(--sp-5);
-  }
-  .group-label[hidden] {
-    display: none;
-  }
-  .group-title {
-    margin: var(--sp-2) 0 0;
+  /* section shells */
+  .section-h {
     font-family: var(--font-display);
     font-size: var(--text-xl);
     line-height: var(--lh-xl);
     color: var(--ink);
+    margin: 0 0 var(--sp-4);
   }
-  .group-dek {
-    max-width: 68ch;
-    margin: var(--sp-2) 0 0;
-    color: var(--muted);
-    font-size: var(--text-sm);
-    line-height: var(--lh-sm);
+  .common {
+    margin-bottom: var(--sp-7);
   }
-  .row[hidden] {
-    display: none;
-  }
-
-  .row-head {
-    display: flex;
-    align-items: flex-start;
-    gap: var(--sp-3);
-  }
-  .head-text {
-    min-width: 0;
-  }
-  .name {
-    font-family: var(--font-display);
-    font-size: var(--text-lg);
-    line-height: 1.1;
-    color: var(--ink);
-    text-decoration: none;
-  }
-  .name:hover {
-    color: var(--primary);
-  }
-  .name:focus-visible {
-    outline: none;
-    box-shadow: var(--focus-ring);
-    border-radius: var(--r-xs);
-  }
-  .verdict {
-    font-size: var(--text-sm);
-    line-height: var(--lh-sm);
-    color: var(--muted);
-    margin: var(--sp-2) 0 0;
-  }
-  .decision {
-    font-size: var(--text-sm);
-    line-height: var(--lh-sm);
-    color: var(--muted);
-    margin: var(--sp-3) 0 0;
-  }
-  .grade-k {
-    display: block;
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
-    color: var(--ink);
-    margin-bottom: var(--sp-1);
-  }
-  .review-line {
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-1);
-  }
-
-  /* labelled cells */
-  .cells {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-    margin: 0;
-  }
-  .cell {
+  .common-list {
     display: grid;
-    grid-template-columns: var(--sp-10) 1fr;
-    gap: var(--sp-4);
-    padding: var(--sp-4) 0;
-    border-top: var(--border-hairline);
-  }
-  .k {
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
-    color: var(--muted);
-    margin: 0;
-  }
-  .v {
-    margin: 0;
-    min-width: 0;
-  }
-  .chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--sp-2);
-  }
-  .chip {
-    display: inline-flex;
-    align-items: center;
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: normal;
-    text-transform: none;
-    line-height: 1;
-    /* §2.3 chip padding is a literal spec value (no token covers 5/11px) — matches GateChip. raw-ok: chip spec padding */
-    padding: 5px 11px;
-    border-radius: var(--r-pill);
-    white-space: nowrap;
-  }
-  .chip-goal {
-    color: var(--primary-deep);
-    background: var(--primary-soft);
-  }
-  .avoid-list {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+    gap: var(--sp-3);
     margin: 0;
     padding: 0;
     list-style: none;
+  }
+  .common-link {
     display: flex;
     flex-direction: column;
-    gap: var(--sp-2);
-  }
-  .avoid-list li {
-    position: relative;
-    padding-left: var(--sp-4);
-    font-size: var(--text-sm);
-    line-height: var(--lh-sm);
-    color: var(--ink);
-  }
-  .avoid-list li::before {
-    content: '—';
-    position: absolute;
-    left: 0;
-    color: var(--muted);
-  }
-  .risk-line {
-    margin: var(--sp-3) 0 0;
-    font-size: var(--text-sm);
-    line-height: var(--lh-sm);
-    color: var(--ink);
-  }
-
-  /* interaction cell — the D4-salvage register, per remedy only */
-  .cell-int {
-    background: var(--grade-c-tint);
+    gap: var(--sp-1);
+    background: var(--surface);
+    border: var(--border-hairline);
     border-radius: var(--r-md);
     padding: var(--sp-4);
-    border-top: none;
+    text-decoration: none;
   }
-  .int-line {
-    margin: 0;
-    font-size: var(--text-sm);
-    line-height: var(--lh-sm);
+  .common-link:hover {
+    border-color: var(--primary);
+  }
+  .common-link:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+  .common-names {
+    font-family: var(--font-display);
+    font-size: var(--text-md);
     color: var(--ink);
   }
-  .int-links {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--sp-2) var(--sp-5);
-    margin: var(--sp-3) 0 0;
+  .vs {
+    color: var(--muted);
+    font-weight: 400;
   }
-  .int-links a {
+  .common-goal {
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);
-    color: var(--primary);
+    color: var(--muted);
+  }
+
+  /* remedy index */
+  .all-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+    gap: var(--sp-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .all-item {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    padding: var(--sp-3) 0;
+    border-top: var(--border-hairline);
+  }
+  .all-name {
+    font-family: var(--font-display);
+    font-size: var(--text-md);
+    color: var(--ink);
     text-decoration: none;
   }
-  .int-links a:hover {
-    color: var(--primary-deep);
+  .all-name:hover {
+    color: var(--primary);
   }
-  .int-links a:focus-visible {
+  .all-name:focus-visible {
     outline: none;
     box-shadow: var(--focus-ring);
     border-radius: var(--r-xs);
   }
-
-  .cat {
-    font-size: var(--text-sm);
-    line-height: var(--lh-sm);
-    color: var(--ink);
-  }
-
-  .empty {
-    margin: var(--sp-6) 0 0;
-    padding: var(--sp-6);
-    background: var(--surface);
-    border: var(--border-hairline);
-    border-radius: var(--r-lg);
-    font-size: var(--text-sm);
-    line-height: var(--lh-sm);
+  .all-grade {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
     color: var(--muted);
-    text-align: center;
+    margin-left: auto;
   }
 
   @media (max-width: 640px) {
@@ -718,12 +361,10 @@ const catFacets = [...new Set(rows.map((r) => r.category).filter(Boolean))].sort
       padding: var(--sp-6) var(--sp-5) var(--sp-8);
     }
     .title {
-      font-weight: 700;
       font-size: var(--text-2xl);
     }
-    .cell {
+    .picker-fields {
       grid-template-columns: 1fr;
-      gap: var(--sp-2);
     }
   }
 </style>
