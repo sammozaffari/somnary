@@ -38,27 +38,34 @@ const somnaryTheme = {
     // package; listed first so it binds. "Instrument Sans" kept as static fallback.
     display: ['"Instrument Sans Variable"', '"Instrument Sans"', 'system-ui', '-apple-system', 'sans-serif'],
     body:    ['"Instrument Sans Variable"', '"Instrument Sans"', 'system-ui', '-apple-system', 'sans-serif'],
-    mono:    ['"IBM Plex Mono"', 'ui-monospace', 'monospace'],
+    // IBM Plex Mono RETIRED 2026-07-09 — mirror global.css --font-mono, which now aliases the
+    // Instrument Sans stack (nothing renders monospace; digits align via .tnum / tabular-nums).
+    mono:    ['"Instrument Sans Variable"', '"Instrument Sans"', 'system-ui', '-apple-system', 'sans-serif'],
   },
   fontSize: {
     // Instrument Sans caps at 700; former Archivo 800/900 display weights map to 700.
     display: ['clamp(64px, 8vw, 128px)', { lineHeight: '0.92', letterSpacing: '-0.067em', fontWeight: '700' }],
     '3xl':   ['clamp(38px, 4.3vw, 66px)', { lineHeight: '1.0', letterSpacing: '-0.065em', fontWeight: '700' }],
     '2xl':   ['42px', { lineHeight: '1.05', letterSpacing: '-0.06em', fontWeight: '700' }],
-    xl:      ['32px', { lineHeight: '1.10', letterSpacing: '-0.04em', fontWeight: '700' }],
+    // xl retuned to match global.css --tracking-tight (v4, 2026-07-27): the old -0.04em was
+    // size-blind. NB: display/3xl/2xl/lg letterSpacing below predate the v4 tracking retune;
+    // components apply --tracking-tight/--tracking-display, not these utility values.
+    xl:      ['32px', { lineHeight: '1.10', letterSpacing: '-0.02em', fontWeight: '700' }],
     lg:      ['21px', { lineHeight: '1.20', letterSpacing: '-0.025em', fontWeight: '600' }],
     md:      ['18px', { lineHeight: '1.40', fontWeight: '500' }],
-    base:    ['16px', { lineHeight: '1.45', fontWeight: '400' }],
+    base:    ['16px', { lineHeight: '1.60', fontWeight: '400' }],
     sm:      ['14px', { lineHeight: '1.50', fontWeight: '400' }],
     xs:      ['12px', { lineHeight: '1.40', letterSpacing: '0.09em', fontWeight: '600' }],
   },
   spacing: { 1:'4px',2:'8px',3:'12px',4:'16px',5:'24px',6:'32px',7:'48px',8:'64px',9:'96px',10:'128px' },
-  borderRadius: { xs:'3px', sm:'7px', md:'11px', lg:'16px', xl:'24px', pill:'999px' },
+  // v4 radius discipline (2026-07-27) — mirror global.css --r-* (4/8/10/12/16), not the old
+  // 3/7/11/16/24 spread, so a `rounded-*` utility can never diverge from var(--r-*).
+  borderRadius: { xs:'4px', sm:'8px', md:'10px', lg:'12px', xl:'16px', pill:'999px' },
   boxShadow: {
     sm:   '0 1px 2px rgba(23,21,18,.05), 0 1px 3px rgba(23,21,18,.06)',
     md:   '0 18px 60px rgba(23,21,18,.10)',
     lift: '0 24px 70px rgba(23,21,18,.16)',
-    ring: '0 0 0 3px rgba(126,31,43,.40)',
+    ring: '0 0 0 2px var(--surface), 0 0 0 4px var(--primary)', // mirror --focus-ring (A-01 two-tone); old 40%-alpha ring failed 3:1 non-text
   },
   transitionDuration: { instant:'120ms', fast:'160ms', base:'320ms', slow:'560ms', ambient:'2800ms' },
   transitionTimingFunction: {

@@ -6,14 +6,12 @@ import Wordmark from './Wordmark.astro';
 import SearchPalette from './SearchPalette.astro';
 import SessionNav from './account/SessionNav.astro';
 
-// Search-first IA (2026-07-27, Phase 1): the navbar collapses to two real destinations plus a
-// first-class search affordance — Remedies (does it work?) + Which to buy (which product?) + Search.
-// Everything else moves to the footer (Start here, Sleep habits, Compare, Safety, Label checker,
-// Lens, Methodology) so the chrome stops overloading; all pages stay crawlable via footer + internal
-// links. Lens becomes the search fallback engine (Phase 2), Label checker folds into search (Phase 3).
+// Search-first IA (2026-07-27, Phase 1) plus CMP-01: the two catalogue destinations remain, while
+// Check a label is promoted as the primary defensive-audit task. Other tools stay in the footer.
 const links = [
   { href: '/tiers', label: 'Remedies' },
-  { href: '/sources', label: 'Which to buy' },
+  { href: '/sources', label: 'Which to buy', shortLabel: 'Products' },
+  { href: '/label-checker', label: 'Check a label', shortLabel: 'Label' },
 ];
 const path = Astro.url.pathname.replace(/\/$/, '') || '/';
 ---
@@ -26,8 +24,14 @@ const path = Astro.url.pathname.replace(/\/$/, '') || '/';
         const current = path === l.href.replace(/\/$/, '');
         return (
           <li>
-            <a href={l.href} aria-current={current ? 'page' : undefined} class:list={['link', { current }]}>
-              {l.label}
+            <a
+              href={l.href}
+              aria-current={current ? 'page' : undefined}
+              aria-label={l.shortLabel ? l.label : undefined}
+              class:list={['link', { current }]}
+            >
+              <span class="long-label">{l.label}</span>
+              {l.shortLabel && <span class="short-label" aria-hidden="true">{l.shortLabel}</span>}
             </a>
           </li>
         );
@@ -93,9 +97,21 @@ const path = Astro.url.pathname.replace(/\/$/, '') || '/';
     box-shadow: var(--focus-ring);
     border-radius: var(--r-xs);
   }
+  .short-label {
+    display: none;
+  }
   @media (max-width: 640px) {
     .nav {
       padding: 0 var(--sp-5);
+    }
+    .links {
+      gap: var(--sp-3);
+    }
+    .link[aria-label] .long-label {
+      display: none;
+    }
+    .link[aria-label] .short-label {
+      display: inline;
     }
   }
 </style>

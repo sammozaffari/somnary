@@ -5,8 +5,10 @@
 // "how rankings change" (methodology §07) points here.
 import Base from '../layouts/Base.astro';
 import TierBadge from '../components/TierBadge.astro';
+import ReviewState from '../components/ReviewState.astro';
 import { getCollection } from 'astro:content';
-import { getTier, type TierId } from '../lib/tiers';
+import type { TierId } from '../lib/tiers';
+import type { WorkflowState } from '../lib/remedy-state';
 
 type Row = {
   date: string;
@@ -17,6 +19,7 @@ type Row = {
   slug: string;
   name: string;
   currentTier: TierId;
+  workflowState: WorkflowState;
 };
 
 const remedies = await getCollection('remedies', (e) => !e.data.draft);
@@ -27,13 +30,14 @@ const rows: Row[] = remedies
       slug: e.id,
       name: e.data.name,
       currentTier: e.data.tier as TierId,
+      workflowState: e.data.workflowState,
     }))
   )
   // newest first; ISO YYYY-MM-DD sorts lexically. Tie-break by name for stable order.
   .sort((a, b) => (a.date === b.date ? a.name.localeCompare(b.name) : b.date < a.date ? -1 : 1));
 
 const typeLabel: Record<Row['type'], string> = {
-  review: 'Published',
+  review: 'Review entry',
   grade: 'Grade change',
   source: 'Sources',
   correction: 'Correction',
@@ -65,6 +69,7 @@ const typeLabel: Record<Row['type'], string> = {
               <p class="entry-head">
                 <a class="remedy" href={`/r/${r.slug}`}>{r.name}</a>
                 <span class:list={['type', `type-${r.type}`]}>{typeLabel[r.type]}</span>
+                <ReviewState state={r.workflowState} />
                 {r.type === 'grade' && r.fromTier && r.toTier && (
                   <span class="grade-move" aria-label={`Grade changed from ${r.fromTier} to ${r.toTier}`}>
                     <TierBadge tier={r.fromTier} size="inline" />
@@ -81,7 +86,7 @@ const typeLabel: Record<Row['type'], string> = {
     </ol>
 
     <p class="foot">
-      Grades are set only by published human evidence and only ever changed by a human editor
+      Grades are set only by published human evidence and only ever changed by the author
       (see <a href="/methodology#rankings">how rankings change</a>). Community reports never move a
       grade. Found an error? Corrections are public — see the <a href="/methodology">methodology</a>.
     </p>

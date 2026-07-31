@@ -1,6 +1,6 @@
 ---
 import Base from '../../layouts/Base.astro';
-import SafetyCallout from '../../components/scorecards/SafetyCallout.astro';
+import SafetyCallout from '../../components/SafetyCallout.astro';
 import RatingLegend from '../../components/scorecards/RatingLegend.astro';
 import LabelReadingPanel from '../../components/scorecards/LabelReadingPanel.astro';
 import WhyCareStrip from '../../components/scorecards/WhyCareStrip.astro';
@@ -70,7 +70,7 @@ const whyCareExample = 'For example, Australia’s regulator is <a href="https:/
         The <a href="/r/magnesium">evidence grade</a> answers whether magnesium helps you sleep.
         This page answers a different question: of the magnesium you can buy in an Australian
         chemist, which brands actually disclose what’s in the bottle and don’t overstate it? Each
-        is rated on six documented dimensions — every point traces to a primary document. No overall
+        is rated on six documented dimensions, each score explained in a written note that shows its basis. No overall
         score, no #1: <a href="/sources/methodology">a ranking would be a recommendation</a>, and we
         don’t make those.
       </p>
@@ -78,7 +78,7 @@ const whyCareExample = 'For example, Australia’s regulator is <a href="https:/
 
     <aside class="banner">
       <p class="banner-line">
-        These scorecards rate how a product is <strong>sourced and labeled</strong> — not whether
+        These scorecards rate how a product is <strong>sourced and labelled</strong> — not whether
         you should take it. Educational, not medical advice.
       </p>
       <p class="banner-sub">
@@ -91,7 +91,7 @@ const whyCareExample = 'For example, Australia’s regulator is <a href="https:/
 
     <SafetyCallout
       title="The vitamin-B6 warning worth knowing"
-      tone="safety"
+      register="serious"
       items={safetyItems}
       foot="These flags are shown for your safety and sit apart from the scores — if you take magnesium daily, check your product’s B6 amount and talk to a pharmacist."
     />

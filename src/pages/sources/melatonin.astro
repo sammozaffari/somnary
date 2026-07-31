@@ -1,6 +1,6 @@
 ---
 import Base from '../../layouts/Base.astro';
-import SafetyCallout from '../../components/scorecards/SafetyCallout.astro';
+import SafetyCallout from '../../components/SafetyCallout.astro';
 import RatingLegend from '../../components/scorecards/RatingLegend.astro';
 import LabelReadingPanel from '../../components/scorecards/LabelReadingPanel.astro';
 import WhyCareStrip from '../../components/scorecards/WhyCareStrip.astro';
@@ -54,7 +54,7 @@ const labelReading = {
 };
 
 // Why-this-matters hook — one ingredient-specific cited example (EWG-inspired IA, Phase A).
-const whyCareExample = 'For example, when researchers tested 31 over-the-counter melatonin supplements, the actual amount ranged from <a href="https://pubmed.ncbi.nlm.nih.gov/27855744/" target="_blank" rel="noopener">83% below to 478% above the label</a>; a 2023 analysis of 25 melatonin gummies found <a href="https://pubmed.ncbi.nlm.nih.gov/37097362/" target="_blank" rel="noopener">22 were mislabeled, with real content from 74% to 347% of the stated amount</a>.';
+const whyCareExample = 'For example, when researchers tested 31 over-the-counter melatonin supplements, the actual amount ranged from <a href="https://pubmed.ncbi.nlm.nih.gov/27855744/" target="_blank" rel="noopener">83% below to 478% above the label</a>; a 2023 analysis of 25 melatonin gummies found <a href="https://pubmed.ncbi.nlm.nih.gov/37097362/" target="_blank" rel="noopener">22 were mislabelled, with real content from 74% to 347% of the stated amount</a>.';
 
 ---
 
@@ -70,15 +70,15 @@ const whyCareExample = 'For example, when researchers tested 31 over-the-counter
         The <a href="/r/melatonin">evidence grade</a> answers whether melatonin works. This page
         answers a different question: of the melatonin an Australian can actually get — which, because
         it’s prescription-only here, means personal import — which products contain what the label
-        says, made by companies whose claims hold up? Each is rated on six documented dimensions —
-        every point traces to a primary document. No overall score, no #1:
+        says, made by companies whose claims hold up? Each is rated on six documented dimensions,
+        each score explained in a written note that shows its basis. No overall score, no #1:
         <a href="/sources/methodology">a ranking would be a recommendation</a>, and we don’t make those.
       </p>
     </header>
 
     <aside class="banner">
       <p class="banner-line">
-        These scorecards rate how a product is <strong>sourced and labeled</strong> — not whether
+        These scorecards rate how a product is <strong>sourced and labelled</strong> — not whether
         you should take it. Educational, not medical advice.
       </p>
       <p class="banner-sub">
@@ -91,7 +91,7 @@ const whyCareExample = 'For example, when researchers tested 31 over-the-counter
 
     <SafetyCallout
       title="Melatonin in Australia — the prescription reality"
-      tone="info"
+      register="info"
       items={safetyItems}
       foot="This is context on how you’d get melatonin in Australia — not medical advice. For a pharmacy option, Circadin (below) is available on prescription; talk to a pharmacist or doctor before starting melatonin."
     />

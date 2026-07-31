@@ -8,13 +8,14 @@
  * `/anxiety-and-sleep` page, or a `/sleep-habits#<anchor>` from the frozen HABIT map. Nothing is
  * invented; an unresolved signal routes NOWHERE.
  *
- * Framing is fixed here too: remedy leads are "you mentioned X — here's Somnary's graded evidence",
+ * Framing is fixed here too: remedy leads are "you mentioned X — here's Somnary's evidence record",
  * never "try X"; CBT-I + clinician routing for chronic/diagnosed cases is matter-of-fact, never
  * preachy. Erasable TS; imported by src/lib/guide/engine.ts and scripts/test-guide.mjs.
  */
 import { ROUTES, detectRemedyMentions, type Route, type RemedyRef } from '../ask/guardrails.ts';
 import { OUTCOMES } from '../outcomes.ts';
 import { HABIT_SUMMARY_BY_ID } from '../habits.ts';
+import { gradeStampState, type WorkflowState } from '../remedy-state.ts';
 import type { Chronicity, GuideExtraction, HabitSignal, Problem, RedFlag } from './schema.ts';
 
 // --- route-plan shape ---------------------------------------------------------------------------
@@ -158,19 +159,19 @@ for (const t of Object.values(PROBLEM_ROUTES)) {
 const CBT_I: RouteItem = {
   href: '/r/cbt-i',
   label: 'CBT-I (cognitive behavioural therapy for insomnia)',
-  note: "Somnary's highest-graded intervention for ongoing insomnia — a structured programme, not a supplement.",
 };
 
 // --- corpus fields the summary reads (beyond RemedyRef) -----------------------------------------
 // The router is generic over RemedyRef (slug/name/aliases), but at runtime the engine and tests pass
-// full AskRemedy objects that also carry `tier` and `chunks`. The summary reads those two fields
-// DEFENSIVELY (optional), so an object lacking them simply omits the grade/verdict — never crashes.
+// full AskRemedy objects that also carry `tier`, `workflowState`, and `chunks`. The summary reads
+// those fields DEFENSIVELY (optional), so an older object simply omits the grade/state/verdict.
 interface SummaryChunk {
   kind: string;
   text: string;
 }
 interface SummaryCorpusFields {
   tier?: string;
+  workflowState?: WorkflowState;
   chunks?: SummaryChunk[];
 }
 
@@ -186,6 +187,16 @@ function tierForSlug<T extends RemedyRef>(slug: string, corpus: T[]): string | n
   const r = corpus.find((x) => x.slug === slug) as (T & SummaryCorpusFields) | undefined;
   const tier = r?.tier?.trim();
   return tier ? tier : null;
+}
+
+/** Collapsed public review label for a corpus remedy, or null for older defensive fixtures. */
+function reviewLabel(remedy: SummaryCorpusFields | undefined): string | null {
+  return remedy?.workflowState ? gradeStampState(remedy.workflowState).label : null;
+}
+
+function reviewLabelForSlug<T extends RemedyRef>(slug: string, corpus: T[]): string | null {
+  const remedy = corpus.find((x) => x.slug === slug) as (T & SummaryCorpusFields) | undefined;
+  return reviewLabel(remedy);
 }
 
 // --- the router ---------------------------------------------------------------------------------
@@ -267,6 +278,12 @@ export function routePlan<T extends RemedyRef>(extraction: GuideExtraction, corp
   // 3 — chronic OR diagnosed → CBT-I + clinician, surfaced prominently and matter-of-factly.
   const chronicOrDiagnosed = situation.chronicity === 'chronic' || screeners.has('diagnosed-condition');
   if (chronicOrDiagnosed) {
+    const cbtTier = tierForSlug('cbt-i', corpus);
+    const cbtReview = reviewLabelForSlug('cbt-i', corpus);
+    const cbtDetails = [
+      cbtTier ? `Grade ${cbtTier}` : null,
+      cbtReview,
+    ].filter(Boolean).join(' · ');
     sections.push({
       kind: 'clinician-first',
       title: 'For an ongoing or diagnosed sleep problem',
@@ -276,7 +293,10 @@ export function routePlan<T extends RemedyRef>(extraction: GuideExtraction, corp
           label: ROUTES.clinician.label,
           note: 'Ongoing sleep trouble is worth a professional visit — here is what makes it worth raising and what to bring.',
         },
-        CBT_I,
+        {
+          ...CBT_I,
+          note: `Somnary's evidence record for this structured programme, not a supplement${cbtDetails ? ` — ${cbtDetails}` : ''}.`,
+        },
       ],
     });
   }
@@ -291,12 +311,16 @@ export function routePlan<T extends RemedyRef>(extraction: GuideExtraction, corp
     const matches = detectRemedyMentions(name, corpus);
     for (const m of matches) {
       if (seenSlugs.has(m.slug)) continue;
+      const detailed = m as T & SummaryCorpusFields;
       seenSlugs.add(m.slug);
-      triedResolved.push(m as T & SummaryCorpusFields);
+      triedResolved.push(detailed);
+      const grade = detailed.tier ? `: Grade ${detailed.tier}` : '';
+      const review = reviewLabel(detailed);
+      const state = review ? ` · ${review}` : '';
       triedItems.push({
         href: `/r/${m.slug}`,
         label: m.name,
-        note: `You mentioned ${m.name} — here's Somnary's graded evidence for it.`,
+        note: `You mentioned ${m.name} — here's Somnary's evidence record for it${grade}${state}.`,
       });
     }
   }
@@ -403,11 +427,13 @@ export function routePlan<T extends RemedyRef>(extraction: GuideExtraction, corp
   // Severity — chronic OR diagnosed → CBT-I + clinician. Grade pulled from the corpus (never 'S').
   if (chronicOrDiagnosed) {
     const cbtTier = tierForSlug('cbt-i', corpus);
-    const grade = cbtTier ? ` (Grade ${cbtTier})` : '';
+    const cbtReview = reviewLabelForSlug('cbt-i', corpus);
+    const grade = cbtTier ? ` Grade ${cbtTier}` : '';
+    const review = cbtReview ? ` · ${cbtReview}` : '';
     summary.push({
       text:
-        `For a sleep problem that's ongoing, or one a clinician has diagnosed, the strongest evidence ` +
-        `points to CBT-I — Somnary's highest-graded intervention for ongoing insomnia${grade}, a ` +
+        `For a sleep problem that's ongoing, or one a clinician has diagnosed, Somnary has an ` +
+        `evidence record for CBT-I —${grade}${review}, a ` +
         `structured programme rather than a supplement — alongside a conversation with a clinician. ` +
         `On its own, adjusting habits is often not enough for a problem at that stage.`,
       links: [
@@ -424,10 +450,12 @@ export function routePlan<T extends RemedyRef>(extraction: GuideExtraction, corp
     for (const m of triedResolved) {
       const tier = m.tier?.trim();
       const grade = tier ? ` Grade ${tier}.` : '';
+      const review = reviewLabel(m);
+      const state = review ? ` ${review}.` : '';
       const verdict = verdictText(m);
       const tail = verdict ? ` ${verdict}` : '';
       summary.push({
-        text: `You mentioned ${m.name} — here's Somnary's graded evidence for it:${grade}${tail}`,
+        text: `You mentioned ${m.name} — here's Somnary's evidence record for it:${grade}${state}${tail}`,
         links: [{ href: `/r/${m.slug}`, label: m.name }],
         tone: 'normal',
       });

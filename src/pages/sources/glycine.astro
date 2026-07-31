@@ -1,6 +1,6 @@
 ---
 import Base from '../../layouts/Base.astro';
-import SafetyCallout from '../../components/scorecards/SafetyCallout.astro';
+import SafetyCallout from '../../components/SafetyCallout.astro';
 import RatingLegend from '../../components/scorecards/RatingLegend.astro';
 import LabelReadingPanel from '../../components/scorecards/LabelReadingPanel.astro';
 import WhyCareStrip from '../../components/scorecards/WhyCareStrip.astro';
@@ -68,7 +68,7 @@ const whyCareExample = 'For example, the pure glycine people take for sleep is u
         The <a href="/r/glycine">evidence grade</a> answers whether glycine helps you sleep. This
         page answers a different question: of the glycine you can buy in Australia, which is genuinely
         pure, honest about its dose, and made by someone who tells you who they are? Each is rated on
-        six documented dimensions — every point traces to a primary document. No overall score, no #1:
+        six documented dimensions, each score explained in a written note that shows its basis. No overall score, no #1:
         <a href="/sources/methodology">a ranking would be a recommendation</a>, and we don’t make
         those.
       </p>
@@ -76,7 +76,7 @@ const whyCareExample = 'For example, the pure glycine people take for sleep is u
 
     <aside class="banner">
       <p class="banner-line">
-        These scorecards rate how a product is <strong>sourced and labeled</strong> — not whether
+        These scorecards rate how a product is <strong>sourced and labelled</strong> — not whether
         you should take it. Educational, not medical advice.
       </p>
       <p class="banner-sub">
@@ -89,7 +89,7 @@ const whyCareExample = 'For example, the pure glycine people take for sleep is u
 
     <SafetyCallout
       title="Two things worth knowing before you read"
-      tone="info"
+      register="info"
       items={safetyItems}
     />
 

@@ -116,7 +116,7 @@ export const MELATONIN_SOURCES: SourceProduct[] = [
     },
     verdict:
       'No independent lab testing; a fully itemized label of benign ingredients at a dose above the studied extended-release amount, from an identifiable manufacturer with no verified regulator action against this product.',
-    heldItems: ['2021 FDA Class II recall of a different Natrol product (ALA lot mislabeled as melatonin)'],
+    heldItems: ['2021 FDA Class II recall of a different Natrol product (ALA lot mislabelled as melatonin)'],
     communityStatus: 'summarized',
     communityThemes: [
       { note: 'Time-release melatonin draws recurring threads about next-morning grogginess, and people seeking doses well below this 5 mg', url: 'https://old.reddit.com/r/melatonin/comments/1hd7wgx/time_release_formulas/' },
@@ -248,7 +248,7 @@ export const MELATONIN_SOURCES: SourceProduct[] = [
     verdict:
       'No independent testing or independent lab test of the exact product for this low-dose capsule; a fully itemized label of benign ingredients from an identifiable manufacturer, with no verified regulator action against this product.',
     heldItems: [
-      '2017 FDA warning letter — verified verbatim on fda.gov (2026-07-19): it cites the brand’s website for disease claims (melatonin appears in a breast-cancer protocol list, not among the lead cited products). A marketing/labeling matter, not a potency or safety action against this product; not applied to the score.',
+      '2017 FDA warning letter — verified verbatim on fda.gov (2026-07-19): it cites the brand’s website for disease claims (melatonin appears in a breast-cancer protocol list, not among the lead cited products). A marketing/labelling matter, not a potency or safety action against this product; not applied to the score.',
     ],
     communityStatus: 'summarized',
     communityThemes: [
@@ -281,7 +281,7 @@ export const MELATONIN_SOURCES: SourceProduct[] = [
     verdict:
       'A clean additive panel and no regulator enforcement on record, but no independent test or certification could be confirmed for this exact product, its melatonin content is untested by any published lab test, and the brand shows an NSF badge Somnary could not match to this SKU in NSF’s own directory.',
     heldItems: [
-      'Murphy v. Olly and Tarvin v. Olly (private class actions alleging mislabeling — unproven allegations, not regulator actions)',
+      'Murphy v. Olly and Tarvin v. Olly (private class actions alleging mislabelling — unproven allegations, not regulator actions)',
     ],
     communityStatus: 'gathering',
     ratified: true,

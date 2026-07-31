@@ -24,7 +24,7 @@ const accentColor: Record<'eucalyptus' | 'primary', string> = {
   {
     cells.map((c) => (
       <div class="cell">
-        <dd class="num" style={c.accent ? `color:${accentColor[c.accent]}` : undefined}>
+        <dd class="num tnum" style={c.accent ? `color:${accentColor[c.accent]}` : undefined}>
           {c.value}
         </dd>
         <dt class="label">{c.label}</dt>

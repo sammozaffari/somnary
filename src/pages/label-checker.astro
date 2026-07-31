@@ -42,7 +42,7 @@ const rules = [
     id: 'R3',
     title: 'A dose below the one studies used',
     rationale:
-      'Each ingredient page records the dose ranges the trials actually used. When a panel lists a matched ingredient below the lowest studied dose, the checker says so and shows the studied figure — so you can compare, not so it can tell you what to take. It only fires when a clean number parses; otherwise it stays silent.',
+      'Each ingredient page records the dose ranges the trials actually used. When a single-form remedy has a clean parsed amount below its study-dose floor, the checker says so and shows the studied figure — so you can compare, not so it can tell you what to take. For remedies with multiple dose forms, Rule R3 is not applied because this checker does not resolve forms yet; that limitation is shown in the result.',
     links: [
       { href: '/methodology#rankings', label: 'How dose-match is judged' },
     ],

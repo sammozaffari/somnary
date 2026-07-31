@@ -63,6 +63,7 @@ const isHome = path === '/';
         Mono for data. No Google Fonts CDN. */}
   </head>
   <body>
+    <a href="#main-content" class="skip-link">Skip to content</a>
     <Nav />
     {
       !isHome && (
@@ -73,7 +74,9 @@ const isHome = path === '/';
         </div>
       )
     }
-    <slot />
+    <div id="main-content" tabindex="-1">
+      <slot />
+    </div>
     <Footer />
     <script>
       // Upgrade the "Back" link to history.back() when there is history to return to; otherwise the
@@ -90,6 +93,38 @@ const isHome = path === '/';
 </html>
 
 <style>
+  /* A-03: skip-to-content bypass. First focusable element on every route, so a keyboard user
+     can jump past the repeated global nav (and back bar) straight to #main-content. Off-screen
+     until focused, then it slides into the top-left as a solid pill — never a hidden focus trap. */
+  .skip-link {
+    position: absolute;
+    top: var(--sp-3);
+    left: var(--sp-3);
+    z-index: 200;
+    padding: var(--sp-3) var(--sp-4);
+    background: var(--ink);
+    color: var(--action-ink);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-decoration: none;
+    border-radius: var(--r-sm);
+    transform: translateY(calc(-100% - var(--sp-6)));
+    transition: transform var(--dur-fast) var(--ease-soft);
+  }
+  .skip-link:focus {
+    transform: translateY(0);
+  }
+  /* the focus target must not paint its own outline/ring when focused programmatically */
+  #main-content:focus {
+    outline: none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .skip-link {
+      transition: none;
+    }
+  }
+
   .backbar {
     padding: var(--sp-4) var(--sp-7) 0;
   }

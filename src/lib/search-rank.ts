@@ -5,6 +5,7 @@
  * build-time index. §2a ranking; TIER NEVER BOOSTS.
  */
 import type { TierId } from './tiers';
+import type { EpistemicState, FreshnessState, WorkflowState } from './remedy-state';
 
 export interface SearchDoc {
   slug: string;
@@ -12,6 +13,9 @@ export interface SearchDoc {
   name: string;
   kind: 'remedy'; // interventions / outcomes / context join as those pages ship
   tier: TierId;
+  workflowState: WorkflowState;
+  epistemicState: EpistemicState;
+  freshnessState: FreshnessState;
   category: string;
   latin: string | null;
   keyCompound: string | null;

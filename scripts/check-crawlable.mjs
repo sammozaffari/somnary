@@ -88,32 +88,54 @@ async function main() {
     }
   }
 
-  // Compare tool (CHK-6.1): the filter is a client island, but the FULL comparison — every remedy
-  // row + a grade signal + the D4 "comparing ≠ combining" framing + the per-remedy interaction
-  // routing — MUST be server-rendered (a no-JS user and a crawler see the whole table). Mirrors the
-  // label-checker assertion: prove the content survives with JS off.
+  // Compare tool (CHK-6.1, rebuilt L-01 as a difference-first PAIR): the IA is now two tiers —
+  //   (1) /compare, the crawlable PICKER/index: every reviewed remedy + its grade, the D4
+  //       "comparing ≠ combining" framing, and the medical disclaimer, all server-rendered; and
+  //   (2) /compare/[a]-vs-[b], one SSG page per pair carrying the FULL comparison (both remedies,
+  //       grade, D4 framing, the per-remedy interaction section + its routing to the medications
+  //       page, disclaimer) in static HTML.
+  // Both must survive with JS off — the picker is an enhancement, the pair content is the payload.
   const cmpPath = join(DIST, 'compare', 'index.html');
   if (!(await exists(cmpPath))) {
     misses.push(`compare: no built HTML at ${cmpPath}`);
   } else {
     const body = await readFile(cmpPath, 'utf8');
-    // Every non-draft remedy name must be in the static HTML (all rows server-rendered).
+    // Every non-draft remedy name must be in the static index HTML (the crawlable remedy list).
     for (const f of files) {
       const { data } = matter(await readFile(join(CONTENT_DIR, f), 'utf8'));
       if (data.draft) continue;
       if (data.name && !body.includes(data.name)) {
-        misses.push(`compare: remedy "${data.name}" not in server-rendered HTML`);
+        misses.push(`compare: remedy "${data.name}" not in server-rendered picker HTML`);
       }
     }
     const needles = [
       { re: /grade/i, why: 'grade signal (grades not server-rendered?)' },
       { re: /not a tool for combining/i, why: 'D4 comparing-≠-combining framing' },
-      { re: /interaction cautions/i, why: 'per-remedy interaction register' },
+      { re: /educational, not medical advice/i, why: 'medical disclaimer' },
+    ];
+    for (const n of needles) {
+      if (!n.re.test(body)) misses.push(`compare: ${n.why} not in server-rendered picker HTML`);
+    }
+  }
+
+  // Representative pair page: the full comparison must be server-rendered, not a client island.
+  const pairDir = 'magnesium-vs-melatonin';
+  const pairPath = join(DIST, 'compare', pairDir, 'index.html');
+  if (!(await exists(pairPath))) {
+    misses.push(`compare pair: no built HTML at ${pairPath} (pair pages not pre-rendered?)`);
+  } else {
+    const body = await readFile(pairPath, 'utf8');
+    const needles = [
+      { re: /Magnesium/, why: 'first remedy name' },
+      { re: /Melatonin/, why: 'second remedy name' },
+      { re: /grade/i, why: 'grade signal' },
+      { re: /not a tool for combining/i, why: 'D4 comparing-≠-combining framing' },
+      { re: /Interaction classes/i, why: 'per-remedy interaction section' },
       { re: /\/medications-and-sleep-aids/i, why: 'interaction routing to medications page' },
       { re: /educational, not medical advice/i, why: 'medical disclaimer' },
     ];
     for (const n of needles) {
-      if (!n.re.test(body)) misses.push(`compare: ${n.why} not in server-rendered HTML`);
+      if (!n.re.test(body)) misses.push(`compare pair (${pairDir}): ${n.why} not in server-rendered HTML`);
     }
   }
 

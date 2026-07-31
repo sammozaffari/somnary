@@ -13,6 +13,7 @@
 import { getCollection } from 'astro:content';
 import { contentIndex } from './content-index';
 import type { SearchDoc } from './search-rank';
+import { isOrdinarySearchEligible, publicationStateProjection } from './remedy-state';
 
 export type { SearchDoc } from './search-rank';
 export { searchDocs } from './search-rank';
@@ -21,7 +22,10 @@ const indexBySlug = new Map(contentIndex.map((e) => [e.slug, e]));
 
 /** The single source of search docs — built from the live (non-draft) remedy collection. */
 export async function getSearchDocs(): Promise<SearchDoc[]> {
-  const remedies = await getCollection('remedies', (e) => !e.data.draft);
+  const remedies = await getCollection(
+    'remedies',
+    (e) => !e.data.draft && isOrdinarySearchEligible(e.data),
+  );
   return remedies
     .map((e) => {
       const d = e.data;
@@ -32,6 +36,7 @@ export async function getSearchDocs(): Promise<SearchDoc[]> {
         name: d.name,
         kind: 'remedy' as const,
         tier: d.tier,
+        ...publicationStateProjection(d),
         category: idx?.category ?? '',
         latin: idx?.latin ?? null,
         keyCompound: d.keyCompound,

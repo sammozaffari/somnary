@@ -41,3 +41,8 @@ docs/html-prototype/screenshots-v2/
 /docs/Somnary_Strategy_Report.docx
 /docs/sources-and-research-notes.md
 /docs/design-reference/crop_*.png
+.vercel
+.env*.local
+
+# Recon audit evidence (176M of screenshots/JSON) — kept on disk, not in git history
+docs/audits/recon-evidence/
