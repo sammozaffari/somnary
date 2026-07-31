@@ -18,6 +18,8 @@
 // ADDITIVES CAVEAT: most AU brands don't publish full ingredients lists online, so `additives` is a
 // provisional 5 with "panel not disclosed" for those — it is NOT a claim of a clean panel.
 
+import type { Retailers } from './card';
+
 export type DimensionKey =
   | 'testing_purity'
   | 'label_accuracy'
@@ -71,7 +73,7 @@ export interface MagProduct {
   communityThemes?: { note: string; url?: string }[];
   /** Where an Australian can find it — PLAIN retailer URLs, zero affiliate/tracking params (D2).
    * Display priority: amazon > chemistWarehouse > iherb. */
-  retailers?: { amazon?: string; chemistWarehouse?: string; iherb?: string };
+  retailers?: Retailers;
   /** Disclosed ingredients panel (from the dossier), actives first — omitted when the brand doesn't publish one. */
   ingredients?: string[];
   imagePath?: string;
@@ -92,7 +94,7 @@ export const MAGNESIUM_SOURCES: MagProduct[] = [
     elementalMg: 320,
     ausL: '312974',
     channel: 'Chemist Warehouse · Amazon AU',
-    retailers: { amazon: 'https://www.amazon.com.au/dp/B0B4CB8LKT', chemistWarehouse: 'https://www.chemistwarehouse.com.au/buy/105734' },
+    retailers: { amazon: 'https://www.amazon.com.au/dp/B0B4CB8LKT', chemistWarehouse: { url: 'https://www.chemistwarehouse.com.au/buy/105734', status: 'unavailable', lastCheckedAt: '2026-07-31' } },
     certSummary: 'TGA-listed (AUST L 312974)',
     additiveSummary: 'Per-form fully disclosed; full ingredients list not published',
     scores: {
@@ -123,7 +125,7 @@ export const MAGNESIUM_SOURCES: MagProduct[] = [
     elementalMg: 400,
     ausL: '221456',
     channel: 'Chemist Warehouse · Amazon AU',
-    retailers: { chemistWarehouse: 'https://www.chemistwarehouse.com.au/buy/75264' },
+    retailers: { chemistWarehouse: { url: 'https://www.chemistwarehouse.com.au/buy/75264', status: 'unavailable', lastCheckedAt: '2026-07-31' } },
     certSummary: 'TGA-listed (AUST L 221456)',
     additiveSummary: 'Per-form fully disclosed; “no oxide” claim verified accurate',
     scores: {
@@ -185,7 +187,7 @@ export const MAGNESIUM_SOURCES: MagProduct[] = [
     elementalMg: 150,
     ausL: '355159',
     channel: 'Chemist Warehouse · Amazon AU',
-    retailers: { chemistWarehouse: 'https://www.chemistwarehouse.com.au/buy/59772' },
+    retailers: { chemistWarehouse: { url: 'https://www.chemistwarehouse.com.au/buy/59772', status: 'unavailable', lastCheckedAt: '2026-07-31' } },
     certSummary: 'TGA-listed (ARTG 355159)',
     additiveSummary: 'Single-salt disclosed; full ingredients list not published',
     scores: {
@@ -216,7 +218,7 @@ export const MAGNESIUM_SOURCES: MagProduct[] = [
     elementalMg: 225,
     ausL: '353356',
     channel: 'Chemist Warehouse · Amazon AU',
-    retailers: { chemistWarehouse: 'https://www.chemistwarehouse.com.au/buy/107212' },
+    retailers: { chemistWarehouse: { url: 'https://www.chemistwarehouse.com.au/buy/107212', status: 'unavailable', lastCheckedAt: '2026-07-31' } },
     certSummary: 'TGA-listed (AUST L 353356)',
     additiveSummary: 'Per-form disclosed; oxide-heavy (~44%)',
     scores: {
@@ -247,7 +249,7 @@ export const MAGNESIUM_SOURCES: MagProduct[] = [
     elementalMg: 300,
     ausL: '298635',
     channel: 'Chemist Warehouse · Amazon AU',
-    retailers: { chemistWarehouse: 'https://www.chemistwarehouse.com.au/buy/69778' },
+    retailers: { chemistWarehouse: { url: 'https://www.chemistwarehouse.com.au/buy/69778', status: 'unavailable', lastCheckedAt: '2026-07-31' } },
     certSummary: 'TGA-listed (AUST L 298635)',
     additiveSummary: 'Per-form fully disclosed; full ingredients list not published',
     scores: {
@@ -278,7 +280,7 @@ export const MAGNESIUM_SOURCES: MagProduct[] = [
     elementalMg: 150,
     ausL: '460629',
     channel: 'Chemist Warehouse · Amazon AU',
-    retailers: { amazon: 'https://www.amazon.com.au/dp/B0DT1511V8', chemistWarehouse: 'https://www.chemistwarehouse.com.au/buy/147527' },
+    retailers: { amazon: 'https://www.amazon.com.au/dp/B0DT1511V8', chemistWarehouse: { url: 'https://www.chemistwarehouse.com.au/buy/147527', status: 'unavailable', lastCheckedAt: '2026-07-31' } },
     certSummary: 'TGA-listed (AUST L 460629)',
     additiveSummary: 'Elemental disclosed, compound weight not; panel not published',
     scores: {
@@ -309,7 +311,7 @@ export const MAGNESIUM_SOURCES: MagProduct[] = [
     elementalMg: 320,
     ausL: null,
     channel: 'Chemist Warehouse · Amazon AU',
-    retailers: { amazon: 'https://www.amazon.com.au/dp/B0C5Z515LD', chemistWarehouse: 'https://www.chemistwarehouse.com.au/buy/124288' },
+    retailers: { amazon: 'https://www.amazon.com.au/dp/B0C5Z515LD', chemistWarehouse: { url: 'https://www.chemistwarehouse.com.au/buy/124288', status: 'unavailable', lastCheckedAt: '2026-07-31' } },
     certSummary: 'TGA-listed (AUST L unconfirmed)',
     additiveSummary: 'Single-salt disclosed; effervescent base not published',
     scores: {
@@ -340,7 +342,7 @@ export const MAGNESIUM_SOURCES: MagProduct[] = [
     elementalMg: 244,
     ausL: '366872',
     channel: 'Chemist Warehouse · Amazon AU · practitioner',
-    retailers: { chemistWarehouse: 'https://www.chemistwarehouse.com.au/buy/112602' },
+    retailers: { chemistWarehouse: { url: 'https://www.chemistwarehouse.com.au/buy/112602', status: 'unavailable', lastCheckedAt: '2026-07-31' } },
     certSummary: 'TGA-listed (AUST L 366872)',
     additiveSummary: 'Per-form hidden — a "proprietary blend"',
     scores: {
@@ -402,7 +404,7 @@ export const MAGNESIUM_SOURCES: MagProduct[] = [
     elementalMg: 300,
     ausL: '489275',
     channel: 'Chemist Warehouse · Amazon AU',
-    retailers: { chemistWarehouse: 'https://www.chemistwarehouse.com.au/buy/72517' },
+    retailers: { chemistWarehouse: { url: 'https://www.chemistwarehouse.com.au/buy/72517', status: 'unavailable', lastCheckedAt: '2026-07-31' } },
     b6: { note: 'Contains vitamin B6 (pyridoxine) at ~100 mg/day at label use — the TGA adult maximum — and carries the mandated peripheral-neuropathy warning.' },
     certSummary: 'TGA-listed (AUST L 489275)',
     additiveSummary: 'Compound weight inconsistent across channels',
@@ -469,7 +471,7 @@ export const MAGNESIUM_SOURCES: MagProduct[] = [
     elementalMg: 322,
     ausL: '185943',
     channel: 'Chemist Warehouse · Amazon AU',
-    retailers: { amazon: 'https://www.amazon.com.au/dp/B0DRBTCWZ3', chemistWarehouse: 'https://www.chemistwarehouse.com.au/buy/82790' },
+    retailers: { amazon: 'https://www.amazon.com.au/dp/B0DRBTCWZ3', chemistWarehouse: { url: 'https://www.chemistwarehouse.com.au/buy/82790', status: 'unavailable', lastCheckedAt: '2026-07-31' } },
     b6: { note: 'Contains vitamin B6 — label figures range 9–41 mg/day across SKU versions (confirm on the physical pack). Below the 50 mg/day TGA on-pack-warning threshold, but it is added B6.' },
     certSummary: 'TGA-listed (AUST L 185943)',
     additiveSummary: 'Per-form partly disclosed; full ingredients list not published',
@@ -498,7 +500,7 @@ export const MAGNESIUM_SOURCES: MagProduct[] = [
     elementalMg: 350,
     ausL: '394052',
     channel: 'Chemist Warehouse · Amazon AU',
-    retailers: { amazon: 'https://www.amazon.com.au/dp/B0BPSN994Z', chemistWarehouse: 'https://www.chemistwarehouse.com.au/buy/121580' },
+    retailers: { amazon: 'https://www.amazon.com.au/dp/B0BPSN994Z', chemistWarehouse: { url: 'https://www.chemistwarehouse.com.au/buy/121580', status: 'unavailable', lastCheckedAt: '2026-07-31' } },
     certSummary: 'TGA-listed (AUST L 394052)',
     additiveSummary: 'Three forms disclosed; full ingredients list not published',
     scores: {
@@ -526,7 +528,7 @@ export const MAGNESIUM_SOURCES: MagProduct[] = [
     elementalMg: 300,
     ausL: '464493',
     channel: 'Chemist Warehouse · Amazon AU',
-    retailers: { chemistWarehouse: 'https://www.chemistwarehouse.com.au/buy/150812' },
+    retailers: { chemistWarehouse: { url: 'https://www.chemistwarehouse.com.au/buy/150812', status: 'unavailable', lastCheckedAt: '2026-07-31' } },
     certSummary: 'TGA-listed (AUST L 464493)',
     additiveSummary: 'Single-salt disclosed; “Ezyglide” coating additive not itemised',
     scores: {
@@ -554,7 +556,7 @@ export const MAGNESIUM_SOURCES: MagProduct[] = [
     elementalMg: 325,
     ausL: '154312',
     channel: 'Chemist Warehouse · Amazon AU',
-    retailers: { chemistWarehouse: 'https://www.chemistwarehouse.com.au/buy/69781' },
+    retailers: { chemistWarehouse: { url: 'https://www.chemistwarehouse.com.au/buy/69781', status: 'unavailable', lastCheckedAt: '2026-07-31' } },
     b6: { note: 'Contains a high dose of vitamin B6 — pyridoxine ~49 mg per tablet; at 2 tablets/day (~99 mg/day) it nears the TGA 100 mg/day adult maximum, and it carries the on-pack neuropathy warning.' },
     certSummary: 'TGA-listed (AUST L 154312)',
     additiveSummary: 'Per-form disclosed; full ingredients list not published',
@@ -583,7 +585,7 @@ export const MAGNESIUM_SOURCES: MagProduct[] = [
     elementalMg: 500,
     ausL: '349297',
     channel: 'Chemist Warehouse · Amazon AU',
-    retailers: { amazon: 'https://www.amazon.com.au/dp/B0CL8GCMMC', chemistWarehouse: 'https://www.chemistwarehouse.com.au/buy/84678' },
+    retailers: { amazon: 'https://www.amazon.com.au/dp/B0CL8GCMMC', chemistWarehouse: { url: 'https://www.chemistwarehouse.com.au/buy/84678', status: 'unavailable', lastCheckedAt: '2026-07-31' } },
     b6: { note: 'Contains vitamin B6 — pyridoxine 50 mg (≡ ~41 mg B6) per tablet, with the on-pack neuropathy warning.' },
     certSummary: 'TGA-listed (AUST L 349297)',
     additiveSummary: 'Per-form disclosed; full ingredients list not published',
@@ -612,7 +614,7 @@ export const MAGNESIUM_SOURCES: MagProduct[] = [
     elementalMg: 400,
     ausL: '314036',
     channel: 'Chemist Warehouse · Amazon AU',
-    retailers: { chemistWarehouse: 'https://www.chemistwarehouse.com.au/buy/111599' },
+    retailers: { chemistWarehouse: { url: 'https://www.chemistwarehouse.com.au/buy/111599', status: 'unavailable', lastCheckedAt: '2026-07-31' } },
     certSummary: 'TGA-listed (AUST L 314036)',
     additiveSummary: 'Per-form fully disclosed; gelatin capsule',
     scores: {
@@ -640,7 +642,7 @@ export const MAGNESIUM_SOURCES: MagProduct[] = [
     elementalMg: 100,
     ausL: '463467',
     channel: 'Chemist Warehouse · Amazon AU',
-    retailers: { amazon: 'https://www.amazon.com.au/dp/B0F1MMLP4J', chemistWarehouse: 'https://www.chemistwarehouse.com.au/buy/146845' },
+    retailers: { amazon: 'https://www.amazon.com.au/dp/B0F1MMLP4J', chemistWarehouse: { url: 'https://www.chemistwarehouse.com.au/buy/146845', status: 'unavailable', lastCheckedAt: '2026-07-31' } },
     b6: { note: 'Contains vitamin B6 at a low dose (~2–4 mg/day) — well below the TGA neuropathy-warning band, but it is added B6.' },
     certSummary: 'TGA-listed (AUST L 463467)',
     additiveSummary: 'Actives disclosed; full ingredients list not published',
@@ -669,7 +671,7 @@ export const MAGNESIUM_SOURCES: MagProduct[] = [
     elementalMg: 200,
     ausL: '325773',
     channel: 'Chemist Warehouse · Amazon AU',
-    retailers: { chemistWarehouse: 'https://www.chemistwarehouse.com.au/buy/86056' },
+    retailers: { chemistWarehouse: { url: 'https://www.chemistwarehouse.com.au/buy/86056', status: 'unavailable', lastCheckedAt: '2026-07-31' } },
     certSummary: 'TGA-listed (AUST L 325773)',
     additiveSummary: 'Single-salt disclosed; effervescent sweeteners + sodium are format-inherent (on-pack)',
     scores: {

@@ -21,7 +21,10 @@ const { card: p, tier, href } = Astro.props;
     {p.imagePath ? (
       <img src={p.imagePath} alt={`${p.brand} ${p.productName}`} loading="lazy" decoding="async" />
     ) : (
-      <span class="shot-fallback" aria-hidden="true">{p.brand.charAt(0)}</span>
+      <span class="shot-fallback">
+        <span class="shot-monogram" aria-hidden="true">{p.brand.charAt(0)}</span>
+        <span class="shot-nolabel">No product image</span>
+      </span>
     )}
   </div>
 
@@ -80,11 +83,34 @@ const { card: p, tier, href } = Astro.props;
     object-fit: contain;
     padding: var(--sp-5);
   }
+  /* No photo yet: a deliberate placeholder (brand monogram in a disc + a plain caption), not a
+     lone oversized letter — matches the product page's fallback. */
   .shot-fallback {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--sp-3);
+    padding: var(--sp-5);
+  }
+  .shot-monogram {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--sp-8);
+    height: var(--sp-8);
+    border-radius: var(--r-pill);
+    background: var(--surface);
+    border: var(--border-hairline);
     font-family: var(--font-display);
     font-weight: 700;
-    font-size: var(--text-3xl);
+    font-size: var(--text-2xl);
     color: var(--primary);
+  }
+  .shot-nolabel {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
   }
 
   /* tier verdict, so a card carries its rating standalone (EWG score-chip analog) */

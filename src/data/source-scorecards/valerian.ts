@@ -21,6 +21,8 @@
 // provisional 5 with "panel not disclosed" for those — it is NOT a claim of a clean panel. MediHerb,
 // NOW and Gaia DO disclose their panels, so their 5 is firm.
 
+import type { Retailers } from './card';
+
 export type DimensionKey =
   | 'testing_purity'
   | 'label_accuracy'
@@ -76,7 +78,7 @@ export interface ValProduct {
   communityThemes?: { note: string; url?: string }[];
   /** Where an Australian can find it — PLAIN retailer URLs, zero affiliate/tracking params (D2).
    * Display priority: amazon > chemistWarehouse > iherb. */
-  retailers?: { amazon?: string; chemistWarehouse?: string; iherb?: string };
+  retailers?: Retailers;
   /** Disclosed ingredients panel (from the dossier), actives first — omitted when the brand doesn't publish one. */
   ingredients?: string[];
   imagePath?: string;
@@ -110,7 +112,7 @@ export const VALERIAN_SOURCES: ValProduct[] = [
     strength: '2000 mg dry-root eq · valerenic acids 3.2 mg',
     ausL: '351518',
     channel: 'Chemist Warehouse · Amazon AU',
-    retailers: { amazon: 'https://www.amazon.com.au/dp/B00AQ7T8A0', chemistWarehouse: 'https://www.chemistwarehouse.com.au/buy/34324' },
+    retailers: { amazon: 'https://www.amazon.com.au/dp/B00AQ7T8A0', chemistWarehouse: { url: 'https://www.chemistwarehouse.com.au/buy/34324', status: 'unavailable', lastCheckedAt: '2026-07-31' } },
     certSummary: 'TGA-listed (AUST L 351518)',
     additiveSummary: 'Active strength disclosed; full ingredients list not published',
     scores: {
@@ -139,7 +141,7 @@ export const VALERIAN_SOURCES: ValProduct[] = [
     strength: '2250 mg dry-root eq · valerenic acid 4.5 mg',
     ausL: '292332',
     channel: 'Chemist Warehouse · Amazon AU',
-    retailers: { amazon: 'https://www.amazon.com.au/dp/B07GDDY67P', chemistWarehouse: 'https://www.chemistwarehouse.com.au/buy/85497' },
+    retailers: { amazon: 'https://www.amazon.com.au/dp/B07GDDY67P', chemistWarehouse: { url: 'https://www.chemistwarehouse.com.au/buy/85497', status: 'unavailable', lastCheckedAt: '2026-07-31' } },
     certSummary: 'TGA-listed (AUST L 292332)',
     additiveSummary: 'Active strength disclosed (highest in set); full ingredients list not published',
     scores: {
@@ -168,7 +170,7 @@ export const VALERIAN_SOURCES: ValProduct[] = [
     strength: '2000 mg dry-root eq · valerenic acids 3.56 mg',
     ausL: '400382',
     channel: 'Chemist Warehouse · Amazon AU',
-    retailers: { chemistWarehouse: 'https://www.chemistwarehouse.com.au/buy/63348' },
+    retailers: { chemistWarehouse: { url: 'https://www.chemistwarehouse.com.au/buy/63348', status: 'unavailable', lastCheckedAt: '2026-07-31' } },
     certSummary: 'TGA-listed (AUST L 400382)',
     additiveSummary: 'Active strength disclosed; full ingredients list not published',
     scores: {
@@ -197,7 +199,7 @@ export const VALERIAN_SOURCES: ValProduct[] = [
     strength: '2000 mg dry-root eq · active strength not stated',
     ausL: '375755',
     channel: 'Chemist Warehouse · Amazon AU',
-    retailers: { amazon: 'https://www.amazon.com.au/dp/B00C1W3TLW', chemistWarehouse: 'https://www.chemistwarehouse.com.au/buy/118544' },
+    retailers: { amazon: 'https://www.amazon.com.au/dp/B00C1W3TLW', chemistWarehouse: { url: 'https://www.chemistwarehouse.com.au/buy/118544', status: 'unavailable', lastCheckedAt: '2026-07-31' } },
     certSummary: 'TGA-listed (AUST L 375755)',
     additiveSummary: 'Active strength NOT disclosed; full ingredients list not published',
     scores: {
@@ -226,7 +228,7 @@ export const VALERIAN_SOURCES: ValProduct[] = [
     strength: '1200 mg valerian dry-root eq · active strength not stated',
     ausL: '394694',
     channel: 'Chemist Warehouse · Amazon AU',
-    retailers: { chemistWarehouse: 'https://www.chemistwarehouse.com.au/buy/123990' },
+    retailers: { chemistWarehouse: { url: 'https://www.chemistwarehouse.com.au/buy/123990', status: 'unavailable', lastCheckedAt: '2026-07-31' } },
     certSummary: 'TGA-listed (AUST L 394694)',
     additiveSummary: 'Each herb dosed; valerian active strength not disclosed; panel not published',
     scores: {
@@ -255,7 +257,7 @@ export const VALERIAN_SOURCES: ValProduct[] = [
     strength: '1300 mg valerian dry-root eq · valerenic acids 2.6 mg',
     ausL: '327845',
     channel: 'Chemist Warehouse · Amazon AU',
-    retailers: { amazon: 'https://www.amazon.com.au/dp/B00LN6XQYW', chemistWarehouse: 'https://www.chemistwarehouse.com.au/buy/58108' },
+    retailers: { amazon: 'https://www.amazon.com.au/dp/B00LN6XQYW', chemistWarehouse: { url: 'https://www.chemistwarehouse.com.au/buy/58108', status: 'unavailable', lastCheckedAt: '2026-07-31' } },
     certSummary: 'TGA-listed (AUST L 327845)',
     additiveSummary: 'Every active dosed; valerenic acid disclosed (on some channels); panel not published',
     scores: {
@@ -284,7 +286,7 @@ export const VALERIAN_SOURCES: ValProduct[] = [
     strength: '556 mg valerian dry-root eq · active strength not stated',
     ausL: '248434',
     channel: 'Chemist Warehouse · Amazon AU',
-    retailers: { amazon: 'https://www.amazon.com.au/dp/B00C1W4SVC', chemistWarehouse: 'https://www.chemistwarehouse.com.au/buy/21031' },
+    retailers: { amazon: 'https://www.amazon.com.au/dp/B00C1W4SVC', chemistWarehouse: { url: 'https://www.chemistwarehouse.com.au/buy/21031', status: 'unavailable', lastCheckedAt: '2026-07-31' } },
     certSummary: 'TGA-listed (AUST L 248434)',
     additiveSummary: 'Each herb dosed; valerian active strength not disclosed; panel not published',
     scores: {
@@ -340,7 +342,7 @@ export const VALERIAN_SOURCES: ValProduct[] = [
     strength: '1500 mg valerian dry-root eq · valerenic acid 1.13 mg',
     ausL: '366873',
     channel: 'Practitioner · iHerb',
-    retailers: { chemistWarehouse: 'https://www.chemistwarehouse.com.au/buy/112913' },
+    retailers: { chemistWarehouse: { url: 'https://www.chemistwarehouse.com.au/buy/112913', status: 'unavailable', lastCheckedAt: '2026-07-31' } },
     certSummary: 'TGA-listed (AUST L 366873)',
     additiveSummary: 'Active strength disclosed (only combo here that keeps the marker); panel not published',
     scores: {
@@ -368,7 +370,7 @@ export const VALERIAN_SOURCES: ValProduct[] = [
     strength: '≈2500 mg eq · named clinical extract (Ze 91019)',
     ausL: '283649',
     channel: 'Pharmacy · Amazon AU',
-    retailers: { amazon: 'https://www.amazon.com.au/dp/B07BF4BHG6' },
+    retailers: { amazon: { url: 'https://www.amazon.com.au/dp/B07BF4BHG6', status: 'unavailable', lastCheckedAt: '2026-07-31' } },
     certSummary: 'TGA-listed (AUST L 283649)',
     certVerified: true,
     additiveSummary: 'Named, trial-studied extract; per-herb doses disclosed; panel not published',
@@ -401,7 +403,7 @@ export const VALERIAN_SOURCES: ValProduct[] = [
     strength: '1000 mg root / serving · whole root, no active figure',
     ausL: null,
     channel: 'iHerb AU (import)',
-    retailers: { amazon: 'https://www.amazon.com.au/dp/B0019LTHXA', iherb: 'https://au.iherb.com/pr/now-foods-valerian-root-500-mg-250-veg-capsules/830' },
+    retailers: { amazon: { url: 'https://www.amazon.com.au/dp/B0019LTHXA', status: 'unavailable', lastCheckedAt: '2026-07-31' }, iherb: 'https://au.iherb.com/pr/now-foods-valerian-root-500-mg-250-veg-capsules/830' },
     certSummary: 'Not TGA-listed (US import)',
     additiveSummary: 'Panel disclosed and clean (vegetarian capsule only)',
     importSafety: {
@@ -471,7 +473,7 @@ export const VALERIAN_SOURCES: ValProduct[] = [
     strength: '2 g dry-root eq (500 mg extract) · valerenic acid not stated',
     ausL: '375753',
     channel: 'Chemist Warehouse · Amazon AU',
-    retailers: { amazon: 'https://www.amazon.com.au/dp/B076VW8R8R', chemistWarehouse: 'https://www.chemistwarehouse.com.au/buy/119891' },
+    retailers: { amazon: 'https://www.amazon.com.au/dp/B076VW8R8R', chemistWarehouse: { url: 'https://www.chemistwarehouse.com.au/buy/119891', status: 'unavailable', lastCheckedAt: '2026-07-31' } },
     certSummary: 'TGA-listed (AUST L 375753)',
     additiveSummary: 'Single-herb; contains soya, sulfites and beeswax (disclosed)',
     scores: {
@@ -499,7 +501,7 @@ export const VALERIAN_SOURCES: ValProduct[] = [
     strength: '2 g dry-root eq per 2.25 mL · valerenic acid not stated',
     ausL: '352103',
     channel: 'Chemist Warehouse · Woolworths · Amazon AU',
-    retailers: { chemistWarehouse: 'https://www.chemistwarehouse.com.au/buy/108462' },
+    retailers: { chemistWarehouse: { url: 'https://www.chemistwarehouse.com.au/buy/108462', status: 'unavailable', lastCheckedAt: '2026-07-31' } },
     certSummary: 'TGA-listed (AUST L 352103)',
     additiveSummary: 'Single-herb liquid; glycerol + peppermint oil, 54% alcohol (disclosed)',
     scores: {

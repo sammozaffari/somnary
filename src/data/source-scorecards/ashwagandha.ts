@@ -27,6 +27,8 @@
 // TRANSPARENCY scheme (cumulative, cap 5): +2 maker identifiable; +1 withanolide figure disclosed;
 // +1 named clinical extract (KSM-66/Shoden); +1 AUST L medicine OR public per-lot COA (Gaia).
 
+import type { Retailers } from './card';
+
 export type DimensionKey =
   | 'testing_purity'
   | 'label_accuracy'
@@ -86,7 +88,7 @@ export interface AshProduct {
   communityThemes?: { note: string; url?: string }[];
   /** Where an Australian can find it — PLAIN retailer URLs, zero affiliate/tracking params (D2).
    * Display priority: amazon > chemistWarehouse > iherb. */
-  retailers?: { amazon?: string; chemistWarehouse?: string; iherb?: string };
+  retailers?: Retailers;
   /** Disclosed ingredients panel (from the dossier), actives first — omitted when the brand doesn't publish one. */
   ingredients?: string[];
   imagePath?: string;
@@ -120,7 +122,7 @@ export const ASHWAGANDHA_SOURCES: AshProduct[] = [
     regulated: 'medicine',
     ausL: '406701',
     channel: 'Chemist Warehouse · Amazon AU',
-    retailers: { chemistWarehouse: 'https://www.chemistwarehouse.com.au/buy/89831' },
+    retailers: { chemistWarehouse: { url: 'https://www.chemistwarehouse.com.au/buy/89831', status: 'unavailable', lastCheckedAt: '2026-07-31' } },
     certSummary: 'KSM-66 · TGA-listed (AUST L 406701)',
     trialFlag: { note: 'Built on KSM-66, a named ashwagandha extract with published RCTs — a "used in trials" signal for the ingredient (context, not a quality endorsement).' },
     additiveSummary: 'Highest disclosed withanolide in the set; full panel not published',
@@ -245,7 +247,7 @@ export const ASHWAGANDHA_SOURCES: AshProduct[] = [
     regulated: 'medicine',
     ausL: '508647',
     channel: 'Chemist Warehouse · Amazon AU',
-    retailers: { chemistWarehouse: 'https://www.chemistwarehouse.com.au/buy/163899' },
+    retailers: { chemistWarehouse: { url: 'https://www.chemistwarehouse.com.au/buy/163899', status: 'unavailable', lastCheckedAt: '2026-07-31' } },
     certSummary: 'KSM-66 · TGA-listed (AUST L 508647)',
     trialFlag: { note: 'Built on KSM-66, a named ashwagandha extract with published RCTs — a "used in trials" signal for the ingredient (context, not a quality endorsement).' },
     additiveSummary: 'KSM-66 but withanolide figure NOT disclosed; full panel not published',
@@ -340,7 +342,7 @@ export const ASHWAGANDHA_SOURCES: AshProduct[] = [
     regulated: 'medicine',
     ausL: '310894',
     channel: 'Chemist Warehouse · Amazon AU',
-    retailers: { chemistWarehouse: 'https://www.chemistwarehouse.com.au/buy/91132' },
+    retailers: { chemistWarehouse: { url: 'https://www.chemistwarehouse.com.au/buy/91132', status: 'unavailable', lastCheckedAt: '2026-07-31' } },
     certSummary: 'Generic extract · TGA-listed (AUST L 310894)',
     b6: { note: 'Contains vitamin B6 at ~41 mg/day at label use — above the 10 mg/day the TGA sets its neuropathy warning at — and carries the mandated peripheral-neuropathy warning. Shown for your safety; separate from the scores.' },
     additiveSummary: 'Generic low-withanolide ashwagandha in a B-vitamin/mineral combo',
@@ -372,7 +374,7 @@ export const ASHWAGANDHA_SOURCES: AshProduct[] = [
     regulated: 'medicine',
     ausL: '390319',
     channel: 'Chemist Warehouse · Amazon AU',
-    retailers: { amazon: 'https://www.amazon.com.au/dp/B09T3JR8F3', chemistWarehouse: 'https://www.chemistwarehouse.com.au/buy/107843' },
+    retailers: { amazon: 'https://www.amazon.com.au/dp/B09T3JR8F3', chemistWarehouse: { url: 'https://www.chemistwarehouse.com.au/buy/107843', status: 'unavailable', lastCheckedAt: '2026-07-31' } },
     certSummary: 'Generic extract · TGA-listed (AUST L 390319)',
     additiveSummary: 'Lowest ashwagandha dose in the set; generic extract',
     scores: {
@@ -403,7 +405,7 @@ export const ASHWAGANDHA_SOURCES: AshProduct[] = [
     regulated: 'medicine',
     ausL: '430133',
     channel: 'Chemist Warehouse · Amazon AU',
-    retailers: { chemistWarehouse: 'https://www.chemistwarehouse.com.au/buy/116926' },
+    retailers: { chemistWarehouse: { url: 'https://www.chemistwarehouse.com.au/buy/116926', status: 'unavailable', lastCheckedAt: '2026-07-31' } },
     certSummary: 'Generic extract · TGA-listed (AUST L 430133)',
     additiveSummary: 'Generic ashwagandha in a passionflower/lavender sleep combo',
     scores: {
@@ -533,7 +535,7 @@ export const ASHWAGANDHA_SOURCES: AshProduct[] = [
     regulated: 'medicine',
     ausL: '378376',
     channel: 'Chemist Warehouse · Amazon AU',
-    retailers: { chemistWarehouse: 'https://www.chemistwarehouse.com.au/buy/114657' },
+    retailers: { chemistWarehouse: { url: 'https://www.chemistwarehouse.com.au/buy/114657', status: 'unavailable', lastCheckedAt: '2026-07-31' } },
     trialFlag: { note: 'Uses the named KSM-66 extract at 600 mg/day — the dose used in its published stress trials — a factual "used in trials" signal, not a quality endorsement.' },
     certSummary: 'TGA-listed (AUST L 378376)',
     additiveSummary: 'Named KSM-66 + B5; full ingredients list not published',
@@ -564,7 +566,7 @@ export const ASHWAGANDHA_SOURCES: AshProduct[] = [
     regulated: 'medicine',
     ausL: '474850',
     channel: 'Chemist Warehouse · Amazon AU',
-    retailers: { chemistWarehouse: 'https://www.chemistwarehouse.com.au/buy/151530' },
+    retailers: { chemistWarehouse: { url: 'https://www.chemistwarehouse.com.au/buy/151530', status: 'unavailable', lastCheckedAt: '2026-07-31' } },
     trialFlag: { note: 'Uses the named KSM-66 extract at 600 mg/day — a factual "used in trials" signal, not a quality endorsement.' },
     certSummary: 'TGA-listed (AUST L 474850)',
     additiveSummary: 'Named KSM-66 sleep combo; full ingredients list not published',
@@ -687,7 +689,7 @@ export const ASHWAGANDHA_SOURCES: AshProduct[] = [
     regulated: 'medicine',
     ausL: '520807',
     channel: 'Chemist Warehouse · Amazon AU',
-    retailers: { chemistWarehouse: 'https://www.chemistwarehouse.com.au/buy/167807' },
+    retailers: { chemistWarehouse: { url: 'https://www.chemistwarehouse.com.au/buy/167807', status: 'unavailable', lastCheckedAt: '2026-07-31' } },
     trialFlag: { note: 'Uses the named KSM-66 extract at 600 mg/day — a factual "used in trials" signal, not a quality endorsement.' },
     b6: { note: 'Contains vitamin B6 at a low dose (~4 mg/day) — well below the TGA neuropathy-warning band, but it is added B6.' },
     certSummary: 'TGA-listed (AUST L 520807)',
@@ -719,7 +721,7 @@ export const ASHWAGANDHA_SOURCES: AshProduct[] = [
     regulated: 'medicine',
     ausL: '416008',
     channel: 'Chemist Warehouse · Amazon AU',
-    retailers: { chemistWarehouse: 'https://www.chemistwarehouse.com.au/buy/135184' },
+    retailers: { chemistWarehouse: { url: 'https://www.chemistwarehouse.com.au/buy/135184', status: 'unavailable', lastCheckedAt: '2026-07-31' } },
     b6: { note: 'Contains a high dose of vitamin B6 — pyridoxine 25 mg per tablet; at 2 tablets/day (~50 mg/day) it is above the TGA on-pack-warning threshold and carries the mandated tingling/numbness warning.' },
     certSummary: 'TGA-listed (AUST L 416008)',
     additiveSummary: 'Root+leaf extract; no named clinical extract confirmed; full ingredients list not published',

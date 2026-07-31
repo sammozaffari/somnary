@@ -26,6 +26,8 @@
 // serving; +1 grade substantiated beyond a bare self-claim (a named raw-material pedigree or a real
 // COA/testing program); +1 public per-lot COA retrievable OR (for a TGA medicine) the AUST L listing.
 
+import type { Retailers } from './card';
+
 export type DimensionKey =
   | 'testing_purity'
   | 'label_accuracy'
@@ -81,7 +83,7 @@ export interface GlyProduct {
   communityThemes?: { note: string; url?: string }[];
   /** Where an Australian can find it — PLAIN retailer URLs, zero affiliate/tracking params (D2).
    * Display priority: amazon > chemistWarehouse > iherb. */
-  retailers?: { amazon?: string; chemistWarehouse?: string; iherb?: string };
+  retailers?: Retailers;
   /** Disclosed ingredients panel (from the dossier), actives first — omitted when the brand doesn't publish one. */
   ingredients?: string[];
   imagePath?: string;
@@ -429,7 +431,7 @@ export const GLYCINE_SOURCES: GlyProduct[] = [
     regulated: 'medicine',
     ausL: '312974',
     channel: 'Chemist Warehouse · Woolworths',
-    retailers: { chemistWarehouse: 'https://www.chemistwarehouse.com.au/buy/105734' },
+    retailers: { chemistWarehouse: { url: 'https://www.chemistwarehouse.com.au/buy/105734', status: 'unavailable', lastCheckedAt: '2026-07-31' } },
     certSummary: 'TGA-listed medicine (AUST L 312974)',
     additiveSummary: 'Each active dosed; full ingredients list not published',
     scores: {
@@ -460,7 +462,7 @@ export const GLYCINE_SOURCES: GlyProduct[] = [
     regulated: 'medicine',
     ausL: '490772',
     channel: 'Chemist Warehouse · pharmacy',
-    retailers: { chemistWarehouse: 'https://www.chemistwarehouse.com.au/buy/114030' },
+    retailers: { chemistWarehouse: { url: 'https://www.chemistwarehouse.com.au/buy/114030', status: 'unavailable', lastCheckedAt: '2026-07-31' } },
     certSummary: 'TGA-listed medicine (AUST L 490772)',
     additiveSummary: 'Panel disclosed (stevia, flavour, silica, sucrose)',
     scores: {
@@ -558,7 +560,7 @@ export const GLYCINE_SOURCES: GlyProduct[] = [
     regulated: 'food',
     ausL: null,
     channel: 'iHerb AU (import)',
-    retailers: { amazon: 'https://www.amazon.com.au/dp/B00B35A394', iherb: 'https://au.iherb.com/pr/life-extension-glycine-1-000-mg-100-vegetarian-capsules/47810' },
+    retailers: { amazon: { url: 'https://www.amazon.com.au/dp/B00B35A394', status: 'unavailable', lastCheckedAt: '2026-07-31' }, iherb: 'https://au.iherb.com/pr/life-extension-glycine-1-000-mg-100-vegetarian-capsules/47810' },
     ingredients: ['Glycine 1,000 mg', 'Vegetarian capsule', 'Ascorbyl palmitate'],
     certSummary: 'Food — not TGA-listed (import)',
     additiveSummary: 'The cleanest panel here — veg cap + ascorbyl palmitate only; no grade claim',
@@ -620,7 +622,7 @@ export const GLYCINE_SOURCES: GlyProduct[] = [
     regulated: 'food',
     ausL: null,
     channel: 'brand webstore (AU-domestic)',
-    retailers: { amazon: 'https://www.amazon.com.au/dp/B0016BX8O2' },
+    retailers: { amazon: { url: 'https://www.amazon.com.au/dp/B0016BX8O2', status: 'unavailable', lastCheckedAt: '2026-07-31' } },
     ingredients: ['Glycine (pure single-ingredient powder)'],
     certSummary: 'Food (sports-food) — not TGA-listed',
     additiveSummary: 'Pure glycine; "Independently Tested" is a badge, not a linked report',
