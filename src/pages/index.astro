@@ -136,6 +136,18 @@ const popularChecks = [
       </div>
 
       <div class="lede-aside">
+        {/* safety boundary — vermilion safety register (DISTINCT from oxblood). Rendered BEFORE
+            the doors so it precedes the "Check a remedy or product" pathway in scroll/tab order at
+            every width — you never scroll past a product pathway to reach it (intent G). */}
+        <a class="safety-strip" href="/safety">
+          <ShieldAlert class="safety-strip-icon" size={22} stroke-width={1.75} aria-hidden="true" />
+          <span class="safety-strip-text">
+            <strong>On medications, pregnant, or considering this for a child?</strong>
+            Start with the safety boundary — interactions and red flags come before any remedy.
+          </span>
+          <span class="safety-strip-go" aria-hidden="true">→</span>
+        </a>
+
         {/* 3 — dual front door: two CO-EQUAL starts. Bordered, no fill, so neither outranks the
             other; the oxblood affordance mark is the only accent. */}
         <div class="doors">
@@ -158,17 +170,6 @@ const popularChecks = [
             <span class="door-go">Check a remedy <span aria-hidden="true">→</span></span>
           </a>
         </div>
-
-        {/* safety boundary — vermilion safety register (DISTINCT from oxblood), placed ABOVE any
-            product content so it is visible without scrolling past a product pathway (intent G). */}
-        <a class="safety-strip" href="/safety">
-          <ShieldAlert class="safety-strip-icon" size={22} stroke-width={1.75} aria-hidden="true" />
-          <span class="safety-strip-text">
-            <strong>On medications, pregnant, or considering this for a child?</strong>
-            Start with the safety boundary — interactions and red flags come before any remedy.
-          </span>
-          <span class="safety-strip-go" aria-hidden="true">→</span>
-        </a>
       </div>
     </section>
 
@@ -311,6 +312,9 @@ const popularChecks = [
   }
   .lede-aside {
     min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
   }
   .lede-eyebrow {
     font-family: var(--font-mono);
@@ -464,7 +468,6 @@ const popularChecks = [
     display: flex;
     align-items: center;
     gap: var(--sp-3);
-    margin-top: var(--sp-4);
     padding: var(--sp-4) var(--sp-5);
     background: var(--warning-bg);
     /* safety-card border — vermilion-alpha, matching the sanctioned §5 pattern (safety.astro) */
@@ -790,10 +793,6 @@ const popularChecks = [
       grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
       gap: var(--sp-8);
       align-items: center;
-    }
-    .lede-aside {
-      display: flex;
-      flex-direction: column;
     }
   }
   @media (max-width: 760px) {
