@@ -63,6 +63,11 @@ const remedies = [
       </p>
     </header>
 
+    <a class="browse-all" href="/products">
+      <span class="browse-all-title">Holding a bottle? Browse every product in one place →</span>
+      <span class="browse-all-sub">Filter all documented products by ingredient, form, single-vs-combination, and brand.</span>
+    </a>
+
     <section class="grid" aria-label="Source scorecards by remedy">
       {
         remedies.map((r) => (
@@ -206,6 +211,35 @@ const remedies = [
     letter-spacing: var(--tracking-label);
     color: var(--primary);
     margin-top: var(--sp-3);
+  }
+
+  .browse-all {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-1);
+    border: var(--border-hairline);
+    border-left: 3px solid var(--primary);
+    border-radius: var(--r-xl);
+    background: var(--primary-soft);
+    padding: var(--sp-5) var(--sp-6);
+    margin-bottom: var(--sp-6);
+    text-decoration: none;
+  }
+  .browse-all:hover {
+    border-color: var(--primary);
+    border-left-color: var(--primary);
+  }
+  .browse-all-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-md);
+    line-height: var(--lh-md);
+    color: var(--ink);
+  }
+  .browse-all-sub {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
   }
 
   .more {

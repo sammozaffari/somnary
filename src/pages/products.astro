@@ -1,0 +1,791 @@
+---
+// Product browse & filter — the "pharmacy aisle" front door (CHK-products-browse).
+//
+// WHY THIS EXISTS: 94 ratified source scorecards are reachable today ONLY under
+// /sources/<ingredient>/<slug>. Someone holding a bottle can't find it by brand/form — the
+// IA audit's intent-E leave trigger ("the product exists only under an internal ingredient
+// category", docs/audits/02-ia.md). This page serves intents E (is this exact product a
+// defensible match?) and the entry to F (what's on the label?), WITHOUT becoming universal
+// search — no entity IDs, no brand pages, no blending into /search (out of scope by the audit's
+// own risk note: poor entity resolution returns wrong SKUs; ranking must not conflate remedy
+// grades with product tiers).
+//
+// ARCHITECTURE: server-rendered (prerender=false) from the build-time browse index. Filter state
+// lives entirely in the URL (?ingredient=&form=&combo=&brand=&sort=), so a view is shareable,
+// crawlable, and complete with JavaScript OFF (a real GET <form>). A progressive-enhancement
+// island re-filters live without a reload and pushState-updates the URL. ALL products are in the
+// DOM (every one crawlable from here); the query controls which are shown and their order.
+//
+// EDITORIAL (CLAUDE.md / /sources/methodology): six documented dimensions + the derived 4-tier
+// label — NEVER an overall letter, NEVER a #1. Sort-by-dimension (owner-ratified) orders on ONE
+// factual axis; there is no composite sort and the default order is neutral (alphabetical).
+export const prerender = false;
+
+import Base from '../layouts/Base.astro';
+import ScorecardCard from '../components/scorecards/ScorecardCard.astro';
+import { TIERS } from '../data/source-scorecards/tiers';
+import { DIMENSION_LABELS, DIMENSION_ORDER } from '../data/source-scorecards/card';
+import {
+  loadBrowseProducts,
+  getFacets,
+  parseQuery,
+  filterProducts,
+  BrowseParamError,
+  EMPTY_QUERY,
+  INGREDIENT_LABELS,
+  FORM_LABELS,
+  COMBO_LABELS,
+  type BrowseQuery,
+  type BrowseProduct,
+} from '../lib/sources/browse';
+
+const reviewDate = '2026-08-03';
+
+// Load the data behind a try/catch (the seam that becomes an awaited Supabase read later). A THROW
+// here maps to the `error` state below — it must NEVER fall through to empty/no-results (CMP-01).
+let allProducts: BrowseProduct[] = [];
+let dataError = false;
+try {
+  allProducts = loadBrowseProducts();
+} catch {
+  dataError = true;
+}
+const facets = dataError
+  ? { ingredients: [], forms: [], combos: [], brands: [] }
+  : getFacets(allProducts);
+const total = allProducts.length;
+
+// Parse the URL strictly: a tampered/mistyped shared link resolves to the explicit `error` state
+// rather than silently pretending to be a clean result (intent-F: a parse failure must never read
+// as a reassuring "no issues" result). Skipped when the data itself failed to load.
+let query: BrowseQuery = EMPTY_QUERY;
+let paramError: string | null = null;
+if (!dataError) {
+  try {
+    query = parseQuery(Astro.url.searchParams);
+  } catch (e) {
+    if (e instanceof BrowseParamError) paramError = e.message;
+    else throw e;
+  }
+}
+
+const matched = dataError || paramError ? [] : filterProducts(query, allProducts);
+const matchedKeys = new Set(matched.map((p) => `${p.ingredient}/${p.slug}`));
+
+// The four RESULTS-region states are mutually exclusive — one discriminant, chosen here and set as
+// data-state. PRECEDENCE MATTERS: a data-load failure is `error` FIRST, above empty/no-results, so a
+// failure can never render as "no products" or "no matches" (CMP-01). `loading` is owned by the
+// client island (the async-path branch); the SSR path yields only empty | error | no-results | results.
+type ResultState = 'empty' | 'error' | 'no-results' | 'results';
+const errorKind: 'data' | 'param' | null = dataError ? 'data' : paramError ? 'param' : null;
+const state: ResultState = errorKind
+  ? 'error'
+  : total === 0
+    ? 'empty'
+    : matched.length === 0
+      ? 'no-results'
+      : 'results';
+
+// Render EVERY product (all crawlable from here); matched in sorted order first, then the rest
+// (hidden). The island reorders/hides live; this is the no-JS-correct starting point.
+const nonMatched = allProducts.filter((p) => !matchedKeys.has(`${p.ingredient}/${p.slug}`));
+const ordered: { p: BrowseProduct; hidden: boolean }[] = [
+  ...matched.map((p) => ({ p, hidden: false })),
+  ...nonMatched.map((p) => ({ p, hidden: true })),
+];
+
+const sortIsDimension = query.sort !== 'brand';
+const sortLabel = query.sort === 'brand' ? null : DIMENSION_LABELS[query.sort];
+
+// Active-filter summary chips (also rebuilt client-side).
+const activeChips: string[] = [
+  ...query.ingredients.map((k) => INGREDIENT_LABELS[k]),
+  ...query.forms.map((k) => FORM_LABELS[k]),
+  ...query.combos.map((k) => COMBO_LABELS[k]),
+  ...(query.brand ? [facets.brands.find((b) => b.slug === query.brand)?.label ?? query.brand] : []),
+];
+
+// "match your filters" is earned only by an actual FILTER (ingredient/form/combo/brand) — a bare
+// sort narrows nothing, so it must not claim to. On no-results, give the polite live region a real
+// spoken sentence (not an empty string) so a screen-reader user who filters down to zero is told so.
+const hasActiveFilters =
+  query.ingredients.length > 0 ||
+  query.forms.length > 0 ||
+  query.combos.length > 0 ||
+  query.brand !== null;
+const countText =
+  state === 'results'
+    ? `${matched.length} ${matched.length === 1 ? 'product' : 'products'}${hasActiveFilters ? ' match your filters' : ''}`
+    : state === 'no-results'
+      ? 'No products match your filters'
+      : '';
+---
+
+<Base
+  title="Browse sleep-supplement products — Somnary source scorecards"
+  description="Browse the sleep-supplement products Somnary has documented — magnesium, ashwagandha, valerian, glycine, melatonin — filtered by ingredient, form, single-vs-combination, and brand. Rated on six documented dimensions. No overall score, no #1, no affiliate links."
+>
+  <main class="page">
+    <header class="head">
+      <p class="eyebrow">Source scorecards · Browse</p>
+      <h1 class="title">Browse products</h1>
+      <p class="dek">
+        Holding a bottle? Find it here. Every product Somnary has documented that you can buy in
+        Australia, in one place — filter by ingredient, form, whether it’s a single ingredient or a
+        combination, and brand.
+        Each is rated on <a href="/sources/methodology">six documented dimensions</a>, and grouped
+        into plain-English trust tiers. <strong>No overall score, no #1</strong>, and
+        <strong>no affiliate links, ever</strong> — Somnary earns nothing if you buy. These pages
+        rate how a product is <strong>sourced and labelled</strong>, never whether you should take
+        it. <a href="/sources">Prefer to browse by ingredient?</a>
+      </p>
+    </header>
+
+    {/* Real GET form → works with JS off. The island below applies filters live and hides Apply. */}
+    <form class="filters" method="get" action="/products" data-pb-form aria-label="Filter products">
+      <div class="filters-grid">
+        <fieldset class="facet">
+          <legend>Ingredient</legend>
+          <div class="opts">
+            {facets.ingredients.map((f) => (
+              <label class="opt">
+                <input type="checkbox" name="ingredient" value={f.key} checked={query.ingredients.includes(f.key)} />
+                <span>{f.label}</span>
+                <span class="opt-count">{f.count}</span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+
+        <fieldset class="facet">
+          <legend>Form</legend>
+          <div class="opts">
+            {facets.forms.map((f) => (
+              <label class="opt">
+                <input type="checkbox" name="form" value={f.key} checked={query.forms.includes(f.key)} />
+                <span>{f.label}</span>
+                <span class="opt-count">{f.count}</span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+
+        <fieldset class="facet">
+          <legend>Type</legend>
+          <div class="opts">
+            {facets.combos.map((f) => (
+              <label class="opt">
+                <input type="checkbox" name="combo" value={f.key} checked={query.combos.includes(f.key)} />
+                <span>{f.label}</span>
+                <span class="opt-count">{f.count}</span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+
+        <div class="facet facet-selects">
+          <p class="facet-legend">
+            <label for="brand">Brand</label>
+          </p>
+          <select id="brand" name="brand" class="select">
+            <option value="">All brands</option>
+            {facets.brands.map((b) => (
+              <option value={b.slug} selected={query.brand === b.slug}>{b.label} ({b.count})</option>
+            ))}
+          </select>
+
+          <p class="facet-legend">
+            <label for="sort">Order by</label>
+          </p>
+          <select id="sort" name="sort" class="select">
+            <option value="brand" selected={query.sort === 'brand'}>Brand (A–Z)</option>
+            {DIMENSION_ORDER.map((k) => (
+              <option value={k} selected={query.sort === k}>{DIMENSION_LABELS[k]} score</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      <div class="filters-actions">
+        <button type="submit" class="apply">Apply filters</button>
+        <a href="/products" class="clear" data-pb-clear>Clear all</a>
+      </div>
+    </form>
+
+    <div
+      class="results"
+      data-state={state}
+      data-error-kind={errorKind}
+      data-pb-results
+      data-total={total}
+    >
+      <div class="results-head">
+        <p class="count" data-pb-count aria-live="polite">{countText}</p>
+        <div class="summary" data-pb-summary>
+          {activeChips.length > 0 && activeChips.map((c) => <span class="summary-chip">{c}</span>)}
+        </div>
+      </div>
+
+      {/* Sort-by-dimension guardrail copy — one axis, never a ranking. Hidden unless a dim is active. */}
+      <p class="sortnote" data-pb-sortnote hidden={!sortIsDimension}>
+        Ordered by <strong data-pb-sortlabel>{sortLabel}</strong> score — one factual axis, not an
+        overall rank. <a href="/sources/methodology">Somnary never names a #1.</a>
+      </p>
+
+      {/* results */}
+      <ul class="grid" data-pb-grid>
+        {ordered.map(({ p, hidden }) => (
+          <li
+            class="item"
+            hidden={hidden}
+            data-ingredient={p.ingredient}
+            data-form={p.form}
+            data-combo={p.combo}
+            data-brand={p.brandSlug}
+            data-brandlabel={p.brand}
+            data-scores={JSON.stringify(
+              Object.fromEntries(DIMENSION_ORDER.map((k) => [k, p.scores[k].score])),
+            )}
+          >
+            <p class="focus" data-pb-focus hidden={!sortIsDimension}>
+              <span data-pb-focus-label>{sortLabel}</span>
+              <span class="focus-score" data-pb-focus-score>{query.sort === 'brand' ? '' : p.scores[query.sort].score}<span class="focus-max">/5</span></span>
+            </p>
+            <ScorecardCard card={p.card} tier={TIERS[p.tier]} href={p.href} />
+          </li>
+        ))}
+      </ul>
+
+      {/* no-results */}
+      <div class="state state-noresults" role="status">
+        <p class="state-title">No products match these filters</p>
+        <p class="state-body">Nothing in the documented set fits every filter at once. Try removing one, or <a href="/products">clear all filters</a>.</p>
+      </div>
+
+      {/* error — a data-load failure and a bad-link failure are BOTH error (never no-results/empty),
+          but they carry different, honest messages. */}
+      <div class="state state-error" role="alert">
+        {errorKind === 'data' ? (
+          <>
+            <p class="state-title">We couldn’t load the products just now</p>
+            <p class="state-body">
+              This is a problem on our side, not a “no results” — the product list didn’t load.
+              <a href="/products">Try again →</a>
+            </p>
+          </>
+        ) : (
+          <>
+            <p class="state-title">That link couldn’t be read</p>
+            <p class="state-body">
+              Part of the filter in this link isn’t a value we recognise, so we didn’t guess.
+              <a href="/products">Start a clean browse →</a>
+            </p>
+          </>
+        )}
+      </div>
+
+      {/* empty (defensive — no ratified products at all) */}
+      <div class="state state-empty" role="status">
+        <p class="state-title">No products documented yet</p>
+        <p class="state-body">Scorecards are being finalised. <a href="/sources">Browse by ingredient →</a></p>
+      </div>
+
+      {/* loading (client island only — reachable on the future async-backed path, see the script) */}
+      <div class="state state-loading" role="status">
+        <p class="state-body">Filtering…</p>
+      </div>
+    </div>
+
+    <p class="footer-strip">
+      Somnary · Source scorecards · Reviewed {reviewDate} · Educational, not medical advice · These
+      pages rate how a product is sourced and labelled — never whether you should take it. This is a
+      curated set of documented products, not a complete catalogue of the Australian market.
+      <strong>Melatonin is prescription-only in Australia</strong> — the melatonin products here are
+      personal imports, not sold over the counter. No affiliate links; no brand pays to appear or to
+      change a score. Found an error? We aim to fix verified errors within 7 days —
+      <a href="mailto:sammymoz@gmail.com">sammymoz@gmail.com</a>.
+    </p>
+  </main>
+
+  <script define:vars={{ DIMENSION_LABELS, FORM_LABELS, COMBO_LABELS, ING_LABELS: INGREDIENT_LABELS }}>
+    // Progressive enhancement: filter/sort live, keep the URL shareable, and drive the four
+    // mutually-exclusive result states. The SSR output above is already correct with JS off; this
+    // only enhances it. All products are in the DOM — we show/hide + reorder, never re-render cards.
+    (() => {
+      const form = document.querySelector('[data-pb-form]');
+      const results = document.querySelector('[data-pb-results]');
+      if (!form || !results) return;
+
+      // On a DATA-load failure the grid is empty and nothing can be recomputed — do NOT enhance,
+      // or a filter change would recompute from zero items and flip `error` → `empty`/`no-results`
+      // (the CMP-01 failure mode). A reload is the recovery. A bad-PARAM error still enhances: every
+      // product is in the DOM (hidden), so unchecking the bad filter recovers to real results.
+      if (results.dataset.state === 'error' && results.dataset.errorKind === 'data') return;
+
+      const grid = results.querySelector('[data-pb-grid]');
+      const countEl = results.querySelector('[data-pb-count]');
+      const summaryEl = results.querySelector('[data-pb-summary]');
+      const sortNote = results.querySelector('[data-pb-sortnote]');
+      const sortLabelEl = results.querySelector('[data-pb-sortlabel]');
+      const items = Array.from(grid.querySelectorAll('.item'));
+      const total = Number(results.dataset.total || '0');
+
+      // JS applies on change; the no-JS submit button is redundant now.
+      form.querySelector('.apply')?.setAttribute('hidden', '');
+      form.setAttribute('data-enhanced', 'true');
+
+      const scoresOf = (li) => JSON.parse(li.dataset.scores || '{}');
+
+      function readQuery() {
+        const fd = new FormData(form);
+        return {
+          ingredients: fd.getAll('ingredient'),
+          forms: fd.getAll('form'),
+          combos: fd.getAll('combo'),
+          brand: (fd.get('brand') || '').toString() || null,
+          sort: (fd.get('sort') || 'brand').toString(),
+        };
+      }
+
+      function toQS(q) {
+        const p = new URLSearchParams();
+        if (q.ingredients.length) p.set('ingredient', q.ingredients.join(','));
+        if (q.forms.length) p.set('form', q.forms.join(','));
+        if (q.combos.length) p.set('combo', q.combos.join(','));
+        if (q.brand) p.set('brand', q.brand);
+        if (q.sort !== 'brand') p.set('sort', q.sort);
+        const s = p.toString();
+        return s ? '?' + s : '';
+      }
+
+      function matches(li, q) {
+        return (
+          (!q.ingredients.length || q.ingredients.includes(li.dataset.ingredient)) &&
+          (!q.forms.length || q.forms.includes(li.dataset.form)) &&
+          (!q.combos.length || q.combos.includes(li.dataset.combo)) &&
+          (!q.brand || li.dataset.brand === q.brand)
+        );
+      }
+
+      function renderSummary(q) {
+        const chips = [
+          ...q.ingredients.map((k) => ING_LABELS[k]),
+          ...q.forms.map((k) => FORM_LABELS[k]),
+          ...q.combos.map((k) => COMBO_LABELS[k]),
+        ];
+        if (q.brand) {
+          const opt = form.querySelector('#brand option[value="' + CSS.escape(q.brand) + '"]');
+          if (opt) chips.push(opt.textContent.replace(/\s*\(\d+\)\s*$/, ''));
+        }
+        summaryEl.innerHTML = '';
+        for (const c of chips) {
+          const s = document.createElement('span');
+          s.className = 'summary-chip';
+          s.textContent = c;
+          summaryEl.appendChild(s);
+        }
+      }
+
+      // Filtering is SYNCHRONOUS and instant (all products are already in the DOM — we show/hide +
+      // reorder, no fetch, no re-render). No requestAnimationFrame: rAF pauses in a background tab,
+      // which would strand the UI on "loading" forever. The `loading` state stays a wired, honest
+      // branch of the state machine for the async path (a future Supabase-backed source) — we don't
+      // flash a spinner for sub-millisecond local work (Somnary real-promises rule).
+      function apply(push) {
+        try {
+          const q = readQuery();
+          let matchedList = items.filter((li) => matches(li, q));
+          const dim = q.sort !== 'brand' ? q.sort : null;
+          if (dim) {
+            matchedList.sort(
+              (a, b) =>
+                scoresOf(b)[dim] - scoresOf(a)[dim] ||
+                a.dataset.brandlabel.localeCompare(b.dataset.brandlabel),
+            );
+          } else {
+            matchedList.sort((a, b) => a.dataset.brandlabel.localeCompare(b.dataset.brandlabel));
+          }
+          const shown = new Set(matchedList);
+          // Reorder: matched (sorted) first, hidden rest after.
+          for (const li of matchedList) {
+            li.hidden = false;
+            const focus = li.querySelector('[data-pb-focus]');
+            if (dim) {
+              focus.hidden = false;
+              focus.querySelector('[data-pb-focus-label]').textContent = DIMENSION_LABELS[dim];
+              focus.querySelector('[data-pb-focus-score]').firstChild.textContent = scoresOf(li)[dim];
+            } else {
+              focus.hidden = true;
+            }
+            grid.appendChild(li);
+          }
+          for (const li of items) {
+            if (!shown.has(li)) {
+              li.hidden = true;
+              grid.appendChild(li);
+            }
+          }
+
+          // A bare sort narrows nothing — only a real filter earns "match your filters". Zero matches
+          // announces a spoken sentence (the count is aria-live) instead of falling silent.
+          const hasActiveFilters =
+            q.ingredients.length || q.forms.length || q.combos.length || q.brand;
+          countEl.textContent = matchedList.length
+            ? matchedList.length + ' ' + (matchedList.length === 1 ? 'product' : 'products') + (hasActiveFilters ? ' match your filters' : '')
+            : 'No products match your filters';
+
+          sortNote.hidden = !dim;
+          if (dim) sortLabelEl.textContent = DIMENSION_LABELS[dim];
+
+          renderSummary(q);
+          results.dataset.state = total === 0 ? 'empty' : matchedList.length ? 'results' : 'no-results';
+
+          if (push) history.pushState(q, '', location.pathname + toQS(q));
+        } catch (err) {
+          results.dataset.state = 'error';
+        }
+      }
+
+      function setControls(params) {
+        const get = (n) => params.getAll(n).flatMap((v) => v.split(',')).filter(Boolean);
+        const ing = new Set(get('ingredient'));
+        const frm = new Set(get('form'));
+        const cmb = new Set(get('combo'));
+        form.querySelectorAll('input[name="ingredient"]').forEach((el) => (el.checked = ing.has(el.value)));
+        form.querySelectorAll('input[name="form"]').forEach((el) => (el.checked = frm.has(el.value)));
+        form.querySelectorAll('input[name="combo"]').forEach((el) => (el.checked = cmb.has(el.value)));
+        form.querySelector('#brand').value = params.get('brand') || '';
+        form.querySelector('#sort').value = params.get('sort') || 'brand';
+      }
+
+      form.addEventListener('change', () => apply(true));
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        apply(true);
+      });
+      form.querySelector('[data-pb-clear]')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        setControls(new URLSearchParams(''));
+        apply(true);
+      });
+      window.addEventListener('popstate', () => {
+        setControls(new URLSearchParams(location.search));
+        apply(false);
+      });
+    })();
+  </script>
+</Base>
+
+<style>
+  .page {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: var(--sp-8) var(--sp-7) var(--sp-9);
+  }
+  /* Match the Base #main-content mobile-padding convention (it drops to --sp-5 at ≤640px) so we
+     don't stack two large side paddings at 390px. */
+  @media (max-width: 560px) {
+    .page {
+      padding-left: var(--sp-5);
+      padding-right: var(--sp-5);
+    }
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+    margin: 0;
+  }
+  .head {
+    margin-bottom: var(--sp-7);
+  }
+  .title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-3xl);
+    line-height: var(--lh-3xl);
+    letter-spacing: var(--tracking-tight);
+    color: var(--ink);
+    margin: var(--sp-2) 0 0;
+  }
+  .dek {
+    font-size: var(--text-md);
+    line-height: var(--lh-md);
+    color: var(--ink);
+    margin: var(--sp-4) 0 0;
+    max-width: 72ch;
+  }
+  .dek a {
+    color: var(--primary);
+  }
+
+  /* ---- filter bar ---- */
+  .filters {
+    border: var(--border-hairline);
+    border-radius: var(--r-xl);
+    background: var(--surface);
+    padding: var(--sp-5) var(--sp-6);
+    margin-bottom: var(--sp-6);
+  }
+  .filters-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--sp-5);
+  }
+  @media (max-width: 900px) {
+    .filters-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 560px) {
+    .filters-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    /* Comfortable one-handed tap targets on mobile (the facet rows are ~21px otherwise). */
+    .opt {
+      min-height: var(--sp-7);
+    }
+  }
+  .facet {
+    min-width: 0;
+    border: none;
+    margin: 0;
+    padding: 0;
+  }
+  .facet legend,
+  .facet-legend {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+    margin: 0 0 var(--sp-3);
+    padding: 0;
+  }
+  .facet-legend label {
+    cursor: pointer;
+  }
+  .opts {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+  }
+  .opt {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .opt input {
+    accent-color: var(--primary);
+    width: 1rem;
+    height: 1rem;
+    flex: none;
+  }
+  .opt span:first-of-type {
+    min-width: 0;
+  }
+  .opt-count {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    font-variant-numeric: tabular-nums;
+    color: var(--muted);
+  }
+  .facet-selects {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+  }
+  .facet-selects .facet-legend:nth-of-type(2) {
+    margin-top: var(--sp-3);
+  }
+  .select {
+    width: 100%;
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: var(--ink);
+    background: var(--stone);
+    border: var(--border-hairline);
+    border-radius: var(--r-md);
+    padding: var(--sp-2) var(--sp-3);
+  }
+  .filters-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-4);
+    margin-top: var(--sp-5);
+    padding-top: var(--sp-4);
+    border-top: var(--border-hairline);
+  }
+  .apply {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--surface);
+    background: var(--primary);
+    border: none;
+    border-radius: var(--r-md);
+    padding: var(--sp-2) var(--sp-4);
+    cursor: pointer;
+  }
+  .clear {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--primary);
+    text-decoration: none;
+  }
+  /* When JS is on, the whole bar applies live; the redundant Apply button is hidden via [hidden]. */
+
+  /* ---- results ---- */
+  .results-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--sp-3) var(--sp-4);
+    margin-bottom: var(--sp-4);
+    min-height: 1.5rem;
+  }
+  .count {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    letter-spacing: var(--tracking-label);
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+    margin: 0;
+  }
+  .summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2);
+  }
+  .summary-chip {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+    background: var(--primary-soft);
+    border-radius: var(--r-sm);
+    padding: var(--sp-1) var(--sp-2);
+  }
+  .sortnote {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: 0 0 var(--sp-5);
+  }
+  .sortnote a {
+    color: var(--primary);
+  }
+
+  .grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--sp-5);
+    align-items: stretch;
+  }
+  @media (max-width: 900px) {
+    .grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 560px) {
+    .grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+  .item {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+  }
+  .item[hidden] {
+    display: none;
+  }
+  /* dimension-focus strip — only shown when ordering by a dimension */
+  .focus {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--sp-2);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+    margin: 0;
+    padding: var(--sp-1) var(--sp-2);
+    border: var(--border-hairline);
+    border-radius: var(--r-sm);
+    background: var(--primary-soft);
+  }
+  .focus[hidden] {
+    display: none;
+  }
+  .focus-score {
+    color: var(--ink);
+    font-size: var(--text-sm);
+    font-variant-numeric: tabular-nums;
+  }
+  .focus-max {
+    color: var(--muted);
+  }
+
+  /* ---- mutually-exclusive states: exactly one region visible per data-state ---- */
+  .state {
+    display: none;
+    border: var(--border-hairline);
+    border-radius: var(--r-xl);
+    background: var(--surface);
+    padding: var(--sp-7) var(--sp-6);
+    text-align: center;
+  }
+  .state-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-lg);
+    line-height: var(--lh-lg);
+    color: var(--ink);
+    margin: 0 0 var(--sp-2);
+  }
+  .state-body {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: 0;
+  }
+  .state-body a {
+    color: var(--primary);
+  }
+
+  .results[data-state='results'] .grid { display: grid; }
+  .results:not([data-state='results']) .grid { display: none; }
+  .results:not([data-state='results']) .sortnote { display: none; }
+
+  .results[data-state='no-results'] .state-noresults { display: block; }
+  .results[data-state='error'] .state-error { display: block; }
+  .results[data-state='empty'] .state-empty { display: block; }
+  .results[data-state='loading'] .state-loading { display: block; }
+  .results[data-state='loading'] .grid { display: none; }
+  .results[data-state='error'] .count,
+  .results[data-state='empty'] .count { display: none; }
+
+  .footer-strip {
+    margin-top: var(--sp-8);
+    padding-top: var(--sp-5);
+    border-top: var(--border-hairline);
+    font-size: var(--text-xs);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+  }
+  .footer-strip a {
+    color: var(--primary);
+  }
+</style>
