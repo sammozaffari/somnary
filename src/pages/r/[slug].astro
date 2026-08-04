@@ -10,6 +10,7 @@ import type { GateVariant } from '../../lib/evidence-gates';
 import RemedyHero from '../../components/RemedyHero.astro';
 import RemedyCoda from '../../components/RemedyCoda.astro';
 import RemedyLeadBlock from '../../components/RemedyLeadBlock.astro';
+import LabelBrandCard from '../../components/LabelBrandCard.astro';
 import VerdictBand from '../../components/VerdictBand.astro';
 import ClaimsDataTable from '../../components/ClaimsDataTable.astro';
 import DosingGrid from '../../components/DosingGrid.astro';
@@ -93,6 +94,19 @@ const jsonLd = remedyJsonLd(d, canonical, site);
       reviewDate={d.reviewDate}
     />
 
+    {/* 1c — Label & Brands card: first actionable block (supplements only — interventions
+        have no label). Surfaces "what to look for on a label" + a brands entry that links to
+        the scorecard only when one is ratified. See docs/plans/2026-08-04-label-brand-card-design.md */}
+    {d.format === 'supplement' && (
+      <LabelBrandCard
+        checklist={d.labelChecklist}
+        avoid={d.labelAvoid}
+        standardization={d.standardization}
+        scorecardHref={hasScorecard ? `/sources/${entry.id}` : null}
+        scorecardCount={scorecardCount}
+      />
+    )}
+
     <PublicationStatePanel
       workflowState={d.workflowState}
       epistemicState={d.epistemicState}
@@ -143,8 +157,9 @@ const jsonLd = remedyJsonLd(d, canonical, site);
           />
         </section>
 
-        {/* 7 — standardization note (reframed as fidelity for interventions) */}
-        <section class="block">
+        {/* 7 — standardization note (reframed as fidelity for interventions).
+            id="on-the-label" is the anchor target for the top LabelBrandCard's "full label guide" link. */}
+        <section class="block" id="on-the-label">
           <p class="eyebrow">{isIntervention ? 'The real version' : 'Standardization'}</p>
           <h2 class="block-title">{isIntervention ? 'What counts as the real thing' : 'What to look for on a label'}</h2>
           <p class="prose-p">{d.standardization}</p>
