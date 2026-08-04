@@ -162,6 +162,12 @@ const remedies = defineCollection({
       doses: z.array(dose).default([]),
       safety,
       standardization: z.string(),
+      // Top-of-page Label & Brands card (docs/plans/2026-08-04-label-brand-card-design.md).
+      // Both OPTIONAL — when labelChecklist is empty the card falls back to the `standardization`
+      // prose above, so every supplement page renders the card from day one. Items may carry
+      // <strong> emphasis (rendered via set:html, same as the scorecard LabelReadingPanel).
+      labelChecklist: z.array(z.string()).default([]), // 2–4 short "look for" items → ✓ bullets
+      labelAvoid: z.array(z.string()).default([]),     // 1–2 red-flag items → the ⚠ avoid line
       mechanism: z.string(),
       sources: z.array(source).default([]),
       // Community data is walled off from the grade (CLAUDE.md evidence firewall): a count
