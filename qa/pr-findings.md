@@ -1,74 +1,54 @@
-# Design QA — PR findings
+# Design-QA — homepage hero refresh (`/`)
 
-**Verdict: PASS-WITH-NOTES** — no P0/P1 findings; 3 low-severity (P3) notes below. All static gates green. Chrome changed, so the rendered-visual + keyboard pass is still REQUIRED before merge (see below).
+**Verdict: BLOCK** — one P1 remains (search-placeholder contrast). Resolve the P1 before merge; the P2/P3 items can follow or ship as noted.
+
+Scope: `/` (index.astro, HeroCarousel, hero-slides, GradeStamp, RemedyIcon, recon-evidence). Chrome untouched.
 
 ## Findings (P0 → P3)
 
-**[P3] tailwind.config.mjs:68** — boxShadow.ring still defines the RETIRED single-colour 40%-alpha oxblood focus ring `0 0 0 3px rgba(126,31,43,.40)` that DESIGN_SYSTEM §6/§9-G4/A-01 explicitly superseded (measured 1.19-2.21:1, fails the 3:1 non-text minimum on carbon/tints/grade fills).
-_Fix:_ Delete the `ring` key from boxShadow (no `shadow-ring` utility is consumed anywhere), or point it at the two-tone token so a stray `shadow-ring` cannot ship a WCAG-failing ring; the live tokens correctly use `var(--ring)=var(--focus-ring)='0 0 0 2px var(--surface),0 0 0 4px var(--primary)'`.
-_Evidence:_ `tailwind.config.mjs:68 ring: '0 0 0 3px rgba(126,31,43,.40)'` vs `global.css:125 --focus-ring: 0 0 0 2px var(--surface), 0 0 0 4px var(--primary)` (A-01). grep for `shadow-ring` across src/ returns zero usages — it is a dormant, contradictory token.
+**[P1] src/pages/index.astro:377** — Search placeholder uses `--soft` (#8C867B, 3.61:1 on `--surface`) at 16px, but §8 forbids `--soft` as text below 19px.
+_Fix:_ Set `.usearch-input::placeholder { color: var(--muted); }` (`--muted` #5C574F = 7.16:1 on surface, AA small). `--soft` is large/decorative only.
+_Evidence:_ line 372 `font-size: var(--text-base)` (16px); line 377 `color: var(--soft)`; computed `--soft` on `--surface` = 3.61:1 (DESIGN_SYSTEM §8: "--soft never below 19px").
 
-**[P3] src/components/TierBadge.astro:5** — Stale contrast comment claims 'white-on-grade-C (3.75:1) clears WCAG AA large (3:1)', contradicting the ratified DESIGN_SYSTEM §8 value of 5.56:1 (grade C/D were darkened; white on grade C is now AA small, not merely AA-large).
-_Fix:_ Update the header comment to the ratified §8 figure (white on --grade-c = 5.56:1, AA small) so the rationale matches the darkened grade palette; the rendered `color:#ffffff` glyph fill is correct and needs no change.
-_Evidence:_ `TierBadge.astro:4-5` comment: 'white-on-grade-C (3.75:1) ... clears WCAG AA large (3:1)'. DESIGN_SYSTEM §8: 'white on grade C / D (darkened) 5.56 / 5.96 | AA' and §3: 'grade-C ... clears AA on their tints'.
+**[P2] src/components/GradeStamp.astro:62** — Card-stamp chip background is a raw literal `rgba(255,255,255,0.62)` instead of a token.
+_Fix:_ Express the translucent chip via a token, e.g. `color-mix(in srgb, var(--surface) 62%, transparent)` to match the tokenized hero variant (line 75) and stay tokens-only per §10.
+_Evidence:_ line 62 `background: rgba(255, 255, 255, 0.62);` — a raw color value; the hero variant already uses `color-mix(... var(--paper) ...)` on line 75.
 
-**[P3] src/pages/methodology.astro:359** — Corrections page states a concrete quantified time commitment ('within 7 days') repeated across seven public surfaces (methodology + all five source scorecards) with no described mechanism guaranteeing it — a borderline 'invented promise' under the real-promises rule.
-_Fix:_ Keep, but only if the 7-day target is actually tracked/kept; the current softening ('a target of', 'we aim to fix') makes it defensible as an aspiration rather than a hard SLA. If it is NOT tracked, drop the number and say 'Corrections are public; confirmed errors are fixed as fast as I can, and each fix is logged.' Verify one author can actually meet 7 days before leaving it as a stated commitment.
-_Evidence:_ "Corrections are public, with a target of fixing confirmed errors **within 7 days**." (echoed on sources pages as "We aim to fix verified errors within 7 days")
+**[P2] src/components/GradeStamp.astro:51** — Stamp forces `text-transform: uppercase` on the tier word, conflicting with the retired ALL-CAPS label treatment (Casing rule: micro-labels render Sentence case, keeping only letterspacing).
+_Fix:_ Drop `text-transform: uppercase`; keep only `var(--tracking-label)`. §11.2 anatomy is [HUMAN-GATE], so confirm with the owner whether the assessor's-mark casing is a sanctioned exception before changing.
+_Evidence:_ line 51 `text-transform: uppercase;` vs DESIGN_SYSTEM Casing: "former ALL-CAPS label/eyebrow treatment is dropped: micro-labels... render in Sentence case, keeping only their letterspacing."
+
+**[P3] src/components/RemedyIcon.astro:52** — Orphan `.is-pill` (26px) style block has no matching size in the Props union (chip|inline|card|spot|lead|fill), so it is dead code.
+_Fix:_ Either add `'pill'` to the size Props union if intended, or remove the `.is-pill` rule (lines 52-55) to keep the size set in sync with the type.
+_Evidence:_ Props size type (lines 9-10) lists `'chip'|'inline'|'card'|'spot'|'lead'|'fill'`; `.is-pill` defined at lines 52-55 is unreachable.
 
 ## Static gates
 
 | Gate | Result |
 | --- | --- |
-| tokens | PASS — exit 0; no unjustified raw values, 17 raw-ok exemptions honored |
-| crawlability | PASS — exit 0; 31 remedy pages + key routes carry content in static HTML |
-| forbidden-framing | PASS — exit 0; 64 shipped files clean, self-test caught the seeded bad string |
-| citations | PASS — exit 0; 142 citations across 31 remedy files all carry a valid identifier |
+| tokens | PASS — no retired tokens or hardcoded colors; 32 non-blocking raw-px spacing warnings. |
+| crawlability | PASS — 31 remedy pages + key routes carry content in static HTML. |
+| forbidden-framing | PASS — 62 shipped files clean; self-test caught the seeded bad string. |
 
 ## Rendered-visual pass
 
-CHROME CHANGED — the rendered-visual + keyboard pass in qa/README.md is REQUIRED and has NOT run in this script. Capture the affected routes at 390/768/1440px and measure nav overflow before merge.
+No chrome/layout change detected — rendered-visual pass optional.
 
-Uncovered files (not exercised by the static gates — review by hand):
-
-- src/components/CitationPopover.astro
-- src/components/CiteMarker.astro
-- src/components/ClaimsDataTable.astro
-- src/components/CommunityBar.astro
-- src/components/DosingGrid.astro
-- src/components/Fn.astro
-- src/components/GateChip.astro
-- src/components/GradeStamp.astro
-- src/components/HeroCarousel.astro
-- src/components/LabelChecker.astro
-- src/components/PublicationStatePanel.astro
-- src/components/RemedyCard.astro
-- src/components/RemedyCoda.astro
-- src/components/RemedyHero.astro
-- src/components/ReviewState.astro
-- src/components/SafetyCallout.astro
-- src/components/SearchPalette.astro
-- src/components/StatRow.astro
-- src/components/TierBadge.astro
-- src/components/scorecards/ProductPage.astro
+Uncovered files (pages-map gaps to track):
+- `src/components/GradeStamp.astro` — shared stamp component (used by RemedyCard + remedy-page hero) but has no entry in `qa/pages-map.json.shared`; this diff's edit is comment-only (removes a stale HeroCarousel note), so no rendered change, but the map gap remains.
+- `src/components/RemedyIcon.astro` — shared icon component (used by RemedyCard) with no entry in `qa/pages-map.json.shared`; this diff's edit is comment-only (removes a HeroCarousel reference), no rendered change, but the map gap remains.
+- `src/components/HeroCarousel.astro` — shared component being DELETED with no `qa/pages-map.json.shared` entry; only remaining references are comments in index.astro and og.png.ts, so nothing renders it.
 
 ## PR comment
 
 ```
-Design QA: PASS-WITH-NOTES (0 P0/P1, 3 P3)
+Design-QA: BLOCK — 1 P1 open (fix before merge).
 
-Static gates all green: tokens · crawlability · forbidden-framing · citations (all exit 0).
+P1 index.astro:377 — search placeholder uses --soft (3.61:1) at 16px; §8 bars --soft below 19px. Fix: use var(--muted) (7.16:1, AA).
+P2 GradeStamp.astro:62 — raw rgba(255,255,255,0.62) chip bg; tokenize via color-mix like the hero variant (line 75).
+P2 GradeStamp.astro:51 — text-transform: uppercase conflicts with retired ALL-CAPS rule; §11.2 is [HUMAN-GATE], confirm casing exception with owner.
+P3 RemedyIcon.astro:52 — dead .is-pill style, no matching size in Props union; add 'pill' or delete.
 
-P3 notes (non-blocking):
-- tailwind.config.mjs:68 — dormant boxShadow.ring uses the RETIRED single-colour oxblood
-  focus ring (fails 3:1); zero shadow-ring consumers. Delete it or point at var(--focus-ring).
-- TierBadge.astro:5 — stale contrast comment (3.75:1 / AA-large) contradicts ratified §8
-  (5.56:1, AA small). Comment-only; rendered #ffffff fill is correct.
-- methodology.astro:359 — "within 7 days" corrections target echoed on 7 public surfaces;
-  keep only if actually tracked (real-promises rule), else drop the number.
-
-CHROME CHANGED — rendered-visual + keyboard pass (qa/README.md) is REQUIRED and has NOT run
-here. Capture affected routes at 390/768/1440px and measure nav overflow before merge. 20
-shared components (CitationPopover, RemedyCard, GradeStamp, Nav-adjacent chrome, etc.) are
-uncovered by static gates — review by hand.
+Static gates: tokens PASS · crawlability PASS · forbidden-framing PASS.
+Rendered-visual: no chrome/layout change — pass optional. pages-map gaps: GradeStamp, RemedyIcon, HeroCarousel (deleted) have no shared entry (edits comment-only, no rendered change).
 ```
