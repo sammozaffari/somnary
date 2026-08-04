@@ -31,7 +31,7 @@ const VARIANT_STYLE: Record<GateVariant, string> = {
     letter-spacing: normal; /* chips are lowercase, not the uppercase --text-xs label style */
     text-transform: none;
     line-height: 1.25;
-    /* §2.3 padding is a literal spec value (no token covers 5/11px). */
+    /* §2.3 padding is a literal spec value (no token covers 5/11px). raw-ok: chip spec padding */
     padding: 5px 11px;
     border-radius: var(--r-md);
     /* Short chips stay on one line naturally; long caveat labels (e.g. "Human evidence is

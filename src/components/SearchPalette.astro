@@ -84,10 +84,12 @@
   }
   .st-hint {
     font-family: var(--font-mono);
+    /* raw-ok: 11px kbd hint label, below the --text-xs (12px) scale floor */
     font-size: 11px;
     color: var(--muted);
     background: var(--stone);
     border-radius: var(--r-xs);
+    /* raw-ok: compact kbd key padding (5px off the 4px step by design) */
     padding: 1px 5px;
   }
   /* mobile: icon-only search — the "Search" label + ⌘K hint don't earn their width on a phone
@@ -107,7 +109,7 @@
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    padding: 12vh 16px 16px;
+    padding: 12vh var(--sp-4) var(--sp-4);
   }
   .search-overlay[hidden] {
     display: none;
@@ -173,7 +175,7 @@
     border-radius: var(--r-sm);
     padding: var(--sp-2) var(--sp-3);
     font-family: var(--font-body);
-    font-size: 18px;
+    font-size: var(--text-md);
     color: var(--ink);
   }
   .p-input:focus {
@@ -222,7 +224,7 @@
   .p-list :global(.p-glyph) {
     font-family: var(--font-display);
     font-weight: 500;
-    font-size: 16px;
+    font-size: var(--text-base);
     line-height: 1;
     transform: translateY(var(--grade-optical-shift));
   }
@@ -354,7 +356,7 @@
       padding: 0;
     }
     .search-overlay {
-      padding: 8vh 8px 8px;
+      padding: 8vh var(--sp-2) var(--sp-2);
     }
   }
 
@@ -368,6 +370,7 @@
 
 <script>
   import { searchDocsScored, shouldOfferAsk, type SearchDoc } from '../lib/search-rank';
+  import { gradeStampState } from '../lib/remedy-state';
 
   interface AskCitation {
     n: number;
@@ -443,10 +446,11 @@
       for (const [kind, rows] of groups) {
         html += `<li class="p-group" role="presentation">${esc(KIND_LABEL[kind] ?? kind)} · ${rows.length}</li>`;
         for (const d of rows) {
+          const state = gradeStampState(d.workflowState);
           html +=
-            `<li id="p-opt-${i}" class="p-row" role="option" aria-selected="${i === active}" data-i="${i}" data-url="${esc(d.url)}" aria-label="grade ${esc(d.tier)}, ${esc(d.name)}">` +
+            `<li id="p-opt-${i}" class="p-row" role="option" aria-selected="${i === active}" data-i="${i}" data-url="${esc(d.url)}" aria-label="grade ${esc(d.tier)}, ${esc(d.name)}, ${esc(state.label)}">` +
             badge(d.tier) +
-            `<span class="p-main"><span class="p-name">${esc(d.name)}</span><span class="p-cat">${esc(d.category)}</span></span>` +
+            `<span class="p-main"><span class="p-name">${esc(d.name)}</span><span class="p-cat">${esc(d.category)} · ${esc(state.label)}</span></span>` +
             `<span class="p-grade">grade ${esc(d.tier)}</span></li>`;
           i++;
         }

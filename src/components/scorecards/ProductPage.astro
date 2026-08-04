@@ -5,15 +5,15 @@
  * disclosed ingredients (linked to the additive watchlist / remedy page where we have content),
  * and plain no-affiliate retailer links.
  */
-import { DIMENSION_ORDER, DIMENSION_LABELS, type ScorecardCardData } from '../../data/source-scorecards/card';
+import { DIMENSION_ORDER, DIMENSION_LABELS, type ScorecardCardData, type RetailerRef } from '../../data/source-scorecards/card';
 import type { TierMeta } from '../../data/source-scorecards/tiers';
 import watchlistYaml from '../../data/additive-watchlist.yaml?raw';
 import { parseAdditiveContent } from '../../lib/sources/additive-content';
 
 interface Retailers {
-  amazon?: string;
-  chemistWarehouse?: string;
-  iherb?: string;
+  amazon?: RetailerRef;
+  chemistWarehouse?: RetailerRef;
+  iherb?: RetailerRef;
 }
 
 interface Props {
@@ -71,10 +71,36 @@ function ingredientStatus(name: string): IngStatus {
   return { kind: 'none', label: 'Not yet reviewed' };
 }
 
-const retailerLinks: { label: string; href: string }[] = [];
-if (retailers?.amazon) retailerLinks.push({ label: 'Amazon AU', href: retailers.amazon });
-if (retailers?.chemistWarehouse) retailerLinks.push({ label: 'Chemist Warehouse', href: retailers.chemistWarehouse });
-if (retailers?.iherb) retailerLinks.push({ label: 'iHerb AU', href: retailers.iherb });
+// A retailer entry is a live link OR a marked-unavailable listing (URL resolved 404 on our last
+// check). We show the unavailable state plainly rather than link to a dead-end — unknown/gone is a
+// first-class state. Re-resolving to a fresh URL is deferred (retailer-offer work).
+type RetailerEntry = { label: string; url: string; unavailable: boolean; lastCheckedAt?: string };
+const retailerLinks: RetailerEntry[] = [];
+function pushRetailer(ref: RetailerRef | undefined, label: string) {
+  if (!ref) return;
+  if (typeof ref === 'string') {
+    retailerLinks.push({ label, url: ref, unavailable: false });
+    return;
+  }
+  retailerLinks.push({
+    label,
+    url: ref.url,
+    unavailable: ref.status === 'unavailable',
+    lastCheckedAt: ref.lastCheckedAt,
+  });
+}
+pushRetailer(retailers?.amazon, 'Amazon AU');
+pushRetailer(retailers?.chemistWarehouse, 'Chemist Warehouse');
+pushRetailer(retailers?.iherb, 'iHerb AU');
+
+// Human-readable check date (e.g. "31 Jul 2026") from an ISO YYYY-MM-DD, TZ-free.
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+function fmtCheckDate(iso?: string): string {
+  if (!iso) return '';
+  const [y, m, d] = iso.split('-').map(Number);
+  if (!y || !m || !d) return iso;
+  return `${d} ${MONTHS[m - 1]} ${y}`;
+}
 ---
 
 <main class="page">
@@ -112,7 +138,10 @@ if (retailers?.iherb) retailerLinks.push({ label: 'iHerb AU', href: retailers.ih
       {p.imagePath ? (
         <img src={p.imagePath} alt={`${p.brand} ${p.productName}`} decoding="async" />
       ) : (
-        <span class="shot-fallback" aria-hidden="true">{p.brand.charAt(0)}</span>
+        <span class="shot-fallback">
+          <span class="shot-monogram" aria-hidden="true">{p.brand.charAt(0)}</span>
+          <span class="shot-nolabel">No product image</span>
+        </span>
       )}
     </div>
   </header>
@@ -141,7 +170,7 @@ if (retailers?.iherb) retailerLinks.push({ label: 'iHerb AU', href: retailers.ih
               <span class="bar" aria-hidden="true">
                 {segs.map((i) => <i class:list={['seg', { on: i <= p.scores[key].score }]} />)}
               </span>
-              <span class="score-num">{p.scores[key].score}<span class="of">/5</span></span>
+              <span class="score-num tnum">{p.scores[key].score}<span class="of">/5</span></span>
             </span>
           </div>
           <p class="score-note">{p.scores[key].note}</p>
@@ -186,9 +215,15 @@ if (retailers?.iherb) retailerLinks.push({ label: 'iHerb AU', href: retailers.ih
     <section class="where" aria-label="Where to find it">
       <h2 class="h2">Where to find it</h2>
       <div class="where-links">
-        {retailerLinks.map((r) => (
-          <a class="where-link" href={r.href} target="_blank" rel="noopener nofollow">{r.label} →</a>
-        ))}
+        {retailerLinks.map((r) =>
+          r.unavailable ? (
+            <span class="where-link is-unavailable" role="note">
+              {r.label} — listing unavailable{r.lastCheckedAt ? ` · last checked ${fmtCheckDate(r.lastCheckedAt)}` : ''}
+            </span>
+          ) : (
+            <a class="where-link" href={r.url} target="_blank" rel="noopener nofollow">{r.label} →</a>
+          )
+        )}
       </div>
       <p class="where-foot">
         Plain links — no affiliate codes, ever. Somnary earns nothing if you buy.
@@ -380,11 +415,34 @@ if (retailers?.iherb) retailerLinks.push({ label: 'iHerb AU', href: retailers.ih
     object-fit: contain;
     padding: var(--sp-5);
   }
+  /* No photo yet: a deliberate placeholder (brand monogram in a disc + a plain caption), not a
+     lone oversized letter. Reads as an intentional "image pending" state. */
   .shot-fallback {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--sp-3);
+    padding: var(--sp-5);
+  }
+  .shot-monogram {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--sp-8);
+    height: var(--sp-8);
+    border-radius: var(--r-pill);
+    background: var(--surface);
+    border: var(--border-hairline);
     font-family: var(--font-display);
     font-weight: 700;
-    font-size: var(--text-3xl);
+    font-size: var(--text-2xl);
     color: var(--primary);
+  }
+  .shot-nolabel {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
   }
 
   .flags {
@@ -612,6 +670,14 @@ if (retailers?.iherb) retailerLinks.push({ label: 'iHerb AU', href: retailers.ih
   .where-link:hover {
     border-color: var(--primary);
     color: var(--primary);
+  }
+  /* a listing we last resolved as gone (404): shown as a calm, non-clickable note so the reader
+     isn't sent to a dead-end. Muted + dashed reads as "known-unavailable", not an error state. */
+  .where-link.is-unavailable {
+    color: var(--muted);
+    border-style: dashed;
+    background: transparent;
+    cursor: default;
   }
   .where-foot {
     font-size: var(--text-xs);

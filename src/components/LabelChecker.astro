@@ -31,8 +31,17 @@
   </div>
 
   <!-- results: aria-live so flags are announced; server-rendered empty until the user checks -->
-  <div class="lc-results" role="region" aria-live="polite" aria-label="Label observations" data-lc-results>
-    <p class="lc-idle" data-lc-idle>No label checked yet.</p>
+  <div
+    class="lc-results"
+    role="status"
+    aria-live="polite"
+    aria-atomic="true"
+    aria-label="Label checker state: idle"
+    data-lc-results>
+    <span class="lc-announcement" data-lc-announcement>Label checker state entered: idle.</span>
+    <div data-lc-result-content>
+      <p class="lc-idle" data-lc-idle><strong>Idle.</strong> Paste a supplement facts panel, then check the label.</p>
+    </div>
   </div>
 </section>
 
@@ -95,6 +104,7 @@
     margin-top: var(--sp-4);
   }
   .btn-check,
+  .btn-retry,
   .btn-clear {
     font-family: var(--font-mono);
     font-size: var(--text-xs);
@@ -107,10 +117,19 @@
   }
   .btn-check {
     background: var(--primary);
-    color: var(--surface);
+    color: var(--action-ink);
     border: 1px solid var(--primary);
   }
-  .btn-check:hover {
+  .btn-retry {
+    background: var(--primary);
+    color: var(--action-ink);
+    border: 1px solid var(--primary);
+    margin-top: var(--sp-4);
+  }
+  .btn-check:hover,
+  .btn-retry:hover,
+  .btn-check:active,
+  .btn-retry:active {
     background: var(--primary-deep);
     border-color: var(--primary-deep);
   }
@@ -123,7 +142,13 @@
     border-color: var(--mineral);
     color: var(--ink);
   }
+  .btn-clear:active {
+    background: var(--paper);
+    border-color: var(--mineral);
+    color: var(--ink);
+  }
   .btn-check:focus-visible,
+  .btn-retry:focus-visible,
   .btn-clear:focus-visible {
     outline: none;
     box-shadow: var(--ring);
@@ -131,9 +156,20 @@
   .btn-clear[hidden] {
     display: none;
   }
+  .btn-check:disabled,
+  .btn-clear:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
 
   .lc-results {
     margin-top: var(--sp-6);
+  }
+  .lc-announcement {
+    position: absolute;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
   /* Results are injected via innerHTML, so they carry no scoped data-cid — every
      result selector must be :global() under .lc-results (the static, scoped parent)
@@ -187,6 +223,24 @@
     color: var(--muted);
     margin: 0;
   }
+  .lc-results :global(.lc-empty strong),
+  .lc-results :global(.lc-coverage strong) {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .lc-results :global(.lc-coverage) {
+    padding-top: var(--sp-4);
+    margin: var(--sp-4) 0 0;
+    border-top: var(--border-hairline);
+    font-size: var(--text-xs);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+  }
+  .lc-results :global(.lc-coverage + .lc-coverage) {
+    padding-top: var(--sp-2);
+    margin-top: var(--sp-2);
+    border-top: none;
+  }
 
   /* flag rows — observations about the label. Neutral/informational marker, NOT the
      vermilion safety register (these are label notes, not health warnings). */
@@ -197,7 +251,7 @@
   }
   .lc-results :global(.flag-row) {
     display: grid;
-    grid-template-columns: 24px 1fr auto;
+    grid-template-columns: 24px 1fr;
     gap: var(--sp-4);
     align-items: start;
     padding: var(--sp-4) 0;
@@ -224,6 +278,25 @@
   .lc-results :global(.flag-body) {
     min-width: 0;
   }
+  .lc-results :global(.flag-label) {
+    font-size: var(--text-xs);
+    line-height: var(--lh-sm);
+    color: var(--ink);
+    margin: 0 0 var(--sp-1);
+  }
+  .lc-results :global(.flag-label strong) {
+    font-weight: 600;
+  }
+  .lc-results :global(.flag-reason) {
+    font-size: var(--text-xs);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+    margin: 0 0 var(--sp-2);
+  }
+  .lc-results :global(.flag-reason strong) {
+    color: var(--ink);
+    font-weight: 600;
+  }
   .lc-results :global(.flag-text) {
     font-size: var(--text-sm);
     line-height: var(--lh-sm);
@@ -245,36 +318,31 @@
     box-shadow: var(--ring);
     border-radius: var(--r-xs);
   }
-  .lc-results :global(.flag-rule) {
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
-    color: var(--muted);
-    white-space: nowrap;
-  }
-
-  @media (max-width: 640px) {
-    .lc-results :global(.flag-row) {
-      grid-template-columns: 24px 1fr;
-    }
-    .lc-results :global(.flag-rule) {
-      display: none;
-    }
-  }
 </style>
 
 <script>
-  import { checkLabel, EMPTY_STATE, type LabelEntry } from '../lib/label-rules';
+  import {
+    checkLabelState,
+    createLoadedIndex,
+    EMPTY_STATE,
+    type CheckerFlag,
+    type CheckerState,
+    type DoseCheckGap,
+    type IndexFailureReason,
+    type LoadedIndex,
+  } from '../lib/label-rules';
 
   const input = document.querySelector<HTMLTextAreaElement>('[data-lc-input]');
   const checkBtn = document.querySelector<HTMLButtonElement>('[data-lc-check]');
   const clearBtn = document.querySelector<HTMLButtonElement>('[data-lc-clear]');
   const results = document.querySelector<HTMLElement>('[data-lc-results]');
+  const announcement = document.querySelector<HTMLElement>('[data-lc-announcement]');
+  const resultContent = document.querySelector<HTMLElement>('[data-lc-result-content]');
 
-  if (input && checkBtn && clearBtn && results) {
-    const IDLE_HTML = '<p class="lc-idle">No label checked yet.</p>';
-    let entries: LabelEntry[] | null = null;
-    let loading = false;
+  if (input && checkBtn && clearBtn && results && announcement && resultContent) {
+    let state: CheckerState = { kind: 'idle' };
+    let loadedIndex: LoadedIndex | null = null;
+    let loadPromise: Promise<LoadedIndex> | null = null;
 
     // Human-readable name for each rule id (matches the server-rendered rules documentation).
     const RULE_LABEL: Record<string, string> = {
@@ -290,75 +358,246 @@
         ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c] as string,
       );
 
-    const loadEntries = async (): Promise<LabelEntry[]> => {
-      if (entries) return entries;
-      if (loading) return [];
-      loading = true;
+    class IndexLoadError extends Error {
+      reason: IndexFailureReason;
+
+      constructor(reason: IndexFailureReason) {
+        super(reason);
+        this.reason = reason;
+      }
+    }
+
+    const loadIndex = async (): Promise<LoadedIndex> => {
+      if (loadedIndex) return loadedIndex;
+      if (loadPromise) return loadPromise;
+      loadPromise = (async () => {
+        let response: Response;
+        try {
+          response = await fetch('/label-index.json');
+        } catch {
+          throw new IndexLoadError('request_failed');
+        }
+        if (!response.ok) throw new IndexLoadError('request_failed');
+        let json: unknown;
+        try {
+          json = await response.json();
+        } catch {
+          throw new IndexLoadError('invalid_index');
+        }
+        const index = createLoadedIndex(json);
+        if (!index) throw new IndexLoadError('invalid_index');
+        loadedIndex = index;
+        return index;
+      })();
       try {
-        const res = await fetch('/label-index.json');
-        entries = (await res.json()) as LabelEntry[];
-      } catch {
-        entries = [];
+        return await loadPromise;
+      } finally {
+        loadPromise = null;
       }
-      loading = false;
-      return entries;
     };
 
-    const renderEmpty = () => {
-      results.innerHTML =
-        `<div class="lc-panel">` +
-        `<div class="lc-head"><span class="lc-head-title">What the label shows</span></div>` +
-        `<p class="lc-empty">${esc(EMPTY_STATE)}</p>` +
-        `</div>`;
+    const panel = (title: string, body: string, extra = '') =>
+      `<div class="lc-panel">` +
+      `<div class="lc-head"><span class="lc-head-title">${esc(title)}</span></div>` +
+      `<p class="lc-empty">${esc(body)}</p>` +
+      extra +
+      `</div>`;
+
+    const panelHtml = (title: string, bodyHtml: string, extra = '') =>
+      `<div class="lc-panel">` +
+      `<div class="lc-head"><span class="lc-head-title">${esc(title)}</span></div>` +
+      bodyHtml +
+      extra +
+      `</div>`;
+
+    const countBySeverity = (flags: readonly CheckerFlag[]) => ({
+      cautions: flags.filter((flag) => flag.severity === 'caution').length,
+      observations: flags.filter((flag) => flag.severity === 'observation').length,
+    });
+
+    const flagSummary = (flags: readonly CheckerFlag[]) => {
+      const { cautions, observations } = countBySeverity(flags);
+      const parts: string[] = [];
+      if (cautions) parts.push(`${cautions} ${cautions === 1 ? 'caution' : 'cautions'}`);
+      if (observations) parts.push(`${observations} ${observations === 1 ? 'observation' : 'observations'}`);
+      return parts.join(' and ');
     };
 
-    const render = (flags: ReturnType<typeof checkLabel>) => {
-      if (flags.length === 0) {
-        renderEmpty();
-        return;
-      }
-      const rows = flags
+    const renderDoseGaps = (gaps: readonly DoseCheckGap[]) =>
+      gaps
+        .map((gap) => {
+          const reason =
+            gap.reason === 'form_unknown'
+              ? 'This remedy has multiple forms, and this checker does not resolve label forms yet, so Rule R3 was not applied. Other applicable rules still ran.'
+              : gap.reason === 'amount_missing'
+                ? 'The checker could not parse an amount for this ingredient, so Rule R3 was not applied. Other applicable rules still ran.'
+                : 'The loaded index has no single numeric study-dose floor for this ingredient, so Rule R3 was not applied. Other applicable rules still ran.';
+          return `<p class="lc-coverage"><strong>Dose check not applied for ${esc(gap.ingredient)}.</strong> ${esc(reason)}</p>`;
+        })
+        .join('');
+
+    const renderFlagRows = (flags: readonly CheckerFlag[]) =>
+      flags
         .map((f) => {
           const ruleName = RULE_LABEL[f.rule] ?? f.rule;
+          const severityName = f.severity === 'caution' ? 'Caution' : 'Observation';
           return (
             `<li class="flag-row">` +
             `<span class="flag-icon" aria-hidden="true">!</span>` +
             `<div class="flag-body">` +
+            `<p class="flag-label"><strong>${esc(severityName)} · ${esc(ruleName)}</strong></p>` +
+            `<p class="flag-reason"><strong>Why this fired:</strong> ${esc(f.why)}</p>` +
             `<p class="flag-text">${esc(f.text)}</p>` +
             `<a class="flag-link" href="${esc(f.href)}">${esc(f.linkLabel)} →</a>` +
             `</div>` +
-            `<span class="flag-rule" title="${esc(ruleName)}" aria-label="${esc(ruleName)}">${esc(f.rule)}</span>` +
             `</li>`
           );
         })
         .join('');
-      const noun = flags.length === 1 ? 'observation' : 'observations';
-      results.innerHTML =
-        `<div class="lc-panel">` +
-        `<div class="lc-head">` +
-        `<span class="lc-head-title">What the label shows</span>` +
-        `<span class="lc-count">${flags.length} ${noun} — described, not a grade or a recommendation.</span>` +
-        `</div>` +
-        `<ul class="flag-list">${rows}</ul>` +
-        `</div>`;
+
+    const renderState = (next: CheckerState) => {
+      state = next;
+      const busy = next.kind === 'loading' || next.kind === 'parsing';
+      const stateName = next.kind.replaceAll('_', ' ');
+      results.setAttribute('aria-label', `Label checker state: ${stateName}`);
+      announcement.textContent = `Label checker state entered: ${stateName}.`;
+      results.setAttribute('aria-busy', String(busy));
+      checkBtn.disabled = busy;
+      clearBtn.disabled = busy;
+
+      switch (next.kind) {
+        case 'idle':
+          resultContent.innerHTML =
+            '<p class="lc-idle"><strong>Idle.</strong> Paste a supplement facts panel, then choose Check the label. Nothing has been checked yet.</p>';
+          return;
+        case 'loading':
+          resultContent.innerHTML = panel(
+            'Loading the checker',
+            'The local remedy index is loading. The check has not run yet.',
+          );
+          return;
+        case 'index_unavailable':
+          resultContent.innerHTML = panel(
+            'The check could not run',
+            next.reason === 'invalid_index'
+              ? 'The remedy index returned data this checker could not use, so nothing in this label was checked. This is a site problem. Retry the check.'
+              : 'The remedy index did not load, so nothing in this label was checked. This may be a network or server problem. Retry the check.',
+            '<button type="button" class="btn-retry" data-lc-retry>Retry</button>',
+          );
+          return;
+        case 'parsing':
+          resultContent.innerHTML = panel(
+            'Reading the label',
+            'The pasted text is being parsed on this device. No result is available yet.',
+          );
+          return;
+        case 'parse_failed':
+          resultContent.innerHTML = panel(
+            'The label could not be read',
+            next.reason === 'parser_error'
+              ? 'The checker hit an error while reading this text, so nothing was checked. Try again or reformat the label text.'
+              : 'The checker could not identify label items in this text, so nothing was checked. Paste ingredient names and amounts, preferably one item per line, and try again.',
+          );
+          return;
+        case 'unrecognised':
+          resultContent.innerHTML = panel(
+            'Nothing was recognised',
+            `The text could be read, but none of these ingredient names matched the checker’s curated index: ${next.items.join(', ')}. No ingredient rules were applied. Check the spelling or use the ingredient pages.`,
+          );
+          return;
+        case 'partial': {
+          const summary = next.flags.length ? flagSummary(next.flags) : '';
+          const title = summary ? `Partial check — ${summary} on recognised items` : 'Partial check';
+          const coverage =
+            `<p class="lc-empty"><strong>Coverage is incomplete.</strong> Checked against the loaded index: ${esc(next.checked.map((item) => item.name).join(', '))}. ` +
+            `Not recognised and not checked: ${esc(next.unrecognised.join(', '))}. Any cautions or observations below apply only to the recognised items.</p>`;
+          const rows = next.flags.length ? `<ul class="flag-list">${renderFlagRows(next.flags)}</ul>` : '';
+          resultContent.innerHTML = panelHtml(title, coverage + renderDoseGaps([...next.doseChecksNotApplied]), rows);
+          return;
+        }
+        case 'flags_found': {
+          const summary = flagSummary(next.flags);
+          const title = `${summary.charAt(0).toUpperCase()}${summary.slice(1)} found`;
+          resultContent.innerHTML =
+            `<div class="lc-panel">` +
+            `<div class="lc-head"><span class="lc-head-title">${esc(title)}</span>` +
+            `<span class="lc-count">Described, not a grade or a recommendation.</span></div>` +
+            `<p class="lc-empty">Checked against the loaded index: ${esc(next.checked.map((item) => item.name).join(', ') || 'label structure only')}. This is not a complete safety or quality check.</p>` +
+            renderDoseGaps([...next.doseChecksNotApplied]) +
+            `<ul class="flag-list">${renderFlagRows(next.flags)}</ul>` +
+            `</div>`;
+          return;
+        }
+        case 'no_flags_checked': {
+          const checked = next.checked.map((item) => item.name).join(', ');
+          resultContent.innerHTML = panelHtml(
+            'No flags after checking',
+            `<p class="lc-empty"><strong>${esc(EMPTY_STATE)}</strong></p>` +
+              `<p class="lc-coverage"><strong>Checked against the loaded index:</strong> ${esc(checked)}. The checker looked for proprietary-blend wording, melatonin above 5 mg, doses below a parsed study floor, missing botanical standardisation, and curated interaction cautions.</p>` +
+              renderDoseGaps([...next.doseChecksNotApplied]) +
+              `<p class="lc-coverage"><strong>Not covered:</strong> Unknown ingredients or forms, missing amounts, every possible interaction, manufacturing quality, contaminants, or anything not pasted.</p>`,
+          );
+          return;
+        }
+      }
     };
 
     const run = async () => {
-      const list = await loadEntries();
-      const flags = checkLabel(input.value, list);
-      render(flags);
-      clearBtn.hidden = input.value.trim().length === 0;
+      const panelText = input.value;
+      clearBtn.hidden = panelText.trim().length === 0;
+      if (!panelText.trim()) {
+        renderState({ kind: 'idle' });
+        return;
+      }
+
+      let index = loadedIndex;
+      if (!index) {
+        renderState({ kind: 'loading' });
+        try {
+          index = await loadIndex();
+        } catch (error) {
+          const reason = error instanceof IndexLoadError ? error.reason : 'request_failed';
+          renderState({ kind: 'index_unavailable', reason });
+          return;
+        }
+      }
+
+      renderState({ kind: 'parsing' });
+      await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+      renderState(checkLabelState(panelText, index));
     };
 
-    checkBtn.addEventListener('click', run);
+    checkBtn.addEventListener('click', () => void run());
     clearBtn.addEventListener('click', () => {
       input.value = '';
-      results.innerHTML = IDLE_HTML;
+      renderState({ kind: 'idle' });
       clearBtn.hidden = true;
       input.focus();
     });
+    results.addEventListener('click', (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement) || !target.closest('[data-lc-retry]')) return;
+      loadedIndex = null;
+      loadPromise = null;
+      void run();
+    });
 
     // warm the index on first focus so the first check feels instant (still no data leaves the page)
-    input.addEventListener('focus', () => void loadEntries(), { once: true });
+    input.addEventListener(
+      'focus',
+      () => {
+        if (loadedIndex || loadPromise) return;
+        renderState({ kind: 'loading' });
+        void loadIndex()
+          .then(() => {
+            if (state.kind === 'loading') renderState({ kind: 'idle' });
+          })
+          .catch((error: unknown) => {
+            const reason = error instanceof IndexLoadError ? error.reason : 'request_failed';
+            renderState({ kind: 'index_unavailable', reason });
+          });
+      },
+      { once: true },
+    );
   }
 </script>

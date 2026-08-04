@@ -178,9 +178,10 @@ export async function openRouterWebResearch(args: WebResearchArgs): Promise<WebF
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
-  let data: {
+  type OpenRouterResponse = {
     choices?: Array<{ message?: { content?: string; annotations?: unknown } }>;
-  } | null = null;
+  };
+  let data: OpenRouterResponse | null = null;
   try {
     const res = await doFetch(ENDPOINT, {
       method: 'POST',
@@ -189,7 +190,7 @@ export async function openRouterWebResearch(args: WebResearchArgs): Promise<WebF
       signal: controller.signal,
     });
     if (!res.ok) return [];
-    data = (await res.json()) as typeof data;
+    data = (await res.json()) as OpenRouterResponse;
   } catch {
     return [];
   } finally {

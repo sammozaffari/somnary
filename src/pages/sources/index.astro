@@ -46,7 +46,7 @@ const remedies = [
 
 <Base
   title="Source scorecards — where to buy sleep supplements — Somnary"
-  description="Independent source scorecards for natural sleep supplements sold in Australia — magnesium, ashwagandha, valerian, glycine, melatonin. Which brands actually disclose what's in the bottle and don't overstate it, rated on six documented dimensions. No composite score, no #1, no affiliate links, ever."
+  description="Documented source scorecards for natural sleep supplements sold in Australia — magnesium, ashwagandha, valerian, glycine, melatonin. Which brands actually disclose what's in the bottle and don't overstate it, rated on six documented dimensions. No composite score, no #1, no affiliate links, ever."
 >
   <main class="page">
     <header class="head">
@@ -56,10 +56,17 @@ const remedies = [
         The <a href="/tiers">evidence grades</a> answer whether a remedy helps you sleep. This section
         answers the next question: <strong>of the products you can actually buy, which brands disclose
         what’s in the bottle and don’t overstate it?</strong> Every product is rated on six documented
-        dimensions — every point traces to a primary document. No overall score, no #1, and
-        <strong>no affiliate links, ever</strong> — Somnary earns nothing if you buy.
+        dimensions, each score explained in a written note that shows its basis. No overall score, no #1, and
+        <strong>no affiliate links, ever</strong> — Somnary earns nothing if you buy. This is a curated
+        set — the most widely sold products across five categories (magnesium, ashwagandha, valerian,
+        glycine, melatonin), reviewed as of {reviewDate}, not a complete catalogue of the Australian market.
       </p>
     </header>
+
+    <a class="browse-all" href="/products">
+      <span class="browse-all-title">Holding a bottle? Browse every product in one place →</span>
+      <span class="browse-all-sub">Filter all documented products by ingredient, form, single-vs-combination, and brand.</span>
+    </a>
 
     <section class="grid" aria-label="Source scorecards by remedy">
       {
@@ -90,7 +97,7 @@ const remedies = [
 
     <p class="footer-strip">
       Somnary · Source scorecards · Reviewed {reviewDate} · Educational, not medical advice · These pages
-      rate how a product is sourced and labeled — never whether you should take it. Found an error, or a
+      rate how a product is sourced and labelled — never whether you should take it. Found an error, or a
       brand with a document to add? We aim to fix verified errors within 7 days —
       <a href="mailto:sammymoz@gmail.com">sammymoz@gmail.com</a>.
     </p>
@@ -204,6 +211,35 @@ const remedies = [
     letter-spacing: var(--tracking-label);
     color: var(--primary);
     margin-top: var(--sp-3);
+  }
+
+  .browse-all {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-1);
+    border: var(--border-hairline);
+    border-left: 3px solid var(--primary);
+    border-radius: var(--r-xl);
+    background: var(--primary-soft);
+    padding: var(--sp-5) var(--sp-6);
+    margin-bottom: var(--sp-6);
+    text-decoration: none;
+  }
+  .browse-all:hover {
+    border-color: var(--primary);
+    border-left-color: var(--primary);
+  }
+  .browse-all-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-md);
+    line-height: var(--lh-md);
+    color: var(--ink);
+  }
+  .browse-all-sub {
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
   }
 
   .more {

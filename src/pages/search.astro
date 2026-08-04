@@ -8,6 +8,7 @@ export const prerender = false;
 
 import Base from '../layouts/Base.astro';
 import TierBadge from '../components/TierBadge.astro';
+import ReviewState from '../components/ReviewState.astro';
 import { getSearchDocs, searchDocs } from '../lib/search';
 
 const q = (Astro.url.searchParams.get('q') ?? '').trim();
@@ -49,7 +50,7 @@ const suggestions = ['melatonin', 'magnesium', 'jet lag', "can't fall asleep", '
           id="q"
           name="q"
           value={q}
-          placeholder="A remedy, a compound, an outcome, a symptom…"
+          placeholder="Search remedies…"
           autocomplete="off"
           autofocus
         />
@@ -71,7 +72,10 @@ const suggestions = ['melatonin', 'magnesium', 'jet lag', "can't fall asleep", '
                     <a class="row" href={r.url}>
                       <TierBadge tier={r.tier} size="inline" />
                       <span class="row-main">
-                        <span class="row-name">{r.name}</span>
+                        <span class="row-title">
+                          <span class="row-name">{r.name}</span>
+                          <ReviewState state={r.workflowState} />
+                        </span>
                         <span class="row-cat">{r.category}</span>
                         <span class="row-dek">{r.oneLiner}</span>
                       </span>
@@ -197,6 +201,13 @@ const suggestions = ['melatonin', 'magnesium', 'jet lag', "can't fall asleep", '
     min-height: 40px;
     cursor: pointer;
   }
+  /* CMP-03: the scoped cursor:pointer above wins over the global :where() disabled default, so
+     the disabled submit state must be set here explicitly — otherwise an empty-query submit
+     button still shows a clickable pointer with identical styling. */
+  .searchbar button:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
 
   .results {
     display: flex;
@@ -243,6 +254,13 @@ const suggestions = ['melatonin', 'magnesium', 'jet lag', "can't fall asleep", '
     font-size: var(--text-base);
     color: var(--ink);
   }
+  .row-title {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--sp-3);
+    flex-wrap: wrap;
+  }
   .row-cat {
     font-family: var(--font-mono);
     font-size: var(--text-xs);
@@ -277,6 +295,7 @@ const suggestions = ['melatonin', 'magnesium', 'jet lag', "can't fall asleep", '
     color: var(--primary);
     background: var(--primary-soft);
     border-radius: var(--r-pill);
+    /* raw-ok: compact pill padding (4/10px off the 4px step by design) */
     padding: 4px 10px;
     text-decoration: none;
     text-transform: none;

@@ -14,25 +14,28 @@ import RemedyIcon from './RemedyIcon.astro';
 import GradeStamp from './GradeStamp.astro';
 import { getTier } from '../lib/tiers';
 import type { TierId } from '../lib/tiers';
+import { gradeStampState, type WorkflowState } from '../lib/remedy-state';
 
 interface Props {
   slug: string;
   name: string;
   tier: TierId;
+  workflowState: WorkflowState;
   oneLiner: string;
 }
-const { slug, name, tier, oneLiner } = Astro.props;
+const { slug, name, tier, workflowState, oneLiner } = Astro.props;
 const t = getTier(tier);
+const state = gradeStampState(workflowState);
 ---
 
 <a
   class="card"
   href={`/r/${slug}`}
-  aria-label={`${name} — grade ${tier}, ${t.name}`}
+  aria-label={`${name} — grade ${tier}, ${t.name}; ${state.label}`}
 >
   <div class="plate">
     <span class="art"><RemedyIcon slug={slug} size="fill" /></span>
-    <GradeStamp tier={tier} size="card" silent class="corner-stamp" />
+    <GradeStamp tier={tier} workflowState={workflowState} size="card" silent class="corner-stamp" />
   </div>
   <div class="body">
     <span class="name">{name}</span>

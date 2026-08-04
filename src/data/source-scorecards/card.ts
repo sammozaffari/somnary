@@ -33,6 +33,26 @@ export interface Dimension {
   note: string;
 }
 
+/**
+ * A retailer purchase link. A plain string is a live link (the common case, no churn).
+ * The object form records a resolver check: `status: 'unavailable'` marks a URL that no
+ * longer resolves (the listing moved or was delisted) so the UI can show "listing
+ * unavailable" instead of a link that dead-ends — unknown/gone is a first-class state,
+ * not a broken link we pretend is fine. Re-resolving to a fresh URL is deferred (L work).
+ */
+export interface RetailerLink {
+  url: string;
+  status?: 'ok' | 'unavailable';
+  /** ISO date (YYYY-MM-DD) the URL was last resolved with a browser-class check. */
+  lastCheckedAt?: string;
+}
+export type RetailerRef = string | RetailerLink;
+export interface Retailers {
+  amazon?: RetailerRef;
+  chemistWarehouse?: RetailerRef;
+  iherb?: RetailerRef;
+}
+
 /** A small flag pill on the card face. `good` = eucalyptus, `warn` = safety register. */
 export interface Chip {
   label: string;

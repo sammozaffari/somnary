@@ -17,13 +17,15 @@
 import { Image } from 'astro:assets';
 import GradeStamp from './GradeStamp.astro';
 import type { TierId } from '../lib/tiers';
+import type { WorkflowState } from '../lib/remedy-state';
 
 interface Props {
   slug: string;
   name: string;
   tier: TierId;
+  workflowState: WorkflowState;
 }
-const { slug, name, tier } = Astro.props;
+const { slug, name, tier, workflowState } = Astro.props;
 
 const heroes = import.meta.glob<{ default: ImageMetadata }>('../assets/remedy-heroes/*.webp', {
   eager: true,
@@ -55,7 +57,7 @@ const focal = FOCAL[slug] ?? 'center 30%';
 <header class:list={['label', { 'no-plate': !plate }]}>
   <div class="label-row">
     <h1 class="title">{name}</h1>
-    <GradeStamp tier={tier} size="hero" />
+    <GradeStamp tier={tier} workflowState={workflowState} size="hero" />
   </div>
 </header>
 
@@ -67,6 +69,7 @@ const focal = FOCAL[slug] ?? 'center 30%';
     overflow: hidden;
     /* the melt: the plate itself dissolves (alpha mask), so the page's real layered
        background shows through — seamless by construction, no color to match. */
+    /* raw-ok: #000 is the opaque end of a luminance mask (mask alpha, not ink) — C-02 */
     -webkit-mask-image: linear-gradient(to bottom, #000 50%, transparent 100%);
     mask-image: linear-gradient(to bottom, #000 50%, transparent 100%);
   }
@@ -99,6 +102,7 @@ const focal = FOCAL[slug] ?? 'center 30%';
   .title {
     font-family: var(--font-display);
     font-weight: 700;
+    /* raw-ok: bespoke largest-title clamp (46–84px), above the --text-* scale — §11.3 */
     font-size: clamp(46px, 7vw, 84px);
     letter-spacing: var(--tracking-display); /* largest title on the site — tighter, poster-set */
     line-height: 0.95;

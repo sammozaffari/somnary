@@ -13,15 +13,18 @@
 // Otherwise the stamp reads naturally with an sr-only "Grade" prefix → "Grade A, Strong".
 import { getTier } from '../lib/tiers';
 import type { TierId } from '../lib/tiers';
+import { gradeStampState, type WorkflowState } from '../lib/remedy-state';
 
 interface Props {
   tier: TierId;
+  workflowState: WorkflowState;
   size?: 'card' | 'hero';
   silent?: boolean;
   class?: string;
 }
-const { tier, size = 'card', silent = false, class: className } = Astro.props;
+const { tier, workflowState, size = 'card', silent = false, class: className } = Astro.props;
 const t = getTier(tier);
+const state = gradeStampState(workflowState);
 const classes = ['stamp', `is-${size}`, className].filter(Boolean).join(' ');
 ---
 
@@ -30,9 +33,12 @@ const classes = ['stamp', `is-${size}`, className].filter(Boolean).join(' ');
   style={`--g:var(--grade-${tier.toLowerCase()})`}
   aria-hidden={silent ? 'true' : undefined}
 >
-  {!silent && <span class="sr-only">Grade</span>}
-  <b>{tier}</b>
-  {t.name}
+  <span class="grade-line">
+    {!silent && <span class="sr-only">Grade</span>}
+    <b>{tier}</b>
+    {t.name}
+  </span>
+  <span class:list={['state', { 'is-prominent': state.prominent }]}>{state.label}</span>
 </span>
 
 <style>
@@ -40,30 +46,51 @@ const classes = ['stamp', `is-${size}`, className].filter(Boolean).join(' ');
     flex: none;
     transform: rotate(-3deg);
     display: inline-flex;
-    align-items: baseline;
-    gap: var(--sp-2);
+    align-items: flex-start;
+    gap: var(--sp-1);
     border: 1.5px solid var(--g);
     border-radius: var(--r-xs);
     color: var(--g);
-    font-weight: 800;
+    font-weight: 700;  /* Instrument Sans caps at 700 (T-01) */
     letter-spacing: var(--tracking-label);
     text-transform: uppercase;
     line-height: 1;
     white-space: nowrap;
   }
   .stamp b {
-    font-weight: 900;
+    font-weight: 700;  /* Instrument Sans caps at 700 (T-01) */
     letter-spacing: -0.02em;
+  }
+  .grade-line {
+    display: inline-flex;
+    align-items: baseline;
+    gap: var(--sp-2);
+  }
+  .state {
+    width: 100%;
+    padding-top: var(--sp-1);
+    border-top: var(--border-hairline);
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+  }
+  .state.is-prominent {
+    color: var(--primary-deep);
+    font-weight: 700;  /* Instrument Sans caps at 700 (T-01) */
   }
 
   /* tier-board plate corner (metrics unchanged from the #55 card) */
   .is-card {
     padding: var(--sp-1) var(--sp-2);
+    /* translucent glass chip over the linocut plate; opacity IS the mechanic (>0 alpha
+       clearance verified in #55), not a palette colour — C-02
+       raw-ok: glass-fill opacity mechanic */
     background: rgba(255, 255, 255, 0.62);
     font-size: var(--text-xs);
   }
   .is-card b {
-    font-size: 15px; /* grade letter, a step above the word (badge dimension system) */
+    font-size: var(--text-sm);
   }
 
   /* remedy-page label row — near-opaque paper chip (--paper at .92): grade ink stays AA
@@ -73,11 +100,11 @@ const classes = ['stamp', `is-${size}`, className].filter(Boolean).join(' ');
     border-width: 2px;
     border-radius: var(--r-sm);
     background: color-mix(in srgb, var(--paper) 92%, transparent);
-    font-size: 15px;
+    font-size: var(--text-sm);
     box-shadow: var(--shadow-sm);
   }
   .is-hero b {
-    font-size: 24px;
+    font-size: var(--text-lg);
   }
 
   .sr-only {

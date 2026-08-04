@@ -15,7 +15,7 @@ const sourcesCited = contentIndex
   .reduce((n, e) => n + e.sourceCount, 0);
 
 const statCells = [
-  { value: String(remediesGraded), label: 'Remedies graded' },
+  { value: String(remediesGraded), label: 'Remedies documented' },
   { value: String(sourcesCited), label: 'Sources cited' },
   { value: '0', label: 'Hallucinated cites', accent: 'eucalyptus' as const },
   { value: '$0', label: 'Brand money', accent: 'primary' as const },
@@ -42,7 +42,7 @@ const killers: { term: string; body: string; link?: { href: string; text: string
   },
   {
     term: 'The proprietary-blend penalty.',
-    body: 'This is the dose-match failure taken to its limit. A label that reports only a combined total (“sleep blend 500 mg”) hides the per-ingredient dose entirely, so there is no dose left to match against any studied dose. The claim can’t be checked, and we don’t grade on faith, so a hidden-dose blend is downgraded on principle. The full walk-through is here:',
+    body: 'This is the dose-match failure taken to its limit. A label that reports only a combined total (“sleep blend 500 mg”) hides the per-ingredient dose entirely, so there is no dose left to match against any studied dose. The claim can’t be checked, and Somnary doesn’t grade on faith, so a hidden-dose blend is downgraded on principle. The full walk-through is here:',
     link: { href: '/sleep-blends', text: 'how a hidden-dose blend defeats its own evidence' },
   },
   {
@@ -53,20 +53,19 @@ const killers: { term: string; body: string; link?: { href: string; text: string
 ---
 
 <Base
-  title="How we grade — Somnary methodology"
+  title="How Somnary grades — methodology"
   description="Somnary grades every sleep remedy S to F by the strength of published human evidence. The full rubric, evidence gates, source hierarchy, citation policy, and corrections policy: specific enough to re-derive any grade."
 >
   <main class="page">
     <!-- header -->
     <header class="head">
       <p class="eyebrow">Methodology · How Somnary grades</p>
-      <h1 class="title">How we grade</h1>
+      <h1 class="title">How Somnary grades</h1>
       <p class="dek">
         Somnary grades every sleep remedy from S to F by one thing only: the strength of the
         published human evidence behind it. Not popularity, not tradition, not how good the
         marketing is. This page is the rubric in full, specific enough that you could
-        re-derive any grade on the site yourself. If you can’t check our work, we haven’t done
-        our job.
+        re-derive any grade on the site yourself. If the work can’t be checked, it isn’t finished.
       </p>
     </header>
 
@@ -75,9 +74,9 @@ const killers: { term: string; body: string; link?: { href: string; text: string
     <!-- editorial-principle band -->
     <aside class="principle">
       <p class="principle-line">
-        Evidence over opinion. Published over promised. Weak data labeled weak, never buried.
+        Evidence over opinion. Published over promised. Weak data labelled weak, never buried.
       </p>
-      <p class="principle-sub">— The Somnary editorial principle</p>
+      <p class="principle-sub">— The Somnary research principle</p>
     </aside>
 
     <!-- Section 1 — the two rubrics -->
@@ -93,13 +92,13 @@ const killers: { term: string; body: string; link?: { href: string; text: string
           </li>
           <li>
             <strong>The brand/product QA check</strong> is a separate, optional audit of
-            whether a specific product is third-party tested and honestly labeled. It never
+            whether a specific product is third-party tested and honestly labelled. It never
             changes a remedy’s evidence grade.
           </li>
         </ul>
         <p>
-          We also keep a third thing fully walled off: <strong>community reports</strong>,
-          what readers tell us about their own experience. Those sit beside the evidence as
+          Somnary also keeps a third thing fully walled off: <strong>community reports</strong>,
+          what readers share about their own experience. Those sit beside the evidence as
           context. They never move a grade. Anecdote is the missing column, not the verdict.
         </p>
         <p>
@@ -110,6 +109,33 @@ const killers: { term: string; body: string; link?: { href: string; text: string
         </p>
       </div>
     </section>
+
+    <aside class="authorship" aria-labelledby="authorship-title">
+      <p class="eyebrow">Authorship and review</p>
+      <h2 id="authorship-title" class="authorship-title">One author, two passes</h2>
+      <p class="authorship-copy">
+        Somnary is researched and written by one person. Grades are not peer reviewed and not
+        independently verified. A second pass by the same author catches transcription errors,
+        citation mismatches, and misread effect sizes. It does not substitute for independent review.
+      </p>
+      <p class="authorship-note">
+        The grade stamp carries one review label. Review complete and Second pass appear as secondary
+        text; pages awaiting final review or still on their first pass show Provisional prominently.
+        Remedy pages also show the evidence status and freshness of that specific record, plus a
+        reason, due date, or successor link when one applies. Those detailed axes stay off cards,
+        search results, and social images.
+      </p>
+      <dl class="state-key">
+        <div>
+          <dt>Evidence status</dt>
+          <dd>Established · Provisional · Disputed · Insufficient</dd>
+        </div>
+        <div>
+          <dt>Freshness</dt>
+          <dd>Current · Review due · Superseded</dd>
+        </div>
+      </dl>
+    </aside>
 
     <!-- Section 2 — the tier system (renders from src/lib/tiers.ts) -->
     <section class="section">
@@ -231,12 +257,12 @@ const killers: { term: string; body: string; link?: { href: string; text: string
       <div class="prose">
         <p>
           The highest-quality source available sets the claim. Weaker evidence isn’t deleted;
-          it’s shown and labeled as weaker, so you can see the full picture.
+          it’s shown and labelled as weaker, so you can see the full picture.
         </p>
         <p>
           <strong>Zero hallucinated cites.</strong> Every citation is checked to resolve to a
-          real source and checked by a human to confirm it actually says what we claim it says.
-          AI helps us draft and synthesize; it never gets the final word on a reference. The
+          real source and checked by the author to confirm it actually says what Somnary claims it
+          says. AI helps with drafting and synthesis; it never gets the final word on a reference. The
           count of hallucinated citations on this site is, and must stay, zero.
         </p>
         <p>
@@ -254,17 +280,17 @@ const killers: { term: string; body: string; link?: { href: string; text: string
       <h2 class="section-title">How uncertainty is handled</h2>
       <div class="prose">
         <p>
-          Weak evidence is the normal state for most natural sleep remedies. We treat saying so
+          Weak evidence is the normal state for most natural sleep remedies. Somnary treats saying so
           as a feature, not a failure.
         </p>
         <p>
           When the data is thin, the page says thin. When a claim has no human trial behind it,
           the claims-vs-data table shows “no human sleep trial tests this claim” rather than
           quietly dropping the row. A near-empty remedy page isn’t a broken page. It’s an honest
-          one. The absence of evidence is information, and we show it.
+          one. The absence of evidence is information, and the page shows it.
         </p>
         <p>
-          We never round weak data up to sound more useful, and we never round strong data down
+          Somnary never rounds weak data up to sound more useful, and never rounds strong data down
           to sound more cautious. The grade reflects what’s published, today.
         </p>
       </div>
@@ -285,9 +311,9 @@ const killers: { term: string; body: string; link?: { href: string; text: string
           <li>A failed replication can pull a grade down.</li>
         </ul>
         <p>
-          When a grade changes, we log it publicly (what changed, which new evidence drove it,
-          and when), so the history is auditable. We run a periodic deep-research sweep for new
-          trials, retractions, and updated reviews, and we prioritize re-reviews by what readers
+          When a grade changes, Somnary logs it publicly (what changed, which new evidence drove it,
+          and when), so the history is auditable. The author runs a periodic deep-research sweep for new
+          trials, retractions, and updated reviews, prioritizing repeat passes by what readers
           are actually searching for.
         </p>
       </div>
@@ -301,22 +327,22 @@ const killers: { term: string; body: string; link?: { href: string; text: string
         <p>This is the part that makes the rest credible:</p>
         <ul>
           <li>
-            <strong>Zero affiliate links.</strong> We never earn a commission when you buy
+            <strong>Zero affiliate links.</strong> Somnary never earns a commission when you buy
             anything. No rel=sponsored, anywhere.
           </li>
           <li>
-            <strong>Zero brand money.</strong> No supplement company pays us, sponsors us, or
+            <strong>Zero brand money.</strong> No supplement company pays Somnary, sponsors it, or
             sees a grade before you do.
           </li>
-          <li><strong>No commerce.</strong> We don’t sell supplements.</li>
+          <li><strong>No commerce.</strong> Somnary doesn’t sell supplements.</li>
           <li>
             <strong>Reader-funded only.</strong> The only money Somnary takes comes from readers
             who choose to support it. That’s the whole model, on purpose.
           </li>
         </ul>
         <p>
-          We grade brands and products honestly precisely because we earn nothing from them. If
-          any of this ever changes, we’ll disclose it loudly, at the top of the page, not in the
+          Brands and products can be graded honestly because Somnary earns nothing from them. If
+          any of this ever changes, the change will be disclosed loudly, at the top of the page, not in the
           footer.
         </p>
       </div>
@@ -329,8 +355,8 @@ const killers: { term: string; body: string; link?: { href: string; text: string
       <div class="prose">
         <p>
           Found something wrong (a citation that doesn’t resolve, a number that’s off, a grade
-          you think the evidence doesn’t support)? Tell us. Corrections are public and we aim to
-          fix verified errors <strong>within 7 days</strong>.
+          you think the evidence doesn’t support)? Tell the author. Corrections are public, with a
+          target of fixing confirmed errors <strong>within 7 days</strong>.
         </p>
         <p class="inbox">
           Corrections inbox: <a href="mailto:sammymoz@gmail.com">sammymoz@gmail.com</a>
@@ -408,6 +434,59 @@ const killers: { term: string; body: string; link?: { href: string; text: string
     letter-spacing: var(--tracking-label);
     color: var(--primary);
     margin: var(--sp-4) 0 0;
+  }
+  .authorship {
+    margin: var(--sp-8) 0;
+    padding: var(--sp-7);
+    background: var(--surface);
+    border: var(--border-strong);
+    border-radius: var(--r-xl);
+  }
+  .authorship-title {
+    margin: var(--sp-2) 0 var(--sp-4);
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    line-height: var(--lh-xl);
+    color: var(--ink);
+  }
+  .authorship-copy {
+    max-width: 68ch;
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    line-height: var(--lh-lg);
+    color: var(--ink);
+  }
+  .authorship-note {
+    max-width: 72ch;
+    margin: var(--sp-5) 0 0;
+    padding-top: var(--sp-5);
+    border-top: var(--border-hairline);
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--muted);
+  }
+  .state-key {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--sp-4);
+    margin: var(--sp-5) 0 0;
+  }
+  .state-key > div {
+    padding-top: var(--sp-4);
+    border-top: var(--border-hairline);
+  }
+  .state-key dt {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+  }
+  .state-key dd {
+    margin: var(--sp-2) 0 0;
+    font-size: var(--text-sm);
+    line-height: var(--lh-sm);
+    color: var(--ink);
   }
 
   /* sections */
@@ -598,6 +677,9 @@ const killers: { term: string; body: string; link?: { href: string; text: string
     .tier-row {
       grid-template-columns: 1fr;
       gap: var(--sp-4);
+    }
+    .state-key {
+      grid-template-columns: 1fr;
     }
     .glossary-row {
       grid-template-columns: 1fr;

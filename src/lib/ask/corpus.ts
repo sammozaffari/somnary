@@ -14,6 +14,7 @@
  * (scripts/test-ask.mjs, via gray-matter over the MDX). Written in erasable TS (types + interfaces
  * only) so Node's type-stripping can import it directly in the test runner.
  */
+import type { WorkflowState } from '../remedy-state.ts';
 
 /** A citation, exactly as stored in the remedy's sources[] — never reshaped, never invented. */
 export interface AskSource {
@@ -40,6 +41,7 @@ export interface AskRemedy {
   slug: string;
   name: string;
   tier: string;
+  workflowState: WorkflowState;
   aliases: string[];
   chunks: AskChunk[];
   sources: AskSource[];
@@ -50,6 +52,7 @@ export interface RawRemedy {
   slug: string;
   name: string;
   tier: string;
+  workflowState: WorkflowState;
   aliases?: string[];
   oneLineVerdict?: string;
   verdict?: string;
@@ -119,6 +122,7 @@ export function buildAskRemedy(r: RawRemedy): AskRemedy {
     slug: r.slug,
     name: r.name,
     tier: r.tier,
+    workflowState: r.workflowState,
     aliases: r.aliases ?? [],
     chunks,
     sources,

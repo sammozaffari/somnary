@@ -60,6 +60,7 @@ const focal = FOCAL[slug] ?? 'center 55%';
     margin-bottom: calc(-1 * var(--sp-10));
     /* the melt-in: the page paper dissolves into the plate from above — the hero's mask,
        mirrored. Alpha mask (not a painted fade): the body background is a gradient. */
+    /* raw-ok: #000 is the opaque end of a luminance mask (mask alpha, not ink) — C-02 */
     -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 45%);
     mask-image: linear-gradient(to bottom, transparent 0%, #000 45%);
   }

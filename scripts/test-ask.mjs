@@ -43,6 +43,7 @@ async function loadCorpus() {
       slug: f.replace(/\.mdx$/, ''),
       name: data.name,
       tier: data.tier,
+      workflowState: data.workflowState,
       aliases: data.aliases ?? [],
       oneLineVerdict: data.oneLineVerdict,
       verdict: data.verdict,

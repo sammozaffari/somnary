@@ -1,7 +1,6 @@
 ---
 // Shared layout for the four legal pages (/disclaimer, /terms, /privacy, /disclosure).
-// Calm reading measure, token-only prose styles. Renders the PRE-LAUNCH review marker into
-// the output for every page that uses it.
+// Calm reading measure, token-only prose styles.
 import Base from './Base.astro';
 
 interface Props {
@@ -11,13 +10,9 @@ interface Props {
   lastUpdated?: string;
 }
 const { title, eyebrow, description, lastUpdated } = Astro.props;
-
-// PRE-LAUNCH: requires legal review before launch / before membership goes live
-const PRELAUNCH = '<!-- PRE-LAUNCH: requires legal review before launch / before membership goes live -->';
 ---
 
 <Base title={title} description={description}>
-  <Fragment set:html={PRELAUNCH} />
   <main class="legal">
     <header class="head">
       <p class="eyebrow">{eyebrow}</p>
