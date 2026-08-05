@@ -195,6 +195,9 @@ function cellNodes(x: number, y: number): MapNode[] {
     min-height: var(--sp-9);
     background: var(--tint);
     border-radius: var(--r-md);
+    /* size to content and top-align: a near-empty cell in a tall row stays compact
+       instead of stretching into a large empty tinted block */
+    align-self: start;
   }
 
   .corner {
