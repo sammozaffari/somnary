@@ -220,11 +220,12 @@ const ratifiedCount = nodes.filter((n) => n.ratified).length;
   }
   .segmented {
     display: inline-flex;
+    flex-wrap: wrap;
     gap: var(--sp-1);
     padding: var(--sp-1);
     background: var(--surface);
     border: var(--border-hairline);
-    border-radius: var(--r-pill);
+    border-radius: var(--r-lg);
   }
   .seg {
     font-family: var(--font-display);
@@ -306,6 +307,12 @@ const ratifiedCount = nodes.filter((n) => n.ratified).length;
     .title {
       font-weight: 700;
       font-size: var(--text-2xl);
+    }
+    .controls {
+      align-items: flex-start;
+    }
+    .compare-link {
+      margin-left: 0;
     }
   }
 
