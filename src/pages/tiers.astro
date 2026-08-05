@@ -1,172 +1,126 @@
 ---
-// Remedies overview / tier board — CHK-3.4 (strategy 03: Remedies is a nav-peer REFERENCE
-// OVERVIEW, not the site hero). Ranks every graded remedy S→F, reading the structured grades
-// from the content collection (single source of truth — no hand-kept list, no re-derived grade).
-// Server-rendered/static and crawlable: the flat, grade→name ordered grid below IS the canonical
-// content. The empty S tier surfaces its "nothing qualifies" note (from tiers.ts) so the
-// intentional-empty credibility signal survives. Sort control is progressive enhancement only —
-// with JS off, the server order (grade→name) stands as the content.
+// Remedies overview — the Evidence × Safety MAP (replaces the old S–F leaderboard).
+// The 1-D ranking led with the two owner-ratified grades (a D and an F) and buried the
+// rest, and a single letter conflated "how sure are we", "how much does it do", and
+// "how safe is it". The map plots every remedy by two orthogonal axes — evidence
+// strength (X) and safety risk (Y) — with effect reality left in each card's own
+// verdict line. Grades are unchanged and human-gated; the map only re-presents them.
+//
+// Server-rendered/static and crawlable: the map is real HTML, and the flat A–Z-within-
+// grade <ul> below it is the canonical, JS-off-safe substrate. Nothing here re-derives
+// or edits a grade.
 import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
-import TierBadge from '../components/TierBadge.astro';
 import RemedyCard from '../components/RemedyCard.astro';
 import Disclaimer from '../components/Disclaimer.astro';
+import EvidenceMap, { type MapNode } from '../components/EvidenceMap.astro';
 import { TIERS, type TierId } from '../lib/tiers';
 import { contentIndex } from '../lib/content-index';
-import {
-  isDefaultRankingEligible,
-  isOrdinarySearchEligible,
-  type WorkflowState,
-} from '../lib/remedy-state';
+import { placeOnMap } from '../lib/evidence-map';
+import { isDefaultRankingEligible, isOrdinarySearchEligible } from '../lib/remedy-state';
 
-interface Card {
-  slug: string;
-  name: string;
-  tier: TierId;
-  workflowState: WorkflowState;
-  oneLiner: string;
-  category: string;
-}
-
-// Category is a nav/sort facet that lives in the content-index store (already imported here);
-// the remedy content schema carries no `category` field, so we read it by slug rather than add
-// a schema field (a schema change is a [HUMAN-GATE]). No content is duplicated — this reads the
-// one existing registry.
+// Category is a nav/filter facet that lives in the content-index store (already imported
+// here); the remedy content schema carries no `category` field, so we read it by slug
+// rather than add a schema field (a schema change is a [HUMAN-GATE]). No content is
+// duplicated — this reads the one existing registry.
 const categoryOf = new Map(contentIndex.map((e) => [e.slug, e.category]));
 
 const remedies = await getCollection(
   'remedies',
   (e) => !e.data.draft && isOrdinarySearchEligible(e.data),
 );
-const cards: Card[] = remedies.map((e) => ({
-  slug: e.id,
-  name: e.data.name,
-  tier: e.data.tier,
-  workflowState: e.data.workflowState,
-  oneLiner: e.data.oneLineVerdict,
-  category: categoryOf.get(e.id) ?? '',
-}));
-const rankedCards = cards.filter((card) => {
-  const remedy = remedies.find((entry) => entry.id === card.slug)!;
-  return isDefaultRankingEligible(remedy.data);
-});
-const underReview = cards
-  .filter((card) => !rankedCards.some((ranked) => ranked.slug === card.slug))
-  .sort((a, b) => a.name.localeCompare(b.name));
-const byTier = new Map<TierId, Card[]>(TIERS.map((t) => [t.id, []]));
-for (const card of rankedCards) byTier.get(card.tier)!.push(card);
-// Within each tier, name A–Z. Rank = position in the S→F TIERS order.
-for (const arr of byTier.values()) arr.sort((a, b) => a.name.localeCompare(b.name));
-const rankOf = new Map<TierId, number>(TIERS.map((t, i) => [t.id, i]));
-// Canonical server order: grade(S→F) then name(A–Z). This flat list is the crawlable content.
-const ordered = TIERS.flatMap((t) => byTier.get(t.id)!);
 
-const sortModes = [
-  { key: 'grade', label: 'Grade' },
-  { key: 'name', label: 'A–Z' },
-  { key: 'category', label: 'Category' },
-] as const;
+// One node per remedy: existing fields → map placement. `ratified` drives the review
+// TEXTURE only (solid vs dashed) — never position or prominence.
+const nodes: MapNode[] = remedies.map((e) => {
+  const { evidenceBand, safetyBand } = placeOnMap({
+    tier: e.data.tier,
+    severity: e.data.safety.severity,
+    interactionCount: e.data.safety.interactions.length,
+  });
+  return {
+    slug: e.id,
+    name: e.data.name,
+    tier: e.data.tier,
+    workflowState: e.data.workflowState,
+    oneLiner: e.data.oneLineVerdict,
+    epistemicState: e.data.epistemicState,
+    category: categoryOf.get(e.id) ?? '',
+    evidenceBand,
+    safetyBand,
+    ratified: isDefaultRankingEligible(e.data),
+  };
+});
+
+// Crawlable substrate: ALL remedies in canonical grade(S→F)→name(A–Z) order. This flat
+// list is the JS-off-safe, accessible reading path beneath the map.
+const rankOf = new Map<TierId, number>(TIERS.map((t, i) => [t.id, i]));
+const orderedNodes = [...nodes].sort(
+  (a, b) => rankOf.get(a.tier)! - rankOf.get(b.tier)! || a.name.localeCompare(b.name),
+);
+
+// Category facets for the map-filter island (progressive enhancement only).
+const categories = [...new Set(nodes.map((n) => n.category).filter(Boolean))].sort();
+const ratifiedCount = nodes.filter((n) => n.ratified).length;
 ---
 
 <Base
-  title="Somnary remedy evidence index, graded S–F"
-  description="The full reference index of natural sleep remedies. Review-complete grades are ranked S to F; provisional grades remain visible in a separate under-review group."
+  title="Somnary remedy evidence map — evidence strength × safety"
+  description="Every natural sleep remedy mapped by two things at once: how strong the published human evidence is, and how risky it is. Grades are the author's; each card says how much the remedy actually does."
   canonical="https://somnary.vercel.app/tiers"
 >
   <main class="page">
     <header class="head">
       <p class="eyebrow">Remedies · Reference overview</p>
-      <h1 class="title">The remedy evidence index</h1>
+      <h1 class="title">The remedy evidence map</h1>
       <p class="dek">
-        Review-complete grades are ranked S–F by the strength of the published human evidence.
-        Grades still under the author’s review remain visible below, but do not enter the ranking.
+        Every remedy plotted by two questions at once: <strong>how sure are we it works</strong>
+        (left → right) and <strong>how risky is it</strong> (bottom → top). A single letter can’t
+        say both — so the grade sets the horizontal position, safety sets the vertical, and each
+        card’s own line tells you how much it actually does. All {nodes.length} remedies show;
+        {ratifiedCount} carry a completed review (solid), the rest are still under the author’s
+        review (dashed).
       </p>
       <Disclaimer variant="compact" />
     </header>
 
-    <!-- overview legend: what each tier means + how many remedies sit in it -->
-    <div class="legend" aria-label="The tiers, and how many review-complete remedies sit in each">
-      {
-        TIERS.map((t) => {
-          const count = byTier.get(t.id)!.length;
-          const empty = count === 0;
-          return (
-            <div class:list={['legend-item', { wide: empty && !!t.emptyNote }]}>
-              <TierBadge tier={t.id} size="inline" />
-              <span class="legend-name">{t.name}</span>
-              <span class="legend-count">{count}</span>
-              {empty && t.emptyNote && <span class="legend-note">{t.emptyNote}</span>}
-            </div>
-          );
-        })
-      }
-    </div>
-
-    <!-- sort control — progressive enhancement; applies only to the review-complete ranking -->
+    <!-- category filter — progressive enhancement; dims non-matching nodes/rows IN PLACE -->
     <div class="controls">
-      <span id="sort-label" class="controls-label">Sort ranking</span>
-      <div class="segmented" role="group" aria-labelledby="sort-label">
+      <span id="filter-label" class="controls-label">Filter by category</span>
+      <div class="segmented" role="group" aria-labelledby="filter-label">
+        <button type="button" class="seg" data-filter="all" aria-pressed="true">All</button>
         {
-          sortModes.map((m) => (
-            <button
-              type="button"
-              class="seg"
-              data-sort={m.key}
-              aria-pressed={m.key === 'grade' ? 'true' : 'false'}
-            >
-              {m.label}
+          categories.map((c) => (
+            <button type="button" class="seg" data-filter={c} aria-pressed="false">
+              {c}
             </button>
           ))
         }
       </div>
-      <!-- CHK-3.4 deferred faceting now lives in the compare tool (CHK-6.1): filter by goal/category. -->
       <a class="compare-link" href="/compare">Compare remedies side by side →</a>
     </div>
 
-    <!-- canonical flat grid: ALL remedies, grade(S→F)→name(A–Z). This is the crawlable content. -->
-    <ul id="remedy-grid" class="grid">
-      {
-        ordered.map((c) => (
-          <li
-            class="cell"
-            data-rank={rankOf.get(c.tier)}
-            data-name={c.name.toLowerCase()}
-            data-category={c.category}
-          >
-            <RemedyCard
-              slug={c.slug}
-              name={c.name}
-              tier={c.tier}
-              workflowState={c.workflowState}
-              oneLiner={c.oneLiner}
-            />
-          </li>
-        ))
-      }
-    </ul>
+    <EvidenceMap nodes={nodes} />
 
-    <section class="under-review" aria-labelledby="under-review-title">
+    <!-- crawlable substrate: ALL remedies, grade(S→F)→name(A–Z). JS-off-safe canonical content. -->
+    <section class="substrate" aria-labelledby="all-remedies-title">
       <div class="section-head">
         <div>
-          <p class="eyebrow">Not in the ranking</p>
-          <h2 id="under-review-title" class="section-title">Under author review</h2>
+          <p class="eyebrow">The full list</p>
+          <h2 id="all-remedies-title" class="section-title">Every remedy, A–Z within grade</h2>
         </div>
-        <p class="section-count">{underReview.length} remedies · A–Z</p>
+        <p class="section-count">{orderedNodes.length} remedies</p>
       </div>
-      <p class="section-dek">
-        These grades remain visible for transparency. They are excluded from the default ranking
-        until the author marks the review complete.
-      </p>
-      <ul class="grid">
+      <ul id="remedy-grid" class="grid">
         {
-          underReview.map((c) => (
-            <li class="cell">
+          orderedNodes.map((n) => (
+            <li class="cell" data-category={n.category}>
               <RemedyCard
-                slug={c.slug}
-                name={c.name}
-                tier={c.tier}
-                workflowState={c.workflowState}
-                oneLiner={c.oneLiner}
+                slug={n.slug}
+                name={n.name}
+                tier={n.tier}
+                workflowState={n.workflowState}
+                oneLiner={n.oneLiner}
               />
             </li>
           ))
@@ -177,30 +131,22 @@ const sortModes = [
 </Base>
 
 <script>
-  // Sort island (CHK-3.4) — reorders the existing, server-rendered <li> nodes IN PLACE. It never
-  // creates content: with JS off, the server order (grade→name) stands. Stateless; default 'grade'
-  // simply restores the canonical order. No reorder animation, so prefers-reduced-motion is honored
-  // by construction (nothing moves with a transition).
-  const grid = document.getElementById('remedy-grid');
-  const buttons = Array.from(document.querySelectorAll<HTMLButtonElement>('.seg'));
-  if (grid && buttons.length) {
-    const items = Array.from(grid.querySelectorAll<HTMLLIElement>('li.cell'));
-    const num = (el: HTMLLIElement, k: string) => Number(el.dataset[k] ?? 0);
-    const str = (el: HTMLLIElement, k: string) => el.dataset[k] ?? '';
-    const comparators: Record<string, (a: HTMLLIElement, b: HTMLLIElement) => number> = {
-      grade: (a, b) => num(a, 'rank') - num(b, 'rank') || str(a, 'name').localeCompare(str(b, 'name')),
-      name: (a, b) => str(a, 'name').localeCompare(str(b, 'name')),
-      category: (a, b) =>
-        str(a, 'category').localeCompare(str(b, 'category')) || str(a, 'name').localeCompare(str(b, 'name')),
+  // Map-filter island — progressive enhancement only. Clicking a category dims the
+  // non-matching map chips AND substrate rows IN PLACE (opacity), never removing them
+  // from the DOM. With JS off, every node/row is present and undimmed — the map + full
+  // list stand as the content. Stateless; "All" clears the dim. No layout reflow, so
+  // prefers-reduced-motion is honored by construction.
+  const buttons = Array.from(document.querySelectorAll<HTMLButtonElement>('.seg[data-filter]'));
+  const targets = Array.from(document.querySelectorAll<HTMLElement>('[data-category]'));
+  if (buttons.length && targets.length) {
+    const apply = (filter: string) => {
+      for (const el of targets) {
+        const match = filter === 'all' || el.dataset.category === filter;
+        el.classList.toggle('is-dimmed', !match);
+      }
+      for (const b of buttons) b.setAttribute('aria-pressed', String(b.dataset.filter === filter));
     };
-    const apply = (key: string) => {
-      const cmp = comparators[key];
-      if (!cmp) return;
-      const sorted = [...items].sort(cmp);
-      grid.append(...sorted); // append() moves existing nodes — no re-render, no content change
-      for (const b of buttons) b.setAttribute('aria-pressed', String(b.dataset.sort === key));
-    };
-    for (const b of buttons) b.addEventListener('click', () => apply(b.dataset.sort ?? 'grade'));
+    for (const b of buttons) b.addEventListener('click', () => apply(b.dataset.filter ?? 'all'));
   }
 </script>
 
@@ -217,11 +163,12 @@ const sortModes = [
     color: var(--muted);
     margin: 0;
   }
-  .dot {
-    color: var(--primary);
-  }
   .head {
     margin-bottom: var(--sp-6);
+  }
+  .dek strong {
+    color: var(--ink);
+    font-weight: 650;
   }
   .title {
     font-family: var(--font-display);
@@ -240,48 +187,7 @@ const sortModes = [
     margin: 0;
   }
 
-  /* overview legend */
-  .legend {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--sp-3) var(--sp-5);
-    align-items: center;
-    margin: var(--sp-6) 0;
-    padding: var(--sp-4) var(--sp-5);
-    background: var(--surface);
-    border: var(--border-hairline);
-    border-radius: var(--r-lg);
-  }
-  .legend-item {
-    display: flex;
-    align-items: center;
-    gap: var(--sp-2);
-  }
-  .legend-item.wide {
-    flex-basis: 100%;
-    flex-wrap: wrap;
-  }
-  .legend-name {
-    font-family: var(--font-mono);
-    font-weight: 700;
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
-    color: var(--ink);
-  }
-  .legend-count {
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
-    color: var(--muted);
-  }
-  .legend-note {
-    font-size: var(--text-sm);
-    line-height: var(--lh-sm);
-    color: var(--muted);
-    max-width: 68ch;
-  }
-
-  /* sort control */
+  /* category filter control */
   .controls {
     display: flex;
     align-items: center;
@@ -314,11 +220,12 @@ const sortModes = [
   }
   .segmented {
     display: inline-flex;
+    flex-wrap: wrap;
     gap: var(--sp-1);
     padding: var(--sp-1);
     background: var(--surface);
     border: var(--border-hairline);
-    border-radius: var(--r-pill);
+    border-radius: var(--r-lg);
   }
   .seg {
     font-family: var(--font-display);
@@ -362,7 +269,12 @@ const sortModes = [
   .cell > :global(.card) {
     width: 100%;
   }
-  .under-review {
+  /* filter island: dim non-matching nodes/rows in place (never removed from DOM) */
+  :global(.is-dimmed) {
+    opacity: 0.28;
+    transition: opacity var(--dur-fast) var(--ease-soft);
+  }
+  .substrate {
     margin-top: var(--sp-9);
     padding-top: var(--sp-7);
     border-top: var(--border-strong);
@@ -388,14 +300,6 @@ const sortModes = [
     letter-spacing: var(--tracking-label);
     color: var(--muted);
   }
-  .section-dek {
-    max-width: 68ch;
-    margin: var(--sp-3) 0 var(--sp-6);
-    color: var(--muted);
-    font-size: var(--text-sm);
-    line-height: var(--lh-sm);
-  }
-
   @media (max-width: 640px) {
     .page {
       padding: var(--sp-6) var(--sp-5) var(--sp-8);
@@ -403,6 +307,18 @@ const sortModes = [
     .title {
       font-weight: 700;
       font-size: var(--text-2xl);
+    }
+    .controls {
+      align-items: flex-start;
+    }
+    .compare-link {
+      margin-left: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :global(.is-dimmed) {
+      transition: none;
     }
   }
 </style>
