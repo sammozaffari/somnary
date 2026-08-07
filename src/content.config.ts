@@ -49,12 +49,36 @@ const changeLogEntry = z.object({
  * (the CHK-0.5 resolver re-checks the same rule). Formats are pre-validated here so a
  * malformed identifier fails the build at schema time.
  */
+// The study field (REDESIGN Reference C2 / step 11) renders each source as a point of
+// light: sample size → radius, effect direction → side of the line, study quality →
+// brightness. That signature visual only works if every source carries these as STRUCTURED
+// fields, so they live here — not buried in the `finding` / `sourceLine` prose.
+//
+// effect DATA (sampleSize, effectDirection, effectSize, studyQuality) is editorial: it must
+// be read off the actual paper, never inferred or estimated (CLAUDE.md; REDESIGN step 2).
+// So each source declares an explicit `effectDataStatus`:
+//   - 'complete' → all four effect fields are filled (validation below FAILS LOUDLY if not);
+//   - 'pending'  → the effect data has not yet been entered editorially; fields stay null and
+//                  the study-field generator OMITS the point (step 11: never render a point
+//                  for a source with missing effect data). This is the honest "not yet"
+//                  state, never a silently-empty one.
+const effectDirection = z.enum([
+  'helped',    // point sits to the RIGHT of the line
+  'no-effect', // point sits ON / LEFT of the line
+  'harmed',    // point sits to the LEFT of the line
+  'mixed',     // helped on some outcomes, not others
+]);
+const studyQuality = z.enum(['high', 'moderate', 'low']); // → point brightness
+
 const source = z
   .object({
-    n: z.number().int().positive(), // footnote number, referenced by claims[].sources
+    n: z.number().int().positive(), // footnote number, referenced by claims[].sources — NOT sample size
     title: z.string(),
-    sourceLine: z.string(), // journal · authors · year
+    sourceLine: z.string(), // journal · authors · year (human-readable citation line)
     finding: z.string(), // plain-language what-it-found (citation popover body)
+    // year — structured, required. Migrated by parsing the existing citation line (an existing
+    // datum, not an inference); every new source states it explicitly.
+    year: z.number().int().gte(1960).lte(2100),
     type: z.enum([
       'meta-analysis',
       'systematic-review',
@@ -68,6 +92,13 @@ const source = z
       'review',
       'other',
     ]),
+    // --- effect data (study-field fields) — editorial, never inferred ---
+    effectDataStatus: z.enum(['complete', 'pending']),
+    sampleSize: z.number().int().positive().nullable().default(null), // people in the study
+    effectDirection: effectDirection.nullable().default(null),
+    effectSize: z.string().min(1).nullable().default(null), // plain-language magnitude, e.g. "~7 minutes faster"
+    studyQuality: studyQuality.nullable().default(null),
+    // --- identifier (at least one required) ---
     pmid: z
       .string()
       .regex(/^\d+$/, 'pmid must be digits only')
@@ -84,6 +115,30 @@ const source = z
   })
   .refine((s) => Boolean(s.pmid || s.doi || s.registry), {
     message: 'each source needs a resolvable identifier: pmid, doi, or registry (NCT…)',
+  })
+  // Fail loudly on a source that CLAIMS complete effect data but is missing any of the four
+  // fields — a half-filled source must never masquerade as renderable in the study field.
+  .superRefine((s, ctx) => {
+    if (s.effectDataStatus !== 'complete') return;
+    const missing = (
+      [
+        ['sampleSize', s.sampleSize],
+        ['effectDirection', s.effectDirection],
+        ['effectSize', s.effectSize],
+        ['studyQuality', s.studyQuality],
+      ] as const
+    )
+      .filter(([, v]) => v === null || v === undefined)
+      .map(([k]) => k);
+    if (missing.length) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['effectDataStatus'],
+        message: `source [${s.n}] is marked effectDataStatus: complete but is missing ${missing.join(
+          ', '
+        )} — fill the field(s) or set effectDataStatus: pending`,
+      });
+    }
   });
 
 /** One row of the claims-vs-data table. `studiesShow: null` → renders the .nodata marker. */
