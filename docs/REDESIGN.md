@@ -194,10 +194,14 @@ paper. PALETTE (dusk): a designed low-light night theme for late-night
 reading — deep warm near-black (~#17151E region), amber-shifted text,
 lowered contrast, dimmed chrome. Show everything in both.
 
-TYPE: a characterful serif reserved for the human voice (verdicts, pulled
-sentences), a precise neutral sans for interface and data, a mono for
-doses and identifiers. Signature device: one italic serif phrase inside an
-otherwise sans headline, used on the words that carry the meaning.
+TYPE: NO serif faces anywhere. A precise neutral sans carries interface, body,
+data and the human voice (verdicts, pulled sentences); a mono carries doses,
+identifiers, AND the accent role. Signature device: one mono phrase inside an
+otherwise sans headline, used on the words that carry the meaning. All UI copy is
+sentence case (first word capitalised only — never Title Case, never all-caps,
+never all-lowercase); the wordmark is "Somnary" (capitalised, no trailing period,
+per D3). Self-host every face — no Google Fonts, no third-party font CDN (@import
+or <link>): render-blocking, third-party, and a GDPR consideration.
 
 SIGNATURE ELEMENT — the study field. Each remedy's research rendered as
 generated art: every published study is a point of light; bigger point =
@@ -252,11 +256,11 @@ stock wellness photography, cream-and-terracotta AI-default styling.
 Design the Somnary homepage in this system — day and dusk, mobile and
 desktop. The page's only real job is to get someone to an answer fast.
 
-1. Slim header: "Somnary" left; nav = remedies · products · problems ·
-   safety · how we grade.
+1. Slim header: "Somnary" left; nav = Remedies · Products · Problems ·
+   Safety · How we grade.
 2. Hero: one plain sentence of what the site does, and beneath it the
    SEARCH FIELD as the largest, most prominent object on the page — this
-   is the hero. Placeholder: "search a remedy, a product, or a brand."
+   is the hero. Placeholder: "Search a remedy, a product, or a brand."
    Show the open state with mixed live results grouped as remedies /
    products / brands / problems, each row carrying its bucket badge inline
    so the answer often arrives before the click.
@@ -286,7 +290,7 @@ Design the melatonin remedy page — the template every remedy inherits.
 Day and dusk, mobile and desktop.
 
 Header: "melatonin", its bucket badge with the plain sentence beneath, a
-one-line verdict in the serif voice, the study-field hero generated from
+one-line verdict in the human voice (sans, with mono accent), the study-field hero generated from
 its research, and "last checked {date}".
 
 Sticky contents list (sidebar on desktop, collapsible on mobile) across
@@ -445,20 +449,25 @@ well-scoring product and one the site advises against.
 Read /docs/REDESIGN.md and the Claude Design handoff bundle.
 
 Task: wire the new token system into the styling layer — colours (day and
-dusk), type scale and the three faces, spacing, radius, motion durations
-and easing. Then build the primitive components: bucket badge, product
-score badge, paired verdict, "see the study" chip, safety callout.
+dusk), type scale and the two faces (sans + mono; no serif), spacing, radius,
+motion durations and easing. Then build the primitive components: bucket badge,
+product score badge, paired verdict, "see the study" chip, safety callout.
 
-Rules: named tokens only, no hardcoded values. Bucket badges carry shape
-AND colour, never colour alone, and always render with their plain
-explanatory sentence. Verify contrast passes WCAG AA on both themes and
-report any token that fails.
+Rules: named tokens only, no hardcoded values — REJECT any bundle component that
+carries hardcoded style values and REPORT them (with the token they should map
+to), never launder them into the repo (the bundle ships many: e.g. SearchField
+min-height 60 / padding 6·8·20 / gap 10 / max-width 560 / border 1.5px / font
+18px). Self-host every webfont — no Google Fonts, no third-party font CDN. Bucket
+badges carry shape AND colour, never colour alone, and always render with their
+plain explanatory sentence. All UI copy is sentence case; no serif faces. Verify
+contrast passes WCAG AA on both themes and report any token that fails.
 
 Treat the handoff bundle as authoritative for values and behaviour, not as
 code to paste — implement in our Astro component conventions.
 
 Acceptance: tokens wired; five components built in both themes with all
-states; a test page renders using named tokens only; contrast verified.
+states; a test page renders using named tokens only; fonts self-hosted (no CDN
+request); any bundle hardcodes reported, not laundered; contrast verified.
 ```
 
 ---
@@ -694,9 +703,9 @@ One thing to protect while simplifying: plain must not become vague. "Might help
 
 Search is the product; everything else is browsing for people who don't know what to search.
 
-**One search field, mixed results.** Someone types "magnesium," "Nature's Own," "melatonin gummies 5mg," or "can't stay asleep" and gets grouped results — *remedies · products · brands · problems · safety topics* — each row showing its bucket badge inline.
+**One search field, mixed results.** Someone types "magnesium," "Nature's Own," "melatonin gummies 5mg," or "can't stay asleep" and gets grouped results — *Remedies · Products · Brands · Problems · Safety topics* — each row showing its bucket badge inline.
 
-**Five nav items:** remedies · products · problems · safety · how we grade.
+**Five nav items:** Remedies · Products · Problems · Safety · How we grade.
 
 **Four page types carry the site:** remedy (does the ingredient work), product (does this bottle deliver it), problem (I have this situation), safety. Everything else supports these.
 
