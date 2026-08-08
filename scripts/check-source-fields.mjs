@@ -2,12 +2,11 @@
 /**
  * Source study-field guard + coverage report (REDESIGN step 2 / Reference C2).
  *
- * The signature study-field visual (step 11) renders each source from seven STRUCTURED
- * fields: sample size, effect direction, effect size, study quality, year, study type, and a
- * resolvable identifier. This script is the standalone, CI-runnable guard for that contract —
- * the same relationship check-citations.mjs has to the identifier rule. The Zod schema
- * (src/content.config.ts) enforces the same rules at build time; this is the report + a gate
- * that can run without a full Astro build.
+ * The study field (step 11) renders each HUMAN sleep-outcome source as a point of light:
+ * sample size → radius, effect direction → one of three bands, study quality → brightness.
+ * This is the standalone, CI-runnable guard for that contract — the same relationship
+ * check-citations.mjs has to the identifier rule. The Zod schema (src/content.config.ts)
+ * enforces the same rules at build time; this is the report + a gate that runs without a build.
  *
  *   node scripts/check-source-fields.mjs           # coverage report + FAIL (exit 1) on any
  *                                                   # structurally-invalid source
@@ -16,11 +15,12 @@
  * FAIL conditions (loud, per acceptance):
  *   - missing/invalid year, type, or identifier (pmid|doi|registry)     — always required
  *   - effectDataStatus missing or not one of complete|pending
- *   - effectDataStatus: complete but any of the four effect fields null  — half-filled source
+ *   - a source with effectDirection but measuresSleepOutcome=false       — dishonest axis placement
+ *   - effectDataStatus: complete but measuresSleepOutcome not set
+ *   - complete + measuresSleepOutcome=true but missing sampleSize / effectDirection / studyQuality
  *
- * A source with effectDataStatus: pending and null effect fields is VALID — it is honestly
- * flagged incomplete, and the study-field generator omits its point. This is the expected
- * state of the whole corpus today (effect data is filled editorially, never inferred).
+ * A `pending` source (any fields null) is VALID — honestly flagged incomplete; the generator
+ * omits its point. `effectSize` is always optional (stat line only, never positioning).
  */
 import { readdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -29,62 +29,93 @@ import matter from 'gray-matter';
 const CONTENT_DIR = process.env.SOMNARY_CONTENT_DIR || 'src/content/remedies';
 const REPORT_ONLY = process.argv.includes('--report');
 
-const EFFECT_FIELDS = ['sampleSize', 'effectDirection', 'effectSize', 'studyQuality'];
-const REQUIRED = ['sampleSize', 'effectDirection', 'effectSize', 'studyQuality', 'year', 'type', 'identifier'];
-
+const DIRECTIONS = ['helped', 'no-clear-effect', 'didnt-help'];
+const QUALITIES = ['high', 'moderate', 'low'];
 const hasId = (s) => Boolean(s.pmid || s.doi || s.registry);
-const filled = (v) => v !== null && v !== undefined && v !== '';
+const set = (v) => v !== null && v !== undefined && v !== '';
 
 async function main() {
   const files = (await readdir(CONTENT_DIR)).filter((f) => f.endsWith('.mdx')).sort();
   const errors = [];
-  const totals = Object.fromEntries(REQUIRED.map((k) => [k, 0]));
-  let totalSources = 0;
-  let pending = 0;
-  let complete = 0;
+  let total = 0, pending = 0, complete = 0;
+  let adjudicated = 0, efficacy = 0, nonEfficacy = 0;
+  const base = { year: 0, type: 0, identifier: 0 };
+  // coverage among efficacy (measuresSleepOutcome=true) sources
+  const eff = { sampleSize: 0, effectDirection: 0, studyQuality: 0, effectSize: 0 };
 
   for (const f of files) {
     const { data } = matter(await readFile(join(CONTENT_DIR, f), 'utf8'));
     for (const s of data.sources || []) {
-      totalSources++;
+      total++;
       const at = `${f} [${s.n}]`;
 
       // always-required
-      if (Number.isInteger(s.year) && s.year >= 1960 && s.year <= 2100) totals.year++;
+      if (Number.isInteger(s.year) && s.year >= 1960 && s.year <= 2100) base.year++;
       else errors.push(`${at}: missing/invalid year`);
-      if (typeof s.type === 'string' && s.type) totals.type++;
+      if (typeof s.type === 'string' && s.type) base.type++;
       else errors.push(`${at}: missing study type`);
-      if (hasId(s)) totals.identifier++;
+      if (hasId(s)) base.identifier++;
       else errors.push(`${at}: no resolvable identifier (pmid|doi|registry)`);
 
-      // effect-data status discriminant
+      // status
       if (s.effectDataStatus === 'complete') complete++;
       else if (s.effectDataStatus === 'pending') pending++;
       else errors.push(`${at}: effectDataStatus must be 'complete' or 'pending' (got ${JSON.stringify(s.effectDataStatus)})`);
 
-      // effect fields: count coverage, and fail on a half-filled "complete"
-      const missing = EFFECT_FIELDS.filter((k) => !filled(s[k]));
-      for (const k of EFFECT_FIELDS) if (filled(s[k])) totals[k]++;
-      if (s.effectDataStatus === 'complete' && missing.length) {
-        errors.push(`${at}: effectDataStatus: complete but missing ${missing.join(', ')}`);
+      // sanity on enum values when present
+      if (set(s.effectDirection) && !DIRECTIONS.includes(s.effectDirection))
+        errors.push(`${at}: effectDirection '${s.effectDirection}' not one of ${DIRECTIONS.join('|')}`);
+      if (set(s.studyQuality) && !QUALITIES.includes(s.studyQuality))
+        errors.push(`${at}: studyQuality '${s.studyQuality}' not one of ${QUALITIES.join('|')}`);
+
+      // adjudication + efficacy split
+      if (s.measuresSleepOutcome === true) { adjudicated++; efficacy++; }
+      else if (s.measuresSleepOutcome === false) { adjudicated++; nonEfficacy++; }
+
+      // rule 2 — no direction on a non-sleep source
+      if (s.measuresSleepOutcome === false && set(s.effectDirection))
+        errors.push(`${at}: has effectDirection but measuresSleepOutcome=false (cannot sit on the helped/didn't-help axis)`);
+
+      // efficacy-field coverage (only meaningful for sleep-outcome sources)
+      if (s.measuresSleepOutcome === true) {
+        if (set(s.sampleSize)) eff.sampleSize++;
+        if (set(s.effectDirection)) eff.effectDirection++;
+        if (set(s.studyQuality)) eff.studyQuality++;
+        if (set(s.effectSize)) eff.effectSize++;
+      }
+
+      // rule 1 — completeness
+      if (s.effectDataStatus === 'complete') {
+        if (s.measuresSleepOutcome === null || s.measuresSleepOutcome === undefined) {
+          errors.push(`${at}: complete but measuresSleepOutcome not set`);
+        } else if (s.measuresSleepOutcome === true) {
+          const miss = ['sampleSize', 'effectDirection', 'studyQuality'].filter((k) => !set(s[k]));
+          if (miss.length) errors.push(`${at}: complete sleep-outcome source missing ${miss.join(', ')}`);
+        }
       }
     }
   }
 
-  // ---- coverage report ----
-  const pct = (a) => (totalSources === 0 ? '—' : `${Math.round((a / totalSources) * 100)}%`);
-  console.log(`\nSOURCE FIELD COVERAGE · ${files.length} remedies · ${totalSources} sources`);
-  console.log(`  effectDataStatus: ${complete} complete · ${pending} pending\n`);
-  for (const k of REQUIRED) {
-    console.log(`  ${k.padEnd(16)} ${String(totals[k]).padStart(4)} / ${totalSources}  ${pct(totals[k]).padStart(4)}`);
-  }
+  const pctOf = (a, b) => (b === 0 ? '  —' : `${Math.round((a / b) * 100)}%`.padStart(4));
+  console.log(`\nSOURCE FIELD COVERAGE · ${files.length} remedies · ${total} sources`);
+  console.log(`  status:       ${complete} complete · ${pending} pending`);
+  console.log(`  adjudicated:  ${adjudicated}/${total}  (sleep-outcome: ${efficacy} · non-sleep: ${nonEfficacy})\n`);
+
+  console.log(`  always-required:`);
+  for (const k of ['year', 'type', 'identifier'])
+    console.log(`    ${k.padEnd(14)} ${String(base[k]).padStart(4)} / ${total}  ${pctOf(base[k], total)}`);
+
+  console.log(`\n  study-field fields — coverage among the ${efficacy} sleep-outcome source(s):`);
+  for (const k of ['sampleSize', 'effectDirection', 'studyQuality'])
+    console.log(`    ${k.padEnd(14)} ${String(eff[k]).padStart(4)} / ${efficacy}  ${pctOf(eff[k], efficacy)}   (required on complete)`);
+  console.log(`    ${'effectSize'.padEnd(14)} ${String(eff.effectSize).padStart(4)} / ${efficacy}  ${pctOf(eff.effectSize, efficacy)}   (optional)`);
 
   if (errors.length) {
     console.error(`\n✗ ${errors.length} structurally-invalid source(s):`);
     for (const e of errors) console.error(`  - ${e}`);
     if (!REPORT_ONLY) process.exit(1);
   } else {
-    console.log(`\n✓ every source carries year, study type, an identifier, and a valid effectDataStatus.`);
+    console.log(`\n✓ all sources valid: year/type/identifier present, status set, no dishonest axis placement, every complete source whole.`);
   }
 }
 

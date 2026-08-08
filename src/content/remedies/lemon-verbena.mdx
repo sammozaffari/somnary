@@ -145,11 +145,14 @@ sources:
       of the manufacturer, Monteloeder.
     type: rct
     year: 2024
-    effectDataStatus: pending
-    sampleSize: null
-    effectDirection: null
-    effectSize: null
-    studyQuality: null
+    # moderate, not high: double-blind & placebo-controlled but n=71 and three authors are
+    # employees of the manufacturer (see rubric — industry involvement caps at moderate).
+    effectDataStatus: complete
+    measuresSleepOutcome: true
+    sampleSize: 71
+    effectDirection: helped
+    effectSize: "slept more efficiently — about 85% of time in bed asleep vs 80% on placebo"
+    studyQuality: moderate
     pmid: "38794761"
     doi: "10.3390/nu16101523"
   - n: 2
@@ -162,11 +165,13 @@ sources:
       ~12% (p<0.05). The manufacturer (Monteloeder) designed the protocol and supplied the product.
     type: rct
     year: 2022
-    effectDataStatus: pending
-    sampleSize: null
-    effectDirection: null
-    effectSize: null
-    studyQuality: null
+    # moderate: double-blind & placebo-controlled but small (n=40) and manufacturer-designed.
+    effectDataStatus: complete
+    measuresSleepOutcome: true
+    sampleSize: 40
+    effectDirection: helped
+    effectSize: "sleep-quality score about 12% better; stress hormone down about 16%"
+    studyQuality: moderate
     pmid: "35011093"
     doi: "10.3390/nu14010218"
   - n: 3
@@ -180,11 +185,14 @@ sources:
       support giving lemon verbena to children.
     type: rct
     year: 2025
+    # pending: manufacturer-run adolescent trial in a non-MEDLINE journal; participant count
+    # not verifiable without full text — sampleSize cannot be recorded without inferring.
     effectDataStatus: pending
+    measuresSleepOutcome: true
     sampleSize: null
-    effectDirection: null
+    effectDirection: helped
     effectSize: null
-    studyQuality: null
+    studyQuality: low
     doi: "10.3390/app15115856"
   - n: 4
     title: "Lemon Verbena Extract Enhances Sleep Quality and Duration via Modulation of Adenosine A1 and GABAA Receptors in Pentobarbital-Induced and Polysomnography-Based Sleep Models"
@@ -196,7 +204,9 @@ sources:
       only — no human sleep outcomes.
     type: animal
     year: 2025
-    effectDataStatus: pending
+    # non-sleep-outcome source (mouse / mechanistic — no human sleep outcome) — not a point.
+    effectDataStatus: complete
+    measuresSleepOutcome: false
     sampleSize: null
     effectDirection: null
     effectSize: null

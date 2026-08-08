@@ -49,26 +49,35 @@ const changeLogEntry = z.object({
  * (the CHK-0.5 resolver re-checks the same rule). Formats are pre-validated here so a
  * malformed identifier fails the build at schema time.
  */
-// The study field (REDESIGN Reference C2 / step 11) renders each source as a point of
-// light: sample size → radius, effect direction → side of the line, study quality →
-// brightness. That signature visual only works if every source carries these as STRUCTURED
-// fields, so they live here — not buried in the `finding` / `sourceLine` prose.
+// The study field (REDESIGN Reference C2 / step 11) renders each *human sleep-outcome* source
+// as a point of light: sample size → radius, effect direction → which of three bands, study
+// quality → brightness. That signature visual only works if those sources carry these as
+// STRUCTURED fields, so they live here — not buried in the `finding` / `sourceLine` prose.
 //
-// effect DATA (sampleSize, effectDirection, effectSize, studyQuality) is editorial: it must
-// be read off the actual paper, never inferred or estimated (CLAUDE.md; REDESIGN step 2).
-// So each source declares an explicit `effectDataStatus`:
-//   - 'complete' → all four effect fields are filled (validation below FAILS LOUDLY if not);
-//   - 'pending'  → the effect data has not yet been entered editorially; fields stay null and
-//                  the study-field generator OMITS the point (step 11: never render a point
-//                  for a source with missing effect data). This is the honest "not yet"
-//                  state, never a silently-empty one.
+// TWO findings from the step-2 audit shape this schema:
+//  1. Outcome units don't share an axis — sources report minutes, %, PSQI/ISI points, pooled
+//     SMD, relative risk, circadian shift. So position is NOT continuous by effect size;
+//     `effectDirection` is a THREE-BAND enum (helped / no clear effect / didn't help), and
+//     `effectSize` is optional, kept for the plain-language stat line, never for positioning.
+//  2. Only ~54% of sources measure a human sleep outcome. The rest are safety, mechanism,
+//     label or off-target studies with no sleep direction. `measuresSleepOutcome` gates this:
+//     only true sources are points and carry direction/sampleSize/quality; false sources
+//     carry none of it (and never a direction). It encodes NO safety signal — that is the
+//     separate Step-1 flag.
+//
+// effect DATA is editorial: read off the actual paper, never inferred or estimated (CLAUDE.md;
+// REDESIGN step 2). Each source declares an explicit `effectDataStatus`:
+//   - 'complete' → adjudicated; the fields required for its kind are filled (validation below
+//                  FAILS LOUDLY if not);
+//   - 'pending'  → not yet entered editorially; fields stay null and the study-field generator
+//                  OMITS the point. The honest "not yet" state, never a silently-empty one.
+// `studyQuality` is assigned strictly per docs/SOURCE_QUALITY_RUBRIC.md (re-derivable, no "feel").
 const effectDirection = z.enum([
-  'helped',    // point sits to the RIGHT of the line
-  'no-effect', // point sits ON / LEFT of the line
-  'harmed',    // point sits to the LEFT of the line
-  'mixed',     // helped on some outcomes, not others
+  'helped',          // a sleep outcome improved → right-hand band
+  'no-clear-effect', // no statistically clear change → middle band
+  'didnt-help',      // no benefit or a worse outcome → left-hand band
 ]);
-const studyQuality = z.enum(['high', 'moderate', 'low']); // → point brightness
+const studyQuality = z.enum(['high', 'moderate', 'low']); // → point brightness (see rubric)
 
 const source = z
   .object({
@@ -94,9 +103,13 @@ const source = z
     ]),
     // --- effect data (study-field fields) — editorial, never inferred ---
     effectDataStatus: z.enum(['complete', 'pending']),
-    sampleSize: z.number().int().positive().nullable().default(null), // people in the study
+    // does this source measure a sleep outcome IN HUMANS? Only true sources are points in the
+    // study field. Animal/in-vitro sleep models are false (grades reflect human evidence).
+    // Set when a source is adjudicated (required on complete sources); null until then.
+    measuresSleepOutcome: z.boolean().nullable().default(null),
+    sampleSize: z.number().int().positive().nullable().default(null), // people in the study → radius
     effectDirection: effectDirection.nullable().default(null),
-    effectSize: z.string().min(1).nullable().default(null), // plain-language magnitude, e.g. "~7 minutes faster"
+    effectSize: z.string().min(1).nullable().default(null), // OPTIONAL plain-language magnitude, e.g. "~7 minutes faster"
     studyQuality: studyQuality.nullable().default(null),
     // --- identifier (at least one required) ---
     pmid: z
@@ -116,28 +129,48 @@ const source = z
   .refine((s) => Boolean(s.pmid || s.doi || s.registry), {
     message: 'each source needs a resolvable identifier: pmid, doi, or registry (NCT…)',
   })
-  // Fail loudly on a source that CLAIMS complete effect data but is missing any of the four
-  // fields — a half-filled source must never masquerade as renderable in the study field.
+  // Fail loudly on a source whose effect data is internally inconsistent. Two honesty rules:
+  //  1. A `complete` source must be adjudicated (measuresSleepOutcome set); a `complete`
+  //     sleep-outcome source must carry the three fields the study field renders it from
+  //     (sampleSize, effectDirection, studyQuality) — a half-filled point must never render.
+  //  2. A NON-sleep-outcome source may NEVER carry an effectDirection (any status) — that
+  //     would place a safety/mechanism study on the helped/didn't-help axis, the exact
+  //     dishonesty this schema exists to prevent.
   .superRefine((s, ctx) => {
+    const fail = (path, message) =>
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: [path], message: `source [${s.n}]: ${message}` });
+
+    // rule 2 — applies regardless of status
+    if (s.measuresSleepOutcome === false && s.effectDirection !== null) {
+      fail(
+        'effectDirection',
+        'has effectDirection but measuresSleepOutcome is false — a non-sleep-outcome source cannot sit on the helped/didn’t-help axis'
+      );
+    }
+
     if (s.effectDataStatus !== 'complete') return;
-    const missing = (
-      [
-        ['sampleSize', s.sampleSize],
-        ['effectDirection', s.effectDirection],
-        ['effectSize', s.effectSize],
-        ['studyQuality', s.studyQuality],
-      ] as const
-    )
-      .filter(([, v]) => v === null || v === undefined)
-      .map(([k]) => k);
-    if (missing.length) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['effectDataStatus'],
-        message: `source [${s.n}] is marked effectDataStatus: complete but is missing ${missing.join(
-          ', '
-        )} — fill the field(s) or set effectDataStatus: pending`,
-      });
+
+    // rule 1 — completeness
+    if (s.measuresSleepOutcome === null || s.measuresSleepOutcome === undefined) {
+      fail('measuresSleepOutcome', 'is effectDataStatus: complete but measuresSleepOutcome is not set — adjudicate it or set effectDataStatus: pending');
+      return;
+    }
+    if (s.measuresSleepOutcome === true) {
+      const missing = (
+        [
+          ['sampleSize', s.sampleSize],
+          ['effectDirection', s.effectDirection],
+          ['studyQuality', s.studyQuality],
+        ] as const
+      )
+        .filter(([, v]) => v === null || v === undefined)
+        .map(([k]) => k);
+      if (missing.length) {
+        fail(
+          'effectDataStatus',
+          `is a complete sleep-outcome source but is missing ${missing.join(', ')} — fill the field(s) or set effectDataStatus: pending (effectSize stays optional)`
+        );
+      }
     }
   });
 
