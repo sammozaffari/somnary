@@ -466,9 +466,18 @@ states; a test page renders using named tokens only; contrast verified.
 ## Step 11 — Study-field generator
 **Claude Code · needs steps 2 and 10**
 
+> **Amended (step 2).** The study field is no longer the signature hero. Build TWO
+> things per the revised C2/C3: (1) the **research filter** — the primary evidence
+> visual, rendered for ALL 31 remedies from the nested counts cited ⊇ measuredSleep ⊇
+> verifiable; (2) the **scatter** — secondary, rendered ONLY where a remedy has ≥3
+> positioned points, omitted elsewhere. The three render states and the two hard
+> constraints (non-sleep labelled "doesn't measure sleep"; serious-concern safety flag
+> always outranks the visual) are data facts in C2 — follow them exactly. The prompt
+> below describes the scatter; read it as the secondary element, not the hero.
+
 ```
-Read /docs/REDESIGN.md Reference C3 and the mapping rules Claude Design
-specified for the study field.
+Read /docs/REDESIGN.md Reference C2 and C3 and the mapping rules Claude
+Design specified for the study field.
 
 Task: build a build-time SVG generator that renders a remedy's sources as
 the study field, following those mapping rules exactly. Three output
@@ -480,14 +489,17 @@ label and a hover target linking to its study. Include the plain-language
 caption ("each dot is a study — the bigger the dot, the more people it
 included").
 
-Handle the honest edge cases: a remedy with two sources, and one with
-none, must both render meaningfully rather than breaking or looking empty
-by accident. Never render a point for a source with missing effect data —
-omit it and note the omission.
+Handle the honest edge cases through the two-visual split, not by drawing a
+sparse scatter: a remedy with fewer than 3 positioned points shows the
+research filter and NO scatter; a remedy with none shows the filter reading
+all-zero. A source that is measured-but-unpositionable or non-sleep is never
+a scatter dot — it is counted in the filter instead.
 
-Acceptance: generates from real source data for all 31 remedies; three
-sizes; renders correctly in both themes; sparse and empty cases handled;
-no canvas.
+Acceptance: the research filter generates from real source data for all 31
+remedies and reads honestly at n=0 and n=20; the scatter generates only for
+remedies with ≥3 positioned points, three sizes, both themes, no canvas;
+the non-sleep count is labelled "doesn't measure sleep" (never "weak
+evidence"); a serious-concern safety flag renders above/outranks both.
 ```
 
 ---
@@ -708,7 +720,16 @@ CLAUDE.md's non-negotiables contradict the new direction, and Claude Code is ins
 
 ## C2. Content model
 
-**Remedy** — replace `tier` with `bucket` (four values), keep everything else. Each source object needs the fields the study field renders from: sample size, effect direction, effect size, study quality, year, study type, identifier.
+**Remedy** — replace `tier` with `bucket` (four values), keep everything else. Each source object carries (implemented in step 2, `src/content.config.ts`):
+`{ n, title, sourceLine, finding, year, type, identifier (pmid|doi|registry), measuresSleepOutcome, effectDataStatus (complete|pending), sampleSize, effectDirection (helped|no-clear-effect|didnt-help), effectSize?, studyQuality (high|moderate|low) }`.
+
+*Render states — data facts for step 11.* The step-2 audit found the effect axis can't be continuous (sources report minutes, %, PSQI/ISI points, SMD, relative risk, circadian shift — non-commensurable) and that only ~54% of sources measure a human sleep outcome. So `effectDirection` is a **three-band** value, not a position, and every source resolves to exactly **one of three render states**, decidable at build time from two fields:
+
+1. **positioned** — `measuresSleepOutcome: true` AND `effectDataStatus: complete` → band ← `effectDirection`, radius ← `sampleSize`, brightness ← `studyQuality` (all three guaranteed present by the schema's `superRefine`).
+2. **measured-but-unpositionable** — `measuresSleepOutcome: true` AND `effectDataStatus: pending` → it answers "does it work" but has no *verified* sample size, so it cannot be positioned. It must NEVER be folded into the non-sleep class (it does bear on the question). ~37% of sleep-outcome sources land here (the abstract states no participant count).
+3. **non-sleep** — `measuresSleepOutcome: false` → does not measure a human sleep outcome (safety, mechanism, label, guideline, off-target). It may never carry an `effectDirection` (schema-enforced). It must be labelled **"doesn't measure sleep,"** never anything implying weak or limited evidence.
+
+Two constraints ride with these facts: `effectSize` is optional (plain-language stat line only, never positioning); and `measuresSleepOutcome` encodes **no safety signal** — a serious-concern safety flag (the separate Step-1 flag) always outranks anything the study visual shows. Kava's non-sleep sources are hepatotoxicity research: a faint/non-sleep cluster must never be the loudest thing on that page.
 
 **Product** (new) — `{ id, name, brand, ingredients[{ remedy_id, amount, unit, form }], dose_match, third_party_tested{ organisation, verified_date }, label_discloses_all, proprietary_blend, form_matches_studied, retail_links[{ retailer, url, price, last_checked }], data_source, last_checked, assessment_state }`.
 
@@ -720,7 +741,17 @@ CLAUDE.md's non-negotiables contradict the new direction, and Claude Code is ins
 
 **`/go/{product-id}`** — server-side redirect, click logged, one place to add affiliate tags later, build check against hardcoded retailer URLs in content.
 
-**Study-field generator** — build-time SVG over the sources array using Claude Design's mapping rules. Three sizes. SVG not canvas: points stay in the DOM for crawlers, screen readers, hover targets and theming.
+**Research filter (PRIMARY evidence visual — amended step 2).** The scatter assumed a dense cluster; the corpus doesn't have one. The step-2 distribution of *positioned-eligible* (sleep-outcome) sources per remedy: **2** remedies at 5+, **10** at 3–4, **16** at 1–2, **3** at zero. A scatter of one or two dots reads as broken, not honest. So the primary per-remedy visual is a **nested-quantity filter**, not a scatter: of the sources cited for this remedy, how many **measured a human sleep outcome**, and how many of those **reported enough to verify** (a sample size).
+
+- *Data it needs* — three nested counts, all computed at build time from `sources[]`, no new field (schema already supports it):
+  - `cited` = `sources.length`
+  - `measuredSleep` = count of `measuresSleepOutcome === true`
+  - `verifiable` = count of `measuresSleepOutcome === true && effectDataStatus === 'complete'`
+- These nest **cited ⊇ measuredSleep ⊇ verifiable** and map exactly onto the three render states in C2: `cited − measuredSleep` = non-sleep, `measuredSleep − verifiable` = measured-but-unpositionable, `verifiable` = positioned.
+- Reads honestly across the whole range: at **n=0** all three are zero ("no research" — not a broken empty scatter); at **n=20** it shows the real breakdown. This is the property the scatter lacks.
+- **Two hard constraints (binding):** the non-sleep segment is labelled **"doesn't measure sleep,"** never "weak evidence" or any evidence-strength language; and a **serious-concern safety flag always outranks this visual** — kava's non-sleep sources are hepatotoxicity research, so the filter must never let a non-sleep cluster read as the loudest signal on the page.
+
+**Study-field scatter (SECONDARY, conditional — amended step 2).** Demoted from signature hero to a secondary element. Rendered **only where a remedy has ≥3 positioned points** (state 1) — currently ~12 remedies, and the exact set settles after the editorial fill because `pending` sources don't position; **omitted entirely everywhere else** (never rendered sparse). Only positioned points appear as dots; measured-but-unpositionable (state 2) and non-sleep (state 3) sources live in the research filter, not here. Same generator rules: build-time SVG **not** canvas (points stay in the DOM for crawlers, screen readers, hover targets and theming), three sizes (hero / card thumbnail / share image), plain-language caption ("each dot is a study — the bigger the dot, the more people it included").
 
 **Share images** — satori (HTML/CSS → SVG) plus resvg (SVG → PNG), so cards are written as components and generated at build.
 
