@@ -5,8 +5,13 @@
   only where interactivity is required (label checker, compare tool, assistant).
 - **D2 Monetization: tools-first, reader-funded.** No membership paywall on the
   wiki. Revenue candidates in order: clinician handout exports, label-checker
-  pro features, supporter tier. No affiliate, no brand money — ever. Any ads must
-  pass the ad framework in the rulebook (source-backed, no treatment claims).
+  pro features, supporter tier. No brand money, no paid placement, and no score
+  ever influenced by a commercial relationship. Any ads must pass the ad
+  framework in the rulebook (source-backed, no treatment claims). *(Amended by
+  owner 2026-08-08 per REDESIGN A2/A3: the flat "no affiliate, ever" ban is
+  dropped — retail links are allowed on every product via `/go/{id}`, and
+  affiliate tags are a possible future, but they never change a score or the
+  order of results. See non-negotiable 1.)*
 - **D3 Brand: "Somnary", capitalized**, in prose, UI, and wordmark. Retire all
   lowercase-only styling; update any doc or design asset that says otherwise when
   touched. *(Amended by owner 2026-07-08: the trailing-period mark is dropped —
@@ -34,16 +39,64 @@ rulebook for every content, design, AI, ad, and product decision.
 4. `/docs/PROJECT_PLAN.md` — historical rationale; superseded sections are marked.
 5. `/docs/BUILD_CHECKLIST.md` — the work queue. One item per session.
 
+> **Tokens — single source of truth (resolved 2026-08-08, REDESIGN C1 #5).**
+> DESIGN_SYSTEM.md stays the ONLY source of token values. Claude Design's handoff
+> bundle is TRANSCRIBED into DESIGN_SYSTEM.md — one in-repo, version-controlled
+> file that shows up in diffs, in a stable format — never referenced or rendered
+> from directly. If the bundle and DESIGN_SYSTEM.md ever disagree, the committed
+> DESIGN_SYSTEM.md wins.
+
+## Build order (amended 2026-08-08 — REDESIGN C5)
+The centre of gravity is now products + search, not the wiki-plus-AI stack the
+original plan front-loaded. Priority order:
+- **Moved forward (build next):** the product & brand layer, the `/go/{id}`
+  retail redirect, product search across remedies / products / brands / problems,
+  and the two-axis evidence-bucket × product-score model (Reference A4).
+- **Moved back (do NOT build yet):** membership / paywall, the Somnary Lens as a
+  headline surface (it already exists as an engine — no new headline work),
+  community reports, and the stack builder (still killed per D4). The label
+  checker survives only as the not-in-database fallback, never a hero feature.
+
+BUILD_CHECKLIST.md remains the work queue; where its phase order conflicts with
+this note, this note wins until the checklist is re-sequenced.
+
 ## NON-NEGOTIABLES (violating any of these breaks the product — halt and escalate)
-- Zero affiliate links, zero brand money, no commerce, no paid placement.
+- No brand sponsorship, no paid placement, and no score influenced by any
+  commercial relationship. Retail links are permitted on every product regardless
+  of its score, routed through `/go/{id}` (never hardcoded into content) and never
+  ordered by anything commercial — the "where to buy" row looks identical on a
+  product we rate well and one we advise against, with the warning intact above
+  it. Affiliate tags may be added later as a one-file change at `/go`; they never
+  influence a score or a ranking, and every product is listed and assessed whether
+  or not it carries a commercial link.
 - Every factual health claim cites a real, resolvable source (PMID / DOI /
   ClinicalTrials.gov). The CI citation resolver must pass; the citation-auditor
   agent must confirm each source supports the claim as written.
-- Community/anecdote data never influences or displays as setting a grade.
-- Weak evidence is shown and labeled weak. Grades reflect published HUMAN evidence.
+- Community/anecdote data never influences or displays as setting an evidence bucket.
+- Weak evidence is shown and labeled weak. The evidence bucket reflects published
+  HUMAN evidence.
 - Safety, interactions, and contraindications are prominent on every remedy and
   decision page; "educational, not medical advice" appears near decisions, not
   only in the footer. Be conservative on pregnancy, children, drug interactions.
+- **Plain language is a non-negotiable (Reference A5).** Write like a well-informed
+  friend who happens to be a pharmacist explaining across a kitchen table — never
+  performing rigor. Technical vocabulary (meta-analysis, randomised controlled
+  trial, placebo-controlled, effect size, bioavailability, standardised extract)
+  is banned from body copy and lives only inside the "see the study" popover, the
+  methodology page, and opt-in expansions. Acronyms are spelled out on first use
+  every page; PMID and DOI appear only inside the popover ("see the study").
+  Numbers appear in everyday units ("about 7 minutes faster to sleep"), with the
+  confidence interval and sample size one tap deeper. Headings are the questions
+  people actually ask ("Does it work?", "Is it safe with my medications?"). Plain
+  must never become vague — every simplification still commits to a specific claim.
+  **Banned phrases (never in user-facing copy — the site talking about itself):**
+  "the evidence layer", "zero brand money", "0 hallucinated cites", "the
+  sleep-supplement internet is a sales floor", "evidence-graded", "reader-funded",
+  "the honesty firewall", "claim-check counter", "disavowal". The whole
+  self-congratulatory stat row is replaced by one quiet sentence somewhere
+  unglamorous: **"Nobody pays us to say any of this. Every claim links to the
+  study it came from."** (These rules bind user-facing copy; this contract's own
+  internal decision labels are exempt.)
 - All content pages are SSR/SSG. Never ship core content client-only.
 - AI features cite back, refuse personalized dosing/diagnosis, and route safety
   concerns to boundary pages. Forbidden framings (from the rulebook): "take X
@@ -61,16 +114,56 @@ rulebook for every content, design, AI, ad, and product decision.
      the load-bearing guarantee, not a nicety.
   3. Weak evidence is labeled weak; the anti-hype "what the evidence does NOT
      show" beat is mandatory.
-  4. Output is a **draft assessment, NEVER a tier grade** — stamped "AI-assisted
-     research · not a Somnary grade", with a route to request a human review.
-     No agent assigns or changes a tier grade (below) is UNCHANGED.
+  4. Output is a **draft assessment, NEVER an evidence bucket** — stamped
+     "AI-assisted research · not a Somnary grade", with a route to request a
+     human review. No agent assigns or changes an evidence bucket (below) is
+     UNCHANGED.
   5. No brand money, no paid placement, no personalized dosing/diagnosis; safety
      routing intact. What stays sacred: published grades, the corpus quality
      bar, citation discipline, safety conservatism — the AI may only *apply*
      that discipline to new inputs, clearly fenced as draft/unvetted.
   Corpus remedies still short-circuit to their human-graded pages (a vetted
   grade always beats fresh AI research).
-- No agent assigns or changes a tier grade. Grading is `[HUMAN-GATE]`, always.
+- No agent assigns or changes an evidence bucket. Bucketing (grading) is
+  `[HUMAN-GATE]`, always.
+
+## Three separate signals — evidence bucket · safety flag · product score (Reference A4)
+Somnary carries three signals and NEVER merges them into one number. Two sit on
+every remedy (about the ingredient); the third sits on product pages (about the
+bottle):
+1. **Does the ingredient work? — the evidence bucket.** From published human
+   research, one of four (each always displayed with its permanent plain sentence,
+   colour- AND shape-coded so colour is never the only signal):
+   - **Works for most people** — studies keep finding it helps.
+   - **Might help a little** — a few studies found a small effect, but the
+     research is thin.
+   - **Nobody really knows yet** — it hasn't been tested properly in people, so
+     nobody can honestly say.
+   - **Best avoided** — it's been tested and doesn't work.
+   (Slightly-more-formal labels — Strong evidence / Some evidence / Not enough
+   evidence / Avoid — are an owner-gated wording choice; the plain sentence does
+   the real work either way.)
+2. **How risky is it? — the safety flag.** SEPARATE from the bucket and never
+   folded into it: one of three — **none · caution · serious concern** — shown
+   alongside the bucket on every remedy, always visible. Safety never changes an
+   evidence bucket, and an evidence bucket never encodes safety. (This is why
+   bucket 4 is only "tested and doesn't work": a remedy with real evidence but a
+   dangerous profile — kava, which works yet carries a hepatotoxicity history —
+   must read as "works" + "serious concern", not collapse into the same box as an
+   untested botanical.)
+3. **Does this product deliver what was studied? — the product score.** Product
+   pages only. From visible factual criteria: dose matches what studies used ·
+   independently third-party tested · label discloses everything (no hidden
+   proprietary blends) · the form that was actually tested. A product is only
+   "worth buying" when the ingredient's bucket AND its product score are both
+   strong — an assessment (about the bottle), never a therapeutic recommendation —
+   and its safety flag is always shown alongside, so a serious-concern remedy is
+   never presented as a clean buy.
+Assigning or changing an evidence bucket is always `[HUMAN-GATE]`; so is the
+safety flag. The old S–F letter tiers are retired. The live `/tiers`
+Evidence×Safety map (PR #153) is the canonical rendering of bucket × safety flag
+— the same two-signal structure, to be aligned to the "bucket" name when the
+migration lands; it reconciles with this model rather than competing with it.
 
 ## Agent roles (definitions in `.claude/agents/`)
 - **planner** — reads this file + current checklist item; produces a task plan
@@ -83,8 +176,9 @@ rulebook for every content, design, AI, ad, and product decision.
   safety boundary → clinician questions → sources → review date + correction link).
 - **citation-auditor** — verifies every source resolves AND says what the page
   claims; logs pass/fail rationale per claim; blocks merge on failure.
-- **design-guardian** — token-only styling; contrast checks; grades readable
-  without color alone; rejects wellness clichés and hidden disclaimers.
+- **design-guardian** — token-only styling; contrast checks; evidence buckets
+  legible without colour alone (shape + colour + label); rejects wellness clichés
+  and hidden disclaimers.
 - **compliance-reviewer** — TGA/FDA/FTC-safe language (describe evidence, never
   promise outcomes), disclaimer placement, forbidden-framing lint on all copy.
 
@@ -132,13 +226,32 @@ it is skipped or vague.
 - Publishing to external channels (newsletter, social) — agents draft only.
 
 ## Content model (schema lives in code; keep in sync)
-remedy = { slug, name, tier `[HUMAN-GATE]`, verdict, bestFor[], notFor[],
+remedy = { slug, name, bucket `[HUMAN-GATE]`, verdict, bestFor[], notFor[],
 biggestRisk, studiedDose, claims[]↔data[] (each row cited), evidenceSummary,
 dosingReality, safety[], interactions[], standardization, mechanism,
-sources[]{pmid|doi|registry, title, year, type}, communityRead (separate store),
-reviewDate, changeLog[] }.
-Citations are DATA, never prose-only. Tier board, checkers, compare tool, and
-the assistant all read this one structure — never duplicate content.
+sources[]{pmid|doi|registry, title, year, type, sampleSize, effectDirection,
+effectSize, studyQuality} (the fields the study field renders from),
+communityRead (separate store), reviewDate, changeLog[] }.
+
+product = { id, name, brand, ingredients[{ remedy_id, amount, unit, form }],
+dose_match, third_party_tested{ organisation, verified_date }, label_discloses_all,
+proprietary_blend, form_matches_studied, retail_links[{ retailer, url, price,
+last_checked }], data_source, last_checked, assessment_state } — where
+assessment_state ∈ { fully assessed · label known, not yet assessed · not in
+database }, and the interface renders honestly against it rather than implying
+uniform coverage.
+
+brand = { name, slug, product_list } — the brand page derives its summary from
+its products.
+
+The ingredient evidence bucket (does it work), the safety flag (how risky —
+none/caution/serious concern, shown on every remedy alongside the bucket), and
+the product score (does this bottle deliver it, on product pages) are THREE
+SEPARATE SIGNALS and must never be merged into a single number anywhere in the
+schema or the rendering (Reference A4). The safety flag is surfaced from the
+existing `safety[]` / `interactions[]` data and never alters a bucket.
+Citations are DATA, never prose-only. The bucket map / browse, checkers, compare
+tool, and the assistant all read this one structure — never duplicate content.
 
 ## Definition of done (per item)
 - Acceptance criteria verified and ticked.
