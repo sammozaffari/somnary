@@ -218,6 +218,30 @@ it is skipped or vague.
   screenshotting stays a HUMAN-GATE (no new Playwright dep) — the visual pass uses
   the Chrome MCP by hand.
 
+## Design system rules (added 2026-08-08 — binding on the Step 4 handoff and all UI)
+Owner-set, ahead of the redesign's design system landing (REDESIGN steps 4–10):
+- **Sentence case everywhere** in UI copy — headings, nav, labels, buttons: first
+  word capitalised only, never Title Case, never ALL CAPS, never all-lowercase.
+  The wordmark is **"Somnary"** — capitalised, no trailing period (D3).
+- **No serif faces anywhere in the system.** A sans carries interface, body, data
+  and the human voice; a mono carries doses, identifiers, and the **accent role**
+  (the signature emphasis on the words that carry the meaning). No italic-serif
+  device. (Matches the live all-sans system.)
+- **Self-host all webfonts.** No Google Fonts — no third-party `@import` or `<link>`
+  to a font CDN anywhere. Render-blocking, third-party, and a GDPR consideration;
+  faces are served from our own origin and preloaded.
+- **Reject-don't-launder hardcoded values.** When the Claude Design handoff bundle
+  is wired in (step 10), any component carrying hardcoded style values is REJECTED
+  and the values REPORTED (with the named token they should map to), never silently
+  transcribed. The bundle is authoritative for behaviour, not for raw values — it
+  ships many (e.g. SearchField: min-height 60, padding 6/8/20, gap 10, max-width
+  560, border 1.5px, font 18px). `scripts/check-tokens.mjs` already fails on raw
+  font-size / radius / spacing; it does NOT yet catch raw width/height/min/max or
+  border-width, so those are a **design-guardian review gate now** and a scoped
+  linter extension to land WITH the step-10 components — a fatal rule today would
+  flag ~265 pre-existing dimensional values (breakpoints, icon geometry, hairlines),
+  so it is not a cheap retroactive add.
+
 ## Human gates (never auto-merge)
 - Tier grade assignment or change on any remedy.
 - Anything monetization, legal-page, or medical-boundary related.
@@ -258,7 +282,9 @@ tool, and the assistant all read this one structure — never duplicate content.
 - Server-rendered content confirmed in build output.
 - Every claim cited; resolver + auditor green.
 - Safety module present and prominent (remedy/decision pages).
-- Tokens only; no hardcoded style values.
+- Tokens only; no hardcoded style values — handoff-bundle values map to named
+  tokens or are reported, never laundered in. Self-hosted fonts only (no font CDN).
+  UI copy in sentence case; no serif faces (see "Design system rules").
 - Rendered-visual + keyboard pass done for any chrome/template/shared-component
   change (routes viewed at 390/768/1440px; nav overflow measured). See `qa/README.md`.
 - Review date + correction link on every article-type page.
