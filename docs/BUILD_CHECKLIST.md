@@ -7,6 +7,27 @@ anything deferred in the session log.
 
 Legend: `[ ]` todo · `[~]` partial (see note) · `[x]` done & verified · `HG` = [HUMAN-GATE]
 
+> **MODEL MIGRATION (2026-08-08 · REDESIGN A4 / C1 #3).** The evidence scale is
+> moving from S–F letter tiers to **four named buckets** — "Works for most people
+> / Might help a little / Nobody really knows yet / Best avoided" — about whether
+> it WORKS, with a SEPARATE safety flag (none / caution / serious concern) shown
+> alongside on every remedy, and a SEPARATE product score (dose match · third-party
+> tested · full label disclosure · form tested) on product pages. Three signals,
+> never merged into one number (see CLAUDE.md "Three separate signals"). The live
+> `/tiers` Evidence×Safety map (PR #153) reconciles with this — it is the bucket ×
+> safety-flag rendering, not a competing model. The completed "Done" notes
+> and the session log below are an audit trail: they are preserved verbatim and
+> still read S–F where the work shipped under that model — do not rewrite them.
+> New and still-open work uses buckets. (The items named in the Step 1 prompt —
+> CHK-0.4 / 1.1 / 2.3 / 3.1 / 4.1 — are all complete; their S–F mentions are
+> historical and are covered by this banner rather than rewritten.)
+>
+> **PRIORITY (2026-08-08 · REDESIGN C5).** Forward: the product & brand layer,
+> `/go/{id}` retail redirect, and product search (REDESIGN steps 3 / 9 / 12 — to
+> be added here as checklist items). Back, behind those: membership/paywall
+> (CHK-6.5), community reports (CHK-6.4 / 6.11), and the Lens as a headline surface
+> (Phase 7, already built). Stack builder stays killed (D4).
+
 ## Reality baseline (audited 2026-07-06, CHK-0.0)
 
 v2 of this checklist was drafted from the docs alone and assumed a greenfield.
@@ -377,9 +398,12 @@ exists so sessions extend the site instead of rebuilding it.
   rulebook's forbidden framings before reuse.)* *Accept:* zero invented
   citations in test runs; forbidden-framing lint passes.
 - [ ] **CHK-6.4 Community reports.** Anonymous, structured, threshold-gated,
-  stored separately. *Accept:* firewall verified in code; never touches grades.
+  stored separately. *Accept:* firewall verified in code; never touches evidence
+  buckets. *(DEFERRED per REDESIGN C5 — behind products + search.)*
 - [ ] **CHK-6.5 Supporter tier / label-checker pro.** `HG` scope + pricing.
-  *Accept:* free wiki never paywalled.
+  *Accept:* free wiki never paywalled. *(DEFERRED per REDESIGN C5 —
+  membership/paywall moves behind products + search; the label checker survives
+  only as the not-in-database fallback.)*
 
 ### Guide-concierge arc (owner-ratified design 2026-07-17 —
 `docs/plans/2026-07-17-guide-concierge-accounts-design.md` is binding for 6.6–6.11)
@@ -410,9 +434,14 @@ exists so sessions extend the site instead of rebuilding it.
   adjacent; grades untouched.
 - [ ] **CHK-6.11 Community nomination pipeline.** Chat history-beats + form feed
   a queue; publish only after editorial criteria verification. *Accept:* firewall
-  holds; community input never sets appearance by popularity alone.
+  holds; community input never sets appearance by popularity alone. *(DEFERRED per
+  REDESIGN C5 — behind products + search.)*
 
 ## Phase 7 — The Somnary Lens (AI re-strategy, owner-ratified 2026-07-21)
+> **REDESIGN C5 (2026-08-08):** the Lens is built, but it is no longer a headline
+> surface — products + search are the front door now. It stays an engine behind
+> search; no new *headline* Lens work until products + search ship.
+
 Binding design: `docs/plans/2026-07-21-somnary-lens-ai-design.md`. Constitution
 amended: CLAUDE.md **D5** (bounded external research allowed under guardrails).
 The AI's differentiated job: apply Somnary's rubric (evidence grade + label R1–R5
@@ -511,6 +540,7 @@ NOT a Somnary grade". Concierge (CHK-6.8) demotes to a secondary mode.
 ---
 
 ### Session log (agents append one line per session)
+- 2026-08-08 · REDESIGN **Step 1** · operating-contract reconciliation (branch `redesign-step1-doc-contract`, in its own worktree `somnary-step1`; **PR for owner — touches non-negotiables + locked decisions, NOT self-merged**). Docs only, no feature code, no checklist boxes ticked. Brought CLAUDE.md + BUILD_CHECKLIST.md + newly-committed `/docs/REDESIGN.md` in line with the v4 runbook (Reference C1): **(1)** non-negotiable 1 rewritten — no brand sponsorship / no paid placement / no score influenced by any commercial relationship; retail links on every product regardless of score, routed through `/go/{id}`, never ordered by anything commercial; D2 amended to match (the flat "no affiliate, ever" ban dropped; affiliate a possible future that never moves a score). **(2)** new plain-language non-negotiable (A5) — pharmacist-friend register, tech-vocab only in popovers/methodology, everyday numbers, question-headings, the verbatim banned-phrase list + the "Nobody pays us to say any of this…" line; scoped to user-facing copy (internal decision labels exempt). **(3)** S–F → **three separate signals**: four evidence buckets (does it work) + a SEPARATE safety flag (none/caution/serious concern, on every remedy) + a SEPARATE product score (product pages) — never merged; new "Three separate signals" section in CLAUDE.md; content-model, D5 and gate wording reworded off "tier grade"; **history preserved** — completed "Done" notes + this log kept verbatim, reframe carried by a top-of-file migration banner (box tallies unchanged 6/35/2). **(4)** product + brand content types added to CLAUDE.md (C2). **(5)** tokens conflict **RESOLVED** (not left open): DESIGN_SYSTEM.md stays the single source of truth, Claude Design's handoff bundle is transcribed into it, never referenced directly. **(6)** build-order note added (C5) — products + search move forward; membership/paywall, Lens-as-headline, community reports, stack builder move back (label checker = not-in-database fallback only); light DEFERRED tags on CHK-6.4/6.5/6.11 + Phase 7 header. **Owner amendments this session:** safety is a separate flag, never folded into the bucket (bucket 4 narrows to "tested and doesn't work"; kava = "works" + "serious concern"), which makes the live `/tiers` Evidence×Safety map (PR #153) **reconcile** with this model rather than compete — same bucket × safety-flag structure, only the S–F→bucket terminology to align later; and REDESIGN's lowercase "somnary." brand corrected up to D3 (capitalised **Somnary**, no trailing period) rather than amending D3, which is left untouched. Worktree used to avoid the shared-tree branch collision (primary tree was mid-session on `chk-redesign-2-source-audit`; my edits were moved out and the primary tree restored clean). VERIFIED: no lowercase brand / no "tier grade" / no safety-in-bucket text remains; no checklist box changed.
 - 2026-08-04 · Label & Brands card **Phase B** — content pass (branch `feat/label-brand-phase-b`). Filled `labelChecklist[]`/`labelAvoid[]` on all **29** remaining supplements (every remedy except the intervention cbt-i + the melatonin pilot), so all 30 supplement pages now render the crisp ✓ checklist instead of the prose fallback. SOURCE-FIRST, **no new claims**: each item distilled ONLY from that remedy's already-cited content (`standardization`/`claims`/`doses`/`safety`), and for the 4 scorecard-backed remedies (ashwagandha/glycine/magnesium/valerian) from their ratified `/sources/<slug>` `labelReading` (the melatonin precedent). Ran via **6 evidence-editor agents in 2 waves of 3** (paced-waves rule; agents edited only their assigned MDX, ran no git). **Build fix:** 5 items began with a bare `"quote"` phrase + trailing text (YAML read it as a closed scalar) → wrapped those values in single quotes so the literal `"…"` still renders. Gates: `npm run build` green (all 30 render `look-item` ✓ bullets, 0 `look-prose` fallbacks), `verify:framing` clean (65 files), `verify:tokens` clean. Reviewers (read-only): **compliance-reviewer PASS** (all 29; describe label attributes not outcomes; named preparations KSM-66/Silexan/Suntheanine/affron/TruCBN/Montmorency are trial-material identity not endorsement; serious-risk remedies kava/iron/l-tryptophan/reishi/vitamin-d/zinc keep their safety stance; applied its P3 → kava checklist item reframed from a "look for" to a caveat that no label makes kava a reasonable sleep choice); **citation-auditor grounding audit FAIL→PASS** (1 defect: ashwagandha "not the higher-scrutiny leaf" — that root-vs-leaf/TGA claim lives on the scorecard, not the remedy page → regrounded to "the trials used a standardized root extract", backed by the page's own `doses`). Design/template unchanged from Phase A, so no new rendered-visual gate beyond Phase A's (which is already live). Deferred: none — the card is now content-complete for every supplement.
 - 2026-08-04 · Label & Brands card — top-of-remedy (branch `feat/label-brand-card`; not self-merged, **rendered-visual + keyboard pass owed = HUMAN-GATE**). Surfaces the two most actionable pre-purchase things ("what to look for on a label" + "what brands to look for") in ONE compact card, moved from buried positions 9–10 to the first *actionable* block — just UNDER the verdict/lead block, so "bottom line first" (CLAUDE.md skeleton) still holds. New `src/components/LabelBrandCard.astro` (SSG, no island): ✓ "look for" bullets + one ⚠ "Avoid:" line (mandatory anti-hype beat) + two links ("See the full label guide →" anchors to the existing standardization section via new `id="on-the-label"`; "Compare N rated brands →" reuses the existing `scorecardCount`, honest-degrades to HIDDEN when no ratified scorecard — no dead links, no "#1", per Source Scorecards no-ranking rule). Two OPTIONAL schema fields `labelChecklist[]`/`labelAvoid[]` (`content.config.ts`) — when `labelChecklist` empty the card FALLS BACK to the existing `standardization` prose, so every supplement page renders the card day one (Phase A ships now; Phase B = per-remedy content pass, evidence-editor). **Supplement-only** gate (`d.format === 'supplement'` — tightened from `!isIntervention` per compliance P3; interventions have no label → no card). Melatonin seeded as the Phase B pilot from its OWN already-cited scorecard label-reading data (`/sources/melatonin` lookFor/cautious + standardization) — no new claims. Design doc `docs/plans/2026-08-04-label-brand-card-design.md`. VERIFIED: `npm run build` green; SSG output confirms card on melatonin (crisp ✓ + Avoid + "Compare 10 rated brands"), prose-fallback + no-brands-row on 5-htp, ABSENT on cbt-i (intervention); `check-tokens.mjs` green. Reviewers (read-only): **design-guardian PASS** (token-only; computed contrast ✓ --eucalyptus 6.16:1 / ⚠ --safety-ink 7.30:1 both AA; legible-without-color via ✓/⚠ glyphs + "Avoid:" word; avoid line has no red fill so it never cries wolf; vocab matches RemedyLeadBlock + LabelReadingPanel); **compliance-reviewer PASS** (no brand endorsement, no treatment/outcome claims, no forbidden framings, melatonin items all corpus-backed; applied its P3 format-gate tightening). NOT a hard gate (no tier/legal/monetization) but the **390/768/1440 rendered-visual + keyboard pass is still owed** (Chrome extension not connected this session) — dev server left at :4324 for the owner. Deferred: Phase B content pass for the other ~24 supplements.
 - 2026-08-04 · L-03 + T-03 · homepage **dual front door** shipped to production (PR #148 → `main`; owner said "ship it"). Removed the rotating `HeroCarousel` + `hero-slides.ts` as the primary IA control (panel sized to its tallest hidden slide → ~45% of the fold blank, L-03); rebuilt `index.astro` on the audit §4 sequence — plain statement of what Somnary does AND doesn't do (H1 + dek) → universal search (real GET `<form>`, the one oxblood `--action`) → dual front door (two co-equal bordered starts) with the safety-boundary strip rendered BEFORE the product door at every width (intent G) → trust cues (`StatRow` from real content-index data) → explore/check pathways, S–F legend, Lens/guide below the fold; desktop is a two-column hero so the 1440 width is used. **T-03**: H1 steps to 32px ≤430px, no one-word line at 375/390/400/414 (was the orphaned "before"). Content-coverage of the above-fold, before→after: 375 26.3→29.1%, 768 24.2→27.9%, 1440 21.1→21.9%; the old ~45% contiguous dead band → 46px (375) / 94px (1440). Branch was 40 commits behind `main`; reconciled in an isolated worktree (merge `origin/main`: index.astro=mine — main's only delta was the `strokeWidth`→`stroke-width` fix mine already had; HeroCarousel modify/delete→delete; GradeStamp auto-merged; BUILD_CHECKLIST/qa combined) and re-verified against main's `global.css`/`StatRow`/`TierBadge`/`content-index`. Aligned "Inspect a product" → the new `/products` browse surface. VERIFIED on current main: `verify:tokens`/`verify:framing`/`verify:crawl`/`verify:responsive` green, `npm run build` green, SSG confirmed (H1/doors/safety/StatRow in built HTML, zero carousel markup), rendered-visual + keyboard pass at 375/768/1440. `/design-qa` (pre-reconcile): 1 P1 fixed (search placeholder `--soft` 3.61:1 → `--muted` 7.16:1, §8 AA). Commits `dc431d6`/`969070f`/`f6daf1e` + merge.
