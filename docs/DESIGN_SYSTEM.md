@@ -18,12 +18,20 @@ v2 citron `--action` is retired and `--action` now resolves to oxblood. The
 is the only warning/danger color — safety is NEVER oxblood. Grades are retuned for
 the warm ground (see §3).
 
-**Typography (v3):** **Instrument Sans is the ONLY typeface site-wide** — display,
-body, data, and citations — self-hosted via `@fontsource-variable/instrument-sans`
-(no Google Fonts CDN). **IBM Plex Mono is retired (owner, 2026-07-09).** The
-`--font-mono` alias is kept for compatibility but now resolves to Instrument Sans;
-there is no separate mono face anywhere. Instrument Sans caps at weight **700**;
-former Archivo 800/900 display weights render at 700 — that is intentional and fine.
+**Typography — TYPE LOCK (owner, 2026-08-09):** the single typeface is **Onest**
+(self-hosted), one family for everything. `--font-display` and `--font-body` both
+resolve to **Onest**. Explicitly NOT Cabinet Grotesk, NOT IBM Plex Sans (both
+proposed by the redesign handoff bundle and rejected), and NOT Instrument Sans. **No
+Google Fonts, no Fontshare, no third-party font `@import`/`<link>`** — the woff2
+files live in `public/fonts/`, declared with a local `@font-face`, and only the
+weights actually used are `<link rel="preload">`ed. Third-party font CDNs are
+render-blocking and a GDPR consideration for EU readers. A mono face exists ONLY if
+the handoff bundle still needs one for identifiers; otherwise there is none and
+`--font-mono` stays an alias resolving to Onest.
+*Implementation status:* the decision is LOCKED; the live `global.css` + OG
+generator still render Instrument Sans (via `@fontsource-variable/instrument-sans`)
+until the self-host swap lands — a global visual change (rendered-visual QA at
+390/768/1440) plus the font-file/preload step, tracked as a follow-up build item.
 
 **Casing (owner, 2026-07-09):** the house voice is **Sentence case** — first word
 plus proper nouns capitalized. This applies to headings, labels, nav, and body
@@ -112,20 +120,19 @@ border-radius: 24px;
 
 | Role | Family | Notes |
 |---|---|---|
-| Display / headings / buttons / brand | **Instrument Sans** (400–700) | weight 600–700, tight tracking |
-| Body / UI | **Instrument Sans** (400–700) | base 16px / 1.6 (reading legibility), no tracking |
-| Data / citations | **Instrument Sans** (400–500) | mono retired; `--font-mono` resolves to Instrument Sans |
+| Display / headings / buttons / brand | **Onest** | weight 600–700, tight tracking |
+| Body / UI | **Onest** | base 16px / 1.6 (reading legibility), no tracking |
+| Data / citations | **Onest** | one family; mono only if the handoff bundle needs it for identifiers |
 
-All type — display, body, data, citations — is Instrument Sans (all-sans, no serif and
-no mono anywhere), self-hosted via `@fontsource-variable/instrument-sans`. **Instrument
-Sans caps at weight 700**; any
-spec below asking for 800/900 renders at 700 (intentional). Use these sizes; don't invent.
+All type — display, body, data, citations — is **Onest** (one self-hosted family, no
+serif; mono only if the handoff bundle still needs it). `--font-display` and
+`--font-body` both resolve to Onest. Use these sizes; don't invent. *(Live code still
+renders Instrument Sans until the self-host swap lands — see the TYPE LOCK above.)*
 
-> **Font-stack note:** the variable package registers its `@font-face` family as
-> `"Instrument Sans Variable"`, so `--font-display` / `--font-body` list that name
-> **first**, then `"Instrument Sans"` (static-family fallback, also the OG generator's
-> family), then system fallbacks. Never reference the family with a hardcoded string in
-> a component — always `var(--font-display)` / `var(--font-body)`.
+> **Font-stack note:** self-host Onest from `public/fonts/` with a local `@font-face`
+> (family name `"Onest"`), preload the weights actually used, and reference it only
+> via `var(--font-display)` / `var(--font-body)` — never a hardcoded family string in
+> a component. No `@fontsource`/npm-CDN, no Google Fonts, no Fontshare `@import`.
 
 | Token | Size | Weight | Tracking | Use |
 |---|---|---|---|---|

@@ -27,6 +27,18 @@ Legend: `[ ]` todo · `[~]` partial (see note) · `[x]` done & verified · `HG` 
 > be added here as checklist items). Back, behind those: membership/paywall
 > (CHK-6.5), community reports (CHK-6.4 / 6.11), and the Lens as a headline surface
 > (Phase 7, already built). Stack builder stays killed (D4).
+>
+> **LOCKS (2026-08-09).** Type = **Onest**, one self-hosted family (DESIGN_SYSTEM.md
+> TYPE LOCK; no Google Fonts/Fontshare/CDN — `verify:fonts` enforces). The **study
+> field is a nested bar**, not a scatter — so REDESIGN **Step 11 is now substantially
+> smaller**: three counts (cited / measured a sleep outcome / reported enough to verify)
+> + one direction sentence; NO SVG point generation, no mapping rules, no three
+> geometries. Product **strength is structured** (amount + unit, never in the name); a
+> `composition` (single/blend) with a blend `perIngredientAmountsDisclosed` flag feeds the
+> proprietary-blend penalty; user-facing dates render "14 July 2026", never ISO. **Owner
+> decision pending:** whether the nested bar makes `sampleSize`/`effectSize`/`studyQuality`
+> (+ the source-quality rubric + the ~72-source effect-data fill) dead weight to drop from
+> the still-open Session-2 schema (PR #154) — see REDESIGN C2.
 
 ## Reality baseline (audited 2026-07-06, CHK-0.0)
 

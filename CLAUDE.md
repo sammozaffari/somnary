@@ -223,13 +223,21 @@ Owner-set, ahead of the redesign's design system landing (REDESIGN steps 4–10)
 - **Sentence case everywhere** in UI copy — headings, nav, labels, buttons: first
   word capitalised only, never Title Case, never ALL CAPS, never all-lowercase.
   The wordmark is **"Somnary"** — capitalised, no trailing period (D3).
-- **No serif faces anywhere in the system.** A sans carries interface, body, data
-  and the human voice; a mono carries doses, identifiers, and the **accent role**
-  (the signature emphasis on the words that carry the meaning). No italic-serif
-  device. (Matches the live all-sans system.)
-- **Self-host all webfonts.** No Google Fonts — no third-party `@import` or `<link>`
-  to a font CDN anywhere. Render-blocking, third-party, and a GDPR consideration;
-  faces are served from our own origin and preloaded.
+- **Type is Onest — one self-hosted family (locked 2026-08-09).** `--font-display`
+  and `--font-body` both resolve to **Onest**; NO serif, NO second display face —
+  specifically NOT Cabinet Grotesk and NOT IBM Plex Sans. A mono face exists only
+  if the Claude Design handoff bundle still needs one for identifiers; otherwise the
+  accent role (the signature emphasis on the words that carry the meaning) is
+  weight/size within Onest. (Live code still renders Instrument Sans until the
+  self-host swap lands — see DESIGN_SYSTEM.md "TYPE LOCK".)
+- **Self-host all webfonts.** No Google Fonts, no Fontshare, no third-party font
+  `@import`/`<link>` anywhere — render-blocking, third-party, and a GDPR
+  consideration for EU readers. The woff2 files live in the repo (`public/fonts/`),
+  declared with a local `@font-face`, with only the weights actually used
+  `<link rel="preload">`ed. Enforced by `scripts/check-fonts.mjs` (`verify:fonts`).
+- **Dates render as "14 July 2026"** (day, full month, year — no ordinal, no comma)
+  in all user-facing copy, NEVER ISO. ISO (YYYY-MM-DD) stays the stored/schema form;
+  the display format is applied at render.
 - **Reject-don't-launder hardcoded values.** When the Claude Design handoff bundle
   is wired in (step 10), any component carrying hardcoded style values is REJECTED
   and the values REPORTED (with the named token they should map to), never silently
@@ -253,17 +261,24 @@ Owner-set, ahead of the redesign's design system landing (REDESIGN steps 4–10)
 remedy = { slug, name, bucket `[HUMAN-GATE]`, verdict, bestFor[], notFor[],
 biggestRisk, studiedDose, claims[]↔data[] (each row cited), evidenceSummary,
 dosingReality, safety[], interactions[], standardization, mechanism,
-sources[]{pmid|doi|registry, title, year, type, sampleSize, effectDirection,
-effectSize, studyQuality} (the fields the study field renders from),
+sources[]{pmid|doi|registry, title, year, type, measuresSleepOutcome,
+effectDataStatus, effectDirection} (the nested-bar study field renders from
+counts + effectDirection; sampleSize/effectSize/studyQuality no longer feed
+rendering — see REDESIGN C2/C3),
 communityRead (separate store), reviewDate, changeLog[] }.
 
-product = { id, name, brand, ingredients[{ remedy_id, amount, unit, form }],
-dose_match, third_party_tested{ organisation, verified_date }, label_discloses_all,
-proprietary_blend, form_matches_studied, retail_links[{ retailer, url, price,
-last_checked }], data_source, last_checked, assessment_state } — where
-assessment_state ∈ { fully assessed · label known, not yet assessed · not in
-database }, and the interface renders honestly against it rather than implying
-uniform coverage.
+product = { id, brand, name, composition ('single-ingredient' | 'blend'),
+strength{ amount, unit }, perIngredientAmountsDisclosed (blends only), ingredients[{
+remedy_id, amount, unit, form }], dose_match, third_party_tested{ organisation,
+verified_date }, label_discloses_all, proprietary_blend, form_matches_studied,
+retail_links[{ retailer, url, price, last_checked }], data_source, last_checked,
+assessment_state } — where assessment_state ∈ { fully assessed · label known, not
+yet assessed · not in database }. STRENGTH is structured (amount + unit) and is
+NEVER baked into the name string — the card composes brand + name + strength.
+`composition` distinguishes single-ingredient from blend; for a blend,
+`perIngredientAmountsDisclosed` is what the proprietary-blend penalty reads. The
+interface renders honestly against assessment_state rather than implying uniform
+coverage.
 
 brand = { name, slug, product_list } — the brand page derives its summary from
 its products.

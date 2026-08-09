@@ -194,30 +194,32 @@ paper. PALETTE (dusk): a designed low-light night theme for late-night
 reading — deep warm near-black (~#17151E region), amber-shifted text,
 lowered contrast, dimmed chrome. Show everything in both.
 
-TYPE: NO serif faces anywhere. A precise neutral sans carries interface, body,
-data and the human voice (verdicts, pulled sentences); a mono carries doses,
-identifiers, AND the accent role. Signature device: one mono phrase inside an
-otherwise sans headline, used on the words that carry the meaning. All UI copy is
-sentence case (first word capitalised only — never Title Case, never all-caps,
-never all-lowercase); the wordmark is "Somnary" (capitalised, no trailing period,
-per D3). Self-host every face — no Google Fonts, no third-party font CDN (@import
-or <link>): render-blocking, third-party, and a GDPR consideration.
+TYPE — LOCKED: **Onest**, a single self-hosted family for everything (display +
+body), NO serif and NO second display face — specifically NOT Cabinet Grotesk and
+NOT IBM Plex Sans. `--font-display` and `--font-body` both resolve to Onest. A mono
+face exists ONLY if the handoff bundle still needs one for identifiers; if so it also
+carries the accent role, otherwise the accent is weight/size within Onest. Signature
+device: one accented phrase inside an otherwise plain headline, on the words that
+carry the meaning. All UI copy is sentence case (first word capitalised only — never
+Title Case, all-caps, or all-lowercase); the wordmark is "Somnary" (capitalised, no
+trailing period, per D3). Self-host every weight — the woff2 files live in the repo,
+declared with a local @font-face and preloaded; NO Google Fonts, NO Fontshare, NO
+third-party font CDN (@import or <link>): render-blocking, third-party, and a GDPR
+consideration.
 
-SIGNATURE ELEMENT — the study field. Each remedy's research rendered as
-generated art: every published study is a point of light; bigger point =
-more people in the study; points to the right of a thin vertical line mean
-it helped, to the left mean it didn't; brighter = better-run study. A
-well-studied remedy is a dense cluster to the right; a poorly-studied one
-is a sparse scatter across the line; an untested one is nearly empty sky.
-It must be readable by a non-scientist from one caption ("each dot is a
-study — the bigger the dot, the more people it included") and still be
-literally accurate. On a warm paper or night field it reads as quiet
-starlight — but NO literal moons, stars, or sleep clipart. Design it at
-three sizes: page hero, card thumbnail, share image. Specify the exact
-mapping rules — how sample size maps to radius, how horizontal position is
-calculated, the opacity range — since these will be implemented as a
-generator over real data. Also show how it degrades honestly: a remedy
-with two studies, and one with none.
+SIGNATURE ELEMENT — the study field, a NESTED BAR (the scatter is retired —
+no per-study points, no coordinates, no positioning, no brightness). It renders
+three counts as one nested bar — how many studies are **cited**, how many
+**measured a sleep outcome**, and how many **reported enough to verify** — plus one
+plain-sentence **direction line** ("most of the studies that measured sleep found it
+helped" / "found no clear effect" / "found it didn't help"). Readable by a
+non-scientist from one caption and still literally accurate. On a warm paper or
+night field it stays quiet and precise — NO literal moons, stars, or sleep clipart.
+Design it at three sizes (page hero, card thumbnail, share image) as the SAME nested
+bar, not three geometries. Show how it degrades honestly: a remedy with two studies,
+and one with none, must both read meaningfully. There is no sample-size radius, no
+left/right axis, and no per-study brightness — those were the retired scatter's
+encodings.
 
 MOTION: calm, 150–250ms, settling ease. One choreographed motif: the
 label-versus-studies reveal — what the bottle claims renders first, a line
@@ -476,26 +478,26 @@ request); any bundle hardcodes reported, not laundered; contrast verified.
 **Claude Code · needs steps 2 and 10**
 
 ```
-Read /docs/REDESIGN.md Reference C3 and the mapping rules Claude Design
-specified for the study field.
+Read /docs/REDESIGN.md Reference C3.
 
-Task: build a build-time SVG generator that renders a remedy's sources as
-the study field, following those mapping rules exactly. Three output
-sizes: page hero, card thumbnail, share image.
+Task: build the nested-bar study field (the scatter is retired — this is
+substantially smaller work: no SVG point generation, no mapping rules, no
+three output geometries). Render three counts as one nested bar — cited /
+measured a sleep outcome / reported enough to verify — plus a plain-sentence
+direction line from effectDirection. The same nested bar at three sizes: page
+hero, card thumbnail, share image.
 
-SVG, not canvas — every point stays in the DOM so it's crawlable,
-screen-readable, hoverable and themeable. Each point needs an accessible
-label and a hover target linking to its study. Include the plain-language
-caption ("each dot is a study — the bigger the dot, the more people it
-included").
+Server-rendered, crawlable and screen-readable: the counts and the direction
+sentence are real text/DOM, themeable in day and dusk. Derive the counts
+directly from the sources array — total cited; measuresSleepOutcome === true;
+effectDataStatus === 'complete' — and aggregate effectDirection over the
+verifiable sleep-outcome sources for the sentence. Never invent a count.
 
-Handle the honest edge cases: a remedy with two sources, and one with
-none, must both render meaningfully rather than breaking or looking empty
-by accident. Never render a point for a source with missing effect data —
-omit it and note the omission.
+Handle the honest edge cases: a remedy with two sources, and one with none,
+must both read meaningfully rather than looking empty by accident.
 
-Acceptance: generates from real source data for all 31 remedies; three
-sizes; renders correctly in both themes; sparse and empty cases handled;
+Acceptance: renders from real source data for all 31 remedies; three sizes;
+both themes; sparse and empty cases handled; no scatter, no per-study points,
 no canvas.
 ```
 
@@ -717,19 +719,26 @@ CLAUDE.md's non-negotiables contradict the new direction, and Claude Code is ins
 
 ## C2. Content model
 
-**Remedy** — replace `tier` with `bucket` (four values), keep everything else. Each source object needs the fields the study field renders from: sample size, effect direction, effect size, study quality, year, study type, identifier.
+**Remedy** — replace `tier` with `bucket` (four values), keep everything else. The **nested-bar** study field renders from **counts + one direction**, so each source object needs: `measuresSleepOutcome` (bool), `effectDataStatus` (complete/pending), `effectDirection` (helped / no clear effect / didn't help → feeds the direction sentence), plus `year`, study `type`, and identifier. **`effectSize` is no longer used for rendering; `sampleSize` and `studyQuality` are no longer used by the study field** — they encoded the retired scatter's radius and brightness (see the Session-2 dead-weight note below).
 
-**Product** (new) — `{ id, name, brand, ingredients[{ remedy_id, amount, unit, form }], dose_match, third_party_tested{ organisation, verified_date }, label_discloses_all, proprietary_blend, form_matches_studied, retail_links[{ retailer, url, price, last_checked }], data_source, last_checked, assessment_state }`.
+**Product** (new) — `{ id, brand, name, composition, strength{ amount, unit }, perIngredientAmountsDisclosed, ingredients[{ remedy_id, amount, unit, form }], dose_match, third_party_tested{ organisation, verified_date }, label_discloses_all, proprietary_blend, form_matches_studied, retail_links[{ retailer, url, price, last_checked }], data_source, last_checked, assessment_state }`.
+- **Strength is structured (`amount` + `unit`) and NEVER baked into the `name` string.** The card composes the label from `brand` + `name` + `strength` (e.g. "Nature's Own · Magnesium · 300 mg"), so strength stays sortable/filterable and never lives twice.
+- **`composition`** is `single-ingredient` or `blend`. For a `blend`, **`perIngredientAmountsDisclosed`** (boolean) records whether the label gives a dose per ingredient — **this is what the proprietary-blend penalty reads** (a blend that hides per-ingredient amounts can't be dose-matched, so it's penalised).
+- All user-facing dates (`last_checked`, `verified_date`, review dates) **render as "14 July 2026"** (day, full month, year — no ordinal, no comma), **never ISO**. ISO stays the stored form; the display format is applied at render.
 
 `assessment_state` is one of *fully assessed · label known, not yet assessed · not in database* — the interface renders honestly against it rather than implying uniform coverage.
 
 **Brand** (new, minimal) — name, slug, product list; the brand page derives its summary from the products.
 
+### Session-2 dead-weight (nested-bar amendment, 2026-08-09)
+
+The nested bar needs only **counts** (`measuresSleepOutcome`, `effectDataStatus`) + **`effectDirection`** (the direction sentence). That makes three Session-2 (PR #154) source fields render-obsolete: **`sampleSize`** (was the scatter's radius), **`studyQuality`** (was its brightness, driven by `docs/SOURCE_QUALITY_RUBRIC.md`), and **`effectSize`** (never positioned; only ever the plain-language stat's magnitude). Recommendation for the owner — **PR #154 is still open, so it can be trimmed before merge**: keep `effectDirection`/`measuresSleepOutcome`/`effectDataStatus`; keep `sampleSize`/`effectSize` **only if the plain-language display stat** ("about 7 minutes faster … covering 1,683 people") **stays data-driven** — if it's authored per remedy, drop both; **drop `studyQuality` + the quality rubric** unless quality is shown or feeds the bucket. Dropping them also retires the outstanding ~72-source effect-data fill and the rubric ratification — real scope saved, not filled.
+
 ## C3. Build items
 
 **`/go/{product-id}`** — server-side redirect, click logged, one place to add affiliate tags later, build check against hardcoded retailer URLs in content.
 
-**Study-field generator** — build-time SVG over the sources array using Claude Design's mapping rules. Three sizes. SVG not canvas: points stay in the DOM for crawlers, screen readers, hover targets and theming.
+**Study-field generator** — build-time **nested bar** over the sources array: three counts (cited / measured a sleep outcome / reported enough to verify) plus a plain-sentence direction line from `effectDirection`. NO scatter, no per-study points, no coordinates, no mapping rules, no three geometries — the same bar at three sizes. Counts derive from the sources array (total; `measuresSleepOutcome` true; `effectDataStatus` complete); server-rendered text/DOM (crawlable, screen-readable, themeable). `effectSize` is not used for rendering; `sampleSize`/`studyQuality` are no longer used by the study field (see the C2 schema note).
 
 **Share images** — satori (HTML/CSS → SVG) plus resvg (SVG → PNG), so cards are written as components and generated at build.
 
