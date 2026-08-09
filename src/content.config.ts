@@ -143,7 +143,15 @@ const remedies = defineCollection({
       // template adaptation: interventions have no dose/compound, so those blocks are skipped and
       // the "standardization" block reframes as fidelity ("what counts as the real thing").
       format: z.enum(['supplement', 'intervention']).default('supplement'),
-      name: z.string(), // lowercase in UI
+      name: z.string(), // inline/prose + search form (kept for existing consumers)
+      // Authoritative on-screen display name — NOT derivable from the slug (a
+      // title-cased slug gets "Tart-cherry" / "5-htp" / "Magnolia-bark" wrong).
+      // Rule: sentence case, EXCEPT where scientific convention fixes the form
+      // (5-HTP, CBD, CBN, CBT-I, GABA, L-theanine, L-tryptophan, vitamin D).
+      // Required + non-empty so a page can never silently fall back to a
+      // title-cased slug; check-displaynames (verify:displaynames) additionally
+      // asserts it only re-cases the slug's own tokens and guards the render layer.
+      displayName: z.string().min(1),
       aliases: z.array(z.string()).default([]), // synonyms + latin names → search
       oneLineVerdict: z.string(),
       verdict: z.string(), // 2–3 sentence verdict block
