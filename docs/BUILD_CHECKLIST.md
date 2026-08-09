@@ -39,6 +39,14 @@ Legend: `[ ]` todo · `[~]` partial (see note) · `[x]` done & verified · `HG` 
 > decision pending:** whether the nested bar makes `sampleSize`/`effectSize`/`studyQuality`
 > (+ the source-quality rubric + the ~72-source effect-data fill) dead weight to drop from
 > the still-open Session-2 schema (PR #154) — see REDESIGN C2.
+>
+> **MARK + TOKEN (2026-08-09).** The favicon + nav wordmark are redrawn as a **capital-"S"
+> letterform (Onest 600)** when the handoff bundle lands — the crescent-moon / study-field
+> mark is retired; **replace ALL icon assets, no old fallbacks** (checklist in DESIGN_SYSTEM.md
+> brand section: `public/favicon.svg`, `Base.astro` icon tags — no manifest/apple-touch exist
+> yet, `Wordmark.astro` nav mark [chrome QA], `RemedyIcon` fallback, `og.ts` font). Type token
+> consolidated to a single **`--font-sans`** (the `--font-display`/`--font-body` pair collapses
+> in; the live rename rides with the Onest self-host swap).
 
 ## Reality baseline (audited 2026-07-06, CHK-0.0)
 

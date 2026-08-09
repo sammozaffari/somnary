@@ -133,8 +133,9 @@ Two setup notes before you paste anything.
 
 ```
 You are designing the visual system for Somnary (wordmark "Somnary", no
-trailing period, per locked decision D3; the crescent-moon disc is the brand
-symbol) — an independent reference that tells
+trailing period, per locked decision D3; the brand symbol is a capital-"S"
+letterform in Onest 600 — the crescent-moon disc is retired) — an independent
+reference that tells
 people whether a natural sleep remedy actually works, and whether a
 specific product actually delivers it. No supplement company pays Somnary
 and no brand can influence a score. Every claim links to the study behind
@@ -196,7 +197,8 @@ lowered contrast, dimmed chrome. Show everything in both.
 
 TYPE — LOCKED: **Onest**, a single self-hosted family for everything (display +
 body), NO serif and NO second display face — specifically NOT Cabinet Grotesk and
-NOT IBM Plex Sans. `--font-display` and `--font-body` both resolve to Onest. A mono
+NOT IBM Plex Sans. Exposed as a single token `--font-sans` → Onest (the old
+`--font-display`/`--font-body` pair collapses into it). A mono
 face exists ONLY if the handoff bundle still needs one for identifiers; if so it also
 carries the accent role, otherwise the accent is weight/size within Onest. Signature
 device: one accented phrase inside an otherwise plain headline, on the words that
@@ -226,8 +228,9 @@ label-versus-studies reveal — what the bottle claims renders first, a line
 draws through it, what the studies found fades in beneath with a "see the
 study" chip. Respect prefers-reduced-motion.
 
-COMPONENTS (each in both themes, with states): wordmark + favicon drawn
-from the study field; bucket badge (4 states, letter-free, shape + colour
+COMPONENTS (each in both themes, with states): wordmark + favicon as a
+capital-"S" letterform mark (Onest 600), NOT drawn from the study field (a nested
+bar now) — replace all icon assets, no old fallbacks; bucket badge (4 states, letter-free, shape + colour
 + label); product score badge with its criteria breakdown; the paired
 ingredient+product verdict; "see the study" chip and its popover (what the
 study found in one plain sentence, how many people, what year, link out,

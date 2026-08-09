@@ -223,8 +223,9 @@ Owner-set, ahead of the redesign's design system landing (REDESIGN steps 4–10)
 - **Sentence case everywhere** in UI copy — headings, nav, labels, buttons: first
   word capitalised only, never Title Case, never ALL CAPS, never all-lowercase.
   The wordmark is **"Somnary"** — capitalised, no trailing period (D3).
-- **Type is Onest — one self-hosted family (locked 2026-08-09).** `--font-display`
-  and `--font-body` both resolve to **Onest**; NO serif, NO second display face —
+- **Type is Onest — one self-hosted family (locked 2026-08-09).** A single type token
+  **`--font-sans`** resolves to **Onest** (the old `--font-display`/`--font-body` pair
+  collapses into it); NO serif, NO second display face —
   specifically NOT Cabinet Grotesk and NOT IBM Plex Sans. A mono face exists only
   if the Claude Design handoff bundle still needs one for identifiers; otherwise the
   accent role (the signature emphasis on the words that carry the meaning) is
