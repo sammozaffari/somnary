@@ -61,7 +61,7 @@
 > - `PENDING-MERGE[redesign-type-studyfield-product]` — Onest `--font-sans` swap + `check-fonts.mjs`,
 >   nested-bar study-field spec, structured product strength/composition, letterform-"S" mark.
 > - `PENDING-MERGE[feat/remedy-displayname]` — required `displayName` + `check-displaynames.mjs`.
-> - `PENDING-MERGE[redesign-design-system-rules]` — sentence-case / no-serif / self-host /
+> - ~~redesign-design-system-rules~~ — MERGED (CHK-R0): sentence-case / no-serif / self-host /
 >   reject-don't-launder doc rules (subset of the type branch).
 
 | Step | Tool | What it does |
