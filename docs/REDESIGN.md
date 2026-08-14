@@ -58,8 +58,10 @@
 >   3-band · `measuresSleepOutcome` · `effectDataStatus` · `sampleSize` · `studyQuality`),
 >   `SOURCE_QUALITY_RUBRIC.md` (**re-scoped** on merge to bucket-determining papers;
 >   ratification still HUMAN-GATE), 31-remedy pilot fill, `check-source-fields.mjs`.
-> - `PENDING-MERGE[redesign-type-studyfield-product]` — Onest `--font-sans` swap + `check-fonts.mjs`,
->   nested-bar study-field spec, structured product strength/composition, letterform-"S" mark.
+> - ~~redesign-type-studyfield-product~~ — MERGED (CHK-R0): `check-fonts.mjs` gate + the
+>   type-lock / nested-bar / structured-strength / letterform-"S" doc decisions. NOTE the
+>   branch carried NO swap code — the Onest `--font-sans` swap in `global.css`/OG and the
+>   letterform favicon/wordmark redraw land with Step 10 from the handoff bundle.
 > - ~~feat/remedy-displayname~~ — MERGED (CHK-R0): required `displayName` + `check-displaynames.mjs`.
 > - ~~redesign-design-system-rules~~ — MERGED (CHK-R0): sentence-case / no-serif / self-host /
 >   reject-don't-launder doc rules (subset of the type branch).

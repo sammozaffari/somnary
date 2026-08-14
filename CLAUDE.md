@@ -30,8 +30,9 @@
   removes sleep-cliché costume (no literal moons/stars in the study field, lavender
   palette and dusk-sky accent cut for the same reason) and a crescent brand mark is
   that costume at maximum visibility. See RULES.md Identity. The live nav wordmark
-  and favicon still render the crescent until the redraw lands —
-  PENDING-MERGE[redesign-type-studyfield-product].)*
+  and favicon still render the crescent until the letterform redraw lands — the
+  redraw was never code on the type branch (merged at CHK-R0); it arrives from
+  the design handoff bundle with the design-system wiring, REDESIGN Step 10.)*
 - **D4 Stack builder: killed.** Never build combine-your-stack features or CTAs.
   Salvage only the interaction-warning engine, surfaced through the compare tool
   and safety router. AI never recommends supplement combinations.
@@ -259,10 +260,11 @@ the operating contract enforces them:
   `--font-sans`. No serif, no mono, no display/body split; weight and size carry
   hierarchy; tabular figures for numbers. No typographic signature device. No
   Google Fonts / Fontshare / third-party font CDN — woff2 self-hosted, local
-  `@font-face`, preload. Enforced by `scripts/check-fonts.mjs` (`verify:fonts`).
-  PENDING-MERGE[redesign-type-studyfield-product] — live `global.css` + OG
-  generator still render Instrument Sans until the self-host swap lands; the font
-  gate itself is also on that branch.
+  `@font-face`, preload. Enforced by `scripts/check-fonts.mjs` (`verify:fonts`),
+  merged at CHK-R0. The live `global.css` + OG generator still render Instrument
+  Sans (self-hosted, so the gate passes) until the Onest self-host swap lands
+  with the rebuild's design-system wiring (REDESIGN Step 10) — a global visual
+  change requiring the rendered-visual pass at 390/768/1440.
 - **Colour means data.** `--evidence` (ink blue) is the evidence bar and its key
   and nothing else; all interface colour is `--ink`; there is no `--accent`. Green
   = earned positive verdict only; amber = safety register only; avoid-red =
@@ -327,8 +329,9 @@ remedy's bucket, per the re-scoped `docs/SOURCE_QUALITY_RUBRIC.md`) }.
 > is kept only for the plain stat, not a dot size.
 
 **product** = { id, brand, name, `strength{ amount, unit }` (STRUCTURED and NEVER
-baked into the name string — the card composes brand + name + strength;
-PENDING-MERGE[redesign-type-studyfield-product]), `composition`
+baked into the name string — the card composes brand + name + strength; decided
+on the type branch, merged at CHK-R0; lands in code with the product schema
+build), `composition`
 ('single-ingredient' | 'blend'), `perIngredientAmountsDisclosed` (blends only —
 what the proprietary-blend penalty reads), `deliveryForm` (CONTROLLED VOCABULARY,
 never free text from the label — tablet · capsule · softgel · gummy · melt-lozenge ·

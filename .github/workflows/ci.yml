@@ -26,6 +26,9 @@ jobs:
       - name: Token linter (no retired tokens / hardcoded colors)
         run: npm run verify:tokens
 
+      - name: Font gate (self-hosted only — no Google Fonts / Fontshare / third-party font CDN)
+        run: npm run verify:fonts
+
       - name: Display-name gate (every remedy has an explicit, slug-faithful displayName; no slug title-casing)
         run: npm run verify:displaynames
 
