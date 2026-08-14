@@ -292,11 +292,10 @@ the operating contract enforces them:
 - Publishing to external channels (newsletter, social) — agents draft only.
 
 ## Content model (schema lives in code; keep in sync)
-Provenance note: several fields below are DECIDED and their code is BUILT but still
-lives on an unmerged branch, marked `PENDING-MERGE[branch]`. Until the branch
-merges (next session — see BUILD_CHECKLIST top item), the live schema in
-`src/content.config.ts` does not yet carry them. Grep `PENDING-MERGE` to find
-every doc/code divergence.
+Provenance note: the four design branches merged at CHK-R0 (2026-08-14), so the
+remedy fields below are live in `src/content.config.ts`. The product/brand fields
+are DECIDED here but not yet in code — they land with the product schema build
+(REDESIGN Step 3 / the rebuild).
 
 **remedy** = { slug, `name` (inline/prose + search form), `displayName`
 (authoritative on-screen name — sentence case except fixed scientific forms like
@@ -388,8 +387,9 @@ compare tool, and the assistant all read this one structure — never duplicate 
 - Tokens only; no hardcoded style values — handoff-bundle values map to named
   tokens or are reported, never laundered in. Self-hosted fonts only (no font CDN).
   UI copy in sentence case; no serif faces; dates render "14 July 2026", not ISO.
-- **Validation gates pass** (item-9 build-time checks; several land with the merges
-  below, marked PENDING-MERGE where the gate itself is on a branch):
+- **Validation gates pass** (item-9 build-time checks; the source-fields,
+  display-name and font gates are merged and live — the product-facing checks
+  below land with the product schema build):
   - `name`/`displayName` strings contain NO dose/strength pattern (the rule drifted
     twice in design — strength is structured `{ amount, unit }`, never in the name).
   - every product `deliveryForm` value is in the controlled vocabulary (a miss is

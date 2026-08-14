@@ -52,8 +52,9 @@
 >   items (quality-rubric decision, direction/sample-size fill, safety copy sourcing, dose
 >   protocols, documented-concern list) — not an assumption.
 >
-> **PENDING-MERGE map (code decided + built, still on branches; merge is the next session).**
-> Grep `PENDING-MERGE` across the docs to find every doc/code divergence.
+> **Branch map — all four MERGED to main at CHK-R0 (2026-08-14).** The doc/code
+> divergence markers this map indexed are cleared; a repo grep for the marker
+> string now returns zero.
 > - ~~chk-redesign-2-source-audit~~ — MERGED (CHK-R0): source study-field fields (`effectDirection`
 >   3-band · `measuresSleepOutcome` · `effectDataStatus` · `sampleSize` · `studyQuality`),
 >   `SOURCE_QUALITY_RUBRIC.md` (**re-scoped** on merge to bucket-determining papers;
