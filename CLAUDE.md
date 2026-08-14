@@ -16,12 +16,34 @@
   lowercase-only styling; update any doc or design asset that says otherwise when
   touched. *(Amended by owner 2026-07-08: the trailing-period mark is dropped —
   the wordmark is "Somnary" (no period), and the crescent-moon disc is the brand
-  symbol. The earlier `Somnary.` trailing-period form is retired.)*
+  symbol. The earlier `Somnary.` trailing-period form is retired.)* *(Further
+  amended by owner 2026-08-14 — brand **mark** superseded: the symbol is now a
+  **capital-"S" letterform** (Onest 600, outlined paths, drawn at 16px first), NOT
+  the crescent-moon disc. Mark chronology, three artifacts: (1) the crescent-moon
+  disc — this one DID pass through a design track: logo-brief rounds 1–3
+  (`docs/plans/2026-07-14-logo-brief.md`; commits `9576e6d` "moon-counter" →
+  `ddc7acf` "moon out of the O" → `f66813e` "integrated crescent, narrowed"),
+  shipped owner-directed as the standalone nav mark in PR #33 (`f6cb3e7`); (2) a
+  dot-field favicon drawn from the study-field scatter, retired when the scatter
+  was retired; (3) the capital-"S" letterform, which supersedes both. The crescent
+  is retired on **charter grounds**, not only coherence: Somnary systematically
+  removes sleep-cliché costume (no literal moons/stars in the study field, lavender
+  palette and dusk-sky accent cut for the same reason) and a crescent brand mark is
+  that costume at maximum visibility. See RULES.md Identity. The live nav wordmark
+  and favicon still render the crescent until the redraw lands —
+  PENDING-MERGE[redesign-type-studyfield-product].)*
 - **D4 Stack builder: killed.** Never build combine-your-stack features or CTAs.
   Salvage only the interaction-warning engine, surfaced through the compare tool
   and safety router. AI never recommends supplement combinations.
 - **Rulebook: `/docs/strategy/06-decision-frameworks-operating-system.md` is
   binding** for all content, design, ads, AI framing, and product decisions.
+- **Design charter: `/docs/RULES.md` is binding** for identity, colour,
+  typography, evidence display, product/additive presentation, interface economy,
+  navigation, and accessibility floors — the design-side companion to the
+  rulebook. Where a design, IA, or user-facing-copy question isn't settled in this
+  file, RULES.md settles it. The repo copy is canonical: if the Claude Design
+  handoff bundle's copy ever diverges, the repo wins and the bundle is updated to
+  match (see the provenance note at the top of RULES.md).
 
 Somnary is an independent, evidence-graded reference for natural sleep remedies.
 This repo is run by an agent team in Claude Code. The human owner reviews at
@@ -134,23 +156,31 @@ bottle):
 1. **Does the ingredient work? — the evidence bucket.** From published human
    research, one of four (each always displayed with its permanent plain sentence,
    colour- AND shape-coded so colour is never the only signal):
-   - **Works for most people** — studies keep finding it helps.
-   - **Might help a little** — a few studies found a small effect, but the
-     research is thin.
-   - **Nobody really knows yet** — it hasn't been tested properly in people, so
-     nobody can honestly say.
-   - **Best avoided** — it's been tested and doesn't work.
-   (Slightly-more-formal labels — Strong evidence / Some evidence / Not enough
-   evidence / Avoid — are an owner-gated wording choice; the plain sentence does
-   the real work either way.)
+   - **Helps most people sleep** — studies keep finding it helps people sleep.
+   - **May help sleep a little** — a few studies found a small effect on sleep,
+     but the research is thin.
+   - **Not properly tested for sleep** — it hasn't been properly tested for sleep
+     in people, so nobody can honestly say.
+   - **Tested — doesn't seem to help sleep** — studies that measured sleep didn't
+     find it helps. **Bucket 4 requires papers that MEASURED a sleep outcome and
+     found no effect** — an untested remedy is bucket 3, never bucket 4.
+   (Labels ratified in RULES.md 2026-08-14; they supersede the earlier "Works for
+   most people / Might help a little / Nobody really knows yet / Best avoided"
+   wording AND the "Strong evidence / Some evidence …" formal set. The permanent
+   plain sentence rides with each label and does the real work.)
 2. **How risky is it? — the safety flag.** SEPARATE from the bucket and never
    folded into it: one of three — **none · caution · serious concern** — shown
    alongside the bucket on every remedy, always visible. Safety never changes an
-   evidence bucket, and an evidence bucket never encodes safety. (This is why
-   bucket 4 is only "tested and doesn't work": a remedy with real evidence but a
-   dangerous profile — kava, which works yet carries a hepatotoxicity history —
-   must read as "works" + "serious concern", not collapse into the same box as an
-   untested botanical.)
+   evidence bucket in either direction, and an evidence bucket never encodes
+   safety. This is why bucket 4 is narrow ("tested and the studies didn't find it
+   helps sleep"): a remedy that is risky but not proven ineffective must be carried
+   by the safety flag, not dumped into bucket 4. A serious-concern flag visually
+   outranks the evidence visual on the page (RULES.md). The worked example is
+   **kava — "not properly tested for sleep" + serious concern**: it carries a real
+   hepatotoxicity history, yet of its 5 cited papers 0 measured a sleep outcome, so
+   it cannot sit in a "works" bucket — the danger rides the safety flag, never the
+   bucket. (Was "works" + serious concern in Step-1 CLAUDE.md — corrected against
+   corpus 5/0/0 and RULES.md, 14 Aug 2026.)
 3. **Does this product deliver what was studied? — the product score.** Product
    pages only. From visible factual criteria: dose matches what studies used ·
    independently third-party tested · label discloses everything (no hidden
@@ -218,47 +248,154 @@ it is skipped or vague.
   screenshotting stays a HUMAN-GATE (no new Playwright dep) — the visual pass uses
   the Chrome MCP by hand.
 
+## Design system rules (binding on the Step 4 handoff and all UI; full charter in RULES.md)
+RULES.md is the authority; these are the load-bearing rules restated here because
+the operating contract enforces them:
+- **Sentence case everywhere** in UI copy — headings, nav, labels, buttons,
+  placeholders, aria text: first word capitalised only, never Title Case, ALL CAPS,
+  or all-lowercase. Names keep their fixed scientific forms (L-theanine, 5-HTP,
+  GABA, CBD, CBN, CBT-I, vitamin D). Wordmark "Somnary" (capitalised, no period, D3).
+- **Type is Onest — one self-hosted family**, exposed as a single token
+  `--font-sans`. No serif, no mono, no display/body split; weight and size carry
+  hierarchy; tabular figures for numbers. No typographic signature device. No
+  Google Fonts / Fontshare / third-party font CDN — woff2 self-hosted, local
+  `@font-face`, preload. Enforced by `scripts/check-fonts.mjs` (`verify:fonts`).
+  PENDING-MERGE[redesign-type-studyfield-product] — live `global.css` + OG
+  generator still render Instrument Sans until the self-host swap lands; the font
+  gate itself is also on that branch.
+- **Colour means data.** `--evidence` (ink blue) is the evidence bar and its key
+  and nothing else; all interface colour is `--ink`; there is no `--accent`. Green
+  = earned positive verdict only; amber = safety register only; avoid-red =
+  documented failure/concern only. No decorative gradients (one dusk exception).
+- **Dates render "14 July 2026"** in all user-facing copy, never ISO. ISO
+  (YYYY-MM-DD) stays the stored/schema form; the display format is applied at render.
+- **Reject-don't-launder hardcoded values.** Any handoff-bundle component carrying
+  hardcoded style values is REJECTED and the values REPORTED (with the named token
+  they map to), never silently transcribed. `check-tokens.mjs` fails on raw
+  font-size / radius / spacing; raw width/height/min/max/border-width is a
+  design-guardian review gate until the scoped linter extension lands with step 10.
+
 ## Human gates (never auto-merge)
-- Tier grade assignment or change on any remedy.
+- Tier/bucket grade assignment or change on any remedy.
 - Anything monetization, legal-page, or medical-boundary related.
 - Phase completion (owner reviews before the next phase starts).
 - Any missing design token, schema change, or new dependency with lock-in.
+- The product **"worth buying" verdict rule** — the four product checks are almost
+  certainly NOT equally weighted (dose-match likely outranks label disclosure), and
+  the current `met >= 3` threshold is a PLACEHOLDER. Settle the weighting and the
+  rule editorially before any Phase 3 product content ships. One definition in code
+  (`PASSES_THRESHOLD`), every consumer importing it, until then (see BUILD_CHECKLIST).
+- The source-quality rubric (`docs/SOURCE_QUALITY_RUBRIC.md`) ratification, before
+  any evidence bucket ships as final.
 - Publishing to external channels (newsletter, social) — agents draft only.
 
 ## Content model (schema lives in code; keep in sync)
-remedy = { slug, name, bucket `[HUMAN-GATE]`, verdict, bestFor[], notFor[],
-biggestRisk, studiedDose, claims[]↔data[] (each row cited), evidenceSummary,
-dosingReality, safety[], interactions[], standardization, mechanism,
-sources[]{pmid|doi|registry, title, year, type, sampleSize, effectDirection,
-effectSize, studyQuality} (the fields the study field renders from),
-communityRead (separate store), reviewDate, changeLog[] }.
+Provenance note: several fields below are DECIDED and their code is BUILT but still
+lives on an unmerged branch, marked `PENDING-MERGE[branch]`. Until the branch
+merges (next session — see BUILD_CHECKLIST top item), the live schema in
+`src/content.config.ts` does not yet carry them. Grep `PENDING-MERGE` to find
+every doc/code divergence.
 
-product = { id, name, brand, ingredients[{ remedy_id, amount, unit, form }],
-dose_match, third_party_tested{ organisation, verified_date }, label_discloses_all,
-proprietary_blend, form_matches_studied, retail_links[{ retailer, url, price,
-last_checked }], data_source, last_checked, assessment_state } — where
-assessment_state ∈ { fully assessed · label known, not yet assessed · not in
-database }, and the interface renders honestly against it rather than implying
-uniform coverage.
+**remedy** = { slug, `name` (inline/prose + search form), `displayName`
+(authoritative on-screen name — sentence case except fixed scientific forms like
+5-HTP / L-theanine / vitamin D; required, never a title-cased slug —
+PENDING-MERGE[feat/remedy-displayname]), bucket `[HUMAN-GATE]`, verdict, bestFor[],
+notFor[], biggestRisk, studiedDose, claims[]↔data[] (each row cited),
+evidenceSummary, dosingReality, safety[], interactions[], standardization,
+mechanism, sources[], communityRead (separate store), reviewDate, changeLog[] }.
 
-brand = { name, slug, product_list } — the brand page derives its summary from
-its products.
+**remedy.sources[]** (the nested-bar study field + citation popover read from
+these — PENDING-MERGE[chk-redesign-2-source-audit]) = { pmid|doi|registry, title,
+year, `type` (structured study type — rendered as plain words: "trial" / "review of
+several studies" / "observational study"; observational + cohort studies count
+toward the MIDDLE buckets but can never alone reach the top bucket),
+`measuresSleepOutcome` (bool — only human sleep-outcome sources feed the bar's
+"measured sleep" count; carries NO safety signal), `effectDataStatus`
+(complete|pending), `effectDirection` (three-band: helped | no-clear-effect |
+didnt-help — REQUIRED on a complete sleep-outcome source; feeds the plain direction
+sentence "of the 3 we could check, all 3 found an improvement"), `sampleSize`
+(REQUIRED on a complete sleep-outcome source; feeds the plain stat and the popover's
+"how many people"), `effectSize` (OPTIONAL — captured where a paper states it
+plainly; feeds the stat line only, NEVER positioning), `studyQuality`
+(OPTIONAL, re-scoped: no longer a render input — it exists to make BUCKET
+assignments defensible, so it is populated only for the papers that determine a
+remedy's bucket, per the re-scoped `docs/SOURCE_QUALITY_RUBRIC.md`) }.
+> The study field is a **nested bar**, not a scatter (RULES.md): three counts —
+> cited ⊇ measured-a-sleep-outcome ⊇ reported-enough-to-verify — plus one plain
+> direction sentence. No per-study points, radius, or brightness. The retired
+> scatter is why `effectSize`/`studyQuality` no longer render and why `sampleSize`
+> is kept only for the plain stat, not a dot size.
+
+**product** = { id, brand, name, `strength{ amount, unit }` (STRUCTURED and NEVER
+baked into the name string — the card composes brand + name + strength;
+PENDING-MERGE[redesign-type-studyfield-product]), `composition`
+('single-ingredient' | 'blend'), `perIngredientAmountsDisclosed` (blends only —
+what the proprietary-blend penalty reads), `deliveryForm` (CONTROLLED VOCABULARY,
+never free text from the label — tablet · capsule · softgel · gummy · melt-lozenge ·
+liquid-drops · spray · tea · powder · patch; ingestion maps label wording into the
+vocabulary and flags anything it can't map `needs-review`, never invents a form),
+`releaseProfile` ('immediate' | 'slow-release' | 'not-stated' — SEPARATE field from
+deliveryForm; feeds the form-matches-studied check; `not-stated` is never an
+auto-pass), `rawFormLabel` (original label wording, kept verbatim), ingredients[{
+remedy_id, amount, unit, form }], dose_match, third_party_tested{ organisation,
+verified_date }, label_discloses_all, proprietary_blend, form_matches_studied,
+`price{ amount, currency, retailer, checkedDate }`, `pricePerNight{ amount,
+currency, retailer, checkedDate }` (derived), `dietary{ sugarFree, glutenFree,
+vegan, artificialSweetenerPresent }`, `allergens[]`, `excipients[]{ name, role,
+amount?, flag }` (flag per the additive policy below), `howToTake{ timing,
+withFood, timeToKnow }` (protocol sourced from the STUDIES, never invented),
+retail_links[{ retailer, url, price, last_checked }], data_source, last_checked,
+assessment_state } — where assessment_state ∈ { fully assessed · label known, not
+yet assessed · not in database }, and the interface renders honestly against it
+rather than implying uniform coverage. `deliveryForm`/`releaseProfile` are a
+`[HUMAN-GATE]` schema plan (`docs/plans/2026-08-12-product-form-schema.md`), not yet
+built.
+> **dose context** lives per remedy (studied range + typical market range) and the
+> product's dose diagram + the alternatives section CONSUME it — it is not
+> re-derived per product.
+
+**brand** = { name, slug, product_list, `recalls[]` (renders a recalls row ONLY
+when one exists) } — the brand page derives a COUNT summary from its products
+(never a brand grade). Label-known-but-unassessed products count as "not yet
+assessed", never as passes or failures.
+
+**Additive policy (excipients[].flag).** Three flag states only — **no known
+concern** (neutral, NOT green) · **worth knowing** (amber tint) · **documented
+concern** (avoid tint). Every non-neutral flag CITES a paper (no source id → the
+flag cannot ship — see validation gates). A public, cited **documented-concern
+list** is maintained as an editorial artefact. Standing rule: non-sugar sweeteners
+are always at least "worth knowing" in daily-use products (WHO 2023 basis — verify
+and cite properly; currently a placeholder). **No hazard scores, no invented
+gradients, ever** — colour states only what's documented.
 
 The ingredient evidence bucket (does it work), the safety flag (how risky —
 none/caution/serious concern, shown on every remedy alongside the bucket), and
 the product score (does this bottle deliver it, on product pages) are THREE
 SEPARATE SIGNALS and must never be merged into a single number anywhere in the
-schema or the rendering (Reference A4). The safety flag is surfaced from the
-existing `safety[]` / `interactions[]` data and never alters a bucket.
-Citations are DATA, never prose-only. The bucket map / browse, checkers, compare
-tool, and the assistant all read this one structure — never duplicate content.
+schema, rendering, or sorting (Reference A4 / RULES.md). The safety flag is
+surfaced from the existing `safety[]` / `interactions[]` data and never alters a
+bucket. Citations are DATA, never prose-only. The bucket map / browse, checkers,
+compare tool, and the assistant all read this one structure — never duplicate content.
 
 ## Definition of done (per item)
 - Acceptance criteria verified and ticked.
 - Server-rendered content confirmed in build output.
 - Every claim cited; resolver + auditor green.
 - Safety module present and prominent (remedy/decision pages).
-- Tokens only; no hardcoded style values.
+- Tokens only; no hardcoded style values — handoff-bundle values map to named
+  tokens or are reported, never laundered in. Self-hosted fonts only (no font CDN).
+  UI copy in sentence case; no serif faces; dates render "14 July 2026", not ISO.
+- **Validation gates pass** (item-9 build-time checks; several land with the merges
+  below, marked PENDING-MERGE where the gate itself is on a branch):
+  - `name`/`displayName` strings contain NO dose/strength pattern (the rule drifted
+    twice in design — strength is structured `{ amount, unit }`, never in the name).
+  - every product `deliveryForm` value is in the controlled vocabulary (a miss is
+    `needs-review`, never a guessed value).
+  - every non-neutral additive flag carries a source id.
+  - NO safety string ships without a source id (SafetyCallout drift reached three
+    occurrences — this becomes a build check).
+  - any user-facing string matching `"[Placeholder"` FAILS the production build
+    (the design phase's placeholder discipline becomes a build-time check).
 - Rendered-visual + keyboard pass done for any chrome/template/shared-component
   change (routes viewed at 390/768/1440px; nav overflow measured). See `qa/README.md`.
 - Review date + correction link on every article-type page.

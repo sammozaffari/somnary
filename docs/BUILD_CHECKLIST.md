@@ -28,6 +28,103 @@ Legend: `[ ]` todo · `[~]` partial (see note) · `[x]` done & verified · `HG` 
 > (CHK-6.5), community reports (CHK-6.4 / 6.11), and the Lens as a headline surface
 > (Phase 7, already built). Stack builder stays killed (D4).
 
+---
+
+## REDESIGN active track (Steps 9–15) — v5 reconciliation (2026-08-14)
+Design is **finished through the Safety and Brand pages** (REDESIGN Steps 4–8).
+`/docs/RULES.md` is the binding design charter. The design phase's decisions were
+committed across FOUR unmerged branches; this session folded the DOC portions into
+CLAUDE.md / REDESIGN.md / this file with `PENDING-MERGE[branch]` markers. The
+CODE/schema on those branches merges next (its own session). **Grep `PENDING-MERGE`
+to find every doc/code divergence.**
+
+### GATE — do this before any Step 9–15 build
+- [ ] **CHK-R0 Merge the four design branches to main and clear all PENDING-MERGE
+  markers.** `HG` (schema changes + a shipped-mark swap). Merge — in their own
+  session, with code review, NOT folded into any build item — `chk-redesign-2-source-audit`
+  (source fields + rubric + pilot + `check-source-fields.mjs`),
+  `redesign-type-studyfield-product` (Onest `--font-sans` + `check-fonts.mjs` +
+  nested-bar spec + structured strength + letterform-"S" mark),
+  `feat/remedy-displayname` (`displayName` + `check-displaynames.mjs`), and
+  `redesign-design-system-rules` (subset). Resolve the CLAUDE.md/REDESIGN.md
+  conflicts (all four edit the same governance docs from the Step-1 base). On merge,
+  **re-scope `SOURCE_QUALITY_RUBRIC.md`** per the decision below and **confirm the
+  kava evidence-bucket** flagged in CLAUDE.md. *Accept:* four branches merged; a repo
+  grep for `PENDING-MERGE` returns zero; `verify:fonts`/`verify:displaynames`/
+  `check-source-fields` green. **No Step 9–15 build session starts until this box is
+  ticked** — the doc/code split this session created is acceptable for exactly one session.
+
+### Editorial fill — the critical path (first-class items, not an assumption)
+- [ ] **CHK-Rfill.1 Source-quality rubric decision + ratification.** `HG`.
+  `SOURCE_QUALITY_RUBRIC.md` is **re-scoped**: its render job (scatter brightness) is
+  dead; its real job — making bucket assignments defensible — stands. Change scope from
+  "rate all ~72 sources" to "a published grading standard applied to the papers that
+  DETERMINE each remedy's bucket", pointed to from How-we-grade. `studyQuality` stays an
+  OPTIONAL field, populated only for bucket-determining papers. Ratification is HUMAN-GATE
+  before any bucket ships final.
+- [ ] **CHK-Rfill.2 Direction + sample-size fill** across the sleep-outcome sources (the
+  fill SHRANK — no studyQuality except for bucket-determining papers; effectSize only where
+  trivially stated). `effectDirection` + `sampleSize` verified against real abstracts,
+  never inferred. Melatonin pilot first (unchanged).
+- [ ] **CHK-Rfill.3 Safety copy sourcing.** Every user-facing safety string carries a
+  source id (SafetyCallout drift reached three occurrences — see validation gates).
+- [ ] **CHK-Rfill.4 Dose protocols (`howToTake`)** sourced from the studies — timing,
+  with-food, time-to-know — never invented. Feeds the product dose diagram + alternatives.
+- [ ] **CHK-Rfill.5 Documented-concern additive list** — the public, cited editorial
+  artefact behind the additive policy; verify + properly cite the WHO 2023 sweetener basis
+  (currently a placeholder).
+
+### New page types (design done Step 8; build here)
+- [ ] **CHK-Rpage.1 Safety page.** Triage BY SITUATION; per-situation interaction sections;
+  a DERIVED "remedies with safety flags" listing rendering caution + serious-concern levels;
+  an escalation block. Reached from the three-item nav. Never diagnoses; routes to clinician
+  boundaries. (Extends the existing `/safety` router, CHK-3.3.)
+- [ ] **CHK-Rpage.2 Brand page.** `HG` (framing). A DERIVED count summary — **never a brand
+  grade**; product rows; a factual brand-data block; a recalls row that renders **only when a
+  recall exists**. Label-known products count as "not yet assessed", never as passes or
+  failures. Derives from its products (schema `brand.product_list` + `brand.recalls[]`).
+
+### Product page additions (schema + build)
+- [ ] **CHK-Rprod.1 Product-page data additions.** `HG` (schema). Add per the CLAUDE.md
+  content model: `price` + derived `pricePerNight` (retailer + checked-date); dietary/allergen
+  fields (sugar-free, gluten-free, vegan, artificial-sweetener presence; allergen list);
+  structured `excipients[]{name, role, amount?, flag}`; per-remedy dose-context (studied range
+  + typical market range); studies-sourced `howToTake{timing, withFood, timeToKnow}`. The dose
+  diagram and the alternatives section CONSUME these.
+- [ ] **CHK-Rprod.2 Delivery-form controlled vocabulary + release profile.** `HG` (schema).
+  Build `docs/plans/2026-08-12-product-form-schema.md`: `deliveryForm` enum (ingestion maps
+  label wording, flags unmappable `needs-review`, never invents), a SEPARATE `releaseProfile`
+  (immediate / slow-release / not-stated) feeding form-matches-studied. Owner still owes the
+  plan's §7 decisions (four-field split, release source, launch facet, wording).
+- [ ] **CHK-Rprod.3 Additive policy.** Three flag states (no known concern / worth knowing /
+  documented concern), every non-neutral flag citing a paper; the documented-concern list
+  (CHK-Rfill.5); non-sugar sweeteners always ≥ "worth knowing" in daily-use products. **No
+  hazard scores, ever.**
+- [ ] **CHK-Rprod.4 Product "worth buying" verdict rule.** `HG` (policy — no owner yet). The
+  four checks are likely NOT equally weighted (dose-match above label disclosure); the current
+  `met >= 3` threshold is a PLACEHOLDER. Settle the weighting + rule editorially BEFORE Phase 3
+  product content ships. ONE definition in code (`PASSES_THRESHOLD`), all consumers importing it.
+
+### Build rules that ride the Step 9–15 surfaces
+- [ ] **CHK-Rui.1 Chrome-by-scale** (applies to every product list): under ~20 items no
+  filters and no sort (the list is the interface, order declared in prose); above ~20, derived
+  filters only (options computed from page data, WITH counts, zero-result options never
+  rendered), plus genuine-preference filters that appear only when both states exist; **no sort
+  controls anywhere**; checks-passed is the fixed order, brand-alphabetical surviving only as
+  the documented tiebreak.
+- [ ] **CHK-Rui.2 Search tiers** (REDESIGN Step 12 / A6): answer / routes / more-matches;
+  category queries return a category count-row + browse route, never a member sample; product
+  rows only on product-intent queries (brand token, dose, product-name word); no-match +
+  did-you-mean (edit-distance).
+- [ ] **CHK-Rui.3 Validation gates (item 9).** Ship as build-time checks (some land with the
+  CHK-R0 merges): `name`/`displayName` contain no dose/strength pattern; every `deliveryForm`
+  is in-vocabulary; every non-neutral additive flag carries a source id; NO safety string ships
+  without a source id; any user-facing `"[Placeholder"` string FAILS the production build.
+
+> Steps 9–15 themselves (`/go` redirect, wire design system, nested-bar study field, search,
+> dusk mode, citation popover + resolver, freshness/share-images/data-pipeline) are specified
+> in REDESIGN.md and remain the active build order once CHK-R0 clears.
+
 ## Reality baseline (audited 2026-07-06, CHK-0.0)
 
 v2 of this checklist was drafted from the docs alone and assumed a greenfield.

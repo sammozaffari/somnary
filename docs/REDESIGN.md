@@ -8,6 +8,62 @@
 
 **Why this order.** Two things drive it. The project's own operating documents currently contradict the new direction, and Claude Code is instructed to stop and flag conflicts with non-negotiables — so nothing else can proceed until they're fixed. And the signature visual depends on data that may not exist yet, so we find that out *before* designing around it rather than after.
 
+---
+
+> ## v5 reconciliation — design-phase decisions folded in (2026-08-14)
+> The design phase (Steps 4–8) is **finished through the Safety and Brand pages**, and it
+> settled a set of decisions that supersede parts of the runbook below. **`/docs/RULES.md`
+> is now the binding design charter** (repo copy canonical). Where a prompt below still
+> describes the pre-decision state, RULES.md and this banner win. Sections are amended
+> in place where the contradiction is sharp; elsewhere read the prompt through these facts:
+>
+> - **Evidence buckets relabelled** → "Helps most people sleep" / "May help sleep a little" /
+>   "Not properly tested for sleep" / "Tested — doesn't seem to help sleep". Bucket 4 requires
+>   papers that MEASURED a sleep outcome and found no effect. (Amends A4, Step 6, Step 8.)
+> - **Nav is THREE items** — Remedies · Products · Safety — plus ever-present search. Problems
+>   are reached by search, situation cards and cross-links; How-we-grade from every bucket
+>   badge (deep-linked) and the footer. Breadcrumbs on every page (root exempt; mobile
+>   truncates to "‹ Parent"). (Supersedes the five-item nav in Step 5 and A6.)
+> - **The study field is a NESTED BAR; the scatter is retired** (RULES.md). Three counts
+>   (cited ⊇ measured-a-sleep-outcome ⊇ reported-enough-to-verify) + one plain direction
+>   sentence. The Step-2 branch's "scatter demoted to secondary" was an *intermediate* state
+>   later **superseded by charter** when the nested bar landed — not a live conflict. (Amends
+>   Signature Element, Step 11, C2, C3.)
+> - **Brand mark = capital-"S" letterform** (Onest 600); the crescent-moon disc and the
+>   study-field-derived favicon are retired on charter grounds (no moons/stars/sleep costume).
+>   (Amends Step 4 setup + COMPONENTS.)
+> - **Type = Onest, one self-hosted family** (`--font-sans`); no serif, no mono, no signature
+>   device; sentence case everywhere; dates render "14 July 2026", never ISO. (Amends Step 4 TYPE.)
+> - **Product schema gains** structured `strength{amount,unit}` (never in the name),
+>   `composition`, `perIngredientAmountsDisclosed`, a controlled-vocabulary `deliveryForm` +
+>   a separate `releaseProfile`, `price`/`pricePerNight`, dietary/allergen fields, structured
+>   `excipients[]`, per-remedy dose-context, and a studies-sourced `howToTake` protocol. Remedy
+>   gains a required `displayName`. (Amends C2; full model in CLAUDE.md.)
+> - **Two new page types enter the build** — the **Safety page** and the **Brand page** (item 3
+>   below; added to the step table and Step 8).
+> - **Additive policy**: three flag states (no known concern / worth knowing / documented
+>   concern), every non-neutral flag cites a paper, a public documented-concern list, non-sugar
+>   sweeteners always ≥ "worth knowing" (WHO 2023). No hazard scores, ever.
+> - **Interface economy**: chrome scales with catalogue size (under ~20 items no filters/sort;
+>   above, derived filters only, no sort controls, checks-passed the fixed order); search returns
+>   tiered results and never an arbitrary member sample of a category (RULES.md).
+> - **Re-scope**: design is done through Safety + Brand; **Steps 9–15 are the active build
+>   track**, and the **editorial fill is the critical path**, carried as first-class BUILD_CHECKLIST
+>   items (quality-rubric decision, direction/sample-size fill, safety copy sourcing, dose
+>   protocols, documented-concern list) — not an assumption.
+>
+> **PENDING-MERGE map (code decided + built, still on branches; merge is the next session).**
+> Grep `PENDING-MERGE` across the docs to find every doc/code divergence.
+> - `PENDING-MERGE[chk-redesign-2-source-audit]` — source study-field fields (`effectDirection`
+>   3-band · `measuresSleepOutcome` · `effectDataStatus` · `sampleSize` · `studyQuality`),
+>   `SOURCE_QUALITY_RUBRIC.md` (to be **re-scoped** on merge — see Step 11 / the rubric note),
+>   31-remedy pilot fill, `check-source-fields.mjs`.
+> - `PENDING-MERGE[redesign-type-studyfield-product]` — Onest `--font-sans` swap + `check-fonts.mjs`,
+>   nested-bar study-field spec, structured product strength/composition, letterform-"S" mark.
+> - `PENDING-MERGE[feat/remedy-displayname]` — required `displayName` + `check-displaynames.mjs`.
+> - `PENDING-MERGE[redesign-design-system-rules]` — sentence-case / no-serif / self-host /
+>   reject-don't-launder doc rules (subset of the type branch).
+
 | Step | Tool | What it does |
 |---|---|---|
 | 1 | Claude Code | Fix the operating contract |
@@ -17,7 +73,7 @@
 | 5 | Claude Design | Home |
 | 6 | Claude Design | Remedy page |
 | 7 | Claude Design | Product layer |
-| 8 | Claude Design | Browse, how we grade, problem page |
+| 8 | Claude Design | Browse, how we grade, problem, **Safety, Brand** pages (design DONE through here) |
 | 9 | Claude Code | /go redirect |
 | 10 | Claude Code | Wire the design system |
 | 11 | Claude Code | Study-field generator |
@@ -463,31 +519,50 @@ states; a test page renders using named tokens only; contrast verified.
 
 ---
 
-## Step 11 — Study-field generator
-**Claude Code · needs steps 2 and 10**
+## Step 11 — Study-field generator (RESCOPED — nested bar, scatter retired)
+**Claude Code · needs steps 2 and 10 · substantially smaller than the original scatter**
+
+> **Rescoped 2026-08-14 (RULES.md).** The study field is a **nested bar**, not a scatter.
+> This is a much smaller build: no SVG point generation, no coordinates, no mapping rules,
+> no three geometries, no per-study radius/brightness. Chronology, so it's not mistaken for a
+> live conflict: the Step-2 branch (`chk-redesign-2-source-audit`) first *demoted* the scatter
+> to a secondary element rendered only where a remedy had ≥3 positioned points; that
+> intermediate state was **superseded by charter** when the nested bar landed
+> (`redesign-type-studyfield-product`). RULES.md is the final state — scatter retired outright.
 
 ```
-Read /docs/REDESIGN.md Reference C3 and the mapping rules Claude Design
-specified for the study field.
+Read /docs/REDESIGN.md Reference C2 and C3 and RULES.md "Evidence display".
 
-Task: build a build-time SVG generator that renders a remedy's sources as
-the study field, following those mapping rules exactly. Three output
-sizes: page hero, card thumbnail, share image.
+Task: build the nested-bar study field. Render three counts as one nested bar —
+cited ⊇ measured-a-sleep-outcome ⊇ reported-enough-to-verify — plus one plain
+direction sentence (e.g. "of the 3 we could check, all 3 found an improvement"),
+aggregated from effectDirection over the verifiable sleep-outcome sources. The
+same nested bar at three sizes: page hero, card thumbnail, share image.
 
-SVG, not canvas — every point stays in the DOM so it's crawlable,
-screen-readable, hoverable and themeable. Each point needs an accessible
-label and a hover target linking to its study. Include the plain-language
-caption ("each dot is a study — the bigger the dot, the more people it
-included").
+Server-rendered text/DOM (crawlable, screen-readable, themeable in day and dusk).
+Derive counts directly from sources[]: cited = sources.length; measured =
+count(measuresSleepOutcome === true); verifiable = count(measuresSleepOutcome ===
+true && effectDataStatus === 'complete'). Never invent a count. Label the muted
+remainder "didn't measure sleep" — never anything implying weak evidence. Every
+compact caption stands alone and carries both steps ("5 of 14 papers measured
+sleep; 3 we could verify"). A serious-concern safety flag visually outranks the bar.
 
-Handle the honest edge cases: a remedy with two sources, and one with
-none, must both render meaningfully rather than breaking or looking empty
-by accident. Never render a point for a source with missing effect data —
-omit it and note the omission.
+effectDirection is NOT retired with the scatter: the three-band field still feeds
+the direction sentence and stays REQUIRED on complete sleep-outcome sources.
 
-Acceptance: generates from real source data for all 31 remedies; three
-sizes; renders correctly in both themes; sparse and empty cases handled;
-no canvas.
+Handle the honest edge cases: a remedy with two sources, and one with none, must
+both read meaningfully rather than looking empty by accident (n=0 reads "no
+research", not a broken empty visual).
+
+REPORT before the fill pass: with effectSize no longer rendered anywhere and the
+scatter's radius/brightness gone, which Step-2 schema fields are now dead weight to
+DROP rather than editorially fill? (Owner-decided outcome, folded into C2: keep
+measuresSleepOutcome/effectDirection/effectDataStatus/sampleSize/type required;
+effectSize optional; studyQuality re-scoped to bucket-determining papers only — so
+the fill shrinks. Confirm nothing is filled that nothing reads.)
+
+Acceptance: renders from real source data for all 31 remedies; three sizes; both
+themes; sparse and empty cases handled; no scatter, no per-study points, no canvas.
 ```
 
 ---
@@ -653,14 +728,14 @@ Two more things worth taking from EWG, one to avoid. Take the **freshness discip
 
 ### The four evidence buckets
 
-| | Plain-friendly | Slightly more formal |
-|---|---|---|
-| 1 | **Works for most people** | **Strong evidence** |
-| 2 | **Might help a little** | **Some evidence** |
-| 3 | **Nobody really knows yet** | **Not enough evidence** |
-| 4 | **Best avoided** | **Avoid** |
+| | Bucket label (RULES.md, ratified 2026-08-14) |
+|---|---|
+| 1 | **Helps most people sleep** |
+| 2 | **May help sleep a little** |
+| 3 | **Not properly tested for sleep** |
+| 4 | **Tested — doesn't seem to help sleep** |
 
-Each carries one plain sentence beneath it, permanently — never a legend the reader has to go find. Roughly: *studies keep finding it helps* / *a few studies found a small effect, but the research is thin* / *it hasn't been tested properly in people, so nobody can honestly say* / *it's been tested and doesn't work*. (Safety is deliberately NOT in that last sentence — it rides a separate flag; see below.)
+These labels **supersede** the earlier "Works for most people / Might help a little / Nobody really knows yet / Best avoided" wording AND the "Strong evidence / Some evidence / Not enough evidence / Avoid" formal set. Each carries one plain sentence beneath it, permanently — never a legend the reader has to go find. Roughly: *studies keep finding it helps people sleep* / *a few studies found a small effect on sleep, but the research is thin* / *it hasn't been properly tested for sleep in people, so nobody can honestly say* / *studies that measured sleep didn't find it helps*. **Bucket 4 requires papers that MEASURED a sleep outcome and found no effect** — an untested remedy is bucket 3, never bucket 4. (Safety is deliberately NOT in that last sentence — it rides a separate flag; see below.)
 
 The honesty asset survives the rename and gets sharper: bucket one will be nearly empty. A browse page where "works for most people" holds one or two entries and "nobody really knows yet" holds a dozen makes your entire argument without a word of manifesto.
 
@@ -694,9 +769,9 @@ One thing to protect while simplifying: plain must not become vague. "Might help
 
 Search is the product; everything else is browsing for people who don't know what to search.
 
-**One search field, mixed results.** Someone types "magnesium," "Nature's Own," "melatonin gummies 5mg," or "can't stay asleep" and gets grouped results — *remedies · products · brands · problems · safety topics* — each row showing its bucket badge inline.
+**One search field, tiered results (amended 2026-08-14, RULES.md).** Someone types "magnesium," "Nature's Own," "melatonin gummies 5mg," or "can't stay asleep" and gets results in tiers — **answer** (the direct hit, with its bucket badge inline so the answer often arrives before the click) · **routes** (the pages that take them where they're going) · **more matches**. Two hard rules: a **category query returns the category** — a count-row and a browse route — **never an arbitrary sample of its members**; and **product rows appear only on product-intent queries** (a brand token, a dose, or a product-name word), not on a bare ingredient search. No-match and did-you-mean states are edit-distance based.
 
-**Five nav items:** remedies · products · problems · safety · how we grade.
+**Nav is THREE items:** Remedies · Products · Safety — plus ever-present search. **Problems** are reached by search, situation cards and cross-links (not a nav tab); **How-we-grade** from every bucket badge (deep-linked) and the footer. Breadcrumbs on every page (root exempt; mobile truncates to "‹ Parent"). *(This supersedes the earlier five-item nav — remedies · products · problems · safety · how we grade.)*
 
 **Four page types carry the site:** remedy (does the ingredient work), product (does this bottle deliver it), problem (I have this situation), safety. Everything else supports these.
 
