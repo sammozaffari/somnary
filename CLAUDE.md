@@ -305,7 +305,7 @@ evidenceSummary, dosingReality, safety[], interactions[], standardization,
 mechanism, sources[], communityRead (separate store), reviewDate, changeLog[] }.
 
 **remedy.sources[]** (the nested-bar study field + citation popover read from
-these — PENDING-MERGE[chk-redesign-2-source-audit]) = { pmid|doi|registry, title,
+these — schema merged at CHK-R0) = { pmid|doi|registry, title,
 year, `type` (structured study type — rendered as plain words: "trial" / "review of
 several studies" / "observational study"; observational + cohort studies count
 toward the MIDDLE buckets but can never alone reach the top bucket),

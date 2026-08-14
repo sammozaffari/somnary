@@ -54,10 +54,10 @@
 >
 > **PENDING-MERGE map (code decided + built, still on branches; merge is the next session).**
 > Grep `PENDING-MERGE` across the docs to find every doc/code divergence.
-> - `PENDING-MERGE[chk-redesign-2-source-audit]` — source study-field fields (`effectDirection`
+> - ~~chk-redesign-2-source-audit~~ — MERGED (CHK-R0): source study-field fields (`effectDirection`
 >   3-band · `measuresSleepOutcome` · `effectDataStatus` · `sampleSize` · `studyQuality`),
->   `SOURCE_QUALITY_RUBRIC.md` (to be **re-scoped** on merge — see Step 11 / the rubric note),
->   31-remedy pilot fill, `check-source-fields.mjs`.
+>   `SOURCE_QUALITY_RUBRIC.md` (**re-scoped** on merge to bucket-determining papers;
+>   ratification still HUMAN-GATE), 31-remedy pilot fill, `check-source-fields.mjs`.
 > - `PENDING-MERGE[redesign-type-studyfield-product]` — Onest `--font-sans` swap + `check-fonts.mjs`,
 >   nested-bar study-field spec, structured product strength/composition, letterform-"S" mark.
 > - `PENDING-MERGE[feat/remedy-displayname]` — required `displayName` + `check-displaynames.mjs`.
