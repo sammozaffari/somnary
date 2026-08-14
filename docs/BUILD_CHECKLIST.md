@@ -79,7 +79,11 @@ repo grep for the marker string now returns zero.
 - [ ] **CHK-Rfill.2 Direction + sample-size fill** across the sleep-outcome sources (the
   fill SHRANK — no studyQuality except for bucket-determining papers; effectSize only where
   trivially stated). `effectDirection` + `sampleSize` verified against real abstracts,
-  never inferred. Melatonin pilot first (unchanged).
+  never inferred. Melatonin pilot first (unchanged). At the pilot, also **re-derive the
+  RULES.md Process audit-data line from repo `sources[]` counts** (owner, 2026-08-14: the
+  evidence bar's "papers cited" means entries in our `sources[]` corpus and bars render
+  from `sources[]` counts only; the design-phase figures are annotated as historical
+  until re-derived).
 - [ ] **CHK-Rfill.3 Safety copy sourcing.** Every user-facing safety string carries a
   source id (SafetyCallout drift reached three occurrences — see validation gates).
 - [ ] **CHK-Rfill.4 Dose protocols (`howToTake`)** sourced from the studies — timing,

@@ -29,7 +29,7 @@ to match — never the reverse.
 - Open question with an owner needed: the `met >= 3` product-verdict threshold is a PLACEHOLDER rule. One definition, flagged, both consumers importing it. Criteria are likely not equally weighted; do not resolve this in design.
 
 ## Evidence display
-- The research filter is a **nested bar**: full track = papers cited; ~35% segment = measured a sleep outcome; solid = published enough to verify. Hairline gaps at boundaries (structure, not just tone). No scatter, no dots, no per-study positioning — the corpus can't support it (best remedy: 3 verifiable papers; sparse is the normal case).
+- The research filter is a **nested bar**: full track = papers cited — meaning entries in that remedy's `sources[]` corpus, the only basis a bar ever renders from (owner, 14 August 2026); ~35% segment = measured a sleep outcome; solid = published enough to verify. Hairline gaps at boundaries (structure, not just tone). No scatter, no dots, no per-study positioning — the corpus can't support it (best remedy: 3 verifiable papers; sparse is the normal case).
 - Muted remainder is always labelled "didn't measure sleep" — never anything implying weak evidence.
 - Every compact caption stands alone and carries both steps: "5 of 14 papers measured sleep; 3 we could verify."
 - Observational and cohort studies count; they support middle buckets but cannot alone reach the top bucket. Papers list shows plain study types: "trial", "review of several studies", "observational study".
@@ -65,5 +65,5 @@ to match — never the reverse.
 
 ## Process
 - Design ships the shape; claims come from review. Every unknown is a marked placeholder.
-- Real audit data only: melatonin 12/5/3 · saffron ~5 sleep · valerian 11/3/1 · magnesium 9/2/2 · L-theanine 8/2/2 · chamomile 6/2/1 · ashwagandha 7/1/0 · kava 5/0/0 · bacopa 0 · taurine 0.
+- Real audit data only. *(The figures below are HISTORICAL — the design-phase audit, counted on a wider basis than remedy `sources[]` (e.g. kava 5 vs 3 in-repo, melatonin 12 vs 8; the "measured sleep" figures do match). Bars render from `sources[]` counts only; this line is re-derived from repo data at the melatonin pilot, CHK-Rfill.2 — owner, 14 August 2026.)* melatonin 12/5/3 · saffron ~5 sleep · valerian 11/3/1 · magnesium 9/2/2 · L-theanine 8/2/2 · chamomile 6/2/1 · ashwagandha 7/1/0 · kava 5/0/0 · bacopa 0 · taurine 0.
 - When you enforce any rule above in code, restate it in a comment where it's enforced.
