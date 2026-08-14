@@ -40,7 +40,7 @@ const { Content } = await render(entry);
 // Remedies that also have a product-sourcing scorecard (/sources/<slug>).
 const SCORECARD_SLUGS = new Set(['magnesium', 'ashwagandha', 'valerian', 'glycine', 'melatonin']);
 const hasScorecard = SCORECARD_SLUGS.has(entry.id);
-const remedyName = entry.id.charAt(0).toUpperCase() + entry.id.slice(1);
+const remedyName = d.displayName; // authored display name — never derive from the slug
 
 // Real per-remedy scorecard count, derived from the same data /sources renders,
 // so the CTA never overstates how many products we've actually reviewed.
@@ -76,7 +76,7 @@ const jsonLd = remedyJsonLd(d, canonical, site);
   <script type="application/ld+json" is:inline set:html={JSON.stringify(jsonLd)} />
   {/* 1 — hero plate + label row (h1 + grade stamp), full-bleed above the content column
       (DESIGN_SYSTEM §11.3 "labeled plate"; crumb retired — navigation stays in the nav) */}
-  <RemedyHero slug={entry.id} name={d.name} tier={d.tier} workflowState={d.workflowState} />
+  <RemedyHero slug={entry.id} name={d.displayName} tier={d.tier} workflowState={d.workflowState} />
   <main class="remedy">
     <header class="head">
       <p class="dek">{d.oneLineVerdict}</p>

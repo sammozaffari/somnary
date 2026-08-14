@@ -299,7 +299,7 @@ every doc/code divergence.
 **remedy** = { slug, `name` (inline/prose + search form), `displayName`
 (authoritative on-screen name — sentence case except fixed scientific forms like
 5-HTP / L-theanine / vitamin D; required, never a title-cased slug —
-PENDING-MERGE[feat/remedy-displayname]), bucket `[HUMAN-GATE]`, verdict, bestFor[],
+merged at CHK-R0, enforced by verify:displaynames), bucket `[HUMAN-GATE]`, verdict, bestFor[],
 notFor[], biggestRisk, studiedDose, claims[]↔data[] (each row cited),
 evidenceSummary, dosingReality, safety[], interactions[], standardization,
 mechanism, sources[], communityRead (separate store), reviewDate, changeLog[] }.

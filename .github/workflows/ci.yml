@@ -26,6 +26,9 @@ jobs:
       - name: Token linter (no retired tokens / hardcoded colors)
         run: npm run verify:tokens
 
+      - name: Display-name gate (every remedy has an explicit, slug-faithful displayName; no slug title-casing)
+        run: npm run verify:displaynames
+
       - name: Citation resolver (every source has a resolvable id)
         run: npm run verify:cites
 

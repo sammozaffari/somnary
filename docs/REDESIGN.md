@@ -60,7 +60,7 @@
 >   ratification still HUMAN-GATE), 31-remedy pilot fill, `check-source-fields.mjs`.
 > - `PENDING-MERGE[redesign-type-studyfield-product]` — Onest `--font-sans` swap + `check-fonts.mjs`,
 >   nested-bar study-field spec, structured product strength/composition, letterform-"S" mark.
-> - `PENDING-MERGE[feat/remedy-displayname]` — required `displayName` + `check-displaynames.mjs`.
+> - ~~feat/remedy-displayname~~ — MERGED (CHK-R0): required `displayName` + `check-displaynames.mjs`.
 > - ~~redesign-design-system-rules~~ — MERGED (CHK-R0): sentence-case / no-serif / self-host /
 >   reject-don't-launder doc rules (subset of the type branch).
 
