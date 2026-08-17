@@ -1,117 +1,90 @@
 ---
-// Sticky top nav — DESIGN_SYSTEM §3 global chrome. Wordmark left; section links right.
-// The ⌘K search trigger is intentionally deferred to CHK-4.2 (slot left below). Only links
-// to pages that exist today are rendered, to avoid 404s; add more as routes land.
+// Nav (app-shell header) — CHK-B2, transcribed from the bundle chrome (HomePage/RemediesPage
+// headers). RULES.md Interface economy: the nav is EXACTLY three items — Remedies · Products ·
+// Safety — plus ever-present search. Never re-add Problems / How-we-grade / tools to the chrome:
+// Problems are reached by search + situation cards + cross-links; How-we-grade from every bucket
+// badge and the footer. Interface colour is --ink (RULES.md Colour — no accent). Sentence case
+// everywhere (RULES.md Identity). The three routes are greenfield (built at CHK-B5/B6/B10).
 import Wordmark from './Wordmark.astro';
-import SearchPalette from './SearchPalette.astro';
-import SessionNav from './account/SessionNav.astro';
+import SearchField from './SearchField.astro';
 
-// Search-first IA (2026-07-27, Phase 1) plus CMP-01: the two catalogue destinations remain, while
-// Check a label is promoted as the primary defensive-audit task. Other tools stay in the footer.
 const links = [
-  { href: '/tiers', label: 'Remedies' },
-  { href: '/sources', label: 'Which to buy', shortLabel: 'Products' },
-  { href: '/label-checker', label: 'Check a label', shortLabel: 'Label' },
+  { href: '/remedies', label: 'Remedies' },
+  { href: '/products', label: 'Products' },
+  { href: '/safety', label: 'Safety' },
 ];
-const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+const path = Astro.url.pathname.replace(/\/+$/, '') || '/';
 ---
 
-<nav class="nav" aria-label="Primary">
+<header class="nav">
   <Wordmark />
-  <ul class="links">
+  <nav class="links" aria-label="Primary">
     {
       links.map((l) => {
-        const current = path === l.href.replace(/\/$/, '');
+        const current = path === l.href || path.startsWith(l.href + '/');
         return (
-          <li>
-            <a
-              href={l.href}
-              aria-current={current ? 'page' : undefined}
-              aria-label={l.shortLabel ? l.label : undefined}
-              class:list={['link', { current }]}
-            >
-              <span class="long-label">{l.label}</span>
-              {l.shortLabel && <span class="short-label" aria-hidden="true">{l.shortLabel}</span>}
-            </a>
-          </li>
+          <a href={l.href} aria-current={current ? 'page' : undefined}>
+            {l.label}
+          </a>
         );
       })
     }
-    <li><SearchPalette /></li>
-    {/* Signed-in indicator (CHK-6.9c): hidden by default; revealed only for a real session.
-        Adds NO sign-in CTA — no login wall in the global chrome. */}
-    <SessionNav />
-  </ul>
-</nav>
+  </nav>
+  <div class="nav-search">
+    <SearchField size="sm" />
+  </div>
+</header>
 
 <style>
   .nav {
-    position: sticky;
-    top: 0;
-    z-index: 50;
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    justify-content: space-between;
-    gap: var(--sp-5);
-    height: 64px;
-    padding: 0 var(--sp-7);
-    /* §3: translucent paper + blur + hairline rule. */
-    background: color-mix(in srgb, var(--paper) 86%, transparent);
-    backdrop-filter: blur(10px);
-    border-bottom: var(--border-hairline);
+    gap: var(--space-3) var(--space-5);
+    width: 100%;
+    max-width: var(--page-max);
+    margin: 0 auto;
+    padding: var(--space-4) var(--space-5);
   }
+  /* the three links group; margin-left:auto right-aligns links+search on desktop and lets the
+     search wrap to its own full-width row on a phone (390px nav overflow is a known risk) */
   .links {
     display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1);
+    margin-left: auto;
+  }
+  .links a {
+    display: inline-flex;
     align-items: center;
-    gap: var(--sp-5);
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-  /* Resting colour moved from --muted (too light, per owner 2026-07-27) to full --ink; the
-     current/hover state is oxblood --primary so state stays legibly distinct. Tokens only. */
-  .link {
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
-    color: var(--ink);
+    min-height: var(--control-md); /* 44px hit floor (RULES.md a11y) even though visually compact */
+    padding: 0 var(--space-3);
+    border-radius: var(--radius-sm);
     text-decoration: none;
-    padding-bottom: 3px;
-    /* the site's one signature interaction: an oxblood underline that draws in from the left */
-    background: linear-gradient(var(--primary), var(--primary)) 0 100% / 0 1.5px no-repeat;
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-ui);
     transition:
-      color var(--dur-fast) var(--ease-soft),
-      background-size var(--dur-base) var(--ease-settle);
+      color var(--dur-fast) var(--ease-settle),
+      background-color var(--dur-fast) var(--ease-settle);
   }
-  .link:hover {
-    color: var(--primary);
-    background-size: 100% 1.5px;
+  .links a:hover {
+    background: var(--surface-sunken);
+    color: var(--text-body);
+    text-decoration: none;
   }
-  /* current page: a settled full underline (state, not motion) */
-  .link.current {
-    color: var(--primary);
-    background-size: 100% 1.5px;
+  /* current page: ink text, no colour cue needed beyond weight + aria-current */
+  .links a[aria-current='page'] {
+    color: var(--text-body);
+    font-weight: var(--weight-strong);
   }
-  .link:focus-visible {
-    outline: none;
-    box-shadow: var(--focus-ring);
-    border-radius: var(--r-xs);
-  }
-  .short-label {
-    display: none;
-  }
-  @media (max-width: 640px) {
-    .nav {
-      padding: 0 var(--sp-5);
-    }
-    .links {
-      gap: var(--sp-3);
-    }
-    .link[aria-label] .long-label {
-      display: none;
-    }
-    .link[aria-label] .short-label {
-      display: inline;
-    }
+  /* the ever-present search: on desktop it right-aligns after the links; when the header wraps
+     (phone, and at the --page-max cap) it drops to its own row and fills it up to --search-max.
+     The cap lives HERE (the container), not in SearchField, so there is no cross-component
+     max-width conflict. */
+  .nav-search {
+    flex: 1 1 240px;
+    min-width: 0;
+    max-width: var(--search-max);
   }
 </style>

@@ -1,0 +1,82 @@
+---
+// Breadcrumb — transcribed from the bundle chrome (components/chrome/Breadcrumb.jsx).
+// RULES.md Interface economy: breadcrumbs on every page (root exempt); this is the BACK
+// affordance, never a referrer-dependent "back" link. Desktop shows the full trail with the
+// current page unlinked; mobile truncates to the parent only ("‹ Parent"). Real anchors, so
+// it works with JS off. Rendered inside <main> by each page (root/home omits it).
+interface Crumb {
+  label: string;
+  href: string;
+}
+interface Props {
+  trail: Crumb[]; // parents in order, e.g. [{label:'Remedies', href:'/remedies'}]
+  current: string; // the current page, unlinked
+  class?: string;
+}
+const { trail, current, class: className } = Astro.props;
+const parent = trail[trail.length - 1];
+---
+
+<nav class:list={['crumbs', className]} aria-label="Breadcrumb">
+  {/* mobile: parent only */}
+  {parent && (
+    <a class="up" href={parent.href}><span aria-hidden="true">‹</span> {parent.label}</a>
+  )}
+  {/* desktop: full trail, current unlinked */}
+  <p class="trail">
+    {
+      trail.map((t) => (
+        <>
+          <a href={t.href}>{t.label}</a>
+          <span class="sep" aria-hidden="true">›</span>
+        </>
+      ))
+    }
+    <span aria-current="page">{current}</span>
+  </p>
+</nav>
+
+<style>
+  .crumbs {
+    margin: var(--space-5) 0;
+    font-size: var(--text-sm);
+    font-weight: var(--weight-ui);
+    color: var(--text-muted);
+  }
+  .crumbs a {
+    color: var(--text-link);
+    text-decoration: none;
+  }
+  .crumbs a:hover {
+    text-decoration: underline;
+  }
+  .up,
+  .trail {
+    margin: 0;
+    display: none;
+    align-items: center;
+    min-height: var(--control-md); /* hit floor for the back link (RULES.md a11y) */
+  }
+  .trail {
+    flex-wrap: wrap;
+    gap: 0 var(--space-1);
+  }
+  .sep {
+    color: var(--text-faint);
+  }
+  /* mobile-first: only the "‹ Parent" back affordance (RULES.md: mobile truncates to parent).
+     gap restores the space the inline-flex context collapses between the ‹ glyph and the label. */
+  .up {
+    display: inline-flex;
+    gap: var(--space-1);
+  }
+  /* --bp-md 768px = the primary phone→desktop switch (DESIGN_SYSTEM breakpoints) */
+  @media (min-width: 768px) {
+    .up {
+      display: none;
+    }
+    .trail {
+      display: flex;
+    }
+  }
+</style>

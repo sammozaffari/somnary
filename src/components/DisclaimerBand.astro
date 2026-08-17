@@ -1,0 +1,30 @@
+---
+// DisclaimerBand — quiet page-bottom strip stating the site's limits without ceremony.
+// Transcribed from the bundle chrome (components/chrome/SafetyCallout.jsx → DisclaimerBand).
+// CLAUDE.md non-negotiable: "educational, not medical advice" must appear near decisions, not
+// only buried. This carries the MEDICAL limit only; the one quiet INDEPENDENCE line
+// ("Nobody pays us…") lives once in the footer (RULES.md Language: the independence claim is
+// ONE line, never repeated) — so the bundle default's trailing independence clause is dropped
+// here to avoid duplicating it.
+---
+
+<div class="band" role="note">
+  <slot>
+    Somnary is a reference, not medical advice. It can't know your health history — a pharmacist
+    or doctor can.
+  </slot>
+</div>
+
+<style>
+  .band {
+    background: var(--surface-sunken);
+    border-top: var(--border-w) solid var(--border-hairline);
+    padding: var(--space-4) var(--space-5);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    line-height: var(--leading-body);
+    color: var(--text-muted);
+    text-align: center;
+    text-wrap: pretty;
+  }
+</style>
