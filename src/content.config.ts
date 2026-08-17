@@ -354,4 +354,173 @@ const remedies = defineCollection({
     }),
 });
 
-export const collections = { remedies };
+/* ============================================================================
+   PRODUCT + BRAND model (CHK-B3) — per CLAUDE.md content model +
+   docs/plans/2026-08-12-product-form-schema.md.
+
+   THREE SEPARATE SIGNALS (Reference A4 / RULES.md): the ingredient evidence bucket
+   (on the remedy, above) and the product score's four checks (here) and the safety flag
+   are NEVER merged into one number — there is deliberately NO combined field anywhere in
+   this schema, rendering, or sorting.
+   ============================================================================ */
+
+// deliveryForm — controlled vocabulary (plan §2a). Ingestion maps label wording into this
+// enum; an unmappable label is `needs-review`, NEVER an invented or silent value (plan §3).
+const deliveryForm = z.enum([
+  'tablet', 'capsule', 'softgel', 'gummy', 'melt-lozenge',
+  'liquid-drops', 'spray', 'tea', 'powder', 'patch',
+]);
+// releaseProfile is SEPARATE from deliveryForm (plan §2b). 'not-stated' is load-bearing: most
+// labels never state release, and forcing immediate-vs-slow would be inventing. form-matches-
+// studied treats 'not-stated' as unverified, never an auto-pass (plan §5).
+const releaseProfile = z.enum(['immediate', 'slow-release', 'not-stated']);
+const composition = z.enum(['single-ingredient', 'blend']);
+// assessment_state — the interface renders honestly against coverage rather than implying
+// uniform assessment (CLAUDE.md product model). Label-known-but-unassessed is NOT a pass.
+const assessmentState = z.enum([
+  'fully assessed',
+  'label known, not yet assessed',
+  'not in database',
+]);
+// Additive policy: THREE flag states only, NO hazard spectrum / invented gradient (RULES.md
+// Products). 'no-known-concern' is neutral, NOT green. Every non-neutral flag CITES a paper
+// (enforced in superRefine below) — no source id → the flag cannot ship.
+const additiveFlag = z.enum(['no-known-concern', 'worth-knowing', 'documented-concern']);
+
+const money = z.object({
+  amount: z.number().nonnegative(),
+  currency: z.string().min(1),
+  retailer: z.string().min(1),
+  checkedDate: isoDate,
+});
+
+// name/strength split (validation gate — item-9): the name string must NOT carry a dose or
+// strength; strength is structured {amount, unit}. The rule drifted twice in design, so it is a
+// build-time failure here. `%` excluded from the pattern (it appears in extract standardisation).
+const DOSE_IN_NAME = /\b\d+(?:\.\d+)?\s?(?:mg|mcg|µg|iu|ml)\b/i;
+
+const productIngredient = z.object({
+  remedy_id: z.string().min(1),
+  amount: z.number().positive().nullable().default(null),
+  unit: z.string().nullable().default(null),
+  form: z.string().nullable().default(null), // chemical form / salt at the ingredient level
+});
+
+const excipient = z.object({
+  name: z.string().min(1),
+  role: z.string().min(1),
+  amount: z.string().nullable().default(null),
+  flag: additiveFlag,
+  source: z.string().nullable().default(null), // resolvable id — REQUIRED when flag is non-neutral
+});
+
+const retailLink = z.object({
+  retailer: z.string().min(1),
+  url: z.string().url(),
+  price: z.number().nonnegative().nullable().default(null),
+  last_checked: isoDate.nullable().default(null),
+});
+
+const products = defineCollection({
+  loader: glob({ pattern: '**/*.json', base: './src/content/products' }),
+  schema: z
+    .object({
+      id: z.string().min(1),
+      brand: z.string().min(1),
+      // sentence/label case as printed; NO dose/strength (strength is structured — see below)
+      name: z.string().min(1).refine((v) => !DOSE_IN_NAME.test(v), {
+        message: 'product name must not contain a dose/strength — strength is the structured { amount, unit } field',
+      }),
+      strength: z.object({ amount: z.number().positive(), unit: z.string().min(1) }).nullable().default(null),
+      composition,
+      perIngredientAmountsDisclosed: z.boolean().nullable().default(null), // blends only; what the proprietary-blend penalty reads
+      // deliveryForm null = needs-review (never invented); formStatus is coupled to it below.
+      deliveryForm: deliveryForm.nullable().default(null),
+      releaseProfile: releaseProfile.default('not-stated'),
+      rawFormLabel: z.string().default(''), // original label wording, kept verbatim (plan §3)
+      chemicalForm: z.string().nullable().default(null), // salt / standardised-extract, disentangled from deliveryForm (plan §2c)
+      formStatus: z.enum(['mapped', 'needs-review']).default('needs-review'),
+      ingredients: z.array(productIngredient).default([]),
+      // --- the four product-score checks (an assessment about the BOTTLE, never a therapeutic
+      // recommendation). null = not yet assessed — HONEST, never guessed (report, don't guess). ---
+      dose_match: z.boolean().nullable().default(null),
+      third_party_tested: z.object({ organisation: z.string().min(1), verified_date: isoDate }).nullable().default(null),
+      label_discloses_all: z.boolean().nullable().default(null),
+      proprietary_blend: z.boolean().nullable().default(null),
+      form_matches_studied: z.boolean().nullable().default(null),
+      price: money.nullable().default(null),
+      pricePerNight: money.nullable().default(null), // derived
+      dietary: z
+        .object({
+          sugarFree: z.boolean().nullable().default(null),
+          glutenFree: z.boolean().nullable().default(null),
+          vegan: z.boolean().nullable().default(null),
+          artificialSweetenerPresent: z.boolean().nullable().default(null),
+        })
+        .nullable()
+        .default(null),
+      allergens: z.array(z.string()).default([]),
+      excipients: z.array(excipient).default([]),
+      howToTake: z.object({ timing: z.string(), withFood: z.string(), timeToKnow: z.string() }).nullable().default(null), // sourced from the STUDIES, never invented
+      retail_links: z.array(retailLink).default([]), // where-to-buy row is identical regardless of score, never commercially ordered (routed via /go at B4)
+      data_source: z.string().min(1),
+      last_checked: isoDate.nullable().default(null),
+      assessment_state: assessmentState,
+    })
+    .superRefine((p, ctx) => {
+      // RULES.md Products: a non-neutral additive flag CANNOT ship without a cited paper.
+      p.excipients.forEach((e, i) => {
+        if (e.flag !== 'no-known-concern' && !e.source) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['excipients', i, 'source'],
+            message: `excipient "${e.name}" carries a non-neutral flag (${e.flag}) but no source id — a worth-knowing/documented-concern flag must cite its paper`,
+          });
+        }
+      });
+      // 'fully assessed' must mean the visible four checks are actually resolved (honesty of the
+      // state). third_party_tested may legitimately be null ("not third-party tested" is an answer),
+      // so it is not required; the three boolean checks are.
+      if (p.assessment_state === 'fully assessed') {
+        const missing = (
+          [
+            ['dose_match', p.dose_match],
+            ['label_discloses_all', p.label_discloses_all],
+            ['form_matches_studied', p.form_matches_studied],
+          ] as const
+        )
+          .filter(([, v]) => v === null || v === undefined)
+          .map(([k]) => k);
+        if (missing.length) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['assessment_state'],
+            message: `assessment_state 'fully assessed' but these checks are unresolved: ${missing.join(', ')}`,
+          });
+        }
+      }
+      // honesty coupling: a resolved deliveryForm ⇒ formStatus 'mapped'; null ⇒ 'needs-review'.
+      if (p.deliveryForm && p.formStatus !== 'mapped') {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['formStatus'], message: 'deliveryForm is set but formStatus is not "mapped"' });
+      }
+      if (!p.deliveryForm && p.formStatus !== 'needs-review') {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['formStatus'], message: 'deliveryForm is null but formStatus is not "needs-review"' });
+      }
+    }),
+});
+
+const brands = defineCollection({
+  loader: glob({ pattern: '**/*.json', base: './src/content/brands' }),
+  // A brand page derives a COUNT summary from its products, NEVER a brand grade (CLAUDE.md).
+  // recalls[] renders a row ONLY when one exists.
+  schema: z.object({
+    name: z.string().min(1),
+    slug: z.string().min(1),
+    product_list: z.array(z.string()).default([]), // product ids
+    recalls: z
+      .array(z.object({ date: isoDate, description: z.string().min(1), source: z.string().nullable().default(null) }))
+      .default([]),
+  }),
+});
+
+export const collections = { remedies, products, brands };

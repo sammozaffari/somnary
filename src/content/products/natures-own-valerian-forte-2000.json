@@ -1,0 +1,49 @@
+{
+  "id": "natures-own-valerian-forte-2000",
+  "brand": "Nature's Own",
+  "name": "Valerian Forte 2000",
+  "strength": null,
+  "composition": "single-ingredient",
+  "perIngredientAmountsDisclosed": null,
+  "deliveryForm": null,
+  "releaseProfile": "not-stated",
+  "rawFormLabel": "single-herb",
+  "chemicalForm": "single-herb",
+  "formStatus": "needs-review",
+  "ingredients": [
+    {
+      "remedy_id": "valerian",
+      "amount": null,
+      "unit": null,
+      "form": "single-herb"
+    }
+  ],
+  "dose_match": null,
+  "third_party_tested": null,
+  "label_discloses_all": null,
+  "proprietary_blend": null,
+  "form_matches_studied": null,
+  "price": null,
+  "pricePerNight": null,
+  "dietary": null,
+  "allergens": [],
+  "excipients": [],
+  "howToTake": null,
+  "retail_links": [
+    {
+      "retailer": "amazon",
+      "url": "https://www.amazon.com.au/dp/B00C1W3TLW",
+      "price": null,
+      "last_checked": null
+    },
+    {
+      "retailer": "chemistWarehouse",
+      "url": "https://www.chemistwarehouse.com.au/buy/118544",
+      "price": null,
+      "last_checked": "2026-07-31"
+    }
+  ],
+  "data_source": "source-scorecard-migration-2026-08-17",
+  "last_checked": null,
+  "assessment_state": "label known, not yet assessed"
+}

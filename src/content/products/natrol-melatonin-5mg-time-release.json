@@ -1,0 +1,46 @@
+{
+  "id": "natrol-melatonin-5mg-time-release",
+  "brand": "Natrol",
+  "name": "Melatonin Time Release",
+  "strength": {
+    "amount": 5,
+    "unit": "mg"
+  },
+  "composition": "blend",
+  "perIngredientAmountsDisclosed": null,
+  "deliveryForm": "tablet",
+  "releaseProfile": "slow-release",
+  "rawFormLabel": "tablet (extended-release)",
+  "chemicalForm": null,
+  "formStatus": "mapped",
+  "ingredients": [
+    {
+      "remedy_id": "melatonin",
+      "amount": 5,
+      "unit": "mg",
+      "form": null
+    }
+  ],
+  "dose_match": null,
+  "third_party_tested": null,
+  "label_discloses_all": null,
+  "proprietary_blend": null,
+  "form_matches_studied": null,
+  "price": null,
+  "pricePerNight": null,
+  "dietary": null,
+  "allergens": [],
+  "excipients": [],
+  "howToTake": null,
+  "retail_links": [
+    {
+      "retailer": "iherb",
+      "url": "https://au.iherb.com/pr/natrol-melatonin-time-release-5-mg-100-tablets/8738",
+      "price": null,
+      "last_checked": null
+    }
+  ],
+  "data_source": "source-scorecard-migration-2026-08-17",
+  "last_checked": null,
+  "assessment_state": "label known, not yet assessed"
+}

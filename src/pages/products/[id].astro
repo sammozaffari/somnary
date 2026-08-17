@@ -1,0 +1,160 @@
+---
+// Sample product page (CHK-B3) — proves the product content type renders server-side from data.
+// This is NOT the full product page (decision narrative, paired verdict, dose diagram, where-to-buy
+// via /go) — that is CHK-B7. It renders the migrated data HONESTLY against assessment_state:
+// most products are "label known, not yet assessed", so the four product-score checks show as
+// "not yet assessed", never a fabricated score. The ingredient evidence bucket is NOT shown here —
+// it lives on the remedy page; the bucket and the product score are two SEPARATE axes (RULES.md),
+// never merged into one number.
+import Base from '../../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const products = await getCollection('products');
+  return products.map((p) => ({ params: { id: p.id }, props: { product: p.data } }));
+}
+
+const { product } = Astro.props;
+
+// deliveryForm plain labels (plan §2a — plain language, no jargon)
+const FORM_LABEL: Record<string, string> = {
+  tablet: 'Tablet', capsule: 'Capsule', softgel: 'Softgel', gummy: 'Gummy',
+  'melt-lozenge': 'Dissolvable (melt / lozenge)', 'liquid-drops': 'Liquid or drops',
+  spray: 'Spray', tea: 'Tea', powder: 'Powder', patch: 'Patch',
+};
+const RELEASE_LABEL: Record<string, string> = {
+  immediate: 'Immediate release', 'slow-release': 'Slow release', 'not-stated': 'Release not stated',
+};
+const strength = product.strength ? `${product.strength.amount} ${product.strength.unit}` : null;
+const notAssessed = product.assessment_state !== 'fully assessed';
+// the four product-score checks, rendered honestly (null = not yet assessed)
+const checks = [
+  { label: 'Dose matches what studies used', value: product.dose_match },
+  { label: 'Independently third-party tested', value: product.third_party_tested ? true : product.dose_match === null ? null : false },
+  { label: 'Label discloses everything', value: product.label_discloses_all },
+  { label: 'The form that was actually studied', value: product.form_matches_studied },
+];
+const checkWord = (v: boolean | null) => (v === null ? 'Not yet assessed' : v ? 'Yes' : 'No');
+---
+
+<Base
+  title={`${product.brand} ${product.name} — Somnary`}
+  description={`${product.brand} ${product.name}${strength ? `, ${strength}` : ''} — what's on the label, and how we assess the bottle.`}
+  breadcrumbs={[{ label: 'Products', href: '/products' }]}
+  breadcrumbCurrent={`${product.brand} ${product.name}`}
+>
+  <p class="brand">{product.brand}</p>
+  <h1>{product.name}{strength && <span class="strength"> · {strength}</span>}</h1>
+
+  <p class="form">
+    {product.deliveryForm ? FORM_LABEL[product.deliveryForm] : 'Form not recorded from the label'}
+    {' · '}{RELEASE_LABEL[product.releaseProfile]}
+  </p>
+
+  {notAssessed && (
+    <p class="state" role="note">
+      We know what's on this label, but we haven't assessed the bottle against the studies yet.
+      The checks below show what we still need to confirm.
+    </p>
+  )}
+
+  <h2>Does this bottle deliver what was studied?</h2>
+  <ul class="checks">
+    {checks.map((c) => (
+      <li>
+        <span class="check-label">{c.label}</span>
+        <span class:list={['check-val', c.value === null && 'pending']}>{checkWord(c.value)}</span>
+      </li>
+    ))}
+  </ul>
+
+  <h2>What's in it</h2>
+  <ul class="ingredients">
+    {product.ingredients.map((i) => (
+      <li>
+        <a href={`/remedies/${i.remedy_id}`}>{i.remedy_id}</a>
+        {i.amount && <span> — {i.amount} {i.unit}</span>}
+        {i.form && <span class="salt"> ({i.form})</span>}
+      </li>
+    ))}
+  </ul>
+
+  {product.retail_links.length > 0 && (
+    <>
+      <h2>Where to buy</h2>
+      <ul class="buy">
+        {product.retail_links.map((l) => (
+          <li><a href={l.url} rel="nofollow">{l.retailer}</a></li>
+        ))}
+      </ul>
+    </>
+  )}
+</Base>
+
+<style>
+  .brand {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-strong);
+  }
+  h1 {
+    margin: var(--space-1) 0 var(--space-2);
+    font-size: var(--display-md);
+    font-weight: var(--weight-title);
+    letter-spacing: var(--tracking-display);
+    line-height: var(--leading-tight);
+  }
+  .strength {
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .form {
+    margin: 0 0 var(--space-5);
+    color: var(--text-muted);
+  }
+  .state {
+    background: var(--surface-sunken);
+    border-radius: var(--radius-sm);
+    padding: var(--space-4) var(--space-5);
+    margin: 0 0 var(--space-6);
+    color: var(--text-body);
+    max-width: var(--measure);
+  }
+  h2 {
+    font-size: var(--text-xl);
+    font-weight: var(--weight-heading);
+    margin: var(--space-7) 0 var(--space-3);
+  }
+  .checks {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-width: var(--measure);
+  }
+  .checks li {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding: var(--space-3) 0;
+    border-bottom: var(--border-w) solid var(--border-hairline);
+  }
+  .check-val {
+    font-weight: var(--weight-strong);
+    white-space: nowrap;
+  }
+  /* pending = the honest "not yet assessed" state — muted, never a pass colour (RULES.md) */
+  .check-val.pending {
+    color: var(--text-faint);
+    font-weight: var(--weight-ui);
+  }
+  .ingredients,
+  .buy {
+    padding-left: var(--space-5);
+    margin: 0;
+    line-height: var(--leading-body);
+  }
+  .salt {
+    color: var(--text-faint);
+  }
+</style>

@@ -1,0 +1,49 @@
+{
+  "id": "blackmores-sleep-sound-magnesium",
+  "brand": "Blackmores",
+  "name": "Sleep Sound Magnesium Powder",
+  "strength": null,
+  "composition": "blend",
+  "perIngredientAmountsDisclosed": null,
+  "deliveryForm": null,
+  "releaseProfile": "not-stated",
+  "rawFormLabel": "combo (+ magnesium, hops, calcium)",
+  "chemicalForm": "combo (+ magnesium, hops, calcium)",
+  "formStatus": "needs-review",
+  "ingredients": [
+    {
+      "remedy_id": "glycine",
+      "amount": null,
+      "unit": null,
+      "form": "combo (+ magnesium, hops, calcium)"
+    },
+    {
+      "remedy_id": "magnesium",
+      "amount": null,
+      "unit": null,
+      "form": "citrate + glycinate (+ glycine, hops)"
+    }
+  ],
+  "dose_match": null,
+  "third_party_tested": null,
+  "label_discloses_all": null,
+  "proprietary_blend": null,
+  "form_matches_studied": null,
+  "price": null,
+  "pricePerNight": null,
+  "dietary": null,
+  "allergens": [],
+  "excipients": [],
+  "howToTake": null,
+  "retail_links": [
+    {
+      "retailer": "chemistWarehouse",
+      "url": "https://www.chemistwarehouse.com.au/buy/105734",
+      "price": null,
+      "last_checked": "2026-07-31"
+    }
+  ],
+  "data_source": "source-scorecard-migration-2026-08-17",
+  "last_checked": null,
+  "assessment_state": "label known, not yet assessed"
+}

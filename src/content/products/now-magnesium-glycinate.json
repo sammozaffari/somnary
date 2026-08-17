@@ -1,0 +1,49 @@
+{
+  "id": "now-magnesium-glycinate",
+  "brand": "NOW Foods",
+  "name": "Magnesium Glycinate",
+  "strength": null,
+  "composition": "single-ingredient",
+  "perIngredientAmountsDisclosed": null,
+  "deliveryForm": null,
+  "releaseProfile": "not-stated",
+  "rawFormLabel": "magnesium bisglycinate (Albion), single",
+  "chemicalForm": "magnesium bisglycinate (Albion), single",
+  "formStatus": "needs-review",
+  "ingredients": [
+    {
+      "remedy_id": "magnesium",
+      "amount": null,
+      "unit": null,
+      "form": "magnesium bisglycinate (Albion), single"
+    }
+  ],
+  "dose_match": null,
+  "third_party_tested": null,
+  "label_discloses_all": null,
+  "proprietary_blend": null,
+  "form_matches_studied": null,
+  "price": null,
+  "pricePerNight": null,
+  "dietary": null,
+  "allergens": [],
+  "excipients": [],
+  "howToTake": null,
+  "retail_links": [
+    {
+      "retailer": "amazon",
+      "url": "https://www.amazon.com.au/dp/B07NWMVMT1",
+      "price": null,
+      "last_checked": null
+    },
+    {
+      "retailer": "iherb",
+      "url": "https://au.iherb.com/pr/now-foods-magnesium-glycinate-180-tablets-100-mg-per-tablet/88819",
+      "price": null,
+      "last_checked": null
+    }
+  ],
+  "data_source": "source-scorecard-migration-2026-08-17",
+  "last_checked": null,
+  "assessment_state": "label known, not yet assessed"
+}

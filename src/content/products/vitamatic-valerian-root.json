@@ -1,0 +1,49 @@
+{
+  "id": "vitamatic-valerian-root",
+  "brand": "Vitamatic",
+  "name": "Valerian Root (High Potency)",
+  "strength": null,
+  "composition": "single-ingredient",
+  "perIngredientAmountsDisclosed": null,
+  "deliveryForm": null,
+  "releaseProfile": "not-stated",
+  "rawFormLabel": "single-herb (20:1 extract)",
+  "chemicalForm": "single-herb (20:1 extract)",
+  "formStatus": "needs-review",
+  "ingredients": [
+    {
+      "remedy_id": "valerian",
+      "amount": null,
+      "unit": null,
+      "form": "single-herb (20:1 extract)"
+    }
+  ],
+  "dose_match": null,
+  "third_party_tested": null,
+  "label_discloses_all": null,
+  "proprietary_blend": null,
+  "form_matches_studied": null,
+  "price": null,
+  "pricePerNight": null,
+  "dietary": null,
+  "allergens": [],
+  "excipients": [],
+  "howToTake": null,
+  "retail_links": [
+    {
+      "retailer": "amazon",
+      "url": "https://www.amazon.com.au/dp/B08RXNSDYF",
+      "price": null,
+      "last_checked": null
+    },
+    {
+      "retailer": "iherb",
+      "url": "https://au.iherb.com/pr/vitamatic-valerian-root-high-potency-5-000-mg-240-vegetable-capsules/126559",
+      "price": null,
+      "last_checked": null
+    }
+  ],
+  "data_source": "source-scorecard-migration-2026-08-17",
+  "last_checked": null,
+  "assessment_state": "label known, not yet assessed"
+}

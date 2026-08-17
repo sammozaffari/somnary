@@ -1,0 +1,46 @@
+{
+  "id": "life-extension-melatonin-300mcg",
+  "brand": "Life Extension",
+  "name": "Melatonin",
+  "strength": {
+    "amount": 0.3,
+    "unit": "mg"
+  },
+  "composition": "single-ingredient",
+  "perIngredientAmountsDisclosed": null,
+  "deliveryForm": "capsule",
+  "releaseProfile": "not-stated",
+  "rawFormLabel": "capsule",
+  "chemicalForm": null,
+  "formStatus": "mapped",
+  "ingredients": [
+    {
+      "remedy_id": "melatonin",
+      "amount": 0.3,
+      "unit": "mg",
+      "form": null
+    }
+  ],
+  "dose_match": null,
+  "third_party_tested": null,
+  "label_discloses_all": null,
+  "proprietary_blend": null,
+  "form_matches_studied": null,
+  "price": null,
+  "pricePerNight": null,
+  "dietary": null,
+  "allergens": [],
+  "excipients": [],
+  "howToTake": null,
+  "retail_links": [
+    {
+      "retailer": "iherb",
+      "url": "https://au.iherb.com/pr/life-extension-melatonin-300-mcg-100-vegetarian-capsules/47809",
+      "price": null,
+      "last_checked": null
+    }
+  ],
+  "data_source": "source-scorecard-migration-2026-08-17",
+  "last_checked": null,
+  "assessment_state": "label known, not yet assessed"
+}
