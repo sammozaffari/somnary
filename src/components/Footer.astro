@@ -1,218 +1,58 @@
 ---
-// Global site footer — DESIGN_SYSTEM §3 chrome. Carries the compact site-wide medical
-// disclaimer (CHK-1.3 component), the independence line, and links to all four legal pages.
-import Disclaimer from './Disclaimer.astro';
-
-const legal = [
-  { href: '/methodology', label: 'Methodology' },
-  { href: '/changelog', label: 'Evidence log' },
-  { href: '/disclaimer', label: 'Disclaimer' },
-  { href: '/terms', label: 'Terms' },
-  { href: '/privacy', label: 'Privacy' },
-  { href: '/disclosure', label: 'Disclosure' },
-];
-// Educational context pages — not graded remedies. Kept in their own labelled group so they're
-// site-wide discoverable (crawlable, no orphans) and never read as part of the graded catalog.
-const context = [
-  { href: '/when-to-see-a-doctor', label: 'When to see a doctor' },
-  { href: '/medications-and-sleep-aids', label: 'Medications & sleep aids' },
-  { href: '/older-adults', label: 'Older adults' },
-  { href: '/otc-antihistamines', label: 'OTC antihistamine sleep aids' },
-  { href: '/jet-lag-shift-work', label: 'Jet lag & shift work' },
-  { href: '/anxiety-and-sleep', label: 'Anxiety & sleep' },
-  { href: '/melatonin-children', label: 'Melatonin in children' },
-  { href: '/melatonin-dose-timing', label: 'Melatonin dose & timing' },
-  { href: '/melatonin-gummies', label: 'Melatonin gummies' },
-  { href: '/melatonin-long-term', label: 'Melatonin, long-term' },
-  { href: '/ramelteon', label: 'Ramelteon' },
-  { href: '/sleep-blends', label: 'Sleep blends' },
-];
-// Participate — reader-facing ways to contribute (CHK-4.2). Not commerce; no paywall.
-const participate = [
-  { href: '/dispatch', label: 'The dispatch' },
-  { href: '/submit-a-claim', label: 'Submit a claim' },
-];
-// Search-first IA (2026-07-27, Phase 1) — items demoted from the primary navbar keep a
-// site-wide home here so nothing is orphaned (crawlability non-negotiable). "Get started" carries
-// the orientation + safety-boundary pages; "Tools" carries the interactive surfaces. Lens and the
-// Lens sits here provisionally until Phase 2 folds it into search. The label checker moved into the
-// primary navigation with the CMP-01 defensive-audit fix.
-const guides = [
-  { href: '/start-here', label: 'Start here' },
-  { href: '/sleep-habits', label: 'Sleep habits' },
-  { href: '/safety', label: 'Safety' },
-];
-const tools = [
-  { href: '/compare', label: 'Compare' },
-  { href: '/lens', label: 'Lens' },
-];
+// Footer (app-shell) — CHK-B2, transcribed from the bundle chrome (HomePage footer +
+// DisclaimerBand). RULES.md Language: the independence claim is ONE quiet line — exactly this
+// sentence, never the self-congratulating stat row or any banned phrase ("reader-funded",
+// "zero brand money", "evidence-graded" …). RULES.md Interface economy: How-we-grade is NOT in
+// the nav — it is reached from every bucket badge and HERE. The "last updated {date}" tag is a
+// CHK-B17 freshness concern (real date, rendered "14 July 2026") — omitted here rather than
+// invent a date (RULES.md: never invent a number). Interface colour is --ink (no accent).
+import DisclaimerBand from './DisclaimerBand.astro';
 ---
 
 <footer class="footer">
-  <div class="row">
-    <span class="brand">Somnary</span>
-    <p class="independence">Zero affiliate links · zero brand money · reader-funded.</p>
+  <div class="inner">
+    <p class="independence">
+      Nobody pays us to say any of this. Every claim links to the study it came from.
+    </p>
+    <div class="meta">
+      <a href="/how-we-grade">How we grade</a>
+    </div>
   </div>
-  <div class="disclaimer">
-    <Disclaimer variant="compact" />
-  </div>
-  <nav class="reflinks" aria-label="Get started">
-    <span class="group-label">Get started</span>
-    <ul class="linkrow">
-      {guides.map((l) => (
-        <li>
-          <a href={l.href}>{l.label}</a>
-        </li>
-      ))}
-    </ul>
-  </nav>
-  <nav class="reflinks" aria-label="Tools">
-    <span class="group-label">Tools</span>
-    <ul class="linkrow">
-      {tools.map((l) => (
-        <li>
-          <a href={l.href}>{l.label}</a>
-        </li>
-      ))}
-    </ul>
-  </nav>
-  <nav class="reflinks" aria-label="Context">
-    <span class="group-label">Context · not graded</span>
-    <ul class="linkrow">
-      {context.map((l) => (
-        <li>
-          <a href={l.href}>{l.label}</a>
-        </li>
-      ))}
-    </ul>
-  </nav>
-  <nav class="reflinks" aria-label="Participate">
-    <span class="group-label">Participate</span>
-    <ul class="linkrow">
-      {participate.map((l) => (
-        <li>
-          <a href={l.href}>{l.label}</a>
-        </li>
-      ))}
-    </ul>
-  </nav>
-  <ul class="legal" aria-label="Legal">
-    {legal.map((l) => (
-      <li>
-        <a href={l.href}>{l.label}</a>
-      </li>
-    ))}
-  </ul>
+  <DisclaimerBand />
 </footer>
 
 <style>
-  /* the one dark slab on the page — closes the cream with a carbon ground for rhythm */
   .footer {
-    margin-top: var(--sp-10);
-    padding: var(--sp-8) var(--sp-7) var(--sp-8);
-    background: var(--carbon);
-    color: var(--on-carbon-muted);
+    border-top: var(--border-w) solid var(--border-hairline);
   }
-  .row {
+  .inner {
+    max-width: var(--page-max);
+    margin: 0 auto;
+    padding: var(--space-7) var(--space-5);
     display: flex;
-    align-items: baseline;
-    gap: var(--sp-5);
-    flex-wrap: wrap;
-  }
-  .brand {
-    font-family: var(--font-display);
-    font-weight: 700;
-    font-size: var(--text-lg);
-    letter-spacing: var(--tracking-tight);
-    color: var(--on-carbon);
+    flex-direction: column;
+    gap: var(--space-4);
   }
   .independence {
     margin: 0;
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
-    color: var(--on-carbon-muted);
+    font-size: var(--text-base);
+    line-height: var(--leading-body);
+    color: var(--text-body);
+    max-width: var(--measure);
   }
-  .disclaimer {
-    margin: var(--sp-4) 0 0;
-    max-width: 70ch;
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-5);
+    font-size: var(--text-sm);
   }
-  /* the compact disclaimer defaults to dark ink (it's also used on the light /tiers page);
-     recolor it for the carbon ground here only, keeping it fully legible per the disclaimer-
-     prominence rule */
-  .disclaimer :global(.disc-compact) {
-    color: var(--on-carbon-muted);
+  .meta a {
+    color: var(--text-muted);
+    font-weight: var(--weight-ui);
+    text-decoration: none;
   }
-  .disclaimer :global(.disc-compact a) {
-    color: var(--on-carbon);
+  .meta a:hover {
+    color: var(--text-body);
     text-decoration: underline;
-    text-underline-offset: 2px;
-  }
-  .legal {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--sp-4);
-    margin: var(--sp-5) 0 0;
-    padding: 0;
-    list-style: none;
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
-  }
-  .legal a {
-    color: var(--on-carbon-muted);
-    text-decoration: none;
-    padding-bottom: 2px;
-    /* same signature underline-draw as the nav — paper-white here so it reads on carbon */
-    background: linear-gradient(var(--on-carbon), var(--on-carbon)) 0 100% / 0 1px no-repeat;
-    transition:
-      color var(--dur-fast) var(--ease-soft),
-      background-size var(--dur-base) var(--ease-settle);
-  }
-  .legal a:hover {
-    color: var(--on-carbon);
-    background-size: 100% 1px;
-  }
-  .reflinks {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: var(--sp-4);
-    margin-top: var(--sp-6);
-  }
-  .group-label {
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
-    color: var(--on-carbon);
-  }
-  .linkrow {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--sp-4);
-    margin: 0;
-    padding: 0;
-    list-style: none;
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
-  }
-  .linkrow a {
-    color: var(--on-carbon-muted);
-    text-decoration: none;
-    padding-bottom: 2px;
-    background: linear-gradient(var(--on-carbon), var(--on-carbon)) 0 100% / 0 1px no-repeat;
-    transition:
-      color var(--dur-fast) var(--ease-soft),
-      background-size var(--dur-base) var(--ease-settle);
-  }
-  .linkrow a:hover {
-    color: var(--on-carbon);
-    background-size: 100% 1px;
-  }
-  @media (max-width: 640px) {
-    .footer {
-      padding: var(--sp-6) var(--sp-5) var(--sp-7);
-    }
   }
 </style>

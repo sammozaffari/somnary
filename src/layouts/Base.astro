@@ -8,15 +8,37 @@
 import '../styles/global.css';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
 
+interface Crumb {
+  label: string;
+  href: string;
+}
 interface Props {
   title: string;
   description?: string;
   canonical?: string; // per-page canonical URL (SEO furniture — first used by remedy pages, CHK-2.1)
   ogType?: string; // open-graph type: 'website' (default) or 'article' for remedy pages (CHK-2.2)
   ogImage?: string; // absolute URL to a per-page OG image (remedy pages generate one, CHK-2.2)
+  // Breadcrumbs are the back affordance (RULES.md) — pass the parent trail + current label and
+  // Base renders them at the top of <main>. Root/home omits them (root exempt). Pages may also
+  // render <Breadcrumb> themselves; this prop is the shell convenience.
+  breadcrumbs?: Crumb[];
+  breadcrumbCurrent?: string;
+  // contain=true wraps the slot in the --page-max content column with page padding. Pages that
+  // manage their own full-bleed layout pass contain={false}.
+  contain?: boolean;
 }
-const { title, description, canonical, ogType = 'website', ogImage } = Astro.props;
+const {
+  title,
+  description,
+  canonical,
+  ogType = 'website',
+  ogImage,
+  breadcrumbs,
+  breadcrumbCurrent,
+  contain = true,
+} = Astro.props;
 
 // Every page gets a share card: remedy pages pass their own generated og:image; everything else
 // falls back to the site-wide branded default at /og.png (see src/pages/og.png.ts). Absolute URL
@@ -24,11 +46,7 @@ const { title, description, canonical, ogType = 'website', ogImage } = Astro.pro
 const site = Astro.site?.href?.replace(/\/$/, '') ?? 'https://somnary.vercel.app';
 const ogImageUrl = ogImage ?? `${site}/og.png`;
 
-// Search-first IA (2026-07-27, Phase 1): a global "Back" affordance on every interior page (not the
-// homepage). The anchor points at "/" so it works with JS disabled / no history (no-referrer fallback);
-// the inline script upgrades it to history.back() when there is somewhere to go back to.
-const path = Astro.url.pathname.replace(/\/+$/, '') || '/';
-const isHome = path === '/';
+const showCrumbs = breadcrumbs && breadcrumbCurrent;
 ---
 
 <!doctype html>
@@ -86,87 +104,52 @@ const isHome = path === '/';
   <body>
     <a href="#main-content" class="skip-link">Skip to content</a>
     <Nav />
-    {
-      !isHome && (
-        <div class="backbar">
-          <a href="/" class="backlink" data-back>
-            <span aria-hidden="true">←</span> Back
-          </a>
-        </div>
-      )
-    }
-    <div id="main-content" tabindex="-1">
+    <main id="main-content" tabindex="-1" class:list={[contain && 'contain']}>
+      {showCrumbs && <Breadcrumb trail={breadcrumbs!} current={breadcrumbCurrent!} />}
       <slot />
-    </div>
+    </main>
     <Footer />
-    <script>
-      // Upgrade the "Back" link to history.back() when there is history to return to; otherwise the
-      // anchor's href="/" is the graceful fallback (works with JS off or when opened in a fresh tab).
-      const back = document.querySelector('[data-back]');
-      if (back && window.history.length > 1) {
-        back.addEventListener('click', (event) => {
-          event.preventDefault();
-          window.history.back();
-        });
-      }
-    </script>
   </body>
 </html>
 
 <style>
-  /* A-03: skip-to-content bypass. First focusable element on every route, so a keyboard user
-     can jump past the repeated global nav (and back bar) straight to #main-content. Off-screen
-     until focused, then it slides into the top-left as a solid pill — never a hidden focus trap. */
+  /* A-03: skip-to-content bypass — the first focusable element on every route, so a keyboard
+     user can jump past the repeated nav straight to #main-content (RULES.md a11y: keyboard
+     access). Off-screen until focused, then it slides in as a solid pill — never a hidden trap. */
   .skip-link {
     position: absolute;
-    top: var(--sp-3);
-    left: var(--sp-3);
+    top: var(--space-3);
+    left: var(--space-3);
     z-index: 200;
-    padding: var(--sp-3) var(--sp-4);
+    padding: var(--space-3) var(--space-4);
     background: var(--ink);
-    color: var(--paper); /* light-on-ink — retired --action-ink removed at CHK-B1 (Base is rebuilt at B2) */
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
+    color: var(--paper); /* light-on-ink */
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-strong);
     text-decoration: none;
-    border-radius: var(--r-sm);
-    transform: translateY(calc(-100% - var(--sp-6)));
-    transition: transform var(--dur-fast) var(--ease-soft);
+    border-radius: var(--radius-sm);
+    transform: translateY(calc(-100% - var(--space-7)));
+    transition: transform var(--dur-fast) var(--ease-fade);
   }
   .skip-link:focus {
     transform: translateY(0);
   }
-  /* the focus target must not paint its own outline/ring when focused programmatically */
+  /* the main landmark takes programmatic focus from the skip link but must not paint its own ring */
   #main-content:focus {
     outline: none;
+  }
+  /* default content column — the single-column reading width (--page-max), with page padding.
+     Pages that manage a full-bleed layout opt out with contain={false}. */
+  .contain {
+    width: 100%;
+    max-width: var(--page-max);
+    margin: 0 auto;
+    padding: 0 var(--space-5) var(--space-9);
   }
   @media (prefers-reduced-motion: reduce) {
     .skip-link {
       transition: none;
-    }
-  }
-
-  .backbar {
-    padding: var(--sp-4) var(--sp-7) 0;
-  }
-  /* muted-but-legible per the design doc: resting --muted, hover --ink. Tokens only. */
-  .backlink {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--sp-2);
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
-    color: var(--muted);
-    text-decoration: none;
-    transition: color var(--dur-fast) var(--ease-soft);
-  }
-  .backlink:hover {
-    color: var(--ink);
-  }
-  @media (max-width: 640px) {
-    .backbar {
-      padding: var(--sp-4) var(--sp-5) 0;
     }
   }
 </style>

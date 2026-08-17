@@ -1,0 +1,117 @@
+---
+// SearchField — the site's primary object, transcribed from the bundle chrome
+// (components/chrome/SearchField.jsx). CHK-B2 ships the FORM-GET SHELL only; the search
+// ENGINE + results land at CHK-B14. Submits GET to /search?q=… so browse works with JS off.
+// Concentric geometry per the nested-radii rule (RULES.md sizing): lg = outer --radius-lg
+// + --space-1 padding → button --radius-md; sm = flush at full height. Every part stays at
+// the --control-md (44px) hit floor (RULES.md a11y). Interface colour is --ink; the field is
+// the primary object by SIZE and the ink button, never colour (RULES.md Colour — no accent).
+interface Props {
+  size?: 'sm' | 'lg';
+  placeholder?: string;
+  autofocus?: boolean;
+  class?: string;
+}
+const {
+  size = 'sm',
+  placeholder = 'A remedy, a product, or a brand',
+  autofocus = false,
+  class: className,
+} = Astro.props;
+---
+
+<form
+  role="search"
+  method="get"
+  action="/search"
+  class:list={['search', `is-${size}`, className]}
+>
+  <svg class="icon" width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+    <circle cx="8" cy="8" r="5.5" fill="none" stroke="currentColor" stroke-width="1.6"></circle>
+    <line x1="12.2" y1="12.2" x2="16" y2="16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></line>
+  </svg>
+  <input
+    type="search"
+    name="q"
+    class="input"
+    placeholder={placeholder}
+    aria-label="Search Somnary"
+    autofocus={autofocus}
+    autocomplete="off"
+  />
+  <button type="submit" class="submit">Look it up</button>
+</form>
+
+<style>
+  .search {
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    width: 100%;
+    /* width is capped by the CONSUMER's container, not here (the bundle pattern) — the nav wraps
+       it in a --search-max cap; the hero (CHK-B9) will wrap it the same way. This avoids a
+       cross-component max-width conflict when a consumer wants a narrower field. */
+    background: var(--surface-card);
+    /* sole-boundary control border ≥ 3:1 (RULES.md a11y — --border-input) */
+    border: var(--border-w) solid var(--border-input);
+    transition: border-color var(--dur-fast) var(--ease-settle);
+  }
+  /* the focus ring lives on the wrapper (RULES.md: visible :focus-visible on everything
+     interactive) — the input's own outline is suppressed so the whole control reads as focused */
+  .search:focus-within {
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-offset);
+    border-color: var(--ink);
+  }
+  .is-lg {
+    height: var(--control-xl);
+    padding: var(--space-1);
+    border-radius: var(--radius-lg);
+  }
+  .is-sm {
+    height: var(--control-md);
+    border-radius: var(--radius-md);
+  }
+  .icon {
+    flex: none;
+    color: var(--text-faint);
+    margin-left: var(--space-3);
+  }
+  .input {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-family: var(--font-sans);
+    font-weight: var(--weight-body);
+    color: var(--text-body);
+  }
+  .is-lg .input {
+    font-size: var(--text-lg);
+  }
+  .is-sm .input {
+    font-size: var(--text-base);
+  }
+  .submit {
+    box-sizing: border-box;
+    flex: none;
+    border: none;
+    border-radius: var(--radius-md);
+    padding: 0 var(--space-5);
+    background: var(--ink);
+    color: var(--paper);
+    font-family: var(--font-sans);
+    font-weight: var(--weight-strong);
+    font-size: var(--text-sm);
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  .is-lg .submit {
+    height: var(--control-lg);
+  }
+  .is-sm .submit {
+    height: 100%;
+  }
+</style>
