@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<!-- @template name="Brand" description="A brand page. Enforces: the counts ARE the sentence (derived from per-product checks, no adjectives); no brand rating, grade, or seal ever — Somnary scores bottles, not companies; the recalls row renders only when a recall exists (absence is the good state, never a boast)." -->
+<helmet><script src="./ds-base.js"></script>
+<!-- body reset carried from ui_kits/site/index.html — kit pages rely on their host page for it -->
+<style>*, *::before, *::after { box-sizing: border-box; } html, body { margin: 0; } body { background: var(--page-ground); color: var(--text-body); font-family: var(--font-sans); } a { color: var(--text-link); } a:hover { color: var(--text-link-hover); }</style></helmet>
+<!-- Carried from ui_kits/site/BrandPage.jsx (load-bearing rule comments):
+/* /brands/dreamwell — one question: "Can I trust this brand's bottles?" — answered the
+   Somnary way: DERIVED from the per-product checks, never an editorial opinion or a brand
+   score. The counts ARE the sentence; no adjectives ("a good brand", "trusted") anywhere.
+   NOT ON THIS PAGE, ever: anything resembling a brand rating, grade, or seal — Somnary
+   scores BOTTLES, not companies; a brand page is an aggregation of bottle facts. When most
+   products fail, the honest summary carries it — the page never softens it and never
+   editorialises beyond the counts.
+   Three routes land here: the product breadcrumb, the brand link in the product header,
+   and BrandResultRow in search. */
+-->
+<x-import component-from-global-scope="SomnaryDesignSystem_d2f73f.BrandPage" go="{{ go }}" go-product="{{ goProduct }}" go-grade="{{ goGrade }}" which="{{ which }}" hint-size="100%,1200px"></x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;which&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;dreamwell&quot;,&quot;options&quot;:[&quot;dreamwell&quot;,&quot;somnol&quot;,&quot;herbwell&quot;],&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const noop = () => {};
+    return { go: noop, goProduct: noop, goGrade: noop, which: this.props.which ?? 'dreamwell' };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<!-- @template name="Problem" description="A problem landing page (search entry, not a nav destination). Enforces: orientation in one line, answer structure immediately, never a diagnosis or recommendation; all medical copy placeholder pending review." -->
+<helmet><script src="./ds-base.js"></script>
+<!-- body reset carried from ui_kits/site/index.html — kit pages rely on their host page for it -->
+<style>*, *::before, *::after { box-sizing: border-box; } html, body { margin: 0; } body { background: var(--page-ground); color: var(--text-body); font-family: var(--font-sans); } a { color: var(--text-link); } a:hover { color: var(--text-link-hover); }</style></helmet>
+<!-- Carried from ui_kits/site/ProblemPage.jsx (load-bearing rule comments):
+/* /problems/waking-at-3am — a Google landing page, not a nav destination. The reader arrives
+   at 3am on a phone knowing nothing about Somnary: orientation in one line, answer structure
+   immediately, never a diagnosis, never a recommendation. All medical/effectiveness copy is
+   [placeholder] pending medical review — the design ships the shape, not the claims. */
+-->
+<x-import component-from-global-scope="SomnaryDesignSystem_d2f73f.ProblemPage" go="{{ go }}" go-remedy="{{ goRemedy }}" go-grade="{{ goGrade }}" hint-size="100%,1200px"></x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const noop = () => {};
+    return { go: noop, goRemedy: noop, goGrade: noop };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+<!-- @dsCard group="Components" viewport="740x560" name="Research filter — copy A/B" subtitle="(a) three tiers vs (b) two tiers + expandable verify line, with edge cases" -->
+<!DOCTYPE html>
+<html><head>
+<link rel="stylesheet" href="../../styles.css">
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="../../ds-loader.js"></script>
+<style>*,*::before,*::after{box-sizing:border-box}body{margin:0;background:var(--surface-page);font-family:var(--font-sans);color:var(--text-body)}</style>
+</head><body>
+<div id="root"></div>
+<script>
+window.loadDS(['filter-variants.demo.jsx'], { probe: 'mountFilterVariantsDemo', bundle: '../../_ds_bundle.js' })
+  .then(m => m.mountFilterVariantsDemo(document.getElementById('root')))
+  .catch(e => console.error('LOADDS FAIL', e && (e.stack || e.message || String(e))));
+</script>
+</body></html>

@@ -1,0 +1,13 @@
+/* somnary motion — calm, 150–250ms, settling ease. One choreographed motif:
+   the label-versus-studies reveal (claim renders → line draws through → finding fades in beneath). */
+:root {
+  --dur-fast: 150ms; /* @kind other */
+  --dur-base: 200ms; /* @kind other */
+  --dur-slow: 250ms; /* @kind other */
+  --dur-reveal: 450ms; /* @kind other */                      /* the strike-through draw, only exception to 250ms */
+  --ease-settle: cubic-bezier(0.22, 0.8, 0.3, 1); /* @kind other */
+  --ease-fade: cubic-bezier(0.4, 0, 0.2, 1); /* @kind other */
+}
+@media (prefers-reduced-motion: reduce) {
+  :root { --dur-fast: 1ms; /* @kind other */ --dur-base: 1ms; /* @kind other */ --dur-slow: 1ms; /* @kind other */ --dur-reveal: 1ms; /* @kind other */ }
+}

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<!-- @template name="Safety" description="The safety triage page. Enforces: amber = the safety register only (all other interface colour is ink); the flagged-remedies listing is derived from the corpus flags, never editorial; safety never moves a bucket (kava: two separate facts); all medical content placeholder pending review." -->
+<helmet><script src="./ds-base.js"></script>
+<!-- body reset carried from ui_kits/site/index.html — kit pages rely on their host page for it -->
+<style>*, *::before, *::after { box-sizing: border-box; } html, body { margin: 0; } body { background: var(--page-ground); color: var(--text-body); font-family: var(--font-sans); } a { color: var(--text-link); } a:hover { color: var(--text-link-hover); }</style></helmet>
+<!-- Carried from ui_kits/site/SafetyPage.jsx (load-bearing rule comments):
+/* /safety — the page the whole site routes vulnerable readers to ("Taking medications,
+   pregnant, or thinking about this for a child? Start here"). Read in worried moments,
+   often at night, often as someone's first page — MOBILE FIRST, single column, calm.
+   Register: a careful pharmacist, not a warning label. Warm, never alarming, never vague.
+   COLOUR RULE: amber = the safety register ONLY; every other interface colour is ink.
+   All medical content is [Placeholder — pending sourcing/medical review]; this ships the shape. */
+/* Derived corpus view — the tri-state safety flag (none / caution / serious) made browsable.
+   SAFETY NEVER MOVES A BUCKET, in either direction: kava is "Not properly tested for sleep"
+   AND a serious concern — two separate facts, shown separately. REAL flags only: kava
+   (serious) and ashwagandha (caution); the rest of the corpus is pending audit, and the
+   pending state is shown, never hidden. */
+-->
+<x-import component-from-global-scope="SomnaryDesignSystem_d2f73f.SafetyPage" go="{{ go }}" go-remedy="{{ goRemedy }}" go-grade="{{ goGrade }}" hint-size="100%,1400px"></x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const noop = () => {};
+    return { go: noop, goRemedy: noop, goGrade: noop };
+  }
+}
+</script>
+</body>
+</html>

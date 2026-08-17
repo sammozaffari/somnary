@@ -1,0 +1,39 @@
+/* Somnary spacing, sizing, radii */
+:root {
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 40px;
+  --space-9: 56px;
+  --space-10: 80px;
+
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-pill: 999px;
+
+  /* control heights — every interactive element uses one of these.
+     --control-sm is VISUAL height only (compact chrome inside a larger hit area);
+     an interactive element's real hit area is never below --control-md (44px). */
+  --control-sm: 36px;
+  --control-md: 44px;     /* = minimum hit target, mobile-first */
+  --control-lg: 48px;
+  --control-xl: 56px;
+
+  --border-w: 1px;        /* the only border width; emphasis via color, never thickness */
+
+  --hit-target: var(--control-md);
+  --measure: 62ch;        /* max body line length */
+  --page-max: 720px;      /* single-column content width */
+  --search-max: 640px;    /* the search field's max width — the hero's primary object earns attention by size and the ink button, not colour */
+  --popover-w: 300px;     /* study-chip popover */
+
+  /* NESTED RADII RULE: when a rounded element sits inside another, use equal padding all
+     round and set inner radius = outer radius − padding, so the curves are concentric.
+     e.g. outer --radius-lg (16) + --space-1 (4) padding → inner --radius-md (12). */
+}

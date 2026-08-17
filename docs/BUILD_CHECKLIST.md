@@ -139,9 +139,116 @@ repo grep for the marker string now returns zero.
   is in-vocabulary; every non-neutral additive flag carries a source id; NO safety string ships
   without a source id; any user-facing `"[Placeholder"` string FAILS the production build.
 
-> Steps 9–15 themselves (`/go` redirect, wire design system, nested-bar study field, search,
-> dusk mode, citation popover + resolver, freshness/share-images/data-pipeline) are specified
-> in REDESIGN.md and remain the active build order once CHK-R0 clears.
+> **SUPERSEDED 2026-08-17 (CHK-B1).** The former note here — "Steps 9–15 … remain the active
+> build order once CHK-R0 clears" — is retired by the re-sequencing below. REDESIGN Steps
+> 9–15 are re-expressed as the **CHK-B1–B18** build track and the **CHK-E0–E9** editorial
+> track (CHK-R1 plan, APPROVED IN FULL). The CHK-Rfill/Rpage/Rprod/Rui items above remain the
+> detailed specs; the mapping table below shows where each lands.
+
+## Rebuild sequence — CHK-B (build) + CHK-E (editorial) (re-sequenced 2026-08-17, CHK-B1)
+
+Ratified in `docs/plans/2026-08-14-chk-r1-rebuild-plan.md` (Artifacts 2 & 3). A fresh Astro app
+shell regenerated from structured data through the design system, on greenfield URLs; **the
+launch gate is a content date** (REDESIGN v6 charter). Components are built at first use; every
+chrome/template item carries the rendered-visual + keyboard pass at 390/768/1440. The full
+scope of each item lives in the plan — this is the work queue.
+
+### CHK-B — the build track
+- [x] **CHK-B1 Tokens + both themes + identity + charter.** Transcribe the handoff bundle
+  (`docs/somnary-design-system/`) → DESIGN_SYSTEM.md (values + behaviour authoritative); wire
+  day + dusk token sets into `src/styles/global.css`; self-host Onest woff2 (`--font-sans`,
+  preloaded, no font CDN); replace ALL identity assets with the letterform-"S"
+  (favicon set + apple-touch + manifest + nav mark); global baseline (focus-visible,
+  scroll-margin, `:target`, reduced-motion); commit the rebuild charter to REDESIGN.md (v6).
+  **Done 2026-08-17** — bundle renamed to the clean committed path `docs/somnary-design-system/`
+  and committed whole; charter is REDESIGN.md v6; contrast spot-check passes both themes;
+  `verify:tokens`/`verify:fonts` green.
+- [ ] **CHK-B2 App shell.** Base layout, three-item nav (Remedies · Products · Safety) +
+  ever-present search field (form-GET shell; engine at B14), breadcrumbs ("‹ Parent" mobile),
+  footer with the one quiet independence sentence, disclaimer band. Depends: B1.
+- [ ] **CHK-B3 Product + brand schema.** `HG` (schema; Rprod.2 §7 decisions owed). Content
+  types per the CLAUDE.md model incl. Rprod.1 fields + Rprod.2 deliveryForm/releaseProfile;
+  migrate ~50 scorecard products with honest `assessment_state`; brand type + recalls[].
+  Parallel with B1/B2. (Maps CHK-Rprod.1 + CHK-Rprod.2.)
+- [ ] **CHK-B4 `/go/{id}` redirect** + click log (no personal data) + build check failing on
+  raw retailer URLs in content. Depends: B3. (Maps REDESIGN Step 9 / A3.)
+- [ ] **CHK-B5 Remedy page** `/remedies/{slug}` + first-use primitives: bucket badge
+  (shape+colour+plain sentence), safety flag, nested-bar study field (hero + thumbnail),
+  "see the study" chip + popover, safety callout, plain stat line, dose section, sources list,
+  sticky question-form contents; **includes the honest-stub template state**. Depends: B1–B2.
+  (Maps REDESIGN Step 11 + the Step-14 popover component, built at first use.)
+- [ ] **CHK-B6 Products list** `/products`: product card (3 completeness states), checks-passed
+  fixed order, chrome-by-scale. Depends: B3, B5. (Maps CHK-Rui.1.)
+- [ ] **CHK-B7 Product page** `/products/{brand-slug}-{product-slug}`: paired verdict first,
+  four checks with working shown, per-ingredient bucket badges → remedy links, additive flags,
+  dose diagram, where-to-buy via `/go` (identical treatment), decision narrative. Verdict line
+  gated on CHK-Rprod.4 (HG). Depends: B3, B4, B5. (Maps CHK-Rprod.3 + Rprod.4.)
+- [ ] **CHK-B8 Remedies browse** `/remedies`: four bucket groups, sparse-top note, outcome
+  filters + Grouped/A–Z toggle. Depends: B5. (Maps CHK-Rui.1 carve-out.)
+- [ ] **CHK-B9 Home** `/`: one-sentence hero + search field as largest object, quiet safety
+  route, situation cards, most-asked remedy cards, one honest number, footer. Depends: B5, B8.
+- [ ] **CHK-B10 Safety page** `/safety`: triage by situation, per-situation interactions,
+  derived flags listing, escalation block. Depends: B5; content = E3 + medical-review HG.
+  (Maps CHK-Rpage.1.)
+- [ ] **CHK-B11 Brand page** `/brands/{slug}`: `HG` (framing). Derived count summary (never a
+  grade), product rows, conditional recalls row. Depends: B3, B6. (Maps CHK-Rpage.2.)
+- [ ] **CHK-B12 Problem page** `/problems/{slug}`: situation explainer, calm see-a-doctor
+  prominence, honest remedy ordering, doesn't-hold-up reveal, non-supplement comparisons
+  (salvage items 1–8). Depends: B5, B8; content = E7.
+- [ ] **CHK-B13 How-we-grade** `/how-we-grade`: deep-linked from every bucket badge + footer;
+  layered plain→technical; rubric pointer. Depends: B5; E1 ratified before "final" wording.
+- [ ] **CHK-B14 Search:** one index (remedies/products/brands/problems/safety), answer/routes/
+  more tiers, category-count rule, product-intent rule, no-match/did-you-mean; browse works
+  without JS. Depends: B3, B5–B12. (Maps CHK-Rui.2 / REDESIGN Step 12.)
+- [ ] **CHK-B15 Dusk mode mechanics:** sunset keying, stored override, prefers-color-scheme
+  fallback, no-flash head script. Depends: B1 (tokens exist); every component verified both
+  themes. (Maps REDESIGN Step 13.)
+- [ ] **CHK-B16 Launch SEO hygiene** (promoted from Step 15 — first crawler contact):
+  canonicals, sitemap, robots, per-page metadata, OG/share images via satori+resvg from the
+  nested-bar components (re-skin the OG generator to Onest here), JSON-LD where honest,
+  resolver last-verified write-back. Depends: B5–B13. (Maps REDESIGN Steps 14 CI half + 15.)
+- [ ] **CHK-B17 Freshness:** 3-year flag / 6-year quarantine, "last checked {date}" site-wide.
+  Depends: B3, B7. (Maps REDESIGN Step 15.)
+- [ ] **CHK-B18 Cutover:** delete the old presentation layer (safe per Artifact 1 + CHK-E0),
+  greenfield URLs only, all validation gates live (Rui.3), full rendered-visual pass, **launch
+  gate satisfied**. Depends: all above + gate. (Maps CHK-Rui.3.)
+
+### CHK-E — the editorial track (the critical path; the launch gate is a content date)
+- [ ] **CHK-E0 Salvage extraction** per Artifact 1 (drafts, never promoted without review).
+- [ ] **CHK-E1 Source-quality rubric ratification.** `HG`. (Maps CHK-Rfill.1.)
+- [ ] **CHK-E2 `measuresSleepOutcome` triage** for all 133 sources + direction/sampleSize fill
+  for full-page remedies; re-derive the RULES.md audit line at the melatonin pilot. (Maps
+  CHK-Rfill.2.)
+- [ ] **CHK-E3 Safety copy sourcing** — every safety string carries a source id — **then
+  medical review** of all launch-visible safety copy. `HG (medical)`. The likeliest long pole;
+  start now. (Maps CHK-Rfill.3.)
+- [ ] **CHK-E4 `howToTake` dose protocols** from studies. (Maps CHK-Rfill.4.)
+- [ ] **CHK-E5 Documented-concern additive list**, WHO-2023 sweetener citation verified. (Maps
+  CHK-Rfill.5.)
+- [ ] **CHK-E6 Bucket migration + ratification, all 31 remedies** (S–F → four buckets; safety
+  flag confirmed alongside). `HG (every grade)`.
+- [ ] **CHK-E7 Problem-page content**, sourced (consumes E0 drafts).
+- [ ] **CHK-E8 Product data fill** for launch products (four checks, prices + checked dates,
+  honest assessment_state).
+- [ ] **CHK-E9 Legal pages rewritten** for the new site. `HG (legal)`.
+
+### Mapping — old items → CHK-B/E
+| Old | New |
+|---|---|
+| CHK-Rpage.1 | B10 |
+| CHK-Rpage.2 | B11 |
+| CHK-Rprod.1 / .2 | B3 |
+| CHK-Rprod.3 | B7 (+E5) |
+| CHK-Rprod.4 | HG gate on B7 |
+| CHK-Rui.1 | B6 / B8 |
+| CHK-Rui.2 | B14 |
+| CHK-Rui.3 | B18 |
+| CHK-Rfill.1–5 | E1 / E2 / E3 / E4 / E5 |
+| REDESIGN Steps 9 / 10 / 11 / 12 / 13 / 14 / 15 | B4 / B1 / B5 / B14 / B15 / B5+B16 / B16+B17 |
+
+Deliberate re-orders (approved): share-images/OG promoted (Step 15 → B16); citation popover
+built at first use on the remedy page (Step 14 → B5+B16); the search-field shell ships with the
+nav at B2 while the engine lands at B14.
 
 ## Reality baseline (audited 2026-07-06, CHK-0.0)
 
@@ -655,6 +762,7 @@ NOT a Somnary grade". Concierge (CHK-6.8) demotes to a secondary mode.
 ---
 
 ### Session log (agents append one line per session)
+- 2026-08-17 · **CHK-B1** · design-system wiring, first build item of the rebuild. Verified the handoff bundle complete (RULES.md at root, tokens/ day+dusk, letterform-"S" outlined-path assets), renamed it from the delivered `docs/somnary-design-system:/` (trailing colon) to the clean committed path `docs/somnary-design-system/` (owner-approved) and committed it whole; synced its RULES.md to the repo canonical. **Charter** committed to REDESIGN.md as the v6 amendment (full presentation-layer retirement · nothing migrated/redirects · greenfield URLs · launch gate = content date). **Checklist** re-sequenced to CHK-B1–B18 + CHK-E0–E9 with the mapping table; the "Steps 9–15 remain the active build order" note superseded. **Tokens** transcribed into DESIGN_SYSTEM.md (values + behaviour authoritative, provenance header authoritative over any brief) and wired both themes into `src/styles/global.css` (reject-don't-launder; RULES.md rules restated at each point of enforcement); contrast spot-check passes both themes. **Onest** self-hosted (variable woff2 in `public/fonts/`, local `@font-face`, latin preloaded, Instrument Sans `@fontsource` import dropped, no font CDN). **Identity** all letterform-"S": favicon (day+dusk) · apple-touch-icon (rasterised) · manifest · wordmark · nav mark (`Wordmark.astro`) · RemedyIcon fallback — every crescent/dot-field reference retired (grep clean). Global baseline (focus-visible, scroll-margin, `:target`, reduced-motion) from the bundle. `verify` suite green; build green. **HAZARD — shared-tree collision:** the session started on `main` but the working tree was mid-CHK-E0 (salvage extraction), and E0 committed its addendum (items 17-19, `08bc0bc`) live during this session. A branch switch was impossible; B1 was landed via a **separate git worktree** from main (`chk-b1-design-system-wiring`), E0's branch untouched. Pushed, NOT merged — merge order sorted after E0 lands. Standing rule recorded: parallel E/B lanes require separate `git worktree`s, never one tree with branch switching.
 - 2026-08-14 · **CHK-R1** · rebuild plan (plan-only; no implementation, no deletion) → `docs/plans/2026-08-14-chk-r1-rebuild-plan.md`, **owner-approved in full same day** (ratification block in the doc). Gate re-verified first (main synced, `PENDING-MERGE` grep zero). Three artifacts: **salvage check** (3 read-only sweeps over the whole presentation layer; 16 salvage items — 12 sourced findings PMID-verified absent from collections, 3 lib-data extractions, ramelteon draft per owner ruling — 5 ambiguous items all owner-decided, write-offs reasoned, load-bearing survivors confirmed outside the presentation layer → deletion at cutover safe after CHK-E0); **rebuild sequence** CHK-B1–B18 (proposed numbering — none pre-existed — with full mapping from CHK-Rpage/Rprod/Rui + Steps 9–15; supersedes the "Steps 9–15 remain the active build order" note; re-orders approved: OG/share-images promoted to launch SEO B16, citation popover at first use B5); **launch gate** CHK-E0–E9 (threshold: melatonin hub + 10 full remedies + all-31 honest stubs + sourced/medically-reviewed safety page + seeded concern list + honest product layer + legal rewrite; owner ratified full 133-source `measuresSleepOutcome` triage, stubs in sitemap, ten-remedy list, Rprod.4 during E-track). DIVERGENCES REPORTED: rebuild charter absent from REDESIGN.md (commit as v6 amendment at CHK-B1) + CHK-B/E numbering existed nowhere. Key data finding: only melatonin/lemon-verbena/taurine sources adjudicated — 29 remedies all-null on `measuresSleepOutcome`. NEXT: CHK-E0 immediately, CHK-E3 early (medical-review long pole), CHK-B1 on bundle delivery; checklist re-sequencing to CHK-B/E lands at CHK-B1.
 - 2026-08-14 · **CHK-R0** · four-branch merge to main (this session, merge-only per the gate). Order: docs-reconciliation FF `958af23` first (the arbiter on main) → `redesign-design-system-rules` `1502850` (doc-only stack base; conflicts resolved toward the reconciled docs — RULES.md "no mono" supersedes its "mono accent role") → `chk-redesign-2-source-audit` `cac6b9a` (schema before consumers; in-merge corrections cited to RULES.md: `studyQuality` relaxed to OPTIONAL/bucket-determining-only in `superRefine` + `check-source-fields.mjs`, scatter-era comments rewritten to nested-bar doctrine, `SOURCE_QUALITY_RUBRIC.md` re-scoped with ratification still HG) → `feat/remedy-displayname` `c07622c` (31-file frontmatter + `[slug].astro` consumer; package.json gate union) → `redesign-type-studyfield-product` `b5d12e6` (font gate + DESIGN_SYSTEM.md type/mark locks; **branch carried NO swap code** — Onest swap + letterform redraw land with Step 10 from the handoff bundle; also deduped a doubled `verify:displaynames` key from the #157 merge). After each merge: build green + that branch's marker grep zero. Final: full marker grep zero repo-wide; `verify:fonts`/`verify:displaynames`/`verify:source-fields` green; kava bucket CONFIRMED (0 sleep-outcome sources in corpus). REPORTED: RULES.md audit "cited" counts use a wider basis than remedy `sources[]` (kava 5 vs 3, melatonin 12 vs 8; "measured sleep" figures match) → state the basis or re-count at CHK-Rfill.2. Also this session: three working-tree doc files found overwritten by bundle "reference copies" (self-declared non-canonical) — preserved to scratchpad, repo versions restored, nothing committed. `node_modules` symlink deletion kept out of every commit.
 - 2026-08-08 · REDESIGN **Step 2** · source-data audit + study-field schema + pilot fill (branch `chk-redesign-2-source-audit`, own worktree; **PR #154 for owner — schema change = HUMAN-GATE, NOT self-merged**; no checklist box ticked). **Audit (the go/no-go for the study field):** of 133 sources across 31 remedies, before this work only study-type + identifier were structured (100%); year lived in prose only; **sampleSize / effectDirection / effectSize / studyQuality did not exist (0/133)**. Two design problems surfaced that the runbook hadn't caught, both owner-ratified this session: **(A)** efficacy outcomes use non-commensurable units (minutes · % · PSQI/ISI points · SMD · relative risk · circadian shift) → a continuous shared effect-size axis would be dishonest → `effectDirection` is now a **three-band** enum (helped / no-clear-effect / didnt-help), `effectSize` demoted to OPTIONAL (stat line only, never positioning); **(B)** only ~54% of sources measure a human sleep outcome (rest = safety 23% · mechanism 11% · off-target 5% · guideline 5% · label 3%) → new `measuresSleepOutcome` gate so only human sleep-outcome sources are study-field points and carry direction/size/quality — **no safety signal encoded at source level** (that's the Step-1 flag). **Schema** (`content.config.ts`): `superRefine` FAILS LOUDLY on a complete sleep-outcome source missing sampleSize/direction/quality, a complete source not adjudicated, and — any status — a non-sleep source carrying a direction (the exact dishonest placement it exists to prevent); proven at both build-time (astro sync) and via standalone `scripts/check-source-fields.mjs` (coverage report, wired into prebuild + `verify:source-fields`). **Quality rubric** settled before any filling: `docs/SOURCE_QUALITY_RUBRIC.md` — 3 levels anchored to Cochrane RoB 2 / AMSTAR 2, re-derivable, covers non-trial sources (**proposed, owner ratification pending**). **Migration:** all 133 carry `measuresSleepOutcome` (null until adjudicated); year parsed from the citation line (existing datum, verified, never inferred). **Pilot** = melatonin + the two owner-ratified remedies (lemon-verbena, taurine), 17 sources: sample sizes VERIFIED against the actual abstracts (Ferracioli-Oda 1683 · Brzezinski 284 · van Geijlswijk 317), never inferred — where an abstract states no participant count (Auld 2017, Herxheimer 2002, the lemon-verbena adolescent trial) the source stays `pending` with direction+quality captured. Honest finding: **taurine (owner-ratified) has zero human sleep-efficacy sources → its study field is empty**, and 3/8 pilot efficacy sources can't get a verified n from the abstract alone (~37% — a structural ceiling on study-field density). Build + full `verify` green. Decisions owed before step 4: ratify the rubric + the full-corpus editorial fill (rate estimate in the PR). Commits `d3ee34c` + `0f123c1`.

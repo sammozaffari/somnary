@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<!-- @template name="Product" description="A product page. Enforces: decision narrative — no TOC, no sidebar, one 'Where to buy ↓' jump; anecdote firewall (no reports at the point of purchase); failing products get identical structure and where-to-buy; name and strength are separate fields." -->
+<helmet><script src="./ds-base.js"></script>
+<!-- body reset carried from ui_kits/site/index.html — kit pages rely on their host page for it -->
+<style>*, *::before, *::after { box-sizing: border-box; } html, body { margin: 0; } body { background: var(--page-ground); color: var(--text-body); font-family: var(--font-sans); } a { color: var(--text-link); } a:hover { color: var(--text-link-hover); }</style></helmet>
+<!-- Carried from ui_kits/site/ProductPage.jsx (load-bearing rule comments):
+/* The product page — a DECISION NARRATIVE read top to bottom: no TOC, no sidebar; the
+   section order is the argument. The one jump is "Where to buy ↓" in the header (the only
+   high-intent jump on the page). "What people report" is deliberately NOT here — anecdote
+   at the moment of purchase is where it does most damage; it lives on the remedy page
+   behind the firewall. Two datasets: a pass-all product and a failing one (1 of 4) with
+   identical structure — failed checks explained as plainly as passes, where-to-buy
+   identical. All prices, protocols, certifier details and label notes are placeholders. */
+-->
+<x-import component-from-global-scope="SomnaryDesignSystem_d2f73f.ProductPage" go="{{ go }}" go-remedy="{{ goRemedy }}" go-grade="{{ goGrade }}" go-brand="{{ goBrand }}" which="{{ which }}" hint-size="100%,1400px"></x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;which&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;melts&quot;,&quot;options&quot;:[&quot;melts&quot;,&quot;complex&quot;],&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const noop = () => {};
+    return { go: noop, goRemedy: noop, goGrade: noop, goBrand: noop, which: this.props.which ?? 'melts' };
+  }
+}
+</script>
+</body>
+</html>

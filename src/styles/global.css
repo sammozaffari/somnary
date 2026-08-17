@@ -1,225 +1,314 @@
-/* Global stylesheet — Tailwind layers + design tokens.
-   Tokens below are DESIGN_SYSTEM.md v3 §1 (warm/oxblood · Instrument Sans), the
-   source of truth that component specs reference directly (e.g. var(--grade-d),
-   var(--ink)). tailwind.config.mjs mirrors the same values as utility classes.
-   Never hardcode raw values — see DESIGN_SYSTEM §10 guardrails.
+/* Global stylesheet — Somnary design system (day + dusk).
 
-   v3 RE-SKIN NOTE: token NAMES are unchanged from v2 (evidence-teal); only their
-   VALUES changed, so every component inherits the warm/oxblood palette + Instrument
-   Sans automatically. Oxblood (--primary) is now both brand AND action (citron
-   retired). The safety register (--vermilion / --warning-bg / --safety-ink) stays a
-   DISTINCT red-orange — never oxblood. */
+   SOURCE OF TRUTH: transcribed from the Claude Design handoff bundle at
+   docs/somnary-design-system/ (RULES.md + tokens/*.css + styles.css), 17 August 2026,
+   CHK-B1. The bundle is the source; this file is what the codebase reads. Values and
+   behaviour are authoritative here — never referenced or rendered from the bundle directly.
+   The doc mirror with the same values is docs/DESIGN_SYSTEM.md. If the two ever disagree,
+   the committed file wins (CLAUDE.md token single-source-of-truth).
 
+   REJECT-DON'T-LAUNDER: raw literals are legitimate ONLY in the token DEFINITIONS below —
+   that is what a token IS, and check-tokens.mjs exempts this one file for exactly that reason.
+   Everywhere else (base rules, components) references var(--token); a raw value outside the
+   definitions is a defect, not a convenience.
+
+   This supersedes the v3 warm/oxblood · Instrument Sans system WHOLESALE (CHK-R1 Artifact 1c).
+   The old presentation layer still consumes some retired token names until it is deleted at
+   CHK-B18; the transition aliases at the end of :root keep its chrome legible in Onest during
+   the interim without reintroducing any accent colour. */
+
+/* Tailwind layers are retained during the rebuild interim so the yet-to-be-deleted v3 pages
+   keep their Preflight reset + utility classes (applyBaseStyles:false in astro.config — this
+   file owns the layer order). The new design system is token-based, not Tailwind; new chrome
+   (CHK-B2+) styles from the custom properties below. Both go at CHK-B18 with the old layer. */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* ---- DESIGN_SYSTEM v3 §1 — :root tokens (warm/oxblood · Instrument Sans) ---- */
+/* ============================================================================
+   Type — Onest, ONE self-hosted family (RULES.md Identity; DESIGN_SYSTEM §Type).
+   No serif, no mono, no display/body split. Self-hosted woff2 in public/fonts/,
+   local @font-face, NO Google Fonts / Fontshare / third-party font CDN (the bundle's
+   tokens/fonts.css shipped a Google Fonts @import — deliberately NOT transcribed;
+   enforced by scripts/check-fonts.mjs). One variable file carries the whole 100–900
+   axis, so the deliberate 450 / 550 / 650 weights resolve without extra files.
+   Family declared as 'Onest' so the --font-sans token binds directly.
+   ============================================================================ */
+@font-face {
+  font-family: 'Onest';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900; /* variable weight axis — one file serves every --weight-* token */
+  src: url('/fonts/onest-latin-wght-normal.woff2') format('woff2-variations');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face {
+  font-family: 'Onest';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url('/fonts/onest-latin-ext-wght-normal.woff2') format('woff2-variations');
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+
+/* ============================================================================
+   Colour — DAY (base). transcribed from tokens/colors.css.
+   RULES.md Colour: COLOUR MEANS DATA. --evidence (ink blue, the colour of printed
+   reference) is the evidence bar + its key and NOTHING else. ALL interface colour —
+   buttons, links, focus, active states — is --ink. There is NO --accent; never add one.
+   Buckets are colour- AND shape-coded (disc / half-disc / ring / struck ring) — colour is
+   never the only signal. Bucket inks are desaturated & colourblind-safe, all AA on paper.
+   ============================================================================ */
 :root {
-  /* ---- type families ----
-     The self-hosted variable file (@fontsource-variable/instrument-sans) registers
-     its @font-face family as "Instrument Sans Variable"; it is listed FIRST so the
-     self-hosted font actually binds. "Instrument Sans" is kept in the stack as the
-     static-family fallback (matches the OG generator's family + any static install). */
-  --font-display: "Instrument Sans Variable", "Instrument Sans", system-ui, -apple-system, sans-serif;
-  --font-body:    "Instrument Sans Variable", "Instrument Sans", system-ui, -apple-system, sans-serif;
-  /* IBM Plex Mono RETIRED 2026-07-09 (owner: remove the mono font entirely). This token now
-     maps to Instrument Sans and is kept only as an alias so the existing var(--font-mono) usages
-     don't each need editing — nothing renders in a monospace face anymore. Where digits must line
-     up (data tables, stat values) use font-variant-numeric: tabular-nums, not a mono family. */
-  --font-mono:    "Instrument Sans Variable", "Instrument Sans", system-ui, -apple-system, sans-serif;
+  /* base — day (warm paper, warm near-black ink) */
+  --paper: #F6F2E9;
+  --page-ground: var(--paper); /* day stays FLAT; dusk overrides with the one allowed gradient */
+  --paper-raised: #FBF8F1;
+  --paper-sunken: #EEE9DB;
+  --ink: #1C1B22;
+  --ink-2: #5B564E;
+  --ink-3: #6B675C;  /* legibility floor: 4.5:1 on every surface (worst 4.65 on sunken) — RULES.md a11y floors */
+  --line: #E1DACA;
+  --line-strong: #C8C0AC;
 
-  /* ---- surfaces (warm off-whites) ---- */
-  --paper:   #FCFAF2;
-  --surface: #FFFFFF;
-  --stone:   #EEE8DA;
-  --mineral: #DBD5CD;
+  /* evidence — ink blue. EVIDENCE ONLY (the research-filter bar + its key). Never on interface. */
+  --evidence: #2C3E63;
+  --evidence-strong: #1E2C4A;
+  --evidence-tint: #E2E6EF;
+  --evidence-line: #B9C2D4;
 
-  /* ---- dark "carbon" register (v4 §C) — one dark slab breaks the continuous cream so the
-     page has rhythm instead of one flat wash. Footer today; optional hero band later. ---- */
-  --carbon:          #191510;                   /* warm near-black ground */
-  --on-carbon:       #FBF8F0;                   /* primary text on carbon — ~16:1 */
-  --on-carbon-muted: rgba(251, 248, 240, 0.62); /* secondary text on carbon — AA */
-  --on-carbon-line:  rgba(251, 248, 240, 0.14); /* hairline dividers on carbon */
+  /* support — muted sage. --sage is a GRAPHIC token (check-mark strokes/fills) and fails AA
+     as text BY DESIGN; sage-coloured TEXT uses --sage-text (worst 5.45:1 on sunken). */
+  --sage: #6E7D64;
+  --sage-text: #53614A;
+  --sage-tint: #E8EBDF;
 
-  /* ---- text ---- */
-  --ink:    #171512;   /* primary text on paper/surface */
-  --raisin: #2B2028;   /* secondary emphasis */
-  --muted:  #5C574F;   /* supporting (AA small) */
-  --soft:   #8C867B;   /* LARGE/decorative text only */
+  /* evidence buckets — moss → ochre → warm grey → clay. Green family = works ONLY.
+     --bucket-unknown is a warm grey, deliberately distinct from evidence blue so a bucket
+     glyph is never mistaken for data (RULES.md Colour). */
+  --bucket-works: #3E6B4F;
+  --bucket-works-tint: #DFE8DD;
+  --bucket-maybe: #7C6012;
+  --bucket-maybe-tint: #F0E7C9;
+  --bucket-unknown: #6B6459;
+  --bucket-unknown-tint: #E7E3DA;
+  --bucket-avoid: #9C4330;
+  --bucket-avoid-tint: #F0DCD3;
 
-  /* ---- primary (oxblood) — brand, links, accents ---- */
-  --primary:      #7E1F2B;
-  --primary-deep: #661722;
-  --primary-soft: #F6E7E3;
+  /* safety — calm, unmissable amber. RULES.md: amber = the SAFETY register only, never
+     interface, never decorative. A serious-concern flag visually outranks the evidence visual. */
+  --amber: #8A5A16;
+  --amber-tint: #F5E7CB;
+  --amber-line: #DCC28C;
 
-  /* ---- action (now oxblood) — primary CTA ---- */
-  --action:     #7E1F2B;
-  --action-ink: #FFFFFF;
+  /* semantic aliases — interface colour is INK, everywhere */
+  --surface-page: var(--paper);
+  --surface-card: var(--paper-raised);
+  --surface-sunken: var(--paper-sunken);
+  --text-body: var(--ink);
+  --text-muted: var(--ink-2);
+  --text-faint: var(--ink-3);
+  --text-link: var(--ink);
+  --text-link-hover: var(--ink-2);
+  --border-hairline: var(--line);
+  --border-strong: var(--line-strong);
+  /* --border-input: 3:1 non-text contrast for a control's SOLE boundary (search field, outline
+     buttons) — RULES.md a11y floors. Decorative hairlines stay low-contrast on purpose. */
+  --border-input: #8A8370;
+  --focus-ring: 2px solid var(--ink);
+  --focus-offset: 2px;
 
-  /* ---- positive / secondary accent (green) ---- */
-  --eucalyptus: #3F6A57;
-  --pistachio:  #E9F2DB;
+  --shadow-card: 0 1px 2px rgba(28,27,34,0.05), 0 6px 20px rgba(28,27,34,0.06);
+  --shadow-pop: 0 2px 6px rgba(28,27,34,0.08), 0 12px 32px rgba(28,27,34,0.14);
+  --scrim: rgba(28,27,34,0.32);
 
-  /* ---- safety (vermilion) — warnings ONLY · DISTINCT from oxblood ---- */
-  --vermilion:  #E34234;
-  --warning-bg: #FDECE7;
-  --safety-ink: #A02C22;
+  /* ---- Type (tokens/typography.css). ONE font token; --font-display was removed
+     deliberately — two names for one value is how a display/body split silently returns. */
+  --font-sans: 'Onest', -apple-system, 'Segoe UI', sans-serif;
 
-  /* ---- grades: fill · tint wash · big-badge gradient anchor (letter always white — §3) ---- */
-  --grade-s: #274B3F; --grade-s-tint: #E5EBE7; --grade-s-anchor: #1B3A30;
-  --grade-a: #3F6A57; --grade-a-tint: #E7EEE9; --grade-a-anchor: #2E5343;
-  --grade-b: #47695A; --grade-b-tint: #E8EDE9; --grade-b-anchor: #35564A;
-  --grade-c: #8F5E12; --grade-c-tint: #F5EEDD; --grade-c-anchor: #6E470E;
-  --grade-d: #9A4F28; --grade-d-tint: #F5E8DF; --grade-d-anchor: #78401F;
-  --grade-f: #96323E; --grade-f-tint: #F5E4E5; --grade-f-anchor: #77232D;
+  /* scale (px) — mobile-first; body never below 16, nothing below 13 (RULES.md floor) */
+  --text-xs: 13px;      /* metadata, "last checked" — legibility floor, ≥4.5:1 per surface both themes */
+  --text-sm: 13.5px;    /* captions, chip labels */
+  --text-base: 16px;    /* body */
+  --text-lg: 18.5px;    /* lead body, verdict sentences, search input */
+  --text-xl: 22px;      /* card titles */
+  --display-sm: 28px;   /* section headings (the questions people ask) */
+  --display-md: 38px;   /* page titles, plain-language stats */
+  --display-lg: 52px;   /* hero stat / remedy name */
 
-  /* ---- type scale: size / line-height (weight + tracking in notes) ---- */
-  --text-display: clamp(64px, 8vw, 128px); --lh-display: 0.92;  /* Instrument Sans 700, -0.067em */
-  --text-3xl:     clamp(38px, 4.3vw, 66px); --lh-3xl:    1.00;  /* Instrument Sans 700, -0.065em (h2) */
-  --text-2xl:     42px;   --lh-2xl:     1.05;  /* Instrument Sans 700, -0.06em (stat numerals) */
-  --text-xl:      32px;   --lh-xl:      1.10;  /* Instrument Sans 700, -0.04em */
-  --text-lg:      21px;   --lh-lg:      1.20;  /* Instrument Sans 600, -0.025em (h3) */
-  --text-md:      18px;   --lh-md:      1.40;  /* Instrument Sans 500 (lede) */
-  --text-base:    16px;   --lh-base:    1.60;  /* Instrument Sans 400 (body reading — looser for legibility) */
-  --text-sm:      14px;   --lh-sm:      1.50;  /* Instrument Sans 400 */
-  --text-xs:      12px;   --lh-xs:      1.40;  /* Instrument Sans 600, 0.09em, UPPERCASE */
-  /* v4 type tuning (2026-07-27): the old −0.04em was size-blind — at 21–32px headings it
-     pulled letters so tight that word spaces collapsed ("I'mconsidering"). Retuned to a
-     moderate −0.02em that reads cleanly across the whole heading range; the largest display
-     type gets its own tighter token so it still feels poster-set. See docs/plans v4 Appendix A. */
-  --tracking-tight:   -0.02em;   /* mid + small headings (h2/h3/tiles/stats) */
-  --tracking-display: -0.035em;  /* ≥40px hero/page display only */
-  --tracking-label:    0.09em;
+  --leading-tight: 1.15;
+  --leading-snug: 1.35;
+  --leading-body: 1.6;
+  --tracking-display: -0.01em;  /* display sizes only */
 
-  /* ---- spacing (8px base, 4px step) ---- */
-  --sp-1: 4px;  --sp-2: 8px;   --sp-3: 12px; --sp-4: 16px; --sp-5: 24px;
-  --sp-6: 32px; --sp-7: 48px;  --sp-8: 64px; --sp-9: 96px; --sp-10: 128px;
+  /* weight assignments — deliberate. Weight + size carry the whole hierarchy (no type trick). */
+  --weight-body: 400;     /* body copy */
+  --weight-meta: 450;     /* metadata, captions, key labels */
+  --weight-ui: 500;       /* interactive row text, input text, verdict lines */
+  --weight-strong: 600;   /* small labels, buttons, chips, card titles, wordmark */
+  --weight-heading: 650;  /* section headings (--display-sm) */
+  --weight-title: 550;    /* page titles & display stats (--display-md/lg) */
 
-  /* ---- radii ---- */
-  /* v4 radius discipline (2026-07-27): the old 3/7/11/16/24 spread gave cards no shared
-     radius identity (four different card roundings on one screen reads as templated). Tightened
-     to a systematic 4/8/10/12/16 step — the dominant card drops 16→12 and heroes 24→16, so the
-     generic panels calm down and the illustrated heroes + grade system carry the personality. */
-  --r-xs: 4px; --r-sm: 8px; --r-md: 10px; --r-lg: 12px; --r-xl: 16px; --r-pill: 999px;
+  /* ---- Spacing / sizing / radii (tokens/spacing.css) ---- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 40px;
+  --space-9: 56px;
+  --space-10: 80px;
 
-  /* ---- borders ---- */
-  --line:          rgba(23, 21, 18, 0.13);   /* hairline color (grids/dividers) */
-  --hairline:      1px solid var(--line);
-  --border-hairline: var(--hairline);
-  --border-strong: 1px solid var(--mineral);
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-pill: 999px;
 
-  /* ---- elevation (warm-neutral tint) ---- */
-  --shadow-sm:   0 1px 2px rgba(23,21,18,.05), 0 1px 3px rgba(23,21,18,.06);
-  --shadow-md:   0 18px 60px rgba(23,21,18,.10);
-  --shadow-lift: 0 24px 70px rgba(23,21,18,.16);
+  /* control heights — every interactive element uses one. --control-sm is VISUAL height only;
+     the real hit area is never below --control-md (44px) — RULES.md: hit areas ≥ 44px. */
+  --control-sm: 36px;
+  --control-md: 44px;
+  --control-lg: 48px;
+  --control-xl: 56px;
 
-  /* ---- a11y + brand mechanics ---- */
-  /* A-01: two-tone focus ring — a --surface (white) inner band + a solid --primary (oxblood)
-     outer band. The single-colour 40%-alpha oxblood ring it replaces measured 1.19–2.21:1
-     (fails 3:1 non-text on carbon, tints, and grade fills). A two-tone ring is the WCAG
-     technique for indicators that must read on ANY ground: on light surfaces the oxblood
-     outer band carries it (9.49:1 on paper); on --carbon the white inner band carries it
-     (~17:1); and the white↔oxblood internal edge is ~10.7:1 everywhere, so the ring is always
-     perceivable. Solid, no alpha compositing. */
-  --focus-ring:          0 0 0 2px var(--surface), 0 0 0 4px var(--primary);
-  --ring:                var(--focus-ring);
-  --grade-optical-shift: 0.02em;  /* cap optical-center nudge in grade badges */
+  --border-w: 1px;        /* the ONLY border width; emphasis via colour, never thickness */
 
-  /* ---- motion ---- */
-  --dur-instant: 120ms; --dur-fast: 160ms; --dur-base: 320ms; --dur-slow: 560ms; --dur-ambient: 2800ms;
-  --ease-settle: cubic-bezier(0.22, 1, 0.36, 1);
-  --ease-soft:   cubic-bezier(0.4, 0, 0.2, 1);
+  --hit-target: var(--control-md);
+  --measure: 62ch;        /* max body line length */
+  --page-max: 720px;      /* single-column content width */
+  --search-max: 640px;    /* the search field's max width — the hero's primary object */
+  --popover-w: 300px;     /* study-chip popover */
+  /* NESTED-RADII RULE (RULES.md sizing): equal padding all round, inner radius = outer − padding,
+     so curves are concentric (e.g. --radius-lg outer + --space-1 padding → --radius-md inner). */
 
-  /* ---- page shell ---- */
-  --page: min(1460px, calc(100vw - 32px));
+  /* ---- Motion (tokens/motion.css). RULES.md: calm 150–250ms, settling ease. ---- */
+  --dur-fast: 150ms;
+  --dur-base: 200ms;
+  --dur-slow: 250ms;
+  --dur-reveal: 450ms;    /* the label→strike-through→finding reveal, the only exception to 250ms */
+  --ease-settle: cubic-bezier(0.22, 0.8, 0.3, 1);
+  --ease-fade: cubic-bezier(0.4, 0, 0.2, 1);
 
-  /* ---- breakpoints (v4 §7) — the canonical mobile-first set. NOTE: CSS custom properties
-     cannot be used inside an @media condition, so these are NOT consumed by media queries
-     directly. They are (a) the single documented reference — new/edited components write these
-     literal px in their scoped @media, and (b) readable by JS via getComputedStyle for matchMedia.
-     Existing bespoke values (640/720/760/900/1180…) were each tuned to a component's content;
-     migrate one to the nearest standard only when reworking that component, never in bulk. */
-  --bp-sm:  480px;   /* large phone */
-  --bp-md:  768px;   /* tablet — the primary phone→desktop switch (nav collapses below this) */
-  --bp-lg: 1024px;   /* small laptop */
-  --bp-xl: 1440px;   /* wide desktop */
+  /* ---- Transition aliases — OLD presentation layer only, removed at CHK-B18. --------------
+     DESIGN_SYSTEM §Type: --font-display/--font-body collapse into --font-sans, and --font-mono
+     aliases it because NO mono exists in the system (RULES.md). These keep retired v3 chrome
+     (nav skip-link, back-bar) rendering in Onest during the interim. NO colour aliases exist:
+     the retired --primary/--accent must NOT be reintroduced (RULES.md Colour). */
+  --font-display: var(--font-sans);
+  --font-body: var(--font-sans);
+  --font-mono: var(--font-sans);
 }
 
-/* ---- DESIGN_SYSTEM v3 §1 — base document ---- */
-@layer base {
-  body {
-    /* raw-ok: page-background gradient stops — a faint oxblood bloom (6% alpha) over a
-       three-stop paper wash. These are gradient MECHANICS local to the body ground, not
-       reusable palette colours; kept literal here in the token-definition file — C-02.
-       (If the owner later wants them named, --paper-hi/--paper-lo/--bloom is a HUMAN-GATE.) */
-    background:
-      radial-gradient(circle at 12% 0%, rgba(126, 31, 43, 0.06), transparent 28%),
-      linear-gradient(180deg, #FEFDF9 0%, var(--paper) 45%, #F4EFE2 100%);
-    /* background-attachment:fixed removed 2026-07-27 — it caused repaint jank on mobile Safari */
-    color: var(--ink);
-    font-family: var(--font-body);
-    /* v4: body was rendering at weight 400 (the "too thin / light" complaint). 440 gives text
-       the weight of set ink on the warm ground without reading as medium/bold. Headings set
-       their own 600/700 and are unaffected. */
-    font-weight: 440;
-    font-size: var(--text-base);
-    line-height: var(--lh-base);
-    letter-spacing: normal;  /* reading text: no tracking/kerning adjustment */
-    font-kerning: normal;
-    text-rendering: optimizeLegibility;
-    /* inherited: long unbreakable tokens (raw PubMed/DOI URLs in citations) break instead of
-       forcing the page wider than a phone. Only affects words that would otherwise overflow. */
-    overflow-wrap: break-word;
-  }
-  ::selection { background: var(--primary-soft); }
-  :focus-visible { box-shadow: var(--focus-ring); outline: none; }
+/* ============================================================================
+   Colour — DUSK. A designed low-light reading theme (amber-shifted text, lowered
+   contrast, dimmed chrome) — not an inverted afterthought. Same rule: evidence blue on
+   DATA only; interface colour is the warm cream --ink. transcribed from tokens/colors.css.
+   ============================================================================ */
+[data-theme="dusk"] {
+  --paper: #17151E;
+  /* page-ground gradient, DUSK ONLY — the one allowed decorative gradient (RULES.md Colour).
+     Lightens the top AND darkens the bottom so it reads as light direction, not a vignette.
+     Applied to the page ground only (body rule below); surfaces/cards keep flat tokens. */
+  --page-ground: linear-gradient(180deg, #191722 0%, #100E1A 100%);
+  --paper-raised: #201D29;
+  --paper-sunken: #100E15;
+  --ink: #E7DECB;
+  --ink-2: #A99F8F;
+  --ink-3: #918876;  /* legibility floor: 4.5:1 on every surface incl. cards (worst 4.72 on raised) */
+  --line: #2C2836;
+  --line-strong: #3D3849;
+  --border-input: #746D8B;
 
-  /* v4: let multi-line headings break for even ragging, and body for fewer orphans */
-  h1, h2, h3 { text-wrap: balance; }
-  p { text-wrap: pretty; }
+  --evidence: #8FA5CE;
+  --evidence-strong: #A9BCDF;
+  --evidence-tint: #232B3F;
+  --evidence-line: #3C4A6B;
 
-  /* A-02: inline links inside running text are underlined so they are distinguishable
-     without relying on colour alone (WCAG 1.4.1 — oxblood on muted body measured 1.38:1).
-     Scoped to running-text elements (p / li / dd) so chrome links (nav, cards, buttons,
-     footer) are untouched. This lives in @layer base ON PURPOSE: Astro component <style> is
-     unlayered and therefore beats @layer base, so any chrome link that already sets
-     `text-decoration: none` in its own scoped styles stays clean automatically. A prose link
-     that must stay underlined but currently forces `none` (RemedyLeadBlock .review) is fixed
-     in its component. Offset/thickness are set on all links so the underline sits off the
-     baseline and reads as editorial, not default-browser. */
-  a { text-underline-offset: 0.18em; text-decoration-thickness: max(1px, 0.06em); }
-  :is(p, li, dd) a[href] { text-decoration-line: underline; }
+  --sage: #92A385;
+  --sage-text: #92A385;  /* passes as text at dusk (worst 6.15:1 on raised) — one value both roles */
+  --sage-tint: #222A1E;
 
-  /* CMP-03: consistent interaction states site-wide. The recon found 0 `:active` rules across
-     33 buttons / 249 links / 18 controls, and disabled controls that kept `cursor: pointer`
-     with identical styling. These :where() defaults have 0 specificity so any component can
-     still override them, but they apply everywhere a component does NOT — the missing baseline.
-     Disabled: real not-allowed cursor + dimmed, and pointer-events off so it can't be clicked.
-     (A scoped rule that hard-codes `cursor: pointer` on a disabled button — e.g. /search — is
-     overridden explicitly in that component.) */
-  :where(button, [role='button'], input, select, textarea):disabled,
-  :where(a, button, [role='button'])[aria-disabled='true'] {
-    cursor: not-allowed;
-    opacity: 0.55;
+  --bucket-works: #8CB795;
+  --bucket-works-tint: #1E2B21;
+  --bucket-maybe: #C7A050;
+  --bucket-maybe-tint: #2B2414;
+  --bucket-unknown: #A29A8B;
+  --bucket-unknown-tint: #26231D;
+  --bucket-avoid: #C97F68;
+  --bucket-avoid-tint: #2E1E18;
+
+  --amber: #D2A559;
+  --amber-tint: #2C2314;
+  --amber-line: #5C4A26;
+
+  --shadow-card: 0 1px 2px rgba(0,0,0,0.3), 0 6px 20px rgba(0,0,0,0.35);
+  --shadow-pop: 0 2px 6px rgba(0,0,0,0.4), 0 16px 40px rgba(0,0,0,0.5);
+  --scrim: rgba(8,7,12,0.55);
+}
+
+/* ============================================================================
+   Global baseline (transcribed from tokens/styles.css). Behaviour the whole system
+   relies on, applied unlayered so it beats Tailwind Preflight where they overlap.
+   ============================================================================ */
+
+/* The page ground reads --page-ground (flat paper by day, the dusk gradient at night).
+   fixed attachment so the light direction spans the viewport, not each scroll height. */
+body {
+  background: var(--page-ground) fixed;
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  font-weight: var(--weight-body);
+  line-height: var(--leading-body);
+  /* RULES.md Identity: tabular lining figures for ALL numbers — prose, identifiers
+     (PMID/NCT/DOI), tables — so digits align and no mono is needed anywhere. */
+  font-variant-numeric: tabular-nums;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  /* long unbreakable tokens (raw PubMed/DOI URLs) break instead of forcing the page wider than a phone */
+  overflow-wrap: break-word;
+}
+
+/* RULES.md Accessibility floors: visible :focus-visible on everything interactive. This global
+   rule is the sanctioned exception to inline-styled components — inline styles cannot express
+   :focus-visible. --focus-ring is 2px solid ink; --focus-offset keeps it clear of the element. */
+:focus-visible { outline: var(--focus-ring); outline-offset: var(--focus-offset); }
+
+/* Links: ink, underline on hover, offset for an editorial (non-default-browser) look. RULES.md. */
+a { color: var(--text-link); text-underline-offset: 3px; }
+a:hover { color: var(--text-link-hover); text-decoration: underline; }
+
+/* In-page-jump landing feedback (RULES.md / step 6). scroll-margin-top keeps an anchored
+   destination clear of sticky chrome — often the real cause of post-jump disorientation. */
+[id] { scroll-margin-top: var(--space-8); }
+
+/* :target settle — a semantically EMPTY neutral tint (never evidence blue, never amber),
+   fading over ~1s; reduced motion gets no animation at all. Targets headings within sections
+   (the bundle's landing pattern; CHK-B5+ sections are structured to match). */
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+  @keyframes target-settle {
+    from { background-color: var(--surface-sunken); }
+    to { background-color: transparent; }
   }
-  :where(button, [role='button'], input, select, textarea):disabled {
-    pointer-events: none;
-  }
-  @media (prefers-reduced-motion: no-preference) {
-    /* press feedback — buttons settle 1px on activation (mirrors the −1px hover lift in §6).
-       Scoped to buttons: a translateY on classed card links would fight their −2px hover lift. */
-    :where(button, [role='button']):not(:disabled):not([aria-disabled='true']):active {
-      transform: translateY(1px);
-    }
+  section:target > div > div > h2,
+  section:target > h2,
+  :target > h2 {
+    animation: target-settle 1.1s var(--ease-fade) both;
+    border-radius: var(--radius-xs);
   }
 }
 
-/* ---- utilities ---- */
-@layer utilities {
-  /* T-04: fixed-width figures so digits line up in compared columns (scores, doses, stat
-     rows). §1 (global.css:26-30) mandates this for compared digits; Instrument Sans ships
-     tabular figures, so this opts in wherever numbers stack or must align. Global class —
-     applied via markup in DosingGrid, StatRow, and the scorecard score meters. */
-  .tnum { font-variant-numeric: tabular-nums; }
+/* RULES.md motion: prefers-reduced-motion collapses all durations to ~1ms. Since components
+   read the --dur-* tokens, overriding them here disables motion system-wide in one place. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-fast: 1ms;
+    --dur-base: 1ms;
+    --dur-slow: 1ms;
+    --dur-reveal: 1ms;
+  }
 }

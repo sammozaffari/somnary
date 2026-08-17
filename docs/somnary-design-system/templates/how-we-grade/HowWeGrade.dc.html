@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<!-- @template name="How we grade" description="The methodology page. Enforces: plain words first, technical detail behind expandables; bucket meanings at the top with deep-linkable sections (badges land here); grading thresholds not signed off are placeholders, never invented." -->
+<helmet><script src="./ds-base.js"></script>
+<!-- body reset carried from ui_kits/site/index.html — kit pages rely on their host page for it -->
+<style>*, *::before, *::after { box-sizing: border-box; } html, body { margin: 0; } body { background: var(--page-ground); color: var(--text-body); font-family: var(--font-sans); } a { color: var(--text-link); } a:hover { color: var(--text-link-hover); }</style></helmet>
+<!-- Carried from ui_kits/site/GradePage.jsx (load-bearing rule comments):
+/* /how-we-grade — the one page allowed real terminology, each term introduced in plain words
+   first: plain on the surface, technical detail behind expandables. Readers arrive mid-question
+   from a bucket badge, so the badge meanings sit at the top, before any preamble.
+   Deep links: #works #maybe #unknown #avoid #two-questions #product-score #verify #sources
+   #recheck #errors #independence. Grading thresholds and ops specifics not yet signed off are
+   marked [placeholder] — never invented. */
+-->
+<x-import component-from-global-scope="SomnaryDesignSystem_d2f73f.GradePage" go="{{ go }}" hint-size="100%,1400px"></x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    return { go: () => {} };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<!-- @template name="Home" description="Homepage: search-first hero, situation cards, corpus rows. Enforces: nav is three items (Remedies · Products · Safety) plus ever-present search; all interface colour is ink (no accent); corpus rows ordered by verifiable count, never invented numbers." -->
+<helmet><script src="./ds-base.js"></script>
+<!-- body reset carried from ui_kits/site/index.html — kit pages rely on their host page for it -->
+<style>*, *::before, *::after { box-sizing: border-box; } html, body { margin: 0; } body { background: var(--page-ground); color: var(--text-body); font-family: var(--font-sans); } a { color: var(--text-link); } a:hover { color: var(--text-link-hover); }</style></helmet>
+<!-- Carried from ui_kits/site/HomePage.jsx (load-bearing rule comments):
+/* Homepage data — real corpus numbers; ordered by verifiable count so the
+   near-empty bars cluster at the end and the row reads as a ranking. */
+/* SYSTEM RULE (nav): three items — Remedies · Products · Safety — plus ever-present search.
+   Problems are reached by search, the situation cards below, and cross-links from remedy
+   pages; How we grade is reached from every bucket badge and the footer. Never re-add
+   them to the chrome. Safety points at the Safety page (built next). */
+-->
+<x-import component-from-global-scope="SomnaryDesignSystem_d2f73f.HomePage" go="{{ go }}" go-grade="{{ goGrade }}" go-remedy="{{ goRemedy }}" go-brand="{{ goBrand }}" hint-size="100%,1200px"></x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const noop = () => {};
+    return { go: noop, goGrade: noop, goRemedy: noop, goBrand: noop };
+  }
+}
+</script>
+</body>
+</html>

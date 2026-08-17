@@ -1,11 +1,10 @@
 ---
-// Base document layout. Imports the global stylesheet (Tailwind layers + DESIGN_SYSTEM
-// tokens) and self-hosts the brand typefaces (DESIGN_SYSTEM v3 §2). Server-rendered
-// shell so content is crawlable from day one.
-// Typefaces (self-hosted via @fontsource — no CDN): Instrument Sans (variable weight
-// axis) for everything. IBM Plex Mono retired 2026-07-09 (owner) — the mono font is gone
-// site-wide; --font-mono now aliases Instrument Sans (see global.css).
-import '@fontsource-variable/instrument-sans';
+// Base document layout. Imports the global stylesheet (design-system tokens, both themes)
+// and self-hosts Onest. Server-rendered shell so content is crawlable from day one.
+// Type: Onest — ONE self-hosted family (RULES.md Identity; CHK-B1). The woff2 live in
+// public/fonts/, declared with a local @font-face in global.css and preloaded below; NO
+// Google Fonts / Fontshare / third-party font CDN (verify:fonts). The Instrument Sans
+// @fontsource import was removed with the CHK-B1 type swap.
 import '../styles/global.css';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
@@ -37,7 +36,32 @@ const isHome = path === '/';
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    {/* Identity — the letterform-"S" mark (RULES.md Identity: the mark is the letterform S,
+        no moons/stars/sleep costume; the crescent-moon disc + dot-field favicon are retired,
+        CHK-B1). SVG favicons render without the page's fonts, so the assets are OUTLINED PATHS
+        (extracted from Onest 600), never live <text>. Day/dusk favicon variants via media. */}
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" media="(prefers-color-scheme: light)" />
+    <link rel="icon" type="image/svg+xml" href="/favicon-dusk.svg" media="(prefers-color-scheme: dark)" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    {/* theme-color is a browser-chrome hint (HTML attr, not CSS) — it cannot read a token, so it
+        must be a literal. These mirror --paper (day) and dusk --paper. */}
+    {/* raw-ok: theme-color literal = --paper (day ground) */}
+    <meta name="theme-color" content="#F6F2E9" media="(prefers-color-scheme: light)" />
+    {/* raw-ok: theme-color literal = dusk --paper (night ground) */}
+    <meta name="theme-color" content="#17151E" media="(prefers-color-scheme: dark)" />
+
+    {/* Self-hosted Onest — preload the primary latin subset (the one weights-axis file that
+        carries every --weight-* token); latin-ext loads on demand. No font CDN (verify:fonts). */}
+    <link
+      rel="preload"
+      href="/fonts/onest-latin-wght-normal.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
     {description && <meta name="description" content={description} />}
@@ -58,9 +82,6 @@ const isHome = path === '/';
     {description && <meta name="twitter:description" content={description} />}
     <meta name="twitter:image" content={ogImageUrl} />
 
-    {/* Brand typefaces are self-hosted via @fontsource (imported in the frontmatter,
-        bundled by Astro) — DESIGN_SYSTEM v3 §2: Instrument Sans display+body, IBM Plex
-        Mono for data. No Google Fonts CDN. */}
   </head>
   <body>
     <a href="#main-content" class="skip-link">Skip to content</a>
@@ -103,7 +124,7 @@ const isHome = path === '/';
     z-index: 200;
     padding: var(--sp-3) var(--sp-4);
     background: var(--ink);
-    color: var(--action-ink);
+    color: var(--paper); /* light-on-ink — retired --action-ink removed at CHK-B1 (Base is rebuilt at B2) */
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-label);

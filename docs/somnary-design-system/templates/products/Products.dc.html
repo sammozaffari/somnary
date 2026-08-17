@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<!-- @template name="Products list" description="The product list for a remedy. Enforces: chrome-by-scale (no filter row or sort under ~20 items — the intro line declares the order), fixed checks-passed order at every scale (sort controls never exist; Brand A–Z cut), derived Form dropdown with counts above threshold." -->
+<helmet><script src="./ds-base.js"></script>
+<!-- body reset carried from ui_kits/site/index.html — kit pages rely on their host page for it -->
+<style>*, *::before, *::after { box-sizing: border-box; } html, body { margin: 0; } body { background: var(--page-ground); color: var(--text-body); font-family: var(--font-sans); } a { color: var(--text-link); } a:hover { color: var(--text-link-hover); }</style></helmet>
+<!-- Carried from ui_kits/site/ProductsPage.jsx (load-bearing rule comments):
+/* /remedies/melatonin/products — the full product list, dense-list layout (C3).
+   All twelve are fictional demo entries in a realistic mix: pass-all, partial, failing,
+   label-known, not-in-database — identical treatment throughout ("we list every product,
+   including the ones we advise against" is most visible here).
+   FIXED ORDER: checks passed, descending (assessed first, then label-known, then
+   not-in-database; ties by brand A–Z). The checks are the reason the page exists, and the
+   order is set by our own published criteria — never by anything commercial. */
+-->
+<x-import component-from-global-scope="SomnaryDesignSystem_d2f73f.ProductsPage" go="{{ go }}" go-product="{{ goProduct }}" go-grade="{{ goGrade }}" catalogue="{{ catalogue }}" hint-size="100%,1400px"></x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;catalogue&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;melatonin&quot;,&quot;options&quot;:[&quot;melatonin&quot;,&quot;large&quot;],&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const noop = () => {};
+    return { go: noop, goProduct: noop, goGrade: noop, catalogue: this.props.catalogue ?? 'melatonin' };
+  }
+}
+</script>
+</body>
+</html>
