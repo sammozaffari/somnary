@@ -1,0 +1,95 @@
+# Habit summaries — the single source of truth for the machine-quotable one-liner + evidence-
+# strength label per sleep-habit anchor. Extracted verbatim at CHK-E0 from src/lib/habits.ts
+# HABIT_SUMMARIES (the old presentation layer, retired at cutover) so the guide/problem rebuild
+# reads DATA, not code. These are cited, compliance-reviewed corpus copy — no model prose.
+#
+# STABLE ANCHOR CONTRACT (do NOT rename these ids):
+#   caffeine · alcohol · light · schedule · naps · environment · exercise · hygiene-vs-cbti
+#
+# Provenance: src/lib/habits.ts (CHK-6.6). Salvage item 14. `salvageItems` cross-references the
+# behavioral/environmental salvage drafts (items 1–8, in src/content/salvage/) that carry the
+# underlying citations. Two habits map to no salvage item: `naps` (its source, PMID 30177248,
+# was not on the CHK-R1 salvage list) and `hygiene-vs-cbti` (the CBT-I trio is written off —
+# already held in src/content/remedies/cbt-i.mdx). Transcribed verbatim, not promoted.
+
+habits:
+  - id: caffeine
+    label: Moderate–strong evidence
+    summary: >-
+      A controlled trial found a standard caffeine dose disrupted sleep even when taken six
+      hours before bed, so cutting off caffeine well before evening is one of the
+      better-evidenced habits.
+    salvageItems: [1]
+    salvageFile: src/content/salvage/caffeine.md
+
+  - id: alcohol
+    label: Moderate evidence
+    summary: >-
+      Review evidence shows alcohol delays REM sleep and fragments the second half of the
+      night, so a nightcap tends to lighten and break up later sleep rather than deepen it.
+    salvageItems: [2]
+    salvageFile: src/content/salvage/alcohol.md
+
+  - id: light
+    label: "Mixed: light timing moderate, blue-light gadgets weak"
+    summary: >-
+      Evening light — especially bright, blue-rich screen light — can suppress melatonin and
+      delay sleep, while the evidence that blue-light glasses or filters fix sleep is weak and
+      inconsistent.
+    salvageItems: [3, 4]
+    salvageFile: src/content/salvage/light-exposure.md
+    salvageNote: >-
+      The light-timing citations (items 3–4) are salvaged; the blue-light-glasses citation
+      (PMID 37593770) was not on the CHK-R1 salvage list.
+
+  - id: schedule
+    label: Moderate evidence, largely observational
+    summary: >-
+      Large cohort data link a more regular sleep–wake schedule to better health outcomes,
+      though most of this evidence is associational rather than proof that fixing your timing
+      causes better sleep.
+    salvageItems: [5]
+    salvageFile: src/content/salvage/sleep-regularity.md
+
+  - id: naps
+    label: Mixed / depends on your sleep
+    summary: >-
+      For good sleepers a short nap is generally fine, but for people with insomnia daytime
+      sleep can erode the sleep drive that helps them sleep at night, which is why CBT-I often
+      limits it.
+    salvageItems: []
+    salvageNote: >-
+      No salvage item — the nap-rationale source (PMID 30177248, sleep-restriction mechanisms)
+      was not on the CHK-R1 salvage list. Re-source at the consuming session if used.
+
+  - id: environment
+    label: Weak–moderate evidence
+    summary: >-
+      A cool, dark, quiet room is reasonable and night noise is measurably disruptive, but
+      direct human trials that a cooler or darker room causes better sleep are thinner than the
+      confident advice implies.
+    salvageItems: [6]
+    salvageFile: src/content/salvage/night-noise.md
+    salvageNote: >-
+      Only the night-noise citation (item 6) is salvaged; the temperature/thermoregulation
+      source (PMID 31105512) was not on the CHK-R1 salvage list.
+
+  - id: exercise
+    label: Moderate evidence, myth-correcting
+    summary: >-
+      Regular exercise is associated with better sleep quality, and the blanket rule against
+      evening exercise is largely overturned for most people — with vigorous exercise right
+      before bed the main exception.
+    salvageItems: [7, 8]
+    salvageFile: src/content/salvage/exercise.md
+
+  - id: hygiene-vs-cbti
+    label: "Candor: hygiene weak as a package; CBT-I is the strong intervention"
+    summary: >-
+      Standalone sleep hygiene is weaker than assumed — it is the control condition CBT-I is
+      measured against and is not recommended as a solo treatment for chronic insomnia — while
+      multicomponent CBT-I is the strongest-graded intervention.
+    salvageItems: []
+    salvageNote: >-
+      No salvage item — the CBT-I benchmark trio (PMIDs 27136449 / 33164742 / 26054060) is
+      written off per CHK-R1 §1c; those facts already live in src/content/remedies/cbt-i.mdx.
