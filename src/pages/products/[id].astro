@@ -8,6 +8,7 @@
 // never merged into one number.
 import Base from '../../layouts/Base.astro';
 import { getCollection } from 'astro:content';
+import RetailLink from '../../components/RetailLink.astro';
 
 export async function getStaticPaths() {
   const products = await getCollection('products');
@@ -81,10 +82,11 @@ const checkWord = (v: boolean | null) => (v === null ? 'Not yet assessed' : v ? 
 
   {product.retail_links.length > 0 && (
     <>
+      {/* identical treatment regardless of score (A3) — routed through /go, raw URLs never in content */}
       <h2>Where to buy</h2>
       <ul class="buy">
         {product.retail_links.map((l) => (
-          <li><a href={l.url} rel="nofollow">{l.retailer}</a></li>
+          <li><RetailLink productId={product.id} retailer={l.retailer} /></li>
         ))}
       </ul>
     </>

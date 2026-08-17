@@ -1,0 +1,45 @@
+---
+// The buy-link component content MUST use (CHK-B4; REDESIGN Step 9). It emits /go/{id}?to={retailer}
+// via goHref() — NEVER a raw retailer URL (scripts/check-go-links.mjs fails the build on a raw URL
+// in content). Treatment is IDENTICAL regardless of the product's score or verdict (RULES.md
+// Products / A3): no score is consulted here, so the where-to-buy row looks the same on a product
+// we rate well and one we advise against, with the warning intact above it. All interface colour is
+// --ink (RULES.md Colour — no accent).
+import { goHref } from '../lib/go/href.ts';
+interface Props {
+  productId: string;
+  retailer: string;
+  label?: string;
+}
+const { productId, retailer, label } = Astro.props;
+const RETAILER_LABEL: Record<string, string> = {
+  amazon: 'Amazon',
+  iherb: 'iHerb',
+  chemistWarehouse: 'Chemist Warehouse',
+};
+---
+
+<a class="retail" href={goHref(productId, retailer)} rel="nofollow">
+  {label ?? RETAILER_LABEL[retailer] ?? retailer}
+  <span aria-hidden="true">→</span>
+</a>
+
+<style>
+  .retail {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: var(--control-md); /* 44px hit floor (RULES.md a11y) */
+    padding: var(--space-2) var(--space-4);
+    border: var(--border-w) solid var(--border-input);
+    border-radius: var(--radius-sm);
+    color: var(--text-body);
+    font-weight: var(--weight-ui);
+    text-decoration: none;
+    transition: border-color var(--dur-fast) var(--ease-settle);
+  }
+  .retail:hover {
+    border-color: var(--ink);
+    text-decoration: none;
+  }
+</style>
