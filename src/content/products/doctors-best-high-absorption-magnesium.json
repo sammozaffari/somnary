@@ -1,0 +1,49 @@
+{
+  "id": "doctors-best-high-absorption-magnesium",
+  "brand": "Doctor's Best",
+  "name": "High Absorption Magnesium",
+  "strength": null,
+  "composition": "single-ingredient",
+  "perIngredientAmountsDisclosed": null,
+  "deliveryForm": null,
+  "releaseProfile": "not-stated",
+  "rawFormLabel": "lysinate glycinate chelate (Albion TRAACS)",
+  "chemicalForm": "lysinate glycinate chelate (Albion TRAACS)",
+  "formStatus": "needs-review",
+  "ingredients": [
+    {
+      "remedy_id": "magnesium",
+      "amount": null,
+      "unit": null,
+      "form": "lysinate glycinate chelate (Albion TRAACS)"
+    }
+  ],
+  "dose_match": null,
+  "third_party_tested": null,
+  "label_discloses_all": null,
+  "proprietary_blend": null,
+  "form_matches_studied": null,
+  "price": null,
+  "pricePerNight": null,
+  "dietary": null,
+  "allergens": [],
+  "excipients": [],
+  "howToTake": null,
+  "retail_links": [
+    {
+      "retailer": "amazon",
+      "url": "https://www.amazon.com.au/dp/B0198YTUMC",
+      "price": null,
+      "last_checked": null
+    },
+    {
+      "retailer": "iherb",
+      "url": "https://au.iherb.com/pr/doctor-s-best-high-absorption-magnesium-lysinate-glycinate-chelated-albion-traacs-240-tablets-100-mg-per-tablet/16567",
+      "price": null,
+      "last_checked": null
+    }
+  ],
+  "data_source": "source-scorecard-migration-2026-08-17",
+  "last_checked": null,
+  "assessment_state": "label known, not yet assessed"
+}

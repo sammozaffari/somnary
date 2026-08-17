@@ -1,0 +1,49 @@
+{
+  "id": "natures-own-high-strength-magnesium",
+  "brand": "Nature's Own",
+  "name": "High Strength Magnesium (3 forms)",
+  "strength": null,
+  "composition": "single-ingredient",
+  "perIngredientAmountsDisclosed": null,
+  "deliveryForm": null,
+  "releaseProfile": "not-stated",
+  "rawFormLabel": "3-salt, oxide-dominant (~86% oxide + chelate + citrate)",
+  "chemicalForm": "3-salt, oxide-dominant (~86% oxide + chelate + citrate)",
+  "formStatus": "needs-review",
+  "ingredients": [
+    {
+      "remedy_id": "magnesium",
+      "amount": null,
+      "unit": null,
+      "form": "3-salt, oxide-dominant (~86% oxide + chelate + citrate)"
+    }
+  ],
+  "dose_match": null,
+  "third_party_tested": null,
+  "label_discloses_all": null,
+  "proprietary_blend": null,
+  "form_matches_studied": null,
+  "price": null,
+  "pricePerNight": null,
+  "dietary": null,
+  "allergens": [],
+  "excipients": [],
+  "howToTake": null,
+  "retail_links": [
+    {
+      "retailer": "amazon",
+      "url": "https://www.amazon.com.au/dp/B0BPSN994Z",
+      "price": null,
+      "last_checked": null
+    },
+    {
+      "retailer": "chemistWarehouse",
+      "url": "https://www.chemistwarehouse.com.au/buy/121580",
+      "price": null,
+      "last_checked": "2026-07-31"
+    }
+  ],
+  "data_source": "source-scorecard-migration-2026-08-17",
+  "last_checked": null,
+  "assessment_state": "label known, not yet assessed"
+}

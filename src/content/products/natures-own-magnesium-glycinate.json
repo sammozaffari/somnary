@@ -1,0 +1,43 @@
+{
+  "id": "natures-own-magnesium-glycinate",
+  "brand": "Nature's Own",
+  "name": "Magnesium Glycinate",
+  "strength": null,
+  "composition": "single-ingredient",
+  "perIngredientAmountsDisclosed": null,
+  "deliveryForm": null,
+  "releaseProfile": "not-stated",
+  "rawFormLabel": "glycinate (single salt)",
+  "chemicalForm": "glycinate (single salt)",
+  "formStatus": "needs-review",
+  "ingredients": [
+    {
+      "remedy_id": "magnesium",
+      "amount": null,
+      "unit": null,
+      "form": "glycinate (single salt)"
+    }
+  ],
+  "dose_match": null,
+  "third_party_tested": null,
+  "label_discloses_all": null,
+  "proprietary_blend": null,
+  "form_matches_studied": null,
+  "price": null,
+  "pricePerNight": null,
+  "dietary": null,
+  "allergens": [],
+  "excipients": [],
+  "howToTake": null,
+  "retail_links": [
+    {
+      "retailer": "chemistWarehouse",
+      "url": "https://www.chemistwarehouse.com.au/buy/150812",
+      "price": null,
+      "last_checked": "2026-07-31"
+    }
+  ],
+  "data_source": "source-scorecard-migration-2026-08-17",
+  "last_checked": null,
+  "assessment_state": "label known, not yet assessed"
+}

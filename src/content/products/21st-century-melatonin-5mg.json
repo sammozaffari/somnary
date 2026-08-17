@@ -1,0 +1,46 @@
+{
+  "id": "21st-century-melatonin-5mg",
+  "brand": "21st Century",
+  "name": "Melatonin",
+  "strength": {
+    "amount": 5,
+    "unit": "mg"
+  },
+  "composition": "single-ingredient",
+  "perIngredientAmountsDisclosed": null,
+  "deliveryForm": "tablet",
+  "releaseProfile": "not-stated",
+  "rawFormLabel": "tablet",
+  "chemicalForm": null,
+  "formStatus": "mapped",
+  "ingredients": [
+    {
+      "remedy_id": "melatonin",
+      "amount": 5,
+      "unit": "mg",
+      "form": null
+    }
+  ],
+  "dose_match": null,
+  "third_party_tested": null,
+  "label_discloses_all": null,
+  "proprietary_blend": null,
+  "form_matches_studied": null,
+  "price": null,
+  "pricePerNight": null,
+  "dietary": null,
+  "allergens": [],
+  "excipients": [],
+  "howToTake": null,
+  "retail_links": [
+    {
+      "retailer": "iherb",
+      "url": "https://au.iherb.com/pr/21st-century-melatonin-5-mg-120-tablets/10813",
+      "price": null,
+      "last_checked": null
+    }
+  ],
+  "data_source": "source-scorecard-migration-2026-08-17",
+  "last_checked": null,
+  "assessment_state": "label known, not yet assessed"
+}

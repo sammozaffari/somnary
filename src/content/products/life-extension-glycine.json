@@ -1,0 +1,49 @@
+{
+  "id": "life-extension-glycine",
+  "brand": "Life Extension",
+  "name": "Glycine",
+  "strength": null,
+  "composition": "single-ingredient",
+  "perIngredientAmountsDisclosed": null,
+  "deliveryForm": "capsule",
+  "releaseProfile": "not-stated",
+  "rawFormLabel": "single-ingredient capsules",
+  "chemicalForm": null,
+  "formStatus": "mapped",
+  "ingredients": [
+    {
+      "remedy_id": "glycine",
+      "amount": null,
+      "unit": null,
+      "form": null
+    }
+  ],
+  "dose_match": null,
+  "third_party_tested": null,
+  "label_discloses_all": null,
+  "proprietary_blend": null,
+  "form_matches_studied": null,
+  "price": null,
+  "pricePerNight": null,
+  "dietary": null,
+  "allergens": [],
+  "excipients": [],
+  "howToTake": null,
+  "retail_links": [
+    {
+      "retailer": "amazon",
+      "url": "https://www.amazon.com.au/dp/B00B35A394",
+      "price": null,
+      "last_checked": "2026-07-31"
+    },
+    {
+      "retailer": "iherb",
+      "url": "https://au.iherb.com/pr/life-extension-glycine-1-000-mg-100-vegetarian-capsules/47810",
+      "price": null,
+      "last_checked": null
+    }
+  ],
+  "data_source": "source-scorecard-migration-2026-08-17",
+  "last_checked": null,
+  "assessment_state": "label known, not yet assessed"
+}

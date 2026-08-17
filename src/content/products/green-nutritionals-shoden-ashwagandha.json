@@ -1,0 +1,36 @@
+{
+  "id": "green-nutritionals-shoden-ashwagandha",
+  "brand": "Green Nutritionals",
+  "name": "Shoden Ashwagandha",
+  "strength": null,
+  "composition": "single-ingredient",
+  "perIngredientAmountsDisclosed": null,
+  "deliveryForm": null,
+  "releaseProfile": "not-stated",
+  "rawFormLabel": "single-herb (Shoden)",
+  "chemicalForm": "single-herb (Shoden)",
+  "formStatus": "needs-review",
+  "ingredients": [
+    {
+      "remedy_id": "ashwagandha",
+      "amount": null,
+      "unit": null,
+      "form": "single-herb (Shoden)"
+    }
+  ],
+  "dose_match": null,
+  "third_party_tested": null,
+  "label_discloses_all": null,
+  "proprietary_blend": null,
+  "form_matches_studied": null,
+  "price": null,
+  "pricePerNight": null,
+  "dietary": null,
+  "allergens": [],
+  "excipients": [],
+  "howToTake": null,
+  "retail_links": [],
+  "data_source": "source-scorecard-migration-2026-08-17",
+  "last_checked": null,
+  "assessment_state": "label known, not yet assessed"
+}

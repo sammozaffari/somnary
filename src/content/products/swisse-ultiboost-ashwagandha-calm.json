@@ -1,0 +1,49 @@
+{
+  "id": "swisse-ultiboost-ashwagandha-calm",
+  "brand": "Swisse",
+  "name": "Ultiboost Ashwagandha Calm+",
+  "strength": null,
+  "composition": "single-ingredient",
+  "perIngredientAmountsDisclosed": null,
+  "deliveryForm": null,
+  "releaseProfile": "not-stated",
+  "rawFormLabel": "combo (+ magnesium, passionflower, reishi)",
+  "chemicalForm": "combo (+ magnesium, passionflower, reishi)",
+  "formStatus": "needs-review",
+  "ingredients": [
+    {
+      "remedy_id": "ashwagandha",
+      "amount": null,
+      "unit": null,
+      "form": "combo (+ magnesium, passionflower, reishi)"
+    }
+  ],
+  "dose_match": null,
+  "third_party_tested": null,
+  "label_discloses_all": null,
+  "proprietary_blend": null,
+  "form_matches_studied": null,
+  "price": null,
+  "pricePerNight": null,
+  "dietary": null,
+  "allergens": [],
+  "excipients": [],
+  "howToTake": null,
+  "retail_links": [
+    {
+      "retailer": "amazon",
+      "url": "https://www.amazon.com.au/dp/B09T3JR8F3",
+      "price": null,
+      "last_checked": null
+    },
+    {
+      "retailer": "chemistWarehouse",
+      "url": "https://www.chemistwarehouse.com.au/buy/107843",
+      "price": null,
+      "last_checked": "2026-07-31"
+    }
+  ],
+  "data_source": "source-scorecard-migration-2026-08-17",
+  "last_checked": null,
+  "assessment_state": "label known, not yet assessed"
+}

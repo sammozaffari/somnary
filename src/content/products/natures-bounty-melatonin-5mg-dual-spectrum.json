@@ -1,0 +1,46 @@
+{
+  "id": "natures-bounty-melatonin-5mg-dual-spectrum",
+  "brand": "Nature's Bounty",
+  "name": "Melatonin Dual Spectrum",
+  "strength": {
+    "amount": 5,
+    "unit": "mg"
+  },
+  "composition": "single-ingredient",
+  "perIngredientAmountsDisclosed": null,
+  "deliveryForm": "tablet",
+  "releaseProfile": "not-stated",
+  "rawFormLabel": "tablet (bi-layer)",
+  "chemicalForm": null,
+  "formStatus": "mapped",
+  "ingredients": [
+    {
+      "remedy_id": "melatonin",
+      "amount": 5,
+      "unit": "mg",
+      "form": null
+    }
+  ],
+  "dose_match": null,
+  "third_party_tested": null,
+  "label_discloses_all": null,
+  "proprietary_blend": null,
+  "form_matches_studied": null,
+  "price": null,
+  "pricePerNight": null,
+  "dietary": null,
+  "allergens": [],
+  "excipients": [],
+  "howToTake": null,
+  "retail_links": [
+    {
+      "retailer": "iherb",
+      "url": "https://au.iherb.com/pr/nature-s-bounty-dual-spectrum-melatonin-5-mg-60-bi-layer-tablets/67800",
+      "price": null,
+      "last_checked": null
+    }
+  ],
+  "data_source": "source-scorecard-migration-2026-08-17",
+  "last_checked": null,
+  "assessment_state": "label known, not yet assessed"
+}

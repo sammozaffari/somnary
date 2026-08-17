@@ -67,7 +67,7 @@ Plain display labels (plain-language non-negotiable — no jargon in body copy):
 | `capsule` | Capsule |
 | `softgel` | Softgel |
 | `gummy` | Gummy |
-| `melt-lozenge` | Dissolvable (melt / lozenge) |
+| `melt-lozenge` | Melt or lozenge |
 | `liquid-drops` | Liquid or drops |
 | `spray` | Spray |
 | `tea` | Tea |
@@ -201,15 +201,18 @@ human-review pass, not a regex sweep. Plan:
 
 ---
 
-## 7. Decisions owed before build (owner)
+## 7. Decisions owed before build (owner) — RATIFIED 2026-08-17 (CHK-B3)
 
-1. **Confirm the four-field split** (delivery form · release profile ·
-   chemical/salt · combo) rather than the literal two — the two can't be clean
-   while salt still shares the string. *(Assumed yes.)*
-2. **Release-profile data source for the migration:** labels only (most land
-   `not-stated`), or pull from product pages during the fill. *(Assumed
-   labels-only.)*
-3. **Release profile at launch:** visible consumer facet, or data-only feeding
-   the form-matches-studied check until enough products carry it?
-4. **Plain label wording:** is "Dissolvable (melt / lozenge)" the right consumer
-   phrasing, or prefer "Melt / lozenge"?
+1. **Four-field split** (delivery form · release profile · chemical/salt · combo)
+   rather than the literal two — the two can't be clean while salt still shares the
+   string. **RULED: yes** — built as the four-field split. The migration proved the
+   need (57/93 products have no shape token in the label string).
+2. **Release-profile data source for the migration:** labels only vs pull from
+   product pages. **RULED: labels only** — most products land `not-stated`, honestly.
+3. **Release profile at launch:** visible facet vs data-only. **RULED: no
+   release-profile facet at launch** — it follows the standard derived-filter rule
+   like every other filter (materialises only above the chrome threshold when a
+   catalogue contains BOTH states). It remains a fact line and a studied-form-check
+   input regardless. (A CHK-B6 filter-rendering concern; no schema change.)
+4. **Plain label wording** for `melt-lozenge`. **RULED: "Melt or lozenge"** — plain
+   nouns, no parenthetical gloss (supersedes "Dissolvable (melt / lozenge)").

@@ -1,0 +1,49 @@
+{
+  "id": "life-extension-neuro-mag",
+  "brand": "Life Extension",
+  "name": "Neuro-Mag Magnesium L-Threonate",
+  "strength": null,
+  "composition": "single-ingredient",
+  "perIngredientAmountsDisclosed": null,
+  "deliveryForm": null,
+  "releaseProfile": "not-stated",
+  "rawFormLabel": "magnesium L-threonate (Magtein), single",
+  "chemicalForm": "magnesium L-threonate (Magtein), single",
+  "formStatus": "needs-review",
+  "ingredients": [
+    {
+      "remedy_id": "magnesium",
+      "amount": null,
+      "unit": null,
+      "form": "magnesium L-threonate (Magtein), single"
+    }
+  ],
+  "dose_match": null,
+  "third_party_tested": null,
+  "label_discloses_all": null,
+  "proprietary_blend": null,
+  "form_matches_studied": null,
+  "price": null,
+  "pricePerNight": null,
+  "dietary": null,
+  "allergens": [],
+  "excipients": [],
+  "howToTake": null,
+  "retail_links": [
+    {
+      "retailer": "amazon",
+      "url": "https://www.amazon.com.au/dp/B006P536E6",
+      "price": null,
+      "last_checked": null
+    },
+    {
+      "retailer": "iherb",
+      "url": "https://au.iherb.com/pr/life-extension-neuro-mag-magnesium-l-threonate-90-vegetarian-capsules-48-mg-per-capsule/40244",
+      "price": null,
+      "last_checked": null
+    }
+  ],
+  "data_source": "source-scorecard-migration-2026-08-17",
+  "last_checked": null,
+  "assessment_state": "label known, not yet assessed"
+}

@@ -1,0 +1,36 @@
+{
+  "id": "oriental-botanicals-anxiolift",
+  "brand": "Oriental Botanicals",
+  "name": "Anxiolift",
+  "strength": null,
+  "composition": "single-ingredient",
+  "perIngredientAmountsDisclosed": null,
+  "deliveryForm": null,
+  "releaseProfile": "not-stated",
+  "rawFormLabel": "combo (KSM-66 + holy basil OciBest, polygala, magnolia, poria, citrus)",
+  "chemicalForm": "combo (KSM-66 + holy basil OciBest, polygala, magnolia, poria, citrus)",
+  "formStatus": "needs-review",
+  "ingredients": [
+    {
+      "remedy_id": "ashwagandha",
+      "amount": null,
+      "unit": null,
+      "form": "combo (KSM-66 + holy basil OciBest, polygala, magnolia, poria, citrus)"
+    }
+  ],
+  "dose_match": null,
+  "third_party_tested": null,
+  "label_discloses_all": null,
+  "proprietary_blend": null,
+  "form_matches_studied": null,
+  "price": null,
+  "pricePerNight": null,
+  "dietary": null,
+  "allergens": [],
+  "excipients": [],
+  "howToTake": null,
+  "retail_links": [],
+  "data_source": "source-scorecard-migration-2026-08-17",
+  "last_checked": null,
+  "assessment_state": "label known, not yet assessed"
+}
