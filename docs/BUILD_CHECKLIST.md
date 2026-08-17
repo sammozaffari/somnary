@@ -256,7 +256,11 @@ scope of each item lives in the plan — this is the work queue.
   flag confirmed alongside). `HG (every grade)`.
 - [ ] **CHK-E7 Problem-page content**, sourced (consumes E0 drafts).
 - [ ] **CHK-E8 Product data fill** for launch products (four checks, prices + checked dates,
-  honest assessment_state).
+  honest assessment_state). **Includes** adjudicating the 57 CHK-B3 deliveryForm `needs-review`
+  products (data adjudication from labels, not schema work) — the migration report
+  (`docs/audits/2026-08-17-product-migration-report.md`) is the input; each fills `deliveryForm`
+  + `releaseProfile` from its label, flipping the product from "label known, not yet assessed"
+  toward "fully assessed" only once the four checks are done (owner ruling 2026-08-17).
 - [ ] **CHK-E9 Legal pages rewritten** for the new site. `HG (legal)`.
 
 ### Mapping — old items → CHK-B/E
