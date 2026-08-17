@@ -1,0 +1,69 @@
+---
+// BucketBadge — the evidence-bucket badge, transcribed from the bundle kit
+// (components/verdicts/BucketBadge.jsx). RULES.md structure: each bucket ALWAYS renders with its
+// permanent plain sentence beneath the label (unless compact). Colour AND shape coded via
+// BucketShape (colour never the only signal). The BUCKETS map is the single source of the plain
+// labels + permanent sentences.
+//
+// RULE (locked, carried verbatim from the kit): a bucket describes ONLY what the research shows
+// about effectiveness. Safety NEVER moves a bucket, in either direction. "Tested — doesn't seem
+// to help sleep" requires papers that measured sleep and found no effect — kava (0 sleep papers,
+// serious safety concern) sits in "Not properly tested", with the safety flag carrying the warning.
+//
+// `bucket = null` is the pre-CHK-E6 state (grade not yet ratified) — the remedy page renders a
+// "grade in review" pending chip instead of this badge (no faked grade; assignment is HUMAN-GATE).
+import BucketShape from './BucketShape.astro';
+import { BUCKETS, type BucketKey } from './buckets.ts';
+
+interface Props {
+  bucket?: BucketKey;
+  naming?: 'plain' | 'evidence';
+  sentence?: string;
+  compact?: boolean;
+}
+const { bucket = 'unknown', naming = 'plain', sentence, compact = false } = Astro.props;
+const b = BUCKETS[bucket] ?? BUCKETS.unknown;
+---
+
+{compact ? (
+  <span class="chip" style={`--b-color:${b.color};--b-tint:${b.tint}`}>
+    <BucketShape bucket={bucket} size={14} />
+    {b[naming] ?? b.plain}
+  </span>
+) : (
+  <div class="badge">
+    <span class="chip" style={`--b-color:${b.color};--b-tint:${b.tint}`}>
+      <BucketShape bucket={bucket} size={14} />
+      {b[naming] ?? b.plain}
+    </span>
+    <p class="sentence">{sentence ?? b.sentence}</p>
+  </div>
+)}
+
+<style>
+  .badge {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    background: var(--b-tint);
+    color: var(--b-color);
+    border-radius: var(--radius-pill);
+    padding: var(--space-2) var(--space-3);
+    font-weight: var(--weight-strong);
+    font-size: var(--text-sm);
+    line-height: 1;
+  }
+  .sentence {
+    margin: 0;
+    font-size: var(--text-base);
+    line-height: var(--leading-body);
+    color: var(--text-muted);
+    max-width: 46ch;
+  }
+</style>

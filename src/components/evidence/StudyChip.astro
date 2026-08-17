@@ -1,0 +1,109 @@
+---
+// StudyChip — "See the study" chip + popover, transcribed from the bundle kit
+// (components/evidence/StudyChip.jsx). RULES.md Language: technical vocabulary (PMID/DOI) lives
+// ONLY inside this popover, never in body copy. Built on a native <details> so it works with JS
+// off and is keyboard-accessible for free (browse works without JS — CHK-B14 note). The popover
+// gives the finding in one plain sentence, how many people, the year, a link out, and when
+// Somnary last checked the link works.
+interface Props {
+  label?: string;
+  finding: string;
+  people?: number | null;
+  year?: number | null;
+  url?: string;
+  linkText?: string;
+  lastChecked?: string | null;
+}
+const {
+  label = 'See the study',
+  finding,
+  people = null,
+  year = null,
+  url = '#',
+  linkText = 'Read the study',
+  lastChecked = null,
+} = Astro.props;
+---
+
+<details class="chip">
+  <summary>
+    <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><circle cx="5" cy="5" r="3.5" fill="currentColor" opacity="0.8"></circle></svg>
+    {label}
+  </summary>
+  <div class="pop" role="group" aria-label="Study details">
+    <p class="finding">{finding}</p>
+    {(people || year) && (
+      <p class="meta">{people ? `${people.toLocaleString()} people` : ''}{people && year ? ' · ' : ''}{year ?? ''}</p>
+    )}
+    <a class="out" href={url} target="_blank" rel="noopener">{linkText} ↗</a>
+    {lastChecked && <p class="checked">Link last checked {lastChecked}</p>}
+  </div>
+</details>
+
+<style>
+  .chip {
+    position: relative;
+    display: inline-block;
+    font-family: var(--font-sans);
+  }
+  summary {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: var(--space-7);
+    padding: var(--space-1) var(--space-3);
+    border: var(--border-w) solid var(--border-strong);
+    border-radius: var(--radius-pill);
+    color: var(--text-link);
+    font-weight: var(--weight-strong);
+    font-size: var(--text-sm);
+    white-space: nowrap;
+    cursor: pointer;
+    list-style: none;
+    transition: background var(--dur-fast) var(--ease-settle);
+  }
+  summary::-webkit-details-marker { display: none; }
+  .chip[open] summary,
+  summary:hover {
+    background: var(--surface-sunken);
+  }
+  .pop {
+    position: absolute;
+    z-index: 30;
+    top: calc(100% + var(--space-2));
+    left: 0;
+    width: var(--popover-w);
+    background: var(--surface-card);
+    border: var(--border-w) solid var(--border-hairline);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-pop);
+    padding: var(--space-4);
+  }
+  .finding {
+    margin: 0;
+    font-size: var(--text-base);
+    line-height: var(--leading-body);
+    color: var(--text-body);
+  }
+  .meta {
+    margin: var(--space-2) 0 0;
+    font-size: var(--text-sm);
+    font-variant-numeric: tabular-nums;
+    color: var(--text-muted);
+  }
+  .out {
+    display: inline-block;
+    margin-top: var(--space-3);
+    font-weight: var(--weight-strong);
+    font-size: var(--text-sm);
+    color: var(--text-link);
+  }
+  .checked {
+    margin: var(--space-3) 0 0;
+    padding-top: var(--space-2);
+    border-top: var(--border-w) solid var(--border-hairline);
+    font-size: var(--text-xs);
+    font-variant-numeric: tabular-nums;
+    color: var(--text-faint);
+  }
+</style>

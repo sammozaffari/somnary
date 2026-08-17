@@ -1,0 +1,190 @@
+---
+// StudyField — the research filter, the signature evidence visual. Transcribed from the bundle
+// kit (components/evidence/StudyField.jsx). RULES.md Evidence display: ONE nested bar — full track
+// = papers cited ⊇ measured a sleep outcome ⊇ published results we could verify. Boundaries are
+// transparent hairline GAPS (structure, not tone). No scatter, no dots, no per-study positioning —
+// the corpus can't support it (best remedy: 3 verifiable papers; sparse is the normal case). The
+// muted remainder is ALWAYS labelled exactly "didn't measure sleep" — never anything implying weak
+// evidence. Direction is ONE plain sentence (`helped`), never a chart. Honest at n=0 and n=20. A
+// serious-concern safety flag always outranks this visual. Copy is authored per size, standalone —
+// every caption survives being read cold, the noun ("papers") always present.
+interface Counts { cited: number; sleep: number; verifiable: number; }
+interface Props {
+  counts?: Counts;
+  helped?: number | null;   // of `verifiable`, how many found an improvement (direction sentence)
+  size?: 'hero' | 'thumb' | 'share';
+  subject?: string;
+  safetyFlag?: string | null;
+  emptyText?: string;
+}
+const {
+  counts = { cited: 0, sleep: 0, verifiable: 0 },
+  helped = null,
+  size = 'hero',
+  subject,
+  safetyFlag = null,
+  emptyText = 'No published papers yet.',
+} = Astro.props;
+
+const SIZES = {
+  hero: { bar: '12px', captionSize: 'var(--text-base)', showKey: true, gap: 'var(--space-3)' },
+  thumb: { bar: '6px', captionSize: 'var(--text-xs)', showKey: false, gap: 'var(--space-2)' },
+  share: { bar: '20px', captionSize: 'var(--text-lg)', showKey: true, gap: 'var(--space-4)' },
+} as const;
+const cfg = SIZES[size] ?? SIZES.hero;
+const { cited = 0, sleep = 0, verifiable = 0 } = counts;
+const papers = (n: number) => `${n} ${n === 1 ? 'paper' : 'papers'}`;
+
+// caption derivation — the derive-empty rules govern the sparse cases (sleep===0, verifiable===0).
+function longCaption(c: number, s: number, v: number, subj?: string) {
+  const lead = subj ? `${subj}: ` : '';
+  if (s === 0) return `${lead}${papers(c)} on this remedy — none measured sleep.`;
+  if (v === 0) return `${lead}Of ${papers(c)}, ${s} measured sleep, but none published results we could verify.`;
+  return `${lead}Of ${papers(c)}, ${s} measured sleep, and ${v} published results we could verify.`;
+}
+function shortCaption(c: number, s: number, v: number) {
+  if (s === 0) return `None of ${papers(c)} measured sleep`;
+  if (v === 0) return `${s} of ${papers(c)} measured sleep — none we could verify`;
+  return `${s} of ${papers(c)} measured sleep; ${v} we could verify`;
+}
+function directionLine(v: number, h: number | null) {
+  if (h == null || v === 0) return null;
+  if (v === 1) return h === 1 ? 'The one result we could verify found an improvement.' : "The one result we could verify didn't find an improvement.";
+  const who = h === v ? `all ${v}` : h === 0 ? 'none' : `${h}`;
+  return `Of the ${v} results we could verify, ${who} found an improvement.`;
+}
+
+const pct = (n: number) => `${Math.max((n / Math.max(cited, 1)) * 100, 0)}%`;
+const caption = size === 'thumb' ? shortCaption(cited, sleep, verifiable) : longCaption(cited, sleep, verifiable, subject);
+const ariaLabel = longCaption(cited, sleep, verifiable, subject);
+const dir = size === 'thumb' ? null : directionLine(verifiable, helped);
+---
+
+<div class="field" style={`--sf-gap:${cfg.gap}`}>
+  {/* a serious-concern safety flag renders here and always outranks the bar (RULES.md) */}
+  {safetyFlag && (
+    <div class="flag" role="alert">
+      <strong>Safety concern —</strong><span>{safetyFlag}</span>
+    </div>
+  )}
+
+  {cited === 0 ? (
+    <p class="caption" style={`--cap-size:${cfg.captionSize}`}>{emptyText}</p>
+  ) : (
+    <>
+      <div class="bar" style={`--bar-h:${cfg.bar}`} role="img" aria-label={ariaLabel}>
+        {verifiable > 0 && <span class="seg verify" style={`width:${pct(verifiable)}`}></span>}
+        {sleep > verifiable && <span class="seg measured" style={`width:${pct(sleep - verifiable)}`}></span>}
+        {cited > sleep && <span class="seg none"></span>}
+      </div>
+
+      {cfg.showKey && (
+        <div class="key">
+          <span class="k"><span class="sw verify" aria-hidden="true"></span>Results we could verify</span>
+          <span class="k"><span class="sw measured" aria-hidden="true"></span>Measured sleep</span>
+          <span class="k"><span class="sw none" aria-hidden="true"></span>Didn't measure sleep</span>
+        </div>
+      )}
+
+      <p class="caption" style={`--cap-size:${cfg.captionSize}`}>{caption}</p>
+      {dir && <p class="dir">{dir}</p>}
+    </>
+  )}
+</div>
+
+<style>
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sf-gap);
+    font-family: var(--font-sans);
+  }
+  /* amber safety register only (RULES.md Colour) */
+  .flag {
+    display: flex;
+    gap: var(--space-2);
+    align-items: baseline;
+    background: var(--amber-tint);
+    border: var(--border-w) solid var(--amber-line);
+    border-radius: var(--radius-sm);
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--text-sm);
+    line-height: var(--leading-snug);
+    color: var(--text-body);
+  }
+  .flag strong {
+    color: var(--amber);
+    font-weight: var(--weight-strong);
+    white-space: nowrap;
+  }
+  /* nested bar — evidence blue is the ONLY saturated element (RULES.md Colour: data only).
+     boundaries are transparent hairline GAPS via the flex gap. */
+  .bar {
+    display: flex;
+    gap: var(--border-w);
+    height: var(--bar-h);
+    border-radius: var(--radius-pill);
+    overflow: hidden;
+  }
+  .seg {
+    flex: none;
+  }
+  .seg.verify {
+    background: var(--evidence);
+  }
+  .seg.measured {
+    background: var(--evidence);
+    opacity: 0.35;
+  }
+  .seg.none {
+    flex: 1;
+    background: var(--surface-sunken);
+    box-shadow: inset 0 0 0 var(--border-w) var(--border-hairline);
+  }
+  .key {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-5);
+  }
+  .k {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-meta);
+    color: var(--text-body);
+  }
+  .sw {
+    width: 12px;
+    height: 12px;
+    border-radius: var(--radius-xs);
+    flex: none;
+  }
+  .sw.verify {
+    background: var(--evidence);
+  }
+  .sw.measured {
+    background: var(--evidence);
+    opacity: 0.35;
+  }
+  .sw.none {
+    background: var(--surface-sunken);
+    border: var(--border-w) solid var(--border-hairline);
+  }
+  .caption {
+    margin: 0;
+    font-size: var(--cap-size);
+    font-variant-numeric: tabular-nums;
+    line-height: var(--leading-snug);
+    color: var(--text-body);
+    max-width: 56ch;
+  }
+  .dir {
+    margin: 0;
+    font-size: var(--text-base);
+    font-variant-numeric: tabular-nums;
+    line-height: var(--leading-snug);
+    color: var(--text-muted);
+    max-width: 56ch;
+  }
+</style>

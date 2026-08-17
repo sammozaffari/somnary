@@ -1,0 +1,68 @@
+---
+// SafetyCallout (+ shape-coded SafetyMark) — transcribed from the bundle kit
+// (components/chrome/SafetyCallout.jsx). RULES.md Colour: amber is the SAFETY register only. The
+// mark is shape-coded (caution = outlined triangle, serious = filled) so it is legible in
+// greyscale — colour is never the only signal. A serious-concern flag visually outranks the
+// evidence visual on the page (the remedy page renders it larger, under the h1).
+//
+// CONTENT RULE (carried verbatim — this has drifted three times): NEVER author a health or safety
+// claim in a component. The safety copy is passed in from the remedy's sourced `safety` data; a
+// design/placeholder file never hard-codes a claim. Tinted-left-edge on a soft amber ground —
+// the same edge language as a "documented concern" additive flag.
+interface Props {
+  level?: 'caution' | 'serious';
+  title?: string;
+  large?: boolean;
+}
+const { level = 'caution', title, large = false } = Astro.props;
+const label = title ?? (level === 'serious' ? 'Serious concern' : 'Safety concern');
+const markFill = level === 'serious' ? 'var(--amber)' : 'none';
+---
+
+<div class="callout" class:list={[large && 'large']} role="note">
+  <span class="label">
+    <svg class="mark" width="13" height="13" viewBox="0 0 14 14" aria-hidden="true">
+      <path d="M7 1.8 L13 12.2 H1 Z" fill={markFill} stroke="var(--amber)" stroke-width="1.6" stroke-linejoin="round"></path>
+    </svg>
+    <strong>{label}</strong>
+  </span>
+  <span class="body"><slot /></span>
+</div>
+
+<style>
+  /* stacked layout: label row above the full-width body — the safe base (the inline variant broke
+     in three contexts when a container squeezed the body into a one-word column, so it is dropped). */
+  .callout {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    background: var(--amber-tint);
+    border-left: 3px solid var(--amber); /* raw-ok: the tinted-left-edge safety cue, a fixed 3px rule (not on the --border-w scale) */
+    border-radius: var(--radius-sm);
+    padding: var(--space-4) var(--space-5);
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    line-height: var(--leading-body);
+    color: var(--text-body);
+  }
+  /* serious outranks: rendered larger under the h1 (RULES.md) */
+  .callout.large {
+    font-size: var(--text-lg);
+  }
+  .label {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+  .label strong {
+    color: var(--amber);
+    font-weight: var(--weight-strong);
+  }
+  .mark {
+    flex: none;
+    display: block;
+  }
+  .body {
+    min-width: 0;
+  }
+</style>
