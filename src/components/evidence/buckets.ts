@@ -2,6 +2,10 @@
 // sentences (RULES.md: each bucket always renders with its explanatory sentence). Kept in a .ts
 // module so BucketBadge.astro and any consumer (browse, how-we-grade) read ONE map.
 //
+// KEEP THIS IN A .ts MODULE — do NOT "tidy" it back into BucketBadge.astro's frontmatter. An Astro
+// component cannot `export const <data>` from its frontmatter: esbuild aborts the build with
+// "Expected ';' but found 'const'" (hit at CHK-B5). Shared data maps live in .ts and are imported.
+//
 // RULE (locked, from the bundle kit): a bucket describes ONLY what the research shows about
 // effectiveness. Safety NEVER moves a bucket. "Tested — doesn't seem to help sleep" (avoid)
 // requires papers that MEASURED sleep and found no effect — kava (0 sleep papers, serious safety

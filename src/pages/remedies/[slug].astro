@@ -90,7 +90,10 @@ const TOC = [
           </SafetyCallout>
         )}
 
-        {/* the bucket badge deep-links to How-we-grade — methodology at the moment of doubt */}
+        {/* the bucket badge deep-links to How-we-grade — methodology at the moment of doubt.
+           NEVER-INVENT RULE at render time: a null bucket (not yet ratified — CHK-E6 is HUMAN-GATE)
+           renders the honest "grade in review" pending chip. We never derive or fake a bucket from
+           the tier or the counts to fill the slot — an absent grade is shown as absent. */}
         {hasBucket ? (
           <a class="bucket-link" href="/how-we-grade" title="How we grade"><BucketBadge bucket={r.bucket!} /></a>
         ) : (
@@ -107,6 +110,16 @@ const TOC = [
 
         <p class="reviewed">Last reviewed {reviewed} · <a href="/request-a-review">Suggest a correction</a></p>
       </div>
+
+      {/* mobile contents — a native <details> disclosure (no-JS, matches the StudyChip pattern).
+         The remedy page is a reference document and most readers arrive on phones, so the sticky
+         desktop rail is NOT enough: the jump-nav must exist on mobile too. Desktop uses the rail. */}
+      <details class="toc-mobile">
+        <summary>On this page</summary>
+        <nav aria-label="On this page">
+          {TOC.map((t) => <a href={`#${t.id}`}>{t.label}</a>)}
+        </nav>
+      </details>
 
       {/* ── Does it work? ─────────────────────────────────────────────────── */}
       <section id="work">
@@ -190,8 +203,51 @@ const TOC = [
     grid-template-columns: 1fr;
     gap: var(--space-6);
   }
+  /* desktop rail hidden on mobile; the mobile <details> takes over below --bp-lg (1024px) */
   .toc {
     display: none;
+  }
+  .toc-mobile {
+    margin-top: var(--space-6);
+    border: var(--border-w) solid var(--border-hairline);
+    border-radius: var(--radius-sm);
+    background: var(--surface-card);
+  }
+  .toc-mobile summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: var(--control-md); /* 44px hit floor (RULES.md a11y) */
+    padding: 0 var(--space-4);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-strong);
+    color: var(--text-body);
+    cursor: pointer;
+    list-style: none;
+  }
+  .toc-mobile summary::-webkit-details-marker { display: none; }
+  .toc-mobile summary::after {
+    content: '+';
+    color: var(--text-muted);
+  }
+  .toc-mobile[open] summary::after { content: '−'; }
+  .toc-mobile nav {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    padding: 0 var(--space-2) var(--space-2);
+  }
+  .toc-mobile nav a {
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    font-size: var(--text-sm);
+    font-weight: var(--weight-ui);
+    color: var(--text-muted);
+  }
+  .toc-mobile nav a:hover {
+    background: var(--surface-sunken);
+    color: var(--text-body);
   }
   @media (min-width: 1024px) {
     .wrap {
@@ -205,6 +261,10 @@ const TOC = [
       position: sticky;
       top: var(--space-4);
       align-self: start;
+    }
+    /* desktop uses the sticky rail; hide the mobile disclosure */
+    .toc-mobile {
+      display: none;
     }
   }
   .toc-h {

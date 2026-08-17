@@ -11,9 +11,11 @@ export interface StudyCounts {
   sleep: number;
   verifiable: number;
   helped: number | null;
-  // triaged = every source has an adjudicated measuresSleepOutcome. Until the whole corpus is
-  // triaged (CHK-E2), a remedy with any `null` cannot honestly show a "measured sleep" count —
-  // the page states "we're still checking which measured sleep" instead of an undercounted bar.
+  // triaged = every source has an adjudicated measuresSleepOutcome. NEVER-INVENT RULE at render
+  // time: until the whole corpus is triaged (CHK-E2), a remedy with any `null` cannot honestly show
+  // a "measured sleep" count — counting only the known-true ones would UNDERCOUNT and quietly
+  // invent a lower number. So the page states "we're still checking which measured sleep" and draws
+  // NO bar rather than a wrong one. The unknown is shown as unknown (same discipline as a null bucket).
   triaged: boolean;
 }
 

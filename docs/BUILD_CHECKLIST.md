@@ -220,8 +220,8 @@ scope of each item lives in the plan — this is the work queue.
   jargon only in the chip, honest-stub forward line. Validated + rendered at BOTH ends: **melatonin**
   (8/5/3 rich bar + "all 3 found an improvement") and **taurine** (5/0/0 — bar all-sunken, "none
   measured sleep"). No placeholders, two axes (no combined number). Build + full verify green.
-  **Minor gap:** mobile sticky-contents collapsible not wired (desktop-only TOC; sections work by
-  scroll). Bucket values + full write-ups come from CHK-E6/E-track.
+  Mobile contents-collapsible wired (native `<details>`, no-JS) + re-verified at 390px on owner
+  request before merge. Bucket values + full write-ups come from CHK-E6/E-track.
 - [ ] **CHK-B6 Products list** `/products`: product card (3 completeness states), checks-passed
   fixed order, chrome-by-scale. Depends: B3, B5. (Maps CHK-Rui.1.)
 - [ ] **CHK-B7 Product page** `/products/{brand-slug}-{product-slug}`: paired verdict first,
