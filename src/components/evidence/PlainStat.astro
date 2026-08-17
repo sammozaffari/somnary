@@ -1,0 +1,60 @@
+---
+// PlainStat — a plain-language statistic at display scale, transcribed from the bundle kit
+// (components/evidence/PlainStat.jsx). RULES.md Language: numbers in everyday units ("about 7
+// minutes faster"), the confidence interval + sample size one tap deeper (the StudyChip). Figures
+// are tabular lining figures.
+// CASING RULE (carried verbatim): the figure carries the sentence's capital ("About 7 minutes");
+// `text` is a lower-case continuation ("faster to sleep, on average") — the two render as ONE
+// sentence. A lowercase figure reads as a typo at display scale.
+import StudyChip from './StudyChip.astro';
+interface Props {
+  figure: string;
+  text?: string;
+  source?: string;
+  size?: 'sm' | 'md' | 'lg';
+  chip?: Record<string, unknown> | null;
+}
+const { figure, text, source, size = 'md', chip = null } = Astro.props;
+const fontSize = size === 'lg' ? 'var(--display-lg)' : size === 'sm' ? 'var(--display-sm)' : 'var(--display-md)';
+---
+
+<div class="stat">
+  <p class="figure" style={`--fig-size:${fontSize}`}>{figure}{figure && text ? ' ' : ''}{text}</p>
+  {(source || chip) && (
+    <div class="prov">
+      {source && <span class="source">{source}</span>}
+      {chip && <StudyChip {...(chip as any)} />}
+    </div>
+  )}
+</div>
+
+<style>
+  .stat {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+  .figure {
+    margin: 0;
+    font-family: var(--font-sans);
+    font-size: var(--fig-size);
+    font-weight: var(--weight-title);
+    letter-spacing: var(--tracking-display);
+    line-height: var(--leading-tight);
+    font-variant-numeric: tabular-nums;
+    color: var(--text-body);
+    text-wrap: pretty;
+    max-width: 24ch;
+  }
+  .prov {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-1) var(--space-3);
+  }
+  .source {
+    font-size: var(--text-sm);
+    font-variant-numeric: tabular-nums;
+    color: var(--text-muted);
+  }
+</style>

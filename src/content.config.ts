@@ -16,6 +16,14 @@ import { glob } from 'astro/loaders';
 // tier is [HUMAN-GATE]: no agent assigns or changes a grade (CLAUDE.md non-negotiable).
 // The enum only constrains the shape; the VALUE is owner-ratified, never set by tooling.
 const tier = z.enum(['S', 'A', 'B', 'C', 'D', 'F']);
+
+// The evidence BUCKET (does the ingredient work) — the new grade, replacing the S–F tier.
+// SAME [HUMAN-GATE] rule as tier: no agent assigns or changes it; the enum is shape only, the
+// VALUE is owner-ratified at CHK-E6. Four buckets (RULES.md); each renders with its permanent
+// plain sentence (in BucketBadge). Bucket 4 ("avoid") requires papers that MEASURED sleep and
+// found no effect — risk is the SEPARATE safety flag, never folded into the bucket. `null` until
+// E6 ratifies it → the remedy page renders the honest "grade in review" pending state.
+const bucket = z.enum(['works', 'maybe', 'unknown', 'avoid']);
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'date must be YYYY-MM-DD');
 
 // Publication state is explicit: no record can silently inherit a ratified default.
@@ -223,6 +231,8 @@ const remedies = defineCollection({
   schema: z
     .object({
       tier,
+      // [HUMAN-GATE] — owner-ratified at CHK-E6, never by tooling. null → "grade in review".
+      bucket: bucket.nullable().default(null),
       workflowState,
       epistemicState,
       freshnessState,

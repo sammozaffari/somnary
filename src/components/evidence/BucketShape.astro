@@ -1,0 +1,30 @@
+---
+// BucketShape — the shared bucket glyph, transcribed from the bundle kit
+// (components/verdicts/BucketShape.jsx). RULES.md Colour: buckets are colour AND shape coded —
+// colour is never the only signal. disc / half-disc / ring / struck ring. Colour comes from
+// currentColor (the consumer sets it to the bucket's --bucket-* token).
+interface Props {
+  bucket?: 'works' | 'maybe' | 'unknown' | 'avoid';
+  size?: number;
+  strokeWidth?: number;
+}
+const { bucket = 'unknown', size = 16, strokeWidth = 1.6 } = Astro.props;
+const sw = strokeWidth;
+---
+
+<svg width={size} height={size} viewBox="0 0 16 16" aria-hidden="true" style="flex:none;display:block">
+  {bucket === 'works' && <circle cx="8" cy="8" r="6.5" fill="currentColor" />}
+  {bucket === 'maybe' && (
+    <g>
+      <circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width={sw} />
+      <path d="M2 8 a6 6 0 0 0 12 0 z" fill="currentColor" />
+    </g>
+  )}
+  {bucket === 'unknown' && <circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width={sw} />}
+  {bucket === 'avoid' && (
+    <g>
+      <circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width={sw} />
+      <line x1="3.8" y1="12.2" x2="12.2" y2="3.8" stroke="currentColor" stroke-width={sw} />
+    </g>
+  )}
+</svg>

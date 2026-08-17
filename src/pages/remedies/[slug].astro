@@ -1,0 +1,381 @@
+---
+// Remedy page (CHK-B5) — /remedies/{slug}. The template all 31 remedies inherit; the first-use
+// home of the evidence primitives (bucket badge, safety flag, nested-bar study field, study chip,
+// plain stat, safety callout). Renders FROM STRUCTURED DATA only; emptiness is derived from the
+// data, never hardcoded (RULES.md Evidence display; the bundle's deriveEmpty rule).
+//
+// RULES.md enforced here:
+//  · Interface economy: PairedVerdict NEVER appears on an ingredient's own page (one answer IS the
+//    page) — it is not imported.
+//  · Structure: a serious-concern safety flag visually OUTRANKS the evidence visual (rendered
+//    larger, directly under the h1).
+//  · Evidence display: the nested bar renders from sources[] counts only; papers are grouped, never
+//    hidden; study types render as plain words; jargon (PMID) lives only in the "see the study" chip.
+//  · Language: headings are the questions people ask ("Does it work?", "Is it safe with my meds?").
+//  · Colour: interface colour is --ink; evidence blue is data-only; amber is the safety register.
+//
+// HONEST-STUB STATE (Artifact 3 template requirement): until a remedy has its full write-up AND an
+// owner-ratified bucket (CHK-E6), the page renders the stub — displayName, bucket badge (or the
+// "grade in review" pending state while bucket is null — no faked grade, HUMAN-GATE), nested bar
+// from real counts, safety flag, ONE plain forward line, review date + correction link. Never old
+// prose. Any "[Placeholder" string fails the production build (item-9 gate).
+import Base from '../../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+import BucketBadge from '../../components/evidence/BucketBadge.astro';
+import StudyField from '../../components/evidence/StudyField.astro';
+import StudyChip from '../../components/evidence/StudyChip.astro';
+import SafetyCallout from '../../components/evidence/SafetyCallout.astro';
+import { studyCounts, safetyInfo, groupSources, typeWords } from '../../lib/remedy/derive.ts';
+
+export async function getStaticPaths() {
+  const remedies = await getCollection('remedies');
+  return remedies.map((r) => ({ params: { slug: r.id }, props: { r: r.data } }));
+}
+const { r } = Astro.props;
+
+const counts = studyCounts(r.sources);
+const safety = safetyInfo(r.safety);
+const groups = groupSources(r.sources);
+
+// human date — "14 July 2026", never ISO (RULES.md Identity)
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+function humanDate(iso: string): string {
+  const [y, m, d] = iso.split('-').map(Number);
+  return `${d} ${MONTHS[m - 1]} ${y}`;
+}
+const reviewed = humanDate(r.reviewDate);
+
+// citation URL for a source (jargon-free label; PMID lives inside the chip only)
+function sourceUrl(s: (typeof r.sources)[number]): string {
+  if (s.pmid) return `https://pubmed.ncbi.nlm.nih.gov/${s.pmid}/`;
+  if (s.doi) return `https://doi.org/${s.doi}`;
+  if (s.registry) return `https://clinicaltrials.gov/study/${s.registry}`;
+  return '#';
+}
+
+// The bucket is HUMAN-GATE (CHK-E6). null → the "grade in review" pending state; no faked grade.
+const hasBucket = r.bucket != null;
+// Until a remedy has its ratified bucket + new write-up, the verdict line is the stub forward line.
+const forwardLine = 'The full write-up is coming. The grade and safety flag above are current.';
+
+const TOC = [
+  { id: 'work', label: 'Does it work?' },
+  { id: 'safe', label: 'Is it safe?' },
+  { id: 'dose', label: 'What dose was studied?' },
+  { id: 'research', label: 'The research' },
+];
+---
+
+<Base
+  title={`${r.displayName} — does it help you sleep? | Somnary`}
+  description={r.oneLineVerdict}
+  contain={false}
+>
+  <div class="wrap">
+    <nav class="toc" aria-label="On this page">
+      <p class="toc-h">On this page</p>
+      {TOC.map((t) => <a href={`#${t.id}`}>{t.label}</a>)}
+    </nav>
+
+    <main class="content">
+      {/* breadcrumb — the back affordance (RULES.md) */}
+      <p class="crumb"><a href="/remedies">‹ Remedies</a></p>
+      <h1>{r.displayName}</h1>
+
+      {/* serious safety concern outranks the evidence: rendered large, directly under the h1 */}
+      <div class="hero">
+        {safety && (
+          <SafetyCallout level={safety.level} large={safety.serious} title={safety.serious ? 'Serious safety concern' : 'Safety'}>
+            {safety.lead}
+          </SafetyCallout>
+        )}
+
+        {/* the bucket badge deep-links to How-we-grade — methodology at the moment of doubt */}
+        {hasBucket ? (
+          <a class="bucket-link" href="/how-we-grade" title="How we grade"><BucketBadge bucket={r.bucket!} /></a>
+        ) : (
+          <a class="pending" href="/how-we-grade">Grade in review <span aria-hidden="true">›</span></a>
+        )}
+
+        <p class="verdict">{forwardLine}</p>
+
+        {counts.triaged ? (
+          <StudyField size="hero" counts={{ cited: counts.cited, sleep: counts.sleep, verifiable: counts.verifiable }} helped={counts.helped} subject={r.displayName} />
+        ) : (
+          <p class="untriaged">{counts.cited} {counts.cited === 1 ? 'paper' : 'papers'} on {r.displayName} — we're still checking which measured sleep.</p>
+        )}
+
+        <p class="reviewed">Last reviewed {reviewed} · <a href="/request-a-review">Suggest a correction</a></p>
+      </div>
+
+      {/* ── Does it work? ─────────────────────────────────────────────────── */}
+      <section id="work">
+        <h2>Does it work?</h2>
+        {counts.triaged && counts.sleep === 0 ? (
+          <p class="empty">No published study we found has measured whether {r.displayName} helps you sleep. That's a gap in the research, not a verdict on the remedy.</p>
+        ) : counts.verifiable > 0 ? (
+          <ul class="findings">
+            {groups.verified.map((s) => (
+              <li>
+                <span class="finding">{s.finding}</span>
+                <StudyChip finding={s.finding} people={s.sampleSize} year={s.year} url={sourceUrl(s)} linkText="Read the study" />
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p class="empty">Some studies measured sleep, but none published results in enough detail for us to verify. See the research below.</p>
+        )}
+      </section>
+
+      {/* ── Is it safe? ───────────────────────────────────────────────────── */}
+      <section id="safe">
+        <h2>Is it safe with my medications?</h2>
+        <SafetyCallout level={safety.level} title={safety.serious ? 'Serious concern' : 'Worth knowing'}>{safety.lead}</SafetyCallout>
+        {r.safety.interactions.length > 0 && (
+          <>
+            <h3>Interactions</h3>
+            <ul class="plain">{r.safety.interactions.map((i) => <li>{i}</li>)}</ul>
+          </>
+        )}
+        <p class="pregnancy">{r.safety.pregnancy}</p>
+      </section>
+
+      {/* ── Dose ──────────────────────────────────────────────────────────── */}
+      <section id="dose">
+        <h2>What dose was studied?</h2>
+        {r.doses.length > 0 ? (
+          <ul class="doses">
+            {r.doses.map((d) => (
+              <li>
+                <strong>{d.studiedDose}</strong> — {d.marketComparison}
+                {d.timing && <span class="timing"> · {d.timing}</span>}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p class="empty">No studied dose is recorded yet.</p>
+        )}
+      </section>
+
+      {/* ── The research ─────────────────────────────────────────────────── */}
+      <section id="research">
+        <h2>The research</h2>
+        <p class="research-lead">Every paper we found on {r.displayName}, grouped by what it measured. Study types in plain words.</p>
+        <ul class="papers">
+          {r.sources.map((s) => (
+            <li>
+              <span class="paper-type">{typeWords(s.type)}</span>
+              <span class="paper-finding">{s.finding}</span>
+              <span class="paper-meta">
+                {s.sampleSize ? `${s.sampleSize.toLocaleString()} people · ` : ''}{s.year}
+              </span>
+              <StudyChip finding={s.finding} people={s.sampleSize} year={s.year} url={sourceUrl(s)} linkText="Read the study" />
+            </li>
+          ))}
+        </ul>
+      </section>
+    </main>
+  </div>
+</Base>
+
+<style>
+  /* remedy layout is wider than the reading column to carry a sticky contents rail.
+     1120px is a layout width (not token-gated); content stays in a readable measure inside. */
+  .wrap {
+    width: 100%;
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: var(--space-5) var(--space-5) var(--space-9);
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+  }
+  .toc {
+    display: none;
+  }
+  @media (min-width: 1024px) {
+    .wrap {
+      grid-template-columns: 200px minmax(0, 1fr);
+      gap: var(--space-8);
+    }
+    .toc {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-1);
+      position: sticky;
+      top: var(--space-4);
+      align-self: start;
+    }
+  }
+  .toc-h {
+    margin: 0 0 var(--space-2);
+    padding: 0 var(--space-3);
+    font-size: var(--text-xs);
+    font-weight: var(--weight-strong);
+    color: var(--text-muted);
+  }
+  .toc a {
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    font-size: var(--text-sm);
+    font-weight: var(--weight-ui);
+    color: var(--text-muted);
+  }
+  .toc a:hover {
+    background: var(--surface-sunken);
+    color: var(--text-body);
+  }
+  .crumb {
+    margin: 0;
+    font-size: var(--text-sm);
+    font-weight: var(--weight-ui);
+  }
+  .crumb a {
+    color: var(--text-link);
+    text-decoration: none;
+  }
+  h1 {
+    margin: var(--space-1) 0 0;
+    font-size: var(--display-lg);
+    font-weight: var(--weight-title);
+    letter-spacing: var(--tracking-display);
+    line-height: var(--leading-tight);
+  }
+  .hero {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-4);
+    padding-top: var(--space-4);
+  }
+  .bucket-link {
+    text-decoration: none;
+  }
+  /* pending grade — muted, never a bucket colour (no faked grade). RULES.md a11y: 44px hit. */
+  .pending {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: var(--control-md);
+    padding: var(--space-2) var(--space-4);
+    border: var(--border-w) solid var(--border-input);
+    border-radius: var(--radius-pill);
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-strong);
+    text-decoration: none;
+  }
+  .verdict {
+    margin: 0;
+    font-size: var(--text-lg);
+    font-weight: var(--weight-ui);
+    line-height: var(--leading-snug);
+    max-width: var(--measure);
+    text-wrap: pretty;
+  }
+  .untriaged,
+  .empty {
+    margin: 0;
+    font-size: var(--text-base);
+    line-height: var(--leading-body);
+    color: var(--text-muted);
+    max-width: var(--measure);
+  }
+  .reviewed {
+    margin: 0;
+    font-size: var(--text-xs);
+    font-variant-numeric: tabular-nums;
+    color: var(--text-faint);
+  }
+  .reviewed a {
+    color: var(--text-link);
+  }
+  section {
+    margin-top: var(--space-8);
+    border-top: var(--border-w) solid var(--border-hairline);
+    padding-top: var(--space-8);
+  }
+  h2 {
+    margin: 0 0 var(--space-4);
+    font-size: var(--text-xl);
+    font-weight: var(--weight-heading);
+    letter-spacing: var(--tracking-display);
+    line-height: var(--leading-snug);
+  }
+  h3 {
+    margin: var(--space-5) 0 var(--space-2);
+    font-size: var(--text-lg);
+    font-weight: var(--weight-strong);
+  }
+  .findings,
+  .papers {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-width: var(--measure);
+  }
+  .findings li {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
+    padding: var(--space-3) 0;
+    border-top: var(--border-w) solid var(--border-hairline);
+  }
+  .finding,
+  .paper-finding {
+    font-size: var(--text-base);
+    line-height: var(--leading-snug);
+    color: var(--text-body);
+  }
+  .papers li {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-1);
+    padding: var(--space-4) 0;
+    border-top: var(--border-w) solid var(--border-hairline);
+  }
+  .paper-type {
+    font-size: var(--text-sm);
+    font-weight: var(--weight-strong);
+    color: var(--text-body);
+  }
+  .paper-meta {
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .papers li :global(.chip) {
+    margin-top: var(--space-2);
+  }
+  .plain,
+  .doses {
+    padding-left: var(--space-5);
+    margin: 0;
+    max-width: var(--measure);
+    line-height: var(--leading-body);
+  }
+  .doses {
+    list-style: none;
+    padding-left: 0;
+  }
+  .doses li {
+    padding: var(--space-2) 0;
+  }
+  .timing {
+    color: var(--text-muted);
+  }
+  .pregnancy,
+  .research-lead {
+    margin: var(--space-4) 0 0;
+    font-size: var(--text-base);
+    line-height: var(--leading-body);
+    color: var(--text-muted);
+    max-width: var(--measure);
+  }
+  .research-lead {
+    margin: 0 0 var(--space-4);
+  }
+</style>
