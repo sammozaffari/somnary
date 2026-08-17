@@ -1,0 +1,39 @@
+/* Somnary type — ONE FAMILY: Onest. Weight and size carry the whole hierarchy;
+   there is no display/body split and no typographic signature device — type is
+   excellent and quiet; character comes from the palette, the spacing discipline,
+   and the evidence visuals.
+   Figures ANYWHERE (prose, identifiers like PMID/NCT, tables) use tabular lining
+   figures: font-variant-numeric: tabular-nums. No mono exists in the system.
+   Sentence case everywhere: buttons, labels, nav, headings.
+   Dates are written for humans: "14 July 2026", never ISO. */
+:root {
+  /* ONE font token. --font-display was removed deliberately: two names for one value
+     is how a display/body split silently returns. Everything reads --font-sans. */
+  --font-sans: 'Onest', -apple-system, 'Segoe UI', sans-serif;
+
+  /* scale (px) — mobile-first; body never below 16 */
+  --text-xs: 13px;      /* metadata, "last checked" — LEGIBILITY FLOOR: no text below 13px,
+                           and nothing below 4.5:1 against its own surface (checked per surface:
+                           page, raised card, sunken — both themes) */
+  --text-sm: 13.5px;    /* captions, chip labels, small labels */
+  --text-base: 16px;    /* body */
+  --text-lg: 18.5px;    /* lead body, verdict sentences, search input */
+  --text-xl: 22px;      /* card titles */
+  --display-sm: 28px;   /* section headings (the questions) */
+  --display-md: 38px;   /* page titles, plain-language stats */
+  --display-lg: 52px;   /* hero stat / remedy name */
+
+  --leading-tight: 1.15;
+  --leading-snug: 1.35;
+  --leading-body: 1.6;
+
+  --tracking-display: -0.01em;  /* display sizes only */
+
+  /* weight assignments — deliberate, not incidental */
+  --weight-body: 400;     /* body copy */
+  --weight-meta: 450;     /* metadata, captions, key labels */
+  --weight-ui: 500;       /* interactive row text, input text, verdict lines */
+  --weight-strong: 600;   /* small labels, buttons, chips, card titles, wordmark */
+  --weight-heading: 650;  /* section headings (--display-sm) */
+  --weight-title: 550;    /* page titles & display stats (--display-md/lg) */
+}

@@ -1,0 +1,21 @@
+<!-- @dsCard group="Foundations" viewport="700x210" subtitle="Calm 150–250ms, settling ease; the label-versus-studies reveal (loops)" name="Motion" -->
+<!DOCTYPE html>
+<html><head><link rel="stylesheet" href="../styles.css">
+<style>
+body{margin:0;background:var(--surface-page);font-family:var(--font-sans);color:var(--text-body);padding:20px 24px;display:flex;gap:32px;align-items:center}
+.demo{flex:1}
+.claim{font-size:17px;font-weight:500;position:relative;display:inline-block}
+.claim .strike{position:absolute;left:0;top:55%;height:1.5px;background:var(--bucket-avoid);width:0;animation:draw 4s var(--ease-settle) infinite}
+.found{font-size:16px;color:var(--text-muted);margin-top:8px;opacity:0;animation:fadein 4s var(--ease-fade) infinite}
+@keyframes draw{0%,20%{width:0}35%,100%{width:100%}}
+@keyframes fadein{0%,35%{opacity:0;transform:translateY(3px)}50%,92%{opacity:1;transform:none}100%{opacity:0}}
+@media (prefers-reduced-motion: reduce){.claim .strike{animation:none;width:100%}.found{animation:none;opacity:1}}
+.tok{font-size:12px;font-variant-numeric:tabular-nums;color:var(--text-muted);line-height:2}
+</style>
+</head><body>
+<div class="demo">
+  <div class="claim">"Fall asleep 3× faster"<span class="strike"></span></div>
+  <div class="found">The studies found about 7 minutes, on average.</div>
+</div>
+<div class="tok">--dur-fast 150ms<br>--dur-base 200ms<br>--dur-slow 250ms<br>--dur-reveal 450ms<br>--ease-settle cubic-bezier(.22,.8,.3,1)</div>
+</body></html>

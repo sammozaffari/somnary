@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<!-- @template name="Remedies" description="The remedies index. Enforces: chrome-by-scale (filters only above ~20 items), buckets in fixed order, real audit data only — unaudited entries render as dimmed pending rows, never invented." -->
+<helmet><script src="./ds-base.js"></script>
+<!-- body reset carried from ui_kits/site/index.html — kit pages rely on their host page for it -->
+<style>*, *::before, *::after { box-sizing: border-box; } html, body { margin: 0; } body { background: var(--page-ground); color: var(--text-body); font-family: var(--font-sans); } a { color: var(--text-link); } a:hover { color: var(--text-link-hover); }</style></helmet>
+<!-- Carried from ui_kits/site/RemediesPage.jsx (load-bearing rule comments):
+/* Real audit data only. Bucket-default sentences are system copy; melatonin and kava carry
+   their page-derived sentences. Use tags describe common use, never effectiveness; unaudited
+   entries are marked placeholder. Bucket totals beyond the entered remedies render as
+   dimmed "pending data entry" rows — never invented. */
+-->
+<x-import component-from-global-scope="SomnaryDesignSystem_d2f73f.RemediesPage" go="{{ go }}" go-remedy="{{ goRemedy }}" go-grade="{{ goGrade }}" hint-size="100%,1200px"></x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const noop = () => {};
+    return { go: noop, goRemedy: noop, goGrade: noop };
+  }
+}
+</script>
+</body>
+</html>

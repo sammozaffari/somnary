@@ -1,0 +1,116 @@
+/* Somnary colour system — quiet warm paper by day, a designed dusk theme for late-night reading.
+   COLOUR MEANS ONE THING ON THIS SITE: THIS IS DATA. --evidence (ink blue, the colour of
+   printed reference — atlases, journals, institutional publishing) is reserved for the
+   evidence bar and its key, and nothing else. ALL interface colour — buttons, links, focus
+   rings, active states — is carried by --ink. There is no --accent: anything reaching for
+   colour has to choose a side.
+   Buckets are colour-coded AND shape-coded (disc / half disc / ring / struck ring); colour is
+   never the only signal. Spectrum moss → ochre → warm grey → clay, all AA on their page surface. */
+:root {
+  /* base — day */
+  --paper: #F6F2E9;
+  --page-ground: var(--paper); /* @kind color */  /* day stays flat; dusk overrides with a gradient */
+  --paper-raised: #FBF8F1;
+  --paper-sunken: #EEE9DB;
+  --ink: #1C1B22;
+  --ink-2: #5B564E;
+  --ink-3: #6B675C;  /* legibility floor: 4.5:1 on every surface (worst 4.65 on sunken) */
+  --line: #E1DACA;
+  --line-strong: #C8C0AC;
+
+  /* evidence — ink blue. EVIDENCE ONLY (the research-filter bar + key). Never on interface. */
+  --evidence: #2C3E63;
+  --evidence-strong: #1E2C4A;
+  --evidence-tint: #E2E6EF;
+  --evidence-line: #B9C2D4;
+
+  /* support — muted sage. --sage is a GRAPHIC token (check-mark strokes, fills) and fails AA
+     as text by design; any sage-coloured TEXT uses --sage-text (worst 5.45:1 on sunken). */
+  --sage: #6E7D64;
+  --sage-text: #53614A;
+  --sage-tint: #E8EBDF;
+
+  /* evidence buckets — desaturated, colourblind-safe, moss → ochre → warm grey → clay */
+  --bucket-works: #3E6B4F;
+  --bucket-works-tint: #DFE8DD;
+  --bucket-maybe: #7C6012;
+  --bucket-maybe-tint: #F0E7C9;
+  --bucket-unknown: #6B6459;
+  --bucket-unknown-tint: #E7E3DA;
+  --bucket-avoid: #9C4330;
+  --bucket-avoid-tint: #F0DCD3;
+
+  /* safety — calm, unmissable amber */
+  --amber: #8A5A16;
+  --amber-tint: #F5E7CB;
+  --amber-line: #DCC28C;
+
+  /* semantic aliases — interface colour is INK, everywhere */
+  --surface-page: var(--paper);
+  --surface-card: var(--paper-raised);
+  --surface-sunken: var(--paper-sunken);
+  --text-body: var(--ink);
+  --text-muted: var(--ink-2);
+  --text-faint: var(--ink-3);
+  --text-link: var(--ink);
+  --text-link-hover: var(--ink-2);
+  --border-hairline: var(--line);
+  --border-strong: var(--line-strong);
+  /* --border-input: 3:1 non-text contrast for borders that are a control's SOLE boundary
+     (search field, outline buttons) — decorative hairlines stay low-contrast on purpose. */
+  --border-input: #8A8370;
+  --focus-ring: 2px solid var(--ink);
+  --focus-offset: 2px;
+
+  --shadow-card: 0 1px 2px rgba(28,27,34,0.05), 0 6px 20px rgba(28,27,34,0.06);
+  --shadow-pop: 0 2px 6px rgba(28,27,34,0.08), 0 12px 32px rgba(28,27,34,0.14);
+  --scrim: rgba(28,27,34,0.32);
+}
+
+/* dusk — designed low-light theme: amber-shifted text, lowered contrast, dimmed chrome.
+   Same rule: evidence blue on data only; interface colour is the warm cream --ink. */
+[data-theme="dusk"] {
+  --paper: #17151E;
+  /* page-ground gradient, dusk only — lightens the top AND darkens the bottom: a pure
+     darken reads as a vignette; shifting both ends reads as light direction. Day stays flat.
+     Applied to the page ground only (body rule below) — surfaces/cards keep flat tokens. */
+  --page-ground: linear-gradient(180deg, #191722 0%, #100E1A 100%); /* @kind color */
+  --paper-raised: #201D29;
+  --paper-sunken: #100E15;
+  --ink: #E7DECB;
+  --ink-2: #A99F8F;
+  --ink-3: #918876;  /* legibility floor: 4.5:1 on every surface incl. cards (worst 4.72 on raised) */
+  --line: #2C2836;
+  --line-strong: #3D3849;
+  --border-input: #746D8B;
+
+  --evidence: #8FA5CE;
+  --evidence-strong: #A9BCDF;
+  --evidence-tint: #232B3F;
+  --evidence-line: #3C4A6B;
+
+  --sage: #92A385;
+  --sage-text: #92A385;  /* passes as text at dusk (worst 6.15:1 on raised) — one value serves both roles */
+  --sage-tint: #222A1E;
+
+  --bucket-works: #8CB795;
+  --bucket-works-tint: #1E2B21;
+  --bucket-maybe: #C7A050;
+  --bucket-maybe-tint: #2B2414;
+  --bucket-unknown: #A29A8B;
+  --bucket-unknown-tint: #26231D;
+  --bucket-avoid: #C97F68;
+  --bucket-avoid-tint: #2E1E18;
+
+  --amber: #D2A559;
+  --amber-tint: #2C2314;
+  --amber-line: #5C4A26;
+
+  --shadow-card: 0 1px 2px rgba(0,0,0,0.3), 0 6px 20px rgba(0,0,0,0.35);
+  --shadow-pop: 0 2px 6px rgba(0,0,0,0.4), 0 16px 40px rgba(0,0,0,0.5);
+  --scrim: rgba(8,7,12,0.55);
+}
+
+/* The page ground reads --page-ground (flat paper by day, the dusk gradient at night).
+   fixed attachment so the light direction spans the viewport, not each scroll height. */
+body { background: var(--page-ground) fixed; }

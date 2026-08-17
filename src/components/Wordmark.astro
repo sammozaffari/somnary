@@ -1,9 +1,11 @@
 ---
-// Wordmark — DESIGN_SYSTEM v3. The brand symbol is a crescent moon in a circular oxblood
-// disc (D3 amended by owner 2026-07-08). In the nav the moon mark stands ALONE — the
-// "Somnary" logotype text was dropped per owner 2026-07-09; the mark is enlarged to carry
-// the brand on its own. The accessible name stays "Somnary" via aria-label so the link is
-// still announced/read as the brand. Linked → wraps in <a> (focus ring applies).
+// Wordmark — Somnary brand mark. RULES.md Identity: the mark is the LETTERFORM S (a capital
+// S in Onest 600), ink on paper, in the system's rounded square — no moons, stars, or sleep
+// iconography. This replaces the retired crescent-moon disc (PR #33 nav mark) and the earlier
+// dot-field favicon (CHK-B1, 2026-08-14 charter). The glyph path is extracted from Onest 600
+// (public/favicon.svg / public/wordmark.svg are the canonical outlined-path assets); inlined
+// here as the path only, filled with currentColor and tinted --ink so it flips with the theme
+// (no hardcoded hex — reject-don't-launder). The accessible name stays "Somnary" via aria-label.
 interface Props {
   href?: string;
 }
@@ -12,8 +14,13 @@ const { href = '/' } = Astro.props;
 
 <a class="wordmark" href={href} aria-label="Somnary — home">
   <span class="mark" aria-hidden="true">
-    <svg viewBox="0 0 24 24" fill="currentColor" role="img" aria-hidden="true">
-      <path d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z"/>
+    <svg viewBox="0 0 32 32" role="img" aria-hidden="true">
+      <g transform="translate(5.58 27.25) scale(0.3177)">
+        <path
+          fill="currentColor"
+          d="M34.2 0.8L34.2 0.8Q27.1 0.8 20.9-1.4Q14.6-3.5 10.4-8.3Q6.2-13 4.9-20.7L4.9-20.7L17.6-20.7Q18.8-16.8 21.5-14.6Q24.1-12.4 27.7-11.6Q31.3-10.7 35-10.7L35-10.7Q38.3-10.7 41.3-11.6Q44.2-12.4 46.2-14.4Q48.1-16.4 48.1-19.7L48.1-19.7Q48.1-22.2 47.1-23.8Q46-25.3 44.2-26.4Q42.3-27.4 39.7-28L39.7-28Q37.2-28.8 34.3-29.4Q31.4-30 28.6-30.7Q25.8-31.4 23.3-32.5L23.3-32.5Q20.1-33.6 17.2-35.1Q14.2-36.5 12.1-38.6Q9.9-40.7 8.6-43.8Q7.3-46.9 7.3-51.2L7.3-51.2Q7.3-56.1 9.0-59.7Q10.6-63.2 13.4-65.5Q16.1-67.8 19.6-69.1Q23-70.4 26.8-71Q30.5-71.6 33.9-71.6L33.9-71.6Q40.5-71.6 46.0-69.4Q51.4-67.2 54.9-62.6Q58.4-58 58.9-50.8L58.9-50.8L46.8-50.8Q46.4-54.2 44.4-56.3Q42.4-58.3 39.4-59.3Q36.4-60.2 32.9-60.2L32.9-60.2Q30.5-60.2 28.2-59.8Q25.8-59.4 24.0-58.4Q22.1-57.4 21.0-55.8Q19.8-54.1 19.8-51.6L19.8-51.6Q19.8-49.4 20.9-47.8Q22-46.1 24.0-45Q25.9-43.9 28.6-43L28.6-43Q32.1-41.6 36.3-40.9Q40.4-40.2 44.1-39L44.1-39Q47.7-38 50.8-36.6Q53.8-35.1 56-33.1Q58.2-31 59.5-28.1Q60.7-25.1 60.7-21L60.7-21Q60.7-15 58.6-10.9Q56.4-6.7 52.7-4.1Q48.9-1.5 44.2-0.4Q39.4 0.8 34.2 0.8Z"
+        />
+      </g>
     </svg>
   </span>
 </a>
@@ -22,24 +29,27 @@ const { href = '/' } = Astro.props;
   .wordmark {
     display: inline-flex;
     align-items: center;
-    gap: var(--sp-2);
+    gap: var(--space-2);
     text-decoration: none;
   }
-  /* filled oxblood disc carrying a white crescent moon — the standalone brand mark.
-     Enlarged (was 27px) now that it carries the nav on its own. */
+  /* The letterform mark in the system's rounded square: --ink glyph on the paper ground with a
+     hairline edge. Interface colour is --ink (RULES.md Colour — no accent). Both the ground and
+     the glyph read from tokens, so the mark flips correctly in dusk. */
   .mark {
     display: grid;
     place-items: center;
-    width: 40px;
-    height: 40px;
+    width: var(--control-md);
+    height: var(--control-md);
     flex: none;
-    border-radius: var(--r-pill);
-    background: var(--primary);
-    color: #ffffff;
+    color: var(--ink);
+    background: var(--surface-page);
+    border: var(--border-w) solid var(--border-hairline);
+    border-radius: var(--radius-sm);
     line-height: 1;
   }
   .mark svg {
-    width: 23px;
-    height: 23px;
+    /* glyph ≈72% of the tile (RULES.md wordmark spec — drawn to read at 16px first) */
+    width: 72%;
+    height: 72%;
   }
 </style>

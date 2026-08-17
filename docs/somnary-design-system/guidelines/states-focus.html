@@ -1,0 +1,17 @@
+<!-- @dsCard group="Foundations" viewport="700x170" subtitle="Visible keyboard focus, hover and press states, both themes" name="States & focus" -->
+<!DOCTYPE html>
+<html><head><link rel="stylesheet" href="../styles.css">
+<style>
+body{margin:0;font-family:var(--font-sans);display:grid;grid-template-rows:1fr 1fr}
+.t{background:var(--surface-page);color:var(--text-body);padding:14px 24px;display:flex;gap:14px;align-items:center;font-size:14px}
+.btn{min-height:40px;padding:0 18px;border-radius:var(--radius-pill);border:1px solid var(--border-strong);background:var(--surface-card);color:var(--text-body);font-weight:500;display:inline-flex;align-items:center}
+.hover{background:var(--surface-sunken);border-color:var(--border-strong)}
+.press{background:var(--surface-sunken)}
+.focus{outline:var(--focus-ring);outline-offset:var(--focus-offset)}
+.lbl{font-size:12px;color:var(--text-faint);font-family:var(--font-mono)}
+a{color:var(--text-link)}
+</style>
+</head><body>
+<div class="t"><span class="btn">Rest</span><span class="btn hover">Hover</span><span class="btn press">Press</span><span class="btn focus">Focus</span><span class="lbl">2px ink ring, 2px offset</span><a href="#">A link</a></div>
+<div class="t" data-theme="dusk"><span class="btn">Rest</span><span class="btn hover">Hover</span><span class="btn press">Press</span><span class="btn focus">Focus</span><span class="lbl">Same ring at dusk</span><a href="#">A link</a></div>
+</body></html>

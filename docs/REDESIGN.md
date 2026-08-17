@@ -67,6 +67,39 @@
 > - ~~redesign-design-system-rules~~ — MERGED (CHK-R0): sentence-case / no-serif / self-host /
 >   reject-don't-launder doc rules (subset of the type branch).
 
+> ## v6 amendment — the rebuild charter (owner-ratified 2026-08-14; committed at CHK-B1)
+> This charter was ratified with the CHK-R1 rebuild plan
+> (`docs/plans/2026-08-14-chk-r1-rebuild-plan.md`, APPROVED IN FULL) but was never recorded in
+> REDESIGN.md — the plan's divergence #1 flagged the gap and its approved fix is to commit it
+> here verbatim in the CHK-B1 session. It is now binding and supersedes any earlier runbook
+> language that assumes a reskin-in-place.
+>
+> - **Full presentation-layer retirement.** The old presentation layer
+>   (`src/pages`, `src/components`, `src/layouts`, `src/styles`, presentation-side `src/lib`)
+>   is **retired entirely, not reskinned.** Every page is **regenerated from structured data
+>   through the design system** — the 31-remedy collection + schema/gates, `src/data/`, the
+>   citation resolver, the Supabase endpoints, and the ask/lens engines survive OUTSIDE the
+>   presentation layer; everything presentational is rebuilt fresh (CHK-R1 Artifact 1). The v3
+>   oxblood tokens + Instrument Sans in `global.css`/OG are superseded wholesale at CHK-B1.
+> - **Nothing migrated, nothing redirects.** No page is ported and no old URL is redirected.
+>   Salvageable data trapped in old pages is extracted to a draft store FIRST (CHK-E0), then the
+>   old layer is deleted at cutover (CHK-B18). Old routes simply cease to exist.
+> - **Greenfield URL scheme.** The rebuilt site uses new canonical paths only:
+>   `/remedies/{slug}` · `/products/{brand-slug}-{product-slug}` · `/brands/{slug}` ·
+>   `/problems/{slug}` · `/safety` · `/how-we-grade`. Nav is three items (Remedies · Products ·
+>   Safety) plus ever-present search; problems are reached by search and cross-links.
+> - **The launch gate is a CONTENT date, not an engineering date.** The
+>   placeholder-fails-build and safety-requires-source-id gates make cutover a content
+>   threshold: the engineering (CHK-B track) can be finished and the site still must not cut
+>   over until the launch content exists — the melatonin hub complete, ten remedies with full
+>   pages, all 31 rendering at least the honest stub (every stub's bucket ratified), the safety
+>   page sourced and medically reviewed (the likeliest long pole), the documented-concern list
+>   seeded, the product layer honest, and legal pages rewritten (CHK-R1 Artifact 3).
+> - **The plan's three artifacts are the execution record:** (1) the salvage check — what is
+>   extracted vs written off before deletion; (2) the rebuild sequence — the **CHK-B1–B18**
+>   track; (3) the launch gate — the **CHK-E0–E9** editorial track and the content threshold.
+>   BUILD_CHECKLIST.md carries the CHK-B/E numbering and the mapping from the old CHK-R\* items.
+
 | Step | Tool | What it does |
 |---|---|---|
 | 1 | Claude Code | Fix the operating contract |

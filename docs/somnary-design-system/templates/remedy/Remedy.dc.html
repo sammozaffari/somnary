@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<!-- @template name="Remedy" description="A remedy reference page: sticky contents, question-headed sections, evidence bar. Enforces: interface economy (no PairedVerdict on the ingredient's own page), safety never moves a bucket, every bucket badge deep-links to How we grade." -->
+<helmet><script src="./ds-base.js"></script>
+<!-- body reset carried from ui_kits/site/index.html — kit pages rely on their host page for it -->
+<style>*, *::before, *::after { box-sizing: border-box; } html, body { margin: 0; } body { background: var(--page-ground); color: var(--text-body); font-family: var(--font-sans); } a { color: var(--text-link); } a:hover { color: var(--text-link-hover); }</style></helmet>
+<!-- Carried from ui_kits/site/RemedyPage.jsx (load-bearing rule comments):
+/* PairedVerdict is deliberately NOT imported: a component answering two questions is
+   redundant where one answer IS the page — it never appears on an ingredient's own
+   remedy page or its filtered lists (interface-economy rule). */
+-->
+<x-import component-from-global-scope="SomnaryDesignSystem_d2f73f.RemedyPage" go="{{ go }}" go-grade="{{ goGrade }}" which="{{ which }}" hint-size="100%,1400px"></x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;which&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;melatonin&quot;,&quot;options&quot;:[&quot;melatonin&quot;,&quot;kava&quot;,&quot;magnesium&quot;,&quot;valerian&quot;,&quot;chamomile&quot;,&quot;ashwagandha&quot;],&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const noop = () => {};
+    return { go: noop, goGrade: noop, which: this.props.which ?? 'melatonin' };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Somnary — setup verification renders</title>
+<link rel="stylesheet" href="styles.css">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="_ds_bundle.js"></script>
+<style>*,*::before,*::after{box-sizing:border-box}body{margin:0;font-family:var(--font-sans);color:var(--text-body)}a{color:var(--text-link)}a:hover{color:var(--text-link-hover)}</style>
+</head><body>
+<div id="root"></div>
+<script type="text/babel">
+const { BucketBadge, StudyField, ProductListRow } = window.SomnaryDesignSystem_d2f73f;
+function Label({ n, children }) {
+  return <p style={{ margin: '0 0 var(--space-4)', fontSize: 'var(--text-sm)', fontWeight: 'var(--weight-strong)', color: 'var(--text-muted)', fontVariantNumeric: 'tabular-nums' }}>{n}. {children}</p>;
+}
+function Section({ n, title, children }) {
+  return <section style={{ padding: 'var(--space-6) var(--space-5)', borderTop: 'var(--border-w) solid var(--border-hairline)', maxWidth: 'var(--page-max)', margin: '0 auto' }}><Label n={n}>{title}</Label>{children}</section>;
+}
+/* Item 5 — faithful replica of the ProductPage ingredient row (page-internal markup, not a
+   public component): 3px flag edge + tint; POLICY — non-sugar sweeteners are ALWAYS
+   "Worth knowing" in a daily-use product (never green, never a per-product judgement). */
+function SucraloseRow() {
+  return (
+    <div>
+      <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+        <li style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', gap: 'var(--space-1) var(--space-5)',
+          padding: 'var(--space-3) var(--space-3)', borderTop: 'var(--border-w) solid var(--border-hairline)',
+          borderLeft: '3px solid var(--bucket-maybe)', background: 'var(--bucket-maybe-tint)' }}>
+          <div>
+            <p style={{ margin: 0, fontSize: 'var(--text-base)', fontWeight: 'var(--weight-strong)' }}>Sucralose</p>
+            <p style={{ margin: 0, fontSize: 'var(--text-sm)', color: 'var(--text-muted)' }}>Sweetener · Policy: non-sugar sweeteners are always worth knowing about in a product designed to be taken every night — anything in it, you're having daily. [Placeholder — WHO 2023 guideline on non-sugar sweeteners, pending verification]</p>
+          </div>
+          <a href="#paper" onClick={(e) => e.preventDefault()} style={{ alignSelf: 'center', fontSize: 'var(--text-sm)', fontWeight: 'var(--weight-strong)', color: 'var(--bucket-maybe)', whiteSpace: 'nowrap', textDecoration: 'underline', textUnderlineOffset: 3 }}>Worth knowing</a>
+        </li>
+      </ul>
+    </div>
+  );
+}
+function App() {
+  const passing = { dose: true, tested: true, disclosed: true, form: true };
+  return (
+    <div>
+      <Section n={1} title="The four bucket badges, each with its plain sentence">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)' }}>
+          <BucketBadge bucket="works" /><BucketBadge bucket="maybe" /><BucketBadge bucket="unknown" /><BucketBadge bucket="avoid" />
+        </div>
+      </Section>
+      <Section n={2} title="Evidence bar — melatonin, real corpus numbers (12 cited / 5 measured sleep / 3 verifiable), key + standalone caption">
+        <StudyField counts={{ cited: 12, sleep: 5, verifiable: 3 }} />
+      </Section>
+      <Section n={3} title="ProductListRow — Dreamwell melts, 4 of 4, placeholder mark (day)">
+        <ProductListRow brand="Dreamwell" name="Melatonin melts" strength="1 mg per melt" criteria={passing} />
+      </Section>
+      <Section n={4} title="Same row in dusk — data-theme must sit on documentElement (aliases are computed at :root), so it renders in an embedded page">
+        <iframe src="verification-render-dusk.html" title="Dusk row" style={{ width: '100%', height: 160, border: 'var(--border-w) solid var(--border-hairline)', borderRadius: 'var(--radius-md)', display: 'block' }}></iframe>
+      </Section>
+      <Section n={5} title={'"Worth knowing" ingredient row — sucralose, tinted edge + policy note'}>
+        <SucraloseRow />
+      </Section>
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body></html>

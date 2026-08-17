@@ -1,0 +1,422 @@
+{
+  "plugins": [
+    "react",
+    "import"
+  ],
+  "rules": {
+    "react/forbid-elements": [
+      "warn",
+      {
+        "forbid": []
+      }
+    ],
+    "no-restricted-imports": [
+      "warn",
+      {
+        "patterns": [
+          {
+            "group": [
+              "components/cards/**",
+              "components/chrome/**",
+              "components/evidence/**",
+              "components/verdicts/**",
+              "ds-loader.js",
+              "ui_kits/site/**"
+            ],
+            "message": "Import design-system components from 'index.js', not component internals."
+          }
+        ]
+      }
+    ],
+    "no-restricted-syntax": [
+      "warn",
+      {
+        "selector": "Literal[value=/#[0-9a-fA-F]{3,8}\\b/]",
+        "message": "Raw hex color — use a design-system color token via var()."
+      },
+      {
+        "selector": "Literal[value=/\\b\\d+px\\b/]",
+        "message": "Raw px value — use a design-system spacing token via var()."
+      },
+      {
+        "selector": "Literal[value=/font-family\\s*:\\s*(?!['\\\"]?(?:Onest))/i]",
+        "message": "Font not provided by the design system. Available: Onest."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='BrandMark'] > JSXAttribute > JSXIdentifier[name!=/^(?:name|src|size|radius|style|key|ref|className|style|children)$/]",
+        "message": "<BrandMark> doesn't accept that prop. Declared props: name, src, size, radius, style."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='BrandResultRow'] > JSXAttribute > JSXIdentifier[name!=/^(?:name|image|productCount|buckets|href|onClick|style|key|ref|className|style|children)$/]",
+        "message": "<BrandResultRow> doesn't accept that prop. Declared props: name, image, productCount, buckets, href, onClick, style."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='BucketBadge'] > JSXAttribute > JSXIdentifier[name!=/^(?:bucket|naming|sentence|compact|style|key|ref|className|style|children)$/]",
+        "message": "<BucketBadge> doesn't accept that prop. Declared props: bucket, naming, sentence, compact, style."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='BucketBadge'] > JSXAttribute[name.name='bucket'] > Literal[value!=/^(?:works|maybe|unknown|avoid)$/]",
+        "message": "<BucketBadge> bucket must be one of 'works' | 'maybe' | 'unknown' | 'avoid'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='BucketBadge'] > JSXAttribute[name.name='naming'] > Literal[value!=/^(?:plain|evidence)$/]",
+        "message": "<BucketBadge> naming must be one of 'plain' | 'evidence'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='BucketShape'] > JSXAttribute > JSXIdentifier[name!=/^(?:bucket|size|strokeWidth|style|key|ref|className|style|children)$/]",
+        "message": "<BucketShape> doesn't accept that prop. Declared props: bucket, size, strokeWidth, style."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='BucketShape'] > JSXAttribute[name.name='bucket'] > Literal[value!=/^(?:works|maybe|unknown|avoid)$/]",
+        "message": "<BucketShape> bucket must be one of 'works' | 'maybe' | 'unknown' | 'avoid'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='LabelVsStudies'] > JSXAttribute > JSXIdentifier[name!=/^(?:claim|found|chip|animate|delay|style|key|ref|className|style|children)$/]",
+        "message": "<LabelVsStudies> doesn't accept that prop. Declared props: claim, found, chip, animate, delay, style."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='PairedVerdict'] > JSXAttribute > JSXIdentifier[name!=/^(?:bucket|criteria|ingredientName|productName|naming|bucketSentence|style|key|ref|className|style|children)$/]",
+        "message": "<PairedVerdict> doesn't accept that prop. Declared props: bucket, criteria, ingredientName, productName, naming, bucketSentence, style."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='PairedVerdict'] > JSXAttribute[name.name='bucket'] > Literal[value!=/^(?:works|maybe|unknown|avoid)$/]",
+        "message": "<PairedVerdict> bucket must be one of 'works' | 'maybe' | 'unknown' | 'avoid'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='PairedVerdict'] > JSXAttribute[name.name='naming'] > Literal[value!=/^(?:plain|evidence)$/]",
+        "message": "<PairedVerdict> naming must be one of 'plain' | 'evidence'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='PlainStat'] > JSXAttribute > JSXIdentifier[name!=/^(?:figure|text|source|chip|size|style|key|ref|className|style|children)$/]",
+        "message": "<PlainStat> doesn't accept that prop. Declared props: figure, text, source, chip, size, style."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='PlainStat'] > JSXAttribute[name.name='size'] > Literal[value!=/^(?:sm|md|lg)$/]",
+        "message": "<PlainStat> size must be one of 'sm' | 'md' | 'lg'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='ProductCard'] > JSXAttribute > JSXIdentifier[name!=/^(?:name|brand|strength|blend|image|state|bucket|criteria|lastChecked|href|onClick|style|key|ref|className|style|children)$/]",
+        "message": "<ProductCard> doesn't accept that prop. Declared props: name, brand, strength, blend, image, state, bucket, criteria, lastChecked, href, onClick, style."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='ProductCard'] > JSXAttribute[name.name='state'] > Literal[value!=/^(?:assessed|labelOnly|notFound)$/]",
+        "message": "<ProductCard> state must be one of 'assessed' | 'labelOnly' | 'notFound'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='ProductCard'] > JSXAttribute[name.name='bucket'] > Literal[value!=/^(?:works|maybe|unknown|avoid)$/]",
+        "message": "<ProductCard> bucket must be one of 'works' | 'maybe' | 'unknown' | 'avoid'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='ProductScoreBadge'] > JSXAttribute > JSXIdentifier[name!=/^(?:criteria|showBreakdown|style|key|ref|className|style|children)$/]",
+        "message": "<ProductScoreBadge> doesn't accept that prop. Declared props: criteria, showBreakdown, style."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='RemedyCard'] > JSXAttribute > JSXIdentifier[name!=/^(?:name|bucket|naming|sentence|research|safetyFlag|meta|href|onClick|style|key|ref|className|style|children)$/]",
+        "message": "<RemedyCard> doesn't accept that prop. Declared props: name, bucket, naming, sentence, research, safetyFlag, meta, href, onClick, style."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='RemedyCard'] > JSXAttribute[name.name='bucket'] > Literal[value!=/^(?:works|maybe|unknown|avoid)$/]",
+        "message": "<RemedyCard> bucket must be one of 'works' | 'maybe' | 'unknown' | 'avoid'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='RemedyCard'] > JSXAttribute[name.name='naming'] > Literal[value!=/^(?:plain|evidence)$/]",
+        "message": "<RemedyCard> naming must be one of 'plain' | 'evidence'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='SafetyCallout'] > JSXAttribute > JSXIdentifier[name!=/^(?:level|title|children|style|key|ref|className|style|children)$/]",
+        "message": "<SafetyCallout> doesn't accept that prop. Declared props: level, title, children, style."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='SafetyCallout'] > JSXAttribute[name.name='level'] > Literal[value!=/^(?:caution|serious)$/]",
+        "message": "<SafetyCallout> level must be one of 'caution' | 'serious'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='SearchField'] > JSXAttribute > JSXIdentifier[name!=/^(?:placeholder|value|onChange|onSubmit|size|autoFocus|style|key|ref|className|style|children)$/]",
+        "message": "<SearchField> doesn't accept that prop. Declared props: placeholder, value, onChange, onSubmit, size, autoFocus, style."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='SearchField'] > JSXAttribute[name.name='size'] > Literal[value!=/^(?:lg|sm)$/]",
+        "message": "<SearchField> size must be one of 'lg' | 'sm'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='StudyChip'] > JSXAttribute > JSXIdentifier[name!=/^(?:label|finding|people|year|url|linkText|lastChecked|defaultOpen|style|key|ref|className|style|children)$/]",
+        "message": "<StudyChip> doesn't accept that prop. Declared props: label, finding, people, year, url, linkText, lastChecked, defaultOpen, style."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='StudyField'] > JSXAttribute > JSXIdentifier[name!=/^(?:counts|helped|size|variant|subject|safetyFlag|emptyText|style|key|ref|className|style|children)$/]",
+        "message": "<StudyField> doesn't accept that prop. Declared props: counts, helped, size, variant, subject, safetyFlag, emptyText, style."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='StudyField'] > JSXAttribute[name.name='size'] > Literal[value!=/^(?:hero|thumb|share)$/]",
+        "message": "<StudyField> size must be one of 'hero' | 'thumb' | 'share'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='StudyField'] > JSXAttribute[name.name='variant'] > Literal[value!=/^(?:three|two)$/]",
+        "message": "<StudyField> variant must be one of 'three' | 'two'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='WhereToBuyRow'] > JSXAttribute > JSXIdentifier[name!=/^(?:retailer|price|url|disclosure|style|key|ref|className|style|children)$/]",
+        "message": "<WhereToBuyRow> doesn't accept that prop. Declared props: retailer, price, url, disclosure, style."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Wordmark'] > JSXAttribute > JSXIdentifier[name!=/^(?:size|style|key|ref|className|style|children)$/]",
+        "message": "<Wordmark> doesn't accept that prop. Declared props: size, style."
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": [
+        "**/index.js"
+      ],
+      "rules": {
+        "no-restricted-imports": "off"
+      }
+    }
+  ],
+  "x-omelette": {
+    "components": {
+      "BrandMark": {
+        "replaces": []
+      },
+      "BrandResultRow": {
+        "replaces": []
+      },
+      "BucketBadge": {
+        "replaces": []
+      },
+      "BucketShape": {
+        "replaces": []
+      },
+      "LabelVsStudies": {
+        "replaces": []
+      },
+      "PairedVerdict": {
+        "replaces": []
+      },
+      "PlainStat": {
+        "replaces": []
+      },
+      "ProductCard": {
+        "replaces": []
+      },
+      "ProductScoreBadge": {
+        "replaces": []
+      },
+      "RemedyCard": {
+        "replaces": []
+      },
+      "SafetyCallout": {
+        "replaces": []
+      },
+      "SearchField": {
+        "replaces": []
+      },
+      "StudyChip": {
+        "replaces": []
+      },
+      "StudyField": {
+        "replaces": []
+      },
+      "WhereToBuyRow": {
+        "replaces": []
+      },
+      "Wordmark": {
+        "replaces": []
+      }
+    },
+    "tokens": [
+      "--amber",
+      "--amber-line",
+      "--amber-tint",
+      "--border-hairline",
+      "--border-input",
+      "--border-strong",
+      "--border-w",
+      "--bucket-avoid",
+      "--bucket-avoid-tint",
+      "--bucket-maybe",
+      "--bucket-maybe-tint",
+      "--bucket-unknown",
+      "--bucket-unknown-tint",
+      "--bucket-works",
+      "--bucket-works-tint",
+      "--control-lg",
+      "--control-md",
+      "--control-sm",
+      "--control-xl",
+      "--display-lg",
+      "--display-md",
+      "--display-sm",
+      "--dur-base",
+      "--dur-fast",
+      "--dur-reveal",
+      "--dur-slow",
+      "--ease-fade",
+      "--ease-settle",
+      "--evidence",
+      "--evidence-line",
+      "--evidence-strong",
+      "--evidence-tint",
+      "--focus-offset",
+      "--focus-ring",
+      "--font-sans",
+      "--hit-target",
+      "--ink",
+      "--ink-2",
+      "--ink-3",
+      "--leading-body",
+      "--leading-snug",
+      "--leading-tight",
+      "--line",
+      "--line-strong",
+      "--measure",
+      "--page-ground",
+      "--page-max",
+      "--paper",
+      "--paper-raised",
+      "--paper-sunken",
+      "--popover-w",
+      "--radius-lg",
+      "--radius-md",
+      "--radius-pill",
+      "--radius-sm",
+      "--radius-xs",
+      "--sage",
+      "--sage-text",
+      "--sage-tint",
+      "--scrim",
+      "--search-max",
+      "--shadow-card",
+      "--shadow-pop",
+      "--space-1",
+      "--space-10",
+      "--space-2",
+      "--space-3",
+      "--space-4",
+      "--space-5",
+      "--space-6",
+      "--space-7",
+      "--space-8",
+      "--space-9",
+      "--surface-card",
+      "--surface-page",
+      "--surface-sunken",
+      "--text-base",
+      "--text-body",
+      "--text-faint",
+      "--text-lg",
+      "--text-link",
+      "--text-link-hover",
+      "--text-muted",
+      "--text-sm",
+      "--text-xl",
+      "--text-xs",
+      "--tracking-display",
+      "--weight-body",
+      "--weight-heading",
+      "--weight-meta",
+      "--weight-strong",
+      "--weight-title",
+      "--weight-ui"
+    ],
+    "tokenKinds": {
+      "--paper": "color",
+      "--page-ground": "color",
+      "--paper-raised": "color",
+      "--paper-sunken": "color",
+      "--ink": "color",
+      "--ink-2": "color",
+      "--ink-3": "color",
+      "--line": "color",
+      "--line-strong": "color",
+      "--evidence": "color",
+      "--evidence-strong": "color",
+      "--evidence-tint": "color",
+      "--evidence-line": "color",
+      "--sage": "color",
+      "--sage-text": "font",
+      "--sage-tint": "color",
+      "--bucket-works": "color",
+      "--bucket-works-tint": "color",
+      "--bucket-maybe": "color",
+      "--bucket-maybe-tint": "color",
+      "--bucket-unknown": "color",
+      "--bucket-unknown-tint": "color",
+      "--bucket-avoid": "color",
+      "--bucket-avoid-tint": "color",
+      "--amber": "color",
+      "--amber-tint": "color",
+      "--amber-line": "color",
+      "--surface-page": "color",
+      "--surface-card": "color",
+      "--surface-sunken": "color",
+      "--text-body": "font",
+      "--text-muted": "font",
+      "--text-faint": "font",
+      "--text-link": "font",
+      "--text-link-hover": "font",
+      "--border-hairline": "color",
+      "--border-strong": "color",
+      "--border-input": "color",
+      "--focus-ring": "color",
+      "--focus-offset": "spacing",
+      "--shadow-card": "shadow",
+      "--shadow-pop": "shadow",
+      "--scrim": "color",
+      "--font-sans": "font",
+      "--text-xs": "font",
+      "--text-sm": "font",
+      "--text-base": "font",
+      "--text-lg": "font",
+      "--text-xl": "font",
+      "--display-sm": "spacing",
+      "--display-md": "spacing",
+      "--display-lg": "spacing",
+      "--leading-tight": "font",
+      "--leading-snug": "font",
+      "--leading-body": "font",
+      "--tracking-display": "font",
+      "--weight-body": "font",
+      "--weight-meta": "font",
+      "--weight-ui": "font",
+      "--weight-strong": "font",
+      "--weight-heading": "font",
+      "--weight-title": "font",
+      "--space-1": "spacing",
+      "--space-2": "spacing",
+      "--space-3": "spacing",
+      "--space-4": "spacing",
+      "--space-5": "spacing",
+      "--space-6": "spacing",
+      "--space-7": "spacing",
+      "--space-8": "spacing",
+      "--space-9": "spacing",
+      "--space-10": "spacing",
+      "--radius-xs": "radius",
+      "--radius-sm": "radius",
+      "--radius-md": "radius",
+      "--radius-lg": "radius",
+      "--radius-pill": "radius",
+      "--control-sm": "spacing",
+      "--control-md": "spacing",
+      "--control-lg": "spacing",
+      "--control-xl": "spacing",
+      "--border-w": "spacing",
+      "--hit-target": "color",
+      "--measure": "spacing",
+      "--page-max": "spacing",
+      "--search-max": "spacing",
+      "--popover-w": "spacing",
+      "--dur-fast": "other",
+      "--dur-base": "other",
+      "--dur-slow": "other",
+      "--dur-reveal": "other",
+      "--ease-settle": "other",
+      "--ease-fade": "other"
+    },
+    "fontFamilies": [
+      "Onest"
+    ]
+  }
+}

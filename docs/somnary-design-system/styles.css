@@ -1,0 +1,24 @@
+@import url("tokens/fonts.css");
+@import url("tokens/colors.css");
+@import url("tokens/typography.css");
+@import url("tokens/spacing.css");
+@import url("tokens/motion.css");
+
+/* Focus is part of the system, not the page harness: every interactive element gets the
+   ring wherever these tokens load. Components style inline and inline styles cannot express
+   :focus-visible — this global rule is the one sanctioned exception (see readme handoff notes). */
+:focus-visible { outline: var(--focus-ring); outline-offset: var(--focus-offset); }
+
+/* Landing feedback for in-page jumps: every id can be a target; scroll-margin keeps the
+   destination clear of sticky chrome (often the real cause of post-jump disorientation).
+   The highlight is a semantically empty neutral tint — never evidence blue, never amber —
+   fading over ~1s. Reduced motion gets no animation at all. */
+[id] { scroll-margin-top: var(--space-8); }
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+  @keyframes target-settle { from { background-color: var(--surface-sunken); } to { background-color: transparent; } }
+  section:target > div > div > h2, section:target > h2, :target > h2 {
+    animation: target-settle 1.1s var(--ease-fade) both;
+    border-radius: var(--radius-xs);
+  }
+}

@@ -1,469 +1,252 @@
-# Somnary — Design System (Developer Handoff)
+# Somnary — Design System (developer handoff)
 
-**v3.0 · warm/oxblood · Instrument Sans · build spec.** This version re-skins the
-v2 evidence-teal system: the cool teal palette becomes a warm paper ground with an
-**oxblood** brand/action color, and both display and body type become **Instrument
-Sans** (all-sans, no serifs). Token **NAMES are unchanged from v2** — only their
-VALUES changed, so every component inherits the new look automatically. v2
-(evidence-teal) and v1.2 (soft-light lavender/sage) survive only in git history.
+<!--
+PROVENANCE — transcribed from docs/somnary-design-system/, 17 August 2026 (CHK-B1).
 
-Every value below is **fixed**. Build against named tokens; never hardcode raw
-values; never re-derive or "improve" a value. Missing tokens are listed in §9
-as flagged gaps — if you need one, stop and open a `[HUMAN-GATE]` question,
-per CLAUDE.md.
+This file is the ONLY source of token VALUES for the codebase (CLAUDE.md token
+single-source-of-truth). The Claude Design handoff bundle at `docs/somnary-design-system/`
+is the SOURCE; this file is what the code reads. The bundle is transcribed here — never
+referenced or rendered from directly. If the bundle and this file ever disagree, THIS
+committed file wins.
 
-**Palette roles (v3):** **oxblood `--primary` `#7E1F2B` is brand AND action** — the
-v2 citron `--action` is retired and `--action` now resolves to oxblood. The
-**safety register stays DISTINCT**: vermilion `--vermilion` `#E34234` (red-orange)
-is the only warning/danger color — safety is NEVER oxblood. Grades are retuned for
-the warm ground (see §3).
+THIS POINTER IS AUTHORITATIVE OVER ANY SESSION BRIEF. Some briefs describe the bundle as
+living at a repo-root `somnary-design-system/`; it does not. It was delivered untracked at
+`docs/somnary-design-system:/` (trailing colon), renamed to the clean committed path
+`docs/somnary-design-system/` at CHK-B1 (owner-approved — colons break Windows checkouts and
+archive tools, and an untracked bundle can't serve as a provenance artifact). Later B sessions
+(B2, B5–B13, B15) resolve the bundle template source from THIS header, not from their prompts.
 
-**Typography — TYPE LOCK (owner, 2026-08-09):** the single typeface is **Onest**
-(self-hosted), one family for everything, exposed as a **single token `--font-sans`**
-→ Onest (the old `--font-display` / `--font-body` pair collapses into it — identical
-today, so the live rename is a no-op that lands with the swap). Explicitly NOT
-Cabinet Grotesk, NOT IBM Plex Sans (both
-proposed by the redesign handoff bundle and rejected), and NOT Instrument Sans. **No
-Google Fonts, no Fontshare, no third-party font `@import`/`<link>`** — the woff2
-files live in `public/fonts/`, declared with a local `@font-face`, and only the
-weights actually used are `<link rel="preload">`ed. Third-party font CDNs are
-render-blocking and a GDPR consideration for EU readers. A mono face exists ONLY if
-the handoff bundle still needs one for identifiers; otherwise there is none and
-`--font-mono` stays an alias resolving to Onest.
-*Implementation status:* the decision is LOCKED; the live `global.css` + OG
-generator still render Instrument Sans (via `@fontsource-variable/instrument-sans`)
-until the self-host swap lands — a global visual change (rendered-visual QA at
-390/768/1440) plus the font-file/preload step, tracked as a follow-up build item.
+The live CSS token layer is `src/styles/global.css` (values identical to below; that file is
+exempt in `scripts/check-tokens.mjs` as the token-definition source of truth). This system
+SUPERSEDES the v3 warm/oxblood · Instrument Sans system WHOLESALE (CHK-R1 Artifact 1c); v3
+survives only in git history. The retired presentation layer is deleted at CHK-B18.
+-->
 
-**Casing (owner, 2026-07-09):** the house voice is **Sentence case** — first word
-plus proper nouns capitalized. This applies to headings, labels, nav, and body
-alike. The old all-lowercase house voice is retired, and Title Case is not used.
-The former ALL-CAPS label/eyebrow treatment is **dropped**: micro-labels, kickers,
-and table headers render in Sentence case, keeping only their letterspacing.
-(Brand wordmark casing is unchanged — see below.)
+**Position — "the observatory":** a quiet, precise, warmly-lit instrument for looking at
+evidence. Not a clinic (cold), not a wellness brand (vague), not a biohacker terminal (dark
+neon). Calm verification, never persuasion. The binding charter is **`docs/RULES.md`** (repo
+copy canonical); this file is the token/spec companion. Every value below is fixed — build
+against named tokens, never a raw literal. A missing token the build needs is a
+`[HUMAN-GATE]`, never an invented value (CLAUDE.md).
 
-**Brand casing (D3):** wordmark is **Somnary** — **capitalized, no trailing period**
-(the earlier `Somnary.` trailing-period form is retired). Do not lowercase.
-
-**Brand mark — LETTERFORM (owner, 2026-08-09; drawn when the handoff bundle lands):**
-the symbol is a **capital "S" letterform (Onest 600)**, replacing the crescent-moon
-disc. The moon / dot-field / "drawn-from-the-study-field" marks are RETIRED — the
-study field is a nested bar now, so a study-field-derived mark depicts a visual the
-product no longer has. When the bundle lands, **replace ALL icon assets outright — do
-NOT keep the old ones as fallbacks.**
-*Icon replacement checklist (audited 2026-08-09 — nothing else references the mark):*
-- `public/favicon.svg` — currently the crescent-moon disc → the "S" letterform.
-- `src/layouts/Base.astro` — only `<link rel="icon" href="/favicon.svg">` exists;
-  there is NO apple-touch-icon, no manifest/`.webmanifest`, no mask-icon today, so a
-  full icon set from the bundle must ADD those tags here (none are stale to remove).
-- `src/components/Wordmark.astro` — the LIVE nav mark renders the crescent-moon disc
-  (a chrome change → rendered-visual QA at 390/768/1440).
-- `src/components/RemedyIcon.astro` — unknown-slug fallback → the "S" letterform.
-- `src/lib/og.ts` — the OG wordmark is text "Somnary" (no moon); swap its font to
-  Onest with the type swap, and add the "S" mark only if the OG design calls for it.
-- Product-photo placeholders (`scorecards/ProductPage.astro`, `ScorecardCard.astro`)
-  use a "brand monogram in a disc" — align to the "S" monogram if kept.
+**Themes:** two — **day** (`:root`, the default) and **dusk** (`[data-theme="dusk"]`, a
+designed low-light reading theme, not an inverted afterthought). Every component is verified in
+both (CHK-B15 wires the sunset keying / stored override / no-flash script).
 
 ---
 
-## 1. Tokens — CSS `:root`
+## 1. Identity (RULES.md Identity)
 
-Warm/oxblood v3 values, with roles annotated. Names match `src/styles/global.css`
-and `tailwind.config.mjs` exactly.
+- **Wordmark:** **Somnary** — capitalised, no trailing period. Sentence case everywhere
+  (headings, buttons, chips, captions, labels, placeholders, aria text). Names keep their
+  fixed scientific forms: L-theanine, 5-HTP, GABA, CBD, CBN, CBT-I, vitamin D.
+- **Brand mark:** the **letterform S** — a capital S in Onest 600, ink on paper, in the
+  system's rounded square. No moons, stars, or sleep iconography anywhere in the identity. The
+  crescent-moon disc (PR #33) and the study-field-derived dot-field favicon are **retired** on
+  charter grounds (Somnary removes sleep-cliché costume).
+  - Assets (all OUTLINED PATHS extracted from Onest 600 — never live `<text>`, since SVG
+    favicons render without the page's fonts and would fall back to Arial): `public/favicon.svg`
+    (day, 32px, ink S on paper), `public/favicon-dusk.svg` (dusk, cream S on night ground),
+    `public/apple-touch-icon.png` (180px, rasterised from the bundle `touch-icon.svg`),
+    `public/wordmark.svg` (full "Somnary"), `public/site.webmanifest`. The nav mark
+    (`src/components/Wordmark.astro`) inlines the S glyph path in `currentColor`/`--ink`.
+- **Dates:** render **"14 July 2026"**, never ISO, anywhere user-facing. ISO (YYYY-MM-DD) is
+  the stored/schema form only; the human format is applied at render.
 
-```css
-:root {
-  /* ---- surfaces (warm off-whites) ---- */
-  --paper:   #FCFAF2;   /* page background (base) */
-  --surface: #FFFFFF;   /* cards, tables, panels */
-  --stone:   #EEE8DA;   /* sunken fills, progress tracks */
-  --mineral: #DBD5CD;   /* strong lines, inactive borders */
+## 2. Type (RULES.md Identity; tokens/typography.css)
 
-  /* ---- text ---- */
-  --ink:    #171512;    /* primary text — 17.4:1 on paper */
-  --raisin: #2B2028;    /* secondary emphasis text — 15.7:1 on surface */
-  --muted:  #5C574F;    /* supporting text — 6.9:1 on paper (AA small) */
-  --soft:   #8C867B;    /* 3.6:1 — LARGE/decorative text only, never body */
+**Onest — one self-hosted family.** No serif, no mono, no display/body split, no typographic
+signature device — character comes from the palette, spacing discipline, and evidence visuals.
+Weight and size carry the whole hierarchy.
 
-  /* ---- primary (oxblood) — brand + action ---- */
-  --primary:      #7E1F2B;   /* brand, links, accents; AA as text on white (9.9:1) */
-  --primary-deep: #661722;   /* hover, dark strips, gradient end */
-  --primary-soft: #F6E7E3;   /* tint fills */
-
-  /* ---- action (oxblood) — primary CTA (citron retired) ---- */
-  --action:     #7E1F2B;    /* CTA fill = --primary */
-  --action-ink: #FFFFFF;    /* the only text color allowed on --action */
-
-  /* ---- positive / secondary accent (green) ---- */
-  --eucalyptus: #3F6A57;    /* progress fills, update kickers; AA text on white (6.2:1) */
-  --pistachio:  #E9F2DB;    /* verified-chip fill (text: #184437, 9.5:1) */
-
-  /* ---- safety (vermilion) — warnings ONLY, DISTINCT from oxblood ---- */
-  --vermilion:  #E34234;    /* icons, borders; see §8 before using as text */
-  --warning-bg: #FDECE7;    /* urgent-card / warn-chip fill */
-  --safety-ink: #A02C22;    /* small safety text on --warning-bg — 6.37:1 (G3) */
-
-  /* ---- grades (fills; letter always white, see §3; retuned for warm ground) ---- */
-  --grade-s: #274B3F;       /* deep pine — apex of the green end, above A (G1) */
-  --grade-a: #3F6A57;
-  --grade-b: #47695A;
-  --grade-c: #8F5E12;
-  --grade-d: #9A4F28;
-  --grade-f: #96323E;
-
-  /* ---- chrome (warm-neutral shadow tint) ---- */
-  --shadow:      0 18px 60px rgba(23, 21, 18, 0.10);
-  --hairline:    1px solid rgba(23, 21, 18, 0.13);
-  --focus-ring:  0 0 0 2px var(--surface), 0 0 0 4px var(--primary);  /* :focus-visible, all interactives — two-tone (A-01) */
-  --radius:      7px;
-  --page:        min(1460px, calc(100vw - 32px));
-}
-```
-
-Page background is not flat paper — it carries the ambient warm wash:
-
-```css
-background:
-  radial-gradient(circle at 12% 0%, rgba(126, 31, 43, 0.06), transparent 28%),
-  linear-gradient(180deg, #FEFDF9 0%, var(--paper) 45%, #F4EFE2 100%);
-```
-
-Hero/page-hero gradient (bold oxblood surface):
-
-```css
-background: linear-gradient(135deg, var(--primary) 0%, var(--primary-deep) 100%);
-box-shadow: 0 24px 70px rgba(23, 21, 18, 0.16);
-border-radius: 24px;
-```
-
-## 2. Typography
-
-| Role | Family | Notes |
-|---|---|---|
-| Display / headings / buttons / brand | **Onest** | weight 600–700, tight tracking |
-| Body / UI | **Onest** | base 16px / 1.6 (reading legibility), no tracking |
-| Data / citations | **Onest** | one family; mono only if the handoff bundle needs it for identifiers |
-
-All type — display, body, data, citations — is **Onest** (one self-hosted family, no
-serif; mono only if the handoff bundle still needs it). The single type token
-**`--font-sans`** resolves to Onest. Use these sizes; don't invent. *(Live code still
-carries `--font-display`/`--font-body` and renders Instrument Sans until the
-self-host swap lands — see the TYPE LOCK above.)*
-
-> **Font-stack note:** self-host Onest from `public/fonts/` with a local `@font-face`
-> (family name `"Onest"`), preload the weights actually used, and reference it only
-> via `var(--font-sans)` — never a hardcoded family string in a component. No
-> `@fontsource`/npm-CDN, no Google Fonts, no Fontshare `@import`.
-
-| Token | Size | Weight | Tracking | Use |
-|---|---|---|---|---|
-| display | `clamp(64px, 8vw, 128px)` / 0.92 | 700 | −0.067em | hero h1, page-title (52px at ≤640px) |
-| h2 | `clamp(38px, 4.3vw, 66px)` / 1.0 | 700 | −0.065em | section headings |
-| h3 | 19–21px | 600–700 | −0.025em | panel/module headings |
-| stat | 42px (34px in hero metrics) | 700 | −0.06em | evidence-card / hero-metric numerals |
-| lede | `clamp(18px, 1.6vw, 23px)` / 1.34 | 400–500 | — | hero/page subheads, `--muted` (white 0.78–0.82 alpha on oxblood) |
-| body | 16px / 1.6 | 400 | — | default (reading text) |
-| support | 13–14px | 400–600 | — | card body, nav links, footer |
-| micro | 11–12px | 600–700 | +0.09–0.11em, Sentence case | eyebrow/kicker/meta-label (`--primary`), table headers |
-
-## 3. Grade system (S–F)
-
-The scale is **S A B C D F** — there is no E. Grades are set only via
-`[HUMAN-GATE]` (CLAUDE.md); this section governs rendering only.
-
-- **Badge** (`.grade`): filled square, 40×40px min, radius 6px, letter 23px
-  Instrument Sans 700, **white letter on the grade color** for A–F, hairline
-  `rgba(255,255,255,.22)` border.
-- **Big badge** (`.grade.big`, remedy lead block): 152×152px, letter 112px,
-  gradient fill `linear-gradient(145deg, var(--grade-X), var(--grade-X-anchor))`
-  (**S anchors to `#1B3A30`**, A to `#2E5343`, B to `#35564A`), "GRADE"
-  micro-label above, verdict micro-label (e.g. "EXCEPTIONAL" for S, "GOOD
-  EVIDENCE" for A) below.
-- **S vs A:** both live at the green end by design — S is the deeper pine, A
-  the mid green. They are adjacent because they are both "good"; the
-  letter (always shown) is what disambiguates them, never color alone. S is
-  reserved for guideline-level evidence (e.g. CBT-I) and is deliberately rare.
-- **Never color alone:** every badge is accompanied by the letter itself plus
-  a text verdict/decision-translation (per strategy doc 03: S "make this the
-  default pathway…" through F "risk… is the headline"). Screen-reader label:
-  "Grade B — good evidence".
-- **Contrast constraint:** the amber/burnt grades C/D were darkened so grade-colored
-  *small* text clears AA on their tints — grade-C `#8F5E12` as text on `--grade-c-tint`
-  = **4.81:1**, grade-D `#9A4F28` on `--grade-d-tint` = **4.96:1** (both AA small).
-  White letter on every grade fill is ≥5:1 except none below AA-large. **Do not** set
-  small white text on a grade fill; for small grade-colored text use the grade color on
-  `--surface` or on its tint (now valid for all six).
-- **S-tier** = `--grade-s` `#274B3F` (retuned for the warm ground), white letter at
-  9.70:1 (AAA). Big-badge anchor `#1B3A30`.
-
-## 4. Layout & chrome
-
-- Page width `--page` = `min(1460px, 100vw − 32px)`; single centered `.shell`.
-  At ≤640px: `min(100vw − 22px, 560px)`.
-- Radii: **7px** (`--radius`) cards/tables/buttons · 10–11px check-panel &
-  trust-stack · **24px** heroes (18px ≤980px) · 999px pills/chips · 50% marks.
-- Borders: `--hairline` everywhere; rows divide with it, never double-borders.
-- Shadows: `--shadow` for floating panels; hero `0 24px 70px rgba(23,21,18,.16)`;
-  card hover `0 16px 40px rgba(23,21,18,0.08)`; big grade
-  `0 22px 50px rgba(23,21,18,0.23)`. All shadow tints are warm-neutral now.
-- Sticky topbar: `rgba(252,250,242,0.9)` (warm paper) + `backdrop-filter: blur(16px)`,
-  hairline bottom, 70px min-height (62px ≤980px).
-
-## 5. Components (prototype inventory)
-
-Buttons (Instrument Sans 700, 13px, min-height 42px, radius 7px):
-- **primary** — oxblood fill, white text; hover `--primary-deep` + lift −1px.
-- **action** — oxblood fill (`--action`) + `--action-ink` (white); **primary CTA
-  only** (the accent budget: one per viewport); hover `--primary-deep`.
-- **secondary** — transparent, `rgba(23,21,18,0.18)` border, ink text; on
-  oxblood heroes: `rgba(255,255,255,0.12)` fill, white text.
-- **ghost** — `--surface` fill, faint border, `--raisin` text.
-
-Chips/pills (999px, 30px min-height, 12px/650): neutral (white 0.84 alpha),
-**verified** (`--pistachio` fill, `#184437` text), **warn** (`--warning-bg`
-fill, `--safety-ink` text), hero variants (white 0.14 alpha; verified on hero
-= white 0.16 alpha fill + white text).
-
-Cards on `rgba(255,255,255,0.9)`, hairline, radius 7: **route-card** (28px oxblood
-icon, 18–20px title, hover lift −2px), **evidence-card** (42px oxblood
-stat), **update-card** (eucalyptus kicker), **safety-card** (vermilion icon;
-`.urgent` = `--warning-bg` fill + vermilion-alpha border), **option-card**
-(rank circle 34px + content + grade), **side-panel / module** (22px padding,
-19px h3).
-
-Structured surfaces: **data-table** (`--surface`, Sentence-case 11px headers on
-`rgba(238,232,218,0.62)`, 15px cell padding), **tier-legend** (6-up strip,
-24px oxblood/green grade letters), **check-panel** (white 0.96, search input 48px +
-popular pills), **trust-stack** (on hero: `rgba(23,21,18,0.28)` fill, white 0.22
-border, white icons), **hero-metrics** (white 0.10 tiles, white 34px
-numerals), **support-strip** (`--primary-deep`, white text),
-**label-input** (dashed `rgba(23,21,18,0.28)` border, `rgba(255,253,248,0.66)`
-fill), **flag rows** (vermilion icon + hairline dividers), **progress**
-(7px track `--stone`, fill `--eucalyptus`).
-
-## 6. Motion
-
-One speed: **160ms ease** on `transform`, `background`, `border-color`,
-`box-shadow`. Hover lifts: buttons −1px, cards −2px. No entrance animations,
-parallax, or ambient motion — the prototype defines none; don't add any.
-
-**Focus:** every interactive element gets `:focus-visible { box-shadow:
-var(--focus-ring); outline: none; }`. The ring is **two-tone** — a `--surface`
-(white) inner band + a solid `--primary` (oxblood) outer band (A-01, 2026-07-30).
-The earlier single-colour 40%-alpha oxblood ring measured 1.19–2.21:1 and failed
-the 3:1 non-text requirement on carbon, tints, and grade fills. Two-tone is the
-WCAG technique for an indicator that must read on ANY ground: the oxblood band
-carries it on light surfaces (9.49:1 on paper), the white band carries it on
-`--carbon` (~17:1), and the white↔oxblood internal edge is ~10.7:1 everywhere.
-This is the one addition to the prototype's motion/state set — it defined no
-focus styling and shipping without it fails accessibility.
-
-## 7. Breakpoints (v4 canonical set, 2026-07-27)
-
-Four mobile-first breakpoints, defined once as `--bp-*` in `global.css` and mirrored in
-`tailwind.config.mjs` `screens`. **A CSS custom property cannot be used inside an `@media`
-condition**, so `--bp-*` are the *documented reference* (write the literal px in scoped
-`@media`) plus a JS-readable source for `matchMedia`; they are not consumed by media queries
-directly.
+- **Self-hosting (non-negotiable):** the woff2 live in `public/fonts/`
+  (`onest-latin-wght-normal.woff2` + `onest-latin-ext-wght-normal.woff2`, the OFL variable
+  font, weight axis 100–900), declared with a local `@font-face` in `global.css`, and the
+  latin subset is `<link rel="preload">`ed in `Base.astro`. **No Google Fonts, no Fontshare,
+  no third-party font `@import`/`<link>`** (a CDN font is render-blocking and leaks the
+  reader's IP to the host — a GDPR consideration). Enforced by `scripts/check-fonts.mjs`
+  (`verify:fonts`). The bundle's `tokens/fonts.css` shipped a Google Fonts `@import`; it was
+  deliberately NOT transcribed. The OFL text is at `public/fonts/onest-OFL.txt`.
+- **One token:** `--font-sans` → `'Onest', -apple-system, 'Segoe UI', sans-serif`.
+  `--font-display` was removed deliberately (two names for one value is how a display/body
+  split silently returns). `--font-body`/`--font-display`/`--font-mono` exist ONLY as
+  transition aliases resolving to `--font-sans` for the retired layer, deleted at CHK-B18.
+- **Figures:** tabular lining figures everywhere — prose, identifiers (PMID/NCT/DOI), tables
+  (`font-variant-numeric: tabular-nums`, set on `body`). Onest's cover every case, so no mono
+  exists in the system.
 
 | Token | Value | Role |
 |---|---|---|
-| `--bp-sm` | 480px | large phone |
-| `--bp-md` | **768px** | tablet — the primary phone→desktop switch; **the nav collapses to the hamburger disclosure below this** |
-| `--bp-lg` | 1024px | small laptop |
-| `--bp-xl` | 1440px | wide desktop |
+| `--text-xs` | 13px | metadata, "last checked" — **legibility floor: nothing below 13px, nothing below 4.5:1 on its surface** |
+| `--text-sm` | 13.5px | captions, chip labels, small labels |
+| `--text-base` | 16px | body (never below 16) |
+| `--text-lg` | 18.5px | lead body, verdict sentences, search input |
+| `--text-xl` | 22px | card titles |
+| `--display-sm` | 28px | section headings (the questions people ask) |
+| `--display-md` | 38px | page titles, plain-language stats |
+| `--display-lg` | 52px | hero stat / remedy name |
 
-**Convention.** New or reworked components use these four values. The codebase still holds
-bespoke per-component breakpoints from v1–v3 (640/720/760/900/1180/1240…), each tuned to its
-own content — **migrate one to the nearest standard only when you rework that component, never
-in a bulk find-replace** (the tuned collapse points are load-bearing; changing them blind
-shifts layouts). A `min-width: 768px` query is `--bp-md`.
+Line-height: `--leading-tight` 1.15 · `--leading-snug` 1.35 · `--leading-body` 1.6.
+Tracking: `--tracking-display` −0.01em (display sizes only).
 
-**Regression guard.** `npm run verify:responsive` (CI, post-build) drives headless Chrome over
-CDP and fails the build if any prerendered route scrolls horizontally at 360px — so a bad
-breakpoint can't ship a sideways-scrolling phone page again.
+**Weights** (deliberate, not incidental): `--weight-body` 400 (body) · `--weight-meta` 450
+(metadata, captions, key labels) · `--weight-ui` 500 (interactive rows, input, verdict lines)
+· `--weight-strong` 600 (small labels, buttons, chips, card titles, wordmark) ·
+`--weight-heading` 650 (`--display-sm` section headings) · `--weight-title` 550 (page titles
+& display stats).
 
-## 8. Contrast (computed 2026-07-08 for warm/oxblood v3, WCAG 2.1)
+## 3. Colour (RULES.md Colour — the one rule above all)
 
-| Pair | Ratio | Verdict |
+**COLOUR MEANS DATA.** `--evidence` (ink blue, the colour of printed reference) is the
+evidence bar and its key and **nothing else**. ALL interface colour — buttons, links, focus
+rings, active states — is `--ink`. **There is no `--accent`; never reintroduce one.** Green
+family = an earned positive verdict only. Amber = the safety register only. Avoid-red =
+documented failure/concern only. No decorative gradients — the one exception is the dusk
+`--page-ground` vertical shift; day stays flat, and never a gradient behind the hero, behind
+or inside the evidence bar, or on any quantity. Bucket badges are colour **and** shape coded
+(disc / half-disc / ring / struck ring); colour is never the sole signal.
+
+### 3.1 Day tokens (`:root`)
+
+| Token | Value | Role |
 |---|---|---|
-| `--ink` on paper / surface | 17.44 / 18.22 | AAA |
-| `--raisin` on surface | 15.67 | AAA |
-| `--muted` on paper / surface | 6.86 / 7.16 | AA small text |
-| `--soft` on surface | 3.61 | **large text only** |
-| `--primary` as text on surface / paper | 9.92 / 9.49 | AAA (small) |
-| white on `--primary` / `--primary-deep` | 9.92 / 12.28 | AAA |
-| `--action-ink` (white) on `--action` | 9.92 | AAA |
-| white letter on grade S | 9.70 | AAA |
-| white on grade A / B / F | 6.16 / 6.11 / 7.44 | AA |
-| white on grade C / D (darkened) | 5.56 / 5.96 | AA |
-| grade-C / grade-D text on their tint | 4.81 / 4.96 | AA small (§3) |
-| `--vermilion` on surface | 4.12 | **large text/icons only** |
-| `--safety-ink` on `--warning-bg` | 6.37 | AA small text |
-| `--eucalyptus` on surface | 6.16 | AA small text |
-| `#184437` on `--pistachio` | 9.47 | AAA |
+| `--paper` | `#F6F2E9` | page ground (base) |
+| `--page-ground` | `var(--paper)` | body ground — flat by day |
+| `--paper-raised` | `#FBF8F1` | cards, raised surfaces |
+| `--paper-sunken` | `#EEE9DB` | sunken fills, tracks, placeholder grounds |
+| `--ink` | `#1C1B22` | primary text AND all interface colour (15.29:1 on paper) |
+| `--ink-2` | `#5B564E` | muted text (6.51:1 on paper) |
+| `--ink-3` | `#6B675C` | faint text — legibility floor (worst 4.65:1 on sunken) |
+| `--line` | `#E1DACA` | hairline dividers/borders |
+| `--line-strong` | `#C8C0AC` | strong lines |
+| `--evidence` | `#2C3E63` | **evidence bar + key ONLY** (9.51:1 on paper) |
+| `--evidence-strong` | `#1E2C4A` | emphasis within the bar |
+| `--evidence-tint` | `#E2E6EF` | bar track tint |
+| `--evidence-line` | `#B9C2D4` | bar hairline |
+| `--sage` | `#6E7D64` | GRAPHIC token (check-mark strokes/fills); fails AA as text by design |
+| `--sage-text` | `#53614A` | sage-coloured TEXT (worst 5.45:1 on sunken) |
+| `--sage-tint` | `#E8EBDF` | sage fill |
+| `--bucket-works` | `#3E6B4F` | "Helps most people sleep" — solid disc (5.49:1 on paper) |
+| `--bucket-maybe` | `#7C6012` | "May help sleep a little" — half-filled disc (5.31:1) |
+| `--bucket-unknown` | `#6B6459` | "Not properly tested" — empty ring; warm grey, distinct from evidence blue (5.23:1) |
+| `--bucket-avoid` | `#9C4330` | "Tested — doesn't seem to help" — struck ring (5.77:1) |
+| `--bucket-*-tint` | `#DFE8DD` / `#F0E7C9` / `#E7E3DA` / `#F0DCD3` | bucket fills |
+| `--amber` | `#8A5A16` | safety register (4.83:1 on `--amber-tint`) |
+| `--amber-tint` | `#F5E7CB` | safety fill |
+| `--amber-line` | `#DCC28C` | safety hairline |
+| `--border-input` | `#8A8370` | sole-boundary control borders, ≥3:1 non-text (3.38:1 on paper) |
+| `--focus-ring` | `2px solid var(--ink)` | `:focus-visible` outline |
+| `--focus-offset` | `2px` | focus outline offset |
+| `--shadow-card` | `0 1px 2px rgba(28,27,34,.05), 0 6px 20px rgba(28,27,34,.06)` | card elevation |
+| `--shadow-pop` | `0 2px 6px rgba(28,27,34,.08), 0 12px 32px rgba(28,27,34,.14)` | popover elevation |
+| `--scrim` | `rgba(28,27,34,0.32)` | overlay scrim |
 
-Rules: body text is `--ink`/`--raisin`/`--muted` only. `--soft` never below
-19px. Vermilion is for icons, borders, and ≥19px-bold text; small safety text
-is `--safety-ink` on `--warning-bg` with vermilion iconography. Oxblood
-`--primary` now passes AAA as small text on white/paper (up from AA in v2) — a
-net accessibility gain from the darker brand color.
+Semantic aliases (all interface colour is ink): `--surface-page`→paper, `--surface-card`
+→paper-raised, `--surface-sunken`→paper-sunken, `--text-body`→ink, `--text-muted`→ink-2,
+`--text-faint`→ink-3, `--text-link`→ink, `--text-link-hover`→ink-2, `--border-hairline`→line,
+`--border-strong`→line-strong.
 
-## 9. Gaps
+### 3.2 Dusk tokens (`[data-theme="dusk"]`) — amber-shifted text, lowered contrast, dimmed chrome
 
-**Resolved (owner-ratified):**
-- **G1 · S-tier grade color → `--grade-s` `#274B3F`** (deep pine, retuned for
-  the warm ground; big-badge anchor `#1B3A30`). Apex of the green end, deeper
-  than A; letter disambiguates the two.
-- **G3 · Warn-chip text → `--safety-ink` `#A02C22`** (6.37:1 on
-  `--warning-bg`), a darkened vermilion in the safety family — DISTINCT from the
-  oxblood brand.
-- **G4 · Focus states → `--focus-ring`** (two-tone: 2px `--surface` inner + 2px
-  `--primary` oxblood outer, A-01) on `:focus-visible` for all interactives.
-  Reads ≥3:1 on every ground incl. `--carbon`; superseded the 40%-alpha ring.
+| Token | Value | Note |
+|---|---|---|
+| `--paper` | `#17151E` | night ground |
+| `--page-ground` | `linear-gradient(180deg, #191722 0%, #100E1A 100%)` | **the one allowed gradient** — lightens top, darkens bottom (light direction, not a vignette); page ground only |
+| `--paper-raised` | `#201D29` | cards |
+| `--paper-sunken` | `#100E15` | sunken |
+| `--ink` | `#E7DECB` | text + interface (13.51:1 on paper) |
+| `--ink-2` | `#A99F8F` | muted (6.92:1) |
+| `--ink-3` | `#918876` | faint — floor (worst 4.72:1 on raised) |
+| `--line` | `#2C2836` | hairline |
+| `--line-strong` | `#3D3849` | strong line |
+| `--border-input` | `#746D8B` | control boundary (3.70:1 on paper) |
+| `--evidence` | `#8FA5CE` | evidence bar (7.26:1 on paper) |
+| `--evidence-strong` | `#A9BCDF` | — |
+| `--evidence-tint` | `#232B3F` | — |
+| `--evidence-line` | `#3C4A6B` | — |
+| `--sage` / `--sage-text` | `#92A385` | one value serves both roles at dusk (6.15:1 on raised) |
+| `--sage-tint` | `#222A1E` | — |
+| `--bucket-works/maybe/unknown/avoid` | `#8CB795` / `#C7A050` / `#A29A8B` / `#C97F68` | all ≥5.78:1 on paper |
+| `--bucket-*-tint` | `#1E2B21` / `#2B2414` / `#26231D` / `#2E1E18` | — |
+| `--amber` / `--amber-tint` / `--amber-line` | `#D2A559` / `#2C2314` / `#5C4A26` | 6.83:1 |
+| `--shadow-card` | `0 1px 2px rgba(0,0,0,.3), 0 6px 20px rgba(0,0,0,.35)` | deepened |
+| `--shadow-pop` | `0 2px 6px rgba(0,0,0,.4), 0 16px 40px rgba(0,0,0,.5)` | deepened |
+| `--scrim` | `rgba(8,7,12,0.55)` | — |
 
-**Still open:**
-- **G2 · Un-designed page types.** Prototype covers one instance each of:
-  home, tier board, remedy detail, outcome, safety router, label checker. No
-  design exists for: article/evidence-watch, methodology/legal text pages,
-  compare tool, assistant UI, community pages, newsletter/forms beyond the
-  label-input pattern. Generalize from §5 primitives; if a new primitive or
-  token is needed, `[HUMAN-GATE]`. (Not a blocker for CHK-0.2 — it reskins
-  existing page types, all of which have a prototype reference.)
+## 4. Spacing, sizing, radii (tokens/spacing.css)
 
-## 10. Guardrails
+- **Spacing** (4px base): `--space-1` 4 · `-2` 8 · `-3` 12 · `-4` 16 · `-5` 20 · `-6` 24 ·
+  `-7` 32 · `-8` 40 · `-9` 56 · `-10` 80.
+- **Radii:** `--radius-xs` 4 · `--radius-sm` 8 · `--radius-md` 12 · `--radius-lg` 16 ·
+  `--radius-pill` 999. **Nested-radii rule:** equal padding all round, inner radius = outer −
+  padding (e.g. `--radius-lg` outer + `--space-1` padding → `--radius-md` inner).
+- **Control heights** (every interactive element uses one): `--control-sm` 36 (VISUAL height
+  only) · `--control-md` 44 (= minimum hit target, mobile-first) · `--control-lg` 48 ·
+  `--control-xl` 56. A real hit area is never below `--control-md` regardless of visual size.
+- **`--border-w` 1px — the only border width.** Emphasis via colour, never thickness.
+- **Widths:** `--measure` 62ch (max body line) · `--page-max` 720px (single-column content) ·
+  `--search-max` 640px (search field) · `--popover-w` 300px (study-chip popover) ·
+  `--hit-target` = `--control-md`.
 
-- Tokens only; the token linter (CHK-0.2) fails builds on raw hex/spacing.
-- Oxblood `--action` (= `--primary`) appears **once per viewport** as the primary
-  CTA — the scarcity is what makes it read as "the" action. Oxblood is
-  brand/action ONLY; it never signals safety.
-- Vermilion means safety, and safety is vermilion — a DISTINCT red-orange, never
-  oxblood. Never decorative, never for emphasis.
-- Grade colors never imply safety; safety modules carry that job (rulebook,
-  design framework: no "UI patterns that make weak evidence feel strong").
-- No wellness clichés: no dream/moon/sparkle imagery, no gradients beyond the
-  two specified washes, no supplement-store aesthetics (strategy doc 03).
+## 5. Motion (tokens/motion.css; RULES.md a11y)
 
-## 11. Illustration
+Calm, 150–250ms, settling ease. `--dur-fast` 150ms · `--dur-base` 200ms · `--dur-slow` 250ms
+· `--dur-reveal` 450ms (the label→strike-through→finding reveal, the only exception to 250ms).
+`--ease-settle` `cubic-bezier(0.22, 0.8, 0.3, 1)` · `--ease-fade` `cubic-bezier(0.4, 0, 0.2, 1)`.
+Hover shifts background to `--surface-sunken` or border to `--border-strong` — no lifts, no
+scale. `prefers-reduced-motion: reduce` collapses all `--dur-*` to 1ms (overridden once in
+`global.css` so every component inherits it).
 
-Remedy illustrations use one coherent, hand-carved linocut system: bold silhouettes,
-slightly irregular edges, sparse gouge marks, and enough negative space to remain clear
-at 48px. Subjects fill 70–75% of a square field with even margins. Molecules use chunky
-ball-and-stick construction, never thin skeletal diagrams. No text, labels, borders,
-scenery, gradients, gray, shadows, or halftones.
+## 6. Global baseline (styles.css → global.css)
 
-- **Masters:** 1024×1024, exactly two tones (solid black ink on pure white), stored in
-  `design/icon-masters/`. Black-on-white is the source of truth so the family can be
-  re-inked without regeneration.
-- **Production assets:** transparent 1024×1024 PNGs in `src/assets/remedies/`. The PNG
-  supplies only the alpha **silhouette**; the ink color is not trusted from the file.
-- **Use:** `RemedyIcon.astro` resolves assets by remedy slug and renders each as a CSS
-  **mask painted with `currentColor`** (default `--primary`) — so the ink is a token at
-  render time, re-inkable in one place and recolorable on dark strips by setting `color`,
-  never a hardcoded value. Icons are decorative: rendered `aria-hidden` (no accessible name),
-  with the adjacent remedy name always carrying the label. Cards use the 48px form; lead
-  blocks the 120px.
-- **Fallback:** an unknown slug receives the Somnary brand mark (the capital-"S" letterform — the crescent disc is retired), not a broken image.
-- **Review gate:** assess the full family together at both 48px and 240px. Reject any
-  candidate whose line weight, detail density, or carved texture drifts from the set,
-  even if it succeeds as an individual illustration.
-- **Product boundary:** containers stay unbranded and unlabeled. Illustrations must not
-  imply that Somnary manufactures or sells a depicted remedy.
+Behaviour the whole system relies on, transcribed into `src/styles/global.css`:
 
-Any change to this illustration grammar or its production color is `[HUMAN-GATE]`.
+- **Page ground:** `body { background: var(--page-ground) fixed; }` — flat paper by day, the
+  dusk gradient at night; fixed attachment so light direction spans the viewport.
+- **Focus (a11y floor):** `:focus-visible { outline: var(--focus-ring); outline-offset:
+  var(--focus-offset); }` — a global rule, the sanctioned exception to inline-styled
+  components (inline styles can't express `:focus-visible`).
+- **In-page jumps:** `[id] { scroll-margin-top: var(--space-8); }` keeps an anchored
+  destination clear of sticky chrome. `:target` gets a semantically-empty neutral tint
+  (`--surface-sunken`, never evidence blue, never amber) fading over ~1s on section headings;
+  reduced motion gets no animation.
+- **Links:** ink, underline on hover, `text-underline-offset: 3px`.
 
-### 11.1 Remedy emblem (RETIRED 2026-07-17)
+## 7. Accessibility floors (RULES.md — non-negotiable)
 
-The struck-coin emblem (carve + orbit; design study 2026-07-15,
-`docs/plans/2026-07-15-remedy-emblem-design.md`) fused the linocut and grade into one mark.
-It was superseded surface by surface within two days: the tier board by the plate card
-(§11.2), the home spotlight by the hero carousel's plate-and-stamp protagonist (PR #56), and
-the remedy lead block by the hero plates (§11.3) — each time because the linocut deserved to
-be bigger than a disc allows, and the **stamp** proved the stronger grade mark. The component
-is deleted; the owner-ratified ideas that survive it: the grade never contaminates the brand
-ink or the vermilion safety register, the grade is never color alone, and identity + verdict
-must read as ONE designed thing, not adjacent chips. `TierBadge` remains the grade mark for
-**illustration-free** contexts (claims table, metadata, inline).
+- Text ≥ 4.5:1 on its actual surface, both themes; minimum 13px. Muted/faint reserved for
+  genuinely peripheral text — data labels are not peripheral.
+- Sole-boundary borders ≥ 3:1 (`--border-input`); decorative hairlines exempt by intent.
+- Visible `:focus-visible` on everything interactive. Hit areas ≥ 44px regardless of visual
+  size. One `h1` per page, no skipped levels. `prefers-reduced-motion` respected.
 
-### 11.2 Plate card (tier board)
+**Contrast — computed 17 August 2026 (WCAG 2.1), both themes.** Every text token clears 4.5:1
+on its worst real surface and every sole-boundary border clears 3:1. Worst text cases: day
+`--ink-3` on sunken 4.65:1, day `--amber` on tint 4.83:1; dusk `--ink-3` on raised 4.72:1.
+Worst borders: day `--border-input` 3.38:1, dusk 3.70:1. (Re-run the spot-check on any token
+change.)
 
-At card scale the linocuts must not shrink below legibility — the tier-board card is a
-**specimen plate** (`RemedyCard.astro`; design study 2026-07-15 v3, owner-ratified
-"plate + stamp"). Anatomy:
+## 8. What this system does NOT carry (retired with v3 / by charter)
 
-- **Plate** — a full-bleed `--primary-soft` field (184px tall, hairline mat edge below)
-  holding the linocut at **132px** — the scale the 1024px masters were carved to read at.
-- **Stamp** — the evidence grade pressed onto the plate's lower-right corner like an
-  assessor's mark: grade **letter + tier word** (from `lib/tiers` — never invent grading
-  language), grade-color ink and border on a translucent paper chip, rotated −3°. The stamp
-  is a shared component (`GradeStamp.astro`, sizes `card`/`hero`) used here and in the
-  remedy-page label row (§11.3); HeroCarousel's inline copy dedups on its next touch.
-- **Body** — remedy name + ONE clamped verdict line (3 lines max). The key-compound line
-  lives on the remedy page, not the browsing card.
+- **No illustration / photography.** The linocut remedy-icon system, hero plates, coda plates,
+  struck-coin emblem, and plate/stamp are all retired. Product/brand imagery is a first-class
+  typographic **BrandMark placeholder** (brand initial on a bucket-tinted ground); the
+  placeholder is the common case. Remedy pages no longer open on a painted hero.
+- **No S–F letter grades / oxblood / vermilion / citron / Instrument Sans.** The four evidence
+  buckets + tri-state safety flag + product score replace the letter tiers (three separate
+  signals, never merged — Reference A4 / RULES.md).
+- **No Tailwind in the new chrome.** Components style from the custom properties above
+  (CHK-B2+). The `@tailwind` directives remain in `global.css` only to keep the retired layer
+  rendering until CHK-B18.
 
-Rules: grade is letter + word + color (stronger than never-color-alone requires) and repeated
-in the card link's aria-label. Hover: card lifts (§4) and the specimen breathes —
-`scale(1.02)`, no more; both disabled under `prefers-reduced-motion`. The plate is the ONLY
-place the linocut may sit smaller than 80px, because the stamp — not a mark on the art —
-carries the grade.
+## 9. Gaps / open human-gates
 
-Any change to the plate/stamp anatomy is `[HUMAN-GATE]`.
-
-### 11.3 Hero plates (remedy pages) — the labeled plate
-
-Every remedy page opens inside its own world: a **full-bleed linocut hero plate**
-(`RemedyHero.astro`; assets `src/assets/remedy-heroes/{slug}.webp`, family grammar in that
-dir's README + `docs/plans/2026-07-16-remedy-hero-plates-prompt.md`; design study 2026-07-17
-v4→v6, owner-ratified "labeled plate"). Anatomy:
-
-- **The plate** — pure art, full viewport width, 40vh min 320px (32vh min 240px under
-  640px) *(owner-trimmed 2026-07-19 twice, from 62/44vh: the verdict must arrive without a
-  scroll)*, focal `object-position` per plate (default `center 30%`, subjects sit in the
-  central 60% by family rule). The linocut ICON does not appear on remedy pages — the hero
-  IS the remedy.
-- **The melt** — the plate itself dissolves via an alpha mask over its bottom 50%
-  *(owner-raised 2026-07-19 in two steps from 34%, with the height trims)*
-  (`mask-image`, opaque → transparent), so the page's real layered background shows through;
-  never a painted color fade (the body background is a gradient — a painted fade seams).
-- **The label row** — the plate is **labeled, not painted over**: NO type ever sits on the
-  art (no single ink survives 31 plates — v5 finding). The `h1` title (hero display size:
-  `clamp(46px, 7vw, 84px)` / 0.95 / weight 700 — a §2 addition ratified with this anatomy)
-  + the assessor's `GradeStamp` (size `hero`: `--paper` chip at 92% opacity + `--shadow-sm`,
-  so grade ink stays **AA ≥4.5:1** over any plate — worst computed 4.97:1, `--grade-c`
-  behind maximum residual melt alpha) print on the paper below, tucked `−7vh` into the melt
-  (`−5vh` under 640px) so plate and label read as one composition. At every ratified
-  height/floor the label's tuck stays inside the melt zone — the title never reaches
-  un-melted art (worst residual image alpha behind the title ≈ 0.35 at 40vh/−7vh —
-  recomputed for the final 2026-07-19 geometry; mobile 0.3125, floor cases lower →
-  ink-on-composite ≥ 8:1 everywhere). Title is always `--ink` on paper — zero per-remedy
-  tuning.
-- **Below** — the one-line verdict as the plate's caption, then the lead block, whose
-  translation line anchors the grade in plain text ("Grade A · Strong — …"): never color
-  alone, twice per page. Crumbs are retired from remedy pages; navigation stays in the nav.
-- **Performance** — the hero is the LCP: `loading="eager"`, `fetchpriority="high"`,
-  responsive widths (828/1400/2048/2880) via the Astro image service. The plate is
-  decorative (`alt=""`) — the adjacent `h1` names it (same pattern as §11 icons). A missing
-  plate never breaks the page: the label row renders alone.
-
-Palettes are per-remedy and live in the ART, not in tokens — no page-level color tokens vary
-by remedy, so the token system stays global. Compliance note (carried from the #55 review):
-the stamp here sits outside the tier board's legend, but the grade line + decision
-translation sit directly under the title — rating context is adjacent. Re-check if the label
-row is ever reused on a surface without that context.
-
-**Coda plates (addendum, owner-ratified 2026-07-19).** Each page *leaves* through the
-hero's world as well: `RemedyCoda.astro` renders a closing band above the site footer —
-the same plate world an hour later, settled toward sleep (family brief:
-`docs/plans/2026-07-19-remedy-coda-plates-prompt.md`; assets
-`src/assets/remedy-codas/{slug}.webp`). Anatomy: **28vh band, min 200px (22vh / 160px under
-640px)** — roughly half the hero, a coda not a second hero; **top-edge alpha-mask melt-in**
-(`transparent 0% → #000 45%`), the hero's melt mirrored; per-plate focal `object-position`
-(default `center 55%` — codas show a low, wide slice); `loading="lazy"` (never competes
-with the hero LCP); decorative `alt=""`; pure art, no type, same family constraints. A
-missing coda renders nothing — the set lights up per-remedy as assets land. The band's
-**bottom edge is a hard cut** (no second melt) seated **flush on the footer hairline**
-*(owner, 2026-07-19: no paper gap — the coda's negative bottom margin collapses the
-Footer's `--sp-10` opening margin to exactly 0)*: art edge → hairline → footer text. Coda
-anatomy changes are `[HUMAN-GATE]` with the rest of this section.
-
-Any change to the hero anatomy (melt spec, label tuck, no-type-on-art rule) is `[HUMAN-GATE]`.
+- **Product "worth buying" verdict threshold** (`met >= 3` / `PASSES_THRESHOLD`) is a
+  PLACEHOLDER — the four checks are almost certainly not equally weighted. One definition in
+  code, every consumer importing it; settle editorially before Phase-3 product content
+  (CLAUDE.md HG; CHK-Rprod.4 during the E-track).
+- **Any token the build needs that the bundle does not define** is a `[HUMAN-GATE]`, never an
+  invented value. None were missing at transcription (17 August 2026).
+- The bundle also ships component/template references (`components/`, `templates/`,
+  `ui_kits/`, `guidelines/`) — these are the design source consumed at CHK-B2+ page sessions,
+  not tokens; they are not rendered from directly.
