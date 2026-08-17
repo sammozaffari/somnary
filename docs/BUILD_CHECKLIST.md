@@ -207,6 +207,11 @@ scope of each item lives in the plan — this is the work queue.
   canonicals, sitemap, robots, per-page metadata, OG/share images via satori+resvg from the
   nested-bar components (re-skin the OG generator to Onest here), JSON-LD where honest,
   resolver last-verified write-back. Depends: B5–B13. (Maps REDESIGN Steps 14 CI half + 15.)
+  **Acceptance (explicit, carried from CHK-B1):** the OG generator (`src/lib/og.ts`) renders
+  Onest and NO other face — `src/lib/og.ts` carries no `instrument-sans` / non-Onest font
+  reference, and its satori font buffer loads the self-hosted Onest woff. B1 swapped the site
+  to Onest but left `og.ts` on Instrument Sans (deferred here); this criterion stops the old
+  face silently surviving into the share images.
 - [ ] **CHK-B17 Freshness:** 3-year flag / 6-year quarantine, "last checked {date}" site-wide.
   Depends: B3, B7. (Maps REDESIGN Step 15.)
 - [ ] **CHK-B18 Cutover:** delete the old presentation layer (safe per Artifact 1 + CHK-E0),
