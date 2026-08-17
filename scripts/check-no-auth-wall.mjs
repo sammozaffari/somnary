@@ -35,6 +35,10 @@ const ACCOUNT_PAGE = 'account.astro';
 // The accounts + AI API routes answer JSON (401/503), never redirect on no-session. Excluded from the
 // content sweep (they are endpoints, not readable pages). The whole api/ tree is data, not content.
 const isApiRoute = (rel) => rel.startsWith('api/');
+// /go/* is a functional RETAIL redirect endpoint (CHK-B4; REDESIGN Step 9) — a 302 to a retailer is
+// its whole purpose, NEVER a sign-in bounce. It touches no auth. Excluded from the content sweep like
+// the API routes, and asserted below to read no server session so it can never become an auth wall.
+const isRetailRedirect = (rel) => rel.startsWith('go/');
 
 // The "auth guard" shapes a CONTENT route must never contain.
 const SERVER_SESSION_RE = /getServerSupabase\s*\(/;
@@ -75,7 +79,7 @@ const routes = await collect(PAGES_DIR);
 // --- (1) content/search/guide routes must not read a session or redirect on auth -----------------
 let contentChecked = 0;
 for (const rel of routes) {
-  if (AUTH_FLOW.has(rel) || rel === ACCOUNT_PAGE || isApiRoute(rel)) continue;
+  if (AUTH_FLOW.has(rel) || rel === ACCOUNT_PAGE || isApiRoute(rel) || isRetailRedirect(rel)) continue;
   const src = await readFile(join(PAGES_DIR, rel), 'utf8');
   contentChecked++;
   check(!SERVER_SESSION_RE.test(src), `${rel}: does not read a server session (no auth gate)`);
@@ -109,6 +113,12 @@ for (const apiRel of ['api/save-map.ts', 'api/saved-maps.ts']) {
   }
   const src = await readFile(join(PAGES_DIR, apiRel), 'utf8');
   check(!REDIRECT_RE.test(src), `${apiRel}: no redirect on no-session (answers JSON 401/503)`);
+}
+
+// --- (4) /go retail redirect: redirects BY DESIGN to a retailer, but must NEVER gate on a session --
+for (const goRel of routes.filter(isRetailRedirect)) {
+  const src = await readFile(join(PAGES_DIR, goRel), 'utf8');
+  check(!SERVER_SESSION_RE.test(src), `${goRel}: reads no server session (retail redirect, not an auth gate)`);
 }
 
 // --- summary -------------------------------------------------------------------------------------
