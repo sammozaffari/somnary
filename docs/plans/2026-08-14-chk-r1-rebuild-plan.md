@@ -85,6 +85,19 @@ and the "non-supplement things with better evidence" beat) — file:line · clai
 | 6 | sleep-habits.astro:543 | +10 dB night traffic noise ≈ 2.5× odds of high sleep disturbance | PMID 35857401 |
 | 7 | sleep-habits.astro:578 | Regular exercise: small benefit to sleep time/efficiency, moderate to quality (meta-analysis, 66 studies) | PMID 25596964 |
 | 8 | sleep-habits.astro:578 | Evening exercise does not harm sleep; slight slow-wave increase (meta-analysis, 23 studies) | PMID 30374942 |
+| 17 | sleep-habits.astro:381 | Blue-light-filtering glasses: very-low-certainty, mixed evidence for sleep (Cochrane) | PMID 37593770 |
+| 18 | sleep-habits.astro:546 | Room temperature: sleep onset coincides with the steepest core-temperature fall (mechanism) | PMID 31105512 |
+| 19 | sleep-habits.astro:492 | Sleep-restriction mechanisms — the sleep-drive rationale behind limiting daytime naps | PMID 30177248 |
+
+> **Approved addendum (owner, 17 August 2026 — at CHK-E0 merge).** Items 17–19 are the three
+> sourced claims adjacent to items 1–8 that this sweep originally scoped OUT (recorded at
+> extraction as deliberately-excluded). The owner ruled them IN with identical treatment —
+> draft store, sources verbatim, excluded from builds: they are sourced claims in pages that
+> die at cutover, so leaving them out was scope discipline and bringing them in is the
+> correction the sweep missed. Extracted to `light-exposure.md` (17), `night-noise.md` (18),
+> and a new `naps.md` (19); the habit cross-references (items 3–4→17, 6→18, naps→19) now point
+> at them. `hygiene-vs-cbti` remains the only habit with no salvage item (CBT-I trio written
+> off per §1c, held in `cbt-i.mdx`).
 
 **Population / drug-class safety evidence** (from context pages; feeds the safety page
 and future non-supplement entries):

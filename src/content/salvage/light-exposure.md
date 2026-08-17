@@ -1,10 +1,10 @@
 ---
 status: draft
 topic: light
-salvageItems: [3, 4]
+salvageItems: [3, 4, 17]
 provenance:
   originFile: src/pages/sleep-habits.astro
-  originLines: [377, 379]
+  originLines: [377, 379, 381]
 extractedBy: CHK-E0
 extractedDate: 2026-08-17
 consumers: [problem-pages, non-supplement-comparisons]
@@ -17,13 +17,16 @@ sources:
     doi: "10.1210/jc.2010-2098"
     cite: "Gooley JJ, Chamberlain K, Smith KA, et al. Exposure to room light before bedtime suppresses melatonin onset and shortens melatonin duration in humans. J Clin Endocrinol Metab. 2011;96(3):E463–E472."
     salvageItem: 4
+  - pmid: "37593770"
+    doi: "10.1002/14651858.CD013244.pub2"
+    cite: "Singh S, Keller PR, Busija L, et al. Blue-light filtering spectacle lenses for visual performance, sleep, and macular health in adults. Cochrane Database Syst Rev. 2023;8(8):CD013244."
+    salvageItem: 17
 ---
 
 # Evening light and melatonin (DRAFT — not promoted)
 
-The light-timing half of the "screens & light" story. NOTE: the *blue-light-glasses*
-claim on the same origin page (PMID 37593770, Singh et al. Cochrane 2023) is NOT part
-of this salvage — it is not in the CHK-R1 salvage list and stays with the retired page.
+The full "screens & light" story: the light-timing half (items 3–4) plus the
+blue-light-glasses candor half (item 17, added as an approved addendum 2026-08-17).
 
 ## Item 3 — eReader before bed
 
@@ -49,3 +52,19 @@ most people. — PMID 21193540 / DOI 10.1210/jc.2010-2098
 **What they do not show.** Both are about light exposure and clock timing under lab
 conditions; they don't prove a given screen habit ruins one person's sleep, or that any
 specific number of minutes offline fixes it.
+
+## Item 17 — blue-light-filtering glasses (approved addendum)
+
+**Claim (short).** Blue-light-filtering spectacle lenses: very-low-certainty, mixed
+evidence on sleep quality; do not support the lenses as a reliable sleep intervention.
+
+**Finding (verbatim from origin).** Cochrane systematic review: the evidence on whether
+blue-light-FILTERING spectacle lenses improve sleep quality was very-low-certainty and
+mixed (of six trials, three reported improvement and three found no difference), and the
+review found probably little or no effect on visual outcomes such as visual acuity — it
+does not support blue-light-filtering lenses as a reliable sleep intervention.
+— PMID 37593770 / DOI 10.1002/14651858.CD013244.pub2
+
+This is the "gadget" half of the origin page's candor: the light-timing point (items 3–4)
+is real; the popular blue-light-glasses fix is weak and inconsistent, and worth separating
+from it.

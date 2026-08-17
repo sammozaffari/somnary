@@ -35,6 +35,12 @@ problem pages + the "non-supplement things with better evidence" beat:
 | 6 | +10 dB night traffic noise ≈ 2.5× odds of high disturbance | PMID 35857401 | `night-noise.md` |
 | 7 | Regular exercise: small–moderate sleep benefit (66 studies) | PMID 25596964 | `exercise.md` |
 | 8 | Evening exercise does not harm sleep (23 studies) | PMID 30374942 | `exercise.md` |
+| 17 | Blue-light-filtering glasses: mixed, very-low-certainty for sleep | PMID 37593770 | `light-exposure.md` |
+| 18 | Room temperature: sleep onset tracks the core-temp fall (mechanism) | PMID 31105512 | `night-noise.md` |
+| 19 | Sleep-restriction mechanisms → the nap-limiting rationale | PMID 30177248 | `naps.md` |
+
+Items 17–19 are an **approved addendum** (owner, 17 August 2026): three sourced claims
+adjacent to items 1–8 that the CHK-R1 sweep left out. Same treatment as the ratified list.
 
 Population / drug-class safety evidence (from context pages) — feeds the safety
 page + future non-supplement entries:

@@ -7,10 +7,10 @@
 #   caffeine · alcohol · light · schedule · naps · environment · exercise · hygiene-vs-cbti
 #
 # Provenance: src/lib/habits.ts (CHK-6.6). Salvage item 14. `salvageItems` cross-references the
-# behavioral/environmental salvage drafts (items 1–8, in src/content/salvage/) that carry the
-# underlying citations. Two habits map to no salvage item: `naps` (its source, PMID 30177248,
-# was not on the CHK-R1 salvage list) and `hygiene-vs-cbti` (the CBT-I trio is written off —
-# already held in src/content/remedies/cbt-i.mdx). Transcribed verbatim, not promoted.
+# behavioral/environmental salvage drafts (items 1–8 plus addendum items 17–19, in
+# src/content/salvage/) that carry the underlying citations. Only `hygiene-vs-cbti` maps to no
+# salvage item: the CBT-I trio is written off per CHK-R1 §1c — already held in
+# src/content/remedies/cbt-i.mdx. Transcribed verbatim, not promoted.
 
 habits:
   - id: caffeine
@@ -36,11 +36,11 @@ habits:
       Evening light — especially bright, blue-rich screen light — can suppress melatonin and
       delay sleep, while the evidence that blue-light glasses or filters fix sleep is weak and
       inconsistent.
-    salvageItems: [3, 4]
+    salvageItems: [3, 4, 17]
     salvageFile: src/content/salvage/light-exposure.md
     salvageNote: >-
-      The light-timing citations (items 3–4) are salvaged; the blue-light-glasses citation
-      (PMID 37593770) was not on the CHK-R1 salvage list.
+      Light-timing citations (items 3–4) plus the blue-light-glasses candor citation
+      (item 17, PMID 37593770) — all in light-exposure.md.
 
   - id: schedule
     label: Moderate evidence, largely observational
@@ -57,10 +57,11 @@ habits:
       For good sleepers a short nap is generally fine, but for people with insomnia daytime
       sleep can erode the sleep drive that helps them sleep at night, which is why CBT-I often
       limits it.
-    salvageItems: []
+    salvageItems: [19]
+    salvageFile: src/content/salvage/naps.md
     salvageNote: >-
-      No salvage item — the nap-rationale source (PMID 30177248, sleep-restriction mechanisms)
-      was not on the CHK-R1 salvage list. Re-source at the consuming session if used.
+      The nap-rationale source (item 19, PMID 30177248, sleep-restriction mechanisms) —
+      in naps.md.
 
   - id: environment
     label: Weak–moderate evidence
@@ -68,11 +69,11 @@ habits:
       A cool, dark, quiet room is reasonable and night noise is measurably disruptive, but
       direct human trials that a cooler or darker room causes better sleep are thinner than the
       confident advice implies.
-    salvageItems: [6]
+    salvageItems: [6, 18]
     salvageFile: src/content/salvage/night-noise.md
     salvageNote: >-
-      Only the night-noise citation (item 6) is salvaged; the temperature/thermoregulation
-      source (PMID 31105512) was not on the CHK-R1 salvage list.
+      Night-noise citation (item 6) plus the temperature/thermoregulation source
+      (item 18, PMID 31105512) — both in night-noise.md.
 
   - id: exercise
     label: Moderate evidence, myth-correcting
