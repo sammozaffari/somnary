@@ -9,6 +9,7 @@
 import Base from '../../layouts/Base.astro';
 import { getCollection } from 'astro:content';
 import RetailLink from '../../components/RetailLink.astro';
+import { FORM_LABEL, RELEASE_LABEL } from '../../lib/products/labels.ts';
 
 export async function getStaticPaths() {
   const products = await getCollection('products');
@@ -17,15 +18,9 @@ export async function getStaticPaths() {
 
 const { product } = Astro.props;
 
-// deliveryForm plain labels (plan §2a — plain language, no jargon)
-const FORM_LABEL: Record<string, string> = {
-  tablet: 'Tablet', capsule: 'Capsule', softgel: 'Softgel', gummy: 'Gummy',
-  'melt-lozenge': 'Melt or lozenge', 'liquid-drops': 'Liquid or drops',
-  spray: 'Spray', tea: 'Tea', powder: 'Powder', patch: 'Patch',
-};
-const RELEASE_LABEL: Record<string, string> = {
-  immediate: 'Immediate release', 'slow-release': 'Slow release', 'not-stated': 'Release not stated',
-};
+// deliveryForm/releaseProfile plain labels (plan §2a — plain language, no jargon). The maps
+// moved to src/lib/products/labels.ts at CHK-B6 so the products list, this page and CHK-B7 read
+// ONE controlled vocabulary — a second copy is how a controlled vocabulary drifts.
 const strength = product.strength ? `${product.strength.amount} ${product.strength.unit}` : null;
 const notAssessed = product.assessment_state !== 'fully assessed';
 // the four product-score checks, rendered honestly (null = not yet assessed)

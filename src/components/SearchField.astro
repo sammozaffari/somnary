@@ -70,7 +70,12 @@ const {
     border-radius: var(--radius-lg);
   }
   .is-sm {
-    height: var(--control-md);
+    /* The 44px floor is the CONTENT box, not the border box. `height: var(--control-md)` under
+       box-sizing: border-box left the input and the submit button at 42px once the 1px
+       sole-boundary border was subtracted — measured under CHK-B6's touch-target pass, and a
+       direct contradiction of this file's own header claim. The control is 44px of hit area
+       PLUS its border. (--is-lg is unaffected: --control-xl leaves 46px inside its padding.) */
+    height: calc(var(--control-md) + 2 * var(--border-w));
     border-radius: var(--radius-md);
   }
   .icon {
@@ -81,6 +86,10 @@ const {
   .input {
     flex: 1;
     min-width: 0;
+    /* stretch, don't centre: a centred input is only as tall as its text (26px measured), so the
+       rest of the field looked clickable and wasn't. Stretching makes the whole field the hit
+       area — no visual change, the input is transparent and borderless. */
+    align-self: stretch;
     border: none;
     outline: none;
     background: transparent;

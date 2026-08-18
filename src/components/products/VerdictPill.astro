@@ -1,0 +1,73 @@
+---
+// VerdictPill — the product row's one-glance answer, transcribed from the bundle kit
+// (components/cards/ProductListRow.jsx VerdictPill). Built at CHK-B6; CHK-B7 reuses it.
+//
+// It states the product score ONLY — how many of the four factual checks the bottle passes.
+// RULES.md "never merged": it must never read an evidence bucket or a safety flag, and its
+// colour must never be reused to mean either. This component imports no bucket module.
+//
+// Colour: green = an EARNED positive verdict (RULES.md Colour) and nothing else, so it is
+// reserved for a product at or above PASSES_THRESHOLD. The unassessed states are deliberately
+// NEUTRAL — sunken ground, muted text, hairline border — because "we haven't checked yet" is
+// not a verdict in either direction and must not read as a soft fail.
+import { CRITERIA, PASSES_THRESHOLD, checksPassed, completeness, type Product } from '../../lib/products/score.ts';
+
+interface Props {
+  product: Product;
+}
+const { product } = Astro.props;
+const state = completeness(product);
+const passed = state === 'assessed' ? checksPassed(product) : 0;
+// The amber/avoid steps below the threshold ride the PLACEHOLDER threshold with it — they are
+// one rule, and CHK-Rprod.4 settles them together. Do not tune here (HUMAN-GATE).
+const tone = passed >= PASSES_THRESHOLD ? 'pass' : passed >= 2 ? 'partial' : 'weak';
+---
+
+{
+  state === 'assessed' ? (
+    <span class:list={['pill', tone]}>
+      <span class="num">{passed} of {CRITERIA.length}</span> checks pass
+    </span>
+  ) : state === 'label-known' ? (
+    <span class="pill pending">Not yet assessed</span>
+  ) : (
+    <span class="pill pending">Not in our database</span>
+  )
+}
+
+<style>
+  .pill {
+    display: inline-flex;
+    align-items: baseline;
+    gap: var(--space-1);
+    border-radius: var(--radius-pill);
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-strong);
+    line-height: 1;
+    white-space: nowrap;
+  }
+  .num {
+    font-variant-numeric: tabular-nums;
+  }
+  /* green ONLY for an earned positive verdict (RULES.md Colour) */
+  .pass {
+    background: var(--sage-tint);
+    color: var(--sage-text);
+  }
+  .partial {
+    background: var(--bucket-maybe-tint);
+    color: var(--bucket-maybe);
+  }
+  .weak {
+    background: var(--bucket-avoid-tint);
+    color: var(--bucket-avoid);
+  }
+  /* neutral, NOT a fail tint — "not checked yet" is not a verdict */
+  .pending {
+    background: var(--surface-sunken);
+    color: var(--text-muted);
+    border: var(--border-w) solid var(--border-hairline);
+    font-weight: var(--weight-ui);
+  }
+</style>

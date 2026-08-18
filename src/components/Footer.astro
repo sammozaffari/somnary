@@ -46,7 +46,14 @@ import DisclaimerBand from './DisclaimerBand.astro';
     gap: var(--space-2) var(--space-5);
     font-size: var(--text-sm);
   }
+  /* RULES.md Accessibility floors: "Hit areas ≥ 44px regardless of visual size." These are
+     standalone navigation links, not links inside a sentence, so the floor applies with no
+     inline exemption — measured at 22px and floored under CHK-B6's touch-target pass. Type size
+     is untouched; the row's own gap absorbs the taller box. */
   .meta a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--control-md);
     color: var(--text-muted);
     font-weight: var(--weight-ui);
     text-decoration: none;
