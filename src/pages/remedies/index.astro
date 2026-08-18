@@ -93,8 +93,9 @@ const dataOutcomes = (i: typeof items[number]) => i.outcomes.join('|').toLowerCa
                   <p class="uses">{i.outcomes.length ? `Mainly used for: ${i.outcomes.slice(0, 3).join(' · ')}` : ''}</p>
                 </div>
                 <div class="row-thumb">
-                  {/* never-invent: an un-triaged remedy's sleep count is UNKNOWN, not zero — showing
-                     a bar would misread "not yet checked" as "none measured sleep" (CHK-E2 triages).
+                  {/* NEVER-INVENT RULE (render-time form; see derive.ts): sleep=0 means adjudicated-
+                     zero; null means still checking; never render the second as the first. Gate the
+                     thumb on triaged so an un-triaged remedy shows "still checking", not a false bar.
                      Two && exprs, not a ternary: an Astro component-vs-element ternary mis-rendered. */}
                   {i.counts.triaged && <StudyField size="thumb" counts={{ cited: i.counts.cited, sleep: i.counts.sleep, verifiable: i.counts.verifiable }} />}
                   {!i.counts.triaged && <p class="thumb-checking">{i.counts.cited} {i.counts.cited === 1 ? 'paper' : 'papers'} — still checking which measured sleep</p>}
