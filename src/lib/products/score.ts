@@ -120,21 +120,21 @@ export function checksPassed(p: Product): number {
   return CRITERIA.filter((c) => v[c.key] === true).length;
 }
 
-/** RULES.md Interface economy: "No sort controls; checks-passed is the fixed order." The order
- *  is set by our own published criteria and NEVER by anything commercial — no price, no
- *  retailer, no brand relationship is read here or anywhere in this file.
+/** RULES.md Interface economy: no sort controls, and the fixed order is the VERDICT, then
+ *  checks-passed within a verdict, then brand A–Z as the documented tiebreak. The order is set
+ *  by our own published criteria and NEVER by anything commercial — no price, no retailer, no
+ *  brand relationship is read here or anywhere in this file.
  *
- *  ORDER FOLLOWS THE VERDICT, THEN THE COUNT — a derived consequence of the Rprod.4 ruling,
- *  FLAGGED FOR OWNER CONFIRMATION. RULES.md wrote "checks-passed is the fixed order" when the
- *  verdict WAS a count. It no longer is, and ordering on the raw count re-introduces the exact
- *  error the ruling removes. The forcing case is real, not hypothetical:
+ *  ORDER FOLLOWS THE VERDICT, THEN THE COUNT — owner-ratified 18 August 2026, and RULES.md was
+ *  amended to match. The charter previously read "checks-passed is the fixed order", written
+ *  when the verdict WAS a count; ordering on the raw count re-introduces the exact error the
+ *  Rprod.4 ruling removes. The forcing case is real, not hypothetical:
  *    · a bottle passing the core pair but neither trust check → 2 checks, verdict `unverified`
  *    · a bottle failing dose-match but passing the other three → 3 checks, verdict `falls-short`
  *  A pure count puts the second ABOVE the first, so the page would list "Not what was studied"
  *  above "Matches, but unverified" — ordering against its own published rule. Verdict first,
- *  then checks-passed WITHIN a verdict (so RULES.md's rule survives as the within-group order),
- *  then the documented brand A–Z tiebreak. If the owner prefers the literal count order, this
- *  comparator is the single place to change it.
+ *  then checks-passed WITHIN a verdict (so the old rule survives as the within-group order),
+ *  then the documented brand A–Z tiebreak.
  *
  *  Rank: assessed products by verdict (delivers → unverified → falls-short); then label-known;
  *  then not-in-database. Brand A–Z survives ONLY as the tiebreak WITHIN equal rank — a
