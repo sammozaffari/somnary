@@ -1,828 +1,345 @@
 ---
+// Home (CHK-B9) — /. Replaces the old S–F tier-board home wholesale (the retiring version is
+// gone from this route; the rest of the old presentation layer goes at CHK-B18).
+//
+// RULES.md enforced, each at the point of enforcement below:
+//  · Interface economy: the SEARCH FIELD is the page's largest object. Not by colour — by size
+//    and weight. The hero sentence sits above it at body scale, deliberately smaller than the
+//    thing it introduces.
+//  · Language: NO manifesto and NO self-congratulating stat row. The independence claim is the
+//    one quiet line, and it lives in the footer (CHK-B2), not here. None of the banned phrases
+//    ("the evidence layer", "reader-funded", "evidence-graded", "zero brand money" …) appears.
+//  · Language: never invent a number. The one honest number on this page is a real cited effect
+//    stat read from the corpus, rendered with its "see the study" chip — and if the corpus ever
+//    stops carrying one, the page falls back to counts of OUR OWN WORK, labelled as such. See
+//    the heroStat block below.
+//  · Structure: the remedy cards show bucket, safety flag and study thumb as three separate
+//    signals; no card merges them, and no grade is guessed (all show "grade in review" until
+//    CHK-E6 ratifies).
+//  · Root is breadcrumb-exempt (RULES.md: "breadcrumbs on every page (root exempt)").
 import Base from '../layouts/Base.astro';
-import Disclaimer from '../components/Disclaimer.astro';
-import TierBadge from '../components/TierBadge.astro';
-import StatRow from '../components/StatRow.astro';
-import { TIERS } from '../lib/tiers';
-import { contentIndex, liveRemedyCount } from '../lib/content-index';
-import {
-  Search,
-  Compass,
-  ScanSearch,
-  ScanLine,
-  Package,
-  Microscope,
-  MessagesSquare,
-  Pill,
-  Timer,
-  AlarmClock,
-  ShieldAlert,
-  Baby,
-} from '@lucide/astro';
+import SearchField from '../components/SearchField.astro';
+import RemedyCard from '../components/evidence/RemedyCard.astro';
+import PlainStat from '../components/evidence/PlainStat.astro';
+import { getCollection } from 'astro:content';
+import { studyCounts, safetyInfo, typeWords } from '../lib/remedy/derive.ts';
+import { sourceUrl } from '../lib/cite.ts';
 
-// Home — L-03 + T-03 rebuild (audit docs/audits/02-ia.md §4 "Homepage purpose and L03").
-// The rotating HeroCarousel is REMOVED as the primary IA control (it sized the panel to its
-// tallest hidden slide, leaving ~45% of the fold blank — L-03). In its place: a static DUAL
-// FRONT DOOR decision surface — two equally clear starts (explore a sleep problem · check a
-// remedy or product) — following the locked audit §4 sequence:
-//   1 plain statement of what Somnary does AND doesn't do  (H1 + dek)
-//   2 universal search entry                               (real GET form → /search)
-//   3 task entries: orientation · product check · label check · safety boundary
-//   4 evidence + methodology trust cues                    (StatRow from REAL data)
-//   5 editorial / research below the decision surface      (Lens + guide)
-// Accent budget (DESIGN_SYSTEM §10): the solid oxblood --action is spent EXACTLY ONCE — the
-// search submit button. The two doors are co-equal (bordered, no fill). The safety boundary
-// wears the DISTINCT vermilion safety register (never oxblood) and sits ABOVE any product
-// pathway content (IA intent G). T-03: the H1 lives here now (carousel deleted) and is tuned
-// to wrap cleanly with no one-word line at 375/390/400/414.
+const remedies = (await getCollection('remedies')).filter((r) => !r.data.draft);
+const byId = new Map(remedies.map((r) => [r.id, r]));
 
-// Trust-cue stats read REAL data (never hardcoded) — same derivation as /methodology.
-const remediesGraded = liveRemedyCount;
-const sourcesCited = contentIndex
-  .filter((e) => e.researchStatus === 'live')
-  .reduce((n, e) => n + e.sourceCount, 0);
-const statCells = [
-  { value: String(remediesGraded), label: 'Remedies documented' },
-  { value: String(sourcesCited), label: 'Sources cited' },
-  { value: '0', label: 'Hallucinated cites', accent: 'eucalyptus' as const },
-  { value: '$0', label: 'Brand money', accent: 'primary' as const },
-];
+// ── the six most-asked ───────────────────────────────────────────────────────────────────────
+// The list the rebuild plan names as the six most-asked (its launch-gate ten starts with these).
+// An id that isn't in the corpus is simply skipped — the row never renders a card for a remedy
+// that has no page behind it.
+const MOST_ASKED = ['melatonin', 'magnesium', 'valerian', 'l-theanine', 'ashwagandha', 'chamomile'];
+const cards = MOST_ASKED.map((id) => byId.get(id))
+  .filter((r): r is NonNullable<typeof r> => Boolean(r))
+  .map((r) => ({
+    slug: r.id,
+    name: r.data.displayName,
+    bucket: r.data.bucket,
+    counts: studyCounts(r.data.sources),
+    safety: safetyInfo(r.data.safety),
+    uses: r.data.outcomes ?? [],
+  }));
 
-// Orientation tiles ("Explore a sleep problem") — labels are situation-led, each wired to a
-// route that resolves. Medications → /safety (the safety router comes before any remedy).
-const situations = [
-  {
-    href: '/r/melatonin',
-    Icon: Pill,
-    title: "I'm considering melatonin, or already take it",
-    dek: 'The flagship decision hub: clock signal vs sedative, dose reality, the label-accuracy problem.',
-  },
-  {
-    href: '/sleep-blends',
-    Icon: Package,
-    title: 'I bought a sleep blend',
-    dek: 'Decode the label before you trust it — proprietary blends, missing doses, studied-dose mismatch.',
-  },
-  {
-    href: '/outcome/fall-asleep-faster',
-    Icon: Timer,
-    title: 'I want to fall asleep faster',
-    dek: 'Remedies with human evidence aimed at sleep-onset latency, ranked by the strength of that evidence.',
-  },
-  {
-    href: '/outcome/stay-asleep',
-    Icon: AlarmClock,
-    title: 'I keep waking up at night',
-    dek: 'The shorter list of remedies studied for staying asleep — wake after sleep onset, not just falling asleep.',
-  },
-  {
-    href: '/safety',
-    Icon: ShieldAlert,
-    title: 'I take medications or have a health condition',
-    dek: 'Using medications? Start with the safety boundary — interactions and red flags come before any remedy.',
-  },
-  {
-    href: '/melatonin-children',
-    Icon: Baby,
-    title: "I'm considering this for a child",
-    dek: 'The most cautious page on the site: what the evidence does and does not support for kids.',
-  },
-];
+// ── the one honest number ────────────────────────────────────────────────────────────────────
+// PRE-RULED (owner, 18 August 2026): if the corpus carries a plainly-stated, CITED effect stat,
+// the hero number is that stat with its "see the study" chip. If it doesn't, the fallback is
+// counts of our own work, framed as counts — never as an evidence claim.
+//
+// We look for the strongest kind of stat only: a source that measured a sleep outcome, whose
+// effect data is COMPLETE (so it is adjudicated, not half-filled), that carries a plain-language
+// `effectSize` AND a sample size AND a resolvable identifier. Anything less and we fall back —
+// a stat without a source id is exactly the number this site exists not to publish.
+const statCandidates = remedies.flatMap((r) =>
+  r.data.sources
+    .filter(
+      (s) =>
+        s.measuresSleepOutcome === true &&
+        s.effectDataStatus === 'complete' &&
+        s.effectDirection === 'helped' &&
+        s.effectSize &&
+        s.sampleSize &&
+        (s.pmid || s.doi || s.registry)
+    )
+    .map((s) => ({ remedy: r, source: s }))
+);
+// Most people studied first — the widest-evidence stat, not the most flattering one. This is a
+// deterministic pick, and it reads no bucket: no grade influences which number the home shows.
+statCandidates.sort((a, b) => (b.source.sampleSize ?? 0) - (a.source.sampleSize ?? 0));
+const hero = statCandidates[0] ?? null;
 
-// Popular known-item checks — real remedy routes, for the "Check a remedy or product" pathway.
-const popularChecks = [
-  { slug: 'melatonin', name: 'Melatonin' },
-  { slug: 'magnesium', name: 'Magnesium' },
-  { slug: 'valerian', name: 'Valerian' },
-  { slug: 'l-theanine', name: 'L-theanine' },
-  { slug: 'ashwagandha', name: 'Ashwagandha' },
-  { slug: 'glycine', name: 'Glycine' },
-];
+// The fallback, if the corpus ever has no qualifying stat: counts of what WE have done. Framed
+// as work, never as evidence ("papers read", not "papers that prove anything").
+const totalSources = remedies.reduce((n, r) => n + r.data.sources.length, 0);
+
+// Sentence-case the figure's first word: PlainStat's casing rule is that the figure carries the
+// sentence's capital and `text` is a lower-case continuation, rendering as ONE sentence.
+const heroFigure = hero
+  ? hero.source.effectSize!.charAt(0).toUpperCase() + hero.source.effectSize!.slice(1)
+  : null;
 ---
 
 <Base
-  title="Somnary: check a sleep remedy before you take it"
-  description="Somnary grades the published human evidence behind every natural sleep supplement — not the hype on the label. Every claim cited. No affiliate links, no brand money."
-  canonical="https://somnary.vercel.app/"
+  title="Somnary — does that sleep remedy actually work?"
+  description="Whether a natural sleep remedy has been shown to work, and whether the bottle in your hand delivers what the studies used. Every claim links to the study it came from."
+  contain={false}
 >
-  <main class="home">
-    <!-- ── decision surface ─────────────────────────────────────────────── -->
-    <section class="lede" aria-labelledby="lede-h1">
-      <div class="lede-copy">
-        <p class="lede-eyebrow">Single-author · evidence-graded · reader-funded</p>
-        <h1 class="lede-statement" id="lede-h1">Check a sleep remedy before you take it</h1>
-        <p class="lede-dek">
-          Somnary grades the published human evidence behind every natural sleep remedy. It doesn’t
-          diagnose, sell supplements, or tell you what to take.
-        </p>
+  <div class="wrap">
+    {/* ── hero ───────────────────────────────────────────────────────────────────────────── */}
+    <div class="hero">
+      <h1>
+        Somnary tells you whether a sleep remedy actually works — and whether the bottle in your
+        hand delivers it.
+      </h1>
+      {/* the largest object on the page (RULES.md Interface economy). Autofocus: arriving here
+          with the cursor already in the field is the whole point of a search-first front door. */}
+      <div class="search">
+        <SearchField size="lg" autofocus />
+      </div>
+    </div>
 
-        {/* 2 — universal search: a real GET form (works with JS off, crawlable). The ⌘K palette in
-            the nav is the enhanced surface; this is the shared known-item entry. The solid oxblood
-            --action is spent HERE, once (§10). */}
-        <form class="usearch" role="search" method="get" action="/search">
-          <label for="q" class="visually-hidden">Search a remedy, product, outcome, or safety topic</label>
-          <Search class="usearch-mag" size={20} stroke-width={1.75} aria-hidden="true" />
-          <input
-            class="usearch-input"
-            type="search"
-            id="q"
-            name="q"
-            placeholder="Search a remedy…"
-            autocomplete="off"
-            spellcheck="false"
+    {/* ── the quiet safety route ─────────────────────────────────────────────────────────── */}
+    {/* Quiet, not loud: amber is the safety register (RULES.md Colour), used at tint strength on
+        one line rather than as an alarm. It sits above everything browsable because these are
+        the readers who should not be browsing. */}
+    <a class="safety" href="/safety">
+      <span>Taking medication, pregnant, or thinking about this for a child?</span>
+      <span class="safety-go">Start here ›</span>
+    </a>
+
+    {/* ── situations ─────────────────────────────────────────────────────────────────────── */}
+    <section class="sec">
+      <h2>Or start with what's going on</h2>
+      <ul class="grid situations">
+        {/* Every destination here EXISTS today. The first three carry an outcome the browse
+            filters on (`?for=` — read by the browse's enhancement script); CHK-B12's problem
+            pages become the richer destination for those three and re-point them. Nothing here
+            links to a route that isn't built — a dead situation card is worse than none. */}
+        <li><a href="/remedies?for=fall+asleep+faster">I can't fall asleep<span aria-hidden="true">›</span></a></li>
+        <li><a href="/remedies?for=stay+asleep">I keep waking in the night<span aria-hidden="true">›</span></a></li>
+        <li><a href="/remedies?for=wind+down+before+bed">I can't switch my head off<span aria-hidden="true">›</span></a></li>
+        <li><a href="/remedies/melatonin">I'm thinking about melatonin<span aria-hidden="true">›</span></a></li>
+        <li><a href="/products">I'm holding a bottle and can't read the label<span aria-hidden="true">›</span></a></li>
+        <li><a href="/how-we-grade">I want to know how you decide<span aria-hidden="true">›</span></a></li>
+      </ul>
+    </section>
+
+    {/* ── most-asked remedies ────────────────────────────────────────────────────────────── */}
+    <section class="sec">
+      <h2>The ones people ask about most</h2>
+      <p class="lede">
+        Each card shows what the research says, how risky it is, and how much of it we've been
+        able to check — three separate things, never rolled into one score.
+      </p>
+      <ul class="grid cards">
+        {cards.map((c) => (
+          <li>
+            <RemedyCard slug={c.slug} name={c.name} bucket={c.bucket} counts={c.counts} safety={c.safety} uses={c.uses} />
+          </li>
+        ))}
+      </ul>
+      <p class="more"><a href="/remedies">Every remedy we cover ›</a></p>
+    </section>
+
+    {/* ── one honest number ──────────────────────────────────────────────────────────────── */}
+    <section class="sec stat-sec">
+      {hero ? (
+        <>
+          <h2>What “it works” actually looks like</h2>
+          <PlainStat
+            figure={heroFigure!}
+            source={`${hero.remedy.data.displayName}, from a ${typeWords(hero.source.type)} covering ${hero.source.sampleSize!.toLocaleString()} people`}
+            chip={{
+              finding: hero.source.finding,
+              people: hero.source.sampleSize,
+              year: hero.source.year,
+              url: sourceUrl(hero.source),
+              linkText: 'Read the study',
+            }}
           />
-          <button class="usearch-btn" type="submit">Search</button>
-        </form>
-      </div>
-
-      <div class="lede-aside">
-        {/* safety boundary — vermilion safety register (DISTINCT from oxblood). Rendered BEFORE
-            the doors so it precedes the "Check a remedy or product" pathway in scroll/tab order at
-            every width — you never scroll past a product pathway to reach it (intent G). */}
-        <a class="safety-strip" href="/safety">
-          <ShieldAlert class="safety-strip-icon" size={22} stroke-width={1.75} aria-hidden="true" />
-          <span class="safety-strip-text">
-            <strong>On medications, pregnant, or considering this for a child?</strong>
-            Start with the safety boundary — interactions and red flags come before any remedy.
-          </span>
-          <span class="safety-strip-go" aria-hidden="true">→</span>
-        </a>
-
-        {/* 3 — dual front door: two CO-EQUAL starts. Bordered, no fill, so neither outranks the
-            other; the oxblood affordance mark is the only accent. */}
-        <div class="doors">
-          <a class="door" href="#explore">
-            <span class="door-icon"><Compass size={26} stroke-width={1.75} aria-hidden="true" /></span>
-            <span class="door-title">Explore a sleep problem</span>
-            <span class="door-dek">
-              Not sure where to start? Route by what you’re trying to fix — falling asleep, staying
-              asleep, a medication, a child.
-            </span>
-            <span class="door-go">Browse sleep problems <span aria-hidden="true">→</span></span>
-          </a>
-          <a class="door" href="#check">
-            <span class="door-icon"><ScanSearch size={26} stroke-width={1.75} aria-hidden="true" /></span>
-            <span class="door-title">Check a remedy or product</span>
-            <span class="door-dek">
-              Have a name or a bottle? Go straight to the grade, the studied dose, and the label
-              reality.
-            </span>
-            <span class="door-go">Check a remedy <span aria-hidden="true">→</span></span>
-          </a>
-        </div>
-      </div>
+          <p class="stat-note">
+            That comes from the largest study we've been able to check — a nudge, not a knockout.
+            If you're expecting a sleeping pill, none of this is that.
+          </p>
+        </>
+      ) : (
+        /* FALLBACK — counts of our own work, labelled as work. Not an evidence claim, and
+           deliberately not dressed up as one. */
+        <>
+          <h2>Where we're up to</h2>
+          <PlainStat
+            figure={`${remedies.length} remedies`}
+            text={`· ${totalSources} papers read`}
+            source="Counts of our own work so far — not a claim about what any of it shows"
+          />
+        </>
+      )}
     </section>
-
-    {/* disclaimer — adjacent to the decision surface, not footer-only */}
-    <Disclaimer />
-
-    <!-- ── 4 · evidence + methodology trust cues ────────────────────────── -->
-    <section class="section" aria-label="Why you can trust the grades">
-      <StatRow cells={statCells} />
-      <p class="trust-note">
-        Every claim links to a real study (PMID, DOI, or trial registry). No affiliate links, no
-        brand money — Somnary is reader-funded. <a href="/methodology">How Somnary grades →</a>
-      </p>
-    </section>
-
-    <!-- ── explore a sleep problem (orientation) ────────────────────────── -->
-    <section class="section" id="explore">
-      <p class="section-eyebrow">Explore a sleep problem</p>
-      <h2 class="section-title">Start from what you’re trying to fix</h2>
-      <div class="tiles">
-        {
-          situations.map((t) => (
-            <a class="tile" href={t.href}>
-              <span class="tile-icon">
-                <t.Icon size={30} stroke-width={1.75} aria-hidden="true" />
-              </span>
-              <p class="tile-title">{t.title}</p>
-              <p class="tile-dek">{t.dek}</p>
-            </a>
-          ))
-        }
-      </div>
-    </section>
-
-    <!-- ── check a remedy or product (known-item) ───────────────────────── -->
-    <section class="section" id="check">
-      <p class="section-eyebrow">Check a remedy or product</p>
-      <h2 class="section-title">Already have something in mind?</h2>
-      <ul class="checklist">
-        {
-          popularChecks.map((c) => (
-            <li>
-              <a class="check-pill" href={`/r/${c.slug}`}>
-                {c.name}
-              </a>
-            </li>
-          ))
-        }
-      </ul>
-      <div class="task-cards">
-        <a class="task-card" href="/label-checker">
-          <span class="task-card-icon"><ScanLine size={26} stroke-width={1.75} aria-hidden="true" /></span>
-          <span class="task-card-text">
-            <span class="task-card-title">Check a label</span>
-            <span class="task-card-dek">
-              Paste an ingredient list — Somnary flags hidden blends, underdoses, and known
-              interactions. Runs in your browser; nothing is sent anywhere.
-            </span>
-          </span>
-        </a>
-        <a class="task-card" href="/products">
-          <span class="task-card-icon"><Package size={26} stroke-width={1.75} aria-hidden="true" /></span>
-          <span class="task-card-text">
-            <span class="task-card-title">Inspect a product</span>
-            <span class="task-card-dek">
-              Browse product scorecards by ingredient, form, or brand — testing, disclosure, dose
-              match — the facts, not a ranking.
-            </span>
-          </span>
-        </a>
-      </div>
-    </section>
-
-    <!-- ── how to read a grade ──────────────────────────────────────────── -->
-    <section class="section" id="how-to-read">
-      <p class="section-eyebrow">How to read a grade</p>
-      <ul class="legend">
-        {
-          TIERS.map((t) => (
-            <li class="legend-item">
-              <TierBadge tier={t.id} size="card" />
-              <span class="legend-name">
-                <span class="legend-letter">{t.id}</span> {t.name}
-              </span>
-            </li>
-          ))
-        }
-      </ul>
-      <p class="legend-note">
-        A grade rates how strong the human evidence is — not whether a remedy is safe for you.
-        Safety lives on each remedy’s page and the <a href="/when-to-see-a-doctor">safety boundary</a>.
-        <a href="/methodology">See the full S–F rubric →</a>
-      </p>
-    </section>
-
-    <!-- ── research / editorial (below the decision surface) ────────────── -->
-    <section class="section" id="research">
-      <p class="section-eyebrow">Researching something Somnary hasn’t graded?</p>
-      <a class="research-entry" href="/lens">
-        <span class="research-entry-icon">
-          <Microscope size={26} stroke-width={1.75} aria-hidden="true" />
-        </span>
-        <span class="research-entry-text">
-          <span class="research-entry-title">Ask the Somnary Lens →</span>
-          <span class="research-entry-dek">
-            Name a product or ingredient — or paste a label — and the Lens researches the published
-            evidence and shows what it does and doesn’t establish. AI-assisted research, never a
-            grade, a recommendation, or a dose.
-          </span>
-        </span>
-      </a>
-      <p class="research-secondary">
-        <MessagesSquare size={16} stroke-width={1.75} aria-hidden="true" />
-        Not sure where to start? <a href="/guide">Talk it through</a> — answer a few questions and
-        get a map of what to read on Somnary for your situation.
-      </p>
-    </section>
-  </main>
+  </div>
 </Base>
 
 <style>
-  .home {
-    max-width: var(--page);
+  /* raw-ok: 880px is the browse column width, matching /products and /remedies — the home's
+     card grids need it, and --page-max (720px) is the prose measure. */
+  .wrap {
+    width: 100%;
+    max-width: 880px;
     margin: 0 auto;
-    padding: var(--sp-8) var(--sp-7) var(--sp-9);
+    padding: var(--space-6) var(--space-5) var(--space-9);
   }
 
-  /* ── decision surface ─────────────────────────────────────────────────── */
-  /* mobile-first: single column (copy → doors → safety). At ≥960px it becomes a two-column
-     hero — statement + universal search on the left, the two doors + safety boundary on the
-     right — so the desktop fold uses its width instead of leaving the right half blank (the
-     L-03 failure mode). */
-  .lede {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: var(--sp-7);
-  }
-  .lede-copy {
-    min-width: 0;
-  }
-  .lede-aside {
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-4);
-  }
-  .lede-eyebrow {
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
-    color: var(--muted);
-    margin: 0 0 var(--sp-4);
-  }
-  /* T-03: the page H1. --text-3xl clamps 38→66px; at ≤430px we drop to --text-xl (32px) so the
-     phrase wraps to clean, balanced lines with no one-word orphan (verified 375/390/400/414).
-     text-wrap:balance is inherited from global.css. The measure is left generous so balance —
-     not an artificial narrow column — decides the ragging (the old 18ch cap caused the orphan). */
-  .lede-statement {
-    font-family: var(--font-display);
-    font-size: var(--text-3xl);
-    font-weight: 700;
-    line-height: var(--lh-3xl);
-    letter-spacing: var(--tracking-display);
-    color: var(--ink);
-    margin: 0;
-    max-width: 20ch;
-  }
-  .lede-dek {
-    font-size: var(--text-md);
-    line-height: var(--lh-md);
-    color: var(--muted);
-    margin: var(--sp-5) 0 0;
-    max-width: 52ch;
-  }
-
-  /* 2 — universal search */
-  .usearch {
-    display: flex;
-    align-items: center;
-    gap: var(--sp-3);
-    margin-top: var(--sp-6);
-    max-width: 640px;
-    padding: var(--sp-2) var(--sp-2) var(--sp-2) var(--sp-4);
-    background: var(--surface);
-    border: var(--border-strong);
-    border-radius: var(--r-pill);
-    box-shadow: var(--shadow-sm);
-    transition: box-shadow var(--dur-fast) var(--ease-soft);
-  }
-  .usearch:focus-within {
-    box-shadow: var(--ring);
-  }
-  .usearch :global(.usearch-mag) {
-    flex: none;
-    color: var(--muted);
-  }
-  .usearch-input {
-    flex: 1 1 auto;
-    min-width: 0;
-    border: none;
-    background: transparent;
-    color: var(--ink);
-    font-family: var(--font-body);
-    font-size: var(--text-base);
-    line-height: var(--lh-sm);
-    padding: var(--sp-2) 0;
-  }
-  /* placeholder is 16px body text, so it must meet AA — --muted (7.16:1), not --soft
-     (3.61:1, large/decorative only per §8). */
-  .usearch-input::placeholder {
-    color: var(--muted);
-  }
-  .usearch-input:focus {
-    outline: none;
-  }
-  /* the ONE solid oxblood --action (§10 budget) */
-  .usearch-btn {
-    flex: none;
-    min-height: var(--sp-7);
-    padding: 0 var(--sp-5);
-    border: none;
-    border-radius: var(--r-pill);
-    background: var(--action);
-    color: var(--action-ink);
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
-    cursor: pointer;
-    transition: transform var(--dur-fast) var(--ease-soft);
-  }
-  .usearch-btn:hover {
-    transform: translateY(-1px);
-  }
-  .usearch-btn:focus-visible {
-    outline: none;
-    box-shadow: var(--ring);
-  }
-
-  /* 3 — dual front door (two co-equal bordered starts) */
-  .doors {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--sp-4);
-    margin-top: var(--sp-6);
-  }
-  .door {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--sp-2);
-    padding: var(--sp-6);
-    background: var(--surface);
-    border: var(--border-strong);
-    border-radius: var(--r-lg);
-    text-decoration: none;
-    color: var(--ink);
-    transition:
-      box-shadow var(--dur-base) var(--ease-settle),
-      transform var(--dur-base) var(--ease-settle);
-  }
-  .door:hover {
-    box-shadow: var(--shadow-lift);
-    transform: translateY(-2px);
-  }
-  .door:focus-visible {
-    outline: none;
-    box-shadow: var(--ring);
-  }
-  .door-icon {
-    display: inline-flex;
-    margin-bottom: var(--sp-2);
-    color: var(--primary);
-  }
-  .door-title {
-    font-family: var(--font-display);
-    font-size: var(--text-xl);
-    line-height: var(--lh-xl);
-    letter-spacing: var(--tracking-tight);
-    color: var(--ink);
-  }
-  .door-dek {
-    font-size: var(--text-sm);
-    line-height: var(--lh-sm);
-    color: var(--muted);
-  }
-  .door-go {
-    margin-top: var(--sp-2);
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
-    color: var(--primary);
-  }
-
-  /* safety boundary strip — distinct vermilion register, never oxblood */
-  .safety-strip {
-    display: flex;
-    align-items: center;
-    gap: var(--sp-3);
-    padding: var(--sp-4) var(--sp-5);
-    background: var(--warning-bg);
-    /* safety-card border — vermilion-alpha, matching the sanctioned §5 pattern (safety.astro) */
-    border: 1px solid color-mix(in srgb, var(--vermilion) 40%, transparent);
-    border-radius: var(--r-md);
-    text-decoration: none;
-    color: var(--ink);
-    transition: box-shadow var(--dur-base) var(--ease-settle);
-  }
-  .safety-strip:hover {
-    box-shadow: var(--shadow-sm);
-  }
-  .safety-strip:focus-visible {
-    outline: none;
-    box-shadow: var(--ring);
-  }
-  .safety-strip :global(.safety-strip-icon) {
-    flex: none;
-    color: var(--safety-ink);
-  }
-  .safety-strip-text {
-    font-size: var(--text-sm);
-    line-height: var(--lh-sm);
-    color: var(--ink);
-  }
-  .safety-strip-text strong {
-    color: var(--safety-ink);
-    font-weight: 700;
-  }
-  .safety-strip-go {
-    flex: none;
-    margin-left: auto;
-    color: var(--safety-ink);
-    font-size: var(--text-lg);
-    line-height: 1;
-  }
-
-  /* ── sections ─────────────────────────────────────────────────────────── */
-  .section {
-    margin-top: var(--sp-9);
-    scroll-margin-top: var(--sp-8);
-  }
-  .section-eyebrow {
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
-    color: var(--muted);
-    margin: 0 0 var(--sp-3);
-  }
-  .section-title {
-    font-family: var(--font-display);
-    font-size: var(--text-lg);
-    line-height: var(--lh-lg);
-    letter-spacing: var(--tracking-tight);
-    color: var(--ink);
-    margin: 0 0 var(--sp-5);
-  }
-
-  /* trust cues */
-  .trust-note {
-    font-size: var(--text-sm);
-    line-height: var(--lh-sm);
-    color: var(--muted);
-    margin: var(--sp-4) 0 0;
-    max-width: 70ch;
-  }
-  .trust-note a {
-    color: var(--primary);
-  }
-
-  /* explore tiles — 2×3 route cards */
-  .tiles {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--sp-4);
-  }
-  .tile {
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-2);
-    background: var(--surface);
-    border: var(--border-hairline);
-    border-radius: var(--r-lg);
-    padding: var(--sp-6);
-    text-decoration: none;
-    color: var(--ink);
-    transition:
-      box-shadow var(--dur-base) var(--ease-settle),
-      transform var(--dur-base) var(--ease-settle);
-  }
-  .tile:hover {
-    box-shadow: var(--shadow-lift);
-    transform: translateY(-2px);
-  }
-  .tile:focus-visible {
-    outline: none;
-    box-shadow: var(--ring);
-  }
-  .tile-icon {
-    display: inline-flex;
-    margin-bottom: var(--sp-3);
-    color: var(--primary);
-  }
-  .tile-title {
-    font-family: var(--font-display);
-    font-size: var(--text-xl);
-    line-height: var(--lh-xl);
-    letter-spacing: var(--tracking-tight);
-    color: var(--ink);
-    margin: 0;
-  }
-  .tile-dek {
-    font-size: var(--text-sm);
-    line-height: var(--lh-sm);
-    color: var(--muted);
-    margin: 0;
-  }
-
-  /* check — popular known-item pills + task cards */
-  .checklist {
-    list-style: none;
-    margin: 0 0 var(--sp-5);
-    padding: 0;
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--sp-3);
-  }
-  .check-pill {
-    display: inline-flex;
-    align-items: center;
-    min-height: var(--sp-6);
-    padding: 0 var(--sp-4);
-    border: var(--border-strong);
-    border-radius: var(--r-pill);
-    background: var(--surface);
-    color: var(--ink);
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
-    text-decoration: none;
-    transition:
-      border-color var(--dur-fast) var(--ease-soft),
-      transform var(--dur-fast) var(--ease-soft);
-  }
-  .check-pill:hover {
-    border: 1px solid var(--primary);
-    transform: translateY(-1px);
-  }
-  .check-pill:focus-visible {
-    outline: none;
-    box-shadow: var(--ring);
-  }
-  .task-cards {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--sp-4);
-  }
-  .task-card {
-    display: flex;
-    align-items: flex-start;
-    gap: var(--sp-4);
-    padding: var(--sp-5) var(--sp-6);
-    background: var(--surface);
-    border: var(--border-hairline);
-    border-radius: var(--r-lg);
-    text-decoration: none;
-    color: var(--ink);
-    transition:
-      box-shadow var(--dur-base) var(--ease-settle),
-      transform var(--dur-base) var(--ease-settle);
-  }
-  .task-card:hover {
-    box-shadow: var(--shadow-lift);
-    transform: translateY(-2px);
-  }
-  .task-card:focus-visible {
-    outline: none;
-    box-shadow: var(--ring);
-  }
-  .task-card-icon {
-    display: inline-flex;
-    flex: none;
-    color: var(--primary);
-  }
-  .task-card-text {
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-1);
-  }
-  .task-card-title {
-    font-family: var(--font-display);
-    font-size: var(--text-lg);
-    line-height: var(--lh-lg);
-    letter-spacing: var(--tracking-tight);
-    color: var(--ink);
-  }
-  .task-card-dek {
-    font-size: var(--text-sm);
-    line-height: var(--lh-sm);
-    color: var(--muted);
-  }
-
-  /* how to read a grade — one horizontal strip of six badges */
-  .legend {
-    list-style: none;
-    margin: 0;
-    padding: var(--sp-5);
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: var(--sp-4);
-    background: var(--surface);
-    border: var(--border-hairline);
-    border-radius: var(--r-lg);
-  }
-  .legend-item {
+  /* ── hero ── */
+  .hero {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: var(--sp-2);
+    gap: var(--space-6);
+    padding: var(--space-7) 0 var(--space-6);
     text-align: center;
   }
-  .legend-name {
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
-    color: var(--muted);
+  /* the h1 is deliberately BODY scale, not display scale: the search field below it is the
+     page's largest object, and a display-scale headline would take that role away from it */
+  h1 {
+    margin: 0;
+    max-width: 44ch;
+    font-size: var(--text-lg);
+    font-weight: var(--weight-body);
+    line-height: var(--leading-body);
+    color: var(--text-muted);
+    text-wrap: pretty;
   }
-  .legend-letter {
-    font-weight: 700;
-    color: var(--ink);
-  }
-  .legend-note {
-    font-size: var(--text-sm);
-    line-height: var(--lh-sm);
-    color: var(--muted);
-    margin: var(--sp-5) 0 0;
-    max-width: 70ch;
-  }
-  .legend-note a {
-    color: var(--primary);
+  .search {
+    width: 100%;
+    max-width: var(--search-max);
   }
 
-  /* research / editorial — Lens on-ramp (soft tint, NOT the solid --action) + guide line */
-  .research-entry {
+  /* ── quiet safety route ── */
+  .safety {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2) var(--space-3);
+    width: fit-content;
+    margin: 0 auto var(--space-9);
+    min-height: var(--control-md);
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-sm);
+    background: var(--amber-tint);
+    border: var(--border-w) solid var(--amber-line);
+    color: var(--text-body);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-ui);
+    line-height: var(--leading-snug);
+    text-decoration: none;
+    text-align: center;
+  }
+  .safety-go {
+    font-weight: var(--weight-strong);
+    color: var(--amber);
+    white-space: nowrap;
+  }
+
+  /* ── sections ── */
+  .sec {
+    padding-bottom: var(--space-9);
+  }
+  h2 {
+    margin: 0 0 var(--space-4);
+    font-size: var(--text-xl);
+    font-weight: var(--weight-heading);
+    letter-spacing: var(--tracking-display);
+    line-height: var(--leading-snug);
+  }
+  .lede {
+    margin: 0 0 var(--space-5);
+    font-size: var(--text-base);
+    line-height: var(--leading-body);
+    color: var(--text-muted);
+    max-width: var(--measure);
+  }
+  .grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--space-3);
+  }
+  .cards {
+    gap: var(--space-4);
+  }
+
+  /* ── situation cards ── */
+  .situations a {
     display: flex;
     align-items: center;
-    gap: var(--sp-4);
-    background: var(--primary-soft);
-    border: var(--border-hairline);
-    border-radius: var(--r-lg);
-    padding: var(--sp-5) var(--sp-6);
+    justify-content: space-between;
+    gap: var(--space-3);
+    min-height: var(--control-lg);
+    padding: var(--space-3) var(--space-4);
+    background: var(--surface-card);
+    border: var(--border-w) solid var(--border-hairline);
+    border-radius: var(--radius-sm);
+    color: var(--text-body);
+    font-size: var(--text-base);
+    font-weight: var(--weight-ui);
+    line-height: var(--leading-snug);
     text-decoration: none;
-    color: var(--ink);
-    transition:
-      box-shadow var(--dur-base) var(--ease-settle),
-      transform var(--dur-base) var(--ease-settle);
+    transition: border-color var(--dur-fast) var(--ease-settle);
   }
-  .research-entry:hover {
-    box-shadow: var(--shadow-lift);
-    transform: translateY(-2px);
+  .situations a:hover {
+    border-color: var(--border-strong);
   }
-  .research-entry:focus-visible {
-    outline: none;
-    box-shadow: var(--ring);
+  .situations span {
+    color: var(--text-faint);
   }
-  .research-entry-icon {
+
+  .more {
+    margin: var(--space-4) 0 0;
+  }
+  .more a {
     display: inline-flex;
-    flex-shrink: 0;
-    color: var(--primary);
-  }
-  .research-entry-text {
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-1);
-  }
-  .research-entry-title {
-    font-family: var(--font-display);
-    font-size: var(--text-lg);
-    line-height: var(--lh-lg);
-    letter-spacing: var(--tracking-tight);
-    color: var(--ink);
-  }
-  .research-entry-dek {
+    align-items: center;
+    min-height: var(--control-md);
+    color: var(--text-link);
     font-size: var(--text-sm);
-    line-height: var(--lh-sm);
-    color: var(--muted);
-  }
-  .research-secondary {
-    display: flex;
-    align-items: baseline;
-    gap: var(--sp-2);
-    margin: var(--sp-4) 0 0;
-    font-size: var(--text-sm);
-    line-height: var(--lh-sm);
-    color: var(--muted);
-  }
-  .research-secondary :global(svg) {
-    flex-shrink: 0;
-    align-self: center;
-    color: var(--primary);
-  }
-  .research-secondary a {
-    color: var(--primary);
-    font-weight: 600;
+    font-weight: var(--weight-strong);
   }
 
-  .visually-hidden {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
+  /* ── the one honest number ── */
+  .stat-sec {
+    border-top: var(--border-w) solid var(--border-hairline);
+    padding-top: var(--space-8);
+  }
+  .stat-note {
+    margin: var(--space-4) 0 0;
+    font-size: var(--text-base);
+    line-height: var(--leading-body);
+    color: var(--text-muted);
+    max-width: var(--measure);
   }
 
-  /* ── responsive ───────────────────────────────────────────────────────── */
-  /* desktop: two-column hero so the fold uses its width (fixes L-03's unused-width failure) */
-  @media (min-width: 960px) {
-    .lede {
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-      gap: var(--sp-8);
-      align-items: center;
+  @media (min-width: 600px) {
+    .situations {
+      grid-template-columns: 1fr 1fr;
     }
   }
-  @media (max-width: 760px) {
-    .tiles,
-    .task-cards {
-      grid-template-columns: 1fr;
-    }
-    /* six badges wrap to two rows of three on narrow viewports */
-    .legend {
-      grid-template-columns: repeat(3, 1fr);
+  @media (min-width: 860px) {
+    .cards {
+      grid-template-columns: 1fr 1fr 1fr;
     }
   }
-  @media (max-width: 560px) {
-    .doors {
-      grid-template-columns: 1fr;
+  @media (min-width: 600px) and (max-width: 859px) {
+    .cards {
+      grid-template-columns: 1fr 1fr;
     }
   }
-  @media (max-width: 640px) {
-    .home {
-      padding: var(--sp-7) var(--sp-5) var(--sp-8);
-    }
-    .usearch-btn {
-      padding: 0 var(--sp-4);
-    }
-  }
-  /* T-03: below 430px the H1 steps down a size so it wraps to clean lines (no one-word orphan) */
-  @media (max-width: 430px) {
-    .lede-statement {
-      font-size: var(--text-xl);
-      max-width: none;
+  @media (prefers-reduced-motion: reduce) {
+    .situations a {
+      transition: none;
     }
   }
 </style>

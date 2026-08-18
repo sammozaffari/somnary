@@ -172,6 +172,16 @@ const dataOutcomes = (i: typeof items[number]) => i.outcomes.join('|').toLowerCa
       const views = [...root.querySelectorAll('.seg[data-view]')];
       const panels = { grouped: root.querySelector('[data-panel="grouped"]'), az: root.querySelector('[data-panel="az"]') };
 
+      // ?for=<outcome> — the home page's situation cards arrive with an outcome preselected
+      // (CHK-B9). Progressive enhancement, like the chips themselves: with JS off the reader
+      // lands on the complete grouped list, which is the honest fallback, never an empty page.
+      // An unrecognised value simply presses nothing rather than filtering to zero rows.
+      const wanted = new URLSearchParams(location.search).get('for');
+      if (wanted) {
+        const target = chips.find((c) => c.dataset.filter === wanted.toLowerCase());
+        if (target) target.setAttribute('aria-pressed', 'true');
+      }
+
       function applyFilters() {
         const active = chips.filter((c) => c.getAttribute('aria-pressed') === 'true').map((c) => c.dataset.filter);
         const hideFlagged = noflag?.getAttribute('aria-pressed') === 'true';
@@ -184,6 +194,7 @@ const dataOutcomes = (i: typeof items[number]) => i.outcomes.join('|').toLowerCa
       }
       const toggle = (btn) => { btn.setAttribute('aria-pressed', btn.getAttribute('aria-pressed') === 'true' ? 'false' : 'true'); applyFilters(); };
       chips.forEach((c) => c.addEventListener('click', () => toggle(c)));
+      applyFilters(); // apply any ?for= arrival immediately
       noflag?.addEventListener('click', () => toggle(noflag));
       views.forEach((v) => v.addEventListener('click', () => {
         views.forEach((o) => o.setAttribute('aria-pressed', String(o === v)));

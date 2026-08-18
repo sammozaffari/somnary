@@ -20,6 +20,7 @@
 // from real counts, safety flag, ONE plain forward line, review date + correction link. Never old
 // prose. Any "[Placeholder" string fails the production build (item-9 gate).
 import Base from '../../layouts/Base.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
 import { getCollection } from 'astro:content';
 import BucketBadge from '../../components/evidence/BucketBadge.astro';
 import StudyField from '../../components/evidence/StudyField.astro';
@@ -79,7 +80,10 @@ const TOC = [
 
     <main class="content">
       {/* breadcrumb — the back affordance (RULES.md) */}
-      <p class="crumb"><a href="/remedies">‹ Remedies</a></p>
+      {/* the SHARED Breadcrumb, not a hand-rolled link — the same swap the owner ruled for the
+        browse page at CHK-B7: a hand-rolled crumb misses the 44px floor and the full-trail
+        desktop behaviour, and every future fix to the component skips the page. */}
+    <Breadcrumb trail={[{ label: 'Remedies', href: '/remedies' }]} current={r.displayName} />
       <h1>{r.displayName}</h1>
 
       {/* serious safety concern outranks the evidence: rendered large, directly under the h1 */}
@@ -237,7 +241,11 @@ const TOC = [
     gap: var(--space-1);
     padding: 0 var(--space-2) var(--space-2);
   }
+  /* standalone navigation targets — same 44px floor as the desktop rail (CHK-B9 pass) */
   .toc-mobile nav a {
+    display: flex;
+    align-items: center;
+    min-height: var(--control-md);
     padding: var(--space-2) var(--space-3);
     border-radius: var(--radius-sm);
     text-decoration: none;
@@ -274,7 +282,12 @@ const TOC = [
     font-weight: var(--weight-strong);
     color: var(--text-muted);
   }
+  /* standalone navigation targets — the 44px floor applies (RULES.md a11y). Measured at 38px
+     under CHK-B9's touch-target pass. */
   .toc a {
+    display: flex;
+    align-items: center;
+    min-height: var(--control-md);
     padding: var(--space-2) var(--space-3);
     border-radius: var(--radius-sm);
     text-decoration: none;
@@ -285,15 +298,6 @@ const TOC = [
   .toc a:hover {
     background: var(--surface-sunken);
     color: var(--text-body);
-  }
-  .crumb {
-    margin: 0;
-    font-size: var(--text-sm);
-    font-weight: var(--weight-ui);
-  }
-  .crumb a {
-    color: var(--text-link);
-    text-decoration: none;
   }
   h1 {
     margin: var(--space-1) 0 0;

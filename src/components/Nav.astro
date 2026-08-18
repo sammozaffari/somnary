@@ -14,6 +14,12 @@ const links = [
   { href: '/safety', label: 'Safety' },
 ];
 const path = Astro.url.pathname.replace(/\/+$/, '') || '/';
+// The search field is EVER-PRESENT (RULES.md Interface economy) — but on the home route the
+// hero's own field IS it, at --control-xl and the largest object on the page. Rendering the
+// nav's copy as well stacks two identical search fields on top of each other at 390px (caught
+// in CHK-B9's rendered pass). So the chrome yields to the hero here rather than duplicating it;
+// the bundle's home header does the same, and it is the ONLY route where the field is omitted.
+const isHome = path === '/';
 ---
 
 <header class="nav">
@@ -30,9 +36,13 @@ const path = Astro.url.pathname.replace(/\/+$/, '') || '/';
       })
     }
   </nav>
-  <div class="nav-search">
-    <SearchField size="sm" />
-  </div>
+  {
+    !isHome && (
+      <div class="nav-search">
+        <SearchField size="sm" />
+      </div>
+    )
+  }
 </header>
 
 <style>

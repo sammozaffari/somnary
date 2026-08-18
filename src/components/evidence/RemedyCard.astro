@@ -1,0 +1,153 @@
+---
+// RemedyCard — the greenfield remedy card, transcribed from the bundle kit
+// (components/cards/RemedyCard.jsx). Built at CHK-B9 (first use: the home page's "ones people
+// ask about most" row); CHK-B12's problem pages reuse it.
+//
+// NOT to be confused with the retiring `src/components/RemedyCard.astro`, which is the old
+// S–F tier-board "plate + stamp" card and dies at CHK-B18. This one carries the four-bucket
+// model: bucket badge or pending chip, the nested-bar study thumb from REAL counts, and the
+// safety flag alongside — three signals, never merged into one mark.
+//
+// RULES.md enforced here:
+//  · Evidence display: the thumb renders from `sources[]` counts only, and NEVER for an
+//    un-triaged remedy (sleep=0 means adjudicated-zero; null means still checking — the
+//    never-invent rule that has now caught bugs on the remedy page and the browse thumb).
+//  · Structure: a serious safety flag outranks the evidence visual — it sits above the thumb.
+//  · A bucket is HUMAN-GATE (CHK-E6): null renders the pending chip, never a guessed grade.
+import BucketBadge from './BucketBadge.astro';
+import StudyField from './StudyField.astro';
+import type { StudyCounts, SafetyInfo } from '../../lib/remedy/derive.ts';
+import type { BucketKey } from './buckets.ts';
+
+interface Props {
+  slug: string;
+  name: string;
+  bucket: BucketKey | null;
+  counts: StudyCounts;
+  safety: SafetyInfo;
+  /** what people mostly reach for it for — plain use, NEVER a claim of effectiveness */
+  uses?: string[];
+}
+const { slug, name, bucket, counts, safety, uses = [] } = Astro.props;
+---
+
+<article class="card">
+  <a class="hit" href={`/remedies/${slug}`} aria-label={`${name} — ${bucket ? 'see the evidence' : 'grade in review'}`}>
+    <h3>{name}</h3>
+  </a>
+
+  <div class="signals">
+    {bucket ? (
+      <a class="badge-link" href={`/how-we-grade#${bucket}`}><BucketBadge bucket={bucket} compact /></a>
+    ) : (
+      <a class="pending" href="/how-we-grade#in-review">Grade in review</a>
+    )}
+    {safety.serious && (
+      <span class="flag">
+        <svg width="12" height="12" viewBox="0 0 14 14" aria-hidden="true">
+          <path d="M7 1.8 L13 12.2 H1 Z" fill="var(--amber)" stroke="var(--amber)" stroke-width="1.6" stroke-linejoin="round"></path>
+        </svg>
+        Safety concern
+      </span>
+    )}
+  </div>
+
+  {uses.length > 0 && <p class="uses">Mainly used for: {uses.slice(0, 2).join(' · ')}</p>}
+
+  <div class="thumb">
+    {/* NEVER-INVENT RULE (render-time form): only a fully triaged remedy gets a bar. An
+        un-triaged one says what it actually is — still being read — rather than drawing a
+        "none measured sleep" bar that would state an adjudication we haven't made. */}
+    {counts.triaged && (
+      <StudyField size="thumb" counts={{ cited: counts.cited, sleep: counts.sleep, verifiable: counts.verifiable }} />
+    )}
+    {!counts.triaged && (
+      <p class="checking">
+        {counts.cited} {counts.cited === 1 ? 'paper' : 'papers'} — still checking which measured sleep
+      </p>
+    )}
+  </div>
+</article>
+
+<style>
+  .card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: var(--space-5);
+    background: var(--surface-card);
+    border: var(--border-w) solid var(--border-hairline);
+    border-radius: var(--radius-md);
+    transition: border-color var(--dur-fast) var(--ease-settle);
+  }
+  .card:hover {
+    border-color: var(--border-strong);
+  }
+  /* the name is the card's primary target; the badge and flag beside it are their own links,
+     so the hit area is the heading block rather than a full-card overlay that would swallow them */
+  .hit {
+    display: block;
+    text-decoration: none;
+    color: var(--text-body);
+  }
+  .hit h3 {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    /* 44px hit floor (RULES.md a11y) — the heading is the link */
+    min-height: var(--control-md);
+    font-size: var(--text-xl);
+    font-weight: var(--weight-strong);
+    letter-spacing: var(--tracking-display);
+    line-height: var(--leading-snug);
+  }
+  .hit:hover h3 {
+    text-decoration: underline;
+  }
+  .signals {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-3);
+  }
+  .badge-link,
+  .pending {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--control-md);
+    text-decoration: none;
+  }
+  .pending {
+    padding: 0 var(--space-3);
+    border: var(--border-w) solid var(--border-input);
+    border-radius: var(--radius-pill);
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-strong);
+  }
+  /* amber is the safety register only (RULES.md Colour), and the mark is shape-coded so
+     colour is never the sole signal */
+  .flag {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-strong);
+    color: var(--amber);
+  }
+  .uses {
+    margin: 0;
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+  }
+  .thumb {
+    margin-top: auto;
+    padding-top: var(--space-2);
+  }
+  .checking {
+    margin: 0;
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+</style>
