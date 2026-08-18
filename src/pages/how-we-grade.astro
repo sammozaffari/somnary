@@ -1,0 +1,796 @@
+---
+// How we grade (CHK-B13) — /how-we-grade. Closes the site's only dead route: the footer, every
+// bucket badge (deep-linked to its own bucket section), every "Grade in review" chip, B8's
+// browse, and the product page's "How we decide this" all land here.
+//
+// RULES.md enforced, each at the point of enforcement below:
+//  · Language: THIS IS THE ONE PAGE ALLOWED REAL TERMINOLOGY — and only on the condition that
+//    every term is introduced in plain words FIRST, with the technical form following it inside
+//    an opt-in expansion. "Randomised controlled trial", "effect size" and "bioavailability"
+//    appear nowhere on this site except here, the "see the study" popover, and the methodology.
+//  · Language: never invent a number. Every figure below is counted from the corpus at build
+//    time, so this page cannot drift from the data it describes.
+//  · Structure: two questions plus a flag, never merged — and the page says so before it
+//    explains either one.
+//  · Evidence display: a bucket moves ONLY on papers that measured a sleep outcome. Safety never
+//    moves a bucket in either direction.
+//  · The expansions are native <details> — no JS, so the technical layer is present for a reader
+//    with scripting off and for a crawler.
+import Base from '../layouts/Base.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+import BucketShape from '../components/evidence/BucketShape.astro';
+import { BUCKETS, type BucketKey } from '../components/evidence/buckets.ts';
+import { CRITERIA, VERDICTS } from '../lib/products/score.ts';
+import { getCollection } from 'astro:content';
+
+const remedies = (await getCollection('remedies')).filter((r) => !r.data.draft);
+
+// ── every number on this page is COUNTED, never asserted ─────────────────────────────────────
+const totalRemedies = remedies.length;
+const totalSources = remedies.reduce((n, r) => n + r.data.sources.length, 0);
+const ratified = remedies.filter((r) => r.data.bucket != null).length;
+const adjudicated = remedies.reduce(
+  (n, r) => n + r.data.sources.filter((s) => s.measuresSleepOutcome !== null).length,
+  0
+);
+const measuredSleep = remedies.reduce(
+  (n, r) => n + r.data.sources.filter((s) => s.measuresSleepOutcome === true).length,
+  0
+);
+
+// The worked examples are REAL remedies, read from the corpus — not illustrations we invented.
+// taurine is the fully-adjudicated zero-sleep-papers case; kava is the risky-but-untested case.
+const findRemedy = (slug: string) => remedies.find((r) => r.id === slug);
+const taurine = findRemedy('taurine');
+const kava = findRemedy('kava');
+const taurineCited = taurine?.data.sources.length ?? 0;
+const taurineSleep = taurine?.data.sources.filter((s) => s.measuresSleepOutcome === true).length ?? 0;
+const kavaCited = kava?.data.sources.length ?? 0;
+const kavaTriaged = kava?.data.sources.filter((s) => s.measuresSleepOutcome !== null).length ?? 0;
+
+const BUCKET_ORDER: BucketKey[] = ['works', 'maybe', 'unknown', 'avoid'];
+
+// What it takes to sit in each bucket, plain first. The TECHNICAL layer names the study designs;
+// the thresholds themselves are NOT stated, because they are not settled — see #standard.
+const BUCKET_DETAIL: Record<BucketKey, { plain: string; technical: string }> = {
+  works: {
+    plain:
+      'More than one well-run study measured sleep, we could check the results ourselves, and they point the same way.',
+    technical:
+      'A "well-run study" here means a trial where people were split at random into a group given the remedy and a group given a dummy that looks identical — the design researchers call a randomised controlled trial. Randomising is what makes the two groups comparable, so the only difference left is the remedy. Studies that simply watch what people already do can support the middle two grades, but they cannot put a remedy in this one on their own.',
+  },
+  maybe: {
+    plain:
+      'A few checkable results show a small benefit — but too few of them, or in too few people, to be confident it would do anything for you.',
+    technical:
+      'Usually one or two checkable studies with small groups, or a mixed picture where the better-run studies find less than the weaker ones. "A small but real difference" is an honest thing for a study to find and an honest thing for us to report — it is not a reason to promote a remedy upward.',
+  },
+  unknown: {
+    plain:
+      "Too few papers measured sleep at all — or none of them published enough detail for us to check. The remedy hasn't failed a test; the test hasn't been run.",
+    technical:
+      'Most remedies sit here, and that is a fact about the research, not about the remedies. A paper "measures sleep" when it reports a sleep outcome — how long it took to fall asleep, how long people were awake in the night, how long they slept in total. A paper about stress, mood, or blood markers may be perfectly good science and still be unable to answer this question.',
+  },
+  avoid: {
+    plain:
+      'Studies measured sleep and found little or no benefit. This grade is about what the research found — how risky something is, is the separate safety flag.',
+    technical:
+      'This is the narrowest grade on the site, and deliberately so. It requires papers that measured a sleep outcome and came back with no meaningful effect. A remedy nobody has tested cannot land here, however unpromising it looks, and a remedy that is dangerous cannot land here either — danger is carried by the safety flag.',
+  },
+};
+
+// The four checks, plain first. CRITERIA is imported so the labels cannot drift from the ones
+// the product page and the list row render.
+const CHECK_DETAIL: Record<string, { plain: string; technical: string }> = {
+  dose: {
+    plain: 'One serving contains an amount inside the range the studies actually used.',
+    technical:
+      'Compared per serving as the label directs, against the doses used in the studies we could check. More is not better: a bottle can fail this check by containing far more than was ever tested, and most of the market fails it in exactly that direction.',
+  },
+  tested: {
+    plain: 'A laboratory with no stake in the sale confirmed what is actually in the bottle.',
+    technical:
+      'Supplements are not routinely verified before sale the way medicines are, so this check asks whether somebody independent has looked. A manufacturer testing its own product is not the same thing and does not pass this check on its own.',
+  },
+  disclosed: {
+    plain: 'Every ingredient and its amount is printed on the label.',
+    technical:
+      'The thing that usually fails this check is a "proprietary blend" — a labelling device that prints one total weight for a mixture without saying how much of each ingredient is in it. Once amounts are hidden, the dose check becomes impossible to run, for us and for you.',
+  },
+  form: {
+    plain: 'The bottle uses the same form of the ingredient the studies used.',
+    technical:
+      'The same ingredient arrives as different salts, extracts and preparations, and the body takes them up at different rates — how much of a dose actually reaches you is its bioavailability. A result found for one form does not automatically carry to another, so a studied result only counts for the form that was studied.',
+  },
+};
+---
+
+<Base
+  title="How we grade | Somnary"
+  description="What the four evidence grades mean, how the product checks work, and what it takes to move either — in plain language, with the technical detail one tap deeper."
+  contain={false}
+>
+  <div class="wrap">
+    <Breadcrumb trail={[{ label: 'Somnary', href: '/' }]} current="How we grade" />
+
+    <h1>How we grade</h1>
+    <p class="intro">
+      You probably tapped a badge to get here. The short answer is first in each section, and the
+      technical detail is one tap deeper — this is the only page on the site that uses the
+      research vocabulary, and it explains each term before using it.
+    </p>
+
+    {/* Section index. NOT a table of contents on a narrative page — this page IS a reference,
+        and readers arrive mid-question from a deep link. */}
+    <nav class="index" aria-label="Sections">
+      <a href="#the-grades">The four grades</a>
+      <a href="#in-review">Why every grade says “in review”</a>
+      <a href="#two-questions">Two questions plus a flag</a>
+      <a href="#product-verdict">The product verdict</a>
+      <a href="#checks">The four checks</a>
+      <a href="#safety-flag">The safety flag</a>
+      <a href="#verify">“Results we could check”</a>
+      <a href="#study-types">What kinds of studies count</a>
+      <a href="#standard">The grading standard</a>
+      <a href="#popularity">Why popularity isn’t evidence</a>
+      <a href="#sources">Where the information comes from</a>
+      <a href="#recheck">Rechecking and corrections</a>
+      <a href="#independence">Independence</a>
+    </nav>
+
+    {/* ── the four grades — the arrival answer, before any preamble ────────────────────────── */}
+    <section id="the-grades" class="sec">
+      <h2>The four grades</h2>
+      <p class="lede">
+        One question only: does the ingredient help people sleep? Each grade carries the same
+        plain sentence everywhere it appears on the site.
+      </p>
+      <div class="buckets">
+        {BUCKET_ORDER.map((k) => (
+          /* the per-bucket anchor every badge on the site deep-links to; scroll-margin comes
+             from the global [id] rule so an anchored heading never lands under the chrome */
+          <section id={k} class="bucket" style={`--b:${BUCKETS[k].color};--bt:${BUCKETS[k].tint}`}>
+            <h3>
+              <span class="glyph"><BucketShape bucket={k} size={16} /></span>
+              {BUCKETS[k].plain}
+            </h3>
+            <p class="permanent">{BUCKETS[k].sentence}</p>
+            <p class="body">{BUCKET_DETAIL[k].plain}</p>
+            <details>
+              <summary>What it takes to sit here</summary>
+              <p class="body">{BUCKET_DETAIL[k].technical}</p>
+            </details>
+          </section>
+        ))}
+      </div>
+      <p class="note">
+        A grade describes the ingredient, not any particular bottle of it. Whether a product
+        gives you what the studies used is a <a href="#two-questions">separate question</a>.
+      </p>
+    </section>
+
+    {/* ── the honest current state ─────────────────────────────────────────────────────────── */}
+    <section id="in-review" class="sec">
+      <h2>Why every grade currently says “in review”</h2>
+      {/* Counted, not asserted: if a grade is ratified tomorrow this paragraph changes itself. */}
+      <p class="body">
+        {ratified === 0 ? (
+          <>
+            Right now, none of the {totalRemedies} remedies on this site has a grade. Every one
+            shows “grade in review”, and that is the true state of things rather than a
+            placeholder — the grades below are the scale we are grading against, and no remedy
+            has been through it yet. A grade is only published once a person has read the papers
+            and signed it off; no automated process assigns one.
+          </>
+        ) : (
+          <>
+            {ratified} of {totalRemedies} remedies now carry a grade. The rest show “grade in
+            review” — the true state of things rather than a placeholder. A grade is only
+            published once a person has read the papers and signed it off; no automated process
+            assigns one.
+          </>
+        )}
+      </p>
+      <p class="body">
+        The same honesty applies a level down. We hold {totalSources} papers across those
+        remedies, and so far {adjudicated} of them have been read closely enough to say whether
+        they measured sleep at all — {measuredSleep} did. Where we haven't finished that reading,
+        the remedy's page says “still checking” instead of drawing a bar that would imply we had.
+      </p>
+    </section>
+
+    {/* ── the structure ───────────────────────────────────────────────────────────────────── */}
+    <section id="two-questions" class="sec">
+      <h2>Two questions plus a flag, never one score</h2>
+      <p class="body">
+        Every page here answers two separate things: does the ingredient work, and does this
+        particular bottle give you what was studied. They are kept apart because a true answer to
+        one tells you nothing about the other — a beautifully made bottle of something useless is
+        still useless, and a proven ingredient at the wrong dose is still the wrong bottle.
+      </p>
+      <p class="body">
+        Safety is a third thing, and not part of either. It is not a grade; it is a warning that
+        sits alongside the grade and outranks it. A remedy can sit in any of the four grades and
+        still carry one.
+      </p>
+      <p class="note">
+        We never combine the three into a single number or a star rating. There is no such number
+        in the data, in the pages, or in the way anything is sorted.
+      </p>
+    </section>
+
+    {/* ── THE Rprod.4 IOU ─────────────────────────────────────────────────────────────────── */}
+    <section id="product-verdict" class="sec">
+      <h2>The product verdict: what the bottle is, and whether we can trust it</h2>
+      <p class="lede">
+        Four checks sit on every product page. They are not four versions of the same question —
+        they split into two kinds, and that split is what decides the verdict.
+      </p>
+      <div class="pairs">
+        <div class="pair">
+          <p class="pair-h">What the bottle <em>is</em></p>
+          <p class="body">
+            Does it contain a dose the studies used, in the form the studies used? Fail either
+            one and this simply isn't the thing the research tested. No amount of paperwork
+            changes that.
+          </p>
+        </div>
+        <div class="pair">
+          <p class="pair-h">Whether we can <em>trust</em> what it says</p>
+          <p class="body">
+            Has an independent laboratory checked the contents, and does the label disclose
+            everything? Failing these doesn't make it the wrong product — it makes it an
+            unverified one.
+          </p>
+        </div>
+      </div>
+      <p class="body">So the verdict has three possible answers, and no score:</p>
+      <ul class="verdicts">
+        <li>
+          <span class="v-label v-delivers">{VERDICTS.delivers.pill}</span>
+          <span class="v-sentence">{VERDICTS.delivers.sentence}</span>
+          <span class="v-when">All four checks pass.</span>
+        </li>
+        <li>
+          <span class="v-label v-unverified">{VERDICTS.unverified.pill}</span>
+          <span class="v-sentence">{VERDICTS.unverified.sentence}</span>
+          <span class="v-when">
+            It's the right dose in the right form, but one of the trust checks failed.
+          </span>
+        </li>
+        <li>
+          <span class="v-label v-falls-short">{VERDICTS['falls-short'].pill}</span>
+          <span class="v-sentence">{VERDICTS['falls-short'].sentence}</span>
+          <span class="v-when">The dose or the form is wrong — whatever the other checks say.</span>
+        </li>
+      </ul>
+      <p class="body">
+        That last one is the part worth spelling out. A bottle can pass three of the four checks
+        and still land there: if it is independently tested, fully disclosed, in the studied form,
+        but the dose is nothing like what was studied, then it is a well-documented bottle of the
+        wrong thing. Counting the checks would have called it a near-miss. It isn't one.
+      </p>
+      <details>
+        <summary>Why there's no weighting and no pass mark</summary>
+        <p class="body">
+          The obvious design is to score the checks and set a threshold — three out of four
+          passes, say. We rejected it, because the arithmetic hides the thing that matters: two
+          bottles can both score three out of four, one having failed a lab test and the other
+          having failed the dose, and those are not remotely the same product. Any threshold has
+          to treat them as equal, and that is the exact mistake this page exists to avoid.
+        </p>
+        <p class="body">
+          So the checks are not weighted and never added up. Dose and form decide the verdict on
+          their own; the other two decide whether we can vouch for it. Ratified 17 August 2026.
+        </p>
+      </details>
+    </section>
+
+    {/* ── the four checks ─────────────────────────────────────────────────────────────────── */}
+    <section id="checks" class="sec">
+      <h2>The four checks, one at a time</h2>
+      <p class="lede">
+        Each one is a plain fact about the bottle, shown on the product's own page with our
+        working next to it. Nothing here is an opinion about the brand.
+      </p>
+      <div class="checks">
+        {CRITERIA.map((c) => (
+          <div id={`check-${c.key}`} class="check">
+            <p class="check-h">{c.label}</p>
+            <p class="body">{CHECK_DETAIL[c.key].plain}</p>
+            <details>
+              <summary>The detail</summary>
+              <p class="body">{CHECK_DETAIL[c.key].technical}</p>
+            </details>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    {/* ── safety ──────────────────────────────────────────────────────────────────────────── */}
+    <section id="safety-flag" class="sec">
+      <h2>The safety flag, and why it never moves a grade</h2>
+      <p class="body">
+        Safety is recorded separately, in three states — none, caution, and serious concern — and
+        it never changes a grade in either direction. This is the rule readers most often expect
+        us to break, so here is exactly why we don't.
+      </p>
+      <p class="body">
+        The grades answer one question: did studies that measured sleep find a benefit. If
+        something risky were pushed into the bottom grade to warn you off it, that grade would
+        quietly come to mean two different things — “tested and didn't work” for some remedies
+        and “dangerous” for others — and neither would be reliable. Worse, a risky remedy nobody
+        has tested would be recorded as though the research had spoken.
+      </p>
+      {kava && (
+        <div class="example">
+          <p class="example-h">Worked example: {kava.data.displayName}</p>
+          <p class="body">
+            {kava.data.displayName} carries a documented history of serious liver harm, and its
+            page says so prominently. It still does not sit in the bottom grade, because we hold{' '}
+            {kavaCited} {kavaCited === 1 ? 'paper' : 'papers'} on it and{' '}
+            {kavaTriaged === 0
+              ? 'none has yet been read closely enough to say whether it measured sleep'
+              : `only ${kavaTriaged} ${kavaTriaged === 1 ? 'has' : 'have'} been read closely enough to say whether it measured sleep`}
+            . “Tested and didn't help” would be a claim about research that hasn't been done. The
+            danger is real and rides the safety flag, where it belongs — a flag you can see
+            without reading a grade at all.
+          </p>
+          <p class="note"><a class="jump-link" href={`/remedies/${kava.id}`}>The {kava.data.displayName} page ›</a></p>
+        </div>
+      )}
+    </section>
+
+    {/* ── verification ────────────────────────────────────────────────────────────────────── */}
+    <section id="verify" class="sec">
+      <h2>What “results we could check” means</h2>
+      <p class="body">
+        A result counts as checkable when the paper published enough detail — how many people took
+        part, what was measured, and what the numbers were — that we could follow the finding
+        ourselves instead of taking the summary's word for it.
+      </p>
+      <p class="body">
+        Most papers don't qualify, for ordinary reasons. A large share of the papers people cite
+        about sleep remedies never measured sleep, and of the ones that did, many don't publish
+        enough detail to check. That is why the bar on every remedy page has three parts and why
+        the solid part is usually the shortest.
+      </p>
+      {taurine && taurineSleep === 0 && (
+        <div class="example">
+          <p class="example-h">Worked example: {taurine.data.displayName}</p>
+          <p class="body">
+            We hold {taurineCited} papers on {taurine.data.displayName.toLowerCase()}. We have read
+            all {taurineCited}, and none of them measured a sleep outcome — they studied other
+            things. So its bar is entirely the muted part, labelled “didn't measure sleep”, and
+            the honest grade is “not properly tested for sleep”, not “doesn't work”. Nobody has
+            asked the question yet.
+          </p>
+          <p class="note"><a class="jump-link" href={`/remedies/${taurine.id}`}>The {taurine.data.displayName} page ›</a></p>
+        </div>
+      )}
+      <details>
+        <summary>How a paper gets counted</summary>
+        <p class="body">
+          Each paper is read and marked for one thing first: did it measure a sleep outcome in
+          people. Papers on animals or on cells don't count toward a grade, because a grade
+          describes published human evidence. A paper that measured sleep is then marked for
+          whether it reported enough to check — the number of people and the direction of the
+          result — and only those feed the solid part of the bar and the plain sentence beneath it.
+        </p>
+      </details>
+    </section>
+
+    {/* ── study types ─────────────────────────────────────────────────────────────────────── */}
+    <section id="study-types" class="sec">
+      <h2>What kinds of studies count</h2>
+      <p class="body">
+        Three kinds of paper can carry evidence here. A trial, where people are given either the
+        remedy or a dummy and the difference is measured. A review that pools the results of
+        several studies. And an observational study, where researchers watch what people already
+        do and record what happens to them.
+      </p>
+      <p class="body">
+        Observational studies count, and they can support the middle two grades — but they can't
+        put a remedy in the top grade on their own. The reason is plain: watching shows that two
+        things go together, while a trial shows that one caused the other. Sleep is especially
+        prone to the difference, because people who sleep well differ from people who don't in
+        dozens of ways at once, and anything they happen to take will look like it works.
+      </p>
+      <details>
+        <summary>The technical names</summary>
+        <p class="body">
+          “Trial” here means a randomised controlled trial — randomised because people are
+          assigned to groups by chance rather than by choice, controlled because one group gets a
+          dummy for comparison. “Review of several studies” covers systematic reviews and
+          meta-analyses, which pool results across trials. “Observational study” covers cohort and
+          similar designs. Every paper in a remedy's list is labelled in the plain words, so you
+          can see at a glance whether the evidence is trials or observation; the technical names
+          appear only inside the sources list.
+        </p>
+      </details>
+    </section>
+
+    {/* ── the rubric ──────────────────────────────────────────────────────────────────────── */}
+    {/* HONEST PENDING STATE, STRUCTURED FOR AN UPGRADE. The source-quality rubric is CHK-E1 and
+        is `HG` — it has not been ratified. This section deliberately explains WHAT the standard
+        governs and WHY it isn't published yet, rather than describing thresholds that don't
+        exist. When E1 ratifies, the ratified rubric replaces the <p class="pending"> block and
+        the section keeps its heading, its anchor and its surrounding copy — a section upgrade,
+        not a page rework. Nothing else on this page states a threshold, for the same reason. */}
+    <section id="standard" class="sec">
+      <h2>The grading standard</h2>
+      <p class="body">
+        Two remedies with the same number of papers can deserve different grades, because the
+        papers aren't equally good. How much weight a paper carries — its size, its design, how
+        directly it measured sleep — is set by a written standard rather than decided case by
+        case, so that a grade can be re-derived by someone else and challenged if it's wrong.
+      </p>
+      <p class="pending">
+        <strong>That standard is being finalised and isn't published yet.</strong> Until it is,
+        you won't find a number on this page saying how many papers or how large an effect it
+        takes to reach a particular grade — those thresholds are exactly what's under review, and
+        publishing a provisional set would give them a certainty they haven't earned. It lands
+        here when it's ratified, and any grade already published gets re-checked against it.
+      </p>
+      <p class="note">
+        This is also why no remedy is graded yet. The standard comes first, then the grades.
+      </p>
+    </section>
+
+    {/* ── popularity ──────────────────────────────────────────────────────────────────────── */}
+    <section id="popularity" class="sec">
+      <h2>Why “everyone swears by it” doesn't move a grade</h2>
+      <p class="body">
+        Sleep is unusually good at making inert things look effective, and it does it three ways
+        at once. It responds strongly to expectation, so believing you've taken something that
+        helps genuinely does help, for a while. Bad sleep comes in stretches, so whatever you take
+        on the worst night gets the credit when the stretch ends by itself. And memory for sleep
+        is unreliable — people misjudge how long they slept, in both directions.
+      </p>
+      <p class="body">
+        Together those build a convincing consensus around something that does nothing at all.
+        That isn't a failing in the people reporting it; it is the reason a grade only moves on
+        studies built to cancel those effects out. What people report is kept well away from the
+        grades, and never appears at the point where you'd be deciding to buy.
+      </p>
+    </section>
+
+    {/* ── sources ─────────────────────────────────────────────────────────────────────────── */}
+    <section id="sources" class="sec">
+      <h2>Where the information comes from</h2>
+      <ul class="list">
+        <li>
+          <strong>Published research</strong> — every claim links to the paper it came from, and
+          every paper carries an identifier that resolves to the real thing. A build of this site
+          fails if one doesn't.
+        </li>
+        <li>
+          <strong>Product labels</strong> — recorded as printed, with the date we recorded them.
+          Where we haven't recorded part of a label, the product's page says so rather than
+          leaving you to assume.
+        </li>
+        <li>
+          <strong>Independent testing</strong> — where a laboratory with no stake in the sale has
+          published a result for a specific product.
+        </li>
+      </ul>
+      <p class="note">
+        A manufacturer's own claims are recorded as claims, and never on their own as evidence
+        that something works.
+      </p>
+    </section>
+
+    {/* ── recheck + corrections ───────────────────────────────────────────────────────────── */}
+    <section id="recheck" class="sec">
+      <h2>Rechecking, and telling us we're wrong</h2>
+      <p class="body">
+        Every page shows when it was last checked, in plain sight rather than in the footer.
+        Formulations change and research moves, so a page is only as good as that date.
+      </p>
+      <p class="body">
+        If a number, a link, or a claim looks wrong, tell us — and say which page. Corrections are
+        made on the page they affect.
+      </p>
+      <p class="note"><a class="jump-link" href="/request-a-review">Report something that looks wrong ›</a></p>
+    </section>
+
+    {/* ── independence ────────────────────────────────────────────────────────────────────── */}
+    <section id="independence" class="sec">
+      <h2>Independence</h2>
+      {/* RULES.md Language: the independence claim is ONE quiet line, and the banned
+          self-congratulating vocabulary ("reader-funded", "zero brand money", "evidence-graded")
+          never appears. What follows states the mechanism, not the virtue. */}
+      <p class="body">
+        Nobody pays us to say any of this. Every claim links to the study it came from.
+      </p>
+      <p class="body">
+        Where-to-buy links exist on every product we list, including the ones we'd tell you to
+        skip, and they look identical either way. No link has ever changed a check, a grade, or
+        the order anything appears in.
+      </p>
+    </section>
+  </div>
+</Base>
+
+<style>
+  /* raw-ok: 720px is --page-max as a layout width; this is a reading page and keeps the prose
+     column rather than the browse list's wider measure. */
+  .wrap {
+    width: 100%;
+    max-width: var(--page-max);
+    margin: 0 auto;
+    padding: var(--space-5) var(--space-5) var(--space-9);
+  }
+  h1 {
+    margin: var(--space-1) 0 var(--space-3);
+    font-size: var(--display-md);
+    font-weight: var(--weight-title);
+    letter-spacing: var(--tracking-display);
+    line-height: var(--leading-tight);
+  }
+  .intro {
+    margin: 0 0 var(--space-6);
+    font-size: var(--text-base);
+    line-height: var(--leading-body);
+    color: var(--text-muted);
+    max-width: var(--measure);
+  }
+
+  /* section index */
+  .index {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-4);
+    padding-bottom: var(--space-4);
+    border-bottom: var(--border-w) solid var(--border-hairline);
+  }
+  .index a {
+    display: inline-flex;
+    align-items: center;
+    /* 44px hit floor — these are standalone navigation targets (RULES.md a11y) */
+    min-height: var(--control-md);
+    color: var(--text-link);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-ui);
+  }
+
+  .sec {
+    padding-top: var(--space-8);
+  }
+  h2 {
+    margin: 0 0 var(--space-4);
+    font-size: var(--display-sm);
+    font-weight: var(--weight-heading);
+    letter-spacing: var(--tracking-display);
+    line-height: var(--leading-snug);
+  }
+  .body,
+  .lede,
+  .note,
+  .pending {
+    margin: 0 0 var(--space-3);
+    font-size: var(--text-base);
+    line-height: var(--leading-body);
+    color: var(--text-body);
+    max-width: var(--measure);
+  }
+  .lede,
+  .note {
+    color: var(--text-muted);
+  }
+  .note {
+    font-size: var(--text-sm);
+  }
+  /* a link that IS its own paragraph is a standalone navigation target and takes the 44px hit
+     floor; links inside a sentence (e.g. "separate question" above) keep the inline exemption. */
+  .jump-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--control-md);
+  }
+  .body a,
+  .note a,
+  .lede a {
+    color: var(--text-link);
+    font-weight: var(--weight-ui);
+  }
+
+  /* ── the four grades ── */
+  .buckets {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    margin-bottom: var(--space-4);
+  }
+  .bucket {
+    background: var(--surface-card);
+    border: var(--border-w) solid var(--border-hairline);
+    border-radius: var(--radius-md);
+    padding: var(--space-5);
+  }
+  .bucket h3 {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin: 0 0 var(--space-2);
+    /* the bucket's own colour carries the grade, alongside its shape — colour is never the
+       only signal (RULES.md Colour) */
+    color: var(--b);
+    font-size: var(--text-lg);
+    font-weight: var(--weight-strong);
+    line-height: var(--leading-snug);
+  }
+  .glyph {
+    display: inline-flex;
+    flex: none;
+  }
+  /* the PERMANENT plain sentence that rides with every bucket, everywhere (RULES.md structure) */
+  .permanent {
+    margin: 0 0 var(--space-3);
+    font-size: var(--text-base);
+    line-height: var(--leading-body);
+    color: var(--text-muted);
+    max-width: var(--measure);
+  }
+
+  /* ── opt-in technical layer (native details — works with JS off) ── */
+  details {
+    margin-top: var(--space-2);
+  }
+  summary {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--control-md);
+    color: var(--text-link);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-ui);
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  details[open] summary {
+    margin-bottom: var(--space-2);
+  }
+  details > .body {
+    background: var(--surface-sunken);
+    border: var(--border-w) solid var(--border-hairline);
+    border-radius: var(--radius-sm);
+    padding: var(--space-4);
+    margin-bottom: var(--space-2);
+  }
+
+  /* ── the two kinds of check ── */
+  .pairs {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    margin-bottom: var(--space-4);
+  }
+  .pair {
+    border-left: var(--border-w) solid var(--border-strong);
+    padding-left: var(--space-4);
+  }
+  .pair-h {
+    margin: 0 0 var(--space-2);
+    font-size: var(--text-base);
+    font-weight: var(--weight-strong);
+  }
+  .pair-h em {
+    font-style: italic;
+  }
+
+  /* ── the three verdicts ── */
+  .verdicts {
+    list-style: none;
+    margin: 0 0 var(--space-4);
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+  .verdicts li {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    align-items: flex-start;
+  }
+  .v-label {
+    display: inline-flex;
+    align-items: center;
+    border-radius: var(--radius-pill);
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-strong);
+    line-height: 1;
+  }
+  /* the same three registers the pill uses on a product page — green only for the earned
+     positive verdict, avoid-red only for a documented failure (RULES.md Colour) */
+  .v-delivers {
+    background: var(--sage-tint);
+    color: var(--sage-text);
+  }
+  .v-unverified {
+    background: var(--bucket-maybe-tint);
+    color: var(--bucket-maybe);
+  }
+  .v-falls-short {
+    background: var(--bucket-avoid-tint);
+    color: var(--bucket-avoid);
+  }
+  .v-sentence {
+    font-size: var(--text-lg);
+    font-weight: var(--weight-ui);
+    line-height: var(--leading-snug);
+    max-width: var(--measure);
+  }
+  .v-when {
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+    max-width: var(--measure);
+  }
+
+  /* ── the four checks ── */
+  .checks {
+    display: flex;
+    flex-direction: column;
+  }
+  .check {
+    border-top: var(--border-w) solid var(--border-hairline);
+    padding-top: var(--space-4);
+    margin-top: var(--space-4);
+  }
+  .check-h {
+    margin: 0 0 var(--space-2);
+    font-size: var(--text-base);
+    font-weight: var(--weight-strong);
+  }
+
+  /* ── worked examples ── */
+  .example {
+    background: var(--surface-sunken);
+    border: var(--border-w) solid var(--border-hairline);
+    border-radius: var(--radius-md);
+    padding: var(--space-4);
+    margin-bottom: var(--space-3);
+  }
+  .example-h {
+    margin: 0 0 var(--space-2);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-strong);
+    color: var(--text-muted);
+  }
+  .example .body:last-of-type,
+  .example .note {
+    margin-bottom: 0;
+  }
+
+  /* the pending standard — stated, not decorated. No warning register: an unfinished standard
+     is not a safety matter and must not borrow the amber that means one. */
+  .pending {
+    background: var(--surface-sunken);
+    border: var(--border-w) solid var(--border-input);
+    border-radius: var(--radius-md);
+    padding: var(--space-4);
+  }
+
+  .list {
+    margin: 0 0 var(--space-3);
+    padding-left: 1.2em;
+    font-size: var(--text-base);
+    line-height: var(--leading-body);
+    max-width: var(--measure);
+  }
+  .list li {
+    margin-bottom: var(--space-3);
+  }
+
+  @media (min-width: 720px) {
+    .pairs {
+      flex-direction: row;
+      gap: var(--space-6);
+    }
+    .pair {
+      flex: 1 1 0;
+    }
+  }
+</style>

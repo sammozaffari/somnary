@@ -95,9 +95,9 @@ const TOC = [
            renders the honest "grade in review" pending chip. We never derive or fake a bucket from
            the tier or the counts to fill the slot — an absent grade is shown as absent. */}
         {hasBucket ? (
-          <a class="bucket-link" href="/how-we-grade" title="How we grade"><BucketBadge bucket={r.bucket!} /></a>
+          <a class="bucket-link" href={`/how-we-grade#${r.bucket}`} title="How we grade"><BucketBadge bucket={r.bucket!} /></a>
         ) : (
-          <a class="pending" href="/how-we-grade">Grade in review <span aria-hidden="true">›</span></a>
+          <a class="pending" href="/how-we-grade#in-review">Grade in review <span aria-hidden="true">›</span></a>
         )}
 
         <p class="verdict">{forwardLine}</p>
