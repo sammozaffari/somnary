@@ -195,11 +195,11 @@ const pageTitle = `${product.brand} ${product.name} — is it what the studies u
                 pending chip is shown rather than a guessed grade (HUMAN-GATE). Every bucket
                 badge links to how-we-grade (RULES.md Interface economy). */}
             {primary.data.bucket ? (
-              <a class="bucket-link" href="/how-we-grade">
+              <a class="bucket-link" href={`/how-we-grade#${primary.data.bucket}`}>
                 <BucketBadge bucket={primary.data.bucket} compact />
               </a>
             ) : (
-              <a class="pending-chip" href="/how-we-grade">Grade in review</a>
+              <a class="pending-chip" href="/how-we-grade#in-review">Grade in review</a>
             )}
           </div>
         )}
@@ -258,7 +258,7 @@ const pageTitle = `${product.brand} ${product.name} — is it what the studies u
             : verdict === 'unverified'
               ? "It's the right thing — we just can't independently confirm what the label says."
               : 'All four hold, so the research describes what is in this bottle.'}{' '}
-          <a href="/how-we-grade">How we decide this</a>
+          <a href="/how-we-grade#product-verdict">How we decide this</a>
         </p>
       )}
     </section>

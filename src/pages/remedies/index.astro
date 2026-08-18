@@ -85,7 +85,8 @@ const dataOutcomes = (i: typeof items[number]) => i.outcomes.join('|').toLowerCa
         <section class="group">
           <h2 class="group-h" style={`--gc:${BUCKETS[bk].color}`}>
             <span class="glyph"><BucketShape bucket={bk} size={18} /></span>
-            {BUCKETS[bk].plain}
+            {/* the group heading IS a bucket badge — deep-link it to its own section (CHK-B13) */}
+            <a class="group-link" href={`/how-we-grade#${bk}`}>{BUCKETS[bk].plain}</a>
           </h2>
           {bk === 'works' && <p class="sparse">Very few natural sleep remedies have been studied well enough to sit here.</p>}
           <div class="rows">
@@ -123,7 +124,7 @@ const dataOutcomes = (i: typeof items[number]) => i.outcomes.join('|').toLowerCa
             <article class="row" data-outcomes={dataOutcomes(i)} data-flag={i.hasFlag ? '1' : '0'}>
               <div class="row-main">
                 <a class="row-name" href={`/remedies/${i.slug}`}>{i.name}</a>
-                <a class="pending-chip" href="/how-we-grade">Grade in review</a>
+                <a class="pending-chip" href="/how-we-grade#in-review">Grade in review</a>
                 {i.serious && <span class="flag">Safety concern</span>}
                 <p class="uses">{i.outcomes.length ? `Mainly used for: ${i.outcomes.slice(0, 3).join(' · ')}` : ''}</p>
               </div>
@@ -145,7 +146,7 @@ const dataOutcomes = (i: typeof items[number]) => i.outcomes.join('|').toLowerCa
           <article class="row" data-outcomes={dataOutcomes(i)} data-flag={i.hasFlag ? '1' : '0'}>
             <div class="row-main">
               <a class="row-name" href={`/remedies/${i.slug}`}>{i.name}</a>
-              {i.bucket == null ? <a class="pending-chip" href="/how-we-grade">Grade in review</a> : <span class="glyph" style={`color:${BUCKETS[i.bucket].color}`}><BucketBadge bucket={i.bucket} compact /></span>}
+              {i.bucket == null ? <a class="pending-chip" href="/how-we-grade#in-review">Grade in review</a> : <a class="glyph" href={`/how-we-grade#${i.bucket}`} style={`color:${BUCKETS[i.bucket].color}`}><BucketBadge bucket={i.bucket} compact /></a>}
               {i.serious && <span class="flag">Safety concern</span>}
             </div>
             <div class="row-thumb">
@@ -279,6 +280,11 @@ const dataOutcomes = (i: typeof items[number]) => i.outcomes.join('|').toLowerCa
   }
   /* the bucket shape carries the group's colour; the label stays --ink (heading, not data) */
   .group-h .glyph { color: var(--gc); display: inline-flex; }
+  /* the heading link keeps the heading's colour and weight — it reads as a heading, not a link,
+     while making every bucket badge reachable to how-we-grade (RULES.md Interface economy) */
+  .group-h .group-link { color: inherit; text-decoration: none; }
+  .group-h .group-link:hover { text-decoration: underline; }
+  a.glyph { text-decoration: none; align-items: center; min-height: var(--control-md); }
   .sparse,
   .pending-note {
     margin: var(--space-4) 0 0;
