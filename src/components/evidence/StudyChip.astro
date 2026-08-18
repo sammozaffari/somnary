@@ -91,8 +91,13 @@ const {
     font-variant-numeric: tabular-nums;
     color: var(--text-muted);
   }
+  /* RULES.md a11y floor: a standalone "see the study" link, not a link inside a sentence, so
+     the 44px hit floor applies with no inline exemption. Measured at 22px under CHK-B6's
+     touch-target pass, floored here (ruled cross-scope fix, CHK-B7). Type size unchanged. */
   .out {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--control-md);
     margin-top: var(--space-3);
     font-weight: var(--weight-strong);
     font-size: var(--text-sm);

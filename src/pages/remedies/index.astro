@@ -12,6 +12,7 @@
 //  · Browse WORKS WITHOUT JS: the full grouped list is server-rendered; the filter chips + view
 //    toggle are progressive enhancement (a small inline script), inert-but-complete with JS off.
 import Base from '../../layouts/Base.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
 import { getCollection } from 'astro:content';
 import BucketBadge from '../../components/evidence/BucketBadge.astro';
 import BucketShape from '../../components/evidence/BucketShape.astro';
@@ -56,7 +57,11 @@ const dataOutcomes = (i: typeof items[number]) => i.outcomes.join('|').toLowerCa
 
 <Base title="Every remedy, graded by the evidence | Somnary" description="Every natural sleep remedy we cover, grouped by what the studies show." contain={false}>
   <div class="wrap" data-remedies>
-    <p class="crumb"><a href="/">‹ Somnary</a></p>
+    {/* the SHARED Breadcrumb, not a hand-rolled link: the hand-rolled one missed the 44px floor
+        and the "‹ Parent" mobile / full-trail desktop behaviour, and every future fix to the
+        component skipped this page (ruled cross-scope fix, CHK-B7). Rendered inside .wrap
+        because this page opts out of Base's content column with contain={false}. */}
+    <Breadcrumb trail={[{ label: 'Somnary', href: '/' }]} current="Remedies" />
     <h1>Every remedy, graded by the evidence</h1>
     <p class="intro">Grouped by what the studies show. The grade is about the ingredient — whether a specific bottle delivers it is scored on its own page.</p>
 
@@ -195,8 +200,6 @@ const dataOutcomes = (i: typeof items[number]) => i.outcomes.join('|').toLowerCa
     margin: 0 auto;
     padding: var(--space-5) var(--space-5) var(--space-9);
   }
-  .crumb { margin: 0; font-size: var(--text-sm); font-weight: var(--weight-ui); }
-  .crumb a { color: var(--text-link); text-decoration: none; }
   h1 {
     margin: var(--space-1) 0 var(--space-2);
     font-size: var(--display-md);
@@ -309,7 +312,13 @@ const dataOutcomes = (i: typeof items[number]) => i.outcomes.join('|').toLowerCa
     gap: var(--space-2) var(--space-3);
     min-width: 0;
   }
+  /* RULES.md a11y floor: 31 of these are the page's primary targets and measured 35px. Floored
+     rather than hit-area-stretched over .row-main, because .row-main also holds the
+     .pending-chip LINK — an overlay would swallow it (ruled cross-scope fix, CHK-B7). */
   .row-name {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--control-md);
     font-size: var(--text-xl);
     font-weight: var(--weight-strong);
     letter-spacing: var(--tracking-display);
@@ -320,7 +329,9 @@ const dataOutcomes = (i: typeof items[number]) => i.outcomes.join('|').toLowerCa
   .pending-chip {
     display: inline-flex;
     align-items: center;
-    min-height: var(--space-7);
+    /* was --space-7 (32px) — a spacing token standing in for a control height. Hit targets use
+       the control scale, and the floor is --control-md (RULES.md a11y; CHK-B7 cross-scope fix). */
+    min-height: var(--control-md);
     padding: 0 var(--space-3);
     border: var(--border-w) solid var(--border-input);
     border-radius: var(--radius-pill);

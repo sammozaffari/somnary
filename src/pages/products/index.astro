@@ -19,9 +19,10 @@
 //    progressive enhancement over a complete list.
 import Base from '../../layouts/Base.astro';
 import { getCollection } from 'astro:content';
+import Breadcrumb from '../../components/Breadcrumb.astro';
 import ProductListRow from '../../components/products/ProductListRow.astro';
 import { formLabel } from '../../lib/products/labels.ts';
-import { CRITERIA, byChecksPassed, checksPassed, completeness } from '../../lib/products/score.ts';
+import { byChecksPassed, completeness, verdictState } from '../../lib/products/score.ts';
 
 const products = (await getCollection('products')).sort((a, b) => byChecksPassed(a.data, b.data));
 const remedies = await getCollection('remedies');
@@ -89,7 +90,9 @@ const showSweetenerFilter = hasBoth('sweetener');
 const total = rows.length;
 const brandCount = new Set(products.map((p) => p.data.brand)).size;
 const assessed = products.filter((p) => completeness(p.data) === 'assessed').length;
-const passAll = products.filter((p) => completeness(p.data) === 'assessed' && checksPassed(p.data) === CRITERIA.length).length;
+// The ruled verdict (CHK-Rprod.4, ratified 17 August 2026), not a count — "passes every check"
+// was the placeholder-threshold framing and is retired with it.
+const delivers = products.filter((p) => verdictState(p.data) === 'delivers').length;
 // When the whole list shares one completeness state, the framing line above states it once and
 // each row's pill repeats it — so the row's explanatory sentence is switched off (it would run
 // identically down every row). The moment the list is mixed it comes back, because then it is
@@ -100,8 +103,6 @@ const uniformState = new Set(products.map((p) => completeness(p.data))).size ===
 <Base
   title="Sleep supplements, checked against the studies | Somnary"
   description="Every sleep supplement we've catalogued, with the four checks that say whether the bottle delivers what the studies used."
-  breadcrumbs={[{ label: 'Somnary', href: '/' }]}
-  breadcrumbCurrent="Products"
   contain={false}
 >
   {/* Set before the controls are parsed, so chrome that needs JS is never painted and then
@@ -113,6 +114,10 @@ const uniformState = new Set(products.map((p) => completeness(p.data))).size ===
   </script>
 
   <div class="wrap" data-products>
+    {/* rendered HERE, not via Base's breadcrumbs prop: this page opts out of Base's content
+        column (contain={false}), and Base renders the crumb before that column — so the prop
+        form sat flush against the viewport edge, outside the page's own gutter. */}
+    <Breadcrumb trail={[{ label: 'Somnary', href: '/' }]} current="Products" />
     <h1>Products</h1>
 
     <p class="intro">
@@ -135,9 +140,9 @@ const uniformState = new Set(products.map((p) => completeness(p.data))).size ===
         ) : (
           <>
             <strong>{total} products from {brandCount} brands.</strong> {assessed} have been
-            through the four checks — {passAll} pass all four, listed first. The rest we hold
-            labels for but haven't checked yet. Order is set by the checks, never by price and
-            never by a brand deal.
+            through the four checks — {delivers} give you what the studies used, listed first.
+            The rest we hold labels for but haven't checked yet. Order is set by the checks,
+            never by price and never by a brand deal.
           </>
         )
       }

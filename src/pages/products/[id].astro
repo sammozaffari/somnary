@@ -1,157 +1,836 @@
 ---
-// Sample product page (CHK-B3) — proves the product content type renders server-side from data.
-// This is NOT the full product page (decision narrative, paired verdict, dose diagram, where-to-buy
-// via /go) — that is CHK-B7. It renders the migrated data HONESTLY against assessment_state:
-// most products are "label known, not yet assessed", so the four product-score checks show as
-// "not yet assessed", never a fabricated score. The ingredient evidence bucket is NOT shown here —
-// it lives on the remedy page; the bucket and the product score are two SEPARATE axes (RULES.md),
-// never merged into one number.
+// Product page (CHK-B7) — /products/{id}, where the id is already {brand-slug}-{product-slug}.
+// Replaces B3's sample page on the same route. Consumes B3's product/brand collections, B4's
+// /go redirect, B5's evidence primitives, and B6's row primitives + the ruled verdict.
+//
+// RULES.md enforced, each at the point of enforcement below:
+//  · Products: a DECISION NARRATIVE — no table of contents, no sidebar; the section order IS the
+//    argument, read top to bottom. The one jump on the page is "Where to buy ↓".
+//  · Products: we list EVERY product, including ones we advise against, and the where-to-buy row
+//    is IDENTICAL regardless of the verdict, with the warning intact above it. Nothing on this
+//    page consults a price, a retailer or a commercial relationship to decide what to show.
+//  · "Never merged": three separate signals appear here and stay separate — the ingredient's
+//    evidence BUCKET (about the ingredient, links to its remedy page), the SAFETY FLAG (shown
+//    alongside, never folded into either), and this bottle's product VERDICT. No combined number
+//    exists anywhere on the page.
+//  · Products: anecdote never appears at the point of purchase. There is no "what people report"
+//    section here by design — it lives on the remedy page, behind the community firewall.
+//  · Language: no invented numbers, and no "[Placeholder" strings (they fail the build, Rui.3).
+//    Every section below either renders real data or says plainly what we don't hold yet.
+import { getCollection, type CollectionEntry } from 'astro:content';
 import Base from '../../layouts/Base.astro';
-import { getCollection } from 'astro:content';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+import BrandMark from '../../components/products/BrandMark.astro';
+import VerdictPill from '../../components/products/VerdictPill.astro';
 import RetailLink from '../../components/RetailLink.astro';
-import { FORM_LABEL, RELEASE_LABEL } from '../../lib/products/labels.ts';
+import BucketBadge from '../../components/evidence/BucketBadge.astro';
+import SafetyCallout from '../../components/evidence/SafetyCallout.astro';
+import { CRITERIA, VERDICTS, byChecksPassed, checkValues, completeness, verdictState } from '../../lib/products/score.ts';
+import { formLabel, RELEASE_LABEL } from '../../lib/products/labels.ts';
+import { safetyInfo } from '../../lib/remedy/derive.ts';
+
+type Remedy = CollectionEntry<'remedies'>;
 
 export async function getStaticPaths() {
   const products = await getCollection('products');
-  return products.map((p) => ({ params: { id: p.id }, props: { product: p.data } }));
+  const remedies = await getCollection('remedies');
+  return products.map((p) => ({
+    params: { id: p.id },
+    props: {
+      product: p.data,
+      productId: p.id,
+      // (the brand RECORD is deliberately not loaded: nothing on this page can link to
+      //  /brands/{slug} until CHK-B11 builds that route)
+      // every remedy this bottle contains, in label order (90 of 93 are single-ingredient)
+      remedies: p.data.ingredients
+        .map((i) => remedies.find((r) => r.id === i.remedy_id))
+        .filter((r): r is Remedy => Boolean(r)),
+      // other products sharing this bottle's first ingredient — the "if this isn't right for you"
+      // row. Ordered by the SAME ruled order as the browse list, never by price or retailer.
+      siblings: products
+        .filter(
+          (o) =>
+            o.id !== p.id &&
+            o.data.ingredients.some((i) => p.data.ingredients.some((j) => j.remedy_id === i.remedy_id))
+        )
+        .sort((a, b) => byChecksPassed(a.data, b.data))
+        .slice(0, 3)
+        .map((o) => ({ id: o.id, data: o.data })),
+    },
+  }));
 }
 
-const { product } = Astro.props;
+const { product, productId, remedies, siblings } = Astro.props;
 
-// deliveryForm/releaseProfile plain labels (plan §2a — plain language, no jargon). The maps
-// moved to src/lib/products/labels.ts at CHK-B6 so the products list, this page and CHK-B7 read
-// ONE controlled vocabulary — a second copy is how a controlled vocabulary drifts.
+const state = completeness(product);
+const verdict = state === 'assessed' ? verdictState(product) : null;
+const values = checkValues(product);
 const strength = product.strength ? `${product.strength.amount} ${product.strength.unit}` : null;
-const notAssessed = product.assessment_state !== 'fully assessed';
-// the four product-score checks, rendered honestly (null = not yet assessed)
-const checks = [
-  { label: 'Dose matches what studies used', value: product.dose_match },
-  { label: 'Independently third-party tested', value: product.third_party_tested ? true : product.dose_match === null ? null : false },
-  { label: 'Label discloses everything', value: product.label_discloses_all },
-  { label: 'The form that was actually studied', value: product.form_matches_studied },
-];
-const checkWord = (v: boolean | null) => (v === null ? 'Not yet assessed' : v ? 'Yes' : 'No');
+const primary = remedies[0] ?? null;
+const safety = primary ? safetyInfo(primary.data.safety) : null;
+
+// The "what it is" line, composed from structured fields — the name NEVER carries the dose
+// (schema rule), so strength arrives here and only here.
+const factLine = [
+  strength ?? 'Strength not recorded yet',
+  formLabel(product.deliveryForm),
+  // release only when the label actually stated it — 'not-stated' is never dressed up as a fact
+  product.releaseProfile === 'not-stated' ? null : RELEASE_LABEL[product.releaseProfile],
+]
+  .filter(Boolean)
+  .join(' · ');
+
+// Dates render "14 July 2026", never ISO (RULES.md Identity).
+const longDate = (iso: string | null | undefined) =>
+  iso
+    ? new Date(iso + 'T00:00:00Z').toLocaleDateString('en-GB', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+        timeZone: 'UTC',
+      })
+    : null;
+
+// ── the four checks, with the working shown ──────────────────────────────────────────────────
+// WHY EACH CHECK LANDED WHERE IT DID, from this product's own data. Nothing here is authored per
+// product: each line states the fact the check read. A failed check is explained exactly as
+// plainly as a passing one (RULES.md: identical treatment), and an unresolved one says so rather
+// than being written up as a failure.
+function working(key: (typeof CRITERIA)[number]['key']): string {
+  const v = values[key];
+  switch (key) {
+    case 'dose':
+      if (v === null)
+        return strength
+          ? `The label says ${strength}. We haven't yet checked that against the doses the studies used.`
+          : "We don't hold a strength for this product yet, so there is nothing to check against the studied doses.";
+      return v
+        ? 'The amount in this product sits inside the range the studies used.'
+        : "The amount in this product is outside the range the studies used — so the research doesn't describe what's in this bottle.";
+    case 'tested':
+      if (product.third_party_tested)
+        return `${product.third_party_tested.organisation} verified the contents against the label${
+          longDate(product.third_party_tested.verified_date) ? ` on ${longDate(product.third_party_tested.verified_date)}` : ''
+        }.`;
+      return v === null
+        ? "We haven't yet found an independent test of this product. That's a gap in our record, not a finding about the product."
+        : "No independent laboratory has verified what's in this bottle. A manufacturer's own certificate is not a substitute.";
+    case 'disclosed':
+      if (v === null)
+        return product.composition === 'blend'
+          ? "This is a blend, and we haven't yet recorded whether it discloses each ingredient's amount."
+          : "We haven't yet checked whether the label discloses everything in it.";
+      return v
+        ? 'Every ingredient and its amount is printed on the label — no proprietary blend hiding the numbers.'
+        : 'Some of what is in this bottle sits inside a proprietary blend, so the individual amounts are not printed. That single device is what fails this check.';
+    case 'form':
+      if (v === null)
+        return product.deliveryForm
+          ? `This is a ${formLabel(product.deliveryForm).toLowerCase()}. We haven't yet checked whether that is the form the studies used.`
+          : "We haven't mapped this label's wording to a form yet, so there is nothing to compare with the studied form.";
+      return v
+        ? 'This is the form the studies actually used, so the results describe this kind of product.'
+        : "This isn't the form the studies used, so their results don't straightforwardly carry over to it.";
+  }
+}
+
+const checkRows = CRITERIA.map((c) => ({ ...c, value: values[c.key], why: working(c.key) }))
+  // failed checks float to the top — the reason the page exists is what it does NOT deliver
+  .sort((a, b) => Number(a.value === true) - Number(b.value === true));
+
+const retailers = product.retail_links;
+const pageTitle = `${product.brand} ${product.name} — is it what the studies used? | Somnary`;
 ---
 
 <Base
-  title={`${product.brand} ${product.name} — Somnary`}
-  description={`${product.brand} ${product.name}${strength ? `, ${strength}` : ''} — what's on the label, and how we assess the bottle.`}
-  breadcrumbs={[{ label: 'Products', href: '/products' }]}
-  breadcrumbCurrent={`${product.brand} ${product.name}`}
+  title={pageTitle}
+  description={`${product.brand} ${product.name}${strength ? `, ${strength}` : ''} — what's on the label, and whether the bottle delivers what the research actually tested.`}
+  contain={false}
 >
-  <p class="brand">{product.brand}</p>
-  <h1>{product.name}{strength && <span class="strength"> · {strength}</span>}</h1>
+  <div class="wrap">
+    {/* breadcrumbs on every page; mobile truncates to "‹ Products" (the shared component) */}
+    {/* Products › Product, NOT Products › Brand › Product. The bundle's trail has the brand in
+        it and it belongs there — but /brands/{slug} is CHK-B11 and does not exist yet, and 93
+        dead breadcrumb links is worse than a shorter trail. B11 adds the brand crumb here (and
+        turns the brand line in the header below into a link) when the route lands. */}
+    <Breadcrumb trail={[{ label: 'Products', href: '/products' }]} current={product.name} />
 
-  <p class="form">
-    {product.deliveryForm ? FORM_LABEL[product.deliveryForm] : 'Form not recorded from the label'}
-    {' · '}{RELEASE_LABEL[product.releaseProfile]}
-  </p>
+    {/* ── header ─────────────────────────────────────────────────────────────────────────── */}
+    <div class="head">
+      <span class="shot"><BrandMark name={product.brand} radius="var(--radius-lg)" /></span>
+      <div class="head-text">
+        <p class="brand">{product.brand}</p>
+        <h1>{product.name}</h1>
+        <p class="fact">{factLine}</p>
 
-  {notAssessed && (
-    <p class="state" role="note">
-      We know what's on this label, but we haven't assessed the bottle against the studies yet.
-      The checks below show what we still need to confirm.
-    </p>
-  )}
+        {/* ── the paired verdict, first ──────────────────────────────────────────────────
+            Two questions, never merged into one: does the INGREDIENT work (its bucket, which
+            belongs to the remedy and links there), and does THIS BOTTLE deliver it (the ruled
+            verdict). The safety flag sits alongside both — so a serious-concern remedy is
+            never presented as a clean buy (CLAUDE.md three signals / RULES.md structure). */}
+        <div class="verdict">
+          <VerdictPill product={product} />
+          {verdict && <p class:list={['verdict-line', verdict]}>{VERDICTS[verdict].sentence}</p>}
+          {!verdict && state === 'label-known' && (
+            <p class="verdict-line pending">
+              We have this label, but we haven't put the bottle through the four checks yet — so
+              there's no verdict here to give you.
+            </p>
+          )}
+        </div>
 
-  <h2>Does this bottle deliver what was studied?</h2>
-  <ul class="checks">
-    {checks.map((c) => (
-      <li>
-        <span class="check-label">{c.label}</span>
-        <span class:list={['check-val', c.value === null && 'pending']}>{checkWord(c.value)}</span>
-      </li>
-    ))}
-  </ul>
+        {primary && (
+          <div class="ingredient">
+            <p class="ing-line">
+              {product.ingredients.length > 1 ? 'Main ingredient: ' : 'Active ingredient: '}
+              {remedies.map((r, i) => (
+                <>
+                  {i > 0 && ', '}
+                  <a href={`/remedies/${r.id}`}>{r.data.displayName}</a>
+                </>
+              ))}
+            </p>
+            {/* the ingredient's evidence bucket — a SEPARATE signal from the verdict above, and
+                the remedy's property, not this bottle's. null until CHK-E6 ratifies it, and a
+                pending chip is shown rather than a guessed grade (HUMAN-GATE). Every bucket
+                badge links to how-we-grade (RULES.md Interface economy). */}
+            {primary.data.bucket ? (
+              <a class="bucket-link" href="/how-we-grade">
+                <BucketBadge bucket={primary.data.bucket} compact />
+              </a>
+            ) : (
+              <a class="pending-chip" href="/how-we-grade">Grade in review</a>
+            )}
+          </div>
+        )}
 
-  <h2>What's in it</h2>
-  <ul class="ingredients">
-    {product.ingredients.map((i) => (
-      <li>
-        <a href={`/remedies/${i.remedy_id}`}>{i.remedy_id}</a>
-        {i.amount && <span> — {i.amount} {i.unit}</span>}
-        {i.form && <span class="salt"> ({i.form})</span>}
-      </li>
-    ))}
-  </ul>
+        {safety?.serious && (
+          <p class="flag-serious">
+            <a href={`/remedies/${primary!.id}#safe`}>This ingredient carries a serious safety concern ↓</a>
+          </p>
+        )}
 
-  {product.retail_links.length > 0 && (
-    <>
-      {/* identical treatment regardless of score (A3) — routed through /go, raw URLs never in content */}
-      <h2>Where to buy</h2>
-      <ul class="buy">
-        {product.retail_links.map((l) => (
-          <li><RetailLink productId={product.id} retailer={l.retailer} /></li>
+        {/* the ONE jump on the page (RULES.md: no TOC, one "Where to buy ↓"). It sits AFTER the
+            verdict, not before it: the verdict is what the page is for, and a utility jump has
+            no business being the first thing under the title. */}
+        {retailers.length > 0 && <a class="jump" href="#buy">Where to buy ↓</a>}
+      </div>
+    </div>
+
+    {/* ── the four checks ────────────────────────────────────────────────────────────────── */}
+    <section class="sec">
+      <h2>The four checks</h2>
+      <p class="lede">
+        These are about the bottle, not about whether the ingredient works. That question is
+        answered on {primary ? <a href={`/remedies/${primary.id}`}>its remedy page</a> : 'its remedy page'}.
+      </p>
+      <ul class="checks">
+        {checkRows.map((c) => (
+          <li class:list={['check', c.value === true ? 'met' : c.value === false ? 'failed' : 'unknown']}>
+            <span class="mark" aria-hidden="true">
+              {c.value === true ? (
+                <svg width="16" height="16" viewBox="0 0 14 14">
+                  <path d="M2.5 7.5 L5.5 10.5 L11.5 3.5" fill="none" stroke="var(--sage)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              ) : c.value === false ? (
+                <svg width="16" height="16" viewBox="0 0 14 14">
+                  <path d="M3.5 3.5 L10.5 10.5 M10.5 3.5 L3.5 10.5" fill="none" stroke="var(--bucket-avoid)" stroke-width="1.8" stroke-linecap="round" />
+                </svg>
+              ) : (
+                <svg width="16" height="16" viewBox="0 0 14 14">
+                  <line x1="3" y1="7" x2="11" y2="7" stroke="var(--text-faint)" stroke-width="1.8" stroke-linecap="round" />
+                </svg>
+              )}
+            </span>
+            <div>
+              <p class="check-label">
+                {c.label} — {c.value === true ? 'yes' : c.value === false ? 'no' : 'not checked yet'}
+              </p>
+              <p class="check-why">{c.why}</p>
+            </div>
+          </li>
         ))}
       </ul>
-    </>
-  )}
+      {verdict && (
+        <p class="rule-note">
+          {verdict === 'falls-short'
+            ? 'Dose and form decide this one on their own: if a bottle is not what the studies tested, the paperwork checks cannot make up for it.'
+            : verdict === 'unverified'
+              ? "It's the right thing — we just can't independently confirm what the label says."
+              : 'All four hold, so the research describes what is in this bottle.'}{' '}
+          <a href="/how-we-grade">How we decide this</a>
+        </p>
+      )}
+    </section>
+
+    {/* ── what's in it ───────────────────────────────────────────────────────────────────── */}
+    <section class="sec">
+      <h2>What's in it</h2>
+      <ul class="ings">
+        {product.ingredients.map((i) => {
+          const r = remedies.find((x) => x.id === i.remedy_id);
+          return (
+            <li>
+              <p class="ing-name">
+                {r ? r.data.displayName : i.remedy_id}
+                {i.amount && i.unit && <span class="amt"> · {i.amount} {i.unit}</span>}
+              </p>
+              {i.form && <p class="ing-note">{i.form}</p>}
+            </li>
+          );
+        })}
+      </ul>
+      {/* Additive flags: three states only, each non-neutral one citing its paper (RULES.md
+          Products). No excipients are recorded for any product yet — so rather than render an
+          empty list that reads as "nothing else in it", the page says what it doesn't hold.
+          NO hazard score and no invented gradient, ever. */}
+      {product.excipients.length > 0 ? (
+        <ul class="ings">
+          {product.excipients.map((e) => (
+            <li class:list={['excipient', e.flag]}>
+              <p class="ing-name">
+                {e.name}
+                {e.amount && <span class="amt"> · {e.amount}</span>}
+              </p>
+              <p class="ing-note">
+                {e.role}
+                {' · '}
+                {e.flag === 'no-known-concern' ? 'No known concern' : e.flag === 'worth-knowing' ? 'Worth knowing' : 'Documented concern'}
+              </p>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p class="empty">
+          We haven't recorded the rest of this label yet — the fillers, sweeteners, colours and
+          coatings. Until we have, treat the list above as the active ingredients only, not the
+          full contents.
+        </p>
+      )}
+      <p class="note">
+        We flag only documented concerns, and every flag cites the paper that earned it. We don't
+        publish hazard scores. "No known concern" means nothing documented at these amounts — not
+        a guarantee.
+      </p>
+      {product.allergens.length > 0 && <p class="note">Per the label: {product.allergens.join(', ')}.</p>}
+    </section>
+
+    {/* ── dose ───────────────────────────────────────────────────────────────────────────── */}
+    <section class="sec">
+      <h2>Is the dose enough?</h2>
+      {/* THE DOSE DIAGRAM IS NOT BUILT HERE, DELIBERATELY. The plan has it consuming the remedy's
+          dose context, but `doses[].studiedDose` is free PROSE, not a structured range — and it
+          carries meaning a number cannot ("150 mg nightly was tested in insomnia, with no benefit
+          on the primary outcomes", "Studied for anxiety", "Not established for sleep"). Regex a
+          figure out of those and the page states a studied dose the paper never supported, which
+          is inventing a number (RULES.md Language) with a citation-shaped hole under it. So the
+          real prose is rendered as written, beside this bottle's actual strength, and the reader
+          does the comparison with everything in view. The diagram needs a structured studied
+          range on the remedy schema — a HUMAN-GATE schema change plus editorial fill; see the
+          checklist note against CHK-B7 / CHK-E4. */}
+      <p class="lede">
+        This bottle: <strong>{strength ?? 'strength not recorded yet'}</strong>
+        {product.deliveryForm && <> per {formLabel(product.deliveryForm).toLowerCase()}</>}.
+      </p>
+      {primary && primary.data.doses.length > 0 ? (
+        <>
+          <p class="lede">What the studies used, in {primary.data.displayName}'s own words:</p>
+          <dl class="doses">
+            {primary.data.doses.map((d) => (
+              <div class="dose-row">
+                <dt>{d.form}</dt>
+                <dd>
+                  <p class="dose-studied">{d.studiedDose}</p>
+                  {d.timing && <p class="dose-meta">When: {d.timing}</p>}
+                  {d.marketComparison && <p class="dose-meta">On the shelf: {d.marketComparison}</p>}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </>
+      ) : (
+        <p class="empty">
+          We don't hold a studied dose for this ingredient yet, so there's nothing to measure this
+          bottle against.
+        </p>
+      )}
+    </section>
+
+    {/* ── safety ─────────────────────────────────────────────────────────────────────────── */}
+    {primary && safety && (
+      <section class="sec">
+        <h2>Before you take it</h2>
+        {/* The safety copy is the REMEDY's sourced data, passed in — never authored here
+            (SafetyCallout's content rule; this has drifted three times). It applies to every
+            product with this ingredient, not just this bottle, and says so. */}
+        <SafetyCallout level={safety.level}>
+          {safety.lead}{' '}
+          <a href={`/remedies/${primary.id}#safe`}>
+            The full safety picture is on the {primary.data.displayName} page
+          </a>{' '}
+          — it applies to every {primary.data.displayName.toLowerCase()} product, not just this one.
+        </SafetyCallout>
+      </section>
+    )}
+
+    {/* ── alternatives ───────────────────────────────────────────────────────────────────── */}
+    {siblings.length > 0 && (
+      <section class="sec">
+        <h2>If this isn't right for you</h2>
+        <p class="lede">
+          Other products with the same ingredient. Same four checks, in the same order we use
+          everywhere — these are assessments, not recommendations.
+        </p>
+        <ul class="alts">
+          {siblings.map((s) => (
+            <li>
+              <a class="alt" href={`/products/${s.id}`} aria-label={`${s.data.brand} ${s.data.name}`}>
+                <BrandMark name={s.data.brand} size={44} radius="var(--radius-sm)" />
+                <span class="alt-text">
+                  <span class="alt-name">{s.data.brand} — {s.data.name}</span>
+                  {s.data.strength && <span class="alt-meta">{s.data.strength.amount} {s.data.strength.unit}</span>}
+                </span>
+                <span class="alt-pill"><VerdictPill product={s.data} /></span>
+              </a>
+            </li>
+          ))}
+        </ul>
+        {/* a standalone navigation target (the link IS the paragraph), so the 44px floor applies
+            — unlike the links inside sentences on this page, which take the inline exemption. */}
+        <p class="note"><a class="more" href="/products">Every product we've catalogued, including the ones we'd skip ›</a></p>
+      </section>
+    )}
+
+    {/* ── provenance ─────────────────────────────────────────────────────────────────────── */}
+    <section class="sec">
+      <h2>Where this comes from</h2>
+      <ul class="prov">
+        <li>The label — as printed, recorded {longDate(product.last_checked) ?? 'when we catalogued it'}.</li>
+        <li>
+          The research — the papers on{' '}
+          {primary ? <a href={`/remedies/${primary.id}#research`}>the {primary.data.displayName} page</a> : 'the remedy page'}.
+        </li>
+        {product.third_party_tested && (
+          <li>
+            Independent testing — {product.third_party_tested.organisation}
+            {longDate(product.third_party_tested.verified_date) ? `, ${longDate(product.third_party_tested.verified_date)}` : ''}.
+          </li>
+        )}
+      </ul>
+      <div class="correct">
+        <p class="correct-h">Spotted something wrong?</p>
+        <p class="note">
+          Formulations change, and this page is only as good as its last check.{' '}
+          <a href="/request-a-review">Tell us</a> and we'll re-check it.
+        </p>
+      </div>
+    </section>
+
+    {/* ── where to buy ───────────────────────────────────────────────────────────────────── */}
+    <section class="sec" id="buy">
+      <h2>Where to buy</h2>
+      {/* IDENTICAL TREATMENT regardless of the verdict (RULES.md Products / non-negotiable 1):
+          this block reads no score and no verdict, so it renders the same on a product we rate
+          well and one we advise against. The warning above it stays where it is — it is not
+          softened, moved, or hidden here. Retailers are in the order the record holds them,
+          never ordered by anything commercial, and every link goes through /go (CHK-B4). */}
+      {verdict === 'falls-short' && (
+        <p class="buy-warning">
+          Worth repeating before you click: this bottle isn't what the studies tested. We still
+          list where to buy it — that's your call to make, not ours to hide.
+        </p>
+      )}
+      {retailers.length > 0 ? (
+        <>
+          <ul class="buys">
+            {retailers.map((r) => (
+              <li><RetailLink productId={productId} retailer={r.retailer} /></li>
+            ))}
+          </ul>
+          <p class="note">
+            Retailers in no particular order. Nobody pays us to list them, and no link here
+            changed a single check above.
+          </p>
+        </>
+      ) : (
+        <p class="empty">
+          We don't have a retailer on record for this one. That's a gap in our record — it doesn't
+          mean the product is unavailable.
+        </p>
+      )}
+    </section>
+  </div>
 </Base>
 
 <style>
+  /* raw-ok: 720px matches --page-max as a layout width; this page is a reading narrative, so it
+     keeps the prose column rather than the browse list's wider 880px. */
+  .wrap {
+    width: 100%;
+    max-width: var(--page-max);
+    margin: 0 auto;
+    padding: var(--space-5) var(--space-5) var(--space-9);
+  }
+
+  /* ── header ── */
+  .head {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+    align-items: flex-start;
+  }
+  .head-text {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    min-width: 0;
+    width: 100%;
+  }
   .brand {
     margin: 0;
-    color: var(--text-muted);
     font-size: var(--text-sm);
     font-weight: var(--weight-strong);
+    color: var(--text-muted);
   }
   h1 {
-    margin: var(--space-1) 0 var(--space-2);
+    margin: 0;
     font-size: var(--display-md);
     font-weight: var(--weight-title);
     letter-spacing: var(--tracking-display);
     line-height: var(--leading-tight);
+    text-wrap: pretty;
   }
-  .strength {
+  .fact {
+    margin: 0;
+    font-size: var(--text-base);
+    font-weight: var(--weight-ui);
+    color: var(--text-body);
+    font-variant-numeric: tabular-nums;
+  }
+  .jump {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--control-md);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-strong);
+    color: var(--text-link);
+  }
+  .verdict {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
+    margin-top: var(--space-2);
+  }
+  .verdict-line {
+    margin: 0;
+    font-size: var(--text-lg);
+    font-weight: var(--weight-ui);
+    line-height: var(--leading-snug);
+    max-width: var(--measure);
+  }
+  .verdict-line.delivers,
+  .verdict-line.unverified {
+    color: var(--text-body);
+  }
+  /* the avoid register carries a documented failure, and only that (RULES.md Colour) */
+  .verdict-line.falls-short {
+    color: var(--bucket-avoid);
+  }
+  .verdict-line.pending {
+    color: var(--text-muted);
+    font-size: var(--text-base);
+  }
+  .ingredient {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-3);
+  }
+  .ing-line {
+    margin: 0;
+    font-size: var(--text-base);
+  }
+  .ing-line a {
+    color: var(--text-link);
+    font-weight: var(--weight-strong);
+  }
+  .bucket-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--control-md);
+    text-decoration: none;
+  }
+  .pending-chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--control-md);
+    padding: 0 var(--space-3);
+    border: var(--border-w) solid var(--border-input);
+    border-radius: var(--radius-pill);
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-strong);
+    text-decoration: none;
+  }
+  /* a serious flag outranks the evidence visual on the page (RULES.md structure) */
+  .flag-serious {
+    margin: 0;
+    font-size: var(--text-base);
+    font-weight: var(--weight-strong);
+  }
+  .flag-serious a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--control-md);
+    color: var(--amber);
+  }
+
+  /* ── sections ── */
+  .sec {
+    margin-top: var(--space-8);
+    border-top: var(--border-w) solid var(--border-hairline);
+    padding-top: var(--space-7);
+  }
+  h2 {
+    margin: 0 0 var(--space-4);
+    font-size: var(--text-xl);
+    font-weight: var(--weight-heading);
+    letter-spacing: var(--tracking-display);
+    line-height: var(--leading-snug);
+  }
+  .lede,
+  .note,
+  .empty,
+  .rule-note {
+    margin: 0 0 var(--space-4);
+    font-size: var(--text-base);
+    line-height: var(--leading-body);
+    max-width: var(--measure);
+    color: var(--text-muted);
+  }
+  .note,
+  .rule-note {
+    font-size: var(--text-sm);
+  }
+  .lede a,
+  .note a,
+  .rule-note a,
+  .prov a {
+    color: var(--text-link);
+    font-weight: var(--weight-ui);
+  }
+  .empty {
+    color: var(--text-muted);
+  }
+
+  /* ── checks ── */
+  .checks {
+    list-style: none;
+    margin: 0 0 var(--space-4);
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+  }
+  .check {
+    display: flex;
+    gap: var(--space-3);
+    align-items: flex-start;
+    padding-left: var(--space-3);
+    border-left: var(--border-w) solid transparent;
+  }
+  /* the tinted left edge is the system-wide "concern" signal — the same language an additive
+     concern uses. One signal means one thing everywhere. */
+  .check.failed {
+    border-left-color: var(--bucket-avoid);
+  }
+  .mark {
+    flex: none;
+    display: inline-flex;
+    padding-top: var(--space-1);
+  }
+  .check-label {
+    margin: 0;
+    font-size: var(--text-base);
+    font-weight: var(--weight-strong);
+  }
+  .check-why {
+    margin: var(--space-1) 0 0;
+    font-size: var(--text-base);
+    line-height: var(--leading-body);
+    color: var(--text-muted);
+    max-width: var(--measure);
+  }
+
+  /* ── ingredient + excipient rows ── */
+  .ings {
+    list-style: none;
+    margin: 0 0 var(--space-4);
+    padding: 0;
+  }
+  .ings li {
+    padding: var(--space-3);
+    border-top: var(--border-w) solid var(--border-hairline);
+    border-left: var(--border-w) solid transparent;
+  }
+  .excipient.worth-knowing {
+    border-left-color: var(--bucket-maybe);
+    background: var(--bucket-maybe-tint);
+  }
+  .excipient.documented-concern {
+    border-left-color: var(--bucket-avoid);
+    background: var(--bucket-avoid-tint);
+  }
+  .ing-name {
+    margin: 0;
+    font-size: var(--text-base);
+    font-weight: var(--weight-strong);
+  }
+  .amt {
+    font-weight: var(--weight-body);
     color: var(--text-muted);
     font-variant-numeric: tabular-nums;
   }
-  .form {
-    margin: 0 0 var(--space-5);
+  .ing-note {
+    margin: var(--space-1) 0 0;
+    font-size: var(--text-sm);
     color: var(--text-muted);
   }
-  .state {
+
+  /* ── doses ── */
+  .doses {
+    margin: 0;
+  }
+  .dose-row {
+    padding: var(--space-3) 0;
+    border-top: var(--border-w) solid var(--border-hairline);
+  }
+  .dose-row dt {
+    font-size: var(--text-sm);
+    font-weight: var(--weight-strong);
+    color: var(--text-muted);
+  }
+  .dose-row dd {
+    margin: var(--space-1) 0 0;
+  }
+  .dose-studied {
+    margin: 0;
+    font-size: var(--text-base);
+    line-height: var(--leading-body);
+    max-width: var(--measure);
+  }
+  .dose-meta {
+    margin: var(--space-1) 0 0;
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+    max-width: var(--measure);
+  }
+
+  /* ── alternatives ── */
+  .alts {
+    list-style: none;
+    margin: 0 0 var(--space-3);
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+  .alt {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    min-height: var(--control-lg);
+    padding: var(--space-3) var(--space-4);
+    background: var(--surface-card);
+    border: var(--border-w) solid var(--border-hairline);
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    color: var(--text-body);
+  }
+  .alt:hover {
+    border-color: var(--border-strong);
+  }
+  .alt-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  .alt-name {
+    font-size: var(--text-base);
+    font-weight: var(--weight-strong);
+  }
+  .alt-meta {
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .alt-pill {
+    margin-left: auto;
+  }
+
+  /* ── provenance + buy ── */
+  .prov {
+    margin: 0 0 var(--space-4);
+    padding-left: 1.2em;
+    font-size: var(--text-base);
+    line-height: var(--leading-body);
+    color: var(--text-muted);
+    max-width: var(--measure);
+  }
+  .prov li {
+    margin-bottom: var(--space-2);
+  }
+  .correct {
     background: var(--surface-sunken);
-    border-radius: var(--radius-sm);
-    padding: var(--space-4) var(--space-5);
-    margin: 0 0 var(--space-6);
+    border: var(--border-w) solid var(--border-hairline);
+    border-radius: var(--radius-md);
+    padding: var(--space-4);
+    max-width: var(--measure);
+  }
+  .correct-h {
+    margin: 0 0 var(--space-1);
+    font-size: var(--text-base);
+    font-weight: var(--weight-strong);
+  }
+  .correct .note {
+    margin: 0;
+  }
+  .buy-warning {
+    margin: 0 0 var(--space-4);
+    font-size: var(--text-base);
+    line-height: var(--leading-body);
     color: var(--text-body);
     max-width: var(--measure);
   }
-  h2 {
-    font-size: var(--text-xl);
-    font-weight: var(--weight-heading);
-    margin: var(--space-7) 0 var(--space-3);
+  .more {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--control-md);
   }
-  .checks {
+  .buys {
     list-style: none;
+    margin: 0 0 var(--space-3);
     padding: 0;
-    margin: 0;
-    max-width: var(--measure);
-  }
-  .checks li {
     display: flex;
-    justify-content: space-between;
-    gap: var(--space-4);
-    padding: var(--space-3) 0;
-    border-bottom: var(--border-w) solid var(--border-hairline);
+    flex-wrap: wrap;
+    gap: var(--space-3);
   }
-  .check-val {
-    font-weight: var(--weight-strong);
-    white-space: nowrap;
+
+  /* the placeholder object is driven from here, not passed as a fixed prop, so it can be a
+     modest 152px block on a phone and the bundle's large object on a wide screen */
+  .shot {
+    --mark-size: 152px;
   }
-  /* pending = the honest "not yet assessed" state — muted, never a pass colour (RULES.md) */
-  .check-val.pending {
-    color: var(--text-faint);
-    font-weight: var(--weight-ui);
-  }
-  .ingredients,
-  .buy {
-    padding-left: var(--space-5);
-    margin: 0;
-    line-height: var(--leading-body);
-  }
-  .salt {
-    color: var(--text-faint);
+  @media (min-width: 720px) {
+    .head {
+      flex-direction: row;
+      gap: var(--space-6);
+    }
+    .shot {
+      flex: none;
+      --mark-size: 224px;
+    }
   }
 </style>

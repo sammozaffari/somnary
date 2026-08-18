@@ -14,10 +14,15 @@
 interface Props {
   name: string;
   src?: string | null;
+  /** Fixed pixel size. OMIT IT to let the caller drive the size responsively instead: the mark
+   *  falls back to `--mark-size` inherited from its container (default 104px), which a parent
+   *  can change in a media query. An inline custom property always beats a stylesheet rule, so
+   *  a caller that needs two sizes must not pass this. */
   size?: number;
   radius?: string;
 }
-const { name, src = null, size = 104, radius = 'var(--radius-md)' } = Astro.props;
+const { name, src = null, size, radius = 'var(--radius-md)' } = Astro.props;
+const sizeVar = size ? `--mark-size:${size}px;` : '';
 const initial = String(name).trim().charAt(0).toUpperCase() || '?';
 ---
 
@@ -27,15 +32,15 @@ const initial = String(name).trim().charAt(0).toUpperCase() || '?';
       class="mark"
       src={src}
       alt=""
-      width={size}
-      height={size}
-      style={`--mark-size:${size}px;--mark-radius:${radius}`}
+      width={size ?? 104}
+      height={size ?? 104}
+      style={`${sizeVar}--mark-radius:${radius}`}
     />
   ) : (
     <span
       class="mark placeholder"
       aria-hidden="true"
-      style={`--mark-size:${size}px;--mark-radius:${radius}`}
+      style={`${sizeVar}--mark-radius:${radius}`}
     >
       {initial}
     </span>
@@ -47,8 +52,8 @@ const initial = String(name).trim().charAt(0).toUpperCase() || '?';
      props and consumed as tokens below; the DEFAULTS come from tokens at the call site. */
   .mark {
     flex: none;
-    width: var(--mark-size);
-    height: var(--mark-size);
+    width: var(--mark-size, 104px);
+    height: var(--mark-size, 104px);
     border-radius: var(--mark-radius);
     border: var(--border-w) solid var(--border-hairline);
     background: var(--surface-sunken);
@@ -63,9 +68,11 @@ const initial = String(name).trim().charAt(0).toUpperCase() || '?';
     color: var(--text-muted);
     font-family: var(--font-sans);
     font-weight: var(--weight-strong);
-    /* raw-ok: the mark's letter scales with the generated --mark-size (0.45 of the square),
-       an intentional off-scale geometry value like the badge/chip geometry the linter exempts. */
-    font-size: calc(var(--mark-size) * 0.45);
+    /* The letter scales with the square (0.45 of it) — intentional off-scale geometry, like the
+       badge/chip shapes the linter exempts. The 104px inside the calc is the var's DEFAULT, not a
+       type size: it only applies when neither a `size` prop nor a parent `--mark-size` is set.
+       raw-ok: generated mark geometry, not a type step */
+    font-size: calc(var(--mark-size, 104px) * 0.45);
     line-height: 1;
     user-select: none;
   }
