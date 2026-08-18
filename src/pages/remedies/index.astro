@@ -1,0 +1,364 @@
+---
+// Remedies browse (CHK-B6 — owner-sequenced ahead of the products list) — /remedies. Consumes
+// B5's bucket badges + StudyField thumbnails. RULES.md enforced:
+//  · Interface economy: chrome scales with catalogue size (31 items → outcome filters + a
+//    Grouped/A–Z view toggle, the Rui.1 carve-out); NO sort control — the grouping IS the order,
+//    and within a bucket the fixed order is most-evidence-first (verifiable, then cited).
+//  · Evidence display: each remedy carries a StudyField THUMB from real sources[] counts; the
+//    muted remainder is "didn't measure sleep"; a serious flag outranks the thumb.
+//  · Real audit data only (RULES.md Process): unaudited entries render as dimmed pending rows,
+//    never invented. Buckets are HUMAN-GATE (CHK-E6) — until ratified they sit in "Grade in
+//    review", never a faked group.
+//  · Browse WORKS WITHOUT JS: the full grouped list is server-rendered; the filter chips + view
+//    toggle are progressive enhancement (a small inline script), inert-but-complete with JS off.
+import Base from '../../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+import BucketBadge from '../../components/evidence/BucketBadge.astro';
+import BucketShape from '../../components/evidence/BucketShape.astro';
+import StudyField from '../../components/evidence/StudyField.astro';
+import { BUCKETS } from '../../components/evidence/buckets.ts';
+import { studyCounts, safetyInfo } from '../../lib/remedy/derive.ts';
+
+const remedies = (await getCollection('remedies')).filter((r) => !r.data.draft);
+
+// per-remedy view model
+const items = remedies.map((r) => {
+  const counts = studyCounts(r.data.sources);
+  const safety = safetyInfo(r.data.safety);
+  return {
+    slug: r.id,
+    name: r.data.displayName,
+    bucket: r.data.bucket, // null → "grade in review" (HG, CHK-E6)
+    counts,
+    serious: safety.serious,
+    hasFlag: r.data.safety.severity === 'serious' || r.data.safety.severity === 'caution',
+    outcomes: r.data.outcomes ?? [],
+  };
+});
+
+// within a bucket/group the order is FIXED: most evidence first (verifiable, then cited). No sort control.
+const byEvidence = (a: typeof items[number], b: typeof items[number]) =>
+  b.counts.verifiable - a.counts.verifiable || b.counts.cited - a.counts.cited || a.name.localeCompare(b.name);
+
+const BUCKET_ORDER = ['works', 'maybe', 'unknown', 'avoid'] as const;
+const grouped = BUCKET_ORDER.map((bk) => ({ bk, list: items.filter((i) => i.bucket === bk).sort(byEvidence) }));
+const pending = items.filter((i) => i.bucket == null).sort(byEvidence);
+const azList = [...items].sort((a, b) => a.name.localeCompare(b.name));
+
+// outcome filter chips — DERIVED from the corpus, with counts; only outcomes on ≥3 remedies (RULES.md:
+// options computed from the page's data, with counts; zero-result options never render).
+const outcomeCounts = new Map<string, number>();
+for (const i of items) for (const o of i.outcomes) outcomeCounts.set(o, (outcomeCounts.get(o) ?? 0) + 1);
+const filterChips = [...outcomeCounts.entries()].filter(([, n]) => n >= 3).sort((a, b) => b[1] - a[1]).map(([o, n]) => ({ o, n }));
+
+const dataOutcomes = (i: typeof items[number]) => i.outcomes.join('|').toLowerCase();
+---
+
+<Base title="Every remedy, graded by the evidence | Somnary" description="Every natural sleep remedy we cover, grouped by what the studies show." contain={false}>
+  <div class="wrap" data-remedies>
+    <p class="crumb"><a href="/">‹ Somnary</a></p>
+    <h1>Every remedy, graded by the evidence</h1>
+    <p class="intro">Grouped by what the studies show. The grade is about the ingredient — whether a specific bottle delivers it is scored on its own page.</p>
+
+    {/* filters + view toggle (progressive enhancement) */}
+    <div class="controls">
+      <div class="chips" role="group" aria-label="Filter by what it's used for">
+        {filterChips.map((c) => (
+          <button type="button" class="chip" data-filter={c.o.toLowerCase()} aria-pressed="false">{c.o} <span class="count">{c.n}</span></button>
+        ))}
+        <button type="button" class="chip" data-noflag aria-pressed="false">Without safety flags</button>
+      </div>
+      <div class="view" role="group" aria-label="View">
+        <button type="button" class="seg" data-view="grouped" aria-pressed="true">Grouped</button>
+        <button type="button" class="seg" data-view="az" aria-pressed="false">A–Z</button>
+      </div>
+    </div>
+
+    {/* ── Grouped view (default, server-rendered) ─────────────────────────── */}
+    <div data-panel="grouped">
+      {grouped.map(({ bk, list }) => (
+        <section class="group">
+          <h2 class="group-h" style={`--gc:${BUCKETS[bk].color}`}>
+            <span class="glyph"><BucketShape bucket={bk} size={18} /></span>
+            {BUCKETS[bk].plain}
+          </h2>
+          {bk === 'works' && <p class="sparse">Very few natural sleep remedies have been studied well enough to sit here.</p>}
+          <div class="rows">
+            {list.length === 0 && <p class="pending-note">Entries here arrive as reviews are ratified.</p>}
+            {list.map((i) => (
+              <article class="row" data-outcomes={dataOutcomes(i)} data-flag={i.hasFlag ? '1' : '0'}>
+                <div class="row-main">
+                  <a class="row-name" href={`/remedies/${i.slug}`}>{i.name}</a>
+                  {i.serious && <span class="flag">Safety concern</span>}
+                  <p class="uses">{i.outcomes.length ? `Mainly used for: ${i.outcomes.slice(0, 3).join(' · ')}` : ''}</p>
+                </div>
+                <div class="row-thumb">
+                  {/* NEVER-INVENT RULE (render-time form; see derive.ts): sleep=0 means adjudicated-
+                     zero; null means still checking; never render the second as the first. Gate the
+                     thumb on triaged so an un-triaged remedy shows "still checking", not a false bar.
+                     Two && exprs, not a ternary: an Astro component-vs-element ternary mis-rendered. */}
+                  {i.counts.triaged && <StudyField size="thumb" counts={{ cited: i.counts.cited, sleep: i.counts.sleep, verifiable: i.counts.verifiable }} />}
+                  {!i.counts.triaged && <p class="thumb-checking">{i.counts.cited} {i.counts.cited === 1 ? 'paper' : 'papers'} — still checking which measured sleep</p>}
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+      ))}
+
+      {/* Grade in review — every remedy whose bucket isn't ratified yet (all of them until CHK-E6).
+         Ordered most-evidence-first so the best-studied remedies surface, never a faked bucket. */}
+      <section class="group">
+        <div class="group-h">
+          <h2 class="review-h">Grade in review</h2>
+        </div>
+        <p class="sparse">Every remedy below is being graded against the four buckets above. Grades arrive as each review is ratified — we won't guess one before then.</p>
+        <div class="rows">
+          {pending.map((i) => (
+            <article class="row" data-outcomes={dataOutcomes(i)} data-flag={i.hasFlag ? '1' : '0'}>
+              <div class="row-main">
+                <a class="row-name" href={`/remedies/${i.slug}`}>{i.name}</a>
+                <a class="pending-chip" href="/how-we-grade">Grade in review</a>
+                {i.serious && <span class="flag">Safety concern</span>}
+                <p class="uses">{i.outcomes.length ? `Mainly used for: ${i.outcomes.slice(0, 3).join(' · ')}` : ''}</p>
+              </div>
+              <div class="row-thumb">
+                {/* never-invent: un-triaged sleep count is UNKNOWN, not zero (CHK-E2 triages) */}
+                {i.counts.triaged && <StudyField size="thumb" counts={{ cited: i.counts.cited, sleep: i.counts.sleep, verifiable: i.counts.verifiable }} />}
+                {!i.counts.triaged && <p class="thumb-checking">{i.counts.cited} {i.counts.cited === 1 ? 'paper' : 'papers'} — still checking which measured sleep</p>}
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+    </div>
+
+    {/* ── A–Z view (hidden until toggled; JS-only) ────────────────────────── */}
+    <div data-panel="az" hidden>
+      <div class="rows">
+        {azList.map((i) => (
+          <article class="row" data-outcomes={dataOutcomes(i)} data-flag={i.hasFlag ? '1' : '0'}>
+            <div class="row-main">
+              <a class="row-name" href={`/remedies/${i.slug}`}>{i.name}</a>
+              {i.bucket == null ? <a class="pending-chip" href="/how-we-grade">Grade in review</a> : <span class="glyph" style={`color:${BUCKETS[i.bucket].color}`}><BucketBadge bucket={i.bucket} compact /></span>}
+              {i.serious && <span class="flag">Safety concern</span>}
+            </div>
+            <div class="row-thumb">
+              {i.counts.triaged && <StudyField size="thumb" counts={{ cited: i.counts.cited, sleep: i.counts.sleep, verifiable: i.counts.verifiable }} />}
+              {!i.counts.triaged && <p class="thumb-checking">{i.counts.cited} {i.counts.cited === 1 ? 'paper' : 'papers'} — still checking which measured sleep</p>}
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+
+    <p class="foot">"Mainly used for" describes common use, not effectiveness. Every grade links to <a href="/how-we-grade">how we grade</a>.</p>
+  </div>
+
+  <script>
+    // Progressive enhancement — the grouped list is already complete server-side. This adds the
+    // outcome filters (OR logic across active chips), the "without safety flags" filter, and the
+    // Grouped/A–Z view toggle. With JS off, everything is still shown (grouped).
+    const root = document.querySelector('[data-remedies]');
+    if (root) {
+      const chips = [...root.querySelectorAll('.chip[data-filter]')];
+      const noflag = root.querySelector('.chip[data-noflag]');
+      const views = [...root.querySelectorAll('.seg[data-view]')];
+      const panels = { grouped: root.querySelector('[data-panel="grouped"]'), az: root.querySelector('[data-panel="az"]') };
+
+      function applyFilters() {
+        const active = chips.filter((c) => c.getAttribute('aria-pressed') === 'true').map((c) => c.dataset.filter);
+        const hideFlagged = noflag?.getAttribute('aria-pressed') === 'true';
+        for (const row of root.querySelectorAll('.row')) {
+          const outs = row.dataset.outcomes || '';
+          const okOutcome = active.length === 0 || active.some((a) => outs.includes(a));
+          const okFlag = !hideFlagged || row.dataset.flag === '0';
+          row.hidden = !(okOutcome && okFlag);
+        }
+      }
+      const toggle = (btn) => { btn.setAttribute('aria-pressed', btn.getAttribute('aria-pressed') === 'true' ? 'false' : 'true'); applyFilters(); };
+      chips.forEach((c) => c.addEventListener('click', () => toggle(c)));
+      noflag?.addEventListener('click', () => toggle(noflag));
+      views.forEach((v) => v.addEventListener('click', () => {
+        views.forEach((o) => o.setAttribute('aria-pressed', String(o === v)));
+        panels.grouped.hidden = v.dataset.view !== 'grouped';
+        panels.az.hidden = v.dataset.view !== 'az';
+      }));
+    }
+  </script>
+</Base>
+
+<style>
+  .wrap {
+    width: 100%;
+    max-width: 880px;
+    margin: 0 auto;
+    padding: var(--space-5) var(--space-5) var(--space-9);
+  }
+  .crumb { margin: 0; font-size: var(--text-sm); font-weight: var(--weight-ui); }
+  .crumb a { color: var(--text-link); text-decoration: none; }
+  h1 {
+    margin: var(--space-1) 0 var(--space-2);
+    font-size: var(--display-md);
+    font-weight: var(--weight-title);
+    letter-spacing: var(--tracking-display);
+    line-height: var(--leading-tight);
+  }
+  .intro {
+    margin: 0 0 var(--space-6);
+    font-size: var(--text-base);
+    line-height: var(--leading-body);
+    color: var(--text-muted);
+    max-width: var(--measure);
+  }
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
+    padding-bottom: var(--space-4);
+  }
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: var(--control-md);
+    padding: 0 var(--space-4);
+    border-radius: var(--radius-pill);
+    border: var(--border-w) solid var(--border-strong);
+    background: var(--surface-card);
+    color: var(--text-body);
+    font: var(--weight-ui) var(--text-sm) var(--font-sans);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background var(--dur-fast) var(--ease-settle), border-color var(--dur-fast) var(--ease-settle);
+  }
+  .chip[aria-pressed='true'] {
+    border-color: var(--ink);
+    background: var(--surface-sunken);
+    font-weight: var(--weight-strong);
+  }
+  .chip .count { color: var(--text-faint); font-variant-numeric: tabular-nums; }
+  .view {
+    margin-left: auto;
+    display: flex;
+    border: var(--border-w) solid var(--border-strong);
+    border-radius: var(--radius-pill);
+    overflow: hidden;
+  }
+  .seg {
+    min-height: var(--control-md);
+    padding: 0 var(--space-4);
+    border: none;
+    cursor: pointer;
+    background: var(--surface-card);
+    color: var(--text-body);
+    font: var(--weight-ui) var(--text-sm) var(--font-sans);
+  }
+  .seg[aria-pressed='true'] { background: var(--ink); color: var(--paper); }
+  .group { padding-top: var(--space-7); }
+  .group-h,
+  .review-h {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    border-bottom: var(--border-w) solid var(--border-hairline);
+    padding-bottom: var(--space-3);
+    font-size: var(--display-sm);
+    font-weight: var(--weight-heading);
+    letter-spacing: var(--tracking-display);
+  }
+  /* the bucket shape carries the group's colour; the label stays --ink (heading, not data) */
+  .group-h .glyph { color: var(--gc); display: inline-flex; }
+  .sparse,
+  .pending-note {
+    margin: var(--space-4) 0 0;
+    font-size: var(--text-base);
+    line-height: var(--leading-body);
+    color: var(--text-muted);
+    max-width: var(--measure);
+  }
+  .rows {
+    display: flex;
+    flex-direction: column;
+    padding-top: var(--space-3);
+  }
+  .row {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    border-radius: var(--radius-md);
+    border: var(--border-w) solid transparent;
+    transition: background var(--dur-fast) var(--ease-settle), border-color var(--dur-fast) var(--ease-settle);
+  }
+  .row:hover {
+    background: var(--surface-card);
+    border-color: var(--border-hairline);
+  }
+  .row-main {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-3);
+    min-width: 0;
+  }
+  .row-name {
+    font-size: var(--text-xl);
+    font-weight: var(--weight-strong);
+    letter-spacing: var(--tracking-display);
+    color: var(--text-body);
+    text-decoration: none;
+  }
+  .row-name:hover { text-decoration: underline; }
+  .pending-chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--space-7);
+    padding: 0 var(--space-3);
+    border: var(--border-w) solid var(--border-input);
+    border-radius: var(--radius-pill);
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-strong);
+    text-decoration: none;
+  }
+  .flag {
+    font-size: var(--text-sm);
+    font-weight: var(--weight-strong);
+    color: var(--amber);
+  }
+  .uses {
+    flex-basis: 100%;
+    margin: 0;
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+  }
+  .thumb-checking {
+    margin: 0;
+    font-size: var(--text-xs);
+    font-variant-numeric: tabular-nums;
+    color: var(--text-muted);
+  }
+  @media (min-width: 768px) {
+    .row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 240px;
+      gap: var(--space-3) var(--space-6);
+      align-items: center;
+    }
+  }
+  .foot {
+    margin: var(--space-7) 0 0;
+    font-size: var(--text-sm);
+    color: var(--text-faint);
+    max-width: var(--measure);
+  }
+  .foot a { color: var(--text-link); font-weight: var(--weight-ui); }
+</style>

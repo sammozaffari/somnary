@@ -12,10 +12,12 @@ export interface StudyCounts {
   verifiable: number;
   helped: number | null;
   // triaged = every source has an adjudicated measuresSleepOutcome. NEVER-INVENT RULE at render
-  // time: until the whole corpus is triaged (CHK-E2), a remedy with any `null` cannot honestly show
-  // a "measured sleep" count — counting only the known-true ones would UNDERCOUNT and quietly
-  // invent a lower number. So the page states "we're still checking which measured sleep" and draws
-  // NO bar rather than a wrong one. The unknown is shown as unknown (same discipline as a null bucket).
+  // time (its render-time form — it has now caught two bugs, the remedy page + the browse thumb):
+  //   sleep=0 means adjudicated-zero; null means still checking; NEVER render the second as the first.
+  // Until the whole corpus is triaged (CHK-E2), a remedy with any `null` cannot honestly show a
+  // "measured sleep" count — counting only the known-true ones would UNDERCOUNT and quietly invent a
+  // lower number. So callers must gate on `triaged`: draw the bar/caption only when true, else state
+  // "still checking" and draw NO bar. The unknown is shown as unknown (same discipline as a null bucket).
   triaged: boolean;
 }
 
