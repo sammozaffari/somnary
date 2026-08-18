@@ -1,45 +1,55 @@
 ---
-// VerdictPill — the product row's one-glance answer, transcribed from the bundle kit
-// (components/cards/ProductListRow.jsx VerdictPill). Built at CHK-B6; CHK-B7 reuses it.
+// VerdictPill — the product row's one-glance answer. Built at CHK-B6; rewritten at CHK-B7 onto
+// the ruled verdict (CHK-Rprod.4, owner-ratified 17 August 2026), which replaced the placeholder
+// "N of 4 checks pass" count.
 //
-// It states the product score ONLY — how many of the four factual checks the bottle passes.
-// RULES.md "never merged": it must never read an evidence bucket or a safety flag, and its
-// colour must never be reused to mean either. This component imports no bucket module.
+// WHY THE COUNT WENT: a count cannot express the rule. Three-of-four with a dose mismatch and
+// three-of-four with a missing lab test both render "3 of 4 checks pass" — identical text, and
+// only colour would have separated them. Colour as the sole signal is exactly what RULES.md
+// forbids. The pill now names the verdict; the four dots beside it already show WHICH checks
+// passed, so the count was redundant as well as unable to carry the distinction.
+//
+// It states the product score ONLY (does this bottle deliver what was studied). RULES.md
+// "never merged": it must never read an evidence bucket or a safety flag, and its colour must
+// never be reused to mean either. This component imports no bucket module.
 //
 // Colour: green = an EARNED positive verdict (RULES.md Colour) and nothing else, so it is
-// reserved for a product at or above PASSES_THRESHOLD. The unassessed states are deliberately
-// NEUTRAL — sunken ground, muted text, hairline border — because "we haven't checked yet" is
-// not a verdict in either direction and must not read as a soft fail.
-import { CRITERIA, PASSES_THRESHOLD, checksPassed, completeness, type Product } from '../../lib/products/score.ts';
+// reserved for `delivers`. The unassessed states are deliberately NEUTRAL — sunken ground, muted
+// text, hairline border — because "we haven't checked yet" is not a verdict in either direction
+// and must not read as a soft fail.
+import { VERDICTS, completeness, verdictState, type Product } from '../../lib/products/score.ts';
 
 interface Props {
   product: Product;
 }
 const { product } = Astro.props;
 const state = completeness(product);
-const passed = state === 'assessed' ? checksPassed(product) : 0;
-// The amber/avoid steps below the threshold ride the PLACEHOLDER threshold with it — they are
-// one rule, and CHK-Rprod.4 settles them together. Do not tune here (HUMAN-GATE).
-const tone = passed >= PASSES_THRESHOLD ? 'pass' : passed >= 2 ? 'partial' : 'weak';
+const verdict = state === 'assessed' ? verdictState(product) : null;
+const v = verdict ? VERDICTS[verdict] : null;
 ---
 
 {
-  state === 'assessed' ? (
-    <span class:list={['pill', tone]}>
-      <span class="num">{passed} of {CRITERIA.length}</span> checks pass
+  v ? (
+    <span class:list={['pill', verdict]}>
+      <span aria-hidden="true">{v.pill}</span>
+      {/* the compression is for the eye; the full ruled sentence is what gets announced */}
+      <span class="sr-only">{v.sentence}</span>
     </span>
   ) : state === 'label-known' ? (
     <span class="pill pending">Not yet assessed</span>
-  ) : (
+  ) : state === 'not-in-db' ? (
     <span class="pill pending">Not in our database</span>
+  ) : (
+    /* assessed but a check is unresolved — the schema forbids this, so it can only mean data
+       drift. Say so rather than invent a verdict. */
+    <span class="pill pending">Checks incomplete</span>
   )
 }
 
 <style>
   .pill {
     display: inline-flex;
-    align-items: baseline;
-    gap: var(--space-1);
+    align-items: center;
     border-radius: var(--radius-pill);
     padding: var(--space-2) var(--space-3);
     font-size: var(--text-sm);
@@ -47,19 +57,17 @@ const tone = passed >= PASSES_THRESHOLD ? 'pass' : passed >= 2 ? 'partial' : 'we
     line-height: 1;
     white-space: nowrap;
   }
-  .num {
-    font-variant-numeric: tabular-nums;
-  }
   /* green ONLY for an earned positive verdict (RULES.md Colour) */
-  .pass {
+  .delivers {
     background: var(--sage-tint);
     color: var(--sage-text);
   }
-  .partial {
+  /* the right product, unverified — the caution register, not a failure register */
+  .unverified {
     background: var(--bucket-maybe-tint);
     color: var(--bucket-maybe);
   }
-  .weak {
+  .falls-short {
     background: var(--bucket-avoid-tint);
     color: var(--bucket-avoid);
   }
@@ -69,5 +77,17 @@ const tone = passed >= PASSES_THRESHOLD ? 'pass' : passed >= 2 ? 'partial' : 'we
     color: var(--text-muted);
     border: var(--border-w) solid var(--border-hairline);
     font-weight: var(--weight-ui);
+  }
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    /* raw-ok: 1px sr-only clip rect — below the token scale, the documented exception */
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
   }
 </style>

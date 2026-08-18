@@ -136,13 +136,15 @@ const statusLine = !explainState
      104/309/221/146 while its unassessed neighbour came out 104/222/317/137 — a dense list in
      which no column lines up down the page, which is the one thing a dense list is for. The two
      widths below are measured worst cases, not guesses: the four labelled checks at their
-     longest ("Studied form") render 221px, and the widest pill ("Not in our database") 153px.
+     longest ("Studied form") render 221px, and the widest pill 190px — "Delivers what was
+     studied", the ruled verdict label that replaced the "N of 4 checks pass" count at CHK-B7
+     (re-measured when the labels changed).
      raw-ok: fixed layout column widths, measured; the tokens are a spacing scale, not a
      column scale, and DESIGN_SYSTEM.md defines no layout-width token (§9 gap → HUMAN-GATE
      if one is ever needed). */
   .row {
     --checks-col: 224px;
-    --pill-col: 156px;
+    --pill-col: 196px;
     display: grid;
     grid-template-columns: 104px minmax(0, 1fr);
     grid-template-areas:

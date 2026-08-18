@@ -282,11 +282,16 @@ the operating contract enforces them:
 - Anything monetization, legal-page, or medical-boundary related.
 - Phase completion (owner reviews before the next phase starts).
 - Any missing design token, schema change, or new dependency with lock-in.
-- The product **"worth buying" verdict rule** — the four product checks are almost
-  certainly NOT equally weighted (dose-match likely outranks label disclosure), and
-  the current `met >= 3` threshold is a PLACEHOLDER. Settle the weighting and the
-  rule editorially before any Phase 3 product content ships. One definition in code
-  (`PASSES_THRESHOLD`), every consumer importing it, until then (see BUILD_CHECKLIST).
+- ~~The product **"worth buying" verdict rule**~~ — **CLOSED: owner-ratified 17 August 2026
+  (CHK-Rprod.4).** No weighting, no threshold; `PASSES_THRESHOLD` is deleted. The four checks
+  are two kinds — the CORE PAIR (dose-match, studied-form: what the bottle IS) and the TRUST
+  PAIR (independent testing, label disclosure: whether we can believe what it says). The verdict
+  is three-valued and derived, never aggregated: all four pass → "gives you what was studied";
+  core pair passes but a trust check fails → "matches what was studied, but we can't fully
+  verify it"; **either core check fails → "doesn't give you what was studied", regardless of the
+  other three** (a 3-of-4 with a dose mismatch is a fail). Any check null → no verdict at all.
+  ONE definition in code — `verdictState()` in `src/lib/products/score.ts` — every consumer
+  importing it. /how-we-grade explains the rule in plain language (CHK-B13).
 - The source-quality rubric (`docs/SOURCE_QUALITY_RUBRIC.md`) ratification, before
   any evidence bucket ships as final.
 - Publishing to external channels (newsletter, social) — agents draft only.
