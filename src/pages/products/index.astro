@@ -1,0 +1,417 @@
+---
+// Products list (CHK-B6) — /products. Consumes CHK-B3's product + brand collections and the
+// row/pill/mark primitives built here at first use. RULES.md enforced, each at the point of
+// enforcement below:
+//  · Products: EVERY product is listed, including ones we'd advise against, with identical
+//    treatment — the ordering and the row markup contain no commercial input of any kind.
+//  · Interface economy: chrome scales with catalogue size. 93 products is above the ~20
+//    threshold, so the derived Form dropdown (options from this page's data, WITH counts,
+//    zero-result options never rendered) plus the genuine-preference filters render — and each
+//    preference filter appears ONLY when the data holds both of its states. There is NO sort
+//    control at any scale; checks-passed is the fixed order (lib/products/score.ts).
+//  · Interface economy: "✓ belongs to the four checks. Never inside a control on any page where
+//    check-ticks render." The bundle kit's filter Chip prefixes a ✓ when active; this page
+//    renders check-ticks, so that ✓ is REJECTED, not transcribed — the active state is carried
+//    by weight, border and ground instead (the same treatment the remedies browse uses).
+//  · Language: no invented numbers. Every figure in the framing line is counted from the
+//    collection at build time, and the copy branches on what is actually true today.
+//  · Content is server-rendered: all 93 rows are in the HTML and crawlable. The filters are
+//    progressive enhancement over a complete list.
+import Base from '../../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+import ProductListRow from '../../components/products/ProductListRow.astro';
+import { formLabel } from '../../lib/products/labels.ts';
+import { CRITERIA, byChecksPassed, checksPassed, completeness } from '../../lib/products/score.ts';
+
+const products = (await getCollection('products')).sort((a, b) => byChecksPassed(a.data, b.data));
+const remedies = await getCollection('remedies');
+const remedyName = new Map(remedies.map((r) => [r.id, r.data.displayName]));
+
+// ── the row's detail line ────────────────────────────────────────────────────────────────────
+// What's in the bottle · how much · what shape it comes in. NEVER-INVENT RULE: a field we do not
+// hold says so plainly ("Strength not recorded yet") rather than being omitted, guessed, or
+// back-derived — an absent line would read as "no strength", which is a different claim.
+// Ingredient names come from the remedy's authoritative displayName, never a title-cased id.
+function detailLine(p: (typeof products)[number]['data']): string {
+  const ingredients = p.ingredients
+    .map((i) => remedyName.get(i.remedy_id) ?? i.remedy_id)
+    .filter((v, i, a) => a.indexOf(v) === i);
+  const strength = p.strength ? `${p.strength.amount} ${p.strength.unit}` : 'Strength not recorded yet';
+  return [ingredients.join(' + '), strength, formLabel(p.deliveryForm)].filter(Boolean).join(' · ');
+}
+
+const rows = products.map((p) => ({
+  entry: p,
+  detail: detailLine(p.data),
+  // filter keys, emitted as data-attributes so the enhancement script never re-derives them
+  form: p.data.deliveryForm ?? 'unrecorded',
+  // TRI-STATE, deliberately: 'unknown' is neither true nor false, and a preference filter must
+  // never sweep unknowns into either bucket (that would turn "we haven't checked" into a claim).
+  tested: p.data.third_party_tested ? 'yes' : completeness(p.data) === 'assessed' ? 'no' : 'unknown',
+  sweetener:
+    p.data.dietary?.artificialSweetenerPresent === true
+      ? 'yes'
+      : p.data.dietary?.artificialSweetenerPresent === false
+        ? 'no'
+        : 'unknown',
+}));
+
+// ── chrome-by-scale (RULES.md Interface economy / CHK-Rui.1) ─────────────────────────────────
+// Under ~20 items the list IS the interface: no filter row, no sort, order declared in prose.
+// Above it, the derived Form dropdown and the preference filters appear. The threshold is a
+// constant, not a hardcoded branch, so a shrinking catalogue loses its chrome automatically.
+const CHROME_THRESHOLD = 20;
+const showChrome = rows.length > CHROME_THRESHOLD;
+
+// Form options DERIVED from this page's data, with counts. A form nobody stocks never renders
+// (there is no empty "Patch · 0"). The unmapped group is a real, countable group of rows and is
+// listed as itself — hiding it would leave the option counts not adding up to the total and put
+// 57 products beyond the reach of the only filter on the page.
+const formCounts = new Map<string, number>();
+for (const r of rows) formCounts.set(r.form, (formCounts.get(r.form) ?? 0) + 1);
+const formOptions = [...formCounts.entries()]
+  .map(([value, count]) => ({ value, count, label: value === 'unrecorded' ? 'Form not recorded yet' : formLabel(value) }))
+  .filter((o) => o.count > 0)
+  .sort((a, b) => (a.value === 'unrecorded' ? 1 : b.value === 'unrecorded' ? -1 : a.label.localeCompare(b.label)));
+
+// Genuine-preference filters render ONLY when the list holds BOTH states. 'unknown' counts as
+// neither: offering "Independently tested" over a catalogue where nothing has been checked would
+// present an unanswered question as an answerable filter.
+const hasBoth = (key: 'tested' | 'sweetener') =>
+  rows.some((r) => r[key] === 'yes') && rows.some((r) => r[key] === 'no');
+const showTestedFilter = hasBoth('tested');
+const showSweetenerFilter = hasBoth('sweetener');
+
+// ── the count framing line ───────────────────────────────────────────────────────────────────
+// Counted, never asserted. The branch matters: until CHK-E8 fills the checks, "93 products
+// checked" would be false, and the honest line has to say what the order means while every row
+// is still tied at zero checks (the documented brand tiebreak is doing all the work).
+const total = rows.length;
+const brandCount = new Set(products.map((p) => p.data.brand)).size;
+const assessed = products.filter((p) => completeness(p.data) === 'assessed').length;
+const passAll = products.filter((p) => completeness(p.data) === 'assessed' && checksPassed(p.data) === CRITERIA.length).length;
+// When the whole list shares one completeness state, the framing line above states it once and
+// each row's pill repeats it — so the row's explanatory sentence is switched off (it would run
+// identically down every row). The moment the list is mixed it comes back, because then it is
+// what distinguishes an unassessed row from the assessed one beside it.
+const uniformState = new Set(products.map((p) => completeness(p.data))).size === 1;
+---
+
+<Base
+  title="Sleep supplements, checked against the studies | Somnary"
+  description="Every sleep supplement we've catalogued, with the four checks that say whether the bottle delivers what the studies used."
+  breadcrumbs={[{ label: 'Somnary', href: '/' }]}
+  breadcrumbCurrent="Products"
+  contain={false}
+>
+  {/* Set before the controls are parsed, so chrome that needs JS is never painted and then
+      withdrawn. A filter control that cannot filter is a defect, not a graceful degradation:
+      with JS off this page shows the complete list and no controls — which is exactly the
+      under-threshold behaviour RULES.md already describes. */}
+  <script is:inline>
+    document.documentElement.classList.add('js');
+  </script>
+
+  <div class="wrap" data-products>
+    <h1>Products</h1>
+
+    <p class="intro">
+      Every sleep supplement we've catalogued — including the ones we'd tell you to skip. Same
+      four checks either way, and the same links to buy it.
+    </p>
+
+    {/* The count framing line. Under threshold this line alone declares the order; above it, it
+        still has to, because there is no sort control to explain it. */}
+    <p class="count">
+      {
+        assessed === 0 ? (
+          <>
+            <strong>{total} products from {brandCount} brands.</strong> We hold the label for
+            every one, and none has been through the four checks yet — so no row below claims a
+            verdict. Until the checks land they sit in brand order; after that, the ones passing
+            the most checks come first. Either way the order is ours, never price and never a
+            brand deal.
+          </>
+        ) : (
+          <>
+            <strong>{total} products from {brandCount} brands.</strong> {assessed} have been
+            through the four checks — {passAll} pass all four, listed first. The rest we hold
+            labels for but haven't checked yet. Order is set by the checks, never by price and
+            never by a brand deal.
+          </>
+        )
+      }
+    </p>
+
+    {
+      showChrome && (
+        <div class="controls" role="group" aria-label="Filter products">
+          <label class="form-filter">
+            Form
+            {/* --border-input: this border is the control's sole boundary (≥3:1, RULES.md floors) */}
+            <select id="form-filter" data-form-select>
+              <option value="">All forms · {total}</option>
+              {formOptions.map((o) => (
+                <option value={o.value}>
+                  {o.label} · {o.count}
+                </option>
+              ))}
+            </select>
+          </label>
+          {/* No ✓ on these controls — the tick belongs to the four checks (RULES.md) */}
+          {showTestedFilter && (
+            <button type="button" class="chip" data-filter="tested" aria-pressed="false">
+              Independently tested
+            </button>
+          )}
+          {showSweetenerFilter && (
+            <button type="button" class="chip" data-filter="sweetener" aria-pressed="false">
+              No artificial sweeteners
+            </button>
+          )}
+        </div>
+      )
+    }
+
+    {/* Filter feedback: empty and single-result states live here. Server-rendered empty and
+        hidden; the script fills it. aria-live so a filter change is announced, not just seen. */}
+    <p class="status" data-status hidden aria-live="polite"></p>
+
+    <ul class="rows" data-rows>
+      {
+        rows.map((r) => (
+          <ProductListRow
+            product={r.entry.data}
+            href={`/products/${r.entry.id}`}
+            detail={r.detail}
+            explainState={!uniformState}
+            data={{ form: r.form, tested: r.tested, sweetener: r.sweetener }}
+          />
+        ))
+      }
+    </ul>
+
+    <p class="foot">
+      The four checks are about the bottle — whether it delivers what the studies used. Whether
+      the ingredient works at all is a separate question, answered on its <a href="/remedies">remedy page</a>.
+    </p>
+  </div>
+
+  <script>
+    // Progressive enhancement over a complete, server-rendered list. Nothing here fetches,
+    // reorders or scores anything — the order is fixed at build time and the script only hides
+    // rows that don't match. Filters are AND across the three controls.
+    const root = document.querySelector('[data-products]');
+    if (root) {
+      const select = root.querySelector<HTMLSelectElement>('[data-form-select]');
+      const chips = [...root.querySelectorAll<HTMLButtonElement>('.chip[data-filter]')];
+      const status = root.querySelector<HTMLParagraphElement>('[data-status]');
+      const rows = [...root.querySelectorAll<HTMLLIElement>('[data-rows] > li')];
+      const total = rows.length;
+
+      // The Form option counts are recomputed against the OTHER active filters, so an option
+      // never promises rows the current combination would hide. A zero-count option is removed
+      // from the list entirely rather than shown as "· 0" (RULES.md: zero-result options never
+      // render); it returns when the filters that emptied it are cleared. The ONE exception is
+      // the option currently selected — a <select> cannot display a hidden selected option, and
+      // hiding the user's own choice would leave the control blank above an empty list. Kept
+      // visible at "· 0", it is the thing that explains the empty state.
+      const options = select ? [...select.options].slice(1).map((o) => ({ el: o, value: o.value, label: o.textContent!.split(' · ')[0] })) : [];
+
+      // Each preference chip states the value its row must carry. 'unknown' matches neither, so
+      // a product we haven't checked is never swept into "independently tested" or out of it.
+      const CHIP_MATCH: Record<string, [string, string]> = {
+        tested: ['tested', 'yes'],
+        sweetener: ['sweetener', 'no'],
+      };
+      const matchesChips = (row: HTMLLIElement) =>
+        chips.every((c) => {
+          if (c.getAttribute('aria-pressed') !== 'true') return true;
+          const [key, want] = CHIP_MATCH[c.dataset.filter!] ?? [];
+          return !key || row.dataset[key] === want;
+        });
+
+      function apply() {
+        const form = select?.value ?? '';
+        let shown = 0;
+        for (const row of rows) {
+          const ok = matchesChips(row) && (!form || row.dataset.form === form);
+          row.hidden = !ok;
+          if (ok) shown += 1;
+        }
+
+        if (select) {
+          const base = rows.filter(matchesChips);
+          for (const o of options) {
+            const count = base.filter((r) => r.dataset.form === o.value).length;
+            o.el.textContent = `${o.label} · ${count}`;
+            o.el.hidden = count === 0 && o.value !== form;
+            o.el.disabled = o.el.hidden;
+          }
+          select.options[0].textContent = `All forms · ${base.length}`;
+        }
+
+        const filtering = Boolean(form) || chips.some((c) => c.getAttribute('aria-pressed') === 'true');
+        if (!status) return;
+        status.hidden = !filtering;
+        if (!filtering) return;
+        const chosenForm = form && select ? (select.selectedOptions[0]?.textContent ?? '').split(' · ')[0].toLowerCase() : '';
+        // Single-result and empty states are named, not left as a silently short list.
+        const text =
+          shown === 0
+            ? 'Nothing matches those filters.'
+            : shown === 1 && form
+              ? `The only ${chosenForm} product we've catalogued.`
+              : shown === 1
+                ? 'One product matches.'
+                : `${shown} of ${total} products match.`;
+        status.textContent = '';
+        status.append(text + ' ');
+        const clear = document.createElement('button');
+        clear.type = 'button';
+        clear.className = 'clear';
+        clear.textContent = shown === 1 && form ? 'Clear filter' : 'Clear filters';
+        clear.addEventListener('click', () => {
+          if (select) select.value = '';
+          chips.forEach((c) => c.setAttribute('aria-pressed', 'false'));
+          apply();
+          (select ?? chips[0])?.focus();
+        });
+        status.append(clear);
+      }
+
+      select?.addEventListener('change', apply);
+      chips.forEach((c) =>
+        c.addEventListener('click', () => {
+          c.setAttribute('aria-pressed', c.getAttribute('aria-pressed') === 'true' ? 'false' : 'true');
+          apply();
+        })
+      );
+      apply();
+    }
+  </script>
+</Base>
+
+<style>
+  /* raw-ok: 880px is the bundle's product-browse reading column (a layout width, not box
+     spacing); --page-max (720px) is the single-column prose measure and is too narrow for a
+     four-column row. Matches the remedies browse, built to the same bundle spec. */
+  .wrap {
+    width: 100%;
+    max-width: 880px;
+    margin: 0 auto;
+    padding: var(--space-5) var(--space-5) var(--space-9);
+  }
+  h1 {
+    margin: var(--space-1) 0 var(--space-2);
+    font-size: var(--display-md);
+    font-weight: var(--weight-title);
+    letter-spacing: var(--tracking-display);
+    line-height: var(--leading-tight);
+  }
+  .intro,
+  .count {
+    margin: 0 0 var(--space-3);
+    font-size: var(--text-base);
+    line-height: var(--leading-body);
+    color: var(--text-muted);
+    max-width: var(--measure);
+  }
+  .count {
+    margin-bottom: var(--space-6);
+    font-variant-numeric: tabular-nums;
+  }
+  .count strong {
+    color: var(--text-body);
+    font-weight: var(--weight-strong);
+  }
+
+  /* chrome is JS-driven; it is not painted at all without it (see the note in the template) */
+  .controls {
+    display: none;
+  }
+  :global(html.js) .controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-3);
+    padding-bottom: var(--space-4);
+  }
+  .form-filter {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-ui);
+    color: var(--text-muted);
+  }
+  select {
+    min-height: var(--control-md);
+    padding: 0 var(--space-3);
+    border-radius: var(--radius-sm);
+    border: var(--border-w) solid var(--border-input);
+    background: var(--surface-card);
+    color: var(--text-body);
+    font: var(--weight-ui) var(--text-sm) var(--font-sans);
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--control-md);
+    padding: 0 var(--space-4);
+    border-radius: var(--radius-pill);
+    border: var(--border-w) solid var(--border-strong);
+    background: var(--surface-card);
+    color: var(--text-body);
+    font: var(--weight-ui) var(--text-sm) var(--font-sans);
+    cursor: pointer;
+    white-space: nowrap;
+    transition:
+      background var(--dur-fast) var(--ease-settle),
+      border-color var(--dur-fast) var(--ease-settle);
+  }
+  .chip[aria-pressed='true'] {
+    border-color: var(--ink);
+    background: var(--surface-sunken);
+    font-weight: var(--weight-strong);
+  }
+  .status {
+    margin: 0 0 var(--space-3);
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .status :global(.clear) {
+    min-height: var(--control-md);
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--text-link);
+    font: var(--weight-strong) var(--text-sm) var(--font-sans);
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  .rows {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    /* the hairline under the last row closes the list; each row draws its own top rule */
+    border-bottom: var(--border-w) solid var(--border-hairline);
+  }
+  .foot {
+    margin: var(--space-6) 0 0;
+    font-size: var(--text-sm);
+    line-height: var(--leading-body);
+    color: var(--text-faint);
+    max-width: var(--measure);
+  }
+  .foot a {
+    color: var(--text-link);
+    font-weight: var(--weight-ui);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .chip {
+      transition: none;
+    }
+  }
+</style>

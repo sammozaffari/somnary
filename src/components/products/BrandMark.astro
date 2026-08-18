@@ -1,0 +1,72 @@
+---
+// BrandMark — the product image PLACEHOLDER as a first-class designed object, transcribed from
+// the bundle kit (components/cards/BrandMark.jsx). Built at CHK-B6 (first use: the products
+// list); CHK-B7 and CHK-B11 reuse it.
+//
+// RULES.md Products: "Placeholder imagery is the common case — a designed object (brand mark on
+// sunken ground), never 'no photo' or broken-image." Most products will never have photography,
+// so the placeholder is the DEFAULT path and has to look deliberate: the brand's initial, set in
+// the one family, on the sunken ground inside a hairline. `src` is the exception, not the rule.
+//
+// The placeholder is aria-hidden: it carries no information the row's brand line doesn't already
+// state, so announcing a bare letter would only add noise. A real photo is decorative too (the
+// row's link text names the product), hence alt="".
+interface Props {
+  name: string;
+  src?: string | null;
+  size?: number;
+  radius?: string;
+}
+const { name, src = null, size = 104, radius = 'var(--radius-md)' } = Astro.props;
+const initial = String(name).trim().charAt(0).toUpperCase() || '?';
+---
+
+{
+  src ? (
+    <img
+      class="mark"
+      src={src}
+      alt=""
+      width={size}
+      height={size}
+      style={`--mark-size:${size}px;--mark-radius:${radius}`}
+    />
+  ) : (
+    <span
+      class="mark placeholder"
+      aria-hidden="true"
+      style={`--mark-size:${size}px;--mark-radius:${radius}`}
+    >
+      {initial}
+    </span>
+  )
+}
+
+<style>
+  /* raw-ok: --mark-size / --mark-radius are the component's generated geometry inputs, set from
+     props and consumed as tokens below; the DEFAULTS come from tokens at the call site. */
+  .mark {
+    flex: none;
+    width: var(--mark-size);
+    height: var(--mark-size);
+    border-radius: var(--mark-radius);
+    border: var(--border-w) solid var(--border-hairline);
+    background: var(--surface-sunken);
+  }
+  img.mark {
+    object-fit: cover;
+  }
+  .placeholder {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    font-family: var(--font-sans);
+    font-weight: var(--weight-strong);
+    /* raw-ok: the mark's letter scales with the generated --mark-size (0.45 of the square),
+       an intentional off-scale geometry value like the badge/chip geometry the linter exempts. */
+    font-size: calc(var(--mark-size) * 0.45);
+    line-height: 1;
+    user-select: none;
+  }
+</style>

@@ -1,0 +1,280 @@
+---
+// ProductListRow — the dense-list product row, transcribed from the bundle kit
+// (components/cards/ProductListRow.jsx). Built at CHK-B6; CHK-B11's brand page reuses it.
+//
+// Shape (bundle C3): 104px square placeholder object · brand / name / detail line · the four
+// checks · verdict pill. Hairline-separated rows, no cards — chosen because the placeholder is
+// the common case (most products will never have photography) and the checks are the reason the
+// page exists.
+//
+// RULES.md Products — "We list EVERY product, including ones we advise against — same checks,
+// identical treatment". There is no branch in this file that hides, dims, shrinks or reorders a
+// row by how it scored: a failing product renders in exactly the markup a passing one does.
+//
+// THE THREE COMPLETENESS STATES (CLAUDE.md `assessment_state`) all render here, and each says
+// what it actually knows:
+//   · assessed     → the four checks, labelled in place
+//   · label-known  → "we have the label, we haven't run the checks" — NOT four empty dots, which
+//                    would read as four failures
+//   · not-in-db    → we hold no record at all (reachable from search/CHK-B14, never from the
+//                    products collection, which by definition only holds records we have)
+//
+// The checks are LABELLED IN PLACE at every size — a 2×2 grid of dot + short word — so a
+// first-time visitor mid-scroll never needs a legend that has scrolled away.
+//
+// A11y (RULES.md floors, and a deliberate divergence from the kit, which put the check's full
+// sentence in a `title=` attribute — invisible to keyboards and unreliable to screen readers):
+// each check announces its full sentence AND its outcome in visually-hidden text, with the short
+// word marked aria-hidden so it is not read twice.
+//
+// Verdict pill placement: on a phone it moves BENEATH the name — it is the most important thing
+// in the row and must never be what falls off the edge. It is ONE element repositioned with
+// grid areas, never rendered twice, so it is announced once.
+import BrandMark from './BrandMark.astro';
+import VerdictPill from './VerdictPill.astro';
+import { CRITERIA, checkValues, completeness, type Product } from '../../lib/products/score.ts';
+
+interface Props {
+  product: Product;
+  href: string;
+  detail: string; // ingredient · strength · form, composed by the page (see products/index.astro)
+  imageSrc?: string | null;
+  // Whether an unassessed row spells its state out in a sentence. RULES.md Interface economy:
+  // "A component answering two questions is redundant where one answer is the page." When every
+  // row on a list shares one state, the page's framing line says it once and the row's pill
+  // carries it per row — repeating the same sentence down 93 rows is noise, not honesty. In a
+  // MIXED list it goes back on, because there the sentence is what tells an unassessed row apart
+  // from the assessed one above it. The page decides; the row never guesses.
+  explainState?: boolean;
+  // Extra data-* attributes for the row element. The browse page tags each row with its filter
+  // keys so its enhancement script never has to re-derive them from the rendered text.
+  data?: Record<string, string>;
+}
+const { product, href, detail, imageSrc = null, explainState = true, data = {} } = Astro.props;
+const dataAttrs = Object.fromEntries(Object.entries(data).map(([k, v]) => [`data-${k}`, v]));
+const state = completeness(product);
+const values = checkValues(product);
+const statusLine = !explainState
+  ? null
+  : state === 'label-known'
+    ? "We have the label, but haven't run the checks yet."
+    : state === 'not-in-db'
+      ? "Not in our database yet — tell us about it and we'll add it."
+      : null;
+---
+
+<li class="row" {...dataAttrs}>
+  <span class="thumb"><BrandMark name={product.brand} src={imageSrc} /></span>
+
+  <div class="main">
+    <span class="brand">{product.brand}</span>
+    {/* SCHEMA RULE (drifted twice — enforced in the schema, restated here): the name NEVER
+        carries the dose. Strength is the structured { amount, unit } field and reaches this row
+        through `detail`. Baking it into the name renders it twice and breaks form filtering. */}
+    {/* The visible link text is the product name alone, because the brand sits directly above
+        it — but 30 of the 93 products share a name with another ("Melatonin" appears 8 times,
+        "Glycine" 6), so a screen reader's link list would be 93 rows of near-identical text.
+        The accessible name carries the brand; it still CONTAINS the visible text, so the
+        speech-input match (WCAG 2.5.3 label in name) holds. */}
+    <a class="name" href={href} aria-label={`${product.brand} ${product.name}`}>{product.name}</a>
+    <span class="detail">{detail}</span>
+  </div>
+
+  <span class="pill"><VerdictPill product={product} /></span>
+
+  {
+    state === 'assessed' ? (
+      <ul class="checks">
+        {CRITERIA.map((c) => (
+          <li class:list={['check', values[c.key] === true && 'met']}>
+            {values[c.key] === true ? (
+              <svg class="dot" width="13" height="13" viewBox="0 0 14 14" aria-hidden="true">
+                <path
+                  d="M2.5 7.5 L5.5 10.5 L11.5 3.5"
+                  fill="none"
+                  stroke="var(--sage)"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            ) : (
+              <svg class="dot" width="13" height="13" viewBox="0 0 14 14" aria-hidden="true">
+                <line
+                  x1="3"
+                  y1="7"
+                  x2="11"
+                  y2="7"
+                  stroke="var(--text-faint)"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                />
+              </svg>
+            )}
+            <span aria-hidden="true">{c.short}</span>
+            <span class="sr-only">
+              {c.label} — {values[c.key] === true ? 'passes' : values[c.key] === false ? 'does not pass' : 'not assessed'}
+            </span>
+          </li>
+        ))}
+      </ul>
+    ) : statusLine ? (
+      <p class="status">{statusLine}</p>
+    ) : null
+  }
+</li>
+
+<style>
+  /* ── 390px: stacked. Thumb beside the name block, verdict pill directly beneath the name,
+     checks spanning the full width below. The pill never sits in a column that can be pushed
+     off a phone screen.
+     raw-ok: 104px is the bundle's C3 thumbnail square (a fixed object size, not box spacing —
+     the same intentional off-scale geometry the token linter exempts for badge/chip shapes).
+
+     THE CHECKS AND PILL COLUMNS ARE FIXED WIDTHS, NOT max-content. Each row is its own grid, so
+     a content-sized column resolves per ROW: measured at 1440px, an assessed row came out
+     104/309/221/146 while its unassessed neighbour came out 104/222/317/137 — a dense list in
+     which no column lines up down the page, which is the one thing a dense list is for. The two
+     widths below are measured worst cases, not guesses: the four labelled checks at their
+     longest ("Studied form") render 221px, and the widest pill ("Not in our database") 153px.
+     raw-ok: fixed layout column widths, measured; the tokens are a spacing scale, not a
+     column scale, and DESIGN_SYSTEM.md defines no layout-width token (§9 gap → HUMAN-GATE
+     if one is ever needed). */
+  .row {
+    --checks-col: 224px;
+    --pill-col: 156px;
+    display: grid;
+    grid-template-columns: 104px minmax(0, 1fr);
+    grid-template-areas:
+      'thumb main'
+      'thumb pill'
+      'checks checks';
+    gap: var(--space-3) var(--space-4);
+    align-items: start;
+    padding: var(--space-4) 0;
+    border-top: var(--border-w) solid var(--border-hairline);
+    font-family: var(--font-sans);
+  }
+  .thumb {
+    grid-area: thumb;
+  }
+  /* RULES.md Accessibility floors: "Hit areas ≥ 44px regardless of visual size." The product
+     name renders as a 25px text line, so its hit area is stretched over the whole brand / name /
+     detail block (~65px+) rather than padded — padding the link alone would put air around the
+     name and break the row's rhythm. Scoped to .main deliberately, NOT the whole row: stretching
+     it across the checks and the pill would make a 165px band of non-interactive data read as
+     one giant button, and would swallow the checks' own text. */
+  .main {
+    grid-area: main;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    min-width: 0;
+  }
+  .name::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+  .pill {
+    grid-area: pill;
+    align-self: start;
+  }
+  .checks,
+  .status {
+    grid-area: checks;
+  }
+  .brand {
+    font-size: var(--text-sm);
+    font-weight: var(--weight-strong);
+    color: var(--text-muted);
+  }
+  .name {
+    font-size: var(--text-lg);
+    font-weight: var(--weight-strong);
+    letter-spacing: var(--tracking-display);
+    line-height: var(--leading-snug);
+    color: var(--text-body);
+    text-decoration: none;
+  }
+  .name:hover {
+    text-decoration: underline;
+  }
+  .detail {
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .checks {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-1) var(--space-4);
+  }
+  .check {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-sm);
+    white-space: nowrap;
+    /* --text-muted, not --text-faint: a check that did not pass is data, and data labels are
+       never peripheral text (RULES.md Accessibility floors). Only the dash glyph is faint. */
+    color: var(--text-muted);
+  }
+  .check.met {
+    color: var(--text-body);
+  }
+  .dot {
+    flex: none;
+  }
+  .status {
+    margin: 0;
+    font-size: var(--text-sm);
+    line-height: var(--leading-snug);
+    color: var(--text-muted);
+  }
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    /* raw-ok: 1px sr-only clip rect — below the token scale, the documented exception */
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  /* ── 768px: room for the pill on the name's line; checks run beneath, full width. ───────── */
+  @media (min-width: 768px) {
+    .row {
+      grid-template-columns: 104px minmax(0, 1fr) var(--pill-col);
+      grid-template-areas:
+        'thumb main pill'
+        'thumb checks checks';
+      gap: var(--space-3) var(--space-5);
+      align-items: center;
+    }
+    .pill {
+      justify-self: end;
+      align-self: center;
+    }
+  }
+
+  /* ── 1000px: the dense single-line row the bundle specifies. Below this width the four
+     columns (104 + name + ~230 checks + ~150 pill + gaps) cannot fit the 880px reading column
+     without crushing the name, so the two-line arrangement above holds instead. ──────────── */
+  @media (min-width: 1000px) {
+    .row {
+      grid-template-columns: 104px minmax(0, 1fr) var(--checks-col) var(--pill-col);
+      grid-template-areas: 'thumb main checks pill';
+    }
+    .checks {
+      column-gap: var(--space-4);
+    }
+  }
+</style>

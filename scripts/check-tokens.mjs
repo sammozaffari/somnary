@@ -14,9 +14,10 @@
  * literals at all. It does now.
  *
  * Checks (all fatal unless justified with a nearby `raw-ok:`):
- *   1 · retired v1.2 token names (base, sunken, line-strong, ink-*, lavender/sage,
- *       tier-{s..f}). NEVER justifiable — a retired name is always a bug, so this
- *       check ignores raw-ok.
+ *   1 · retired v1.2 token names (base, sunken, line-strong, ink-*, lavender,
+ *       sage-ink, tier-{s..f}). NEVER justifiable — a retired name is always a bug,
+ *       so this check ignores raw-ok. Names the v3 system re-uses (--sage, --sage-tint)
+ *       are NOT retired and were dropped from the list at CHK-B6.
  *   2 · hardcoded color hex (#rgb..#rrggbbaa). White/black (#fff/#000) stay allowed
  *       as on-color / shadow / mask ink.
  *   3 · rgba()/rgb()/hsla()/hsl() color literals.
@@ -48,7 +49,13 @@ const EXT = /\.(astro|ts|tsx|js|mjs|css)$/;
 // Retired color words. `base` is handled separately: it must NOT match the `text-`
 // prefix (that collides with the `text-base` font-size utility and the `--text-base`
 // type token, both current) — only `--base` and `bg-/border-/…-base` color utils are retired.
-const COLOR = 'sunken|line-strong|ink-soft|ink-faint|lavender(?:-ink|-tint)?|sage(?:-ink|-tint)?|tier-[sabcdf](?:-ink|-tint)?';
+// `sage` and `sage-tint` were REMOVED from this list at CHK-B6. They were v1.2 names, but the
+// v3 system re-introduced the same names with new values — `--sage` (the check-mark graphic
+// token), `--sage-text` and `--sage-tint` are all current, defined in global.css and documented
+// in DESIGN_SYSTEM.md §3. A name that is current cannot also be a retired-name failure, and the
+// products list (CHK-B6) is the first consumer of the check-mark token. `sage-ink` stays: it is
+// still a v1.2-only name with no v3 definition.
+const COLOR = 'sunken|line-strong|ink-soft|ink-faint|lavender(?:-ink|-tint)?|sage-ink|tier-[sabcdf](?:-ink|-tint)?';
 const RETIRED_STRICT = [
   new RegExp(`--(?:base|${COLOR})\\b`),                                              // CSS vars, incl --base
   new RegExp(`\\b(?:bg|border|ring|from|to|divide|decoration|fill|stroke)-(?:base|${COLOR})\\b`), // color utils, incl -base
