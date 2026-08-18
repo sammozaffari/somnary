@@ -17,6 +17,10 @@ const { href = '/' } = Astro.props;
   .wordmark {
     display: inline-flex;
     align-items: center;
+    /* RULES.md Accessibility floors: "Hit areas ≥ 44px regardless of visual size." The logotype
+       is a --text-xl line box ~22px tall, so the anchor is floored at --control-md the same way
+       the nav links are; the type size is untouched. Measured under CHK-B6's touch-target pass. */
+    min-height: var(--control-md);
     font-family: var(--font-sans);
     font-weight: var(--weight-strong); /* Onest 600 */
     font-size: var(--text-xl);

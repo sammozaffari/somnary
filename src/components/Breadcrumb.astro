@@ -61,6 +61,15 @@ const parent = trail[trail.length - 1];
     flex-wrap: wrap;
     gap: 0 var(--space-1);
   }
+  /* RULES.md a11y: the floor belongs to each HIT TARGET, not the row that holds them. .trail
+     carried min-height above, but its anchors were still 22px line boxes — the mobile `.up`
+     link (which IS the anchor) was already compliant, so this was one component disagreeing
+     with itself. Measured at 768/1440 under CHK-B6's touch-target pass. */
+  .trail a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--control-md);
+  }
   .sep {
     color: var(--text-faint);
   }
