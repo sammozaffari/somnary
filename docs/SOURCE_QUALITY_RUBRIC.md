@@ -1,9 +1,10 @@
 # Source quality rubric — making bucket assignments defensible
 
-*Status: **proposed**, owner ratification pending — a `[HUMAN-GATE]` before any evidence
-bucket ships as final (CLAUDE.md "Human gates"). Once ratified this is binding for every
-`studyQuality` value in `sources[]` and is published, in plain language, on the
-how-we-grade page.*
+*Status: **RATIFIED by the owner, 20 August 2026** (CHK-E1), closing the `[HUMAN-GATE]` that
+stood before any evidence bucket could ship as final. This is now **binding** for every
+`studyQuality` value in `sources[]`, and it is published in plain language on
+`/how-we-grade#standard`. Changing a level, or what earns it, is a new owner decision — not
+an editorial one.*
 
 *Re-scoped at CHK-R0 merge (RULES.md Process): the study field is a nested bar, not a
 scatter — `studyQuality` is **no longer a render input** and is **not filled for the whole
