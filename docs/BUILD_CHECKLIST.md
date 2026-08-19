@@ -469,8 +469,23 @@ scope of each item lives in the plan — this is the work queue.
   `@fontsource/instrument-sans` (a swap, not an added dependency — satori needs woff, not the
   woff2 the pages self-host).
 
-- [ ] **CHK-B17 Freshness:** 3-year flag / 6-year quarantine, "last checked {date}" site-wide.
+- [x] **CHK-B17 Freshness:** 3-year flag / 6-year quarantine, "last checked {date}" site-wide.
   Depends: B3, B7. (Maps REDESIGN Step 15.)
+  **Done 2026-08-19.** `src/lib/freshness.ts` — flagged at 3 years, quarantined at 6. **Time is an
+  input, not an ambient fact:** `now` is passed in, so the module is pure, the build is
+  reproducible, and the thresholds are testable without mocking a clock. Remedy pages render
+  "Last checked {date}" (was "Last reviewed") with the flag sitting WITH the date rather than in
+  a footer — a stale page should say so where the reader is already looking at how old it is.
+  A stale page is stated on the neutral sunken ground, NOT in amber: amber is the safety register
+  and staleness is not a safety matter.
+  **`verify:freshness` (17 cases) exists precisely because no live page can exercise this** — the
+  whole corpus was reviewed weeks ago, so every page is 'current' and both the stale and
+  quarantine branches would sit unexecuted for three years before anyone learned whether they
+  worked. Also asserts the honest-absence cases: a missing, empty or malformed date returns null
+  and never reads as 'current', and a future date is current rather than ancient.
+  **Not applied to products:** every product's `last_checked` is null, so the product page says
+  when we catalogued it rather than implying a check we never made. That fills at CHK-E8.
+
 - [x] **CHK-B18 Cutover:** delete the old presentation layer (safe per Artifact 1 + CHK-E0),
   greenfield URLs only, all validation gates live (Rui.3), full rendered-visual pass, **launch
   gate satisfied**. Depends: all above + gate. (Maps CHK-Rui.3.)
