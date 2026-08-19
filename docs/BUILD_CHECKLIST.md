@@ -452,9 +452,32 @@ scope of each item lives in the plan — this is the work queue.
   face silently surviving into the share images.
 - [ ] **CHK-B17 Freshness:** 3-year flag / 6-year quarantine, "last checked {date}" site-wide.
   Depends: B3, B7. (Maps REDESIGN Step 15.)
-- [ ] **CHK-B18 Cutover:** delete the old presentation layer (safe per Artifact 1 + CHK-E0),
+- [x] **CHK-B18 Cutover:** delete the old presentation layer (safe per Artifact 1 + CHK-E0),
   greenfield URLs only, all validation gates live (Rui.3), full rendered-visual pass, **launch
   gate satisfied**. Depends: all above + gate. (Maps CHK-Rui.3.)
+  **Done 2026-08-19.** The old presentation layer is gone: **30 routes deleted** (tiers, compare,
+  lens, guide, label-checker, methodology, changelog, start-here, dispatch, submit-a-claim, the
+  `/r/{slug}` remedy pages, `/sources/*`, `/outcome/{slug}`, the nine context pages, and the three
+  retired JSON endpoints), plus **35 orphaned components** (all of `scorecards/`, the S–F
+  `TierBadge`/`EvidenceGateChip`/`GateChip`/`ReviewState`, the ask/lens/guide panels, the old
+  remedy hero/lead/coda, the search palette) and **8 orphaned libs + 3 dead test scripts** for the
+  retired evidence map, compare-diff and lens card, with their `verify:*` entries removed.
+  **Final route surface — exactly the redesign IA:** `/` · `/remedies` + 31 · `/products` + 93 ·
+  `/brands` + 55 · `/problems` + 3 · `/safety` · `/how-we-grade` · `/search` (SSR) ·
+  `/request-a-review` · the four legal pages · `/account` + `/go/{id}` + `/api/*` + `/auth/*` (SSR).
+  **Zero dead internal links** across the whole build.
+  **SURVIVORS, and why.** The four legal pages stay: CHK-E9 requires their substance rewritten
+  under legal review, and deleting them into a gap on a public health site is worse than carrying
+  them. Their layout was RE-SKINNED (it opened a second `<main>` inside Base's — two landmarks —
+  appended the retired trailing-period dot to every title, and carried the old lowercase voice);
+  the words are untouched pending E9. `/request-a-review` was REWRITTEN rather than re-skinned:
+  every remedy, product and brand page promises "tell us" and points there, and its old copy
+  routed to five pages that died here. Its form is unchanged — it posts to `/api/nominate` and
+  works with JS off. `/account` stays because the privacy policy references it three times and
+  that copy is legal-gated; it is a utility behind auth, not IA.
+  **Gate fixed at the source:** `check-displaynames.mjs` guarded `src/pages/r/[slug].astro` and
+  failed the build the moment that page was deleted. It now guards the greenfield remedy page —
+  the gate protects whichever page renders a remedy.
   > **DELETION HAS ALREADY BEGUN — B18 is no longer the first deletion.** Owner-accepted
   > exception (2026-08-18): `src/pages/products.astro` (the old scorecard browse) was deleted at
   > **CHK-B6**, because two pages cannot own `/products` and the greenfield URL belongs to the new

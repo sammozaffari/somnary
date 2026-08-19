@@ -1,118 +1,120 @@
 ---
 // Shared layout for the four legal pages (/disclaimer, /terms, /privacy, /disclosure).
-// Calm reading measure, token-only prose styles.
+// RE-SKINNED at CHK-B18 to the rebuilt design system. The pages SURVIVE the cutover deliberately:
+// CHK-E9 requires their substance to be rewritten under legal review, and deleting them into a
+// gap on a public health site would be worse than carrying them. So the presentation is new and
+// the words are untouched, pending that review.
+//
+// What the old version got wrong, fixed here:
+//  · it opened a SECOND <main> inside Base's <main> — invalid, and two main landmarks is an
+//    outright screen-reader defect;
+//  · it appended a decorative "." to every title, a leftover of the retired `Somnary.`
+//    trailing-period wordmark (D3 dropped it);
+//  · "last updated" and the eyebrow carried the retired all-lowercase / ALL-CAPS voice —
+//    everything is sentence case now (RULES.md Identity);
+//  · the date rendered as given rather than in the house format.
 import Base from './Base.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
 
 interface Props {
   title: string;
   eyebrow: string;
   description: string;
+  /** ISO date; rendered "14 July 2026" (RULES.md Identity — never ISO in user-facing copy) */
   lastUpdated?: string;
 }
 const { title, eyebrow, description, lastUpdated } = Astro.props;
+
+const longDate = (v: string) => {
+  const iso = /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : null;
+  return iso
+    ? new Date(iso + 'T00:00:00Z').toLocaleDateString('en-GB', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+        timeZone: 'UTC',
+      })
+    : v; // already prose — carried through rather than reformatted blindly
+};
 ---
 
-<Base title={title} description={description}>
-  <main class="legal">
-    <header class="head">
-      <p class="eyebrow">{eyebrow}</p>
-      <h1 class="title"><slot name="title" />{title}<span class="dot">.</span></h1>
-      {lastUpdated && <p class="updated">last updated {lastUpdated}</p>}
-    </header>
-    <div class="legal-prose">
+<Base title={title} description={description} contain={false}>
+  <div class="wrap">
+    <Breadcrumb trail={[{ label: 'Somnary', href: '/' }]} current={title} />
+    <p class="eyebrow">{eyebrow}</p>
+    <h1>{title}</h1>
+    {lastUpdated && <p class="updated">Last updated {longDate(lastUpdated)}</p>}
+    <div class="prose">
       <slot />
     </div>
-  </main>
+  </div>
 </Base>
 
 <style>
-  .legal {
-    max-width: 760px;
+  /* raw-ok: --page-max as a layout width — legal text is a reading column. */
+  .wrap {
+    width: 100%;
+    max-width: var(--page-max);
     margin: 0 auto;
-    padding: var(--sp-8) var(--sp-7) var(--sp-9);
+    padding: var(--space-5) var(--space-5) var(--space-9);
   }
   .eyebrow {
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
-    color: var(--muted);
-    margin: 0;
+    margin: var(--space-2) 0 0;
+    font-size: var(--text-sm);
+    font-weight: var(--weight-strong);
+    color: var(--text-muted);
+    letter-spacing: var(--tracking-display);
   }
-  .title {
-    font-family: var(--font-display);
-    font-size: var(--text-3xl);
-    line-height: var(--lh-3xl);
-    letter-spacing: var(--tracking-tight);
-    color: var(--ink);
-    margin: var(--sp-3) 0 var(--sp-3);
-  }
-  .dot {
-    color: var(--primary);
+  h1 {
+    margin: var(--space-1) 0 var(--space-2);
+    font-size: var(--display-md);
+    font-weight: var(--weight-title);
+    letter-spacing: var(--tracking-display);
+    line-height: var(--leading-tight);
   }
   .updated {
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
-    color: var(--muted);
-    margin: 0;
-  }
-  .head {
-    margin-bottom: var(--sp-7);
+    margin: 0 0 var(--space-6);
+    font-size: var(--text-sm);
+    color: var(--text-faint);
+    font-variant-numeric: tabular-nums;
   }
 
-  /* prose */
-  .legal-prose :global(p),
-  .legal-prose :global(li) {
-    font-size: var(--text-base);
-    line-height: var(--lh-base);
-    color: var(--muted);
+  /* prose styles for authored legal copy — token-only, generous measure, calm */
+  .prose :global(h2) {
+    margin: var(--space-7) 0 var(--space-3);
+    font-size: var(--text-xl);
+    font-weight: var(--weight-heading);
+    letter-spacing: var(--tracking-display);
+    line-height: var(--leading-snug);
   }
-  .legal-prose :global(p) {
-    margin: 0 0 var(--sp-5);
-    max-width: 68ch;
-  }
-  .legal-prose :global(.lead) {
-    font-size: var(--text-md);
-    line-height: var(--lh-md);
-    color: var(--ink);
-  }
-  .legal-prose :global(h2) {
-    font-family: var(--font-display);
+  .prose :global(h3) {
+    margin: var(--space-5) 0 var(--space-2);
     font-size: var(--text-lg);
-    line-height: var(--lh-lg);
-    color: var(--ink);
-    margin: var(--sp-7) 0 var(--sp-3);
+    font-weight: var(--weight-strong);
   }
-  .legal-prose :global(ul) {
-    margin: 0 0 var(--sp-5);
-    padding-left: var(--sp-5);
-    max-width: 68ch;
+  .prose :global(p),
+  .prose :global(li) {
+    font-size: var(--text-base);
+    line-height: var(--leading-body);
+    color: var(--text-body);
+    max-width: var(--measure);
   }
-  .legal-prose :global(li) {
-    margin-bottom: var(--sp-2);
+  .prose :global(p) {
+    margin: 0 0 var(--space-4);
   }
-  .legal-prose :global(strong) {
-    color: var(--ink);
-    font-weight: 600;
+  .prose :global(ul),
+  .prose :global(ol) {
+    margin: 0 0 var(--space-4);
+    padding-left: 1.2em;
   }
-  .legal-prose :global(a) {
-    color: var(--primary);
+  .prose :global(li) {
+    margin-bottom: var(--space-2);
   }
-  /* the standing principle line on /disclosure-style emphasis */
-  .legal-prose :global(.emphasis) {
-    border-left: 2px solid var(--primary);
-    padding-left: var(--sp-4);
-    color: var(--ink);
+  .prose :global(a) {
+    color: var(--text-link);
+    font-weight: var(--weight-ui);
   }
-
-  @media (max-width: 640px) {
-    .legal {
-      padding: var(--sp-6) var(--sp-5) var(--sp-8);
-    }
-    .title {
-      font-size: var(--text-2xl);
-    }
+  .prose :global(strong) {
+    font-weight: var(--weight-strong);
   }
 </style>

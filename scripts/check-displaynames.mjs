@@ -21,7 +21,9 @@ import { readdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 const DIR = 'src/content/remedies';
-const REMEDY_PAGE = 'src/pages/r/[slug].astro';
+// The greenfield remedy page. Was `src/pages/r/[slug].astro` until CHK-B18 deleted the old
+// presentation layer — the gate guards whichever page RENDERS a remedy, and that is now this one.
+const REMEDY_PAGE = 'src/pages/remedies/[slug].astro';
 
 const norm = (s) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
 const slugKey = (slug) => slug.replace(/-/g, '');
