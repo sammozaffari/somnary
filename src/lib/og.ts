@@ -27,17 +27,26 @@ export const GRADE: Record<TierId, { fill: string; anchor: string }> = {
   F: { fill: '#96323E', anchor: '#77232D' },
 };
 
-// The disavowal strip shared by every share surface (DESIGN_SYSTEM voice: describe evidence, no hype).
-export const OG_TAGLINE = 'Somnary · evidence-graded sleep remedies · zero brand money';
+// The strip shared by every share surface.
+// RULES.md Language — this line USED to read "Somnary · evidence-graded sleep remedies · zero
+// brand money", which contains TWO banned phrases ("evidence-graded", "zero brand money") and
+// shipped on every share card the site produced. A share card is user-facing copy and is held to
+// exactly the same bar as a page. Replaced at CHK-B16 with the quiet claim the charter allows.
+export const OG_TAGLINE = 'Somnary · every claim links to the study it came from';
 
 const fontFile = (pkg: string, file: string) =>
   readFileSync(join(process.cwd(), 'node_modules/@fontsource', pkg, 'files', file));
 
-// Instrument Sans (static @fontsource weights) for display + body; caps at 700 (all-sans site-wide).
+// ONEST — the site's one family (RULES.md Identity / the CHK-B1 type lock). Swapped from
+// Instrument Sans at CHK-B16, which DESIGN_SYSTEM.md had recorded as this item's explicit
+// acceptance criterion: the pages render Onest, so a share card in a different typeface is the
+// one surface where the type lock silently didn't hold.
+// satori needs woff/ttf, not the woff2 the pages self-host, so the static @fontsource weights are
+// read here. This REPLACES the instrument-sans dependency rather than adding to it.
 export const fonts = [
-  { name: 'Instrument Sans', data: fontFile('instrument-sans', 'instrument-sans-latin-400-normal.woff'), weight: 400 as const, style: 'normal' as const },
-  { name: 'Instrument Sans', data: fontFile('instrument-sans', 'instrument-sans-latin-600-normal.woff'), weight: 600 as const, style: 'normal' as const },
-  { name: 'Instrument Sans', data: fontFile('instrument-sans', 'instrument-sans-latin-700-normal.woff'), weight: 700 as const, style: 'normal' as const },
+  { name: 'Onest', data: fontFile('onest', 'onest-latin-400-normal.woff'), weight: 400 as const, style: 'normal' as const },
+  { name: 'Onest', data: fontFile('onest', 'onest-latin-600-normal.woff'), weight: 600 as const, style: 'normal' as const },
+  { name: 'Onest', data: fontFile('onest', 'onest-latin-700-normal.woff'), weight: 700 as const, style: 'normal' as const },
 ];
 
 // Tiny hyperscript for satori element objects.

@@ -46,6 +46,35 @@ const {
 const site = Astro.site?.href?.replace(/\/$/, '') ?? 'https://somnary.vercel.app';
 const ogImageUrl = ogImage ?? `${site}/og.png`;
 
+// CANONICAL ON EVERY PAGE, DERIVED (CHK-B16). It used to be an optional prop no page passed, so
+// the site shipped none. Deriving it here means it cannot be forgotten on a new page — the one
+// place it can go wrong is a page that genuinely needs a different canonical, which passes the
+// prop. Query strings are dropped (/search?q=x must not canonicalise to itself as a new page)
+// and the trailing slash is normalised so /remedies and /remedies/ never compete.
+const canonicalUrl =
+  canonical ?? `${site}${Astro.url.pathname.replace(/\/+$/, '') || '/'}`;
+
+// JSON-LD, and ONLY where it is honest (CHK-B16). The site publishes no ratings, so it emits NO
+// Product, Review or AggregateRating markup — that is precisely the score this site refuses to
+// have, and emitting it for search engines while refusing it on the page would be a lie told to
+// a machine. What is honest: what the site IS, and how to search it.
+const isHome = Astro.url.pathname === '/';
+const jsonLd = isHome
+  ? {
+      '@context': 'https://schema.org',
+      '@type': 'WebSite',
+      name: 'Somnary',
+      url: `${site}/`,
+      description:
+        'An independent, evidence-graded reference for natural sleep remedies.',
+      potentialAction: {
+        '@type': 'SearchAction',
+        target: { '@type': 'EntryPoint', urlTemplate: `${site}/search?q={search_term_string}` },
+        'query-input': 'required name=search_term_string',
+      },
+    }
+  : null;
+
 const showCrumbs = breadcrumbs && breadcrumbCurrent;
 ---
 
@@ -113,7 +142,7 @@ const showCrumbs = breadcrumbs && breadcrumbCurrent;
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
     {description && <meta name="description" content={description} />}
-    {canonical && <link rel="canonical" href={canonical} />}
+    <link rel="canonical" href={canonicalUrl} />
 
     {/* Open Graph / Twitter (CHK-2.2). Remedy pages pass a generated og:image; every other page
         falls back to the site-wide branded default (ogImageUrl), so no page ships an imageless card. */}
@@ -121,7 +150,7 @@ const showCrumbs = breadcrumbs && breadcrumbCurrent;
     <meta property="og:type" content={ogType} />
     <meta property="og:title" content={title} />
     {description && <meta property="og:description" content={description} />}
-    {canonical && <meta property="og:url" content={canonical} />}
+    <meta property="og:url" content={canonicalUrl} />
     <meta property="og:image" content={ogImageUrl} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
@@ -129,6 +158,8 @@ const showCrumbs = breadcrumbs && breadcrumbCurrent;
     <meta name="twitter:title" content={title} />
     {description && <meta name="twitter:description" content={description} />}
     <meta name="twitter:image" content={ogImageUrl} />
+
+    {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
 
   </head>
   <body>

@@ -441,7 +441,7 @@ scope of each item lives in the plan — this is the work queue.
   **Verified: 10 routes × 2 themes = 20 combinations, ZERO contrast failures** against WCAG AA
   (4.5:1 body, 3:1 large), measured from computed colours against the effective ground. The
   stored override applies correctly in both directions.
-- [ ] **CHK-B16 Launch SEO hygiene** (promoted from Step 15 — first crawler contact):
+- [x] **CHK-B16 Launch SEO hygiene** (promoted from Step 15 — first crawler contact):
   canonicals, sitemap, robots, per-page metadata, OG/share images via satori+resvg from the
   nested-bar components (re-skin the OG generator to Onest here), JSON-LD where honest,
   resolver last-verified write-back. Depends: B5–B13. (Maps REDESIGN Steps 14 CI half + 15.)
@@ -450,6 +450,25 @@ scope of each item lives in the plan — this is the work queue.
   reference, and its satori font buffer loads the self-hosted Onest woff. B1 swapped the site
   to Onest but left `og.ts` on Instrument Sans (deferred here); this criterion stops the old
   face silently surviving into the share images.
+  **Done 2026-08-19.** **Canonicals are DERIVED in Base, not passed** — the prop existed and no
+  page ever used it, so the site shipped none; deriving it means a new page cannot forget one.
+  Query strings dropped and trailing slashes normalised, so `/search?q=x` and `/remedies/` never
+  compete with themselves. `robots.txt` added: everything public (nothing is behind an account —
+  `check-no-auth-wall` enforces it), with `/go/`, `/api/`, `/auth/` excluded as machinery.
+  Sitemap filtered to PAGES — 192 entries, zero machinery, zero old routes.
+  **JSON-LD only where honest:** a `WebSite` + `SearchAction` on the home page, and nothing else.
+  **No `Product`, `Review` or `AggregateRating` markup anywhere** — that is exactly the score this
+  site refuses to have, and emitting it for search engines while refusing it on the page would be
+  a lie told to a machine.
+  **Two live defects in the share-card generator, fixed:** its tagline read
+  "Somnary · evidence-graded sleep remedies · zero brand money" — **two banned phrases**, shipping
+  on every share card the site produced; a share card is user-facing copy held to the same bar as
+  a page. And the cards rendered **Instrument Sans** while every page renders Onest — the one
+  surface where the ratified type lock silently didn't hold, which DESIGN_SYSTEM.md had recorded
+  as this item's explicit acceptance criterion. Both fixed; `@fontsource/onest` REPLACES
+  `@fontsource/instrument-sans` (a swap, not an added dependency — satori needs woff, not the
+  woff2 the pages self-host).
+
 - [ ] **CHK-B17 Freshness:** 3-year flag / 6-year quarantine, "last checked {date}" site-wide.
   Depends: B3, B7. (Maps REDESIGN Step 15.)
 - [x] **CHK-B18 Cutover:** delete the old presentation layer (safe per Artifact 1 + CHK-E0),

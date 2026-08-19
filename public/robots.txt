@@ -1,0 +1,14 @@
+# Somnary — everything here is meant to be read, and read by anyone.
+# The whole site is public: no content sits behind an account (enforced by
+# scripts/check-no-auth-wall.mjs), so there is nothing to hide from a crawler.
+User-agent: *
+Allow: /
+
+# /go/ is the retail redirect. It is excluded because it is machinery, not a page:
+# each URL 302s straight out to a retailer, so there is nothing to index and
+# crawling it would log clicks nobody made.
+Disallow: /go/
+Disallow: /api/
+Disallow: /auth/
+
+Sitemap: https://somnary.vercel.app/sitemap-index.xml
