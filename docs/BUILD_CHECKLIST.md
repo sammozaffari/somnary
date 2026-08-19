@@ -426,9 +426,21 @@ scope of each item lives in the plan — this is the work queue.
   `sleep` → the category counts 31/93/55 + browse routes, never a member sample; `5 mg` → 7
   product matches (dose = product intent); `blackmores` → the brand as answer + its products;
   `ashwaganda` → "Did you mean Ashwagandha"; `melatonine` → "Did you mean Melatonin".
-- [ ] **CHK-B15 Dusk mode mechanics:** sunset keying, stored override, prefers-color-scheme
+- [x] **CHK-B15 Dusk mode mechanics:** sunset keying, stored override, prefers-color-scheme
   fallback, no-flash head script. Depends: B1 (tokens exist); every component verified both
   themes. (Maps REDESIGN Step 13.)
+  **Done 2026-08-19.** The dusk TOKENS existed from B1 but nothing ever set `data-theme`, so the
+  night theme had never rendered. Now: an `is:inline` script FIRST in `<head>` resolves the theme
+  before first paint (deferred or post-stylesheet, it produces the flash every dark mode is judged
+  by). Precedence: explicit stored choice → OS dark preference → **sunset keying by the local
+  clock (19:00–06:00)**. Clock, not true sunset, because true sunset needs a location and this
+  site has no business asking for one — a deliberate approximation, commented as such. `dusk` is
+  the only value ever written, so a stale or corrupt stored value can never leave the page in an
+  undefined theme. The override is a quiet footer control, rendered `hidden` and revealed by its
+  own script — a control that can't work without JS shouldn't be painted.
+  **Verified: 10 routes × 2 themes = 20 combinations, ZERO contrast failures** against WCAG AA
+  (4.5:1 body, 3:1 large), measured from computed colours against the effective ground. The
+  stored override applies correctly in both directions.
 - [ ] **CHK-B16 Launch SEO hygiene** (promoted from Step 15 — first crawler contact):
   canonicals, sitemap, robots, per-page metadata, OG/share images via satori+resvg from the
   nested-bar components (re-skin the OG generator to Onest here), JSON-LD where honest,

@@ -53,6 +53,36 @@ const showCrumbs = breadcrumbs && breadcrumbCurrent;
 <html lang="en">
   <head>
     <meta charset="utf-8" />
+
+    {/* DUSK MODE (CHK-B15) — this script is FIRST in <head> and inline for one reason: it must
+        resolve the theme before the browser paints anything. Deferred, bundled, or placed after
+        the stylesheet, it produces the flash of the wrong theme that every dark mode is judged
+        by. `is:inline` keeps Astro from moving it.
+
+        Precedence, most-specific first:
+          1. an explicit choice the reader made here (stored) — always wins;
+          2. an OS preference for dark — honoured, because someone who set that meant it;
+          3. otherwise SUNSET KEYING by the local clock: dusk from 19:00 to 06:00.
+        We key on the clock, not on real sunset, because real sunset needs a location and this
+        site has no business asking for one. That is a deliberate approximation, not an oversight.
+
+        `dusk` is the ONLY value ever written — the day theme is the absence of the attribute, so
+        a corrupted or stale stored value can never leave the page in an undefined theme. */}
+    <script is:inline>
+      (() => {
+        try {
+          const stored = localStorage.getItem('somnary-theme');
+          const hour = new Date().getHours();
+          const dusk =
+            stored === 'dusk' ||
+            (stored !== 'day' &&
+              (window.matchMedia('(prefers-color-scheme: dark)').matches || hour >= 19 || hour < 6));
+          if (dusk) document.documentElement.setAttribute('data-theme', 'dusk');
+        } catch (e) {
+          /* private mode, blocked storage, anything — day is the safe default and needs no attribute */
+        }
+      })();
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
     {/* Identity — the letterform-"S" mark (RULES.md Identity: the mark is the letterform S,

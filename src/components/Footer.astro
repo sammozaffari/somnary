@@ -16,10 +16,47 @@ import DisclaimerBand from './DisclaimerBand.astro';
     </p>
     <div class="meta">
       <a href="/how-we-grade">How we grade</a>
+      {/* The theme control lives HERE, quietly, and not in the chrome: the theme follows the
+          clock on its own (CHK-B15), so this is the override for the minority who want to
+          countermand it — not a feature to advertise. Rendered hidden and revealed by the
+          script below, because a control that cannot work without JS should not be painted. */}
+      <button type="button" class="theme" data-theme-toggle hidden aria-pressed="false">
+        <span data-theme-label>Night colours</span>
+      </button>
     </div>
   </div>
   <DisclaimerBand />
 </footer>
+
+<script>
+  // Theme override (CHK-B15). The resolved theme is already applied by the inline head script;
+  // this only lets a reader countermand it and remembers the choice. Writing 'day' explicitly
+  // matters — it is what stops the clock from flipping the page back at 19:00.
+  const btn = document.querySelector<HTMLButtonElement>('[data-theme-toggle]');
+  if (btn) {
+    const label = btn.querySelector('[data-theme-label]')!;
+    const isDusk = () => document.documentElement.getAttribute('data-theme') === 'dusk';
+    const sync = () => {
+      const dusk = isDusk();
+      btn.setAttribute('aria-pressed', String(dusk));
+      // the label names what the control DOES, not the state it is in
+      label.textContent = dusk ? 'Day colours' : 'Night colours';
+    };
+    btn.hidden = false; // it works, so it may now be seen
+    sync();
+    btn.addEventListener('click', () => {
+      const next = isDusk() ? 'day' : 'dusk';
+      if (next === 'dusk') document.documentElement.setAttribute('data-theme', 'dusk');
+      else document.documentElement.removeAttribute('data-theme');
+      try {
+        localStorage.setItem('somnary-theme', next);
+      } catch (e) {
+        /* storage blocked — the toggle still works for this page view */
+      }
+      sync();
+    });
+  }
+</script>
 
 <style>
   .footer {
@@ -59,6 +96,22 @@ import DisclaimerBand from './DisclaimerBand.astro';
     text-decoration: none;
   }
   .meta a:hover {
+    color: var(--text-body);
+    text-decoration: underline;
+  }
+  .theme {
+    display: inline-flex;
+    align-items: center;
+    /* 44px hit floor (RULES.md a11y) */
+    min-height: var(--control-md);
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--text-muted);
+    font: var(--weight-ui) var(--text-sm) var(--font-sans);
+    cursor: pointer;
+  }
+  .theme:hover {
     color: var(--text-body);
     text-decoration: underline;
   }
