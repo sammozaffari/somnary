@@ -47,6 +47,11 @@ const taurineCited = taurine?.data.sources.length ?? 0;
 const taurineSleep = taurine?.data.sources.filter((s) => s.measuresSleepOutcome === true).length ?? 0;
 const kavaCited = kava?.data.sources.length ?? 0;
 const kavaTriaged = kava?.data.sources.filter((s) => s.measuresSleepOutcome !== null).length ?? 0;
+// CHK-E2 adjudicated the whole corpus, so kava's example is now made from live counts rather
+// than hedged: all of its papers have been read, and none measured a sleep outcome. That is the
+// strongest possible form of the argument, and it is now simply true.
+const kavaSleep = kava?.data.sources.filter((s) => s.measuresSleepOutcome === true).length ?? 0;
+const kavaFullyRead = kavaCited > 0 && kavaTriaged === kavaCited;
 
 const BUCKET_ORDER: BucketKey[] = ['works', 'maybe', 'unknown', 'avoid'];
 
@@ -193,9 +198,21 @@ const CHECK_DETAIL: Record<string, { plain: string; technical: string }> = {
       </p>
       <p class="body">
         The same honesty applies a level down. We hold {totalSources} papers across those
-        remedies, and so far {adjudicated} of them have been read closely enough to say whether
-        they measured sleep at all — {measuredSleep} did. Where we haven't finished that reading,
-        the remedy's page says “still checking” instead of drawing a bar that would imply we had.
+        remedies.{' '}
+        {adjudicated === totalSources ? (
+          <>
+            Every one has now been read closely enough to say whether it measured sleep at all,
+            and {measuredSleep} did. That's what the bar on each remedy page is counting — and why
+            the muted part of it is usually the longest.
+          </>
+        ) : (
+          <>
+            So far {adjudicated} of them have been read closely enough to say whether they
+            measured sleep at all — {measuredSleep} did. Where we haven't finished that reading,
+            the remedy's page says “still checking” instead of drawing a bar that would imply we
+            had.
+          </>
+        )}
       </p>
     </section>
 
@@ -327,14 +344,23 @@ const CHECK_DETAIL: Record<string, { plain: string; technical: string }> = {
           <p class="example-h">Worked example: {kava.data.displayName}</p>
           <p class="body">
             {kava.data.displayName} carries a documented history of serious liver harm, and its
-            page says so prominently. It still does not sit in the bottom grade, because we hold{' '}
-            {kavaCited} {kavaCited === 1 ? 'paper' : 'papers'} on it and{' '}
-            {kavaTriaged === 0
-              ? 'none has yet been read closely enough to say whether it measured sleep'
-              : `only ${kavaTriaged} ${kavaTriaged === 1 ? 'has' : 'have'} been read closely enough to say whether it measured sleep`}
-            . “Tested and didn't help” would be a claim about research that hasn't been done. The
-            danger is real and rides the safety flag, where it belongs — a flag you can see
-            without reading a grade at all.
+            page says so prominently. It still does not sit in the bottom grade.{' '}
+            {kavaFullyRead && kavaSleep === 0 ? (
+              <>
+                We hold {kavaCited}{' '}{kavaCited === 1 ? 'paper' : 'papers'} on it, we've read all{' '}
+                {kavaCited === 1 ? 'of it' : `${kavaCited} of them`}, and not one measured whether
+                it helps people sleep — they're about the liver, and about anxiety.
+              </>
+            ) : (
+              <>
+                We hold {kavaCited} {kavaCited === 1 ? 'paper' : 'papers'} on it, and{' '}
+                {kavaTriaged === 0 ? 'none has' : `only ${kavaTriaged} have`} been read closely
+                enough to say whether it measured sleep.
+              </>
+            )}{' '}
+            “Tested and didn't help” would be a claim about research nobody has done. The danger is
+            real and rides the safety flag, where it belongs — a flag you can see without reading a
+            grade at all.
           </p>
           <p class="note"><a class="jump-link" href={`/remedies/${kava.id}`}>The {kava.data.displayName} page ›</a></p>
         </div>
