@@ -21,6 +21,7 @@
 // prose. Any "[Placeholder" string fails the production build (item-9 gate).
 import Base from '../../layouts/Base.astro';
 import Breadcrumb from '../../components/Breadcrumb.astro';
+import { freshness, freshnessNote } from '../../lib/freshness.ts';
 import { getCollection } from 'astro:content';
 import BucketBadge from '../../components/evidence/BucketBadge.astro';
 import StudyField from '../../components/evidence/StudyField.astro';
@@ -45,6 +46,10 @@ function humanDate(iso: string): string {
   return `${d} ${MONTHS[m - 1]} ${y}`;
 }
 const reviewed = humanDate(r.reviewDate);
+// Freshness (CHK-B17): a page not re-checked in 3 years says so, and one at 6 years says more.
+// `now` is read once here and passed in, so the module stays pure and testable.
+const fresh = freshness(r.reviewDate, new Date());
+const freshNote = freshnessNote(fresh);
 
 // citation URL for a source (jargon-free label; PMID lives inside the chip only)
 function sourceUrl(s: (typeof r.sources)[number]): string {
@@ -112,7 +117,10 @@ const TOC = [
           <p class="untriaged">{counts.cited} {counts.cited === 1 ? 'paper' : 'papers'} on {r.displayName} — we're still checking which measured sleep.</p>
         )}
 
-        <p class="reviewed">Last reviewed {reviewed} · <a href="/request-a-review">Suggest a correction</a></p>
+        <p class="reviewed">Last checked {reviewed} · <a href="/request-a-review">Suggest a correction</a></p>
+        {/* the flag sits WITH the date, not in a footer — a stale page should say so where the
+            reader is already looking at how old it is (RULES.md: never fine print) */}
+        {freshNote && <p class:list={['freshness', fresh]}>{freshNote}</p>}
       </div>
 
       {/* mobile contents — a native <details> disclosure (no-JS, matches the StudyChip pattern).
@@ -345,6 +353,19 @@ const TOC = [
     line-height: var(--leading-body);
     color: var(--text-muted);
     max-width: var(--measure);
+  }
+  .freshness {
+    margin: var(--space-2) 0 0;
+    padding: var(--space-3);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-sm);
+    line-height: var(--leading-body);
+    max-width: var(--measure);
+    /* amber is the SAFETY register (RULES.md Colour) and staleness is not a safety matter, so a
+       stale page is stated on the neutral sunken ground, not dressed as a warning. */
+    background: var(--surface-sunken);
+    border: var(--border-w) solid var(--border-input);
+    color: var(--text-body);
   }
   .reviewed {
     margin: 0;
