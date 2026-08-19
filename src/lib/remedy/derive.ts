@@ -69,3 +69,39 @@ const TYPE_WORDS: Record<string, string> = {
   other: 'study',
 };
 export const typeWords = (t: string): string => TYPE_WORDS[t] ?? 'study';
+
+
+/**
+ * The PLAIN-LANGUAGE line for a study, built from the structured fields (CHK-conformance).
+ *
+ * RULES.md Language is explicit: technical vocabulary — meta-analysis, randomised controlled
+ * trial, placebo-controlled, effect size, sleep-onset latency — lives ONLY inside the "see the
+ * study" popover and the how-we-grade page. The remedy page was rendering the source's `finding`
+ * field as body copy, and `finding` is written in exactly that register ("Pooled randomized
+ * trials: melatonin reduced sleep-onset latency by ~7 minutes"). That put research vocabulary on
+ * 17 remedy pages and duplicated the popover's own text directly above it.
+ *
+ * So body copy is composed here from the structured fields, in everyday words, and `finding`
+ * stays where the charter puts it: one tap deeper. Nothing is invented — every part is a field
+ * that was editorially entered, and a field we don't hold is simply left out of the sentence.
+ */
+export function plainFinding(s: Source, remedyName: string): string {
+  const kind = typeWords(s.type);
+  const article = /^[aeiou]/i.test(kind) ? 'An' : 'A';
+  const people = s.sampleSize ? ` in ${s.sampleSize.toLocaleString()} people` : '';
+
+  // `effectSize` is the plain magnitude, entered by hand off the paper — always preferred.
+  if (s.effectSize) return `${article} ${kind}${people} found people ${s.effectSize}.`;
+
+  // No magnitude recorded: say the direction, which is still a real finding, and no more.
+  switch (s.effectDirection) {
+    case 'helped':
+      return `${article} ${kind}${people} found ${remedyName.toLowerCase()} helped, though we don't have a plain figure for how much.`;
+    case 'no-clear-effect':
+      return `${article} ${kind}${people} found no clear effect on sleep.`;
+    case 'didnt-help':
+      return `${article} ${kind}${people} found it didn't help sleep.`;
+    default:
+      return `${article} ${kind}${people} measured sleep; we haven't recorded what it found in plain terms yet.`;
+  }
+}
