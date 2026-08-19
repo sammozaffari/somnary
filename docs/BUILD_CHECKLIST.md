@@ -593,6 +593,24 @@ scope of each item lives in the plan — this is the work queue.
   re-verified and are sound — every identifier resolves, every title matches its claim.
 - [ ] **CHK-E6 Bucket migration + ratification, all 31 remedies** (S–F → four buckets; safety
   flag confirmed alongside). `HG (every grade)`.
+  **Ratification packet prepared 2026-08-20 — `docs/audits/2026-08-20-e6-bucket-ratification-packet.md`.
+  NO bucket has been written; all 31 remain `null`.** CLAUDE.md is unconditional that no agent
+  assigns a bucket, so this is the proposal that makes the human decision fast, not the decision.
+  **The finding that should drive it: 16 of 31 are NOT GRADABLE YET.** A bucket depends on what a
+  remedy's papers found, and only 20 of 65 sleep-outcome sources carry `effectDirection` +
+  `sampleSize` — so 16 remedies have zero verifiable results, not because the science is absent
+  but because CHK-E2's second half is unfinished. **Grading them now would encode our own data
+  backlog as a verdict about the remedy.** `cbt-i` is the proof: first-line treatment for chronic
+  insomnia in two clinical guidelines, and on today's data it would grade "not properly tested for
+  sleep", which is false.
+  Proposal: **Group A (4)** — kava, reishi, taurine, magnolia-bark → `unknown`, confident, zero
+  sleep papers between them. **Group B (11)** — one `works` (melatonin, three independent positive
+  meta-analyses), six `maybe`, three `unknown`, one `avoid`; saffron and lemon-verbena graded DOWN
+  under the manufacturer/unreplicated rule. **Group C (16)** — do not grade until E2 finishes.
+  Two calls flagged as genuinely arguable: **bacopa → `avoid`** rests the site's harshest grade on
+  a single (well-run, negative-on-primary) trial where RULES.md says "papers", plural; and
+  **iron → `unknown`**, whose sleep analysis was null but thin and secondary.
+
 - [ ] **CHK-E7 Problem-page content**, sourced (consumes E0 drafts).
 - [ ] **CHK-E8 Product data fill** for launch products (four checks, prices + checked dates,
   honest assessment_state). **Includes** adjudicating the 57 CHK-B3 deliveryForm `needs-review`
