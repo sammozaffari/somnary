@@ -451,15 +451,59 @@ const CHECK_DETAIL: Record<string, { plain: string; technical: string }> = {
         directly it measured sleep — is set by a written standard rather than decided case by
         case, so that a grade can be re-derived by someone else and challenged if it's wrong.
       </p>
-      <p class="pending">
-        <strong>That standard is being finalised and isn't published yet.</strong> Until it is,
-        you won't find a number on this page saying how many papers or how large an effect it
-        takes to reach a particular grade — those thresholds are exactly what's under review, and
-        publishing a provisional set would give them a certainty they haven't earned. It lands
-        here when it's ratified, and any grade already published gets re-checked against it.
+      <p class="body">
+        That standard is now settled and public. It rates each paper on one question — how much
+        weight can this study honestly bear — in three levels, and it deliberately uses the
+        checklists researchers already use, so anyone can re-derive a rating rather than take
+        our word for it.
       </p>
+      <ul class="levels">
+        <li>
+          <p class="level-h">Strong</p>
+          <p class="body">
+            A trial that was registered before it started, ran properly, and shows no serious
+            weakness in how it was run — or a review that pools those trials to the same
+            standard.
+          </p>
+        </li>
+        <li>
+          <p class="level-h">Middling</p>
+          <p class="body">
+            A real trial with a real limitation: few people, no blinding, sleep measured as a
+            side question rather than the main one, or a study designed or paid for by the
+            company selling the product.
+          </p>
+        </li>
+        <li>
+          <p class="level-h">Weak</p>
+          <p class="body">
+            Studies with no comparison group, single case reports, opinion reviews, and results
+            a manufacturer published without outside checking.
+          </p>
+        </li>
+      </ul>
+      <details>
+        <summary>The instruments and the exact rule</summary>
+        <p class="body">
+          Trials are rated with <strong>Cochrane Risk of Bias 2</strong>: low risk of bias earns
+          strong, “some concerns” earns middling. Reviews are rated with <strong>AMSTAR 2</strong>:
+          high confidence earns strong, a mixed-quality evidence base or no pooled estimate earns
+          middling. Everything else — observational work, case series, open-label studies,
+          manufacturer data — is weak. Observational studies can support the middle two grades
+          but can never on their own put a remedy in the top one.
+        </p>
+        <p class="body">
+          Two rules matter more than the levels. <strong>Industry involvement caps a trial at
+          middling</strong> unless someone independent has replicated it — an otherwise clean
+          trial designed or written by the company selling the product is never rated strong. And
+          the rating describes the <em>study</em>, not the <em>result</em>: a strong trial that
+          found no effect is still strong, and it is exactly the kind of paper the bottom grade
+          requires.
+        </p>
+      </details>
       <p class="note">
-        This is also why no remedy is graded yet. The standard comes first, then the grades.
+        Ratified 20 August 2026. Grades are being assigned against it now; a grade cannot be
+        published before the papers behind it are rated.
       </p>
     </section>
 
@@ -799,6 +843,26 @@ const CHECK_DETAIL: Record<string, { plain: string; technical: string }> = {
     padding: var(--space-4);
   }
 
+  .levels {
+    list-style: none;
+    margin: 0 0 var(--space-4);
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+  .levels li {
+    border-left: var(--border-w) solid var(--border-strong);
+    padding-left: var(--space-4);
+  }
+  .level-h {
+    margin: 0 0 var(--space-1);
+    font-size: var(--text-base);
+    font-weight: var(--weight-strong);
+  }
+  .levels .body {
+    margin: 0;
+  }
   .list {
     margin: 0 0 var(--space-3);
     padding-left: 1.2em;

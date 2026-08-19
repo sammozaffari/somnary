@@ -524,7 +524,17 @@ scope of each item lives in the plan — this is the work queue.
 
 ### CHK-E — the editorial track (the critical path; the launch gate is a content date)
 - [ ] **CHK-E0 Salvage extraction** per Artifact 1 (drafts, never promoted without review).
-- [ ] **CHK-E1 Source-quality rubric ratification.** `HG`. (Maps CHK-Rfill.1.)
+- [x] **CHK-E1 Source-quality rubric ratification.** `HG` — **RATIFIED by the owner
+  20 August 2026.** `docs/SOURCE_QUALITY_RUBRIC.md` is now binding for every `studyQuality`
+  value; changing a level, or what earns it, is a new owner decision rather than an editorial one.
+  **`/how-we-grade#standard` filled from the upgrade slot B13 built for exactly this** — the
+  heading, the anchor and the surrounding copy are unchanged, and the pending block was replaced
+  by the three levels in plain words (strong / middling / weak) with the instruments behind an
+  expandable: RoB 2 for trials, AMSTAR 2 for reviews, and the two rules that matter more than the
+  levels — industry involvement caps a trial at middling unless independently replicated, and the
+  rating describes the study, not the result.
+  **This unblocks CHK-E6**: the page said "the standard comes first, then the grades", and it now
+  says grades are being assigned against it.
 - [~] **CHK-E2 `measuresSleepOutcome` triage** for all 133 sources + direction/sampleSize fill
   for full-page remedies; re-derive the RULES.md audit line at the melatonin pilot. (Maps
   CHK-Rfill.2.)
