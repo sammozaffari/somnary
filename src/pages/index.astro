@@ -114,13 +114,12 @@ const heroFigure = hero
     <section class="sec">
       <h2>Or start with what's going on</h2>
       <ul class="grid situations">
-        {/* Every destination here EXISTS today. The first three carry an outcome the browse
-            filters on (`?for=` — read by the browse's enhancement script); CHK-B12's problem
-            pages become the richer destination for those three and re-point them. Nothing here
-            links to a route that isn't built — a dead situation card is worse than none. */}
-        <li><a href="/remedies?for=fall+asleep+faster">I can't fall asleep<span aria-hidden="true">›</span></a></li>
-        <li><a href="/remedies?for=stay+asleep">I keep waking in the night<span aria-hidden="true">›</span></a></li>
-        <li><a href="/remedies?for=wind+down+before+bed">I can't switch my head off<span aria-hidden="true">›</span></a></li>
+        {/* The first three now point at CHK-B12's problem pages, which is what they were always
+            meant to reach — they pointed at filtered browse views only while those pages didn't
+            exist. The `?for=` browse arrival stays live and is still used by cross-links. */}
+        <li><a href="/problems/cant-fall-asleep">I can't fall asleep<span aria-hidden="true">›</span></a></li>
+        <li><a href="/problems/waking-in-the-night">I keep waking in the night<span aria-hidden="true">›</span></a></li>
+        <li><a href="/problems/cant-switch-off">I can't switch my head off<span aria-hidden="true">›</span></a></li>
         <li><a href="/remedies/melatonin">I'm thinking about melatonin<span aria-hidden="true">›</span></a></li>
         <li><a href="/products">I'm holding a bottle and can't read the label<span aria-hidden="true">›</span></a></li>
         <li><a href="/how-we-grade">I want to know how you decide<span aria-hidden="true">›</span></a></li>

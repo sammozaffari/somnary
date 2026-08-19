@@ -1,0 +1,263 @@
+---
+// Problem page (CHK-B12) — /problems/{slug}. The situation-first route into the site: someone
+// arrives with a problem, not a remedy name. Reached from the home situation cards, search, and
+// cross-links — never from the nav, which stays three items (RULES.md Interface economy).
+//
+// The order of this page IS the argument, and it is deliberate:
+//   1. what the situation is, plainly;
+//   2. when it's a doctor's problem rather than a shelf problem — calm, early, and not a
+//      symptom checklist;
+//   3. the things that aren't supplements, with better evidence than most things that are;
+//   4. only then, what people reach for — with the honest state of each one's evidence.
+// Putting the supplements last is the whole point. A page that leads with them teaches the
+// reader that the answer is on a shelf.
+//
+// RULES.md / CLAUDE.md enforced below:
+//  · Every factual claim carries a resolvable source, re-verified for this page (see
+//    lib/problems/index.ts for the provenance note and the two claims cut during that review).
+//  · The mandatory anti-hype beat: every finding states what it does NOT show.
+//  · No diagnosis, no dosing, no "safe for you", no combination advice.
+//  · Buckets are HUMAN-GATE: remedies show their real pending state, never a guessed grade,
+//    and the page says plainly that it cannot rank them yet.
+//  · Anecdote never appears here.
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+import SafetyCallout from '../../components/evidence/SafetyCallout.astro';
+import StudyChip from '../../components/evidence/StudyChip.astro';
+import RemedyCard from '../../components/evidence/RemedyCard.astro';
+import { PROBLEMS } from '../../lib/problems/index.ts';
+import { studyCounts, safetyInfo } from '../../lib/remedy/derive.ts';
+
+export async function getStaticPaths() {
+  const remedies = (await getCollection('remedies')).filter((r) => !r.data.draft);
+  return PROBLEMS.map((problem) => {
+    // Remedies people reach for in THIS situation, from the corpus's own outcome tags. Ordered
+    // most-evidence-first (verifiable, then cited) — the same fixed order the browse uses. NOT
+    // ordered by grade, because no grade exists yet, and never by anything commercial.
+    const matched = remedies
+      .filter((r) => r.data.outcomes.some((o) => o.toLowerCase().includes(problem.outcome.toLowerCase())))
+      .map((r) => ({
+        slug: r.id,
+        name: r.data.displayName,
+        bucket: r.data.bucket,
+        counts: studyCounts(r.data.sources),
+        safety: safetyInfo(r.data.safety),
+        uses: r.data.outcomes,
+      }))
+      .sort(
+        (a, b) =>
+          b.counts.verifiable - a.counts.verifiable ||
+          b.counts.cited - a.counts.cited ||
+          a.name.localeCompare(b.name)
+      );
+    return { params: { slug: problem.slug }, props: { problem, matched } };
+  });
+}
+
+const { problem, matched } = Astro.props;
+const anyGraded = matched.some((m) => m.bucket != null);
+const shown = matched.slice(0, 6);
+---
+
+<Base
+  title={`${problem.title} — what actually helps | Somnary`}
+  description={`${problem.intro}`}
+  contain={false}
+>
+  <div class="wrap">
+    <Breadcrumb trail={[{ label: 'Somnary', href: '/' }]} current={problem.title} />
+
+    <h1>{problem.title}</h1>
+    <p class="intro">{problem.intro}</p>
+
+    {/* ── 2 · the doctor route, early and calm ─────────────────────────────────────────────
+        Routing, never diagnosis: it names no symptoms to self-check against and tells nobody
+        what they have. It says who can answer, and it sits above the remedies deliberately. */}
+    <SafetyCallout level="caution" title="When this is worth a doctor, not a shelf">
+      {problem.seeSomeone}
+    </SafetyCallout>
+
+    {/* ── 3 · the things that aren't supplements ──────────────────────────────────────────── */}
+    <section class="sec">
+      <h2>Things that aren't supplements</h2>
+      <p class="lede">
+        These have better evidence behind them than most of what's sold for this, and none of
+        them costs anything. Each one says what the study found and what it doesn't show.
+      </p>
+      <ul class="findings">
+        {problem.findings.map((f) => (
+          <li class="finding">
+            <h3>{f.topic}</h3>
+            <p class="found">{f.found}</p>
+            <p class="not-shown"><strong>What it doesn't show.</strong> {f.notShown}</p>
+            <StudyChip
+              label="See the study"
+              finding={f.found}
+              year={f.year}
+              url={`https://pubmed.ncbi.nlm.nih.gov/${f.pmid}/`}
+              linkText={`Read the ${f.kind} — ${f.cite}`}
+            />
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    {/* ── 4 · what people reach for, last ─────────────────────────────────────────────────── */}
+    <section class="sec">
+      <h2>What people reach for</h2>
+      {shown.length > 0 ? (
+        <>
+          <p class="lede">
+            {anyGraded ? (
+              <>The remedies people use for this, best-evidenced first. A grade describes the
+              ingredient, not any particular bottle.</>
+            ) : (
+              /* HONEST ORDERING, stated. With no grade ratified, the page must not imply a
+                 ranking it cannot support — so it says what the order actually is. */
+              <>These are the remedies people use for this, ordered by how much research we've
+              been able to check — not by how well they work. We haven't graded any of them yet,
+              and the cards say so rather than guessing.</>
+            )}
+          </p>
+          <ul class="cards">
+            {shown.map((m) => (
+              <li>
+                <RemedyCard slug={m.slug} name={m.name} bucket={m.bucket} counts={m.counts} safety={m.safety} uses={m.uses} />
+              </li>
+            ))}
+          </ul>
+          {matched.length > shown.length && (
+            <p class="more">
+              <a href="/remedies">
+                {matched.length} remedies are used for this — see all of them ›
+              </a>
+            </p>
+          )}
+        </>
+      ) : (
+        <p class="lede">
+          We don't yet cover a remedy that people specifically use for this.{' '}
+          <a href="/remedies">Everything we do cover ›</a>
+        </p>
+      )}
+      <p class="note">
+        Nothing here is a recommendation to take anything. It's what the research says, so you
+        can decide with a pharmacist rather than from a label.
+      </p>
+    </section>
+  </div>
+</Base>
+
+<style>
+  /* raw-ok: --page-max as a layout width — this is a reading page. */
+  .wrap {
+    width: 100%;
+    max-width: var(--page-max);
+    margin: 0 auto;
+    padding: var(--space-5) var(--space-5) var(--space-9);
+  }
+  h1 {
+    margin: var(--space-1) 0 var(--space-3);
+    font-size: var(--display-md);
+    font-weight: var(--weight-title);
+    letter-spacing: var(--tracking-display);
+    line-height: var(--leading-tight);
+  }
+  .intro {
+    margin: 0 0 var(--space-6);
+    font-size: var(--text-base);
+    line-height: var(--leading-body);
+    color: var(--text-muted);
+    max-width: var(--measure);
+  }
+  .sec {
+    padding-top: var(--space-8);
+  }
+  h2 {
+    margin: 0 0 var(--space-3);
+    font-size: var(--display-sm);
+    font-weight: var(--weight-heading);
+    letter-spacing: var(--tracking-display);
+    line-height: var(--leading-snug);
+  }
+  h3 {
+    margin: 0 0 var(--space-2);
+    font-size: var(--text-lg);
+    font-weight: var(--weight-strong);
+    line-height: var(--leading-snug);
+  }
+  .lede,
+  .note {
+    margin: 0 0 var(--space-5);
+    font-size: var(--text-base);
+    line-height: var(--leading-body);
+    color: var(--text-muted);
+    max-width: var(--measure);
+  }
+  .note {
+    margin: var(--space-5) 0 0;
+    font-size: var(--text-sm);
+  }
+  .lede a,
+  .note a {
+    color: var(--text-link);
+    font-weight: var(--weight-ui);
+  }
+  .findings {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+  }
+  .finding {
+    padding: var(--space-5);
+    background: var(--surface-card);
+    border: var(--border-w) solid var(--border-hairline);
+    border-radius: var(--radius-md);
+  }
+  .found {
+    margin: 0 0 var(--space-3);
+    font-size: var(--text-base);
+    line-height: var(--leading-body);
+    max-width: var(--measure);
+  }
+  /* the anti-hype beat is body text, not fine print — it carries the same weight as the finding */
+  .not-shown {
+    margin: 0 0 var(--space-3);
+    font-size: var(--text-base);
+    line-height: var(--leading-body);
+    color: var(--text-muted);
+    max-width: var(--measure);
+  }
+  .not-shown strong {
+    color: var(--text-body);
+    font-weight: var(--weight-strong);
+  }
+  .cards {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--space-4);
+  }
+  .more {
+    margin: var(--space-4) 0 0;
+  }
+  .more a {
+    display: inline-flex;
+    align-items: center;
+    /* 44px hit floor (RULES.md a11y) */
+    min-height: var(--control-md);
+    color: var(--text-link);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-strong);
+  }
+  @media (min-width: 640px) {
+    .cards {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+</style>
