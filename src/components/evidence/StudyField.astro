@@ -50,7 +50,7 @@ function shortCaption(c: number, s: number, v: number) {
 function directionLine(v: number, h: number | null) {
   if (h == null || v === 0) return null;
   if (v === 1) return h === 1 ? 'The one result we could verify found an improvement.' : "The one result we could verify didn't find an improvement.";
-  const who = h === v ? `all ${v}` : h === 0 ? 'none' : `${h}`;
+  const who = h === v ? (v === 2 ? 'both' : `all ${v}`) : h === 0 ? 'none' : `${h}`;
   return `Of the ${v} results we could verify, ${who} found an improvement.`;
 }
 
