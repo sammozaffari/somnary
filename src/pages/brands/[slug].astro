@@ -1,0 +1,289 @@
+---
+// Brand page (CHK-B11) — /brands/{slug}. Consumes B3's brand + product collections and B6's
+// product row. Unblocks the brand crumb and header link the product page deliberately left
+// unlinked until this route existed.
+//
+// THE FRAMING RULE, which is the whole reason this page is `HG` (CLAUDE.md content model):
+// a brand page derives a COUNT SUMMARY from its products and NEVER a brand grade. There is no
+// brand score, no brand ranking, no "best brands" anywhere in this file — and there must never
+// be. A brand is a bag of products; each product carries its own verdict, and the only honest
+// thing to say about the bag is how many of each kind are in it.
+//
+// The counts are honest in the other direction too: a product whose label we hold but whose
+// checks we haven't run counts as NOT YET ASSESSED — never as a pass and never as a failure.
+// A brand with 20 unassessed products must not read as a brand with 20 clean ones.
+//
+// RULES.md enforced below: Products (identical treatment, no commercial ordering); Interface
+// economy (chrome-by-scale — no filters here, these lists are small); Identity (dates render
+// "14 July 2026"); Accessibility floors.
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+import BrandMark from '../../components/products/BrandMark.astro';
+import ProductListRow from '../../components/products/ProductListRow.astro';
+import { formLabel } from '../../lib/products/labels.ts';
+import { byChecksPassed, completeness, verdictState } from '../../lib/products/score.ts';
+
+export async function getStaticPaths() {
+  const brands = await getCollection('brands');
+  const products = await getCollection('products');
+  const remedies = await getCollection('remedies');
+  return brands.map((b) => ({
+    params: { slug: b.data.slug },
+    props: {
+      brand: b.data,
+      products: products
+        .filter((p) => p.data.brand === b.data.name)
+        .sort((a, z) => byChecksPassed(a.data, z.data))
+        .map((p) => ({ id: p.id, data: p.data })),
+      remedyNames: Object.fromEntries(remedies.map((r) => [r.id, r.data.displayName])),
+    },
+  }));
+}
+
+const { brand, products, remedyNames } = Astro.props;
+
+// ── the derived count summary — counts, never a grade ────────────────────────────────────────
+const total = products.length;
+const assessed = products.filter((p) => completeness(p.data) === 'assessed');
+const notAssessed = total - assessed.length;
+const delivers = assessed.filter((p) => verdictState(p.data) === 'delivers').length;
+const unverified = assessed.filter((p) => verdictState(p.data) === 'unverified').length;
+const fallsShort = assessed.filter((p) => verdictState(p.data) === 'falls-short').length;
+
+// which ingredients this brand's range covers — a fact about the range, not a judgement of it
+const ingredients = [
+  ...new Set(products.flatMap((p) => p.data.ingredients.map((i) => remedyNames[i.remedy_id] ?? i.remedy_id))),
+].sort();
+
+const longDate = (iso: string) =>
+  new Date(iso + 'T00:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+
+const detailLine = (p: (typeof products)[number]['data']) =>
+  [
+    [...new Set(p.ingredients.map((i) => remedyNames[i.remedy_id] ?? i.remedy_id))].join(' + '),
+    p.strength ? `${p.strength.amount} ${p.strength.unit}` : 'Strength not recorded yet',
+    formLabel(p.deliveryForm),
+  ]
+    .filter(Boolean)
+    .join(' · ');
+
+const uniformState = new Set(products.map((p) => completeness(p.data))).size === 1;
+---
+
+<Base
+  title={`${brand.name} — what we've checked | Somnary`}
+  description={`Every ${brand.name} sleep product we've catalogued, and how many of them we've put through the four checks.`}
+  contain={false}
+>
+  <div class="wrap">
+    <Breadcrumb trail={[{ label: 'Products', href: '/products' }]} current={brand.name} />
+
+    <div class="head">
+      <span class="mark"><BrandMark name={brand.name} size={72} radius="var(--radius-md)" /></span>
+      <div>
+        <h1>{brand.name}</h1>
+        <p class="sub">
+          {total} {total === 1 ? 'product' : 'products'} we've catalogued
+          {ingredients.length > 0 && <> · {ingredients.join(' · ')}</>}
+        </p>
+      </div>
+    </div>
+
+    {/* ── the count summary ───────────────────────────────────────────────────────────────
+        A COUNT, NEVER A GRADE. Nothing here scores the brand, ranks it against another, or
+        averages its products into a number. Read the sentence carefully before changing it:
+        every clause is a count of products in a state, and that is deliberate. */}
+    <section class="summary">
+      <h2 class="sr-only">What we've checked</h2>
+      {assessed.length === 0 ? (
+        <p class="count">
+          We hold the label for {total === 1 ? 'this product' : `all ${total}`}, and we haven't put
+          {total === 1 ? ' it' : ' any of them'} through the four checks yet. So there's nothing
+          here that says whether {brand.name} makes good products — only what's on the labels we've
+          recorded.
+        </p>
+      ) : (
+        <>
+          <ul class="tally">
+            {delivers > 0 && <li><strong>{delivers}</strong> {delivers === 1 ? 'gives' : 'give'} you what was studied</li>}
+            {unverified > 0 && <li><strong>{unverified}</strong> {unverified === 1 ? 'matches' : 'match'} what was studied, unverified</li>}
+            {fallsShort > 0 && <li><strong>{fallsShort}</strong> {fallsShort === 1 ? 'is' : 'are'} not what was studied</li>}
+            {notAssessed > 0 && <li><strong>{notAssessed}</strong> not checked yet</li>}
+          </ul>
+          <p class="count-note">
+            These are counts of individual products, not a score for {brand.name}. We don't grade
+            brands — each bottle is assessed on its own, and a company that makes one good product
+            and one poor one is exactly that.
+          </p>
+        </>
+      )}
+    </section>
+
+    {/* ── recalls: the row renders ONLY when one exists (CLAUDE.md brand model). An empty
+        recalls[] means we hold no recall record — which is NOT the same as "never recalled",
+        and the page must not imply the stronger claim by showing a reassuring empty state. */}
+    {brand.recalls.length > 0 && (
+      <section class="recalls">
+        <h2>Recalls on record</h2>
+        <ul>
+          {brand.recalls.map((r) => (
+            <li>
+              <p class="recall-date">{longDate(r.date)}</p>
+              <p class="recall-text">{r.description}</p>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
+
+    <section class="listing">
+      <h2>Every {brand.name} product we've catalogued</h2>
+      <ul class="rows">
+        {products.map((p) => (
+          <ProductListRow
+            product={p.data}
+            href={`/products/${p.id}`}
+            detail={detailLine(p.data)}
+            explainState={!uniformState}
+          />
+        ))}
+      </ul>
+      <p class="foot">
+        Ordered by our own checks, never by price and never by anything commercial —{' '}
+        <a href="/how-we-grade#product-verdict">how we decide</a>. Missing a product?{' '}
+        <a href="/request-a-review">Tell us</a>.
+      </p>
+    </section>
+  </div>
+</Base>
+
+<style>
+  /* raw-ok: 880px is the browse column, matching /products — this page is a product listing. */
+  .wrap {
+    width: 100%;
+    max-width: 880px;
+    margin: 0 auto;
+    padding: var(--space-5) var(--space-5) var(--space-9);
+  }
+  .head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
+  }
+  .mark {
+    flex: none;
+  }
+  h1 {
+    margin: 0;
+    font-size: var(--display-md);
+    font-weight: var(--weight-title);
+    letter-spacing: var(--tracking-display);
+    line-height: var(--leading-tight);
+  }
+  .sub {
+    margin: var(--space-1) 0 0;
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .summary {
+    padding: var(--space-5);
+    background: var(--surface-sunken);
+    border: var(--border-w) solid var(--border-hairline);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-7);
+  }
+  .tally {
+    list-style: none;
+    margin: 0 0 var(--space-3);
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    font-size: var(--text-base);
+    font-variant-numeric: tabular-nums;
+  }
+  .tally strong {
+    font-weight: var(--weight-strong);
+  }
+  .count,
+  .count-note {
+    margin: 0;
+    font-size: var(--text-base);
+    line-height: var(--leading-body);
+    color: var(--text-muted);
+    max-width: var(--measure);
+  }
+  .count-note {
+    font-size: var(--text-sm);
+  }
+  .recalls {
+    margin-bottom: var(--space-7);
+    padding: var(--space-5);
+    /* amber is the safety register only (RULES.md Colour) — a recall is exactly that */
+    background: var(--amber-tint);
+    border: var(--border-w) solid var(--amber-line);
+    border-radius: var(--radius-md);
+  }
+  .recalls ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+  .recall-date {
+    margin: 0;
+    font-size: var(--text-sm);
+    font-weight: var(--weight-strong);
+    color: var(--amber);
+  }
+  .recall-text {
+    margin: var(--space-1) 0 0;
+    font-size: var(--text-base);
+    line-height: var(--leading-body);
+    max-width: var(--measure);
+  }
+  h2 {
+    margin: 0 0 var(--space-4);
+    font-size: var(--text-xl);
+    font-weight: var(--weight-heading);
+    letter-spacing: var(--tracking-display);
+    line-height: var(--leading-snug);
+  }
+  .recalls h2 {
+    font-size: var(--text-lg);
+  }
+  .rows {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-bottom: var(--border-w) solid var(--border-hairline);
+  }
+  .foot {
+    margin: var(--space-5) 0 0;
+    font-size: var(--text-sm);
+    line-height: var(--leading-body);
+    color: var(--text-faint);
+    max-width: var(--measure);
+  }
+  .foot a {
+    color: var(--text-link);
+    font-weight: var(--weight-ui);
+  }
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    /* raw-ok: 1px sr-only clip rect — the documented sub-token exception */
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+  }
+</style>
