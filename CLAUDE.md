@@ -370,10 +370,18 @@ assessed", never as passes or failures.
 concern** (neutral, NOT green) · **worth knowing** (amber tint) · **documented
 concern** (avoid tint). Every non-neutral flag CITES a paper (no source id → the
 flag cannot ship — see validation gates). A public, cited **documented-concern
-list** is maintained as an editorial artefact. Standing rule: non-sugar sweeteners
-are always at least "worth knowing" in daily-use products (WHO 2023 basis — verify
-and cite properly; currently a placeholder). **No hazard scores, no invented
+list** is maintained as an editorial artefact. **No hazard scores, no invented
 gradients, ever** — colour states only what's documented.
+*(Amended by owner 2026-08-20, CHK-E5: the standing rule that non-sugar sweeteners are always
+at least "worth knowing" in daily-use products is **DROPPED**. Its WHO-2023 basis was verified
+as CLAUDE.md required and does not support it — the guideline advises against non-sugar
+sweeteners **for weight control and disease risk**, is explicitly conditional, and does not
+conclude they are unsafe; it says nothing about a sweetener in a nightly supplement. Flagging
+every sweetened product on that citation would have been the exact "source doesn't support the
+claim" failure the flag system exists to prevent. `src/data/additive-watchlist.yaml`'s explicit
+exclusion now stands unopposed: **sweeteners are not flagged**, and fear-based "no nasty
+sweeteners" marketing is penalised as marketing dishonesty instead. Evidence and the two
+rejected alternatives: `docs/audits/2026-08-20-e5-sweetener-policy-conflict.md`.)*
 
 The ingredient evidence bucket (does it work), the safety flag (how risky —
 none/caution/serious concern, shown on every remedy alongside the bucket), and

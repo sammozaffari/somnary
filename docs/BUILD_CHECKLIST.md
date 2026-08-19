@@ -571,7 +571,7 @@ scope of each item lives in the plan — this is the work queue.
   medical review** of all launch-visible safety copy. `HG (medical)`. The likeliest long pole;
   start now. (Maps CHK-Rfill.3.)
 - [ ] **CHK-E4 `howToTake` dose protocols** from studies. (Maps CHK-Rfill.4.)
-- [~] **CHK-E5 Documented-concern additive list**, WHO-2023 sweetener citation verified. (Maps
+- [x] **CHK-E5 Documented-concern additive list**, WHO-2023 sweetener citation verified. (Maps
   CHK-Rfill.5.)
   **Verification DONE 2026-08-20 — and it FAILED, which is the finding. `[HUMAN-GATE]`.**
   CLAUDE.md's standing rule ("non-sugar sweeteners are always at least 'worth knowing' in
@@ -591,7 +591,13 @@ scope of each item lives in the plan — this is the work queue.
   **Not blocking today:** no product carries `excipients[]` yet (CHK-E8), so no additive flag
   renders anywhere and nothing is mis-stated to a reader. The other ten watchlist entries were
   re-verified and are sound — every identifier resolves, every title matches its claim.
-- [ ] **CHK-E6 Bucket migration + ratification, all 31 remedies** (S–F → four buckets; safety
+  **RESOLVED by the owner 20 August 2026: the standing rule is DROPPED.** The watchlist's
+  explicit exclusion now stands unopposed — **sweeteners are not flagged**, and fear-based "no
+  nasty sweeteners" marketing is penalised as marketing dishonesty instead. Amended in CLAUDE.md
+  and in both RULES.md copies. This is the flag system working as designed: a flag whose source
+  does not carry it does not ship.
+
+- [~] **CHK-E6 Bucket migration + ratification, all 31 remedies** (S–F → four buckets; safety
   flag confirmed alongside). `HG (every grade)`.
   **Ratification packet prepared 2026-08-20 — `docs/audits/2026-08-20-e6-bucket-ratification-packet.md`.
   NO bucket has been written; all 31 remain `null`.** CLAUDE.md is unconditional that no agent
@@ -610,6 +616,17 @@ scope of each item lives in the plan — this is the work queue.
   Two calls flagged as genuinely arguable: **bacopa → `avoid`** rests the site's harshest grade on
   a single (well-run, negative-on-primary) trial where RULES.md says "papers", plural; and
   **iron → `unknown`**, whose sleep analysis was null but thin and secondary.
+  **15 of 31 RATIFIED by the owner 20 August 2026** from the packet above. Live: **works** —
+  melatonin. **maybe** — saffron, ashwagandha, magnesium, L-theanine, lemon-verbena, valerian,
+  chamomile. **unknown** — kava, reishi, taurine, magnolia-bark, apigenin, iron. **avoid** —
+  bacopa. Each carries a `changeLog` entry of type `grade` recording the bucket and the reasoning,
+  so every grade is publicly re-derivable.
+  `workflowState` was deliberately NOT flipped to `owner_ratified`: that field is the RECORD's
+  state, most of this prose is still the old voice awaiting the E-track rewrite, and claiming the
+  whole record was reviewed would overstate what happened. The owner ratified the GRADE.
+  **The remaining 16 stay `null` and keep rendering "grade in review"** — they are not gradable
+  until CHK-E2's effect fill finishes, because their bucket would otherwise reflect our data
+  backlog rather than the evidence. `cbt-i` is the case in point.
 
 - [ ] **CHK-E7 Problem-page content**, sourced (consumes E0 drafts).
 - [ ] **CHK-E8 Product data fill** for launch products (four checks, prices + checked dates,
