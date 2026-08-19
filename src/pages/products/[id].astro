@@ -34,13 +34,15 @@ type Remedy = CollectionEntry<'remedies'>;
 export async function getStaticPaths() {
   const products = await getCollection('products');
   const remedies = await getCollection('remedies');
+  const brands = await getCollection('brands');
   return products.map((p) => ({
     params: { id: p.id },
     props: {
       product: p.data,
       productId: p.id,
-      // (the brand RECORD is deliberately not loaded: nothing on this page can link to
-      //  /brands/{slug} until CHK-B11 builds that route)
+      // CHK-B11 built /brands/{slug}, so the brand crumb and the header brand line are links
+      // again — the thing B7 deliberately left unlinked rather than ship 93 dead breadcrumbs.
+      brand: brands.find((b) => b.data.name === p.data.brand)?.data ?? null,
       // every remedy this bottle contains, in label order (90 of 93 are single-ingredient)
       remedies: p.data.ingredients
         .map((i) => remedies.find((r) => r.id === i.remedy_id))
@@ -60,7 +62,7 @@ export async function getStaticPaths() {
   }));
 }
 
-const { product, productId, remedies, siblings } = Astro.props;
+const { product, productId, brand, remedies, siblings } = Astro.props;
 
 const state = completeness(product);
 const verdict = state === 'assessed' ? verdictState(product) : null;
@@ -149,17 +151,20 @@ const pageTitle = `${product.brand} ${product.name} — is it what the studies u
 >
   <div class="wrap">
     {/* breadcrumbs on every page; mobile truncates to "‹ Products" (the shared component) */}
-    {/* Products › Product, NOT Products › Brand › Product. The bundle's trail has the brand in
-        it and it belongs there — but /brands/{slug} is CHK-B11 and does not exist yet, and 93
-        dead breadcrumb links is worse than a shorter trail. B11 adds the brand crumb here (and
-        turns the brand line in the header below into a link) when the route lands. */}
-    <Breadcrumb trail={[{ label: 'Products', href: '/products' }]} current={product.name} />
+    {/* Products › Brand › Product, the bundle's full trail — restored at CHK-B11 when
+        /brands/{slug} landed. Falls back to the short trail if a product's brand has no record. */}
+    <Breadcrumb
+      trail={brand
+        ? [{ label: 'Products', href: '/products' }, { label: product.brand, href: `/brands/${brand.slug}` }]
+        : [{ label: 'Products', href: '/products' }]}
+      current={product.name}
+    />
 
     {/* ── header ─────────────────────────────────────────────────────────────────────────── */}
     <div class="head">
       <span class="shot"><BrandMark name={product.brand} radius="var(--radius-lg)" /></span>
       <div class="head-text">
-        <p class="brand">{product.brand}</p>
+        {brand ? <a class="brand brand-link" href={`/brands/${brand.slug}`}>{product.brand}</a> : <p class="brand">{product.brand}</p>}
         <h1>{product.name}</h1>
         <p class="fact">{factLine}</p>
 
@@ -485,6 +490,17 @@ const pageTitle = `${product.brand} ${product.name} — is it what the studies u
     gap: var(--space-3);
     min-width: 0;
     width: 100%;
+  }
+  .brand-link {
+    display: inline-flex;
+    align-items: center;
+    /* 44px hit floor (RULES.md a11y) */
+    min-height: var(--control-md);
+    color: var(--text-link);
+    text-decoration: none;
+  }
+  .brand-link:hover {
+    text-decoration: underline;
   }
   .brand {
     margin: 0;

@@ -330,8 +330,18 @@ scope of each item lives in the plan — this is the work queue.
 - [ ] **CHK-B10 Safety page** `/safety`: triage by situation, per-situation interactions,
   derived flags listing, escalation block. Depends: B5; content = E3 + medical-review HG.
   (Maps CHK-Rpage.1.)
-- [ ] **CHK-B11 Brand page** `/brands/{slug}`: `HG` (framing). Derived count summary (never a
+- [x] **CHK-B11 Brand page** `/brands/{slug}`: `HG` (framing). Derived count summary (never a
   grade), product rows, conditional recalls row. Depends: B3, B6. (Maps CHK-Rpage.2.)
+  **Done 2026-08-19** — 55 brand pages. The `HG` framing rule is built in and commented at the
+  point of enforcement: the page derives a COUNT SUMMARY and never a brand grade — no brand
+  score, no ranking, no averaging of products into a number. Unassessed products count as
+  "not checked yet", never as passes, so a brand with 20 unassessed products cannot read as a
+  brand with 20 clean ones. With nothing assessed yet the summary says so in a sentence rather
+  than showing a reassuring empty tally. The recalls row renders ONLY when a recall exists — an
+  empty `recalls[]` means we hold no record, which is not the same as "never recalled", and the
+  page must not imply the stronger claim. **Unblocks the product page**: the brand crumb
+  (Products › Brand › Product) and the header brand link, both deliberately left unlinked at B7,
+  are live.
 - [ ] **CHK-B12 Problem page** `/problems/{slug}`: situation explainer, calm see-a-doctor
   prominence, honest remedy ordering, doesn't-hold-up reveal, non-supplement comparisons
   (salvage items 1–8). Depends: B5, B8; content = E7.
