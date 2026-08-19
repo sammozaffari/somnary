@@ -17,7 +17,7 @@ function card() {
       justifyContent: 'space-between',
       backgroundColor: PAPER,
       padding: '68px 76px',
-      fontFamily: 'Instrument Sans',
+      fontFamily: 'Onest',
     },
     [
       // top row: wordmark + the standing promises (mirrors the homepage eyebrow)
@@ -31,7 +31,7 @@ function card() {
       // middle: the homepage headline + value-prop dek
       h({ flexDirection: 'column' }, [
         h(
-          { fontFamily: 'Instrument Sans', fontWeight: 700, fontSize: '86px', color: INK, lineHeight: 1.02, letterSpacing: '-0.05em', maxWidth: '1000px' },
+          { fontFamily: 'Onest', fontWeight: 700, fontSize: '86px', color: INK, lineHeight: 1.02, letterSpacing: '-0.05em', maxWidth: '1000px' },
           'Check a sleep remedy before you take it',
         ),
         h(
