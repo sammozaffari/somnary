@@ -1,0 +1,132 @@
+---
+// ThemeToggle — day / night, in the chrome where it can actually be found.
+//
+// WHY IT MOVED HERE. CHK-B15 put this in the footer on the reasoning that "the theme follows the
+// clock on its own, so this is the override for the minority who want to countermand it — not a
+// feature to advertise". That reasoning was wrong in practice, for a reason the rendered pass
+// didn't catch: **an OS set to dark short-circuits the clock entirely**, so for every reader on a
+// dark-mode machine the site was simply dark, at every hour, with the only way out sitting 2,200
+// pixels down the page. Sunset keying never fired for them at all. A control that is the ONLY
+// route to half the design cannot live below the fold.
+//
+// RULES.md Interface economy says the nav is exactly three items — Remedies · Products · Safety —
+// plus ever-present search. That rule is about NAVIGATION DESTINATIONS: it exists to stop the
+// chrome accumulating pages (Problems, How-we-grade, tools). This is a control, not a
+// destination; it adds no route and reaches no page. The three items are untouched.
+//
+// It renders `hidden` and is revealed by its own script: a control that cannot work without
+// JavaScript should not be painted. The theme itself is resolved before first paint by the
+// inline script in Base.astro — this only lets a reader countermand that, and remembers it.
+---
+
+<button type="button" class="theme" data-theme-toggle hidden aria-pressed="false">
+  {/* Both glyphs ship and CSS shows the relevant one — no icon swapping in script, so the button
+      cannot flash the wrong icon between paint and hydration. */}
+  <svg class="glyph sun" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+    <circle cx="8" cy="8" r="3.1" fill="none" stroke="currentColor" stroke-width="1.5"></circle>
+    <g stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+      <line x1="8" y1="1.2" x2="8" y2="2.8"></line><line x1="8" y1="13.2" x2="8" y2="14.8"></line>
+      <line x1="1.2" y1="8" x2="2.8" y2="8"></line><line x1="13.2" y1="8" x2="14.8" y2="8"></line>
+      <line x1="3.4" y1="3.4" x2="4.5" y2="4.5"></line><line x1="11.5" y1="11.5" x2="12.6" y2="12.6"></line>
+      <line x1="12.6" y1="3.4" x2="11.5" y2="4.5"></line><line x1="4.5" y1="11.5" x2="3.4" y2="12.6"></line>
+    </g>
+  </svg>
+  <svg class="glyph moon" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+    <path d="M13.4 9.9A5.9 5.9 0 0 1 6.1 2.6a5.9 5.9 0 1 0 7.3 7.3Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"></path>
+  </svg>
+  <span class="label" data-theme-label>Night colours</span>
+</button>
+
+<script>
+  // The resolved theme is already applied by the inline head script. This only countermands it.
+  // Writing 'day' EXPLICITLY is what stops the clock — or an OS dark preference — flipping the
+  // page back on the next navigation.
+  const btn = document.querySelector<HTMLButtonElement>('[data-theme-toggle]');
+  if (btn) {
+    const label = btn.querySelector('[data-theme-label]')!;
+    const isDusk = () => document.documentElement.getAttribute('data-theme') === 'dusk';
+    const sync = () => {
+      const dusk = isDusk();
+      btn.setAttribute('aria-pressed', String(dusk));
+      // the accessible name states what the control DOES, not the state it is in
+      const next = dusk ? 'Switch to day colours' : 'Switch to night colours';
+      btn.setAttribute('aria-label', next);
+      btn.title = next;
+      label.textContent = dusk ? 'Day' : 'Night';
+    };
+    btn.hidden = false; // it works, so it may now be seen
+    sync();
+    btn.addEventListener('click', () => {
+      const next = isDusk() ? 'day' : 'dusk';
+      if (next === 'dusk') document.documentElement.setAttribute('data-theme', 'dusk');
+      else document.documentElement.removeAttribute('data-theme');
+      try {
+        localStorage.setItem('somnary-theme', next);
+      } catch (e) {
+        /* storage blocked — the toggle still works for this page view */
+      }
+      sync();
+    });
+  }
+</script>
+
+<style>
+  .theme {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    /* 44px hit floor (RULES.md a11y) */
+    min-height: var(--control-md);
+    padding: 0 var(--space-3);
+    border: var(--border-w) solid var(--border-input);
+    border-radius: var(--radius-pill);
+    background: var(--surface-card);
+    color: var(--text-muted);
+    font: var(--weight-ui) var(--text-sm) var(--font-sans);
+    cursor: pointer;
+    white-space: nowrap;
+    transition:
+      color var(--dur-fast) var(--ease-settle),
+      border-color var(--dur-fast) var(--ease-settle);
+  }
+  .theme:hover {
+    color: var(--text-body);
+    border-color: var(--ink);
+  }
+  .glyph {
+    flex: none;
+  }
+  /* Both glyphs are in the DOM; CSS picks the one that shows what pressing it will DO.
+     In day the moon shows (press → night); at dusk the sun shows (press → day). */
+  .sun {
+    display: none;
+  }
+  :global([data-theme='dusk']) .sun {
+    display: block;
+  }
+  :global([data-theme='dusk']) .moon {
+    display: none;
+  }
+  /* the word is a hint, not the control — it goes when the nav is tight */
+  @media (max-width: 519px) {
+    .label {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      /* raw-ok: 1px sr-only clip rect — the documented sub-token exception */
+      margin: -1px;
+      padding: 0;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+    }
+    .theme {
+      padding: 0 var(--space-2);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .theme {
+      transition: none;
+    }
+  }
+</style>
