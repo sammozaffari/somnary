@@ -27,7 +27,7 @@ import BucketBadge from '../../components/evidence/BucketBadge.astro';
 import StudyField from '../../components/evidence/StudyField.astro';
 import StudyChip from '../../components/evidence/StudyChip.astro';
 import SafetyCallout from '../../components/evidence/SafetyCallout.astro';
-import { studyCounts, safetyInfo, groupSources, typeWords } from '../../lib/remedy/derive.ts';
+import { studyCounts, safetyInfo, groupSources, typeWords , plainFinding } from '../../lib/remedy/derive.ts';
 
 export async function getStaticPaths() {
   const remedies = await getCollection('remedies');
@@ -142,7 +142,11 @@ const TOC = [
           <ul class="findings">
             {groups.verified.map((s) => (
               <li>
-                <span class="finding">{s.finding}</span>
+                {/* PLAIN in body copy, technical one tap deeper (RULES.md Language). The
+                    source's own `finding` is written in research register and belongs in the
+                    popover below — rendering it here put "meta-analysis" and "sleep-onset
+                    latency" on 17 remedy pages, and repeated the popover's text above it. */}
+                <span class="finding">{plainFinding(s, r.displayName)}</span>
                 <StudyChip finding={s.finding} people={s.sampleSize} year={s.year} url={sourceUrl(s)} linkText="Read the study" />
               </li>
             ))}
