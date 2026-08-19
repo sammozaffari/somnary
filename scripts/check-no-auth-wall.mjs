@@ -87,9 +87,12 @@ for (const rel of routes) {
 }
 check(contentChecked > 0, `swept ${contentChecked} content/search/guide routes`);
 
-// Guard: the guide route + shell must exist and carry no auth gate (belt-and-suspenders — it is the
-// flow most likely to be walled, and the spec calls it out explicitly).
-check(routes.includes('guide.astro'), 'the /guide route exists in the content sweep');
+// Guard: the site's READING routes must exist and be in the sweep — belt-and-suspenders on the
+// pages most likely to be walled by accident. This named `guide.astro` until CHK-B18 deleted the
+// old presentation layer with it; the guarantee is about whatever pages actually carry the
+// content, so it now names the greenfield ones. Every route below must be public, always.
+for (const r of ['index.astro', 'safety.astro', 'search.astro', 'how-we-grade.astro'])
+  check(routes.includes(r), `the /${r.replace(/(index)?\.astro$/, '')} route exists in the content sweep`);
 
 // --- (2) /account: reads the session but is NEVER a redirect wall --------------------------------
 const acctSrc = await readFile(join(PAGES_DIR, ACCOUNT_PAGE), 'utf8');
