@@ -1,315 +1,265 @@
 ---
-// Crawlable search results page — CHK-4.3 (DESIGN_SYSTEM §3.7, PLAN §2a). The no-JS / deep-link /
-// SEO fallback for the ⌘K palette: it renders results SERVER-SIDE from ?q=, so query pages are
-// crawlable and work with JavaScript off. Same index + ranker as the palette (getSearchDocs +
-// searchDocs). This is the project's FIRST server-rendered route (prerender=false) — every other
-// page stays static; the astro.config note anticipated opting specific routes into server mode.
+// Search (CHK-B14 / CHK-Rui.2) — /search?q=…. Replaces the old search page on the same route.
+// This is where the nav's ever-present field and the home hero both submit.
+//
+// SERVER-RENDERED, deliberately (`prerender = false`). The whole point of a form-GET search
+// field is that it works without JavaScript, and a static page cannot answer a query. Results
+// are resolved on the server from the one index, so the page is complete on first paint, is
+// crawlable, and is shareable as a URL.
+//
+// The tier rules live in lib/search/resolve.ts as a pure module — see the rule commentary there.
+// This file renders them and adds nothing: no re-ranking, no re-ordering, no commercial signal.
 export const prerender = false;
 
 import Base from '../layouts/Base.astro';
-import TierBadge from '../components/TierBadge.astro';
-import ReviewState from '../components/ReviewState.astro';
-import { getSearchDocs, searchDocs } from '../lib/search';
+import Breadcrumb from '../components/Breadcrumb.astro';
+import SearchField from '../components/SearchField.astro';
+import { buildIndex } from '../lib/search/index.ts';
+import { resolve, type Entry } from '../lib/search/resolve.ts';
 
-const q = (Astro.url.searchParams.get('q') ?? '').trim();
-const docs = await getSearchDocs();
-const results = q ? searchDocs(q, docs) : [];
+const q = Astro.url.searchParams.get('q') ?? '';
+const entries = await buildIndex();
+const res = resolve(q, entries);
 
-// group by kind (only 'remedy' today; interventions/outcomes/context join as they ship)
-const KIND_LABEL: Record<string, string> = {
-  remedy: 'Remedies',
-  intervention: 'Interventions',
-  outcome: 'Outcomes',
-  context: 'Context',
+const KIND_LABEL: Record<Entry['kind'], string> = {
+  remedy: 'Remedy',
+  product: 'Product',
+  brand: 'Brand',
+  problem: 'Situation',
+  page: 'Page',
 };
-const groups = new Map<string, typeof results>();
-for (const r of results) {
-  const arr = groups.get(r.kind) ?? [];
-  arr.push(r);
-  groups.set(r.kind, arr);
-}
-
-const suggestions = ['melatonin', 'magnesium', 'jet lag', "can't fall asleep", 'passionflower'];
+// group tier 3 by kind so a long list reads as a structure, not a pile
+const groups = (['remedy', 'problem', 'product', 'brand', 'page'] as const)
+  .map((k) => ({ kind: k, items: res.more.filter((e) => e.kind === k) }))
+  .filter((g) => g.items.length > 0);
 ---
 
 <Base
-  title={q ? `Search: ${q} — Somnary` : 'Search — Somnary'}
-  description="Search Somnary: every remedy by name, alias, Latin name, outcome, or symptom."
+  title={q ? `${q} — search | Somnary` : 'Search | Somnary'}
+  description="Search remedies, products, brands and situations."
+  contain={false}
 >
-  <main class="page">
-    <header class="head">
-      <p class="eyebrow">Search</p>
-      <h1 class="title">{q ? <>Results for “{q}”</> : 'Search the wiki'}</h1>
+  <div class="wrap">
+    <Breadcrumb trail={[{ label: 'Somnary', href: '/' }]} current="Search" />
 
-      {/* real <form> GET → works with JS off; the palette is the enhanced surface */}
-      <form class="searchbar" role="search" method="get" action="/search">
-        <label for="q" class="sr-only">Search remedies, outcomes, and symptoms</label>
-        <span class="mag" aria-hidden="true">⌕</span>
-        <input
-          type="search"
-          id="q"
-          name="q"
-          value={q}
-          placeholder="Search remedies…"
-          autocomplete="off"
-          autofocus
-        />
-        <button type="submit">Search</button>
-      </form>
-    </header>
+    <h1>Search</h1>
+    <div class="field"><SearchField size="lg" value={q} autofocus={!q} /></div>
 
-    {
-      q && results.length > 0 && (
-        <div class="results">
-          {[...groups.entries()].map(([kind, rows]) => (
-            <section class="group" aria-label={KIND_LABEL[kind] ?? kind}>
-              <p class="group-head">
-                {KIND_LABEL[kind] ?? kind} · {rows.length}
-              </p>
-              <ul class="rows">
-                {rows.map((r) => (
-                  <li>
-                    <a class="row" href={r.url}>
-                      <TierBadge tier={r.tier} size="inline" />
-                      <span class="row-main">
-                        <span class="row-title">
-                          <span class="row-name">{r.name}</span>
-                          <ReviewState state={r.workflowState} />
-                        </span>
-                        <span class="row-cat">{r.category}</span>
-                        <span class="row-dek">{r.oneLiner}</span>
-                      </span>
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </section>
+    {res.kind === 'empty' && (
+      <p class="hint">
+        Type a remedy, a product, a brand, or what's going on — “melatonin”, “Blackmores”,
+        “5 mg gummies”, “I keep waking”.
+      </p>
+    )}
+
+    {res.kind === 'short' && (
+      <p class="hint">A little more to go on — two letters match too much to be useful.</p>
+    )}
+
+    {/* ── the category rule: return the category, never a sample of its members ───────────── */}
+    {res.kind === 'category' && (
+      <section class="results">
+        <p class="tier-label">That's a whole category</p>
+        <p class="hint">
+          Rather than show you an arbitrary handful, here's the whole thing — browse it and you'll
+          see everything, in our published order.
+        </p>
+        <ul class="rows">
+          {res.categories.map((c) => (
+            <li>
+              <a class="row category" href={c.href}>
+                <span class="row-name">All {c.label}</span>
+                <span class="row-meta">{c.count}</span>
+              </a>
+            </li>
           ))}
-        </div>
-      )
-    }
+        </ul>
+      </section>
+    )}
 
-    {
-      q && results.length === 0 && (
-        <div class="empty">
-          <p class="empty-lead">No matches. Try a compound, an outcome, or a symptom.</p>
-          <p class="empty-sub">
-            Popular:
-            {suggestions.map((s) => (
-              <a class="chip" href={`/search?q=${encodeURIComponent(s)}`}>
-                {s}
-              </a>
-            ))}
-          </p>
-        </div>
-      )
-    }
+    {/* ── tier 1 · the answer ─────────────────────────────────────────────────────────────── */}
+    {res.kind === 'answer' && res.answer && (
+      <section class="results">
+        <p class="tier-label">{KIND_LABEL[res.answer.kind]}</p>
+        <a class="answer" href={res.answer.href}>
+          <span class="answer-name">{res.answer.name}</span>
+          {res.answer.meta && <span class="answer-meta">{res.answer.meta}</span>}
+        </a>
 
-    {
-      !q && (
-        <div class="empty">
-          <p class="empty-lead">Search remedies by name, alias, Latin name, outcome, or symptom.</p>
-          <p class="empty-sub">
-            Try:
-            {suggestions.map((s) => (
-              <a class="chip" href={`/search?q=${encodeURIComponent(s)}`}>
-                {s}
-              </a>
-            ))}
-          </p>
-        </div>
-      )
-    }
-  </main>
+        {/* ── tier 2 · routes ── */}
+        {res.routes.length > 0 && (
+          <>
+            <p class="tier-label">Also worth reading</p>
+            <ul class="rows">
+              {res.routes.map((e) => (
+                <li>
+                  <a class="row" href={e.href}>
+                    <span class="row-name">{e.name}</span>
+                    <span class="row-kind">{KIND_LABEL[e.kind]}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+      </section>
+    )}
+
+    {/* ── tier 3 · everything else that matched ───────────────────────────────────────────── */}
+    {(res.kind === 'list' || (res.kind === 'answer' && groups.length > 0)) && (
+      <section class="results">
+        <p class="tier-label">
+          {res.kind === 'answer' ? 'Other matches' : `${res.more.length} ${res.more.length === 1 ? 'match' : 'matches'}`}
+        </p>
+        {groups.map((g) => (
+          <>
+            <p class="group-label">{KIND_LABEL[g.kind]}{g.items.length > 1 ? 's' : ''}</p>
+            <ul class="rows">
+              {g.items.map((e) => (
+                <li>
+                  <a class="row" href={e.href}>
+                    <span class="row-name">{e.name}</span>
+                    {e.meta && <span class="row-meta">{e.meta}</span>}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </>
+        ))}
+      </section>
+    )}
+
+    {/* ── no match ────────────────────────────────────────────────────────────────────────── */}
+    {res.kind === 'nomatch' && (
+      <section class="results">
+        <p class="none">
+          Nothing here matches “{q}”.
+          {res.suggestion && <> Did you mean <a href={`/search?q=${encodeURIComponent(res.suggestion)}`}>{res.suggestion}</a>?</>}
+        </p>
+        <p class="hint">
+          We cover {entries.filter((e) => e.kind === 'remedy').length} remedies and{' '}
+          {entries.filter((e) => e.kind === 'product').length} products — if we're missing
+          something, <a href="/request-a-review">tell us</a> and we'll look at adding it.
+        </p>
+        <ul class="rows">
+          <li><a class="row" href="/remedies"><span class="row-name">Browse every remedy</span></a></li>
+          <li><a class="row" href="/products"><span class="row-name">Browse every product</span></a></li>
+        </ul>
+      </section>
+    )}
+  </div>
 </Base>
 
 <style>
-  .page {
-    max-width: 820px;
+  /* raw-ok: 720px matches --page-max; a result list is a reading column. */
+  .wrap {
+    width: 100%;
+    max-width: var(--page-max);
     margin: 0 auto;
-    padding: var(--sp-8) var(--sp-7) var(--sp-9);
+    padding: var(--space-5) var(--space-5) var(--space-9);
   }
-  .sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
+  h1 {
+    margin: var(--space-1) 0 var(--space-4);
+    font-size: var(--display-md);
+    font-weight: var(--weight-title);
+    letter-spacing: var(--tracking-display);
+    line-height: var(--leading-tight);
   }
-  .eyebrow {
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
-    color: var(--muted);
-    margin: 0;
+  .field {
+    max-width: var(--search-max);
+    margin-bottom: var(--space-6);
   }
-  .head {
-    margin-bottom: var(--sp-7);
+  .hint,
+  .none {
+    margin: 0 0 var(--space-4);
+    font-size: var(--text-base);
+    line-height: var(--leading-body);
+    color: var(--text-muted);
+    max-width: var(--measure);
   }
-  .title {
-    font-family: var(--font-display);
-    font-weight: 700;
-    font-size: var(--text-2xl);
-    line-height: var(--lh-2xl);
-    color: var(--ink);
-    margin: var(--sp-3) 0 var(--sp-5);
+  .none {
+    color: var(--text-body);
+    font-weight: var(--weight-ui);
   }
-
-  .searchbar {
-    display: flex;
-    align-items: center;
-    gap: var(--sp-3);
-    background: var(--surface);
-    border: var(--border-strong);
-    border-radius: var(--r-lg);
-    padding: var(--sp-3) var(--sp-4);
+  .hint a,
+  .none a {
+    color: var(--text-link);
+    font-weight: var(--weight-ui);
   }
-  .searchbar:focus-within {
-    box-shadow: var(--ring);
-  }
-  .mag {
-    color: var(--muted);
-    font-size: var(--text-lg);
-    line-height: 1;
-  }
-  .searchbar input {
-    flex: 1;
-    min-width: 0;
-    border: none;
-    background: transparent;
-    font-family: var(--font-body);
-    font-size: var(--text-md);
-    color: var(--ink);
-    min-height: 36px;
-  }
-  .searchbar input:focus {
-    outline: none;
-  }
-  .searchbar button {
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
-    color: var(--surface);
-    background: var(--ink);
-    border: none;
-    border-radius: var(--r-pill);
-    padding: 0 var(--sp-4);
-    min-height: 40px;
-    cursor: pointer;
-  }
-  /* CMP-03: the scoped cursor:pointer above wins over the global :where() disabled default, so
-     the disabled submit state must be set here explicitly — otherwise an empty-query submit
-     button still shows a clickable pointer with identical styling. */
-  .searchbar button:disabled {
-    cursor: not-allowed;
-    opacity: 0.55;
-  }
-
   .results {
+    padding-top: var(--space-2);
+  }
+  .tier-label {
+    margin: var(--space-6) 0 var(--space-2);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-strong);
+    color: var(--text-muted);
+    letter-spacing: var(--tracking-display);
+  }
+  .group-label {
+    margin: var(--space-4) 0 var(--space-1);
+    font-size: var(--text-xs);
+    font-weight: var(--weight-strong);
+    color: var(--text-faint);
+  }
+
+  /* tier 1 answer — the biggest object in the results, by size not colour */
+  .answer {
     display: flex;
     flex-direction: column;
-    gap: var(--sp-7);
+    gap: var(--space-1);
+    padding: var(--space-5);
+    background: var(--surface-card);
+    border: var(--border-w) solid var(--border-strong);
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    color: var(--text-body);
   }
-  .group-head {
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
-    color: var(--muted);
-    margin: 0 0 var(--sp-3);
+  .answer:hover {
+    border-color: var(--ink);
   }
+  .answer-name {
+    font-size: var(--text-xl);
+    font-weight: var(--weight-strong);
+    letter-spacing: var(--tracking-display);
+  }
+  .answer-meta {
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+  }
+
   .rows {
     list-style: none;
     margin: 0;
     padding: 0;
   }
   .row {
-    display: grid;
-    grid-template-columns: 38px 1fr;
-    gap: var(--sp-4);
-    align-items: start;
-    padding: var(--sp-4);
-    border-radius: var(--r-md);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2) var(--space-4);
+    /* 44px hit floor (RULES.md a11y) */
+    min-height: var(--control-md);
+    padding: var(--space-2) var(--space-3);
+    border-bottom: var(--border-w) solid var(--border-hairline);
     text-decoration: none;
-    color: var(--ink);
-    transition: background var(--dur-fast) var(--ease-soft);
+    color: var(--text-body);
   }
   .row:hover {
-    background: var(--stone);
-  }
-  .row:focus-visible {
-    outline: none;
-    box-shadow: var(--ring);
-  }
-  .row-main {
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
+    background: var(--surface-card);
   }
   .row-name {
     font-size: var(--text-base);
-    color: var(--ink);
+    font-weight: var(--weight-ui);
   }
-  .row-title {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: var(--sp-3);
-    flex-wrap: wrap;
-  }
-  .row-cat {
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
-    color: var(--muted);
-  }
-  .row-dek {
+  .row-meta,
+  .row-kind {
     font-size: var(--text-sm);
-    line-height: var(--lh-sm);
-    color: var(--muted);
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
   }
-
-  .empty {
-    padding: var(--sp-7) 0;
-  }
-  .empty-lead {
-    font-size: var(--text-md);
-    color: var(--muted);
-    margin: 0 0 var(--sp-4);
-  }
-  .empty-sub {
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
-    color: var(--muted);
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--sp-2);
-    align-items: center;
-  }
-  .chip {
-    color: var(--primary);
-    background: var(--primary-soft);
-    border-radius: var(--r-pill);
-    /* raw-ok: compact pill padding (4/10px off the 4px step by design) */
-    padding: 4px 10px;
-    text-decoration: none;
-    text-transform: none;
-    letter-spacing: normal;
-    font-size: var(--text-sm);
-  }
-  .chip:focus-visible {
-    outline: none;
-    box-shadow: var(--ring);
-  }
-
-  @media (max-width: 640px) {
-    .page {
-      padding: var(--sp-6) var(--sp-5) var(--sp-8);
-    }
+  .category .row-name {
+    font-weight: var(--weight-strong);
   }
 </style>

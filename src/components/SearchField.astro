@@ -8,12 +8,15 @@
 // the primary object by SIZE and the ink button, never colour (RULES.md Colour — no accent).
 interface Props {
   size?: 'sm' | 'lg';
+  /** pre-fills the field — the results page keeps the query visible so it can be edited */
+  value?: string;
   placeholder?: string;
   autofocus?: boolean;
   class?: string;
 }
 const {
   size = 'sm',
+  value = '',
   placeholder = 'A remedy, a product, or a brand',
   autofocus = false,
   class: className,
@@ -35,6 +38,7 @@ const {
     name="q"
     class="input"
     placeholder={placeholder}
+    value={value}
     aria-label="Search Somnary"
     autofocus={autofocus}
     autocomplete="off"

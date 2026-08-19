@@ -413,9 +413,19 @@ scope of each item lives in the plan — this is the work queue.
   Layered plain→technical throughout via native `<details>` (11 of them — no JS, so the technical
   layer is present with scripting off and for crawlers). Every term is introduced plainly before
   its technical name appears.
-- [ ] **CHK-B14 Search:** one index (remedies/products/brands/problems/safety), answer/routes/
+- [x] **CHK-B14 Search:** one index (remedies/products/brands/problems/safety), answer/routes/
   more tiers, category-count rule, product-intent rule, no-match/did-you-mean; browse works
   without JS. Depends: B3, B5–B12. (Maps CHK-Rui.2 / REDESIGN Step 12.)
+  **Done 2026-08-19.** `/search?q=` is **server-rendered** (`prerender = false`) — the point of a
+  form-GET field is that it works without JavaScript, and a static page cannot answer a query.
+  Results are complete on first paint, crawlable and shareable as a URL. One index built from the
+  collections themselves (`lib/search/index.ts`), so a new remedy/product/brand is searchable the
+  moment it exists. The rules live in a PURE module (`lib/search/resolve.ts`) so they are tested
+  directly, not eyeballed — `verify:search`, 16 cases, wired into verify.
+  Verified live: `melatonin` → the remedy as the answer with products WITHHELD (no product intent);
+  `sleep` → the category counts 31/93/55 + browse routes, never a member sample; `5 mg` → 7
+  product matches (dose = product intent); `blackmores` → the brand as answer + its products;
+  `ashwaganda` → "Did you mean Ashwagandha"; `melatonine` → "Did you mean Melatonin".
 - [ ] **CHK-B15 Dusk mode mechanics:** sunset keying, stored override, prefers-color-scheme
   fallback, no-flash head script. Depends: B1 (tokens exist); every component verified both
   themes. (Maps REDESIGN Step 13.)
