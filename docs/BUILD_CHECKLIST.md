@@ -358,9 +358,28 @@ scope of each item lives in the plan — this is the work queue.
   page must not imply the stronger claim. **Unblocks the product page**: the brand crumb
   (Products › Brand › Product) and the header brand link, both deliberately left unlinked at B7,
   are live.
-- [ ] **CHK-B12 Problem page** `/problems/{slug}`: situation explainer, calm see-a-doctor
+- [x] **CHK-B12 Problem page** `/problems/{slug}`: situation explainer, calm see-a-doctor
   prominence, honest remedy ordering, doesn't-hold-up reveal, non-supplement comparisons
   (salvage items 1–8). Depends: B5, B8; content = E7.
+  **Done 2026-08-19** — three pages: `cant-fall-asleep`, `waking-in-the-night`, `cant-switch-off`,
+  which are exactly the three the home situation cards point at (re-pointed from their interim
+  filtered-browse destinations).
+  **Section order IS the argument, and supplements come LAST:** what the situation is → when it's
+  a doctor's problem rather than a shelf problem → the things that aren't supplements → only then
+  what people reach for. A page that leads with remedies teaches the reader the answer is on a
+  shelf.
+  **The salvage claims went through review, and the review CUT things** — which is the point of
+  having it. Each PMID was re-resolved through the NCBI E-utilities API and checked against the
+  abstract's own wording (19 August 2026). Five findings published: caffeine at 6 h (24235903),
+  light before bed (25535358 + 21193540), alcohol and the second half of the night (23347102),
+  night noise (35857401), sleep regularity (37738616). **Two were cut:** the night-noise item's
+  "+10 dB ≈ 2.5× odds" figure is not in the abstract, so only the qualitative finding ships; and
+  the exercise item (25596964) could not be confirmed from its abstract in this pass and stays a
+  salvage draft for CHK-E7. Every finding carries the mandatory "what it doesn't show" beat at
+  body weight, not as fine print.
+  **Honest ordering, stated:** remedies are ordered most-evidence-first (verifiable, then cited)
+  and the page SAYS that is the order — "not by how well they work" — because no bucket is
+  ratified. The doesn't-hold-up reveal cannot be built until CHK-E6 gives it something to reveal.
 - [x] **CHK-B13 How-we-grade** `/how-we-grade`: deep-linked from every bucket badge + footer;
   layered plain→technical; rubric pointer. Depends: B5; E1 ratified before "final" wording.
   **Done 2026-08-18** (branch `chk-b13-how-we-grade` off main `caeecef`; pushed, NOT merged).
