@@ -543,9 +543,19 @@ scope of each item lives in the plan — this is the work queue.
   4/2/0 · kava 3/0/0 · bacopa 7/1/1 · taurine 5/0/0 — replacing the design-phase figures that were
   counted on a wider basis. `/how-we-grade`'s kava and taurine worked examples now read from live
   counts instead of hedged prose, and its coverage sentence branches on completion.
-  **STILL OPEN (the second half): only 6 of the 65 sleep-outcome sources carry the `sampleSize` +
-  `effectDirection` that `effectDataStatus: complete` requires**, so the bar's third segment is
-  nearly empty. That needs each paper's numbers read off the paper, one at a time.
+  **Effect-data fill, launch-gate remedies — DONE 2026-08-20.** Coverage went **6 → 20 of the 65**
+  sleep-outcome sources. 14 completed with `sampleSize` + `effectDirection` read off each
+  abstract's own results section (ashwagandha ×2, chamomile/apigenin, iron, L-theanine ×2,
+  magnesium ×2, saffron ×3, valerian ×2), 5 of them also carrying a plain `effectSize`.
+  **7 were deliberately LEFT PENDING** because their abstracts state a direction but no
+  participant total (chamomile's meta-analysis, melatonin [3] and [5], saffron [2] and [4],
+  valerian [2] and [3]) — a source without both numbers is not "reported enough to verify", and
+  guessing the N to make the bar longer is the exact dishonesty the third segment exists to
+  prevent. The bar's third segment and the plain direction sentence now render for real:
+  saffron "of the 3 results we could verify, all 3 found an improvement", magnesium "both found
+  an improvement", **iron "the one result we could verify didn't find an improvement"** — the
+  negative case rendering as plainly as the positive ones.
+  **Still open:** the remaining 45 sleep-outcome sources across the non-launch-gate remedies.
   **No bucket was assigned or changed** — that is CHK-E6 and `[HUMAN-GATE]`.
 - [ ] **CHK-E3 Safety copy sourcing** — every safety string carries a source id — **then
   medical review** of all launch-visible safety copy. `HG (medical)`. The likeliest long pole;
