@@ -1,239 +1,341 @@
 ---
-// Safety hub / router — CHK-3.3 (strategy 03 "Safety Hub"; DESIGN_SYSTEM §57-60 safety tokens,
-// §174-177 route-card + safety-card .urgent). NOT a graded remedy and NOT a diagnostic tool: it is
-// a NAVIGATIONAL router. Some sleep problems are a reason to see a clinician, not to check a shelf,
-// and this page points to the boundary pages that cover them. Every card names a boundary and says
-// what its destination covers — descriptive only, no new clinical claim (so no new citation is
-// needed; the CI resolver doesn't scan .astro). Each link resolves to an EXISTING route. The urgent
-// card alone wears the safety register (§57-60 vermilion); vermilion is never decorative.
+// Safety (CHK-B10) — /safety. Replaces the old safety router on the same route. This is the
+// page the whole site routes worried readers to, and it is often someone's first page, read at
+// night. Mobile-first, single column, calm: a careful pharmacist, never a warning label.
+//
+// THE CONTENT RULE, and the reason this page looks the way it does:
+// **No safety string ships without a source id** (CLAUDE.md validation gates / CHK-E3). The
+// corpus is only partly sourced — the page states its own coverage in real numbers below — so
+// this page renders the SOURCED subset and says plainly what is still being worked on. It does
+// NOT publish unsourced medical claims, and it does NOT ship the bundle's placeholder copy,
+// which was explicitly "the shape, pending sourcing and medical review".
+//
+// What that rules out, deliberately:
+//  · no symptom checklist and no "signs you should see a doctor" list — that is diagnosis-shaped
+//    and every line of it would be an unsourced medical claim;
+//  · no pregnancy or paediatric guidance — the schema gives `pregnancy` no source field at all,
+//    so nothing on it can meet the bar yet;
+//  · no dosing, no "safe for you", no combination advice (CLAUDE.md forbidden framings).
+// What it ships instead is real: the recorded flags, the sourced interaction cautions with their
+// citations, and honest routing to a person who can see your history.
+//
+// RULES.md: amber is the safety register and the ONLY colour here; a serious flag outranks
+// everything on the page; dates render "14 July 2026"; hit areas ≥ 44px; one h1.
+import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
-import ContextBanner from '../components/ContextBanner.astro';
-import Disclaimer from '../components/Disclaimer.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+import SafetyCallout from '../components/evidence/SafetyCallout.astro';
+import StudyChip from '../components/evidence/StudyChip.astro';
+import { flagged, safetyCoverage, sourcedInteractions } from '../lib/safety/derive.ts';
+import { typeWords } from '../lib/remedy/derive.ts';
+import { sourceUrl } from '../lib/cite.ts';
 
-// Route grid. Four calm route-cards + one urgent safety-card. `register: 'urgent'` marks the only
-// card that carries the vermilion safety styling. Every href points to a page that exists today.
-const routes = [
-  {
-    href: '/when-to-see-a-doctor',
-    boundary: 'Snoring with breathing pauses',
-    covers:
-      "Why loud snoring with pauses, gasping, or heavy daytime sleepiness is a reason to ask a clinician about a sleep study — not something to self-treat.",
-  },
-  {
-    href: '/when-to-see-a-doctor',
-    boundary: 'Insomnia most nights, for months',
-    covers:
-      'When persistent insomnia is a condition to treat properly rather than paper over nightly, and what to bring to the appointment.',
-  },
-  {
-    href: '/medications-and-sleep-aids',
-    boundary: 'You take medications or manage a condition',
-    covers:
-      'Why interactions and timing are a pharmacist conversation before any sleep aid — the documented cautions to raise, and the questions to bring to a clinician.',
-  },
-  {
-    href: '/melatonin-children',
-    boundary: 'You are considering this for a child',
-    covers:
-      "The most cautious page on the site: the accidental-ingestion risk, the label-accuracy problem, and why it's a pediatrician conversation first.",
-  },
-];
-
-const urgentRoute = {
-  href: '/when-to-see-a-doctor#urgent',
-  boundary: 'An urgent situation right now',
-  covers:
-    'Crisis and emergency contacts: thoughts of self-harm, someone hard to wake or struggling to breathe, or a suspected overdose or poisoning.',
-};
+const remedies = (await getCollection('remedies')).filter((r) => !r.data.draft);
+const { serious, caution } = flagged(remedies);
+const interactions = sourcedInteractions(remedies);
+const cover = safetyCoverage(remedies);
 ---
 
 <Base
-  title="Sleep safety: when to see a clinician, not check a shelf | Somnary"
-  description="Some sleep problems are a reason to see a clinician, not to check a shelf. A router to Somnary's safety boundaries: snoring with breathing pauses, months of insomnia, medications and conditions, children, and urgent situations."
-  canonical="https://somnary.vercel.app/safety"
+  title="Safety — before you take anything | Somnary"
+  description="What we know about the risks of natural sleep remedies, which ones carry a flag, and when to talk to a pharmacist or doctor instead."
+  contain={false}
 >
-  <main class="page">
-    <header class="head">
-      <p class="eyebrow">Safety · Where a remedy is the wrong question</p>
-      <h1 class="title">Safety</h1>
-      <p class="dek">
-        Somnary grades remedies for mild, occasional sleeplessness. Some sleep problems are a reason
-        to see a clinician, not to check a shelf. This page routes you to the boundary that fits your
-        situation — each one covers what a supplement can't, and where the right next move is
-        professional help.
+  <div class="wrap">
+    <Breadcrumb trail={[{ label: 'Somnary', href: '/' }]} current="Safety" />
+
+    <h1>Before you take anything</h1>
+    <p class="intro">
+      “Natural” doesn't mean “gentle”, and a supplement you can buy without asking anyone is still
+      something your body has to process. This page is what we can tell you honestly. It is not a
+      substitute for asking a pharmacist — they can see your history, and we can't.
+    </p>
+
+    {/* ── the one thing that outranks the rest ─────────────────────────────────────────────
+        Routing, not diagnosis: no symptoms are listed and nothing here tells a reader what
+        their problem is. It tells them who can answer that. */}
+    <SafetyCallout level="caution" title="Talk to a pharmacist or doctor first if">
+      you take prescription medication, you're pregnant or breastfeeding, this is for a child, or
+      you're managing a health condition. Those are the four situations where a general answer is
+      worth the least and a personal one is worth the most. A pharmacy consultation is usually
+      free and takes a few minutes.
+    </SafetyCallout>
+
+    {/* ── flagged remedies — DERIVED from the recorded flag, not authored here ───────────── */}
+    <section class="sec" id="flags">
+      <h2>Remedies we've flagged</h2>
+      <p class="lede">
+        A flag is separate from whether something works, and it never moves an evidence grade in
+        either direction — <a href="/how-we-grade#safety-flag">why that matters</a>. A remedy can
+        be untested for sleep and still be risky; kava is exactly that.
       </p>
-    </header>
 
-    <ContextBanner
-      note="This is a router, not a remedy and not a diagnosis. It points to the boundary pages; it doesn't tell you which one applies to you — that's a conversation for a clinician."
-    />
+      {serious.length > 0 && (
+        <div class="flag-group serious">
+          <h3><span class="mark" aria-hidden="true">
+            <svg width="14" height="14" viewBox="0 0 14 14"><path d="M7 1.8 L13 12.2 H1 Z" fill="var(--amber)" stroke="var(--amber)" stroke-width="1.6" stroke-linejoin="round"></path></svg>
+          </span>Serious concern — {serious.length}</h3>
+          <ul class="flag-list">
+            {serious.map((r) => (
+              <li>
+                <a href={`/remedies/${r.slug}#safe`}>{r.name}</a>
+                {/* the lead sentence renders ONLY where the remedy's risks carry sources */}
+                {r.leadIsSourced && <span class="lead">{r.lead}</span>}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
-    <!-- disclaimer sits WITH the route grid, near the decisions (non-negotiable: not footer-only) -->
-    <div class="disclaimer-slot">
-      <Disclaimer variant="standard" />
-    </div>
-
-    <section class="section" aria-label="Safety routes">
-      <p class="eyebrow">Choose the boundary that fits</p>
-      <div class="grid">
-        {
-          routes.map((r) => (
-            <a class="route-card" href={r.href}>
-              <p class="card-boundary">{r.boundary}</p>
-              <p class="card-covers">{r.covers}</p>
-              <span class="card-go">{r.href.startsWith('/melatonin-children') ? 'Melatonin in children →' : r.href.startsWith('/medications-and-sleep-aids') ? 'Medications & sleep aids →' : 'When to see a doctor →'}</span>
-            </a>
-          ))
-        }
-
-        <a class="safety-card urgent" href={urgentRoute.href}>
-          <span class="urgent-tag" aria-hidden="true">Urgent</span>
-          <p class="card-boundary">{urgentRoute.boundary}</p>
-          <p class="card-covers">{urgentRoute.covers}</p>
-          <span class="card-go">Crisis &amp; emergency contacts →</span>
-        </a>
-      </div>
+      {caution.length > 0 && (
+        <div class="flag-group">
+          <h3><span class="mark" aria-hidden="true">
+            <svg width="14" height="14" viewBox="0 0 14 14"><path d="M7 1.8 L13 12.2 H1 Z" fill="none" stroke="var(--amber)" stroke-width="1.6" stroke-linejoin="round"></path></svg>
+          </span>Worth a conversation — {caution.length}</h3>
+          <p class="group-note">
+            Nothing here is a reason to panic. It means there's something specific worth raising
+            before you take it regularly — usually an interaction, a dose ceiling, or thin data.
+          </p>
+          <ul class="flag-list columns">
+            {caution.map((r) => (
+              <li><a href={`/remedies/${r.slug}#safe`}>{r.name}</a></li>
+            ))}
+          </ul>
+        </div>
+      )}
     </section>
-  </main>
+
+    {/* ── sourced interactions — real, cited, and only the sourced ones ──────────────────── */}
+    <section class="sec" id="interactions">
+      <h2>What we know about interactions</h2>
+      <p class="lede">
+        These are the interaction cautions we hold a published source for. Each one links to the
+        paper it came from. This is not a complete list of interactions — it's the complete list
+        of the ones we can stand behind today.
+      </p>
+      {/* CLAUDE.md forbidden framing: we describe what is documented and route to a clinician.
+          Nothing here tells anyone to combine, avoid combining, or that anything is safe. */}
+      <ul class="inter">
+        {interactions.map((r) => (
+          <li>
+            <p class="inter-h">
+              <a href={`/remedies/${r.slug}#safe`}>{r.name}</a>
+              {r.severity === 'serious' && <span class="serious-tag">Serious concern</span>}
+            </p>
+            <ul class="inter-list">
+              {r.interactions.map((i) => <li>{i}</li>)}
+            </ul>
+            <div class="chips">
+              {r.sources.map((s) => (
+                <StudyChip
+                  label="See the source"
+                  finding={s.finding}
+                  people={s.sampleSize}
+                  year={s.year}
+                  url={sourceUrl(s)}
+                  linkText={`Read the ${typeWords(s.type)}`}
+                />
+              ))}
+            </div>
+          </li>
+        ))}
+      </ul>
+      <p class="note">
+        Take this list to a pharmacist rather than acting on it. Whether an interaction matters
+        for you depends on your dose, your other medicines, and your history — none of which this
+        page can see.
+      </p>
+    </section>
+
+    {/* ── the honest gap ─────────────────────────────────────────────────────────────────── */}
+    <section class="sec" id="gap">
+      <h2>What we haven't finished</h2>
+      <p class="body">
+        We hold safety notes on all {cover.total} remedies, but we only publish the ones with a
+        source attached to them. Right now that's{' '}
+        <strong>{cover.riskSourced} of {cover.riskRows} risk notes</strong> and{' '}
+        <strong>{cover.interactionsSourced} of {cover.withInteractions} interaction lists</strong>.
+        The rest are being sourced and reviewed before they go up.
+      </p>
+      <p class="body">
+        Two things we're deliberately not publishing yet: guidance for pregnancy and
+        breastfeeding, and guidance for children. Both need a clinician's review before they're
+        worth anything, and a half-sourced version of either is worse than nothing. Until then,
+        those questions belong with your pharmacist or doctor.
+      </p>
+      <p class="note">
+        That gap is the honest state of the work, not a disclaimer. Everything above it is
+        sourced.
+      </p>
+    </section>
+  </div>
 </Base>
 
 <style>
-  .page {
-    max-width: var(--page);
+  /* raw-ok: --page-max as a layout width — this is a reading page, read in worried moments,
+     so it keeps the single prose column at every width. */
+  .wrap {
+    width: 100%;
+    max-width: var(--page-max);
     margin: 0 auto;
-    padding: var(--sp-8) var(--sp-7) var(--sp-9);
+    padding: var(--space-5) var(--space-5) var(--space-9);
   }
-  .eyebrow {
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
-    color: var(--muted);
+  h1 {
+    margin: var(--space-1) 0 var(--space-3);
+    font-size: var(--display-md);
+    font-weight: var(--weight-title);
+    letter-spacing: var(--tracking-display);
+    line-height: var(--leading-tight);
+  }
+  .intro {
+    margin: 0 0 var(--space-6);
+    font-size: var(--text-base);
+    line-height: var(--leading-body);
+    color: var(--text-muted);
+    max-width: var(--measure);
+  }
+  .sec {
+    padding-top: var(--space-8);
+  }
+  h2 {
+    margin: 0 0 var(--space-3);
+    font-size: var(--display-sm);
+    font-weight: var(--weight-heading);
+    letter-spacing: var(--tracking-display);
+    line-height: var(--leading-snug);
+  }
+  h3 {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin: 0 0 var(--space-3);
+    font-size: var(--text-lg);
+    font-weight: var(--weight-strong);
+  }
+  .mark {
+    display: inline-flex;
+    flex: none;
+  }
+  .lede,
+  .body,
+  .note,
+  .group-note {
+    margin: 0 0 var(--space-4);
+    font-size: var(--text-base);
+    line-height: var(--leading-body);
+    color: var(--text-muted);
+    max-width: var(--measure);
+  }
+  .body {
+    color: var(--text-body);
+  }
+  .note {
+    font-size: var(--text-sm);
+  }
+  .lede a,
+  .body a,
+  .note a {
+    color: var(--text-link);
+    font-weight: var(--weight-ui);
+  }
+
+  /* ── flag groups ── */
+  .flag-group {
+    margin-bottom: var(--space-6);
+  }
+  /* a serious flag outranks everything else on the page (RULES.md structure) */
+  .flag-group.serious {
+    background: var(--amber-tint);
+    border: var(--border-w) solid var(--amber-line);
+    border-radius: var(--radius-md);
+    padding: var(--space-5);
+  }
+  .flag-list {
+    list-style: none;
     margin: 0;
-  }
-  .dot {
-    color: var(--primary);
-  }
-  .head {
-    margin-bottom: var(--sp-6);
-  }
-  .title {
-    font-family: var(--font-display);
-    font-weight: 700;
-    font-size: var(--text-3xl);
-    line-height: var(--lh-3xl);
-    letter-spacing: var(--tracking-tight);
-    color: var(--ink);
-    margin: var(--sp-3) 0 var(--sp-5);
-  }
-  .dek {
-    font-size: var(--text-md);
-    line-height: var(--lh-md);
-    color: var(--muted);
-    max-width: 68ch;
-    margin: 0;
-  }
-
-  .disclaimer-slot {
-    margin-top: var(--sp-6);
-  }
-
-  .section {
-    margin-top: var(--sp-8);
-  }
-  .section .eyebrow {
-    margin-bottom: var(--sp-5);
-  }
-
-  /* route grid */
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--sp-4);
-  }
-
-  /* route-card recipe (§5): hairline, radius 7, hover lift −2px, oxblood-register text */
-  .route-card,
-  .safety-card {
+    padding: 0;
     display: flex;
     flex-direction: column;
-    gap: var(--sp-2);
-    background: var(--surface);
-    border: var(--border-hairline);
-    border-radius: var(--r-sm);
-    padding: var(--sp-6);
-    text-decoration: none;
-    color: var(--ink);
-    transition:
-      box-shadow var(--dur-base) var(--ease-settle),
-      transform var(--dur-base) var(--ease-settle);
+    gap: var(--space-2);
   }
-  .route-card:hover,
-  .safety-card:hover {
-    box-shadow: var(--shadow-lift);
-    transform: translateY(-2px);
+  .flag-list li {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
   }
-  .route-card:focus-visible,
-  .safety-card:focus-visible {
-    outline: none;
-    box-shadow: var(--ring);
-  }
-
-  .card-boundary {
-    font-family: var(--font-display);
-    font-size: var(--text-lg);
-    line-height: var(--lh-lg);
-    letter-spacing: var(--tracking-tight);
-    color: var(--ink);
-    margin: 0;
-  }
-  .card-covers {
-    font-size: var(--text-sm);
-    line-height: var(--lh-sm);
-    color: var(--muted);
-    margin: 0;
-  }
-  .card-go {
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
-    color: var(--primary);
-    margin-top: var(--sp-2);
-  }
-
-  /* safety-card .urgent (§174-177): --warning-bg fill + vermilion-alpha border + --safety-ink */
-  .safety-card.urgent {
-    background: var(--warning-bg);
-    border: 1px solid color-mix(in srgb, var(--vermilion) 40%, transparent);
-  }
-  .safety-card.urgent .card-boundary,
-  .safety-card.urgent .card-covers,
-  .safety-card.urgent .card-go {
-    color: var(--safety-ink);
-  }
-  .urgent-tag {
+  .flag-list a {
+    display: inline-flex;
+    align-items: center;
     align-self: flex-start;
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
-    color: var(--surface);
-    background: var(--safety-ink);
-    border-radius: var(--r-pill);
-    padding: var(--sp-1) var(--sp-3);
-    margin-bottom: var(--sp-2);
+    /* 44px hit floor (RULES.md a11y) */
+    min-height: var(--control-md);
+    color: var(--text-link);
+    font-size: var(--text-base);
+    font-weight: var(--weight-strong);
+    text-decoration: none;
+  }
+  .flag-list a:hover {
+    text-decoration: underline;
+  }
+  .lead {
+    font-size: var(--text-sm);
+    line-height: var(--leading-body);
+    color: var(--text-body);
+    max-width: var(--measure);
   }
 
-  @media (max-width: 760px) {
-    .grid {
-      grid-template-columns: 1fr;
-    }
+  /* ── sourced interactions ── */
+  .inter {
+    list-style: none;
+    margin: 0 0 var(--space-4);
+    padding: 0;
   }
-  @media (max-width: 640px) {
-    .page {
-      padding: var(--sp-6) var(--sp-5) var(--sp-8);
-    }
-    .title {
-      font-weight: 700;
-      font-size: var(--text-2xl);
+  .inter > li {
+    padding: var(--space-4) 0;
+    border-top: var(--border-w) solid var(--border-hairline);
+  }
+  .inter-h {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-3);
+    margin: 0;
+  }
+  .inter-h a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--control-md);
+    color: var(--text-link);
+    font-size: var(--text-lg);
+    font-weight: var(--weight-strong);
+    text-decoration: none;
+  }
+  .serious-tag {
+    font-size: var(--text-sm);
+    font-weight: var(--weight-strong);
+    color: var(--amber);
+  }
+  .inter-list {
+    margin: var(--space-1) 0 var(--space-3);
+    padding-left: 1.2em;
+    font-size: var(--text-base);
+    line-height: var(--leading-body);
+    max-width: var(--measure);
+  }
+  .inter-list li {
+    margin-bottom: var(--space-1);
+  }
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  @media (min-width: 640px) {
+    .columns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-1) var(--space-5);
     }
   }
 </style>

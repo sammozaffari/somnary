@@ -327,9 +327,25 @@ scope of each item lives in the plan — this is the work queue.
   small addition to the browse's existing enhancement script that pre-presses the matching filter
   chip on arrival (unknown value → presses nothing and shows everything; JS off → the complete
   grouped list). CHK-B12's problem pages become the richer destination for those three.
-- [ ] **CHK-B10 Safety page** `/safety`: triage by situation, per-situation interactions,
+- [x] **CHK-B10 Safety page** `/safety`: triage by situation, per-situation interactions,
   derived flags listing, escalation block. Depends: B5; content = E3 + medical-review HG.
   (Maps CHK-Rpage.1.)
+  **Done 2026-08-19** — the SHAPE plus only what is genuinely sourced. The bundle's version is
+  entirely `[Placeholder — pending sourcing/medical review]` by its own admission; none of it was
+  transcribed, because placeholder medical copy fails the build (Rui.3) and would be dishonest
+  besides. What ships: the pharmacist-first routing callout; the DERIVED flag listing (4 serious
+  / 27 caution, read from the recorded `severity` field, not authored); the 9 interaction lists
+  that carry a source id, each rendered with its citation chip; and a "what we haven't finished"
+  section stating the real coverage (36/85 risk notes, 9/30 interaction lists).
+  **Deliberately NOT shipped, and the page says so:** no symptom checklist or "signs to see a
+  doctor" list (diagnosis-shaped, and every line would be an unsourced medical claim), and no
+  pregnancy or paediatric guidance — the schema gives `pregnancy` no source field at all, so
+  nothing on it can meet the bar. Those remain **CHK-E3 + medical-review HG**.
+  **New gate `verify:safety` (`scripts/check-safety-sources.mjs`), wired into prebuild + verify.**
+  The final rule ("no safety string ships without a source id") cannot pass today, and a gate
+  that fails on a known backlog gets disabled — so it ships as a RATCHET: it fails if sourced
+  coverage drops OR if the count of unsourced safety strings grows. The backlog can only shrink.
+  Baseline recorded in the script; replace it with a hard `unsourced === 0` when E3 lands.
 - [x] **CHK-B11 Brand page** `/brands/{slug}`: `HG` (framing). Derived count summary (never a
   grade), product rows, conditional recalls row. Depends: B3, B6. (Maps CHK-Rpage.2.)
   **Done 2026-08-19** — 55 brand pages. The `HG` framing rule is built in and commented at the
