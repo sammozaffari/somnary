@@ -441,6 +441,23 @@ scope of each item lives in the plan — this is the work queue.
   **Verified: 10 routes × 2 themes = 20 combinations, ZERO contrast failures** against WCAG AA
   (4.5:1 body, 3:1 large), measured from computed colours against the effective ground. The
   stored override applies correctly in both directions.
+  **CORRECTED 2026-08-20 after owner feedback ("why is only the dark mode on?").** Two causes,
+  both mine: (1) **an OS set to dark short-circuits the clock entirely**, so for every reader on a
+  dark-mode machine the site was dusk at every hour — sunset keying never fired for them at all;
+  (2) the override sat in the FOOTER, ~2,200px down, on the reasoning that the theme "follows the
+  clock on its own, so this is the override for the minority". That reasoning collapses given (1):
+  the toggle wasn't a minority override, it was **the only route to half the design**, and it was
+  below the fold.
+  Fixed: new `ThemeToggle.astro` in the CHROME — 44px, icon + word (icon-only under 520px), both
+  glyphs shipped so CSS picks one and the button can't flash the wrong icon, accessible name
+  states the ACTION ("Switch to day colours") and flips with state. The footer duplicate is gone.
+  **Not a fourth nav item:** RULES.md's three-item rule governs navigation DESTINATIONS — this
+  adds no route and reaches no page; the three items are untouched.
+  Knock-on caught and fixed in the same pass: the control added ~84px and pushed the nav to two
+  rows inside the `--page-max` cap, so the search field's flex-basis went 240 → 180. Nav is back
+  to one row (78px) at 768/1440 and the phone layout is unchanged. Re-swept: 12 page×theme
+  combinations, zero contrast failures, no overflow, 44px everywhere.
+
 - [x] **CHK-B16 Launch SEO hygiene** (promoted from Step 15 — first crawler contact):
   canonicals, sitemap, robots, per-page metadata, OG/share images via satori+resvg from the
   nested-bar components (re-skin the OG generator to Onest here), JSON-LD where honest,
