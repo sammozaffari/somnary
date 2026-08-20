@@ -20,10 +20,13 @@ interface Props {
   form?: string | null;
   /** product photo path (from the product record's `image` field); null → drawn object */
   imageSrc?: string | null;
+  /** explicit square size; omit to inherit `--mark-size` from the container (default 104px),
+   *  which lets a page drive the size responsively — same contract as BrandMark */
   size?: number;
   radius?: string;
 }
-const { brand, form = null, imageSrc = null, size = 104, radius = 'var(--radius-md)' } = Astro.props;
+const { brand, form = null, imageSrc = null, size, radius = 'var(--radius-md)' } = Astro.props;
+const sizeVar = size ? `--obj-size:${size}px;` : '';
 const initial = String(brand).trim().charAt(0).toUpperCase() || '?';
 // what the object is showing, for assistive tech — the form when we know it, else nothing
 // pretending to be a picture
@@ -36,7 +39,7 @@ const label = imageSrc
 
 <span
   class="obj"
-  style={`--obj-size:${size}px;--obj-radius:${radius}`}
+  style={`${sizeVar}--obj-radius:${radius}`}
   role={label ? 'img' : undefined}
   aria-label={label ?? undefined}
   aria-hidden={label ? undefined : 'true'}
@@ -119,15 +122,16 @@ const label = imageSrc
 
 <style>
   /* raw-ok: --obj-size / --obj-radius are the component's generated geometry, set from props and
-     consumed as tokens below; both DEFAULT to tokens at the call site. */
+     consumed as tokens below; both DEFAULT to tokens at the call site. An explicit `size` prop
+     wins; otherwise the container's --mark-size drives it (BrandMark's contract), else 104px. */
   .obj {
     position: relative;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     flex: none;
-    width: var(--obj-size);
-    height: var(--obj-size);
+    width: var(--obj-size, var(--mark-size, 104px));
+    height: var(--obj-size, var(--mark-size, 104px));
     border-radius: var(--obj-radius);
     background: var(--surface-sunken);
     border: var(--border-w) solid var(--border-hairline);
@@ -174,7 +178,7 @@ const label = imageSrc
     /* The letterform scales with the square (0.42 of it) — intentional off-scale geometry, like
        the badge/chip shapes the linter exempts. The 104px is the var's DEFAULT, not a type size.
        raw-ok: generated object geometry, not a type step */
-    font-size: calc(var(--obj-size, 104px) * 0.42);
+    font-size: calc(var(--obj-size, var(--mark-size, 104px)) * 0.42);
   }
   /* with a shape present the letter steps back to a corner mark */
   .corner {
@@ -184,6 +188,6 @@ const label = imageSrc
     padding: 0 var(--space-2) var(--space-1) 0;
     color: var(--text-faint);
     /* raw-ok: corner mark scales with the object, same as above — not a type step */
-    font-size: calc(var(--obj-size, 104px) * 0.17);
+    font-size: calc(var(--obj-size, var(--mark-size, 104px)) * 0.17);
   }
 </style>
