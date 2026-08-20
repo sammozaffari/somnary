@@ -7,15 +7,15 @@
   "perIngredientAmountsDisclosed": null,
   "deliveryForm": "capsule",
   "releaseProfile": "not-stated",
-  "rawFormLabel": "single-herb (proprietary blend \u2014 not KSM-66)",
-  "chemicalForm": "single-herb (proprietary blend \u2014 not KSM-66)",
+  "rawFormLabel": "single-herb (proprietary blend — not KSM-66)",
+  "chemicalForm": "single-herb (proprietary blend — not KSM-66)",
   "formStatus": "mapped",
   "ingredients": [
     {
       "remedy_id": "ashwagandha",
       "amount": null,
       "unit": null,
-      "form": "single-herb (proprietary blend \u2014 not KSM-66)"
+      "form": "single-herb (proprietary blend — not KSM-66)"
     }
   ],
   "dose_match": null,
@@ -39,5 +39,6 @@
   ],
   "data_source": "source-scorecard-migration-2026-08-17",
   "last_checked": null,
-  "assessment_state": "label known, not yet assessed"
+  "assessment_state": "label known, not yet assessed",
+  "image": "/images/products/gaia-herbs-ashwagandha-root.jpg"
 }

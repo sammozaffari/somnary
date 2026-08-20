@@ -2,33 +2,36 @@
 // ProductObject — the product tile. Replaces the bare brand-initial square that readers were
 // reading as a broken image.
 //
-// THE HONEST POSITION ON PRODUCT PHOTOGRAPHY. Somnary holds **no product photography at all** and
-// never has: `imageSrc` was a prop nothing ever passed. Real photographs would have to be
-// licensed — a manufacturer's press image or a retailer's catalogue shot is their copyright, and
-// scraping either would be both a legal problem and a promise we could not keep as products
-// change. RULES.md anticipated exactly this: *"Placeholder imagery is the common case — a
-// designed object (brand mark on sunken ground), never 'no photo' or broken-image."*
+// PRODUCT PHOTOGRAPHY (owner decision, 2026-08-20). The earlier no-photography position is
+// superseded for this private, personal-use deployment: the owner directed that product photos
+// (sourced from brand/retailer catalogues) be shown. `imageSrc` comes from the product record's
+// `image` field (public/images/products/, keyed by product id).
 //
-// So this is not a fallback waiting for a photo. It is the artwork, drawn from data we actually
-// hold — and it now shows the **dose form**, which is a real fact about the product and the one
-// a reader most wants at a glance: a gummy is not a capsule is not a powder. 36 of 93 products
-// have a mapped `deliveryForm`; the other 57 are `needs-review`, and for those the object falls
-// back to the brand letterform alone rather than inventing a shape. **Never draw a form we have
-// not recorded** — a guessed silhouette is a claim about the product.
+// When there is NO photo, the drawn object remains the artwork, not a broken-image state: it
+// shows the **dose form**, a real fact about the product — a gummy is not a capsule is not a
+// powder. Products with no mapped `deliveryForm` (needs-review) fall back to the brand
+// letterform alone rather than inventing a shape. **Never draw a form we have not recorded** —
+// a guessed silhouette is a claim about the product.
 import { formLabel } from '../../lib/products/labels.ts';
 
 interface Props {
   brand: string;
   /** the CONTROLLED-VOCABULARY form; null (needs-review) draws no shape, only the letterform */
   form?: string | null;
+  /** product photo path (from the product record's `image` field); null → drawn object */
+  imageSrc?: string | null;
   size?: number;
   radius?: string;
 }
-const { brand, form = null, size = 104, radius = 'var(--radius-md)' } = Astro.props;
+const { brand, form = null, imageSrc = null, size = 104, radius = 'var(--radius-md)' } = Astro.props;
 const initial = String(brand).trim().charAt(0).toUpperCase() || '?';
 // what the object is showing, for assistive tech — the form when we know it, else nothing
 // pretending to be a picture
-const label = form ? `${formLabel(form)} — illustration, not a photograph` : null;
+const label = imageSrc
+  ? `${brand} — product photo`
+  : form
+    ? `${formLabel(form)} — illustration, not a photograph`
+    : null;
 ---
 
 <span
@@ -38,10 +41,14 @@ const label = form ? `${formLabel(form)} — illustration, not a photograph` : n
   aria-label={label ?? undefined}
   aria-hidden={label ? undefined : 'true'}
 >
+  {/* The product photo, when the record carries one. White-background catalogue shots sit on the
+      tile's own ground; contain (never crop) so the label stays readable. */}
+  {imageSrc && <img class="photo" src={imageSrc} alt="" loading="lazy" decoding="async" />}
+
   {/* The dose form, drawn at a fixed 48-unit viewBox and scaled by the tile. Stroke and fill are
       tokens, so the object re-themes with the page and never carries meaning colour — this is
       furniture, not data (RULES.md: colour means data). */}
-  {form && (
+  {!imageSrc && form && (
     <svg class="shape" viewBox="0 0 48 48" width="100%" height="100%" aria-hidden="true">
       {form === 'tablet' && (
         <g>
@@ -105,9 +112,9 @@ const label = form ? `${formLabel(form)} — illustration, not a photograph` : n
     </svg>
   )}
 
-  {/* The brand letterform. It is the whole object when the form is unknown, and a quiet corner
-      mark when a shape is drawn. */}
-  <span class:list={['mark', form && 'corner']}>{initial}</span>
+  {/* The brand letterform. It is the whole object when the form is unknown, a quiet corner
+      mark when a shape is drawn, and absent entirely when a photo is shown. */}
+  {!imageSrc && <span class:list={['mark', form && 'corner']}>{initial}</span>}
 </span>
 
 <style>
@@ -131,6 +138,16 @@ const label = form ? `${formLabel(form)} — illustration, not a photograph` : n
     display: block;
     width: 62%;
     height: 62%;
+  }
+  /* photos are catalogue shots on white — contain within a small inset so labels stay whole */
+  .photo {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: var(--space-1);
+    box-sizing: border-box;
+    background: var(--surface-card);
   }
   /* furniture, not data: the object uses the muted interface ink and no meaning colour */
   .fill {

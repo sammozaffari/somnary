@@ -476,6 +476,10 @@ const products = defineCollection({
       data_source: z.string().min(1),
       last_checked: isoDate.nullable().default(null),
       assessment_state: assessmentState,
+      // Product photo under /images/products/, keyed by id. Owner-directed 2026-08-20 (private,
+      // personal-use site): photos sourced from brand/retailer catalogues. null → the drawn
+      // dose-form object (ProductObject) renders instead — never a broken-image state.
+      image: z.string().regex(/^\/images\/products\//).nullable().default(null),
     })
     .superRefine((p, ctx) => {
       // RULES.md Products: a non-neutral additive flag CANNOT ship without a cited paper.
