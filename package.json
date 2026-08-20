@@ -22,6 +22,7 @@
     "verify:go-links": "node scripts/check-go-links.mjs && node scripts/check-go-links.mjs --selftest",
     "verify:search": "node --experimental-strip-types scripts/test-search.mjs",
     "verify:freshness": "node --experimental-strip-types scripts/test-freshness.mjs",
+    "verify:retail-links": "node scripts/check-retail-links.mjs",
     "verify:cites": "node scripts/check-citations.mjs",
     "verify:cites:online": "node scripts/check-citations.mjs --online",
     "verify:cites:selftest": "node scripts/test-resolver.mjs",

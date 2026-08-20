@@ -83,32 +83,26 @@ const showCrumbs = breadcrumbs && breadcrumbCurrent;
   <head>
     <meta charset="utf-8" />
 
-    {/* DUSK MODE (CHK-B15) — this script is FIRST in <head> and inline for one reason: it must
-        resolve the theme before the browser paints anything. Deferred, bundled, or placed after
-        the stylesheet, it produces the flash of the wrong theme that every dark mode is judged
-        by. `is:inline` keeps Astro from moving it.
+    {/* THEME (CHK-B15, amended by owner 20 August 2026: **light is the standard**).
+        This script is FIRST in <head> and inline for one reason: it must resolve the theme
+        before the browser paints, or you get the flash of the wrong theme.
 
-        Precedence, most-specific first:
-          1. an explicit choice the reader made here (stored) — always wins;
-          2. an OS preference for dark — honoured, because someone who set that meant it;
-          3. otherwise SUNSET KEYING by the local clock: dusk from 19:00 to 06:00.
-        We key on the clock, not on real sunset, because real sunset needs a location and this
-        site has no business asking for one. That is a deliberate approximation, not an oversight.
+        THE RULE IS NOW DELIBERATELY SIMPLE — day unless the reader has chosen night.
+        The previous version consulted `prefers-color-scheme` and then the clock, which meant
+        anyone on a dark-mode machine got the night theme at every hour and never saw the light
+        design at all. Sunset keying is RETIRED with it: a theme that flips itself at 19:00
+        contradicts "light is the standard", and a page that changes appearance on its own
+        between two visits is surprising more than it is clever.
 
-        `dusk` is the ONLY value ever written — the day theme is the absence of the attribute, so
-        a corrupted or stale stored value can never leave the page in an undefined theme. */}
+        `dusk` is the only value ever written, so a stale or corrupt stored value can never
+        leave the page in an undefined theme — anything that isn't exactly 'dusk' is day. */}
     <script is:inline>
       (() => {
         try {
-          const stored = localStorage.getItem('somnary-theme');
-          const hour = new Date().getHours();
-          const dusk =
-            stored === 'dusk' ||
-            (stored !== 'day' &&
-              (window.matchMedia('(prefers-color-scheme: dark)').matches || hour >= 19 || hour < 6));
-          if (dusk) document.documentElement.setAttribute('data-theme', 'dusk');
+          if (localStorage.getItem('somnary-theme') === 'dusk')
+            document.documentElement.setAttribute('data-theme', 'dusk');
         } catch (e) {
-          /* private mode, blocked storage, anything — day is the safe default and needs no attribute */
+          /* private mode, blocked storage, anything — day is the standard and needs no attribute */
         }
       })();
     </script>

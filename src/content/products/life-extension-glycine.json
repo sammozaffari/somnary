@@ -31,12 +31,6 @@
   "howToTake": null,
   "retail_links": [
     {
-      "retailer": "amazon",
-      "url": "https://www.amazon.com.au/dp/B00B35A394",
-      "price": null,
-      "last_checked": "2026-07-31"
-    },
-    {
       "retailer": "iherb",
       "url": "https://au.iherb.com/pr/life-extension-glycine-1-000-mg-100-vegetarian-capsules/47810",
       "price": null,

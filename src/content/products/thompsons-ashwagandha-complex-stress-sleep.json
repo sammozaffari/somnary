@@ -29,14 +29,7 @@
   "allergens": [],
   "excipients": [],
   "howToTake": null,
-  "retail_links": [
-    {
-      "retailer": "chemistWarehouse",
-      "url": "https://www.chemistwarehouse.com.au/buy/116926",
-      "price": null,
-      "last_checked": "2026-07-31"
-    }
-  ],
+  "retail_links": [],
   "data_source": "source-scorecard-migration-2026-08-17",
   "last_checked": null,
   "assessment_state": "label known, not yet assessed"

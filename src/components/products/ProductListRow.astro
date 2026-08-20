@@ -30,7 +30,7 @@
 // Verdict pill placement: on a phone it moves BENEATH the name — it is the most important thing
 // in the row and must never be what falls off the edge. It is ONE element repositioned with
 // grid areas, never rendered twice, so it is announced once.
-import BrandMark from './BrandMark.astro';
+import ProductObject from './ProductObject.astro';
 import VerdictPill from './VerdictPill.astro';
 import { CRITERIA, checkValues, completeness, type Product } from '../../lib/products/score.ts';
 
@@ -38,7 +38,6 @@ interface Props {
   product: Product;
   href: string;
   detail: string; // ingredient · strength · form, composed by the page (see products/index.astro)
-  imageSrc?: string | null;
   // Whether an unassessed row spells its state out in a sentence. RULES.md Interface economy:
   // "A component answering two questions is redundant where one answer is the page." When every
   // row on a list shares one state, the page's framing line says it once and the row's pill
@@ -50,7 +49,7 @@ interface Props {
   // keys so its enhancement script never has to re-derive them from the rendered text.
   data?: Record<string, string>;
 }
-const { product, href, detail, imageSrc = null, explainState = true, data = {} } = Astro.props;
+const { product, href, detail, explainState = true, data = {} } = Astro.props;
 const dataAttrs = Object.fromEntries(Object.entries(data).map(([k, v]) => [`data-${k}`, v]));
 const state = completeness(product);
 const values = checkValues(product);
@@ -64,7 +63,7 @@ const statusLine = !explainState
 ---
 
 <li class="row" {...dataAttrs}>
-  <span class="thumb"><BrandMark name={product.brand} src={imageSrc} /></span>
+  <span class="thumb"><ProductObject brand={product.brand} form={product.deliveryForm} /></span>
 
   <div class="main">
     <span class="brand">{product.brand}</span>
@@ -142,6 +141,12 @@ const statusLine = !explainState
      raw-ok: fixed layout column widths, measured; the tokens are a spacing scale, not a
      column scale, and DESIGN_SYSTEM.md defines no layout-width token (§9 gap → HUMAN-GATE
      if one is ever needed). */
+  /* `[hidden]` lives in the UA stylesheet, so the author `display: grid` below outranks it and
+     a row marked hidden kept rendering — the browse filter counted correctly and hid nothing.
+     This restores the intent at author level, and must stay above the display rule. */
+  .row[hidden] {
+    display: none;
+  }
   .row {
     --checks-col: 224px;
     --pill-col: 196px;
