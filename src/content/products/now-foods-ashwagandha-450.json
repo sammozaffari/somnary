@@ -5,11 +5,11 @@
   "strength": null,
   "composition": "single-ingredient",
   "perIngredientAmountsDisclosed": null,
-  "deliveryForm": null,
+  "deliveryForm": "capsule",
   "releaseProfile": "not-stated",
   "rawFormLabel": "single-herb (generic standardised)",
   "chemicalForm": "single-herb (generic standardised)",
-  "formStatus": "needs-review",
+  "formStatus": "mapped",
   "ingredients": [
     {
       "remedy_id": "ashwagandha",

@@ -5,11 +5,11 @@
   "strength": null,
   "composition": "single-ingredient",
   "perIngredientAmountsDisclosed": null,
-  "deliveryForm": null,
+  "deliveryForm": "powder",
   "releaseProfile": "not-stated",
   "rawFormLabel": "glycinate (\"Meta Mag\"/\"MagActive\")",
   "chemicalForm": "glycinate (\"Meta Mag\"/\"MagActive\")",
-  "formStatus": "needs-review",
+  "formStatus": "mapped",
   "ingredients": [
     {
       "remedy_id": "magnesium",

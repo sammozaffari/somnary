@@ -5,11 +5,11 @@
   "strength": null,
   "composition": "single-ingredient",
   "perIngredientAmountsDisclosed": null,
-  "deliveryForm": null,
+  "deliveryForm": "capsule",
   "releaseProfile": "not-stated",
   "rawFormLabel": "single-herb (KSM-66) (+ BioPerine)",
   "chemicalForm": "single-herb (KSM-66) (+ BioPerine)",
-  "formStatus": "needs-review",
+  "formStatus": "mapped",
   "ingredients": [
     {
       "remedy_id": "ashwagandha",
