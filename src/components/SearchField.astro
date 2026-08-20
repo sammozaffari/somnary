@@ -14,10 +14,16 @@ interface Props {
   autofocus?: boolean;
   class?: string;
 }
+// The placeholder is SIZED TO THE FIELD. The descriptive one belongs in the hero, where the
+// field is 640px and there is room to say what you can search for. In the nav the same field is
+// ~280px with a 104px button inside it, leaving ~130px of input — the long string needs 237px and
+// was rendering as "A rer". A placeholder that cannot be read is worse than a short one.
+const PLACEHOLDER = { lg: 'A remedy, a product, or a brand', sm: 'Search' } as const;
+
 const {
   size = 'sm',
   value = '',
-  placeholder = 'A remedy, a product, or a brand',
+  placeholder = PLACEHOLDER[size],
   autofocus = false,
   class: className,
 } = Astro.props;

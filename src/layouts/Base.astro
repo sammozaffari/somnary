@@ -83,45 +83,25 @@ const showCrumbs = breadcrumbs && breadcrumbCurrent;
   <head>
     <meta charset="utf-8" />
 
-    {/* THEME (CHK-B15, amended by owner 20 August 2026: **light is the standard**).
-        This script is FIRST in <head> and inline for one reason: it must resolve the theme
-        before the browser paints, or you get the flash of the wrong theme.
-
-        THE RULE IS NOW DELIBERATELY SIMPLE — day unless the reader has chosen night.
-        The previous version consulted `prefers-color-scheme` and then the clock, which meant
-        anyone on a dark-mode machine got the night theme at every hour and never saw the light
-        design at all. Sunset keying is RETIRED with it: a theme that flips itself at 19:00
-        contradicts "light is the standard", and a page that changes appearance on its own
-        between two visits is surprising more than it is clever.
-
-        `dusk` is the only value ever written, so a stale or corrupt stored value can never
-        leave the page in an undefined theme — anything that isn't exactly 'dusk' is day. */}
-    <script is:inline>
-      (() => {
-        try {
-          if (localStorage.getItem('somnary-theme') === 'dusk')
-            document.documentElement.setAttribute('data-theme', 'dusk');
-        } catch (e) {
-          /* private mode, blocked storage, anything — day is the standard and needs no attribute */
-        }
-      })();
-    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
     {/* Identity — the letterform-"S" mark (RULES.md Identity: the mark is the letterform S,
         no moons/stars/sleep costume; the crescent-moon disc + dot-field favicon are retired,
         CHK-B1). SVG favicons render without the page's fonts, so the assets are OUTLINED PATHS
-        (extracted from Onest 600), never live <text>. Day/dusk favicon variants via media. */}
+        (extracted from Onest 600), never live <text>. The light/dark favicon pair STAYS even though
+        the site is light-only: it answers the colour of the BROWSER'S tab strip, which is still
+        dark for a reader on a dark OS, and has nothing to do with the page's own theme. */}
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" media="(prefers-color-scheme: light)" />
     <link rel="icon" type="image/svg+xml" href="/favicon-dusk.svg" media="(prefers-color-scheme: dark)" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
     {/* theme-color is a browser-chrome hint (HTML attr, not CSS) — it cannot read a token, so it
         must be a literal. These mirror --paper (day) and dusk --paper. */}
-    {/* raw-ok: theme-color literal = --paper (day ground) */}
-    <meta name="theme-color" content="#F6F2E9" media="(prefers-color-scheme: light)" />
-    {/* raw-ok: theme-color literal = dusk --paper (night ground) */}
-    <meta name="theme-color" content="#17151E" media="(prefers-color-scheme: dark)" />
+    {/* One ground, because the site is light-only (owner, 20 August 2026). The dark variant is
+        gone with the night theme — it would have tinted the browser chrome dark around a page
+        that is always light.
+        raw-ok: theme-color is an HTML attribute and cannot read a token; literal = --paper */}
+    <meta name="theme-color" content="#F6F2E9" />
 
     {/* Self-hosted Onest — preload the primary latin subset (the one weights-axis file that
         carries every --weight-* token); latin-ext loads on demand. No font CDN (verify:fonts). */}
