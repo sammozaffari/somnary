@@ -185,6 +185,13 @@ const pageTitle = `${product.brand} ${product.name} — is it what the studies u
           )}
         </div>
 
+        {/* the visible route to how the verdict is decided — present whether or not this bottle
+            has been assessed, because the reader asking "how do you decide?" is most likely the
+            one looking at a product that hasn't been. */}
+        <p class="how">
+          <a href="/how-we-grade#product-verdict">How we decide this <span aria-hidden="true">›</span></a>
+        </p>
+
         {primary && (
           <div class="ingredient">
             <p class="ing-line">
@@ -558,6 +565,20 @@ const pageTitle = `${product.brand} ${product.name} — is it what the studies u
   .verdict-line.pending {
     color: var(--text-muted);
     font-size: var(--text-base);
+  }
+  .how {
+    margin: 0;
+  }
+  .how a {
+    display: inline-flex;
+    align-items: center;
+    /* inline-flex collapses the whitespace before the chevron — put it back as a gap */
+    gap: var(--space-1);
+    /* 44px hit floor (RULES.md a11y) */
+    min-height: var(--control-md);
+    color: var(--text-link);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-ui);
   }
   .ingredient {
     display: flex;

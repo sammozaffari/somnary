@@ -116,10 +116,16 @@ this note, this note wins until the checklist is re-sequenced.
   "the evidence layer", "zero brand money", "0 hallucinated cites", "the
   sleep-supplement internet is a sales floor", "evidence-graded", "reader-funded",
   "the honesty firewall", "claim-check counter", "disavowal". The whole
-  self-congratulatory stat row is replaced by one quiet sentence somewhere
-  unglamorous: **"Nobody pays us to say any of this. Every claim links to the
-  study it came from."** (These rules bind user-facing copy; this contract's own
-  internal decision labels are exempt.)
+  self-congratulatory stat row is banned outright. *(Amended by owner 2026-08-20:
+  the standing replacement sentence — "Nobody pays us to say any of this. Every
+  claim links to the study it came from." — is **REMOVED from the site**. It sat
+  in the footer of every page and read as the site talking about itself, which is
+  the very failure the banned-phrase list exists to prevent. The prohibition is
+  unchanged and now simply stands on its own: **say nothing about our own virtue
+  in the chrome.** The substantive funding disclosure still lives on /disclosure,
+  in full and in one place, where a reader who wants it can find it.)*
+  (These rules bind user-facing copy; this contract's own internal decision labels
+  are exempt.)
 - All content pages are SSR/SSG. Never ship core content client-only.
 - AI features cite back, refuse personalized dosing/diagnosis, and route safety
   concerns to boundary pages. Forbidden framings (from the rulebook): "take X
