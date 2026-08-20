@@ -31,12 +31,6 @@
   "howToTake": null,
   "retail_links": [
     {
-      "retailer": "amazon",
-      "url": "https://www.amazon.com.au/dp/B0019LTHXA",
-      "price": null,
-      "last_checked": "2026-07-31"
-    },
-    {
       "retailer": "iherb",
       "url": "https://au.iherb.com/pr/now-foods-valerian-root-500-mg-250-veg-capsules/830",
       "price": null,

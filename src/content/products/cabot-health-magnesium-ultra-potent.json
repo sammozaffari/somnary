@@ -7,15 +7,15 @@
   "perIngredientAmountsDisclosed": null,
   "deliveryForm": null,
   "releaseProfile": "not-stated",
-  "rawFormLabel": "4-salt chelate/ascorbate/glycinate/phosphate — no oxide (+ taurine, zinc)",
-  "chemicalForm": "4-salt chelate/ascorbate/glycinate/phosphate — no oxide (+ taurine, zinc)",
+  "rawFormLabel": "4-salt chelate/ascorbate/glycinate/phosphate \u2014 no oxide (+ taurine, zinc)",
+  "chemicalForm": "4-salt chelate/ascorbate/glycinate/phosphate \u2014 no oxide (+ taurine, zinc)",
   "formStatus": "needs-review",
   "ingredients": [
     {
       "remedy_id": "magnesium",
       "amount": null,
       "unit": null,
-      "form": "4-salt chelate/ascorbate/glycinate/phosphate — no oxide (+ taurine, zinc)"
+      "form": "4-salt chelate/ascorbate/glycinate/phosphate \u2014 no oxide (+ taurine, zinc)"
     }
   ],
   "dose_match": null,
@@ -29,14 +29,7 @@
   "allergens": [],
   "excipients": [],
   "howToTake": null,
-  "retail_links": [
-    {
-      "retailer": "chemistWarehouse",
-      "url": "https://www.chemistwarehouse.com.au/buy/75264",
-      "price": null,
-      "last_checked": "2026-07-31"
-    }
-  ],
+  "retail_links": [],
   "data_source": "source-scorecard-migration-2026-08-17",
   "last_checked": null,
   "assessment_state": "label known, not yet assessed"

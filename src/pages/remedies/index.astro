@@ -309,6 +309,11 @@ const dataOutcomes = (i: typeof items[number]) => i.outcomes.join('|').toLowerCa
     flex-direction: column;
     padding-top: var(--space-3);
   }
+  /* same UA-vs-author `[hidden]` trap as the product row: without this, the outcome filters
+     mark rows hidden and the rows keep rendering. */
+  .row[hidden] {
+    display: none;
+  }
   .row {
     display: flex;
     flex-direction: column;

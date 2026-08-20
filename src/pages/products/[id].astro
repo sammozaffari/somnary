@@ -20,6 +20,7 @@
 import { getCollection, type CollectionEntry } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import Breadcrumb from '../../components/Breadcrumb.astro';
+import ProductObject from '../../components/products/ProductObject.astro';
 import BrandMark from '../../components/products/BrandMark.astro';
 import VerdictPill from '../../components/products/VerdictPill.astro';
 import RetailLink from '../../components/RetailLink.astro';
@@ -162,7 +163,7 @@ const pageTitle = `${product.brand} ${product.name} — is it what the studies u
 
     {/* ── header ─────────────────────────────────────────────────────────────────────────── */}
     <div class="head">
-      <span class="shot"><BrandMark name={product.brand} radius="var(--radius-lg)" /></span>
+      <span class="shot"><ProductObject brand={product.brand} form={product.deliveryForm} radius="var(--radius-lg)" /></span>
       <div class="head-text">
         {brand ? <a class="brand brand-link" href={`/brands/${brand.slug}`}>{product.brand}</a> : <p class="brand">{product.brand}</p>}
         <h1>{product.name}</h1>

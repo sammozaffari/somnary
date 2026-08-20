@@ -35,12 +35,6 @@
       "url": "https://www.amazon.com.au/dp/B0C5Z515LD",
       "price": null,
       "last_checked": null
-    },
-    {
-      "retailer": "chemistWarehouse",
-      "url": "https://www.chemistwarehouse.com.au/buy/124288",
-      "price": null,
-      "last_checked": "2026-07-31"
     }
   ],
   "data_source": "source-scorecard-migration-2026-08-17",
