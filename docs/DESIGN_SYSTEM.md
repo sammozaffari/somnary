@@ -97,6 +97,16 @@ Tracking: `--tracking-display` −0.01em (display sizes only).
 
 ## 3. Colour (RULES.md Colour — the one rule above all)
 
+> **Dusk / night theme — REMOVED from the shipped site (owner, 20 August 2026).** Somnary is
+> **light only**. The toggle, the stored preference, the resolution script and the whole
+> `[data-theme="dusk"]` token block are gone from `src/styles/global.css`, and nothing can set
+> `data-theme` any more. The night palette recorded below is **kept on purpose** — it was
+> designed, contrast-checked and transcribed at CHK-B1 — so restoring night mode would be a
+> transcription job rather than a redesign. **Treat the dusk values in this section as
+> documentation of a retired theme, not as something the stylesheet ships.** The one allowed
+> decorative gradient (the dusk page-ground) went with it: every ground is now flat.
+
+
 **COLOUR MEANS DATA.** `--evidence` (ink blue, the colour of printed reference) is the
 evidence bar and its key and **nothing else**. ALL interface colour — buttons, links, focus
 rings, active states — is `--ink`. **There is no `--accent`; never reintroduce one.** Green
