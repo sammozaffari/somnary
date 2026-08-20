@@ -37,7 +37,7 @@ to match — never the reverse.
 
 ## Language
 - Register: a well-informed friend who happens to be a pharmacist. Plain, short, specific. Plain never means vague — every sentence still commits.
-- Banned: "the evidence layer", "zero brand money", "0 hallucinated cites", "evidence-graded", "reader-funded", "the honesty firewall", any self-congratulating independence copy. The whole claim is one quiet line: "Nobody pays us to say any of this. Every claim links to the study it came from."
+- Banned: "the evidence layer", "zero brand money", "0 hallucinated cites", "evidence-graded", "reader-funded", "the honesty firewall", any self-congratulating independence copy. **No independence line in the chrome at all** (owner, 20 August 2026): the standing quiet sentence "Nobody pays us to say any of this…" was removed from the footer, because a claim about our own virtue on every page is the thing this rule exists to stop. The funding disclosure lives on /disclosure, once.
 - Headings are the questions people ask ("Does it work?", "Is it safe with my medications?").
 - **Never invent a number.** Real corpus figures only; anything unknown is "[Placeholder — …]" or asked about.
 - **Never author a health or safety claim** in a design file. Placeholder wording, explicitly marked, pending sourcing/medical review.

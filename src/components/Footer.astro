@@ -1,8 +1,10 @@
 ---
 // Footer (app-shell) — CHK-B2, transcribed from the bundle chrome (HomePage footer +
-// DisclaimerBand). RULES.md Language: the independence claim is ONE quiet line — exactly this
-// sentence, never the self-congratulating stat row or any banned phrase ("reader-funded",
-// "zero brand money", "evidence-graded" …). RULES.md Interface economy: How-we-grade is NOT in
+// DisclaimerBand). The independence line ("Nobody pays us to say any of this…") was REMOVED from
+// the footer by the owner on 20 August 2026 — it appeared on every page and read as the site
+// talking about itself, which is the failure mode the banned-phrase rule exists to prevent. The
+// substantive disclosure still lives on /disclosure, in full and in one place.
+// RULES.md Interface economy: How-we-grade is NOT in
 // the nav — it is reached from every bucket badge and HERE. The "last updated {date}" tag is a
 // CHK-B17 freshness concern (real date, rendered "14 July 2026") — omitted here rather than
 // invent a date (RULES.md: never invent a number). Interface colour is --ink (no accent).
@@ -11,9 +13,6 @@ import DisclaimerBand from './DisclaimerBand.astro';
 
 <footer class="footer">
   <div class="inner">
-    <p class="independence">
-      Nobody pays us to say any of this. Every claim links to the study it came from.
-    </p>
     <div class="meta">
       <a href="/how-we-grade">How we grade</a>
     </div>
@@ -33,13 +32,6 @@ import DisclaimerBand from './DisclaimerBand.astro';
     display: flex;
     flex-direction: column;
     gap: var(--space-4);
-  }
-  .independence {
-    margin: 0;
-    font-size: var(--text-base);
-    line-height: var(--leading-body);
-    color: var(--text-body);
-    max-width: var(--measure);
   }
   .meta {
     display: flex;

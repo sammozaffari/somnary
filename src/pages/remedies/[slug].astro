@@ -109,6 +109,15 @@ const TOC = [
           <a class="pending" href="/how-we-grade#in-review">Grade in review <span aria-hidden="true">›</span></a>
         )}
 
+        {/* The badge itself links to how-we-grade, but a badge that happens to be a link is not
+            an affordance — nothing tells the reader the grade can be interrogated. This is the
+            visible route, and it sits with the grade it explains rather than in the footer. */}
+        <p class="how">
+          <a href={hasBucket ? `/how-we-grade#${r.bucket}` : '/how-we-grade#in-review'}>
+            How we decided this <span aria-hidden="true">›</span>
+          </a>
+        </p>
+
         <p class="verdict">{forwardLine}</p>
 
         {counts.triaged ? (
@@ -341,6 +350,20 @@ const TOC = [
     font-size: var(--text-sm);
     font-weight: var(--weight-strong);
     text-decoration: none;
+  }
+  .how {
+    margin: var(--space-2) 0 0;
+  }
+  .how a {
+    display: inline-flex;
+    align-items: center;
+    /* inline-flex collapses the whitespace before the chevron — put it back as a gap */
+    gap: var(--space-1);
+    /* 44px hit floor (RULES.md a11y) */
+    min-height: var(--control-md);
+    color: var(--text-link);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-ui);
   }
   .verdict {
     margin: 0;
