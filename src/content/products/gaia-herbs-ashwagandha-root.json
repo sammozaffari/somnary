@@ -5,17 +5,17 @@
   "strength": null,
   "composition": "single-ingredient",
   "perIngredientAmountsDisclosed": null,
-  "deliveryForm": null,
+  "deliveryForm": "capsule",
   "releaseProfile": "not-stated",
-  "rawFormLabel": "single-herb (proprietary blend — not KSM-66)",
-  "chemicalForm": "single-herb (proprietary blend — not KSM-66)",
-  "formStatus": "needs-review",
+  "rawFormLabel": "single-herb (proprietary blend \u2014 not KSM-66)",
+  "chemicalForm": "single-herb (proprietary blend \u2014 not KSM-66)",
+  "formStatus": "mapped",
   "ingredients": [
     {
       "remedy_id": "ashwagandha",
       "amount": null,
       "unit": null,
-      "form": "single-herb (proprietary blend — not KSM-66)"
+      "form": "single-herb (proprietary blend \u2014 not KSM-66)"
     }
   ],
   "dose_match": null,

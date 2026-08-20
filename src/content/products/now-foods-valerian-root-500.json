@@ -5,11 +5,11 @@
   "strength": null,
   "composition": "single-ingredient",
   "perIngredientAmountsDisclosed": null,
-  "deliveryForm": null,
+  "deliveryForm": "capsule",
   "releaseProfile": "not-stated",
   "rawFormLabel": "single-herb (whole root)",
   "chemicalForm": "single-herb (whole root)",
-  "formStatus": "needs-review",
+  "formStatus": "mapped",
   "ingredients": [
     {
       "remedy_id": "valerian",

@@ -5,11 +5,11 @@
   "strength": null,
   "composition": "blend",
   "perIngredientAmountsDisclosed": null,
-  "deliveryForm": null,
+  "deliveryForm": "powder",
   "releaseProfile": "not-stated",
   "rawFormLabel": "combo (+ magnesium, hops, calcium)",
   "chemicalForm": "combo (+ magnesium, hops, calcium)",
-  "formStatus": "needs-review",
+  "formStatus": "mapped",
   "ingredients": [
     {
       "remedy_id": "glycine",

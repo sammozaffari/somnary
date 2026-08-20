@@ -5,11 +5,11 @@
   "strength": null,
   "composition": "single-ingredient",
   "perIngredientAmountsDisclosed": null,
-  "deliveryForm": null,
+  "deliveryForm": "powder",
   "releaseProfile": "not-stated",
   "rawFormLabel": "4-salt chelate/citrate/glycinate/orotate",
   "chemicalForm": "4-salt chelate/citrate/glycinate/orotate",
-  "formStatus": "needs-review",
+  "formStatus": "mapped",
   "ingredients": [
     {
       "remedy_id": "magnesium",
