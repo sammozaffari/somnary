@@ -1,4 +1,4 @@
-/* Global stylesheet — Somnary design system (day + dusk).
+/* Global stylesheet — Somnary design system (light only; the dusk set was removed 20 Aug 2026).
 
    SOURCE OF TRUTH: transcribed from the Claude Design handoff bundle at
    docs/somnary-design-system/ (RULES.md + tokens/*.css + styles.css), 17 August 2026,
@@ -62,7 +62,7 @@
 :root {
   /* base — day (warm paper, warm near-black ink) */
   --paper: #F6F2E9;
-  --page-ground: var(--paper); /* day stays FLAT; dusk overrides with the one allowed gradient */
+  --page-ground: var(--paper); /* flat — the one gradient exception went with the dusk set */
   --paper-raised: #FBF8F1;
   --paper-sunken: #EEE9DB;
   --ink: #1C1B22;
@@ -203,59 +203,22 @@
 }
 
 /* ============================================================================
-   Colour — DUSK. A designed low-light reading theme (amber-shifted text, lowered
-   contrast, dimmed chrome) — not an inverted afterthought. Same rule: evidence blue on
-   DATA only; interface colour is the warm cream --ink. transcribed from tokens/colors.css.
+   Colour — DUSK: REMOVED 20 August 2026 (owner: "light only").
+   The night palette and its one allowed page-ground gradient are gone from the shipped
+   stylesheet along with the toggle, the stored preference and the resolution script —
+   nothing can set `data-theme` any more, so the tokens were dead weight.
+   The palette is NOT lost: it stays recorded in DESIGN_SYSTEM.md §3 and in the handoff
+   bundle, so restoring night mode is a transcription job, not a redesign.
    ============================================================================ */
-[data-theme="dusk"] {
-  --paper: #17151E;
-  /* page-ground gradient, DUSK ONLY — the one allowed decorative gradient (RULES.md Colour).
-     Lightens the top AND darkens the bottom so it reads as light direction, not a vignette.
-     Applied to the page ground only (body rule below); surfaces/cards keep flat tokens. */
-  --page-ground: linear-gradient(180deg, #191722 0%, #100E1A 100%);
-  --paper-raised: #201D29;
-  --paper-sunken: #100E15;
-  --ink: #E7DECB;
-  --ink-2: #A99F8F;
-  --ink-3: #918876;  /* legibility floor: 4.5:1 on every surface incl. cards (worst 4.72 on raised) */
-  --line: #2C2836;
-  --line-strong: #3D3849;
-  --border-input: #746D8B;
 
-  --evidence: #8FA5CE;
-  --evidence-strong: #A9BCDF;
-  --evidence-tint: #232B3F;
-  --evidence-line: #3C4A6B;
-
-  --sage: #92A385;
-  --sage-text: #92A385;  /* passes as text at dusk (worst 6.15:1 on raised) — one value both roles */
-  --sage-tint: #222A1E;
-
-  --bucket-works: #8CB795;
-  --bucket-works-tint: #1E2B21;
-  --bucket-maybe: #C7A050;
-  --bucket-maybe-tint: #2B2414;
-  --bucket-unknown: #A29A8B;
-  --bucket-unknown-tint: #26231D;
-  --bucket-avoid: #C97F68;
-  --bucket-avoid-tint: #2E1E18;
-
-  --amber: #D2A559;
-  --amber-tint: #2C2314;
-  --amber-line: #5C4A26;
-
-  --shadow-card: 0 1px 2px rgba(0,0,0,0.3), 0 6px 20px rgba(0,0,0,0.35);
-  --shadow-pop: 0 2px 6px rgba(0,0,0,0.4), 0 16px 40px rgba(0,0,0,0.5);
-  --scrim: rgba(8,7,12,0.55);
-}
 
 /* ============================================================================
    Global baseline (transcribed from tokens/styles.css). Behaviour the whole system
    relies on, applied unlayered so it beats Tailwind Preflight where they overlap.
    ============================================================================ */
 
-/* The page ground reads --page-ground (flat paper by day, the dusk gradient at night).
-   fixed attachment so the light direction spans the viewport, not each scroll height. */
+/* The page ground reads --page-ground, now always flat paper. `fixed` is kept so the value
+   is a single painted ground rather than one per scroll height. */
 body {
   background: var(--page-ground) fixed;
   color: var(--ink);

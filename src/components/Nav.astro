@@ -7,7 +7,6 @@
 // everywhere (RULES.md Identity). The three routes are greenfield (built at CHK-B5/B6/B10).
 import Wordmark from './Wordmark.astro';
 import SearchField from './SearchField.astro';
-import ThemeToggle from './ThemeToggle.astro';
 
 const links = [
   { href: '/remedies', label: 'Remedies' },
@@ -44,9 +43,6 @@ const isHome = path === '/';
       </div>
     )
   }
-  {/* day/night, in the chrome so it can be found. NOT a fourth nav item — the three
-      destinations are untouched; this is a control that reaches no page (see ThemeToggle). */}
-  <ThemeToggle />
 </header>
 
 <style>
@@ -97,11 +93,11 @@ const isHome = path === '/';
      The cap lives HERE (the container), not in SearchField, so there is no cross-component
      max-width conflict. */
   .nav-search {
-    /* basis trimmed 240 → 180 when the theme control joined the row (it added ~84px and pushed
-       the nav to two lines inside the --page-max cap). The field still grows to fill whatever is
-       left and still drops to its own full-width row on a phone — it just no longer demands more
-       room than the row has. */
-    flex: 1 1 180px;
+    /* Basis restored to 240 when the theme toggle was removed (20 Aug 2026) — it had been cut to
+       180 to make room for that control, which squeezed the placeholder to "A rer". The field
+       grows to fill whatever the row has left and still drops to its own full-width row on a
+       phone. */
+    flex: 1 1 240px;
     min-width: 0;
     max-width: var(--search-max);
   }
